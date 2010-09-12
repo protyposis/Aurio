@@ -39,6 +39,10 @@ namespace AudioAlign.WaveControls {
         private WaveStream waveStream;
         private byte[] buffer = new byte[BUFFER_SIZE];
 
+        public WaveView() {
+            //SetValue(RenderOptions.EdgeModeProperty, EdgeMode.Aliased);
+        }
+
         public WaveStream WaveStream {
             get { return waveStream; }
             set { 
@@ -65,7 +69,7 @@ namespace AudioAlign.WaveControls {
 
             if (waveStream != null) {
                 long offset = (long)Math.Floor(viewport.Left);
-                int width = (int)Math.Ceiling(viewport.Width);
+                int width = (int)Math.Ceiling(viewport.Width) + 1;
                 drawingContext.DrawGeometry(Brushes.Red, new Pen(Brushes.Black, 1), CreateWaveform(offset, width));
             }
 
@@ -87,6 +91,7 @@ namespace AudioAlign.WaveControls {
 
         private void PaintWaveformBackground(Rect viewport, DrawingContext drawingContext) {
             drawingContext.DrawLine(new Pen(Brushes.Gray, 1), new Point(viewport.Left, viewport.Top + viewport.Height / 2), new Point(viewport.Right, viewport.Top + viewport.Height / 2));
+            drawingContext.DrawLine(new Pen(Brushes.Red, 3), viewport.TopLeft, viewport.BottomLeft);
         }
 
         private Geometry CreateWaveform(long offset, int samples) {
