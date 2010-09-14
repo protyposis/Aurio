@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign", "AudioAlign\Au
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.WaveControls", "AudioAlign.WaveControls\AudioAlign.WaveControls.csproj", "{FD0C6CC5-B509-4441-9AA2-E8B34BAD9F95}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Audio", "AudioAlign.Audio\AudioAlign.Audio.csproj", "{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -39,6 +41,16 @@ Global
 		{FD0C6CC5-B509-4441-9AA2-E8B34BAD9F95}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{FD0C6CC5-B509-4441-9AA2-E8B34BAD9F95}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{FD0C6CC5-B509-4441-9AA2-E8B34BAD9F95}.Release|x86.ActiveCfg = Release|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

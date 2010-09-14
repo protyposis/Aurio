@@ -34,8 +34,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NAudio">
-      <HintPath>..\..\lib\NAudio-1-3\Binaries\NAudio.dll</HintPath>
+    <Reference Include="NAudio, Version=1.3.8.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>E:\DEVELOPMENT\Diplomarbeit\lib\NAudio-1-3\Binaries\NAudio.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -81,6 +81,12 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AudioAlign.Audio\AudioAlign.Audio.csproj">
+      <Project>{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}</Project>
+      <Name>AudioAlign.Audio</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

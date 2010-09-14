@@ -11,43 +11,47 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using NAudio.Wave;
 using System.Globalization;
 using System.Diagnostics;
+using AudioAlign.Audio;
 
 namespace AudioAlign.WaveControls {
     public class WaveView : Control {
 
         public static readonly DependencyProperty VirtualHorizontalOffsetProperty;
         public static readonly DependencyProperty VirtualWidthProperty;
+        public static readonly DependencyProperty WaveformBackgroundProperty;
 
         private const int BUFFER_SIZE = 512;
-        private const int BYTES_PER_SAMPLE = 2;
-
-        private const int BASE_SCALE = 96;
 
         static WaveView() {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(WaveView), new FrameworkPropertyMetadata(typeof(WaveView)));
 
             FrameworkPropertyMetadata virtualHorizontalOffsetMetadata = new FrameworkPropertyMetadata() { AffectsRender = true };
             FrameworkPropertyMetadata virtualWidthMetadata = new FrameworkPropertyMetadata() { AffectsRender = true };
+            FrameworkPropertyMetadata waveformBackgroundMetadata = new FrameworkPropertyMetadata() { AffectsRender = true };
 
             VirtualHorizontalOffsetProperty = DependencyProperty.Register("VirtualHorizontalOffset", typeof(double), typeof(WaveView), virtualHorizontalOffsetMetadata);
             VirtualWidthProperty = DependencyProperty.Register("VirtualWidth", typeof(double), typeof(WaveView), virtualWidthMetadata);
+            WaveformBackgroundProperty = DependencyProperty.Register("WaveformBackground", typeof(Brush), typeof(WaveView), waveformBackgroundMetadata);
         }
 
-        private WaveStream waveStream;
-        private byte[] buffer = new byte[BUFFER_SIZE];
+        private IAudioStream16 audioStream;
+        private float[][] buffer;
 
         public WaveView() {
             //SetValue(RenderOptions.EdgeModeProperty, EdgeMode.Aliased);
         }
 
-        public WaveStream WaveStream {
-            get { return waveStream; }
-            set { 
-                waveStream = value;
-                VirtualWidth = waveStream.Length / 2;
+        public IAudioStream16 AudioStream {
+            get { return audioStream; }
+            set {
+                audioStream = value;
+                buffer = new float[audioStream.Properties.Channels][];
+                for (int channel = 0; channel < audioStream.Properties.Channels; channel++) {
+                    buffer[channel] = new float[BUFFER_SIZE];
+                }
+                VirtualWidth = audioStream.SampleCount;
             }
         }
 
@@ -61,16 +65,36 @@ namespace AudioAlign.WaveControls {
             set { SetValue(VirtualWidthProperty, value); }
         }
 
+        public Brush WaveformBackground {
+            get { return (Brush)GetValue(WaveformBackgroundProperty); }
+            set { SetValue(WaveformBackgroundProperty, value); }
+        }
+
         protected override void OnRender(DrawingContext drawingContext) {
             base.OnRender(drawingContext);
+            // draw background
+            //drawingContext.DrawRectangle(Background, new Pen(), new Rect(0, 0, ActualWidth, ActualHeight));
+            
             Rect viewport = CalculateViewport();
 
-            PaintWaveformBackground(viewport, drawingContext);
-
-            if (waveStream != null) {
+            if (audioStream != null) {
                 long offset = (long)Math.Floor(viewport.Left);
                 int width = (int)Math.Ceiling(ActualWidth) + 1; // +1 to avoid small gap on right border of graph (draws the graph over the right border)
-                drawingContext.DrawGeometry(Brushes.Red, new Pen(Brushes.Black, 1), CreateWaveform(offset, width));
+
+                audioStream.SamplePosition = offset;
+                if (audioStream.SamplePosition != offset) {
+                    throw new Exception("WaveStream/WavFileReader BlockAlign violation");
+                }
+                long remainingSamples = (audioStream.SampleCount - audioStream.SamplePosition);
+                width = remainingSamples < width ? (int)remainingSamples : width;
+                Debug.WriteLine(remainingSamples + " / " + width);
+
+                drawingContext.DrawRectangle(WaveformBackground, new Pen(), new Rect(0, 0, width, ActualHeight));
+                PaintWaveformBackground(viewport, drawingContext);
+                drawingContext.DrawGeometry(Brushes.Red, new Pen(Brushes.Black, 1), CreateWaveform(width));
+            }
+            else {
+                PaintWaveformBackground(viewport, drawingContext);
             }
 
             // DEBUG OUTPUT: VIEWPORT
@@ -94,30 +118,31 @@ namespace AudioAlign.WaveControls {
             drawingContext.DrawLine(new Pen(Brushes.Gray, 1), new Point(0, viewport.Height / 2), new Point(ActualWidth, viewport.Height / 2));
         }
 
-        private Geometry CreateWaveform(long offset, int samples) {
+        private Geometry CreateWaveform(int samples) {
             List<Point> linePoints = new List<Point>(samples);
-            int samplesRead = 0;
+            int totalSamplesRead = 0;
             double height = ActualHeight;
             double horizontalScale = height / ushort.MaxValue;
 
-            waveStream.Position = offset * BYTES_PER_SAMPLE;
-            while (samplesRead < samples) {
-                int bytesRead = waveStream.Read(buffer, 0, BUFFER_SIZE);
-                if(bytesRead == 0) break;
+            while (totalSamplesRead < samples) {
+                int samplesRead = audioStream.Read(buffer, BUFFER_SIZE);
+                if (samplesRead == 0)
+                    break;
 
-                for (int x = 0; x < bytesRead; x += BYTES_PER_SAMPLE * 2) {
-                    short sample = (short)((buffer[x + 1] << 8) | buffer[x + 0]);
-                    linePoints.Add(new Point(samplesRead, (height / 2) - (sample * horizontalScale)));
-                    samplesRead++;
-                    if (samplesRead == samples) break;
+                for (int x = 0; x < samplesRead; x++) {
+                    linePoints.Add(new Point(totalSamplesRead, (height / 2) - (buffer[0][x] * (height / 2))));
+                    totalSamplesRead++;
+                    if (totalSamplesRead == samples)
+                        break;
                 }
             }
 
-            if (samplesRead == 0) {
+            if (totalSamplesRead == 0) {
                 return new PathGeometry();
             }
-            else if (samplesRead == 1) {
-                throw new NotImplementedException();
+            else if (totalSamplesRead == 1) {
+                // TODO auch vorheriges sample lesen um im Fall von einem angezeigten sample trotzdem eine Linie zw. 2 samples zeichen zu können
+                return new PathGeometry();
             }
             else {
                 PathFigure pathFigure = new PathFigure();
