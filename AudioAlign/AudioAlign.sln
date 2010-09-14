@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.WaveControls", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Audio", "AudioAlign.Audio\AudioAlign.Audio.csproj", "{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NAudio", "NAudio", "{145C5564-02B1-42C2-ABDF-E29888E145A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAudio", "..\NAudio\NAudio\NAudio.csproj", "{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -51,8 +55,21 @@ Global
 		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|x86.ActiveCfg = Release|Any CPU
+		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E} = {145C5564-02B1-42C2-ABDF-E29888E145A5}
 	EndGlobalSection
 EndGlobal
