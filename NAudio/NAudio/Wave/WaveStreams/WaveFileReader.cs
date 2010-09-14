@@ -268,7 +268,7 @@ namespace NAudio.Wave
                     if (waveStream.Position < waveStream.Length)
                         buffer[channel][sample] = (float)br.ReadInt16() / 32768.0f;
                     else
-                        return 0;
+                        return sample;
                 }
             }
             return samples;
