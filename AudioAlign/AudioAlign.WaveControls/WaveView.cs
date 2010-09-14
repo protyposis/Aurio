@@ -22,7 +22,7 @@ namespace AudioAlign.WaveControls {
         public static readonly DependencyProperty VirtualWidthProperty;
         public static readonly DependencyProperty WaveformBackgroundProperty;
 
-        private const int BUFFER_SIZE = 512;
+        private const int BUFFER_SIZE = 1024;
 
         static WaveView() {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(WaveView), new FrameworkPropertyMetadata(typeof(WaveView)));
@@ -87,11 +87,13 @@ namespace AudioAlign.WaveControls {
                 }
                 long remainingSamples = (audioStream.SampleCount - audioStream.SamplePosition);
                 width = remainingSamples < width ? (int)remainingSamples : width;
-                Debug.WriteLine(remainingSamples + " / " + width);
 
-                drawingContext.DrawRectangle(WaveformBackground, new Pen(), new Rect(0, 0, width, ActualHeight));
+                drawingContext.DrawRectangle(WaveformBackground, null, new Rect(0, 0, width, ActualHeight));
                 PaintWaveformBackground(viewport, drawingContext);
-                drawingContext.DrawGeometry(Brushes.Red, new Pen(Brushes.Black, 1), CreateWaveform(width));
+
+                Geometry waveForm = CreateWaveform(width);
+                //waveForm.Transform = new ScaleTransform(2, 1);
+                drawingContext.DrawGeometry(null, new Pen(Brushes.Black, 1), waveForm);
             }
             else {
                 PaintWaveformBackground(viewport, drawingContext);
@@ -119,7 +121,11 @@ namespace AudioAlign.WaveControls {
         }
 
         private Geometry CreateWaveform(int samples) {
-            List<Point> linePoints = new List<Point>(samples);
+            int channels = audioStream.Properties.Channels;
+            List<Point>[] linePoints = new List<Point>[channels];
+            for (int channel = 0; channel < channels; channel++) {
+                linePoints[channel] = new List<Point>(samples);
+            }
             int totalSamplesRead = 0;
             double height = ActualHeight;
             double horizontalScale = height / ushort.MaxValue;
@@ -130,7 +136,9 @@ namespace AudioAlign.WaveControls {
                     break;
 
                 for (int x = 0; x < samplesRead; x++) {
-                    linePoints.Add(new Point(totalSamplesRead, (height / 2) - (buffer[0][x] * (height / 2))));
+                    for (int channel = 0; channel < channels; channel++) {
+                        linePoints[channel].Add(new Point(totalSamplesRead, (height / 2) - (buffer[channel][x] * (height / 2))));
+                    }
                     totalSamplesRead++;
                     if (totalSamplesRead == samples)
                         break;
@@ -145,15 +153,18 @@ namespace AudioAlign.WaveControls {
                 return new PathGeometry();
             }
             else {
-                PathFigure pathFigure = new PathFigure();
-                pathFigure.IsClosed = false;
-                pathFigure.IsFilled = false;
-                pathFigure.StartPoint = linePoints[0];
-                for (int x = 1; x < linePoints.Count; x++) {
-                    pathFigure.Segments.Add(new LineSegment(linePoints[x], true));
-                }
                 PathGeometry geometry = new PathGeometry();
-                geometry.Figures.Add(pathFigure);
+                for (int channel = 0; channel < channels; channel++) {
+                    PathFigure pathFigure = new PathFigure();
+                    pathFigure.IsClosed = false;
+                    pathFigure.IsFilled = false;
+                    pathFigure.StartPoint = linePoints[channel][0];
+                    for (int x = 1; x < linePoints[channel].Count; x++) {
+                        pathFigure.Segments.Add(new LineSegment(linePoints[channel][x], true));
+                    }
+                    geometry.Figures.Add(pathFigure);
+                }
+                geometry.Freeze();
                 return geometry;
 
                 // TODO testen ob diese Methode effizienter ist:
