@@ -104,7 +104,7 @@ namespace AudioAlign.WaveControls {
 
                 // draw background
                 drawingContext.DrawRectangle(WaveformBackground, null, 
-                    new Rect(0, 0, width > 0 ? width - 1 : 0, ActualHeight > 0 ? ActualHeight - 1 : 0));
+                    new Rect(0, 0, width, ActualHeight));
 
                 // draw waveform guides
                 for (int channel = 0; channel < channels; channel++) {
