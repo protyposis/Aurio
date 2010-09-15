@@ -21,6 +21,7 @@ namespace AudioAlign.WaveControls {
         public static readonly DependencyProperty VirtualHorizontalOffsetProperty;
         public static readonly DependencyProperty VirtualWidthProperty;
         public static readonly DependencyProperty WaveformBackgroundProperty;
+        public static readonly DependencyProperty ZoomFactorProperty;
 
         private const int BUFFER_SIZE = 1024;
 
@@ -30,17 +31,18 @@ namespace AudioAlign.WaveControls {
             FrameworkPropertyMetadata virtualHorizontalOffsetMetadata = new FrameworkPropertyMetadata() { AffectsRender = true };
             FrameworkPropertyMetadata virtualWidthMetadata = new FrameworkPropertyMetadata() { AffectsRender = true };
             FrameworkPropertyMetadata waveformBackgroundMetadata = new FrameworkPropertyMetadata() { AffectsRender = true };
+            FrameworkPropertyMetadata zoomFactorMetadata = new FrameworkPropertyMetadata() { AffectsRender = true, DefaultValue = 1.0f };
 
             VirtualHorizontalOffsetProperty = DependencyProperty.Register("VirtualHorizontalOffset", typeof(double), typeof(WaveView), virtualHorizontalOffsetMetadata);
             VirtualWidthProperty = DependencyProperty.Register("VirtualWidth", typeof(double), typeof(WaveView), virtualWidthMetadata);
             WaveformBackgroundProperty = DependencyProperty.Register("WaveformBackground", typeof(Brush), typeof(WaveView), waveformBackgroundMetadata);
+            ZoomFactorProperty = DependencyProperty.Register("ZoomFactor", typeof(float), typeof(WaveView), zoomFactorMetadata);
         }
 
         private IAudioStream16 audioStream;
         private float[][] buffer;
 
         public WaveView() {
-            //SetValue(RenderOptions.EdgeModeProperty, EdgeMode.Aliased);
         }
 
         public IAudioStream16 AudioStream {
@@ -53,6 +55,11 @@ namespace AudioAlign.WaveControls {
                 }
                 VirtualWidth = audioStream.SampleCount;
             }
+        }
+
+        public bool Antialiased {
+            get { return ((EdgeMode)GetValue(RenderOptions.EdgeModeProperty)) == EdgeMode.Aliased; }
+            set { SetValue(RenderOptions.EdgeModeProperty, !value ? EdgeMode.Aliased : EdgeMode.Unspecified); }
         }
 
         public double VirtualHorizontalOffset {
@@ -70,6 +77,11 @@ namespace AudioAlign.WaveControls {
             set { SetValue(WaveformBackgroundProperty, value); }
         }
 
+        public float ZoomFactor {
+            get { return (float)GetValue(ZoomFactorProperty); }
+            set { SetValue(ZoomFactorProperty, value); }
+        }
+
         protected override void OnRender(DrawingContext drawingContext) {
             base.OnRender(drawingContext);
             
@@ -77,7 +89,7 @@ namespace AudioAlign.WaveControls {
 
             if (audioStream != null) {
                 long offset = (long)Math.Floor(viewport.Left);
-                int width = (int)Math.Ceiling(ActualWidth) + 1; // +1 to avoid small gap on right border of graph (draws the graph over the right border)
+                int width = (int)Math.Ceiling(ActualWidth); // +1 to avoid small gap on right border of graph (draws the graph over the right border)
 
                 audioStream.SamplePosition = offset;
                 if (audioStream.SamplePosition != offset) {
@@ -109,19 +121,30 @@ namespace AudioAlign.WaveControls {
                 }
 
                 // draw waveforms
-                Geometry[] waveforms = CreateWaveforms(width);
+                int zoomedSamples = (int)Math.Ceiling(width / ZoomFactor) + 1;
+                Geometry[] waveforms = CreateWaveforms(zoomedSamples);
                 for (int channel = 0; channel < channels; channel++) {
                     if (waveforms[channel].IsFrozen)
                         continue;
                     TransformGroup transformGroup = new TransformGroup();
-                    transformGroup.Children.Add(new ScaleTransform(1, channelHalfHeight * -1));
+                    transformGroup.Children.Add(new ScaleTransform(ZoomFactor, channelHalfHeight * -1));
                     transformGroup.Children.Add(new TranslateTransform(0, channelHalfHeight + (channelHalfHeight * channel * 2)));
                     waveforms[channel].Transform = transformGroup;
                     drawingContext.DrawGeometry(null, new Pen(Brushes.CornflowerBlue, 1), waveforms[channel]);
+
+                    // draw sample dots on high zoom factors
+                    if (ZoomFactor > 10) {
+                        float sampleDotSize = ZoomFactor < 30 ? ZoomFactor / 10 : 3;
+                        PointCollection pointCollection = ((waveforms[channel] as PathGeometry)
+                            .Figures[0].Segments[0] as PolyLineSegment).Points;
+                        GeometryGroup geometryGroup = new GeometryGroup();
+                        foreach (Point point in pointCollection) {
+                            EllipseGeometry sampleDot = new EllipseGeometry(transformGroup.Transform(point), sampleDotSize, sampleDotSize);
+                            geometryGroup.Children.Add(sampleDot);
+                        }
+                        drawingContext.DrawGeometry(Brushes.RoyalBlue, null, geometryGroup);
+                    }
                 }
-            }
-            else {
-                PaintWaveformBackground(viewport, drawingContext);
             }
 
             // DEBUG OUTPUT: VIEWPORT
@@ -139,11 +162,6 @@ namespace AudioAlign.WaveControls {
 
         private Rect CalculateViewport() {
             return new Rect(VirtualHorizontalOffset, 0, ActualWidth, ActualHeight);
-        }
-
-        private void PaintWaveformBackground(Rect viewport, DrawingContext drawingContext) {
-            // TODO eventuell als DrawingVisual vorberechnen und wiederverwenden 
-            
         }
 
         private Geometry[] CreateWaveforms(int samples) {
