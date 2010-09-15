@@ -72,8 +72,6 @@ namespace AudioAlign.WaveControls {
 
         protected override void OnRender(DrawingContext drawingContext) {
             base.OnRender(drawingContext);
-            // draw background
-            //drawingContext.DrawRectangle(Background, new Pen(), new Rect(0, 0, ActualWidth, ActualHeight));
             
             Rect viewport = CalculateViewport();
 
@@ -88,15 +86,38 @@ namespace AudioAlign.WaveControls {
                 long remainingSamples = (audioStream.SampleCount - audioStream.SamplePosition);
                 width = remainingSamples < width ? (int)remainingSamples : width;
 
-                drawingContext.DrawRectangle(WaveformBackground, null, new Rect(0, 0, width, ActualHeight));
-                PaintWaveformBackground(viewport, drawingContext);
+                int channels = audioStream.Properties.Channels;
+                double channelHeight = viewport.Height / channels;
+                double channelHalfHeight = channelHeight / 2;
 
+                // draw background
+                drawingContext.DrawRectangle(WaveformBackground, null, 
+                    new Rect(0, 0, width > 0 ? width - 1 : 0, ActualHeight > 0 ? ActualHeight - 1 : 0));
+
+                // draw waveform guides
+                for (int channel = 0; channel < channels; channel++) {
+                    // waveform zero-line
+                    drawingContext.DrawLine(new Pen(Brushes.LightGray, 1), 
+                        new Point(0, channelHeight * channel + channelHalfHeight), 
+                        new Point(width, channelHeight * channel + channelHalfHeight));
+                    // waveform spacers
+                    if (channel > 0) {
+                        drawingContext.DrawLine(new Pen(Brushes.DarkGray, 1),
+                            new Point(0, channelHeight * channel),
+                            new Point(width, channelHeight * channel));
+                    }
+                }
+
+                // draw waveforms
                 Geometry[] waveforms = CreateWaveforms(width);
-                // TODO waveforms "normalisiert" zeichnen, und dann erst auf gewünschte Größe scalen
-                // TODO waveforms untereinander zeichen (wie Vegas)
-                //waveForm.Transform = new ScaleTransform(4, 1);
-                for (int channel = 0; channel < waveforms.Length; channel++) {
-                    drawingContext.DrawGeometry(null, new Pen(Brushes.Black, 1), waveforms[channel]);
+                for (int channel = 0; channel < channels; channel++) {
+                    if (waveforms[channel].IsFrozen)
+                        continue;
+                    TransformGroup transformGroup = new TransformGroup();
+                    transformGroup.Children.Add(new ScaleTransform(1, channelHalfHeight * -1));
+                    transformGroup.Children.Add(new TranslateTransform(0, channelHalfHeight + (channelHalfHeight * channel * 2)));
+                    waveforms[channel].Transform = transformGroup;
+                    drawingContext.DrawGeometry(null, new Pen(Brushes.CornflowerBlue, 1), waveforms[channel]);
                 }
             }
             else {
@@ -121,7 +142,8 @@ namespace AudioAlign.WaveControls {
         }
 
         private void PaintWaveformBackground(Rect viewport, DrawingContext drawingContext) {
-            drawingContext.DrawLine(new Pen(Brushes.Gray, 1), new Point(0, viewport.Height / 2), new Point(ActualWidth, viewport.Height / 2));
+            // TODO eventuell als DrawingVisual vorberechnen und wiederverwenden 
+            
         }
 
         private Geometry[] CreateWaveforms(int samples) {
@@ -132,8 +154,6 @@ namespace AudioAlign.WaveControls {
                 linePoints[channel] = new List<Point>(samples);
             }
             int totalSamplesRead = 0;
-            double height = ActualHeight;
-            double horizontalScale = height / ushort.MaxValue;
 
             while (totalSamplesRead < samples) {
                 int samplesRead = audioStream.Read(buffer, BUFFER_SIZE);
@@ -142,7 +162,7 @@ namespace AudioAlign.WaveControls {
 
                 for (int x = 0; x < samplesRead; x++) {
                     for (int channel = 0; channel < channels; channel++) {
-                        linePoints[channel].Add(new Point(totalSamplesRead, (height / 2) - (buffer[channel][x] * (height / 2))));
+                        linePoints[channel].Add(new Point(totalSamplesRead, buffer[channel][x]));
                     }
                     totalSamplesRead++;
                     if (totalSamplesRead == samples)
@@ -150,7 +170,7 @@ namespace AudioAlign.WaveControls {
                 }
             }
 
-            if (totalSamplesRead <= 1) {
+            if (totalSamplesRead < 2) {
                 for (int channel = 0; channel < channels; channel++) {
                     waveforms[channel] = Geometry.Empty;
                 }
@@ -164,14 +184,9 @@ namespace AudioAlign.WaveControls {
                     pathFigure.StartPoint = linePoints[channel][0];
                     pathFigure.Segments.Add(new PolyLineSegment(linePoints[channel], true)); // first point gets added a second time
                     geometry.Figures.Add(pathFigure);
+                    //geometry.Freeze();
                     waveforms[channel] = geometry;
                 }
-                //geometry.Freeze();
-
-                // TODO testen ob diese Methode effizienter ist:
-                //PathFigure pathFigure = new PathFigure();
-                //pathFigure.Segments.Add(new PolyLineSegment(linePoints, true));
-                //return geometry;
             }
             return waveforms;
         }
