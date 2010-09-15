@@ -91,9 +91,13 @@ namespace AudioAlign.WaveControls {
                 drawingContext.DrawRectangle(WaveformBackground, null, new Rect(0, 0, width, ActualHeight));
                 PaintWaveformBackground(viewport, drawingContext);
 
-                Geometry waveForm = CreateWaveform(width);
-                //waveForm.Transform = new ScaleTransform(2, 1);
-                drawingContext.DrawGeometry(null, new Pen(Brushes.Black, 1), waveForm);
+                Geometry[] waveforms = CreateWaveforms(width);
+                // TODO waveforms "normalisiert" zeichnen, und dann erst auf gewünschte Größe scalen
+                // TODO waveforms untereinander zeichen (wie Vegas)
+                //waveForm.Transform = new ScaleTransform(4, 1);
+                for (int channel = 0; channel < waveforms.Length; channel++) {
+                    drawingContext.DrawGeometry(null, new Pen(Brushes.Black, 1), waveforms[channel]);
+                }
             }
             else {
                 PaintWaveformBackground(viewport, drawingContext);
@@ -120,8 +124,9 @@ namespace AudioAlign.WaveControls {
             drawingContext.DrawLine(new Pen(Brushes.Gray, 1), new Point(0, viewport.Height / 2), new Point(ActualWidth, viewport.Height / 2));
         }
 
-        private Geometry CreateWaveform(int samples) {
+        private Geometry[] CreateWaveforms(int samples) {
             int channels = audioStream.Properties.Channels;
+            Geometry[] waveforms = new Geometry[channels];
             List<Point>[] linePoints = new List<Point>[channels];
             for (int channel = 0; channel < channels; channel++) {
                 linePoints[channel] = new List<Point>(samples);
@@ -145,33 +150,30 @@ namespace AudioAlign.WaveControls {
                 }
             }
 
-            if (totalSamplesRead == 0) {
-                return new PathGeometry();
-            }
-            else if (totalSamplesRead == 1) {
-                // TODO auch vorheriges sample lesen um im Fall von einem angezeigten sample trotzdem eine Linie zw. 2 samples zeichen zu können
-                return new PathGeometry();
+            if (totalSamplesRead <= 1) {
+                for (int channel = 0; channel < channels; channel++) {
+                    waveforms[channel] = Geometry.Empty;
+                }
             }
             else {
-                PathGeometry geometry = new PathGeometry();
                 for (int channel = 0; channel < channels; channel++) {
+                    PathGeometry geometry = new PathGeometry();
                     PathFigure pathFigure = new PathFigure();
                     pathFigure.IsClosed = false;
                     pathFigure.IsFilled = false;
                     pathFigure.StartPoint = linePoints[channel][0];
-                    for (int x = 1; x < linePoints[channel].Count; x++) {
-                        pathFigure.Segments.Add(new LineSegment(linePoints[channel][x], true));
-                    }
+                    pathFigure.Segments.Add(new PolyLineSegment(linePoints[channel], true)); // first point gets added a second time
                     geometry.Figures.Add(pathFigure);
+                    waveforms[channel] = geometry;
                 }
-                geometry.Freeze();
-                return geometry;
+                //geometry.Freeze();
 
                 // TODO testen ob diese Methode effizienter ist:
                 //PathFigure pathFigure = new PathFigure();
                 //pathFigure.Segments.Add(new PolyLineSegment(linePoints, true));
                 //return geometry;
             }
+            return waveforms;
         }
     }
 }
