@@ -265,7 +265,7 @@ namespace NAudio.Wave
             {
                 for (int channel = 0; channel < waveFormat.Channels; channel++)
                 {
-                    if (waveStream.Position < waveStream.Length)
+                    if (Position < Length)
                         buffer[channel][sample] = (float)br.ReadInt16() / 32768.0f;
                     else
                         return sample;
@@ -290,7 +290,7 @@ namespace NAudio.Wave
             {
                 for (int channel = 0; channel < waveFormat.Channels; channel++)
                 {
-                    if (waveStream.Position < waveStream.Length)
+                    if (Position < Length)
                         buffer[channel][sample] = br.ReadInt16() / 32768.0;
                     else
                         return sample;
