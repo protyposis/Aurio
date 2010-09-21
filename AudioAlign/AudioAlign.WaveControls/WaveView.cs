@@ -49,10 +49,7 @@ namespace AudioAlign.WaveControls {
             get { return audioStream; }
             set {
                 audioStream = value;
-                buffer = new float[audioStream.Properties.Channels][];
-                for (int channel = 0; channel < audioStream.Properties.Channels; channel++) {
-                    buffer[channel] = new float[BUFFER_SIZE];
-                }
+                buffer = AudioUtil.CreateArray<float>(audioStream.Properties.Channels, BUFFER_SIZE);
                 VirtualWidth = audioStream.SampleCount;
             }
         }
@@ -89,40 +86,43 @@ namespace AudioAlign.WaveControls {
 
             if (audioStream != null) {
                 long offset = (long)Math.Floor(viewport.Left);
-                int width = (int)Math.Ceiling(ActualWidth); // +1 to avoid small gap on right border of graph (draws the graph over the right border)
+                int width = (int)Math.Ceiling(ActualWidth);
 
                 audioStream.SamplePosition = offset;
                 if (audioStream.SamplePosition != offset) {
                     throw new Exception("WaveStream/WavFileReader BlockAlign violation");
                 }
                 long remainingSamples = (audioStream.SampleCount - audioStream.SamplePosition);
-                width = remainingSamples < width ? (int)remainingSamples : width;
+                //width = remainingSamples < width ? (int)remainingSamples : width;
+                int zoomedSamples = (int)Math.Ceiling(width / ZoomFactor) + 1; // +1 to avoid small gap on right border of graph (draws the graph over the right border)
 
                 int channels = audioStream.Properties.Channels;
                 double channelHeight = viewport.Height / channels;
                 double channelHalfHeight = channelHeight / 2;
 
+                List<Point>[] samples = LoadSamples(zoomedSamples);
+                zoomedSamples = samples[0].Count;
+
                 // draw background
-                drawingContext.DrawRectangle(WaveformBackground, null, 
-                    new Rect(0, 0, width, ActualHeight));
+                drawingContext.DrawRectangle(WaveformBackground, null,
+                    new Rect(0, 0, zoomedSamples * ZoomFactor, ActualHeight));
 
                 // draw waveform guides
                 for (int channel = 0; channel < channels; channel++) {
                     // waveform zero-line
                     drawingContext.DrawLine(new Pen(Brushes.LightGray, 1), 
-                        new Point(0, channelHeight * channel + channelHalfHeight), 
-                        new Point(width, channelHeight * channel + channelHalfHeight));
+                        new Point(0, channelHeight * channel + channelHalfHeight),
+                        new Point(zoomedSamples * ZoomFactor, channelHeight * channel + channelHalfHeight));
                     // waveform spacers
                     if (channel > 0) {
                         drawingContext.DrawLine(new Pen(Brushes.DarkGray, 1),
                             new Point(0, channelHeight * channel),
-                            new Point(width, channelHeight * channel));
+                            new Point(zoomedSamples * ZoomFactor, channelHeight * channel));
                     }
                 }
 
                 // draw waveforms
-                int zoomedSamples = (int)Math.Ceiling(width / ZoomFactor) + 1;
-                Geometry[] waveforms = CreateWaveforms(zoomedSamples);
+                Geometry[] waveforms = CreateWaveforms(samples);
                 for (int channel = 0; channel < channels; channel++) {
                     if (waveforms[channel].IsFrozen)
                         continue;
@@ -135,10 +135,8 @@ namespace AudioAlign.WaveControls {
                     // draw sample dots on high zoom factors
                     if (ZoomFactor > 10) {
                         float sampleDotSize = ZoomFactor < 30 ? ZoomFactor / 10 : 3;
-                        PointCollection pointCollection = ((waveforms[channel] as PathGeometry)
-                            .Figures[0].Segments[0] as PolyLineSegment).Points;
                         GeometryGroup geometryGroup = new GeometryGroup();
-                        foreach (Point point in pointCollection) {
+                        foreach (Point point in samples[channel]) {
                             EllipseGeometry sampleDot = new EllipseGeometry(transformGroup.Transform(point), sampleDotSize, sampleDotSize);
                             geometryGroup.Children.Add(sampleDot);
                         }
@@ -148,15 +146,11 @@ namespace AudioAlign.WaveControls {
             }
 
             // DEBUG OUTPUT: VIEWPORT
-            String viewportInfo = "Size: " + new Size(ActualWidth, ActualHeight) + " / " + "Viewport: " + viewport.ToString();
+            String viewportInfo = "Size: " + new Size(ActualWidth, ActualHeight)
+                + " / " + "Viewport: " + viewport + " / " + "Zoom: " + ZoomFactor;
             drawingContext.DrawText(
-                new FormattedText(
-                    viewportInfo,
-                    CultureInfo.CurrentUICulture,
-                    System.Windows.FlowDirection.LeftToRight,
-                    new Typeface("Tahoma"),
-                    8,
-                    Brushes.Black),
+                new FormattedText(viewportInfo, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
+                    new Typeface("Tahoma"), 8, Brushes.Black),
                 new Point(0, ActualHeight) + new Vector(0, -10));
         }
 
@@ -164,13 +158,9 @@ namespace AudioAlign.WaveControls {
             return new Rect(VirtualHorizontalOffset, 0, ActualWidth, ActualHeight);
         }
 
-        private Geometry[] CreateWaveforms(int samples) {
+        private List<Point>[] LoadSamples(int samples) {
             int channels = audioStream.Properties.Channels;
-            Geometry[] waveforms = new Geometry[channels];
-            List<Point>[] linePoints = new List<Point>[channels];
-            for (int channel = 0; channel < channels; channel++) {
-                linePoints[channel] = new List<Point>(samples);
-            }
+            List<Point>[] samplePoints = AudioUtil.CreateList<Point>(channels, samples);
             int totalSamplesRead = 0;
 
             while (totalSamplesRead < samples) {
@@ -180,7 +170,7 @@ namespace AudioAlign.WaveControls {
 
                 for (int x = 0; x < samplesRead; x++) {
                     for (int channel = 0; channel < channels; channel++) {
-                        linePoints[channel].Add(new Point(totalSamplesRead, buffer[channel][x]));
+                        samplePoints[channel].Add(new Point(totalSamplesRead, buffer[channel][x]));
                     }
                     totalSamplesRead++;
                     if (totalSamplesRead == samples)
@@ -188,7 +178,14 @@ namespace AudioAlign.WaveControls {
                 }
             }
 
-            if (totalSamplesRead < 2) {
+            return samplePoints;
+        }
+
+        private Geometry[] CreateWaveforms(List<Point>[] samplePoints) {
+            int channels = samplePoints.Length;
+            Geometry[] waveforms = new Geometry[channels];
+
+            if (samplePoints[0].Count < 2) {
                 for (int channel = 0; channel < channels; channel++) {
                     waveforms[channel] = Geometry.Empty;
                 }
@@ -199,8 +196,8 @@ namespace AudioAlign.WaveControls {
                     PathFigure pathFigure = new PathFigure();
                     pathFigure.IsClosed = false;
                     pathFigure.IsFilled = false;
-                    pathFigure.StartPoint = linePoints[channel][0];
-                    pathFigure.Segments.Add(new PolyLineSegment(linePoints[channel], true)); // first point gets added a second time
+                    pathFigure.StartPoint = samplePoints[channel][0];
+                    pathFigure.Segments.Add(new PolyLineSegment(samplePoints[channel], true)); // first point gets added a second time
                     geometry.Figures.Add(pathFigure);
                     //geometry.Freeze();
                     waveforms[channel] = geometry;

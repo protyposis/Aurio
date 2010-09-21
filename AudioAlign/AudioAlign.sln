@@ -5,11 +5,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign", "AudioAlign\Au
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.WaveControls", "AudioAlign.WaveControls\AudioAlign.WaveControls.csproj", "{FD0C6CC5-B509-4441-9AA2-E8B34BAD9F95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Audio", "AudioAlign.Audio\AudioAlign.Audio.csproj", "{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NAudio", "NAudio", "{145C5564-02B1-42C2-ABDF-E29888E145A5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAudio", "..\NAudio\NAudio\NAudio.csproj", "{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Audio", "AudioAlign.Audio\AudioAlign.Audio.csproj", "{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}"
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
@@ -55,21 +55,6 @@ Global
 		{FD0C6CC5-B509-4441-9AA2-E8B34BAD9F95}.Release|x64.ActiveCfg = Release|x64
 		{FD0C6CC5-B509-4441-9AA2-E8B34BAD9F95}.Release|x64.Build.0 = Release|x64
 		{FD0C6CC5-B509-4441-9AA2-E8B34BAD9F95}.Release|x86.ActiveCfg = Release|Any CPU
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|x64.ActiveCfg = Debug|x64
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|x64.Build.0 = Debug|x64
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|x86.ActiveCfg = Debug|x86
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|x86.Build.0 = Debug|x86
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|x64.ActiveCfg = Release|x64
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|x64.Build.0 = Release|x64
-		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|x86.ActiveCfg = Release|Any CPU
 		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -85,6 +70,22 @@ Global
 		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Release|x64.ActiveCfg = Release|x64
 		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Release|x64.Build.0 = Release|x64
 		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}.Release|x86.ActiveCfg = Release|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|x64.ActiveCfg = Debug|x64
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|x64.Build.0 = Debug|x64
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|x86.ActiveCfg = Debug|x86
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Debug|x86.Build.0 = Debug|x86
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|Mixed Platforms.Build.0 = Release|x86
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|x64.ActiveCfg = Release|x64
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|x64.Build.0 = Release|x64
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|x86.ActiveCfg = Release|x86
+		{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

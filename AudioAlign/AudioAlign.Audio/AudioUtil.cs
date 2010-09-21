@@ -26,5 +26,33 @@ namespace AudioAlign.Audio {
         public static int CalculateSamples(AudioProperties audioProperties, TimeSpan timeSpan) {
             return (int)Math.Ceiling(timeSpan.Ticks / CalculateSampleTicks(audioProperties));
         }
+
+        /// <summary>
+        /// Creates an array of buffers with a given size for a given number of channels.
+        /// </summary>
+        /// <param name="channels">the number of channels the buffer should be capable</param>
+        /// <param name="size">the size of each channel's buffer</param>
+        /// <returns>the multichannel buffer</returns>
+        public static T[][] CreateArray<T>(int channels, int size) {
+            T[][] buffer = new T[channels][];
+            for (int channel = 0; channel < channels; channel++) {
+                buffer[channel] = new T[size];
+            }
+            return buffer;
+        }
+
+        /// <summary>
+        /// Creates an array of lists with a given size for a given number of channels.
+        /// </summary>
+        /// <param name="channels">the number of channels the list should be created for</param>
+        /// <param name="size">the size of each channel's list</param>
+        /// <returns>the multichannel list</returns>
+        public static List<T>[] CreateList<T>(int channels, int size) {
+            List<T>[] list = new List<T>[channels];
+            for (int channel = 0; channel < channels; channel++) {
+                list[channel] = new List<T>(size);
+            }
+            return list;
+        }
     }
 }
