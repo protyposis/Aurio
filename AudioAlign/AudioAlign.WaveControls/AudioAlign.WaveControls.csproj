@@ -145,6 +145,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <Compile Include="WaveView.DependencyProperties.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AudioAlign.Audio\AudioAlign.Audio.csproj">
