@@ -30,8 +30,7 @@ namespace AudioAlign.WaveControls
 
             TrackLengthProperty = DependencyProperty.Register("TrackLength", typeof(long), typeof(WaveView),
                 new FrameworkPropertyMetadata { AffectsRender = true, 
-                    PropertyChangedCallback = OnTrackLengthChanged, 
-                    CoerceValueCallback =  CoerceTrackLength });
+                    PropertyChangedCallback = OnTrackLengthChanged });
 
             TrackOffsetProperty = DependencyProperty.Register("TrackOffset", typeof(long), typeof(WaveView),
                 new FrameworkPropertyMetadata { AffectsRender = true });

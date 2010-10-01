@@ -33,7 +33,7 @@ namespace AudioAlign.WaveControls {
             set {
                 audioStream = value;
                 buffer = AudioUtil.CreateArray<float>(audioStream.Properties.Channels, BUFFER_SIZE);
-                TrackLength = audioStream.SampleCount;
+                //TrackLength = audioStream.TimeLength.Ticks;
             }
         }
 
@@ -44,52 +44,67 @@ namespace AudioAlign.WaveControls {
 
         protected override void OnRender(DrawingContext drawingContext) {
             base.OnRender(drawingContext);
-            
-            Rect viewport = CalculateViewport();
 
             if (audioStream != null) {
-                long offset = (long)Math.Floor(viewport.Left);
-                int width = (int)Math.Ceiling(ActualWidth);
+                long totalAudioDataLength = audioStream.TimeLength.Ticks;
+                long virtualViewportOffset = TrackOffset - ViewportOffset;
 
-                audioStream.SamplePosition = offset;
-                if (audioStream.SamplePosition != offset) {
-                    throw new Exception("WaveStream/WavFileReader BlockAlign violation");
+                // determine if the virtual viewport offset is valid and if there's some data to draw
+                if (virtualViewportOffset < 0) { // audio data starts before viewport
+                    if (virtualViewportOffset + totalAudioDataLength <= 0) { // audio data starts & ends before viewport
+                        return;
+                    }
+                    virtualViewportOffset = 0; // audio data overlaps or ends at viewport start
                 }
-                int zoomedSamples = (int)ViewportWidth;
+                else { // audio data starts at viewport start or later;
+                    if (virtualViewportOffset >= ViewportWidth) { // audio data starts after viewport
+                        return;
+                    }
+                }
 
-                int channels = audioStream.Properties.Channels;
-                double channelHeight = viewport.Height / channels;
-                double channelHalfHeight = channelHeight / 2;
+                // read audio data
+                long visibleAudioDataLength = ViewportWidth - virtualViewportOffset;
+                audioStream.TimePosition = new TimeSpan(ViewportOffset - TrackOffset + virtualViewportOffset);
+                List<Point>[] samples = LoadSamples(AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(visibleAudioDataLength)));
+                // after loading the audio data, we know the real length (can be less than the desired read length at end of stream)
+                int sampleCount = samples[0].Count;
+                visibleAudioDataLength = (long)(AudioUtil.CalculateSampleTicks(audioStream.Properties) * sampleCount);
 
-                List<Point>[] samples = LoadSamples(zoomedSamples);
-                zoomedSamples = samples[0].Count;
+                double viewportToDrawingScaleFactor = ActualWidth / ViewportWidth;
+                double drawingOffset = virtualViewportOffset * viewportToDrawingScaleFactor;
+                double drawingWidth = visibleAudioDataLength * viewportToDrawingScaleFactor; // ActualWidth - drawingOffset
 
                 // draw background
-                drawingContext.DrawRectangle(WaveformBackground, null,
-                    new Rect(0, 0, zoomedSamples * ViewportZoom, ActualHeight));
+                drawingContext.DrawRectangle(WaveformBackground, new Pen(Brushes.Brown, 4), new Rect(drawingOffset, 0, drawingWidth, ActualHeight));
 
                 // draw waveform guides
+                int channels = audioStream.Properties.Channels;
+                double channelHeight = ActualHeight / channels;
+                double channelHalfHeight = channelHeight / 2;
                 for (int channel = 0; channel < channels; channel++) {
                     // waveform zero-line
-                    drawingContext.DrawLine(new Pen(Brushes.LightGray, 1), 
-                        new Point(0, channelHeight * channel + channelHalfHeight),
-                        new Point(zoomedSamples * ViewportZoom, channelHeight * channel + channelHalfHeight));
+                    drawingContext.DrawLine(new Pen(Brushes.LightGray, 1),
+                        new Point(drawingOffset, channelHeight * channel + channelHalfHeight),
+                        new Point(drawingOffset + drawingWidth, channelHeight * channel + channelHalfHeight));
                     // waveform spacers
                     if (channel > 0) {
                         drawingContext.DrawLine(new Pen(Brushes.DarkGray, 1),
-                            new Point(0, channelHeight * channel),
-                            new Point(zoomedSamples * ViewportZoom, channelHeight * channel));
+                            new Point(drawingOffset, channelHeight * channel),
+                            new Point(drawingOffset + drawingWidth, channelHeight * channel));
                     }
+                }
+
+                if (sampleCount <= 1) {
+                    drawingContext.DrawText(DebugText("SAMPLE WARNING: " + sampleCount), new Point(0, 0));
+                    return;
                 }
 
                 // draw waveforms
                 Geometry[] waveforms = CreateWaveforms(samples);
                 for (int channel = 0; channel < channels; channel++) {
-                    if (waveforms[channel].IsFrozen)
-                        continue;
                     TransformGroup transformGroup = new TransformGroup();
-                    transformGroup.Children.Add(new ScaleTransform(ViewportZoom, channelHalfHeight * -1));
-                    transformGroup.Children.Add(new TranslateTransform(0, channelHalfHeight + (channelHalfHeight * channel * 2)));
+                    transformGroup.Children.Add(new ScaleTransform(drawingWidth / waveforms[channel].Bounds.Width, channelHalfHeight * -1));
+                    transformGroup.Children.Add(new TranslateTransform(drawingOffset, channelHalfHeight + (channelHalfHeight * channel * 2)));
                     waveforms[channel].Transform = transformGroup;
                     drawingContext.DrawGeometry(null, new Pen(Brushes.CornflowerBlue, 1), waveforms[channel]);
 
@@ -104,14 +119,18 @@ namespace AudioAlign.WaveControls {
                         drawingContext.DrawGeometry(Brushes.RoyalBlue, null, geometryGroup);
                     }
                 }
+
+                // DEBUG OUTPUT
+                drawingContext.DrawText(DebugText("Drawing Offset: " + drawingOffset + ", Width: " + drawingWidth + ", ScalingFactor: " + viewportToDrawingScaleFactor + ", Samples: " + sampleCount),
+                    new Point(0, ActualHeight) + new Vector(0, -40));
             }
 
-            // DEBUG OUTPUT: VIEWPORT
-            String viewportInfo = "Size: " + new Size(ActualWidth, ActualHeight)
-                + " / " + "Viewport: " + viewport + " / " + "Zoom: " + ViewportZoom;
-            drawingContext.DrawText(
-                new FormattedText(viewportInfo, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
-                    new Typeface("Tahoma"), 8, Brushes.Black),
+            // DEBUG OUTPUT
+            drawingContext.DrawText(DebugText("ActualWidth: " + ActualWidth + ", ActualHeight: " + ActualHeight),
+                new Point(0, ActualHeight) + new Vector(0, -30));
+            drawingContext.DrawText(DebugText("TrackLength: " + TrackLength + ", TrackOffset: " + TrackOffset),
+                new Point(0, ActualHeight) + new Vector(0, -20));
+            drawingContext.DrawText(DebugText("ViewportOffset: " + ViewportOffset + ", ViewportWidth: " + ViewportWidth),
                 new Point(0, ActualHeight) + new Vector(0, -10));
         }
 
@@ -165,6 +184,11 @@ namespace AudioAlign.WaveControls {
                 }
             }
             return waveforms;
+        }
+
+        private FormattedText DebugText(string text) {
+            return new FormattedText(text, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, 
+                new Typeface("Tahoma"), 8, Brushes.Black);
         }
     }
 }
