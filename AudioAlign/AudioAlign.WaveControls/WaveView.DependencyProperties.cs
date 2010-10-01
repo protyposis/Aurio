@@ -126,6 +126,9 @@ namespace AudioAlign.WaveControls
         }
 
         private void WaveView_SizeChanged(object sender, SizeChangedEventArgs e) {
+            if (e.WidthChanged && e.PreviousSize.Width > 0) {
+                ViewportWidth = (long)(ViewportWidth * e.NewSize.Width / e.PreviousSize.Width);
+            }
             UpdateViewportZoom(this);
             //InvalidateVisual();
         }

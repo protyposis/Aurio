@@ -33,7 +33,7 @@ namespace AudioAlign.WaveControls {
             set {
                 audioStream = value;
                 buffer = AudioUtil.CreateArray<float>(audioStream.Properties.Channels, BUFFER_SIZE);
-                //TrackLength = audioStream.TimeLength.Ticks;
+                TrackLength = audioStream.TimeLength.Ticks;
             }
         }
 
@@ -44,6 +44,13 @@ namespace AudioAlign.WaveControls {
 
         protected override void OnRender(DrawingContext drawingContext) {
             base.OnRender(drawingContext);
+
+            /*
+             * TODO:
+             * - Sample davor und danach laden und zeichnen, damit bei nur einem sichtbaren Sample trotzdem Linien gezeichnet werden
+             * - smooth scrolling wenn ganz hineingezoomt, nicht nur auf sample-ebene wie jetzt
+             * - skips bei änderung der waveview-breite beheben (wenn ganz weit reingezoomt; nur ein paar samples sichtbar)
+             */
 
             if (audioStream != null) {
                 long totalAudioDataLength = audioStream.TimeLength.Ticks;
@@ -109,8 +116,9 @@ namespace AudioAlign.WaveControls {
                     drawingContext.DrawGeometry(null, new Pen(Brushes.CornflowerBlue, 1), waveforms[channel]);
 
                     // draw sample dots on high zoom factors
-                    if (ViewportZoom > 10) {
-                        float sampleDotSize = ViewportZoom < 30 ? ViewportZoom / 10 : 3;
+                    float zoomFactor = (float)(ActualWidth / sampleCount);
+                    if (zoomFactor > 2) {
+                        float sampleDotSize = zoomFactor < 30 ? zoomFactor / 10 : 3;
                         GeometryGroup geometryGroup = new GeometryGroup();
                         foreach (Point point in samples[channel]) {
                             EllipseGeometry sampleDot = new EllipseGeometry(transformGroup.Transform(point), sampleDotSize, sampleDotSize);
