@@ -194,9 +194,14 @@ namespace NAudio.Wave
             }
             set
             {
+                if (value < 0) {
+                    throw new ArgumentOutOfRangeException("negative position is not allowed: " + value);
+                }
+                if (value > Length) {
+                    throw new EndOfStreamException("cannot seek beyond end of stream: requested " + value + ", length " + Length);
+                }
                 lock (this)
                 {
-                    value = Math.Min(value, Length);
                     // make sure we don't get out of sync
                     value -= (value % waveFormat.BlockAlign);
                     waveStream.Position = value + dataPosition;
