@@ -7,6 +7,7 @@ using NAudio.Wave;
 namespace AudioAlign.Audio {
     internal class NAudio16BitWaveFileReaderWrapperStream: AbstractAudioStream<float>, IAudioStream16 {
         private WaveFileReader waveFileReader;
+        float sampleTicks;
 
         public NAudio16BitWaveFileReaderWrapperStream(WaveFileReader waveFileReader) {
             this.waveFileReader = waveFileReader;
@@ -19,11 +20,17 @@ namespace AudioAlign.Audio {
             TimePosition = waveFileReader.CurrentTime;
             SampleCount = ByteToSamplePosition(waveFileReader.Length);
             SamplePosition = ByteToSamplePosition(waveFileReader.Position);
+
+            sampleTicks = AudioUtil.CalculateSampleTicks(Properties);
         }
 
+        /// <summary>
+        /// NAudio WaveStream.CurrentTime isn't very accurate, so we set the sample Position instead.
+        /// </summary>
+        /// <see cref="NAudio.Wave.WaveStream#CurrentTime"/>
         public override TimeSpan TimePosition {
-            get { return waveFileReader.CurrentTime; }
-            set { waveFileReader.CurrentTime = value; }
+            get { return new TimeSpan((long)Math.Round(SamplePosition * sampleTicks)); }
+            set { SamplePosition = (long)Math.Round(value.Ticks / sampleTicks); }
         }
 
         public override long SamplePosition {

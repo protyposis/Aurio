@@ -45,41 +45,52 @@ namespace AudioAlign.WaveControls {
         protected override void OnRender(DrawingContext drawingContext) {
             base.OnRender(drawingContext);
 
-            /*
-             * TODO:
-             * - Sample davor und danach laden und zeichnen, damit bei nur einem sichtbaren Sample trotzdem Linien gezeichnet werden
-             * - smooth scrolling wenn ganz hineingezoomt, nicht nur auf sample-ebene wie jetzt
-             * - skips bei änderung der waveview-breite beheben (wenn ganz weit reingezoomt; nur ein paar samples sichtbar)
-             */
-
             if (audioStream != null) {
-                long totalAudioDataLength = audioStream.TimeLength.Ticks;
-                long virtualViewportOffset = TrackOffset - ViewportOffset;
+                Interval audioInterval = new Interval(TrackOffset, TrackOffset + audioStream.TimeLength.Ticks);
+                Interval viewportInterval = new Interval(ViewportOffset, ViewportOffset + ViewportWidth);
 
-                // determine if the virtual viewport offset is valid and if there's some data to draw
-                if (virtualViewportOffset < 0) { // audio data starts before viewport
-                    if (virtualViewportOffset + totalAudioDataLength <= 0) { // audio data starts & ends before viewport
-                        return;
-                    }
-                    virtualViewportOffset = 0; // audio data overlaps or ends at viewport start
-                }
-                else { // audio data starts at viewport start or later;
-                    if (virtualViewportOffset >= ViewportWidth) { // audio data starts after viewport
-                        return;
-                    }
+                if (!audioInterval.Intersects(viewportInterval)) {
+                    Debug.WriteLine("nothing to draw!");
+                    return;
                 }
 
-                // read audio data
-                long visibleAudioDataLength = ViewportWidth - virtualViewportOffset;
-                audioStream.TimePosition = new TimeSpan(ViewportOffset - TrackOffset + virtualViewportOffset);
-                List<Point>[] samples = LoadSamples(AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(visibleAudioDataLength)));
-                // after loading the audio data, we know the real length (can be less than the desired read length at end of stream)
+                float sampleLength = AudioUtil.CalculateSampleTicks(audioStream.Properties);
+                Interval visibleAudioInterval = audioInterval.Intersect(viewportInterval);
+                Interval audioToLoadInterval = visibleAudioInterval - TrackOffset;
+
+                // align interval to samples
+                Interval audioToLoadIntervalAligned = new Interval(
+                    (long)(audioToLoadInterval.From - ((double)audioToLoadInterval.From % sampleLength)),
+                    (long)(audioToLoadInterval.To + ((double)audioToLoadInterval.To % sampleLength)));
+
+                // load audio samples
+                audioStream.TimePosition = new TimeSpan(audioToLoadIntervalAligned.From);
+                List<Point>[] samples = LoadSamples(AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(audioToLoadIntervalAligned.Length)) + 1);
                 int sampleCount = samples[0].Count;
-                visibleAudioDataLength = (long)(AudioUtil.CalculateSampleTicks(audioStream.Properties) * sampleCount);
 
+                // calculate drawing measures
                 double viewportToDrawingScaleFactor = ActualWidth / ViewportWidth;
-                double drawingOffset = virtualViewportOffset * viewportToDrawingScaleFactor;
-                double drawingWidth = visibleAudioDataLength * viewportToDrawingScaleFactor; // ActualWidth - drawingOffset
+                double drawingOffset = ((audioToLoadIntervalAligned.From - audioToLoadInterval.From) + (visibleAudioInterval.From - viewportInterval.From)) * viewportToDrawingScaleFactor;
+                double drawingWidth = (sampleCount - 1) * sampleLength * viewportToDrawingScaleFactor;
+
+                //Debug.WriteLine("sampleCount:                  " + sampleCount);
+                //Debug.WriteLine("sampleLength:                 " + sampleLength);
+                //Debug.WriteLine("viewportToDrawingScaleFactor: " + viewportToDrawingScaleFactor);
+
+                //Debug.WriteLine("audioInterval:                " + audioInterval);
+                //Debug.WriteLine("viewportInterval:             " + viewportInterval);
+                //Debug.WriteLine("visibleAudioInterval:         " + visibleAudioInterval);
+                //Debug.WriteLine("audioToLoadInterval:          " + audioToLoadInterval + " (" + audioToLoadInterval.Length / sampleLength + ")");
+                //Debug.WriteLine("audioToLoadIntervalAligned:   " + audioToLoadIntervalAligned + " (" + audioToLoadIntervalAligned.Length / sampleLength + ")");
+
+                //Debug.WriteLine((audioToLoadIntervalAligned.From - visibleAudioInterval.From) + " * " + viewportToDrawingScaleFactor + " = " + drawingOffset);
+                //Debug.WriteLine((visibleAudioInterval.From - ViewportOffset) + " * " + viewportToDrawingScaleFactor + " = " + drawingOffset);
+                //Debug.WriteLine(sampleCount + " samples, drawingWidth: " + audioToLoadIntervalAligned.Length + " * " + viewportToDrawingScaleFactor + " = " + drawingWidth);
+
+                if (sampleCount <= 1) {
+                    drawingContext.DrawText(DebugText("SAMPLE WARNING: " + sampleCount), new Point(0, 0));
+                    return;
+                }
 
                 // draw background
                 drawingContext.DrawRectangle(WaveformBackground, new Pen(Brushes.Brown, 4), new Rect(drawingOffset, 0, drawingWidth, ActualHeight));
@@ -99,11 +110,6 @@ namespace AudioAlign.WaveControls {
                             new Point(drawingOffset, channelHeight * channel),
                             new Point(drawingOffset + drawingWidth, channelHeight * channel));
                     }
-                }
-
-                if (sampleCount <= 1) {
-                    drawingContext.DrawText(DebugText("SAMPLE WARNING: " + sampleCount), new Point(0, 0));
-                    return;
                 }
 
                 // draw waveforms
