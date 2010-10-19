@@ -116,7 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interval.cs" />
-    <Compile Include="LogTransformConverter.cs" />
+    <Compile Include="LogSlider.cs" />
     <Compile Include="WaveView.cs" />
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
