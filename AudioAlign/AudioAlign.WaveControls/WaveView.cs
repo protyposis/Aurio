@@ -128,7 +128,7 @@ namespace AudioAlign.WaveControls {
                         transformGroup.Children.Add(new ScaleTransform(drawingWidth / peakforms[channel].Bounds.Width, channelHalfHeight * -1));
                         transformGroup.Children.Add(new TranslateTransform(drawingOffset, channelHalfHeight + (channelHalfHeight * channel * 2)));
                         peakforms[channel].Transform = transformGroup;
-                        drawingContext.DrawGeometry(Brushes.LightBlue, new Pen(Brushes.CornflowerBlue, 1), peakforms[channel]);
+                        drawingContext.DrawGeometry(WaveformFill, new Pen(WaveformLine, 1), peakforms[channel]);
                     }
                 }
                 else {
@@ -139,7 +139,7 @@ namespace AudioAlign.WaveControls {
                         transformGroup.Children.Add(new ScaleTransform(drawingWidth / waveforms[channel].Bounds.Width, channelHalfHeight * -1));
                         transformGroup.Children.Add(new TranslateTransform(drawingOffset, channelHalfHeight + (channelHalfHeight * channel * 2)));
                         waveforms[channel].Transform = transformGroup;
-                        drawingContext.DrawGeometry(null, new Pen(Brushes.CornflowerBlue, 1), waveforms[channel]);
+                        drawingContext.DrawGeometry(null, new Pen(WaveformLine, 1), waveforms[channel]);
 
                         // draw sample dots on high zoom factors
                         float zoomFactor = (float)(ActualWidth / sampleCount);
@@ -150,7 +150,7 @@ namespace AudioAlign.WaveControls {
                                 EllipseGeometry sampleDot = new EllipseGeometry(transformGroup.Transform(point), sampleDotSize, sampleDotSize);
                                 geometryGroup.Children.Add(sampleDot);
                             }
-                            drawingContext.DrawGeometry(Brushes.RoyalBlue, null, geometryGroup);
+                            drawingContext.DrawGeometry(WaveformSamplePoint, null, geometryGroup);
                         }
                     }
                 }

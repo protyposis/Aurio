@@ -4,12 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
+using System.ComponentModel;
 
 namespace AudioAlign.WaveControls
 {
     public partial class WaveView {
 
         public static readonly DependencyProperty WaveformBackgroundProperty;
+        public static readonly DependencyProperty WaveformLineProperty;
+        public static readonly DependencyProperty WaveformFillProperty;
+        public static readonly DependencyProperty WaveformSamplePointProperty;
         public static readonly DependencyProperty TrackLengthProperty;
         public static readonly DependencyProperty TrackOffsetProperty;
         public static readonly DependencyProperty ViewportOffsetProperty;
@@ -26,7 +30,16 @@ namespace AudioAlign.WaveControls
                 new FrameworkPropertyMetadata(typeof(WaveView)));
 
             WaveformBackgroundProperty = DependencyProperty.Register("WaveformBackground", typeof(Brush), typeof(WaveView), 
-                new FrameworkPropertyMetadata { AffectsRender = true });
+                new FrameworkPropertyMetadata { DefaultValue = Brushes.White, AffectsRender = true });
+
+            WaveformLineProperty = DependencyProperty.Register("WaveformLine", typeof(Brush), typeof(WaveView),
+                new FrameworkPropertyMetadata { DefaultValue = Brushes.CornflowerBlue, AffectsRender = true });
+
+            WaveformFillProperty = DependencyProperty.Register("WaveformFill", typeof(Brush), typeof(WaveView),
+                new FrameworkPropertyMetadata { DefaultValue = Brushes.LightBlue, AffectsRender = true });
+
+            WaveformSamplePointProperty = DependencyProperty.Register("WaveformSamplePoint", typeof(Brush), typeof(WaveView),
+                new FrameworkPropertyMetadata { DefaultValue = Brushes.RoyalBlue, AffectsRender = true });
 
             TrackLengthProperty = DependencyProperty.Register("TrackLength", typeof(long), typeof(WaveView),
                 new FrameworkPropertyMetadata { AffectsRender = true, 
@@ -92,9 +105,28 @@ namespace AudioAlign.WaveControls
             d.SetValue(ViewportZoomPropertyKey, (float)(actualWidth / viewportWidth));
         }
 
+        [Bindable(true), Category("Brushes")]
         public Brush WaveformBackground {
             get { return (Brush)GetValue(WaveformBackgroundProperty); }
             set { SetValue(WaveformBackgroundProperty, value); }
+        }
+
+        [Bindable(true), Category("Brushes")]
+        public Brush WaveformLine {
+            get { return (Brush)GetValue(WaveformLineProperty); }
+            set { SetValue(WaveformLineProperty, value); }
+        }
+
+        [Bindable(true), Category("Brushes")]
+        public Brush WaveformFill {
+            get { return (Brush)GetValue(WaveformFillProperty); }
+            set { SetValue(WaveformFillProperty, value); }
+        }
+
+        [Bindable(true), Category("Brushes")]
+        public Brush WaveformSamplePoint {
+            get { return (Brush)GetValue(WaveformSamplePointProperty); }
+            set { SetValue(WaveformSamplePointProperty, value); }
         }
 
         public long TrackLength {
