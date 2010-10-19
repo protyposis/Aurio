@@ -7,7 +7,7 @@ using NAudio.Wave;
 namespace AudioAlign.Audio {
     internal class NAudio16BitWaveFileReaderWrapperStream: AbstractAudioStream<float>, IAudioStream16 {
         private WaveFileReader waveFileReader;
-        float sampleTicks;
+        double sampleTicks;
 
         public NAudio16BitWaveFileReaderWrapperStream(WaveFileReader waveFileReader) {
             this.waveFileReader = waveFileReader;

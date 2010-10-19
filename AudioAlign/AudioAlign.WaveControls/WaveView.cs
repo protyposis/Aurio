@@ -60,7 +60,7 @@ namespace AudioAlign.WaveControls {
                     return;
                 }
 
-                float sampleLength = AudioUtil.CalculateSampleTicks(audioStream.Properties);
+                double sampleLength = AudioUtil.CalculateSampleTicks(audioStream.Properties);
                 Interval visibleAudioInterval = audioInterval.Intersect(viewportInterval);
                 Interval audioToLoadInterval = visibleAudioInterval - TrackOffset;
 
@@ -71,7 +71,7 @@ namespace AudioAlign.WaveControls {
 
                 // load audio samples
                 audioStream.TimePosition = new TimeSpan(audioToLoadIntervalAligned.From);
-                List<Point>[] samples = LoadSamples(AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(audioToLoadIntervalAligned.Length)) + 1);
+                List<Point>[] samples = LoadSamples(AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(audioToLoadIntervalAligned.Length)));
                 int sampleCount = samples[0].Count;
 
                 // calculate drawing measures
@@ -164,6 +164,8 @@ namespace AudioAlign.WaveControls {
 
                 if (debug) {
                     // DEBUG OUTPUT
+                    drawingContext.DrawText(DebugText("visibleAudioInterval: " + visibleAudioInterval + ", audioToLoadInterval: " + audioToLoadInterval + ", audioToLoadIntervalAligned: " + audioToLoadIntervalAligned),
+                        new Point(0, ActualHeight) + new Vector(0, -50));
                     drawingContext.DrawText(DebugText("Drawing Offset: " + drawingOffset + ", Width: " + drawingWidth + ", ScalingFactor: " + viewportToDrawingScaleFactor + ", Samples: " + sampleCount),
                         new Point(0, ActualHeight) + new Vector(0, -40));
                 }
@@ -293,9 +295,8 @@ namespace AudioAlign.WaveControls {
                     }
                     numPeaks++;
                     if (!samplesPerPeakIsInteger) {
-                        // in case of a floating point sample per peak ratio, the sample counts to the actual
-                        // and the next peak
-                        // go one step back in the cycle and continue with next peak
+                        // in case of a floating point sample per peak ratio, the sample is added to the actual
+                        // and the following peak, therefore we go one step back in the cycle and continue with next peak
                         x--;
                     }
                 }
