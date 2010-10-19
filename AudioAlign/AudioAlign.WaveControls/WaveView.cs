@@ -104,17 +104,22 @@ namespace AudioAlign.WaveControls {
                     drawingContext.DrawRectangle(null, new Pen(Brushes.Brown, 4), new Rect(drawingOffset, 0, drawingWidth, ActualHeight));
                 }
 
-                // draw waveform guides
+                GuidelineSet guidelineSet = new GuidelineSet();
+                drawingContext.PushGuidelineSet(guidelineSet);
+
+                // draw waveform guides & create drawing guidelines
                 int channels = audioStream.Properties.Channels;
                 double channelHeight = ActualHeight / channels;
                 double channelHalfHeight = channelHeight / 2;
                 for (int channel = 0; channel < channels; channel++) {
                     // waveform zero-line
+                    guidelineSet.GuidelinesY.Add((channelHeight * channel + channelHalfHeight) + 0.5);
                     drawingContext.DrawLine(new Pen(Brushes.LightGray, 1),
                         new Point(drawingOffset, channelHeight * channel + channelHalfHeight),
                         new Point(drawingOffset + drawingWidth, channelHeight * channel + channelHalfHeight));
                     // waveform spacers
                     if (channel > 0) {
+                        guidelineSet.GuidelinesY.Add((channelHeight * channel) + 0.5);
                         drawingContext.DrawLine(new Pen(Brushes.DarkGray, 1),
                             new Point(drawingOffset, channelHeight * channel),
                             new Point(drawingOffset + drawingWidth, channelHeight * channel));
@@ -154,6 +159,8 @@ namespace AudioAlign.WaveControls {
                         }
                     }
                 }
+
+                drawingContext.Pop();
 
                 if (debug) {
                     // DEBUG OUTPUT
