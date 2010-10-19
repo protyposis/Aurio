@@ -121,25 +121,37 @@ namespace AudioAlign.WaveControls {
                     }
                 }
 
-                // draw waveforms
-                Geometry[] waveforms = CreateWaveforms(samples);
-                for (int channel = 0; channel < channels; channel++) {
-                    TransformGroup transformGroup = new TransformGroup();
-                    transformGroup.Children.Add(new ScaleTransform(drawingWidth / waveforms[channel].Bounds.Width, channelHalfHeight * -1));
-                    transformGroup.Children.Add(new TranslateTransform(drawingOffset, channelHalfHeight + (channelHalfHeight * channel * 2)));
-                    waveforms[channel].Transform = transformGroup;
-                    drawingContext.DrawGeometry(null, new Pen(Brushes.CornflowerBlue, 1), waveforms[channel]);
+                if (sampleCount > drawingWidth * 2) {
+                    Geometry[] peakforms = CreatePeakforms(SamplesToPeaks(samples, (int)drawingWidth));
+                    for (int channel = 0; channel < channels; channel++) {
+                        TransformGroup transformGroup = new TransformGroup();
+                        transformGroup.Children.Add(new ScaleTransform(drawingWidth / peakforms[channel].Bounds.Width, channelHalfHeight * -1));
+                        transformGroup.Children.Add(new TranslateTransform(drawingOffset, channelHalfHeight + (channelHalfHeight * channel * 2)));
+                        peakforms[channel].Transform = transformGroup;
+                        drawingContext.DrawGeometry(Brushes.LightBlue, new Pen(Brushes.CornflowerBlue, 1), peakforms[channel]);
+                    }
+                }
+                else {
+                    // draw waveforms
+                    Geometry[] waveforms = CreateWaveforms(samples);
+                    for (int channel = 0; channel < channels; channel++) {
+                        TransformGroup transformGroup = new TransformGroup();
+                        transformGroup.Children.Add(new ScaleTransform(drawingWidth / waveforms[channel].Bounds.Width, channelHalfHeight * -1));
+                        transformGroup.Children.Add(new TranslateTransform(drawingOffset, channelHalfHeight + (channelHalfHeight * channel * 2)));
+                        waveforms[channel].Transform = transformGroup;
+                        drawingContext.DrawGeometry(null, new Pen(Brushes.CornflowerBlue, 1), waveforms[channel]);
 
-                    // draw sample dots on high zoom factors
-                    float zoomFactor = (float)(ActualWidth / sampleCount);
-                    if (zoomFactor > 2) {
-                        float sampleDotSize = zoomFactor < 30 ? zoomFactor / 10 : 3;
-                        GeometryGroup geometryGroup = new GeometryGroup();
-                        foreach (Point point in samples[channel]) {
-                            EllipseGeometry sampleDot = new EllipseGeometry(transformGroup.Transform(point), sampleDotSize, sampleDotSize);
-                            geometryGroup.Children.Add(sampleDot);
+                        // draw sample dots on high zoom factors
+                        float zoomFactor = (float)(ActualWidth / sampleCount);
+                        if (zoomFactor > 2) {
+                            float sampleDotSize = zoomFactor < 30 ? zoomFactor / 10 : 3;
+                            GeometryGroup geometryGroup = new GeometryGroup();
+                            foreach (Point point in samples[channel]) {
+                                EllipseGeometry sampleDot = new EllipseGeometry(transformGroup.Transform(point), sampleDotSize, sampleDotSize);
+                                geometryGroup.Children.Add(sampleDot);
+                            }
+                            drawingContext.DrawGeometry(Brushes.RoyalBlue, null, geometryGroup);
                         }
-                        drawingContext.DrawGeometry(Brushes.RoyalBlue, null, geometryGroup);
                     }
                 }
 
@@ -213,9 +225,106 @@ namespace AudioAlign.WaveControls {
             return waveforms;
         }
 
+        private Geometry[] CreatePeakforms(List<PointPair>[] peakLines) {
+            int channels = peakLines.Length;
+            Geometry[] peakforms = new Geometry[channels];
+
+            for (int channel = 0; channel < channels; channel++) {
+                List<Point> peakPoints = new List<Point>(peakLines.Length * 2);
+                for (int x = 0; x < peakLines[channel].Count; x++) {
+                    peakPoints.Add(peakLines[channel][x].Point1);
+                }
+                for (int x = peakLines[channel].Count - 1; x >= 0; x--) {
+                    peakPoints.Add(peakLines[channel][x].Point2);
+                }
+
+                PathGeometry geometry = new PathGeometry();
+                PathFigure pathFigure = new PathFigure();
+                pathFigure.IsClosed = true;
+                pathFigure.IsFilled = true;
+                pathFigure.StartPoint = peakPoints[0];
+                pathFigure.Segments.Add(new PolyLineSegment(peakPoints, true)); // first point gets added a second time
+                geometry.Figures.Add(pathFigure);
+                peakforms[channel] = geometry;
+
+                //GeometryGroup geometry = new GeometryGroup();
+                //foreach (PointPair pp in peakLines[channel]) {
+                //    geometry.Children.Add(new LineGeometry(pp.Point1, pp.Point2));
+                //}
+                //peakforms[channel] = geometry;
+            }
+
+            return peakforms;
+        }
+
+        private List<PointPair>[] SamplesToPeaks(List<Point>[] samplePoints, int width) {
+            int channels = samplePoints.Length;
+            List<PointPair>[] peakLines = AudioUtil.CreateList<PointPair>(channels, width);
+
+            if (width == 0) {
+                return peakLines;
+            }
+
+            double samplesPerPeak = samplePoints[0].Count / (double)width;
+            int samplesPerPeakCeiling = (int)Math.Ceiling(samplesPerPeak);
+            bool samplesPerPeakIsInteger = samplesPerPeak == samplesPerPeakCeiling; // is the number of samples per peak an integer or a floating point number?
+            List<double>[] minMax = AudioUtil.CreateList<double>(channels, samplesPerPeakCeiling);
+
+            int minMaxCount = 0;
+            int numPeaks = 0;
+            for (int x = 0; x < samplePoints[0].Count; x++) {
+                for (int channel = 0; channel < channels; channel++) {
+                    minMax[channel].Add(samplePoints[channel][x].Y);
+                }
+                minMaxCount++;
+                if (minMaxCount % samplesPerPeakCeiling == 0) {
+                    for (int channel = 0; channel < channels; channel++) {
+                        double min = minMax[channel].Min();
+                        double max = minMax[channel].Max();
+                        peakLines[channel].Add(new PointPair(numPeaks, max, numPeaks, min));
+                        minMax[channel].Clear();
+                    }
+                    numPeaks++;
+                    if (!samplesPerPeakIsInteger) {
+                        // in case of a floating point sample per peak ratio, the sample counts to the actual
+                        // and the next peak
+                        // go one step back in the cycle and continue with next peak
+                        x--;
+                    }
+                }
+            }
+
+            return peakLines;
+        }
+
         private FormattedText DebugText(string text) {
             return new FormattedText(text, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, 
                 new Typeface("Tahoma"), 8, Brushes.Black);
+        }
+    }
+
+    internal struct PointPair {
+
+        private Point p1, p2;
+
+        public PointPair(double x1, double y1, double x2, double y2) {
+            p1 = new Point(x1, y1);
+            p2 = new Point(x2, y2);
+        }
+
+        public PointPair(Point p1, Point p2) {
+            this.p1 = p1;
+            this.p2 = p2;
+        }
+
+        public Point Point1 {
+            get { return p1; }
+            set { p1 = value; }
+        }
+
+        public Point Point2 {
+            get { return p2; }
+            set { p2 = value; }
         }
     }
 }
