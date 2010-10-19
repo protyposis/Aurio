@@ -20,6 +20,7 @@ namespace AudioAlign.WaveControls {
 
         private const int BUFFER_SIZE = 1024;
 
+        private bool debug = false;
         private IAudioStream16 audioStream;
         private float[][] buffer;
 
@@ -40,6 +41,11 @@ namespace AudioAlign.WaveControls {
         public bool Antialiased {
             get { return ((EdgeMode)GetValue(RenderOptions.EdgeModeProperty)) == EdgeMode.Aliased; }
             set { SetValue(RenderOptions.EdgeModeProperty, !value ? EdgeMode.Aliased : EdgeMode.Unspecified); }
+        }
+
+        public bool DebugMode {
+            get { return debug; }
+            set { debug = value; InvalidateVisual(); }
         }
 
         protected override void OnRender(DrawingContext drawingContext) {
@@ -93,7 +99,10 @@ namespace AudioAlign.WaveControls {
                 }
 
                 // draw background
-                drawingContext.DrawRectangle(WaveformBackground, new Pen(Brushes.Brown, 4), new Rect(drawingOffset, 0, drawingWidth, ActualHeight));
+                drawingContext.DrawRectangle(WaveformBackground, null, new Rect(drawingOffset, 0, drawingWidth, ActualHeight));
+                if (debug) {
+                    drawingContext.DrawRectangle(null, new Pen(Brushes.Brown, 4), new Rect(drawingOffset, 0, drawingWidth, ActualHeight));
+                }
 
                 // draw waveform guides
                 int channels = audioStream.Properties.Channels;
@@ -134,18 +143,22 @@ namespace AudioAlign.WaveControls {
                     }
                 }
 
-                // DEBUG OUTPUT
-                drawingContext.DrawText(DebugText("Drawing Offset: " + drawingOffset + ", Width: " + drawingWidth + ", ScalingFactor: " + viewportToDrawingScaleFactor + ", Samples: " + sampleCount),
-                    new Point(0, ActualHeight) + new Vector(0, -40));
+                if (debug) {
+                    // DEBUG OUTPUT
+                    drawingContext.DrawText(DebugText("Drawing Offset: " + drawingOffset + ", Width: " + drawingWidth + ", ScalingFactor: " + viewportToDrawingScaleFactor + ", Samples: " + sampleCount),
+                        new Point(0, ActualHeight) + new Vector(0, -40));
+                }
             }
 
-            // DEBUG OUTPUT
-            drawingContext.DrawText(DebugText("ActualWidth: " + ActualWidth + ", ActualHeight: " + ActualHeight),
-                new Point(0, ActualHeight) + new Vector(0, -30));
-            drawingContext.DrawText(DebugText("TrackLength: " + TrackLength + ", TrackOffset: " + TrackOffset),
-                new Point(0, ActualHeight) + new Vector(0, -20));
-            drawingContext.DrawText(DebugText("ViewportOffset: " + ViewportOffset + ", ViewportWidth: " + ViewportWidth),
-                new Point(0, ActualHeight) + new Vector(0, -10));
+            if (debug) {
+                // DEBUG OUTPUT
+                drawingContext.DrawText(DebugText("ActualWidth: " + ActualWidth + ", ActualHeight: " + ActualHeight),
+                    new Point(0, ActualHeight) + new Vector(0, -30));
+                drawingContext.DrawText(DebugText("TrackLength: " + TrackLength + ", TrackOffset: " + TrackOffset),
+                    new Point(0, ActualHeight) + new Vector(0, -20));
+                drawingContext.DrawText(DebugText("ViewportOffset: " + ViewportOffset + ", ViewportWidth: " + ViewportWidth),
+                    new Point(0, ActualHeight) + new Vector(0, -10));
+            }
         }
 
         private Rect CalculateViewport() {
