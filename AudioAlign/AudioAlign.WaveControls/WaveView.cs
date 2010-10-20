@@ -126,29 +126,22 @@ namespace AudioAlign.WaveControls {
                     }
                 }
 
-                if (sampleCount > drawingWidth * 2) {
-                    Geometry[] peakforms = CreatePeakforms(SamplesToPeaks(samples, (int)drawingWidth));
-                    for (int channel = 0; channel < channels; channel++) {
-                        TransformGroup transformGroup = new TransformGroup();
-                        transformGroup.Children.Add(new ScaleTransform(drawingWidth / peakforms[channel].Bounds.Width, channelHalfHeight * -1));
-                        transformGroup.Children.Add(new TranslateTransform(drawingOffset, channelHalfHeight + (channelHalfHeight * channel * 2)));
-                        peakforms[channel].Transform = transformGroup;
-                        drawingContext.DrawGeometry(WaveformFill, new Pen(WaveformLine, 1), peakforms[channel]);
-                    }
-                }
-                else {
-                    // draw waveforms
-                    Geometry[] waveforms = CreateWaveforms(samples);
-                    for (int channel = 0; channel < channels; channel++) {
-                        TransformGroup transformGroup = new TransformGroup();
-                        transformGroup.Children.Add(new ScaleTransform(drawingWidth / waveforms[channel].Bounds.Width, channelHalfHeight * -1));
-                        transformGroup.Children.Add(new TranslateTransform(drawingOffset, channelHalfHeight + (channelHalfHeight * channel * 2)));
-                        waveforms[channel].Transform = transformGroup;
-                        drawingContext.DrawGeometry(null, new Pen(WaveformLine, 1), waveforms[channel]);
+                // draw waveforms
+                bool peaks = sampleCount > drawingWidth * 2;
+                Geometry[] audioforms = peaks ? 
+                    CreatePeakforms(SamplesToPeaks(samples, (int)drawingWidth)) : 
+                    CreateWaveforms(samples);
+                for (int channel = 0; channel < channels; channel++) {
+                    TransformGroup transformGroup = new TransformGroup();
+                    transformGroup.Children.Add(new ScaleTransform(drawingWidth / audioforms[channel].Bounds.Width, channelHalfHeight * -1));
+                    transformGroup.Children.Add(new TranslateTransform(drawingOffset, channelHalfHeight + (channelHalfHeight * channel * 2)));
+                    audioforms[channel].Transform = transformGroup;
+                    drawingContext.DrawGeometry(WaveformFill, new Pen(WaveformLine, 1), audioforms[channel]);
 
+                    if (!peaks) {
                         // draw sample dots on high zoom factors
-                        float zoomFactor = (float)(ActualWidth / sampleCount);
-                        if (zoomFactor > 2) {
+                        float zoomFactor = (float)(drawingWidth / sampleCount);
+                        if (zoomFactor > 0.05) {
                             float sampleDotSize = zoomFactor < 30 ? zoomFactor / 10 : 3;
                             GeometryGroup geometryGroup = new GeometryGroup();
                             foreach (Point point in samples[channel]) {
