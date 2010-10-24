@@ -4,6 +4,8 @@ using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Interop;
 
 namespace AudioAlign.Test.HugeControlRendering
 {

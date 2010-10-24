@@ -11,6 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Interop;
+using System.Windows.Controls.Primitives;
 
 namespace AudioAlign.Test.HugeControlRendering
 {
@@ -22,6 +24,11 @@ namespace AudioAlign.Test.HugeControlRendering
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void softwareRender_Checked(object sender, RoutedEventArgs e) {
+            RenderOptions.ProcessRenderMode = (bool)((CheckBox)e.Source).IsChecked ? RenderMode.SoftwareOnly : RenderMode.Default;
+            InvalidateVisual();
         }
     }
 }
