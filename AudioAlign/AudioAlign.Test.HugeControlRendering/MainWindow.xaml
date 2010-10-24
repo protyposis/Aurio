@@ -1,0 +1,16 @@
+﻿<Window x:Class="AudioAlign.Test.HugeControlRendering.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="236" Width="525" xmlns:my="clr-namespace:AudioAlign.Test.HugeControlRendering">
+    <Grid>
+        <Border BorderBrush="Silver" BorderThickness="1" Name="border1" Margin="12,12,12,46">
+            <ScrollViewer Name="scrollViewer" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Visible">
+                    <my:SineWave x:Name="sineWave1" Width="{Binding ElementName=slider1, Path=Value}" VerticalAlignment="Stretch" ViewportHorizontalOffset="{Binding Path=HorizontalOffset, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ScrollViewer}}}" ViewportWidth="{Binding Path=ViewportWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ScrollViewer}}}" />
+            </ScrollViewer>
+        </Border>
+        <Label Content="Sine Width" Margin="12,0,0,12" Name="label1" HorizontalAlignment="Left" Width="70" Height="28" VerticalAlignment="Bottom" />
+        <Slider Margin="88,0,12,12" Name="slider1" Height="23" VerticalAlignment="Bottom" Maximum="50000000" LargeChange="100" SmallChange="1" TickFrequency="1000000" TickPlacement="BottomRight" />
+    </Grid>
+</Window>
+
+    
