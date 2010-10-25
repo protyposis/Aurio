@@ -16,8 +16,6 @@ namespace AudioAlign.WaveControls
         public static readonly DependencyProperty WaveformSamplePointProperty;
         public static readonly DependencyProperty TrackLengthProperty;
         public static readonly DependencyProperty TrackOffsetProperty;
-        public static readonly DependencyProperty ViewportOffsetProperty;
-        public static readonly DependencyProperty ViewportWidthProperty;
 
         private static readonly DependencyPropertyKey TrackScrollLengthPropertyKey; // TrackLength - ViewportWidth
         public static readonly DependencyProperty TrackScrollLengthProperty;
@@ -48,14 +46,6 @@ namespace AudioAlign.WaveControls
             TrackOffsetProperty = DependencyProperty.Register("TrackOffset", typeof(long), typeof(WaveView),
                 new FrameworkPropertyMetadata { AffectsRender = true });
 
-            ViewportOffsetProperty = DependencyProperty.Register("ViewportOffset", typeof(long), typeof(WaveView),
-                new FrameworkPropertyMetadata { AffectsRender = true });
-
-            ViewportWidthProperty = DependencyProperty.Register("ViewportWidth", typeof(long), typeof(WaveView),
-                new FrameworkPropertyMetadata { AffectsRender = true, 
-                    PropertyChangedCallback = OnViewportWidthChanged, 
-                    CoerceValueCallback = CoerceViewportWidth, DefaultValue = (long)100 });
-
             TrackScrollLengthPropertyKey = DependencyProperty.RegisterReadOnly("TrackScrollLength", typeof(long), typeof(WaveView),
                 new FrameworkPropertyMetadata());
             TrackScrollLengthProperty = TrackScrollLengthPropertyKey.DependencyProperty;
@@ -63,34 +53,16 @@ namespace AudioAlign.WaveControls
             ViewportZoomPropertyKey = DependencyProperty.RegisterReadOnly("ViewportZoom", typeof(float), typeof(WaveView),
                 new FrameworkPropertyMetadata());
             ViewportZoomProperty = ViewportZoomPropertyKey.DependencyProperty;
-
-            //ActualWidthProperty.OverrideMetadata(typeof(WaveView),
-            //    new FrameworkPropertyMetadata(0.0, OnActualWidthChanged));
         }
 
         private static void OnTrackLengthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             UpdateTrackScrollLength(d);
         }
 
-        private static void OnViewportWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
-            UpdateTrackScrollLength(d);
-            UpdateViewportZoom(d);
-        }
-
-        //private static void OnActualWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
-        //    UpdateViewportZoom(d);
-        //}
-
         private static object CoerceTrackLength(DependencyObject d, object value) {
             long trackLength = (long)value;
             // avoid negative length
             return trackLength >= 0 ? trackLength : 0;
-        }
-
-        private static object CoerceViewportWidth(DependencyObject d, object value) {
-            long viewportWidth = (long)value;
-            // avoid negative length
-            return viewportWidth >= 0 ? viewportWidth : 0;
         }
 
         private static void UpdateTrackScrollLength(DependencyObject d) {
@@ -139,16 +111,6 @@ namespace AudioAlign.WaveControls
             set { SetValue(TrackOffsetProperty, value); }
         }
 
-        public long ViewportOffset {
-            get { return (long)GetValue(ViewportOffsetProperty); }
-            set { SetValue(ViewportOffsetProperty, value); }
-        }
-
-        public long ViewportWidth {
-            get { return (long)GetValue(ViewportWidthProperty); }
-            set { SetValue(ViewportWidthProperty, value); }
-        }
-
         public long TrackScrollLength {
             get { return (long)GetValue(TrackScrollLengthProperty); }
         }
@@ -163,6 +125,11 @@ namespace AudioAlign.WaveControls
             }
             UpdateViewportZoom(this);
             //InvalidateVisual();
+        }
+
+        protected override void OnViewportWidthChanged(long oldValue, long newValue) {
+            UpdateTrackScrollLength(this);
+            UpdateViewportZoom(this);
         }
     }
 }

@@ -16,7 +16,7 @@ using System.Diagnostics;
 using AudioAlign.Audio;
 
 namespace AudioAlign.WaveControls {
-    public partial class WaveView : Control {
+    public partial class WaveView : VirtualViewBase {
 
         private const int BUFFER_SIZE = 1024;
 
