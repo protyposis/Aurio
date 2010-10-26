@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows;
 using System.Globalization;
 using System.ComponentModel;
+using AudioAlign.Audio;
 
 namespace AudioAlign.WaveControls {
     public class TimeScale: VirtualViewBase {

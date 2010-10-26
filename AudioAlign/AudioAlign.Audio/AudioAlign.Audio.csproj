@@ -104,6 +104,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractAudioStream.cs" />
@@ -112,7 +113,9 @@
     <Compile Include="AudioUtil.cs" />
     <Compile Include="IAudioStream.cs" />
     <Compile Include="IAudioStream16.cs" />
+    <Compile Include="Interval.cs" />
     <Compile Include="NAudio16BitWaveFileReaderWrapperStream.cs" />
+    <Compile Include="PointPair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

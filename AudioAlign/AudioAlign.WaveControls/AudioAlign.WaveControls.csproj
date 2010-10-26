@@ -115,7 +115,6 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Interval.cs" />
     <Compile Include="LogSlider.cs" />
     <Compile Include="TimeScale.cs" />
     <Compile Include="VirtualViewBase.cs" />

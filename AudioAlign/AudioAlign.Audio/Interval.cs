@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.WaveControls {
-    internal struct Interval: IEquatable<Interval> {
+namespace AudioAlign.Audio {
+    public struct Interval: IEquatable<Interval> {
         public static readonly Interval None = new Interval(-1, -1);
 
         private long from, to;
