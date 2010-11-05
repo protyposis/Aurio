@@ -28,6 +28,28 @@ namespace AudioAlign.Audio {
         }
 
         /// <summary>
+        /// Adjusts the beginning and the end of a time-interval to the sample interval length so that the
+        /// adjusted input interval includes the preceding and following sample.
+        /// Since audio samples can be between two integer ticks, the outputInterval.From is less or equal its
+        /// matching sample's time, and outputInterval.To is greater or equal its matching sample's time. Recursive 
+        /// usage may therefore enlarge the output interval with every execution.
+        /// 
+        /// Example:
+        /// audio stream samples:    X-----X-----X-----X-----X-----X-----X-----X-----X-----X-----X
+        /// input interval:                   (---------------)
+        /// output interval:               (-----------------------)
+        /// </summary>
+        /// <param name="intervalToAlign">the interval that should be sample-aligned</param>
+        /// <param name="audioProperties">the audio properties containing the sample rate</param>
+        /// <returns>the sample aligned interval</returns>
+        public static Interval AlignToSamples(Interval intervalToAlign, AudioProperties audioProperties) {
+            double sampleLength = CalculateSampleTicks(audioProperties);
+            return new Interval(
+                    (long)(intervalToAlign.From - ((double)intervalToAlign.From % sampleLength)),
+                    (long)(intervalToAlign.To + ((double)intervalToAlign.To % sampleLength)));
+        }
+
+        /// <summary>
         /// Creates an array of buffers with a given size for a given number of channels.
         /// </summary>
         /// <param name="channels">the number of channels the buffer should be capable</param>
