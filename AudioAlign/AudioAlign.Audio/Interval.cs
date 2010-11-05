@@ -29,7 +29,7 @@ namespace AudioAlign.Audio {
         }
 
         public bool Intersects(Interval interval) {
-            return !(from > interval.to || to < interval.from);
+            return !(from >= interval.to || to <= interval.from);
         }
 
         public Interval Intersect(Interval interval) {

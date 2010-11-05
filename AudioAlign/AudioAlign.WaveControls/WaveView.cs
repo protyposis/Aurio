@@ -196,33 +196,6 @@ namespace AudioAlign.WaveControls {
             return waveforms;
         }
 
-        [Obsolete]
-        private Geometry[] CreatePeakforms(List<PointPair>[] peakLines) {
-            int channels = peakLines.Length;
-            Geometry[] peakforms = new Geometry[channels];
-
-            for (int channel = 0; channel < channels; channel++) {
-                List<Point> peakPoints = new List<Point>(peakLines.Length * 2);
-                for (int x = 0; x < peakLines[channel].Count; x++) {
-                    peakPoints.Add(peakLines[channel][x].Point1);
-                }
-                for (int x = peakLines[channel].Count - 1; x >= 0; x--) {
-                    peakPoints.Add(peakLines[channel][x].Point2);
-                }
-
-                PathGeometry geometry = new PathGeometry();
-                PathFigure pathFigure = new PathFigure();
-                pathFigure.IsClosed = true;
-                pathFigure.IsFilled = true;
-                pathFigure.StartPoint = peakPoints[0];
-                pathFigure.Segments.Add(new PolyLineSegment(peakPoints, true)); // first point gets added a second time
-                geometry.Figures.Add(pathFigure);
-                peakforms[channel] = geometry;
-            }
-
-            return peakforms;
-        }
-
         private Geometry[] CreatePeakforms(List<Point>[] peakLines) {
             int channels = peakLines.Length;
             Geometry[] peakforms = new Geometry[channels];
@@ -239,46 +212,6 @@ namespace AudioAlign.WaveControls {
             }
 
             return peakforms;
-        }
-
-        [Obsolete]
-        private List<PointPair>[] SamplesToPeaks(List<Point>[] samplePoints, int width) {
-            int channels = samplePoints.Length;
-            List<PointPair>[] peakLines = AudioUtil.CreateList<PointPair>(channels, width);
-
-            if (width == 0) {
-                return peakLines;
-            }
-
-            double samplesPerPeak = samplePoints[0].Count / (double)width;
-            int samplesPerPeakCeiling = (int)Math.Ceiling(samplesPerPeak);
-            bool samplesPerPeakIsInteger = samplesPerPeak == samplesPerPeakCeiling; // is the number of samples per peak an integer or a floating point number?
-            List<double>[] minMax = AudioUtil.CreateList<double>(channels, samplesPerPeakCeiling);
-
-            int minMaxCount = 0;
-            int numPeaks = 0;
-            for (int x = 0; x < samplePoints[0].Count; x++) {
-                for (int channel = 0; channel < channels; channel++) {
-                    minMax[channel].Add(samplePoints[channel][x].Y);
-                }
-                minMaxCount++;
-                if (minMaxCount % samplesPerPeakCeiling == 0) {
-                    for (int channel = 0; channel < channels; channel++) {
-                        double min = minMax[channel].Min();
-                        double max = minMax[channel].Max();
-                        peakLines[channel].Add(new PointPair(numPeaks, max, numPeaks, min));
-                        minMax[channel].Clear();
-                    }
-                    numPeaks++;
-                    if (!samplesPerPeakIsInteger) {
-                        // in case of a floating point sample per peak ratio, the sample is added to the actual
-                        // and the following peak, therefore we go one step back in the cycle and continue with next peak
-                        x--;
-                    }
-                }
-            }
-
-            return peakLines;
         }
 
         private FormattedText DebugText(string text) {
