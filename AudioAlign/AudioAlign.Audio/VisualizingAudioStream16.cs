@@ -44,6 +44,13 @@ namespace AudioAlign.Audio {
         /// <param name="peaks"></param>
         /// <returns></returns>
         public List<Point>[] Read(Interval requestedInterval, long targetSamples, out Interval readInterval, out bool peaks) {
+            if (targetSamples == 0) {
+                //throw new ArgumentException(targetSamples + " samples requested!?");
+                peaks = false;
+                readInterval = new Interval(requestedInterval.From, requestedInterval.From);
+                return AudioUtil.CreateList<Point>(Properties.Channels, 0);
+            }
+
             int samplesInRequestedInterval = AudioUtil.CalculateSamples(Properties, new TimeSpan(requestedInterval.Length));
             if (samplesInRequestedInterval < targetSamples) {
                 throw new ArgumentException("the requested interval contains less samples than requested: " +
@@ -51,17 +58,17 @@ namespace AudioAlign.Audio {
             }
 
             double resampleFactor = samplesInRequestedInterval / targetSamples;
-            Debug.WriteLine("VisualizingAudioStream16 resampleFactor: " + resampleFactor + " (" + samplesInRequestedInterval + "/" + targetSamples + ")");
+            //Debug.WriteLine("VisualizingAudioStream16 resampleFactor: " + resampleFactor + " (" + samplesInRequestedInterval + "/" + targetSamples + ")");
 
             /*
              * STAGES:
-             * - just return unresampled samples from file data CHECK
+             * - return unresampled samples from file data CHECK
              * - return on the fly resampled samples from file data NO - DECEPTIVE VISUALS RESULTING
              * - return on the fly generated peaks from file data CHECK
-             * - return precomputed peaks from peak data CHECK
+             * - return precomputed & on the fly resampled peaks from peak data CHECK
              */
 
-            if (resampleFactor < 2) {
+            if (resampleFactor <= 1) {
                 peaks = false;
                 audioStream.TimePosition = new TimeSpan(requestedInterval.From);
                 List<Point>[] samples = SamplesToPoints(LoadSamples(AudioUtil.CalculateSamples(Properties, new TimeSpan(requestedInterval.Length))));
@@ -74,15 +81,15 @@ namespace AudioAlign.Audio {
                 List<float>[] samples = LoadSamples(AudioUtil.CalculateSamples(Properties, new TimeSpan(requestedInterval.Length)));
                 readInterval = new Interval(requestedInterval.From, requestedInterval.From + (long)Math.Ceiling(samples[0].Count * AudioUtil.CalculateSampleTicks(Properties)));
                 int downsamplingFactor = (int)(samples[0].Count / targetSamples);
-                List<Point>[] samplesDownsampled = SamplesToPeaks(samples, downsamplingFactor);
-                return samplesDownsampled;
+                return PeaksToPoints(SamplesToPeaks(samples, downsamplingFactor));
             }
             else {
                 peaks = true;
                 readInterval = requestedInterval;
-                return LoadPeaks(requestedInterval);
+                List<Peak>[] loadedPeaks = LoadPeaks(requestedInterval);
+                int downsamplingFactor = (int)(loadedPeaks[0].Count / targetSamples);
+                return PeaksToPoints(loadedPeaks, downsamplingFactor);
             }
-            // TODO optionally introduce additional stage to return resampled peaks from peak data
         }
 
         private List<float>[] LoadSamples(int samples) {
@@ -140,47 +147,93 @@ namespace AudioAlign.Audio {
             return points;
         }
 
-        private static List<Point>[] SamplesToPeaks(List<float>[] samples, int downsamplingFactor) {
+        private static List<Peak>[] SamplesToPeaks(List<float>[] samples, int downsamplingFactor) {
             int channels = samples.Length;
-            int targetPoints = (int)Math.Ceiling((float)samples[0].Count / downsamplingFactor);
-            List<Point>[] peakPoints = AudioUtil.CreateList<Point>(channels, targetPoints * 2);
-            Point[][] tempPeakPoints = AudioUtil.CreateArray<Point>(channels, targetPoints * 2);
+            int sourceSampleCount = samples[0].Count;
+            int targetPeakCount = (int)Math.Ceiling((float)sourceSampleCount / downsamplingFactor);
+            List<Peak>[] peaks = AudioUtil.CreateList<Peak>(channels, targetPeakCount);
 
             for (int channel = 0; channel < channels; channel++) {
                 List<float> temp = new List<float>(downsamplingFactor);
                 int pointCount = 0;
                 int sampleCount = 0;
-                for (int sample = 0; sample < samples[0].Count; sample++) {
+                for (int sample = 0; sample < sourceSampleCount; sample++) {
                     temp.Add(samples[channel][sample]);
-                    if (++sampleCount % downsamplingFactor == 0 || sample + 1 == samples[0].Count) {
-                        tempPeakPoints[channel][pointCount] = new Point(pointCount, temp.Min());
-                        tempPeakPoints[channel][targetPoints * 2 - 1 - pointCount] = new Point(pointCount, temp.Max());
+                    if (++sampleCount % downsamplingFactor == 0 || sample + 1 == sourceSampleCount) {
+                        peaks[channel].Add(new Peak(temp.Min(), temp.Max()));
                         pointCount++;
                         temp.Clear();
                     }
                 }
-                peakPoints[channel].AddRange(tempPeakPoints[channel]);
             }
-            return peakPoints;
+            return peaks;
         }
 
-        private List<Point>[] LoadPeaks(Interval interval) {
+        private List<Peak>[] LoadPeaks(Interval interval) {
             int channels = Properties.Channels;
             audioStream.TimePosition = new TimeSpan(interval.From);
 
-            int peaks = AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(interval.Length)) / SAMPLES_PER_PEAK;
-            long peakStreamPosition = SamplePosition / SAMPLES_PER_PEAK * 2;
-            Debug.WriteLine("LoadPeaks peakStreamPosition: " + peakStreamPosition);
+            int peakCount = AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(interval.Length)) / SAMPLES_PER_PEAK;
+            long peakStreamPosition = SamplePosition / SAMPLES_PER_PEAK * 4;
 
-            List<Point>[] peakPoints = AudioUtil.CreateList<Point>(channels, peaks * 2);
-            Point[][] tempPeakPoints = AudioUtil.CreateArray<Point>(channels, peaks * 2);
+            //Debug.WriteLine("LoadPeaks peakCount: " + peakCount);
+            //Debug.WriteLine("LoadPeaks peakStreamPosition: " + peakStreamPosition);
+
+            List<Peak>[] peaks = AudioUtil.CreateList<Peak>(channels, peakCount);
 
             for (int channel = 0; channel < channels; channel++) {
                 peakStreams[channel].Position = peakStreamPosition * 2;
                 BinaryReader peakReader = new BinaryReader(peakStreams[channel]);
-                for (int x = 0; x < peaks; x++) {
-                    tempPeakPoints[channel][x] = new Point(x, peakReader.ReadSingle());
-                    tempPeakPoints[channel][peaks * 2 - 1 - x] = new Point(x, peakReader.ReadSingle());
+                for (int x = 0; x < peakCount; x++) {
+                    peaks[channel].Add(new Peak(peakReader.ReadSingle(), peakReader.ReadSingle()));
+                }
+            }
+
+            return peaks;
+        }
+
+        private static List<Point>[] PeaksToPoints(List<Peak>[] peaks) {
+            int channels = peaks.Length;
+            int peakCount = peaks[0].Count;
+
+            List<Point>[] peakPoints = AudioUtil.CreateList<Point>(channels, peakCount * 2);
+            Point[][] tempPeakPoints = AudioUtil.CreateArray<Point>(channels, peakCount * 2);
+
+            for (int channel = 0; channel < channels; channel++) {
+                for (int x = 0; x < peakCount; x++) {
+                    tempPeakPoints[channel][x] = new Point(x, peaks[channel][x].Min);
+                    tempPeakPoints[channel][peakCount * 2 - 1 - x] = new Point(x, peaks[channel][x].Max);
+                }
+                peakPoints[channel].AddRange(tempPeakPoints[channel]);
+            }
+
+            return peakPoints;
+        }
+
+        private static List<Point>[] PeaksToPoints(List<Peak>[] peaks, int downsamplingFactor) {
+            int channels = peaks.Length;
+            int sourcePeakCount = peaks[0].Count;
+            int targetPeakCount = (int)Math.Ceiling((float)sourcePeakCount / downsamplingFactor);
+
+            List<Point>[] peakPoints = AudioUtil.CreateList<Point>(channels, targetPeakCount * 2);
+            Point[][] tempPeakPoints = AudioUtil.CreateArray<Point>(channels, targetPeakCount * 2);
+
+
+            for (int channel = 0; channel < channels; channel++) {
+                List<float> min = new List<float>(downsamplingFactor);
+                List<float> max = new List<float>(downsamplingFactor);
+
+                int pointCount = 0;
+                for (int peak = 0; peak < sourcePeakCount; peak++) {
+                    min.Add(peaks[channel][peak].Min);
+                    max.Add(peaks[channel][peak].Max);
+                    if ((peak + 1) % downsamplingFactor == 0 || peak + 1 == sourcePeakCount) {
+                        tempPeakPoints[channel][pointCount] = new Point(pointCount, min.Min());
+                        tempPeakPoints[channel][targetPeakCount * 2 - 1 - pointCount] = new Point(pointCount, max.Max());
+                        pointCount++;
+                        max.Clear();
+                        min.Clear();
+                    }
                 }
                 peakPoints[channel].AddRange(tempPeakPoints[channel]);
             }

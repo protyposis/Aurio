@@ -116,7 +116,7 @@
     <Compile Include="IAudioStream16.cs" />
     <Compile Include="Interval.cs" />
     <Compile Include="NAudio16BitWaveFileReaderWrapperStream.cs" />
-    <Compile Include="PointPair.cs" />
+    <Compile Include="Peak.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualizingAudioStream16.cs" />
   </ItemGroup>
