@@ -12,6 +12,10 @@ using AudioAlign.Audio;
 namespace AudioAlign.WaveControls {
     public class TimeScale: VirtualViewBase {
 
+        private const int SCALE_HEIGHT = 10;
+        private const int SCALE_FONT_SIZE = 8;
+        private const string SCALE_TEXT_FORMAT = @"d\.hh\.mm\:ss\.fff";
+
         private readonly long[] TICK_LEVELS = { 
                                             10L * 1000,                         // MS
                                             10L * 1000 * 10,                    // 10MS
@@ -62,21 +66,33 @@ namespace AudioAlign.WaveControls {
             GuidelineSet guidelineSet = new GuidelineSet();
             drawingContext.PushGuidelineSet(guidelineSet);
 
+            // draw interval start & end time
+            FormattedText formattedStartText = new FormattedText(
+                        new TimeSpan(viewportInterval.From).ToString(SCALE_TEXT_FORMAT),
+                        CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, Brushes.Gray) { TextAlignment = TextAlignment.Left };
+            drawingContext.DrawText(formattedStartText, new Point(1, 0));
+            FormattedText formattedEndText = new FormattedText(
+                        new TimeSpan(viewportInterval.To).ToString(SCALE_TEXT_FORMAT),
+                        CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, Brushes.Gray) { TextAlignment = TextAlignment.Right };
+            drawingContext.DrawText(formattedEndText, new Point(actualWidth - 1, 0));
+
             // draw markers and time
             int timeDrawingRate = 5;
             long markerCount = (viewportIntervalAligned.From / ticks) % timeDrawingRate;
             for (long i = 0; i < viewportIntervalAligned.Length; i += ticks) {
-                double markerHeight = actualHeight - (actualHeight / 4);
+                double markerHeight = actualHeight - (SCALE_HEIGHT / 2 * 1.5);
                 double x = i * scale + drawingOffset;
 
                 // draw time
                 if (markerCount++ % timeDrawingRate == 0) {
-                    markerHeight = actualHeight / 2;
+                    markerHeight = actualHeight - SCALE_HEIGHT;
                     FormattedText formattedText = new FormattedText(
-                        new TimeSpan(viewportIntervalAligned.From + i).ToString(@"d\.hh\.mm\:ss\.fff"),
+                        new TimeSpan(viewportIntervalAligned.From + i).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), 8, Foreground) { TextAlignment = TextAlignment.Center };
-                    drawingContext.DrawText(formattedText, new Point(x, 0));
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, Foreground) { TextAlignment = TextAlignment.Center };
+                    drawingContext.DrawText(formattedText, new Point(x, actualHeight - SCALE_HEIGHT - SCALE_FONT_SIZE * 1.2));
                 }
 
                 // draw marker
