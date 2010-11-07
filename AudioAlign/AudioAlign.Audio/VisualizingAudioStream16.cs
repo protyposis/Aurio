@@ -4,28 +4,27 @@ using System.Linq;
 using System.Diagnostics;
 using System.Windows;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 namespace AudioAlign.Audio {
     public class VisualizingAudioStream16: AudioStreamWrapper<float>, IAudioStream16 {
 
         private const int SAMPLES_PER_PEAK = 1024;
         private const int BUFFER_SIZE = 1024;
 
-        private MemoryStream[] peakStreams;
         private float[][] buffer;
 
-        public VisualizingAudioStream16(IAudioStream16 audioStream)
+        private PeakStore peakStore;
+        private BinaryReader[] peakReaders;
+
+        public VisualizingAudioStream16(IAudioStream16 audioStream, PeakStore peakStore)
             : base(audioStream) {
             // init memory streams
-            peakStreams = new MemoryStream[audioStream.Properties.Channels];
-            for (int channel = 0; channel < audioStream.Properties.Channels; channel++) {
-                peakStreams[channel] = new MemoryStream((int)(
-                    audioStream.SampleCount / SAMPLES_PER_PEAK
-                    * (audioStream.Properties.BitDepth / 8) * 2)); // * 2 for min and max value per peak
-            }
+            this.peakStore = peakStore;
+            this.peakReaders = peakStore.CreateMemoryStreams().WrapWithBinaryReaders();
+
             //init buffer
             buffer = AudioUtil.CreateArray<float>(audioStream.Properties.Channels, BUFFER_SIZE);
-
-            GeneratePeaks();
         }
 
         /// <summary>
@@ -174,7 +173,7 @@ namespace AudioAlign.Audio {
             audioStream.TimePosition = new TimeSpan(interval.From);
 
             int peakCount = AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(interval.Length)) / SAMPLES_PER_PEAK;
-            long peakStreamPosition = SamplePosition / SAMPLES_PER_PEAK * 4;
+            long peakStreamPosition = SamplePosition / SAMPLES_PER_PEAK * 8;
 
             //Debug.WriteLine("LoadPeaks peakCount: " + peakCount);
             //Debug.WriteLine("LoadPeaks peakStreamPosition: " + peakStreamPosition);
@@ -182,10 +181,9 @@ namespace AudioAlign.Audio {
             List<Peak>[] peaks = AudioUtil.CreateList<Peak>(channels, peakCount);
 
             for (int channel = 0; channel < channels; channel++) {
-                peakStreams[channel].Position = peakStreamPosition * 2;
-                BinaryReader peakReader = new BinaryReader(peakStreams[channel]);
+                peakReaders[channel].BaseStream.Position = peakStreamPosition;
                 for (int x = 0; x < peakCount; x++) {
-                    peaks[channel].Add(new Peak(peakReader.ReadSingle(), peakReader.ReadSingle()));
+                    peaks[channel].Add(peakReaders[channel].ReadPeak());
                 }
             }
 
@@ -239,42 +237,6 @@ namespace AudioAlign.Audio {
             }
 
             return peakPoints;
-        }
-
-        private void GeneratePeaks() {
-            int bufferSize = 512;
-            int channels = Properties.Channels;
-            float[][] buffer = AudioUtil.CreateArray<float>(channels, bufferSize);
-            int samplesRead;
-
-            BinaryWriter[] peakWriters = new BinaryWriter[channels];
-            for (int channel = 0; channel < channels; channel++) {
-                peakWriters[channel] = new BinaryWriter(peakStreams[channel]);
-            }
-
-            List<float>[] minMax = AudioUtil.CreateList<float>(channels, SAMPLES_PER_PEAK);
-            int sampleCount = 0;
-            while ((samplesRead = audioStream.Read(buffer, bufferSize)) > 0) {
-                for (int x = 0; x < samplesRead; x++) {
-                    for (int channel = 0; channel < channels; channel++) {
-                        minMax[channel].Add(buffer[channel][x]);
-                    }
-                    if (++sampleCount == SAMPLES_PER_PEAK) {
-                        // write peak
-                        for (int channel = 0; channel < channels; channel++) {
-                            peakWriters[channel].Write(minMax[channel].Min());
-                            peakWriters[channel].Write(minMax[channel].Max());
-                            minMax[channel].Clear();
-                        }
-                        sampleCount = 0;
-                    }
-                }
-
-                Debug.WriteLine((100.0f / SampleCount * SamplePosition) + "% of peaks generated...");
-            }
-            Debug.WriteLine("peak generation finished - " + (peakStreams[0].Length * channels) + " bytes");
-
-            // TODO dispose / close / ??? the binary writers?
         }
     }
 }
