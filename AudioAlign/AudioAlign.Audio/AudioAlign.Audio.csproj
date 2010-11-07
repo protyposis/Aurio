@@ -112,11 +112,13 @@
     <Compile Include="AudioStreamFactory.cs" />
     <Compile Include="AudioStreamWrapper.cs" />
     <Compile Include="AudioUtil.cs" />
+    <Compile Include="BinaryIOExtensions.cs" />
     <Compile Include="IAudioStream.cs" />
     <Compile Include="IAudioStream16.cs" />
     <Compile Include="Interval.cs" />
     <Compile Include="NAudio16BitWaveFileReaderWrapperStream.cs" />
     <Compile Include="Peak.cs" />
+    <Compile Include="PeakStore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualizingAudioStream16.cs" />
   </ItemGroup>
