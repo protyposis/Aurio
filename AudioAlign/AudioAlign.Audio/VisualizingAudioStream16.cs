@@ -10,7 +10,7 @@ namespace AudioAlign.Audio {
     public class VisualizingAudioStream16: AudioStreamWrapper<float>, IAudioStream16 {
 
         private const int SAMPLES_PER_PEAK = 1024;
-        private const int BUFFER_SIZE = 1024;
+        private const int BUFFER_SIZE = 65536;
 
         private float[][] buffer;
 

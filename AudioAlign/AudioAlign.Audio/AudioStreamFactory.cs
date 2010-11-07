@@ -31,7 +31,7 @@ namespace AudioAlign.Audio {
                 // generate peakfile
             else {
                 int channels = peakStore.Channels;
-                int bufferSize = 512;
+                int bufferSize = 65536;
                 float[][] buffer = AudioUtil.CreateArray<float>(channels, bufferSize);
                 List<float>[] minMax = AudioUtil.CreateList<float>(channels, SAMPLES_PER_PEAK);
                 IAudioStream16 audioInputStream2 = new NAudio16BitWaveFileReaderWrapperStream(
