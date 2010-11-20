@@ -6,27 +6,36 @@ using NAudio.Wave;
 using System.IO;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using AudioAlign.Audio.Project;
 
 namespace AudioAlign.Audio {
     public static class AudioStreamFactory {
+        public const string PEAKFILE_EXTENSION = ".aapeaks";
+
         public static IAudioStream16 FromFilename(string filename) {
             return new NAudio16BitWaveFileReaderWrapperStream(new WaveFileReader(filename));
         }
 
-        public static VisualizingAudioStream16 FromFilenameForGUI(string filename) {
-            int SAMPLES_PER_PEAK = 1024;
-            string PEAKFILE_EXTENSION = ".aapeaks";
+        public static IAudioStream16 FromFileInfo(FileInfo fileInfo) {
+            return new NAudio16BitWaveFileReaderWrapperStream(new WaveFileReader(fileInfo.FullName));
+        }
 
-            NAudio16BitWaveFileReaderWrapperStream audioInputStream = new NAudio16BitWaveFileReaderWrapperStream(
-                new WaveFileReader(File.OpenRead(filename)));
+        public static IAudioStream16 FromStream(Stream stream) {
+            return new NAudio16BitWaveFileReaderWrapperStream(new WaveFileReader(stream));
+        }
+
+        public static VisualizingAudioStream16 FromAudioTrackForGUI(AudioTrack audioTrack) {
+            int SAMPLES_PER_PEAK = 1024;
+
+            IAudioStream16 audioInputStream = audioTrack.CreateAudioStream();
 
             PeakStore peakStore = new PeakStore(audioInputStream.Properties.Channels,
                 (int)Math.Ceiling((float)audioInputStream.SampleCount / audioInputStream.Properties.Channels / SAMPLES_PER_PEAK * 2));
             
             // search for existing peakfile
-            if (File.Exists(filename + PEAKFILE_EXTENSION)) {
+            if (audioTrack.HasPeakFile) {
                 // load peakfile from disk
-                peakStore.ReadFrom(File.OpenRead(filename + PEAKFILE_EXTENSION));
+                peakStore.ReadFrom(File.OpenRead(audioTrack.PeakFile.FullName));
             }
                 // generate peakfile
             else {
@@ -34,8 +43,7 @@ namespace AudioAlign.Audio {
                 int bufferSize = 65536;
                 float[][] buffer = AudioUtil.CreateArray<float>(channels, bufferSize);
                 List<float>[] minMax = AudioUtil.CreateList<float>(channels, SAMPLES_PER_PEAK);
-                IAudioStream16 audioInputStream2 = new NAudio16BitWaveFileReaderWrapperStream(
-                    new WaveFileReader(File.OpenRead(filename)));
+                IAudioStream16 audioInputStream2 = audioTrack.CreateAudioStream();
                 BinaryWriter[] peakWriters = peakStore.CreateMemoryStreams().WrapWithBinaryWriters();
 
                 Task.Factory.StartNew(() => {
@@ -66,13 +74,17 @@ namespace AudioAlign.Audio {
                     Debug.WriteLine("peak generation finished - " + (DateTime.Now - startTime) + ", " + (peakWriters[0].BaseStream.Length * channels) + " bytes");
 
                     // write peakfile to disk
-                    FileStream peakOutputFile = File.OpenWrite(filename + PEAKFILE_EXTENSION);
+                    FileStream peakOutputFile = File.OpenWrite(audioTrack.PeakFile.FullName);
                     peakStore.StoreTo(peakOutputFile);
                     peakOutputFile.Close();
                 });
             }
 
             return new VisualizingAudioStream16(audioInputStream, peakStore);
+        }
+
+        public static VisualizingAudioStream16 FromFilenameForGUI(string fileName) {
+            return FromAudioTrackForGUI(new AudioTrack(new FileInfo(fileName)));
         }
     }
 }

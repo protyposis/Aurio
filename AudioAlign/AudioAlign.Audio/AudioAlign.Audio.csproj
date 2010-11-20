@@ -119,6 +119,11 @@
     <Compile Include="NAudio16BitWaveFileReaderWrapperStream.cs" />
     <Compile Include="Peak.cs" />
     <Compile Include="PeakStore.cs" />
+    <Compile Include="Project\AudioTrack.cs" />
+    <Compile Include="Project\MediaType.cs" />
+    <Compile Include="Project\Project.cs" />
+    <Compile Include="Project\Track.cs" />
+    <Compile Include="Project\TrackList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisualizingAudioStream16.cs" />
   </ItemGroup>
