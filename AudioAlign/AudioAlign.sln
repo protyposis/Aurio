@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{585D9426-E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Test.HugeControlRendering", "AudioAlign.Test.HugeControlRendering\AudioAlign.Test.HugeControlRendering.csproj", "{EDD59524-641D-4EB3-BF96-7138BBA8D009}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Test.MultitrackControls", "AudioAlign.Test.MultitrackControls\AudioAlign.Test.MultitrackControls.csproj", "{0A18E477-2141-4B32-ABFD-E23EF534FC93}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -102,6 +104,18 @@ Global
 		{EDD59524-641D-4EB3-BF96-7138BBA8D009}.Release|x64.ActiveCfg = Release|x86
 		{EDD59524-641D-4EB3-BF96-7138BBA8D009}.Release|x86.ActiveCfg = Release|x86
 		{EDD59524-641D-4EB3-BF96-7138BBA8D009}.Release|x86.Build.0 = Release|x86
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93}.Debug|x64.ActiveCfg = Debug|x86
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93}.Debug|x86.ActiveCfg = Debug|x86
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93}.Debug|x86.Build.0 = Debug|x86
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93}.Release|Any CPU.ActiveCfg = Release|x86
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93}.Release|Mixed Platforms.Build.0 = Release|x86
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93}.Release|x64.ActiveCfg = Release|x86
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93}.Release|x86.ActiveCfg = Release|x86
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -109,5 +123,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E} = {145C5564-02B1-42C2-ABDF-E29888E145A5}
 		{EDD59524-641D-4EB3-BF96-7138BBA8D009} = {585D9426-E46D-404B-8463-DF2F5FE539D6}
+		{0A18E477-2141-4B32-ABFD-E23EF534FC93} = {585D9426-E46D-404B-8463-DF2F5FE539D6}
 	EndGlobalSection
 EndGlobal
