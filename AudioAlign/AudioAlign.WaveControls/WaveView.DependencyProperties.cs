@@ -53,6 +53,8 @@ namespace AudioAlign.WaveControls
             ViewportZoomPropertyKey = DependencyProperty.RegisterReadOnly("ViewportZoom", typeof(float), typeof(WaveView),
                 new FrameworkPropertyMetadata());
             ViewportZoomProperty = ViewportZoomPropertyKey.DependencyProperty;
+
+            HeightProperty.OverrideMetadata(typeof(WaveView), new FrameworkPropertyMetadata(80d));
         }
 
         private static void OnTrackLengthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
@@ -121,7 +123,7 @@ namespace AudioAlign.WaveControls
 
         private void WaveView_SizeChanged(object sender, SizeChangedEventArgs e) {
             if (e.WidthChanged && e.PreviousSize.Width > 0) {
-                ViewportWidth = (long)(ViewportWidth * e.NewSize.Width / e.PreviousSize.Width);
+                //ViewportWidth = (long)(ViewportWidth * e.NewSize.Width / e.PreviousSize.Width);
             }
             UpdateViewportZoom(this);
             //InvalidateVisual();

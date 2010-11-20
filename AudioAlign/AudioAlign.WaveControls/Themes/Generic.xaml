@@ -14,4 +14,48 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style TargetType="{x:Type local:MultiTrackViewer}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:MultiTrackViewer}">
+                    <Border>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <local:TimeScale x:Name="PART_TimeScale" Grid.Column="0" Grid.Row="0"/>
+
+                            <Border Grid.Column="0" Grid.Row="1" Background="LightGray">
+                                <ScrollContentPresenter Name="PART_ScrollContentPresenter"/>
+                            </Border>
+
+                            <ScrollBar Name="PART_VerticalScrollBar"
+                                           Grid.Row="1"
+                                           Grid.Column="1"
+                                           Value="{TemplateBinding VerticalOffset}"
+                                           Maximum="{TemplateBinding ScrollableHeight}"
+                                           ViewportSize="{TemplateBinding ViewportHeight}"
+                                           Visibility="Visible"/>
+                            <ScrollBar Name="PART_HorizontalScrollBar"
+                                           Orientation="Horizontal"
+                                           Grid.Row="2"
+                                           Grid.Column="0"
+                                           Value="{TemplateBinding ViewportOffset}"
+                                           Maximum="{TemplateBinding ScrollableWidth}"
+                                           ViewportSize="{TemplateBinding ViewportWidth}"
+                                           Visibility="Visible"/>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

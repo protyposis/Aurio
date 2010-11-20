@@ -10,11 +10,11 @@ namespace AudioAlign.WaveControls {
 
         public static readonly DependencyProperty ViewportOffsetProperty = DependencyProperty.Register(
             "ViewportOffset", typeof(long), typeof(VirtualViewBase),
-                new FrameworkPropertyMetadata { AffectsRender = true });
+                new FrameworkPropertyMetadata { Inherits = true, AffectsRender = true });
 
         public static readonly DependencyProperty ViewportWidthProperty = DependencyProperty.Register(
             "ViewportWidth", typeof(long), typeof(VirtualViewBase),
-                new FrameworkPropertyMetadata { AffectsRender = true, 
+                new FrameworkPropertyMetadata { Inherits = true, AffectsRender = true, 
                     PropertyChangedCallback = OnViewportWidthChanged, 
                     CoerceValueCallback = CoerceViewportWidth, DefaultValue = (long)100 });
 

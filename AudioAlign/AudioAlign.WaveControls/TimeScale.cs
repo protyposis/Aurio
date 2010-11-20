@@ -42,6 +42,9 @@ namespace AudioAlign.WaveControls {
                                         };
 
         static TimeScale() {
+            WidthProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(Double.NaN));
+            HeightProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(30d));
+
             ClipToBoundsProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(true));
             ForegroundProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(Brushes.Gray));
             BackgroundProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(Brushes.White));
