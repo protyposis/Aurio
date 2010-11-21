@@ -15,8 +15,6 @@ namespace AudioAlign.WaveControls {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(ResizeDecorator), new FrameworkPropertyMetadata(typeof(ResizeDecorator)));
         }
 
-        public event DragDeltaEventHandler ResizeDelta;
-
         public ResizeDecorator() {
             this.Loaded += new RoutedEventHandler(ResizeDecorator_Loaded);
         }
@@ -30,8 +28,6 @@ namespace AudioAlign.WaveControls {
         }
 
         private void resizeThumb_DragDelta(object sender, DragDeltaEventArgs e) {
-            Debug.WriteLine("ResizeDecorator ResizeThumb DragDelta: " + e.VerticalChange);
-
             double newHeight = Math.Max(MinHeight, ActualHeight + e.VerticalChange);
             SetValue(HeightProperty, newHeight);
             e.Handled = true;
@@ -40,12 +36,6 @@ namespace AudioAlign.WaveControls {
         void resizeThumb_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
             ClearValue(HeightProperty);
             e.Handled = true;
-        }
-
-        private void OnResizeDelta(DragDeltaEventArgs e) {
-            if (ResizeDelta != null) {
-                ResizeDelta(this, e);
-            }
         }
 
     }

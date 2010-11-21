@@ -115,6 +115,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DragDropDecorator.cs" />
     <Compile Include="LogSlider.cs" />
     <Compile Include="MultiTrackListBox.cs" />
     <Compile Include="MultiTrackViewer.cs" />

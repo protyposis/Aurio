@@ -128,11 +128,11 @@
         <Setter Property="ItemTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <local:ResizeDecorator Height="100">
-                        <local:WaveView AudioStream="{Binding}" 
-                                        Margin="0,1" 
-                                        VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"/>
-                    </local:ResizeDecorator>
+                        <local:ResizeDecorator Height="100">
+                            <local:WaveView AudioStream="{Binding}" 
+                                            Margin="0,2" 
+                                            VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"/>
+                        </local:ResizeDecorator>
                 </DataTemplate>
             </Setter.Value>
         </Setter>
@@ -213,7 +213,7 @@
                 <ControlTemplate TargetType="{x:Type local:ResizeDecorator}">
                     <Grid>
                         <ContentPresenter/>
-                        <Thumb Name="PART_ResizeThumb" HorizontalAlignment="Stretch" Height="5" VerticalAlignment="Bottom" SnapsToDevicePixels="True" Visibility="Visible" Opacity="0"/>
+                        <Thumb Name="PART_ResizeThumb" HorizontalAlignment="Stretch" Height="3" VerticalAlignment="Bottom" SnapsToDevicePixels="True" Visibility="Visible" Opacity="0"/>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger SourceName="PART_ResizeThumb" Property="IsMouseOver" Value="True">
@@ -221,6 +221,28 @@
                         </Trigger>
                         <Trigger SourceName="PART_ResizeThumb" Property="IsMouseOver" Value="True">
                             <Setter TargetName="PART_ResizeThumb" Property="Cursor" Value="SizeNS"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type local:DragDropDecorator}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:DragDropDecorator}">
+                    <Grid>
+                        <ContentPresenter/>
+                        <Rectangle Name="DropMarker" Height="3" Fill="Red" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Visibility="Hidden">
+                            <Rectangle.Effect>
+                                <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="Red" Opacity="1"/>
+                            </Rectangle.Effect>
+                        </Rectangle>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsDragOver" Value="True">
+                            <Setter TargetName="DropMarker" Property="Visibility" Value="Visible"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
