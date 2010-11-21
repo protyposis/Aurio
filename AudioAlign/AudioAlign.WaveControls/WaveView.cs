@@ -41,7 +41,7 @@ namespace AudioAlign.WaveControls {
 
             if (audioStream != null) {
                 Interval audioInterval = new Interval(TrackOffset, TrackOffset + audioStream.TimeLength.Ticks);
-                Interval viewportInterval = new Interval(VirtualViewportOffset, VirtualViewportOffset + VirtualViewportWidth);
+                Interval viewportInterval = VirtualViewportInterval;
 
                 if (!audioInterval.Intersects(viewportInterval)) {
                     Debug.WriteLine("nothing to draw!");

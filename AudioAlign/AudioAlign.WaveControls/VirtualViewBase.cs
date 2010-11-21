@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows;
+using AudioAlign.Audio;
 
 namespace AudioAlign.WaveControls {
     public class VirtualViewBase: Control {
@@ -37,6 +38,10 @@ namespace AudioAlign.WaveControls {
         public long VirtualViewportWidth {
             get { return (long)GetValue(VirtualViewportWidthProperty); }
             set { SetValue(VirtualViewportWidthProperty, value); }
+        }
+
+        public Interval VirtualViewportInterval {
+            get { return new Interval(VirtualViewportOffset, VirtualViewportOffset + VirtualViewportWidth); }
         }
 
         protected virtual void OnViewportWidthChanged(long oldValue, long newValue) {}
