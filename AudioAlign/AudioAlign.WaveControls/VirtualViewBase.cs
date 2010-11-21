@@ -44,6 +44,19 @@ namespace AudioAlign.WaveControls {
             get { return new Interval(VirtualViewportOffset, VirtualViewportOffset + VirtualViewportWidth); }
         }
 
+        public long PhysicalToVirtualOffset(double physicalOffset) {
+            Interval viewportInterval = VirtualViewportInterval;
+            long visibleIntervalOffset = (long)Math.Round(viewportInterval.Length / ActualWidth * physicalOffset);
+            return viewportInterval.From + visibleIntervalOffset;
+        }
+
+        public double VirtualToPhysicalOffset(long virtualOffset) {
+            Interval viewportInterval = VirtualViewportInterval;
+            virtualOffset -= viewportInterval.From;
+            double physicalOffset = ActualWidth / viewportInterval.Length * virtualOffset;
+            return physicalOffset;
+        }
+
         protected virtual void OnViewportWidthChanged(long oldValue, long newValue) {}
     }
 }

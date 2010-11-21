@@ -39,6 +39,10 @@ namespace AudioAlign.Audio {
             return new Interval(Math.Max(from, interval.from), Math.Min(to, interval.to));
         }
 
+        public bool Contains(long value) {
+            return value >= from && value <= to;
+        }
+
         public void Offset(long offset) {
             from += offset;
             to += offset;
