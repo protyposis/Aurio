@@ -8,15 +8,15 @@ using System.Windows;
 namespace AudioAlign.WaveControls {
     public class VirtualViewBase: Control {
 
-        public static readonly DependencyProperty ViewportOffsetProperty = DependencyProperty.Register(
-            "ViewportOffset", typeof(long), typeof(VirtualViewBase),
+        public static readonly DependencyProperty VirtualViewportOffsetProperty = DependencyProperty.Register(
+            "VirtualViewportOffset", typeof(long), typeof(VirtualViewBase),
                 new FrameworkPropertyMetadata { Inherits = true, AffectsRender = true });
 
-        public static readonly DependencyProperty ViewportWidthProperty = DependencyProperty.Register(
-            "ViewportWidth", typeof(long), typeof(VirtualViewBase),
+        public static readonly DependencyProperty VirtualViewportWidthProperty = DependencyProperty.Register(
+            "VirtualViewportWidth", typeof(long), typeof(VirtualViewBase),
                 new FrameworkPropertyMetadata { Inherits = true, AffectsRender = true, 
                     PropertyChangedCallback = OnViewportWidthChanged, 
-                    CoerceValueCallback = CoerceViewportWidth, DefaultValue = (long)100 });
+                    CoerceValueCallback = CoerceViewportWidth, DefaultValue = (long)1000000 });
 
         private static object CoerceViewportWidth(DependencyObject d, object value) {
             long viewportWidth = (long)value;
@@ -29,14 +29,14 @@ namespace AudioAlign.WaveControls {
             ctrl.OnViewportWidthChanged((long)e.OldValue, (long)e.NewValue);
         }
 
-        public long ViewportOffset {
-            get { return (long)GetValue(ViewportOffsetProperty); }
-            set { SetValue(ViewportOffsetProperty, value); }
+        public long VirtualViewportOffset {
+            get { return (long)GetValue(VirtualViewportOffsetProperty); }
+            set { SetValue(VirtualViewportOffsetProperty, value); }
         }
 
-        public long ViewportWidth {
-            get { return (long)GetValue(ViewportWidthProperty); }
-            set { SetValue(ViewportWidthProperty, value); }
+        public long VirtualViewportWidth {
+            get { return (long)GetValue(VirtualViewportWidthProperty); }
+            set { SetValue(VirtualViewportWidthProperty, value); }
         }
 
         protected virtual void OnViewportWidthChanged(long oldValue, long newValue) {}

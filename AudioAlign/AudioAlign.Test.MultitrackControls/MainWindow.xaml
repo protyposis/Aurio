@@ -1,13 +1,68 @@
 ﻿<Window x:Class="AudioAlign.Test.MultitrackControls.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="485" Width="525" xmlns:my="clr-namespace:AudioAlign.WaveControls;assembly=AudioAlign.WaveControls">
+        Title="MainWindow" Height="485" Width="892" xmlns:my="clr-namespace:AudioAlign.WaveControls;assembly=AudioAlign.WaveControls">
+    <Window.Resources>
+        <!--<Style TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                        <Border BorderThickness="{TemplateBinding Border.BorderThickness}" Padding="{TemplateBinding Control.Padding}" BorderBrush="{TemplateBinding Border.BorderBrush}" Background="{TemplateBinding Panel.Background}" Name="Bd" SnapsToDevicePixels="True">
+                            <ContentPresenter Content="{TemplateBinding ContentControl.Content}" ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}" ContentStringFormat="{TemplateBinding ContentControl.ContentStringFormat}" HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Selector.IsSelected">
+                                <Setter TargetName="Bd" Property="Panel.Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                                <Setter Property="TextElement.Foreground">
+                                    <Setter.Value>
+                                        <DynamicResource ResourceKey="{x:Static SystemColors.HighlightTextBrushKey}" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Trigger.Value>
+                                    <s:Boolean>True</s:Boolean>
+                                </Trigger.Value>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="Selector.IsSelected">
+                                        <Condition.Value>
+                                            <s:Boolean>True</s:Boolean>
+                                        </Condition.Value>
+                                    </Condition>
+                                    <Condition Property="Selector.IsSelectionActive">
+                                        <Condition.Value>
+                                            <s:Boolean>False</s:Boolean>
+                                        </Condition.Value>
+                                    </Condition>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Bd" Property="Panel.Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+                                <Setter Property="TextElement.Foreground">
+                                    <Setter.Value>
+                                        <DynamicResource ResourceKey="{x:Static SystemColors.ControlTextBrushKey}" />
+                                    </Setter.Value>
+                                </Setter>
+                            </MultiTrigger>
+                            <Trigger Property="UIElement.IsEnabled">
+                                <Setter Property="TextElement.Foreground">
+                                    <Setter.Value>
+                                        <DynamicResource ResourceKey="{x:Static SystemColors.GrayTextBrushKey}" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Trigger.Value>
+                                    <s:Boolean>False</s:Boolean>
+                                </Trigger.Value>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>-->
+    </Window.Resources>
     <Grid>
         <Button Content="Add Waveform" HorizontalAlignment="Left" Margin="12,0,0,12" Name="btnAddWaveform" Width="101" Height="23" VerticalAlignment="Bottom" Click="btnAddWaveform_Click" />
-        <my:MultiTrackViewer Margin="13,12,13,77" Name="multiTrackViewer1" ViewportWidth="{Binding ElementName=slider1, Path=LogValue, Mode=TwoWay}">
-            <StackPanel Name="multiTrackPanel" />
-        </my:MultiTrackViewer>
+        <my:MultiTrackViewer Margin="12,12,13,77" Name="multiTrackViewer1" VirtualViewportWidth="{Binding ElementName=slider1, Path=LogValue}" />
         <my:LogSlider Height="23" HorizontalAlignment="Left" Margin="13,380,0,0" Name="slider1" VerticalAlignment="Top" Width="477" Maximum="1000000000000" Minimum="1" />
-        <Label Content="{Binding ElementName=multiTrackViewer1, Path=ViewportWidth}" Height="28" HorizontalAlignment="Left" Margin="452,406,0,0" Name="label1" VerticalAlignment="Top" />
+        <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualViewportWidth}" Height="28" HorizontalAlignment="Left" Margin="452,406,0,0" Name="label1" VerticalAlignment="Top" />
     </Grid>
 </Window>

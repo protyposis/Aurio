@@ -19,19 +19,10 @@ namespace AudioAlign.WaveControls {
     public partial class WaveView : VirtualViewBase {
 
         private bool debug = false;
-        private VisualizingAudioStream16 audioStream;
 
         public WaveView() {
             // event gets triggered when ActualWidth or ActualHeight change
             SizeChanged += WaveView_SizeChanged;
-        }
-
-        public VisualizingAudioStream16 AudioStream {
-            get { return audioStream; }
-            set {
-                audioStream = value;
-                TrackLength = audioStream.TimeLength.Ticks;
-            }
         }
 
         public bool Antialiased {
@@ -46,10 +37,11 @@ namespace AudioAlign.WaveControls {
 
         protected override void OnRender(DrawingContext drawingContext) {
             base.OnRender(drawingContext);
+            VisualizingAudioStream16 audioStream = AudioStream;
 
             if (audioStream != null) {
                 Interval audioInterval = new Interval(TrackOffset, TrackOffset + audioStream.TimeLength.Ticks);
-                Interval viewportInterval = new Interval(ViewportOffset, ViewportOffset + ViewportWidth);
+                Interval viewportInterval = new Interval(VirtualViewportOffset, VirtualViewportOffset + VirtualViewportWidth);
 
                 if (!audioInterval.Intersects(viewportInterval)) {
                     Debug.WriteLine("nothing to draw!");
@@ -65,7 +57,7 @@ namespace AudioAlign.WaveControls {
                 int samplesToLoad = AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(audioToLoadIntervalAligned.Length));
 
                 // calculate drawing measures
-                double viewportToDrawingScaleFactor = ActualWidth / ViewportWidth;
+                double viewportToDrawingScaleFactor = ActualWidth / VirtualViewportWidth;
                 double drawingOffset = ((audioToLoadIntervalAligned.From - audioToLoadInterval.From) + (visibleAudioInterval.From - viewportInterval.From)) * viewportToDrawingScaleFactor;
                 double drawingWidth = (samplesToLoad - 1) * sampleLength * viewportToDrawingScaleFactor;
 
@@ -166,7 +158,7 @@ namespace AudioAlign.WaveControls {
                     new Point(0, ActualHeight) + new Vector(0, -30));
                 drawingContext.DrawText(DebugText("TrackLength: " + TrackLength + ", TrackOffset: " + TrackOffset),
                     new Point(0, ActualHeight) + new Vector(0, -20));
-                drawingContext.DrawText(DebugText("ViewportOffset: " + ViewportOffset + ", ViewportWidth: " + ViewportWidth),
+                drawingContext.DrawText(DebugText("ViewportOffset: " + VirtualViewportOffset + ", ViewportWidth: " + VirtualViewportWidth),
                     new Point(0, ActualHeight) + new Vector(0, -10));
             }
         }

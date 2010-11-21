@@ -58,7 +58,7 @@ namespace AudioAlign.WaveControls {
             // draw background
             drawingContext.DrawRectangle(Background, null, new Rect(0, 0, actualWidth, actualHeight));
 
-            Interval viewportInterval = new Interval(ViewportOffset, ViewportOffset + ViewportWidth);
+            Interval viewportInterval = new Interval(VirtualViewportOffset, VirtualViewportOffset + VirtualViewportWidth);
             double scale = actualWidth / viewportInterval.Length;
             long ticks = FindTicks(viewportInterval.Length, (int)(Math.Round(actualWidth / 20)));
             Interval viewportIntervalAligned = new Interval(

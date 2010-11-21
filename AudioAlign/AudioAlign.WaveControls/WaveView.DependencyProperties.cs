@@ -5,10 +5,13 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.ComponentModel;
+using AudioAlign.Audio;
 
 namespace AudioAlign.WaveControls
 {
     public partial class WaveView {
+
+        public static readonly DependencyProperty AudioStreamProperty;
 
         public static readonly DependencyProperty WaveformBackgroundProperty;
         public static readonly DependencyProperty WaveformLineProperty;
@@ -26,6 +29,10 @@ namespace AudioAlign.WaveControls
         static WaveView() {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(WaveView),
                 new FrameworkPropertyMetadata(typeof(WaveView)));
+
+            AudioStreamProperty = DependencyProperty.Register("AudioStream", typeof(VisualizingAudioStream16), typeof(WaveView),
+                new FrameworkPropertyMetadata { DefaultValue = null, AffectsRender = true, 
+                    PropertyChangedCallback = OnAudioStreamChanged });
 
             WaveformBackgroundProperty = DependencyProperty.Register("WaveformBackground", typeof(Brush), typeof(WaveView), 
                 new FrameworkPropertyMetadata { DefaultValue = Brushes.White, AffectsRender = true });
@@ -57,6 +64,14 @@ namespace AudioAlign.WaveControls
             HeightProperty.OverrideMetadata(typeof(WaveView), new FrameworkPropertyMetadata(80d));
         }
 
+        private static void OnAudioStreamChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+            WaveView waveView = d as WaveView;
+            VisualizingAudioStream16 audioStream = e.NewValue as VisualizingAudioStream16;
+            if (waveView != null && audioStream != null) {
+                 waveView.TrackLength = audioStream.TimeLength.Ticks;
+            }
+        }
+
         private static void OnTrackLengthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             UpdateTrackScrollLength(d);
         }
@@ -69,14 +84,19 @@ namespace AudioAlign.WaveControls
 
         private static void UpdateTrackScrollLength(DependencyObject d) {
             long trackLength = (long)d.GetValue(TrackLengthProperty);
-            long viewportWidth = (long)d.GetValue(ViewportWidthProperty);
+            long viewportWidth = (long)d.GetValue(VirtualViewportWidthProperty);
             d.SetValue(TrackScrollLengthPropertyKey, trackLength - viewportWidth);
         }
 
         private static void UpdateViewportZoom(DependencyObject d) {
-            long viewportWidth = (long)d.GetValue(ViewportWidthProperty);
+            long viewportWidth = (long)d.GetValue(VirtualViewportWidthProperty);
             double actualWidth = (double)d.GetValue(ActualWidthProperty);
             d.SetValue(ViewportZoomPropertyKey, (float)(actualWidth / viewportWidth));
+        }
+
+        public VisualizingAudioStream16 AudioStream {
+            get { return (VisualizingAudioStream16)GetValue(AudioStreamProperty); }
+            set { SetValue(AudioStreamProperty, value); }
         }
 
         [Bindable(true), Category("Brushes")]
