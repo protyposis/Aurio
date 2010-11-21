@@ -118,6 +118,7 @@
     <Compile Include="LogSlider.cs" />
     <Compile Include="MultiTrackListBox.cs" />
     <Compile Include="MultiTrackViewer.cs" />
+    <Compile Include="ResizeDecorator.cs" />
     <Compile Include="TimeScale.cs" />
     <Compile Include="VirtualViewBase.cs" />
     <Compile Include="WaveView.cs" />

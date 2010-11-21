@@ -128,9 +128,11 @@
         <Setter Property="ItemTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <local:WaveView AudioStream="{Binding}" 
-                                    Margin="0,1" 
-                                    VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"/>
+                    <local:ResizeDecorator Height="100">
+                        <local:WaveView AudioStream="{Binding}" 
+                                        Margin="0,1" 
+                                        VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"/>
+                    </local:ResizeDecorator>
                 </DataTemplate>
             </Setter.Value>
         </Setter>
@@ -197,6 +199,28 @@
                             <Trigger.Value>
                                 <s:Boolean>False</s:Boolean>
                             </Trigger.Value>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type local:ResizeDecorator}">
+        <Setter Property="MinHeight" Value="5"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:ResizeDecorator}">
+                    <Grid>
+                        <ContentPresenter/>
+                        <Thumb Name="PART_ResizeThumb" HorizontalAlignment="Stretch" Height="5" VerticalAlignment="Bottom" SnapsToDevicePixels="True" Visibility="Visible" Opacity="0"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger SourceName="PART_ResizeThumb" Property="IsMouseOver" Value="True">
+                            <Setter TargetName="PART_ResizeThumb" Property="Opacity" Value="1"/>
+                        </Trigger>
+                        <Trigger SourceName="PART_ResizeThumb" Property="IsMouseOver" Value="True">
+                            <Setter TargetName="PART_ResizeThumb" Property="Cursor" Value="SizeNS"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

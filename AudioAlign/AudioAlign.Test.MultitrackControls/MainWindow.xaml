@@ -58,10 +58,18 @@
                 </Setter.Value>
             </Setter>
         </Style>-->
+        <Style TargetType="Line">
+            <Setter Property="Stroke" Value="Aquamarine"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Stroke" Value="Red"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Grid>
         <Button Content="Add Waveform" HorizontalAlignment="Left" Margin="12,0,0,12" Name="btnAddWaveform" Width="101" Height="23" VerticalAlignment="Bottom" Click="btnAddWaveform_Click" />
-        <my:MultiTrackViewer Margin="12,12,13,77" Name="multiTrackViewer1" VirtualViewportWidth="{Binding ElementName=slider1, Path=LogValue}" />
+        <my:MultiTrackViewer Margin="12,12,12,77" Name="multiTrackViewer1" VirtualViewportWidth="{Binding ElementName=slider1, Path=LogValue}" />
         <my:LogSlider Height="23" HorizontalAlignment="Left" Margin="13,380,0,0" Name="slider1" VerticalAlignment="Top" Width="477" Maximum="1000000000000" Minimum="1" />
         <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualViewportWidth}" Height="28" HorizontalAlignment="Left" Margin="452,406,0,0" Name="label1" VerticalAlignment="Top" />
     </Grid>

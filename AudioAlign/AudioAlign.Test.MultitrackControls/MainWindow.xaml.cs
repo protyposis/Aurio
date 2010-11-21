@@ -15,6 +15,7 @@ using AudioAlign.Audio.Project;
 using System.IO;
 using AudioAlign.WaveControls;
 using AudioAlign.Audio;
+using System.Diagnostics;
 
 namespace AudioAlign.Test.MultitrackControls {
     /// <summary>

@@ -60,8 +60,6 @@ namespace AudioAlign.WaveControls
             ViewportZoomPropertyKey = DependencyProperty.RegisterReadOnly("ViewportZoom", typeof(float), typeof(WaveView),
                 new FrameworkPropertyMetadata());
             ViewportZoomProperty = ViewportZoomPropertyKey.DependencyProperty;
-
-            HeightProperty.OverrideMetadata(typeof(WaveView), new FrameworkPropertyMetadata(80d));
         }
 
         private static void OnAudioStreamChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {

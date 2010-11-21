@@ -12,7 +12,7 @@ using AudioAlign.Audio;
 namespace AudioAlign.WaveControls {
     public class TimeScale: VirtualViewBase {
 
-        private const int SCALE_HEIGHT = 10;
+        private const int SCALE_HEIGHT = 8;
         private const int SCALE_FONT_SIZE = 8;
         private const string SCALE_TEXT_FORMAT = @"d\.hh\.mm\:ss\.fff";
 
@@ -47,7 +47,7 @@ namespace AudioAlign.WaveControls {
 
             ClipToBoundsProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(true));
             ForegroundProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(Brushes.Gray));
-            BackgroundProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(Brushes.White));
+            BackgroundProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(Brushes.Transparent));
         }
 
         protected override void OnRender(System.Windows.Media.DrawingContext drawingContext) {
@@ -105,9 +105,9 @@ namespace AudioAlign.WaveControls {
             }
 
             // draw markers' bottom line
-            guidelineSet.GuidelinesY.Add(actualHeight - 0.5);
-            drawingContext.DrawLine(new Pen(Foreground, 1),
-                        new Point(0, actualHeight - 1), new Point(actualWidth, actualHeight - 1));
+            //guidelineSet.GuidelinesY.Add(actualHeight - 0.5);
+            //drawingContext.DrawLine(new Pen(Foreground, 1),
+            //            new Point(0, actualHeight - 1), new Point(actualWidth, actualHeight - 1));
 
             drawingContext.Pop();
         }
