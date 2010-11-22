@@ -9,7 +9,6 @@ using System.Windows.Data;
 namespace AudioAlign.WaveControls {
     [TemplatePart(Name = "PART_TimeScale", Type = typeof(TimeScale))]
     [TemplatePart(Name = "PART_TrackListBox", Type = typeof(MultiTrackListBox))]
-    [TemplatePart(Name = "PART_Caret", Type = typeof(TrackPositionSelectorOverlay))]
     public class MultiTrackViewer : Control {
 
         public static readonly DependencyProperty VirtualViewportOffsetProperty;

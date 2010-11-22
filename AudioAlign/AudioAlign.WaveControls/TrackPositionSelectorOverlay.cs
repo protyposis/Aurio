@@ -8,14 +8,17 @@ using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Threading;
+using System.Windows.Media;
+using System.ComponentModel;
 
 namespace AudioAlign.WaveControls {
     public class TrackPositionSelectorOverlay : VirtualViewBase {
 
         public static readonly DependencyPropertyKey PhysicalCaretOffsetPropertyKey;
-        public static readonly DependencyProperty PhysicalCaretOffsetProperty;
 
+        public static readonly DependencyProperty PhysicalCaretOffsetProperty;
         public static readonly DependencyProperty VirtualCaretOffsetProperty;
+        public static readonly DependencyProperty CaretBrushProperty;
 
         static TrackPositionSelectorOverlay() {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(TrackPositionSelectorOverlay), 
@@ -29,6 +32,10 @@ namespace AudioAlign.WaveControls {
             VirtualCaretOffsetProperty = DependencyProperty.Register("VirtualCaretOffset",
                 typeof(long), typeof(TrackPositionSelectorOverlay), 
                 new FrameworkPropertyMetadata(new PropertyChangedCallback(OnVirtualCaretOffsetChanged)));
+
+            CaretBrushProperty = DependencyProperty.Register("CaretBrush",
+                typeof(Brush), typeof(TrackPositionSelectorOverlay),
+                new FrameworkPropertyMetadata(Brushes.Black));
         }
 
         private static void OnPhysicalCaretOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
@@ -51,6 +58,12 @@ namespace AudioAlign.WaveControls {
         public long VirtualCaretOffset {
             get { return (long)GetValue(VirtualCaretOffsetProperty); }
             private set { SetValue(VirtualCaretOffsetProperty, value); }
+        }
+
+        [Bindable(true), Category("Brushes")]
+        public Brush CaretBrush {
+            get { return (Brush)GetValue(CaretBrushProperty); }
+            set { SetValue(CaretBrushProperty, value); }
         }
 
         protected override void OnPreviewMouseDown(System.Windows.Input.MouseButtonEventArgs e) {

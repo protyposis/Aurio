@@ -7,7 +7,7 @@ using System.Windows;
 using AudioAlign.Audio;
 
 namespace AudioAlign.WaveControls {
-    public class VirtualViewBase: Control {
+    public class VirtualViewBase: ContentControl {
 
         public static readonly DependencyProperty VirtualViewportOffsetProperty = DependencyProperty.Register(
             "VirtualViewportOffset", typeof(long), typeof(VirtualViewBase),

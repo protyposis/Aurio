@@ -40,10 +40,12 @@
         </Setter>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="ListBox">
-                    <ScrollViewer Focusable="False" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden">
-                        <StackPanel IsItemsHost="True" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
-                    </ScrollViewer>
+                <ControlTemplate TargetType="local:MultiTrackListBox">
+                    <local:TrackPositionSelectorOverlay x:Name="PART_Caret" VirtualViewportWidth="{TemplateBinding VirtualViewportWidth}">
+                        <ScrollViewer Focusable="False" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden">
+                            <StackPanel IsItemsHost="True" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                        </ScrollViewer>
+                    </local:TrackPositionSelectorOverlay>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -84,12 +86,6 @@
                                                      Grid.ColumnSpan="2" 
                                                      VirtualViewportWidth="{TemplateBinding VirtualViewportWidth}"/>
 
-                            <local:TrackPositionSelectorOverlay x:Name="PART_Caret" 
-                                                                Grid.Row="1" 
-                                                                Grid.Column="0" 
-                                                                VirtualViewportWidth="{TemplateBinding VirtualViewportWidth}"
-                                                                />
-                            
                             <ScrollBar Orientation="Horizontal" 
                                        Grid.Row="2" 
                                        Grid.Column="0"/>
@@ -159,19 +155,21 @@
     </Style>
 
     <Style TargetType="{x:Type local:TrackPositionSelectorOverlay}">
-        <Setter Property="Background" Value="Transparent"/>
-        <!--<Setter Property="IsHitTestVisible" Value="False"/>-->
+        <Setter Property="CaretBrush" Value="Black"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:TrackPositionSelectorOverlay}">
-                    <Border Background="{TemplateBinding Background}"
+                    <Grid>
+                        <ContentPresenter/>
+                        <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Padding="{TemplateBinding Padding}">
-                        <ContentControl HorizontalAlignment="Left" VerticalAlignment="Stretch" MinWidth="1" Width="{TemplateBinding PhysicalCaretOffset}">
-                            <Rectangle Fill="Red" Width="1" SnapsToDevicePixels="True" VerticalAlignment="Stretch" HorizontalAlignment="Right"/>
-                        </ContentControl>
-                    </Border>
+                            <ContentControl HorizontalAlignment="Left" VerticalAlignment="Stretch" MinWidth="1" Width="{TemplateBinding PhysicalCaretOffset}">
+                                <Rectangle Fill="{TemplateBinding CaretBrush}" Width="1" SnapsToDevicePixels="True" VerticalAlignment="Stretch" HorizontalAlignment="Right"/>
+                            </ContentControl>
+                        </Border>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
