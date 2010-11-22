@@ -162,12 +162,18 @@
                     <Grid>
                         <ContentPresenter/>
                         <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            Padding="{TemplateBinding Padding}">
-                            <ContentControl HorizontalAlignment="Left" VerticalAlignment="Stretch" MinWidth="1" Width="{TemplateBinding PhysicalCaretOffset}">
-                                <Rectangle Fill="{TemplateBinding CaretBrush}" Width="1" SnapsToDevicePixels="True" VerticalAlignment="Stretch" HorizontalAlignment="Right"/>
-                            </ContentControl>
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Rectangle Grid.Column="0" Width="{TemplateBinding PhysicalCaretOffset}"/>
+                                <Rectangle Grid.Column="1" Fill="{TemplateBinding CaretBrush}" 
+                                           Width="1" SnapsToDevicePixels="True" VerticalAlignment="Stretch"/>
+                            </Grid>
                         </Border>
                     </Grid>
                 </ControlTemplate>
