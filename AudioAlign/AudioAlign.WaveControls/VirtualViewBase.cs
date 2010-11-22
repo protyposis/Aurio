@@ -7,7 +7,7 @@ using System.Windows;
 using AudioAlign.Audio;
 
 namespace AudioAlign.WaveControls {
-    public class VirtualViewBase: ContentControl {
+    public class VirtualViewBase: Control {
 
         public static readonly DependencyProperty VirtualViewportOffsetProperty = DependencyProperty.Register(
             "VirtualViewportOffset", typeof(long), typeof(VirtualViewBase),
@@ -16,14 +16,7 @@ namespace AudioAlign.WaveControls {
         public static readonly DependencyProperty VirtualViewportWidthProperty = DependencyProperty.Register(
             "VirtualViewportWidth", typeof(long), typeof(VirtualViewBase),
                 new FrameworkPropertyMetadata { Inherits = true, AffectsRender = true, 
-                    PropertyChangedCallback = OnViewportWidthChanged, 
-                    CoerceValueCallback = CoerceViewportWidth, DefaultValue = (long)1000000 });
-
-        private static object CoerceViewportWidth(DependencyObject d, object value) {
-            long viewportWidth = (long)value;
-            // avoid negative length
-            return viewportWidth >= 0 ? viewportWidth : 0;
-        }
+                    PropertyChangedCallback = OnViewportWidthChanged, DefaultValue = 1000L });
 
         private static void OnViewportWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             VirtualViewBase ctrl = (VirtualViewBase)d;
@@ -44,17 +37,23 @@ namespace AudioAlign.WaveControls {
             get { return new Interval(VirtualViewportOffset, VirtualViewportOffset + VirtualViewportWidth); }
         }
 
+        public static long PhysicalToVirtualOffset(Interval virtualViewportInverval, double controlWidth, double physicalOffset) {
+            long visibleIntervalOffset = (long)Math.Round(virtualViewportInverval.Length / controlWidth * physicalOffset);
+            return virtualViewportInverval.From + visibleIntervalOffset;
+        }
+
+        public static double VirtualToPhysicalOffset(Interval virtualViewportInverval, double controlWidth, long virtualOffset) {
+            virtualOffset -= virtualViewportInverval.From;
+            double physicalOffset = controlWidth / virtualViewportInverval.Length * virtualOffset;
+            return physicalOffset;
+        }
+
         public long PhysicalToVirtualOffset(double physicalOffset) {
-            Interval viewportInterval = VirtualViewportInterval;
-            long visibleIntervalOffset = (long)Math.Round(viewportInterval.Length / ActualWidth * physicalOffset);
-            return viewportInterval.From + visibleIntervalOffset;
+            return PhysicalToVirtualOffset(VirtualViewportInterval, ActualWidth, physicalOffset);
         }
 
         public double VirtualToPhysicalOffset(long virtualOffset) {
-            Interval viewportInterval = VirtualViewportInterval;
-            virtualOffset -= viewportInterval.From;
-            double physicalOffset = ActualWidth / viewportInterval.Length * virtualOffset;
-            return physicalOffset;
+            return VirtualToPhysicalOffset(VirtualViewportInterval, ActualWidth, virtualOffset);
         }
 
         protected virtual void OnViewportWidthChanged(long oldValue, long newValue) {}

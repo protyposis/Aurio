@@ -123,6 +123,7 @@
     <Compile Include="TimeScale.cs" />
     <Compile Include="TimeSpanConverter.cs" />
     <Compile Include="TrackPositionSelectorOverlay.cs" />
+    <Compile Include="VirtualContentViewBase.cs" />
     <Compile Include="VirtualViewBase.cs" />
     <Compile Include="WaveView.cs" />
     <Page Include="Themes\Generic.xaml">

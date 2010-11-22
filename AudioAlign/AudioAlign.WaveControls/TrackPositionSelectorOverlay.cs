@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.ComponentModel;
 
 namespace AudioAlign.WaveControls {
-    public class TrackPositionSelectorOverlay : VirtualViewBase {
+    public class TrackPositionSelectorOverlay : VirtualContentViewBase {
 
         public static readonly DependencyPropertyKey PhysicalCaretOffsetPropertyKey;
 
