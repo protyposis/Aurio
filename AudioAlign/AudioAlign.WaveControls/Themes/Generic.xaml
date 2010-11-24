@@ -202,57 +202,47 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:MultiTrackListBox">
-                    <!--<local:CaretOverlay VirtualViewportWidth="{TemplateBinding VirtualViewportWidth}">-->
-                        <ScrollViewer Focusable="False" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden">
-                            <ScrollViewer.Template>
-                                <ControlTemplate TargetType="{x:Type ScrollViewer}">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+                    <ScrollViewer Focusable="False" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden">
+                        <ScrollViewer.Template>
+                            <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                        <local:CaretOverlay VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}" 
-                                                    Style="{StaticResource TimeScaleCaretOverlay}">
-                                            <local:TimeScale x:Name="PART_TimeScale" 
-                                                     Grid.Column="0" 
-                                                     Grid.Row="0" 
-                                                     VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"/>
-                                        </local:CaretOverlay>
+                                    <local:CaretOverlay VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}" 
+                                                        Style="{StaticResource TimeScaleCaretOverlay}">
+                                        <local:TimeScale x:Name="PART_TimeScale" 
+                                                         Grid.Column="0" 
+                                                         Grid.Row="0" 
+                                                         VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"/>
+                                    </local:CaretOverlay>
 
-                                        <local:CaretOverlay Grid.Row="1" VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}">
-                                            <Grid>
-                                                <Border Name="invisibleBorderToForceInputEvents" Background="Transparent"/> <!-- without this, the empty parts of the scroll viewer wouldn't provoke events -->
-                                                <ScrollContentPresenter/>
-                                            </Grid>
-                                        </local:CaretOverlay>
+                                    <local:CaretOverlay Grid.Row="1" VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}">
+                                        <Grid>
+                                            <Border Name="invisibleBorderToForceInputEvents" Background="Transparent"/> <!-- without this, the empty parts of the scroll viewer wouldn't provoke events -->
+                                            <ScrollContentPresenter/>
+                                        </Grid>
+                                    </local:CaretOverlay>
 
-                                        <ScrollBar Name="PART_VerticalScrollBar"
-                                                   Grid.RowSpan="2"
-                                                   Grid.Column="1"
-                                                   Value="{TemplateBinding VerticalOffset}"
-                                                   Maximum="{TemplateBinding ScrollableHeight}"
-                                                   ViewportSize="{TemplateBinding ViewportHeight}"
-                                                   Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
-                                        <!--<ScrollBar Name="PART_HorizontalScrollBar"
-                                                   Orientation="Horizontal"
-                                                   Grid.Row="1"
-                                                   Grid.Column="1"
-                                                   Value="{TemplateBinding HorizontalOffset}"
-                                                   Maximum="{TemplateBinding ScrollableWidth}"
-                                                   ViewportSize="{TemplateBinding ViewportWidth}"
-                                                   Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>-->
-                                    </Grid>
-                                </ControlTemplate>
-                            </ScrollViewer.Template>
-                            <StackPanel IsItemsHost="True" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
-                        </ScrollViewer>
-                    <!--</local:CaretOverlay>-->
+                                    <ScrollBar Name="PART_VerticalScrollBar"
+                                               Grid.RowSpan="2"
+                                               Grid.Column="1"
+                                               Value="{TemplateBinding VerticalOffset}"
+                                               Maximum="{TemplateBinding ScrollableHeight}"
+                                               ViewportSize="{TemplateBinding ViewportHeight}"
+                                               Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+                                </Grid>
+                            </ControlTemplate>
+                        </ScrollViewer.Template>
+                        <StackPanel IsItemsHost="True" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                    </ScrollViewer>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -281,14 +271,6 @@
                                 <RowDefinition/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-
-                            <!--<local:CaretOverlay VirtualViewportWidth="{TemplateBinding VirtualViewportWidth}" 
-                                                Style="{StaticResource TimeScaleCaretOverlay}">
-                                <local:TimeScale x:Name="PART_TimeScale" 
-                                                 Grid.Column="0" 
-                                                 Grid.Row="0" 
-                                                 VirtualViewportWidth="{TemplateBinding VirtualViewportWidth}"/>
-                            </local:CaretOverlay>-->
                             
                             <local:MultiTrackListBox x:Name="PART_TrackListBox" 
                                                      Grid.Row="1" 
@@ -298,7 +280,11 @@
 
                             <ScrollBar Orientation="Horizontal" 
                                        Grid.Row="2" 
-                                       Grid.Column="0"/>
+                                       Grid.Column="0"
+                                       Value="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=VirtualViewportOffset}"
+                                       Minimum="0"
+                                       Maximum="1000000000000"
+                                       ViewportSize="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=VirtualViewportWidth}"/>
                             
                             <ScrollBar Name="hiddenPlaceHolderForCorrectColumnWidth" 
                                        Grid.Row="0" 

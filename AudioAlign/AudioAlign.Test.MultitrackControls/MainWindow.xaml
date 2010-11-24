@@ -6,10 +6,12 @@
         <my:TimeSpanConverter x:Key="TimeSpanConverter"/>
     </Window.Resources>
     <Grid>
-        <Button Content="Add Waveform" HorizontalAlignment="Left" Margin="12,0,0,12" Name="btnAddWaveform" Width="101" Height="23" VerticalAlignment="Bottom" Click="btnAddWaveform_Click" />
-        <my:MultiTrackViewer Margin="12,12,12,77" Name="multiTrackViewer1" VirtualViewportWidth="{Binding ElementName=slider1, Path=LogValue}" />
-        <my:LogSlider Height="23" HorizontalAlignment="Left" Margin="13,380,0,0" Name="slider1" VerticalAlignment="Top" Width="477" Maximum="1000000000000" Minimum="1" />
-        <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualViewportWidth}" Height="28" HorizontalAlignment="Left" Margin="452,406,0,0" Name="label1" VerticalAlignment="Top" />
+        <Button Content="Add Waveform" Margin="0,0,12,12" Name="btnAddWaveform" Height="23" VerticalAlignment="Bottom" Click="btnAddWaveform_Click" HorizontalAlignment="Right" Width="101" />
+        <my:MultiTrackViewer Margin="12,12,12,77" Name="multiTrackViewer1" VirtualViewportWidth="{Binding ElementName=slider1, Path=LogValue}" VirtualViewportOffset="{Binding ElementName=logSlider1, Path=Value}" />
+        <my:LogSlider Height="23" HorizontalAlignment="Left" Margin="12,0,0,48" Name="slider1" VerticalAlignment="Bottom" Width="477" Maximum="1000000000000" Minimum="1" />
         <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualCaretOffset, Converter={StaticResource TimeSpanConverter}, ConverterParameter='d\\.hh\\.mm\\:ss\\.fffffff'}" Height="28" Margin="0,0,12,54" Name="label2" VerticalAlignment="Bottom" FontSize="16" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Width="146" />
+        <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualViewportWidth}" ContentStringFormat="VirtualViewportWidth: {0}" HorizontalAlignment="Left" Margin="495,0,0,43" Name="label3" Width="241" Height="28" VerticalAlignment="Bottom" />
+        <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualViewportOffset}" ContentStringFormat="VirtualViewportOffset: {0}" HorizontalAlignment="Left" Margin="495,0,0,15" Name="label4" Width="241" Height="28" VerticalAlignment="Bottom" />
+        <Slider HorizontalAlignment="Left" Margin="12,0,0,20" Maximum="1000000000000" Minimum="0" Name="logSlider1" Width="477" Height="23" VerticalAlignment="Bottom" Value="0" />
     </Grid>
 </Window>
