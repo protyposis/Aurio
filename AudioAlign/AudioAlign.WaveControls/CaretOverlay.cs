@@ -129,5 +129,10 @@ namespace AudioAlign.WaveControls {
             base.OnViewportWidthChanged(oldValue, newValue);
             PhysicalCaretOffset = VirtualToPhysicalOffset(VirtualCaretOffset);
         }
+
+        protected override void OnViewportOffsetChanged(long oldValue, long newValue) {
+            base.OnViewportOffsetChanged(oldValue, newValue);
+            PhysicalCaretOffset = VirtualToPhysicalOffset(VirtualCaretOffset);
+        }
     }
 }

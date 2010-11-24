@@ -11,12 +11,18 @@ namespace AudioAlign.WaveControls {
 
         public static readonly DependencyProperty VirtualViewportOffsetProperty = DependencyProperty.Register(
             "VirtualViewportOffset", typeof(long), typeof(VirtualViewBase),
-                new FrameworkPropertyMetadata { Inherits = true, AffectsRender = true });
+                new FrameworkPropertyMetadata { Inherits = true, AffectsRender = true,
+                PropertyChangedCallback = OnViewportOffsetChanged});
 
         public static readonly DependencyProperty VirtualViewportWidthProperty = DependencyProperty.Register(
             "VirtualViewportWidth", typeof(long), typeof(VirtualViewBase),
                 new FrameworkPropertyMetadata { Inherits = true, AffectsRender = true, 
                     PropertyChangedCallback = OnViewportWidthChanged, DefaultValue = 1000L });
+
+        private static void OnViewportOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+            VirtualViewBase ctrl = (VirtualViewBase)d;
+            ctrl.OnViewportOffsetChanged((long)e.OldValue, (long)e.NewValue);
+        }
 
         private static void OnViewportWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             VirtualViewBase ctrl = (VirtualViewBase)d;
@@ -56,6 +62,7 @@ namespace AudioAlign.WaveControls {
             return VirtualToPhysicalOffset(VirtualViewportInterval, ActualWidth, virtualOffset);
         }
 
+        protected virtual void OnViewportOffsetChanged(long oldValue, long newValue) { }
         protected virtual void OnViewportWidthChanged(long oldValue, long newValue) {}
     }
 }
