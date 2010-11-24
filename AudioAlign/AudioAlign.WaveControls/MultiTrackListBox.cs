@@ -7,7 +7,6 @@ using System.Windows;
 using System.Diagnostics;
 
 namespace AudioAlign.WaveControls {
-    [TemplatePart(Name = "PART_Caret", Type = typeof(TrackPositionSelectorOverlay))]
     class MultiTrackListBox : ListBox {
         
         public static readonly DependencyProperty VirtualViewportWidthProperty;

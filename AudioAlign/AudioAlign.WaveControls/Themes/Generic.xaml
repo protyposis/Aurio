@@ -17,6 +17,167 @@
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type local:CaretOverlay}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:CaretOverlay}">
+                    <Grid>
+                        <ContentPresenter/>
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Rectangle Grid.Column="0" Width="{TemplateBinding PhysicalCaretOffset}"/>
+                                <Rectangle Name="PART_Caret" Grid.Column="1" Fill="Black" 
+                                           Width="1" SnapsToDevicePixels="True" VerticalAlignment="Stretch"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="TimeScaleCaretOverlay" BasedOn="{StaticResource {x:Type local:CaretOverlay}}" TargetType="{x:Type local:CaretOverlay}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:CaretOverlay}">
+                    <Grid>
+                        <ContentPresenter/>
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Rectangle Grid.Column="0" Width="{TemplateBinding PhysicalCaretOffset}"/>
+                                <Thumb Name="PART_Caret" Grid.Column="1" Width="1" Height="1" VerticalAlignment="Bottom">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="{x:Type Thumb}">
+                                            <Canvas SnapsToDevicePixels="True">
+                                                <Path Data="M4.5,-11.5A1,1,0,0,0,3.5,-12.5L-3.5,-12.5A1,1,0,0,0,-4.5,-11.5L-4.5,-4 -0.5,0 0.5,0 4.5,-4z" Name="Background">
+                                                    <Path.Fill>
+                                                        <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                                                            <LinearGradientBrush.GradientStops>
+                                                                <GradientStop Color="#FFFFFFFF" Offset="0" />
+                                                                <GradientStop Color="#FFF0EFEF" Offset="0.4" />
+                                                                <GradientStop Color="#FFD6D5D5" Offset="0.8" />
+                                                            </LinearGradientBrush.GradientStops>
+                                                        </LinearGradientBrush>
+                                                    </Path.Fill>
+                                                </Path>
+                                                <Path Data="M3.5,-11.5L-3.5,-11.5 -3.5,-4.5 0,-1 3.5,-4.5z" Stroke="#FFFFFFFF" StrokeThickness="1" Name="InnerBorder" />
+                                                <Path Data="M4.5,-11.5A1,1,0,0,0,3.5,-12.5L-3.5,-12.5A1,1,0,0,0,-4.5,-11.5L-4.5,-4 -0.5,0 0.5,0 4.5,-4z" Stroke="#FF929292" StrokeThickness="1" Name="OuterBorder" />
+                                            </Canvas>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="UIElement.IsMouseOver">
+                                                    <Setter Property="Shape.Fill" TargetName="Background">
+                                                        <Setter.Value>
+                                                            <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                                                                <LinearGradientBrush.GradientStops>
+                                                                    <GradientStop Color="#FFFFFFFF" Offset="0" />
+                                                                    <GradientStop Color="#FFB8E2F9" Offset="0.5" />
+                                                                    <GradientStop Color="#FFB0DFF8" Offset="1" />
+                                                                </LinearGradientBrush.GradientStops>
+                                                            </LinearGradientBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Setter Property="Shape.Stroke" TargetName="OuterBorder">
+                                                        <Setter.Value>
+                                                            <SolidColorBrush>#FF3C7FB1</SolidColorBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Trigger.Value>
+                                                        <s:Boolean>True</s:Boolean>
+                                                    </Trigger.Value>
+                                                </Trigger>
+                                                <Trigger Property="TextElement.Foreground">
+                                                    <Setter Property="Shape.Fill" TargetName="Background">
+                                                        <Setter.Value>
+                                                            <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                                                                <LinearGradientBrush.GradientStops>
+                                                                    <GradientStop Color="#FFFFFFFF" Offset="0" />
+                                                                    <GradientStop Color="#FFB8E2F9" Offset="0.5" />
+                                                                    <GradientStop Color="#FFB0DFF8" Offset="1" />
+                                                                </LinearGradientBrush.GradientStops>
+                                                            </LinearGradientBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Setter Property="Shape.Stroke" TargetName="OuterBorder">
+                                                        <Setter.Value>
+                                                            <SolidColorBrush>#FF3C7FB1</SolidColorBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Trigger.Value>
+                                                        <SolidColorBrush>#FF0000FF</SolidColorBrush>
+                                                    </Trigger.Value>
+                                                </Trigger>
+                                                <Trigger Property="Thumb.IsDragging">
+                                                    <Setter Property="Shape.Fill" TargetName="Background">
+                                                        <Setter.Value>
+                                                            <LinearGradientBrush StartPoint="1,0" EndPoint="0,0">
+                                                                <LinearGradientBrush.GradientStops>
+                                                                    <GradientStop Color="#FFB8E4FA" Offset="0.25" />
+                                                                    <GradientStop Color="#FF5EB4E3" Offset="0.5" />
+                                                                    <GradientStop Color="#FF4C8BB4" Offset="1" />
+                                                                </LinearGradientBrush.GradientStops>
+                                                            </LinearGradientBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Setter Property="Shape.Stroke" TargetName="OuterBorder">
+                                                        <Setter.Value>
+                                                            <SolidColorBrush>#FF2C628B</SolidColorBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Trigger.Value>
+                                                        <s:Boolean>True</s:Boolean>
+                                                    </Trigger.Value>
+                                                </Trigger>
+                                                <Trigger Property="UIElement.IsEnabled">
+                                                    <Setter Property="Shape.Fill" TargetName="Background">
+                                                        <Setter.Value>
+                                                            <SolidColorBrush>#FFF4F4F4</SolidColorBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Setter Property="Shape.Stroke" TargetName="InnerBorder">
+                                                        <Setter.Value>
+                                                            <x:Null />
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Setter Property="Path.Data" TargetName="OuterBorder">
+                                                        <Setter.Value>
+                                                            <StreamGeometry>M4.5,-8.5L-4.5,-8.5 -4.5,4.5 -0.5,8.5 0.5,8.5 4.5,4.5z</StreamGeometry>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Setter Property="Shape.Stroke" TargetName="OuterBorder">
+                                                        <Setter.Value>
+                                                            <SolidColorBrush>#FFAEB1AF</SolidColorBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Trigger.Value>
+                                                        <s:Boolean>False</s:Boolean>
+                                                    </Trigger.Value>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="{x:Type local:MultiTrackListBox}">
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="ScrollViewer.CanContentScroll" Value="False"/> <!-- if set to True, smooth scrolling is disabled -->
@@ -41,11 +202,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="local:MultiTrackListBox">
-                    <local:TrackPositionSelectorOverlay x:Name="PART_Caret" VirtualViewportWidth="{TemplateBinding VirtualViewportWidth}">
+                    <local:CaretOverlay VirtualViewportWidth="{TemplateBinding VirtualViewportWidth}">
                         <ScrollViewer Focusable="False" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden">
                             <StackPanel IsItemsHost="True" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
                         </ScrollViewer>
-                    </local:TrackPositionSelectorOverlay>
+                    </local:CaretOverlay>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -74,11 +235,14 @@
                                 <RowDefinition/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-                            
-                            <local:TimeScale x:Name="PART_TimeScale" 
-                                             Grid.Column="0" 
-                                             Grid.Row="0" 
-                                             VirtualViewportWidth="{TemplateBinding VirtualViewportWidth}"/>
+
+                            <local:CaretOverlay VirtualViewportWidth="{TemplateBinding VirtualViewportWidth}" 
+                                                Style="{StaticResource TimeScaleCaretOverlay}">
+                                <local:TimeScale x:Name="PART_TimeScale" 
+                                                 Grid.Column="0" 
+                                                 Grid.Row="0" 
+                                                 VirtualViewportWidth="{TemplateBinding VirtualViewportWidth}"/>
+                            </local:CaretOverlay>
                             
                             <local:MultiTrackListBox x:Name="PART_TrackListBox" 
                                                      Grid.Row="1" 
@@ -149,33 +313,6 @@
                             <Setter TargetName="DropMarker" Property="Visibility" Value="Visible"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style TargetType="{x:Type local:TrackPositionSelectorOverlay}">
-        <Setter Property="CaretBrush" Value="Black"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type local:TrackPositionSelectorOverlay}">
-                    <Grid>
-                        <ContentPresenter/>
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                Padding="{TemplateBinding Padding}">
-                            <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Rectangle Grid.Column="0" Width="{TemplateBinding PhysicalCaretOffset}"/>
-                                <Rectangle Grid.Column="1" Fill="{TemplateBinding CaretBrush}" 
-                                           Width="1" SnapsToDevicePixels="True" VerticalAlignment="Stretch"/>
-                            </Grid>
-                        </Border>
-                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

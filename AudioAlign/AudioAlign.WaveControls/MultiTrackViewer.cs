@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Data;
+using System.Diagnostics;
 
 namespace AudioAlign.WaveControls {
     [TemplatePart(Name = "PART_TimeScale", Type = typeof(TimeScale))]
@@ -17,7 +18,7 @@ namespace AudioAlign.WaveControls {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(MultiTrackViewer), 
                 new FrameworkPropertyMetadata(typeof(MultiTrackViewer)));
 
-            VirtualCaretOffsetProperty = TrackPositionSelectorOverlay.VirtualCaretOffsetProperty
+            VirtualCaretOffsetProperty = CaretOverlay.VirtualCaretOffsetProperty
                 .AddOwner(typeof(MultiTrackViewer), new FrameworkPropertyMetadata() { Inherits = true });
         }
 
@@ -26,18 +27,26 @@ namespace AudioAlign.WaveControls {
         }
 
         private void MultiTrackViewer_Loaded(object sender, RoutedEventArgs e) {
-            TrackPositionSelectorOverlay caretOverlay = GetTemplateChild("PART_Caret") as TrackPositionSelectorOverlay;
-            if (caretOverlay != null) {
-                Binding virtualCaretOffsetBinding = new Binding() {
-                    Source = caretOverlay,
-                    Path = new PropertyPath("VirtualCaretOffset")
-                };
-                SetBinding(VirtualCaretOffsetProperty, virtualCaretOffsetBinding);
-            }
+            AddHandler(CaretOverlay.PositionSelectedEvent, new CaretOverlay.PositionEventHandler(MultiTrackViewer_CaretPositionSelected));
+            AddHandler(CaretOverlay.IntervalSelectedEvent, new CaretOverlay.IntervalEventHandler(MultiTrackViewer_CaretIntervalSelected));
+        }
+
+        private void MultiTrackViewer_CaretPositionSelected(object sender, CaretOverlay.PositionEventArgs e) {
+            //Debug.WriteLine("MultiTrackViewer CaretPositionSelected @ " + e.Position);
+            //SetValue(PhysicalCaretOffsetProperty, e.Position);
+            SetValue(VirtualCaretOffsetProperty, PhysicalToVirtualOffset(e.Position));
+            e.Handled = true;
+        }
+
+        private void MultiTrackViewer_CaretIntervalSelected(object sender, CaretOverlay.IntervalEventArgs e) {
+            //Debug.WriteLine("MultiTrackViewer CaretIntervalSelected {0} -> {1} ", e.From, e.To);
+            //SetValue(PhysicalCaretOffsetProperty, e.Position);
+            e.Handled = true;
         }
 
         public long VirtualCaretOffset {
             get { return (long)GetValue(VirtualCaretOffsetProperty); }
+            set { SetValue(VirtualCaretOffsetProperty, value); }
         }
 
         public ItemCollection Items {
