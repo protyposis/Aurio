@@ -26,6 +26,7 @@ namespace AudioAlign.WaveControls {
             public PositionEventArgs(RoutedEvent routedEvent, object source) : base(routedEvent, source) { }
 
             public double Position { get; set; }
+            public double SourceInterval { get; set; }
         }
 
         public class IntervalEventArgs : RoutedEventArgs {
@@ -35,6 +36,7 @@ namespace AudioAlign.WaveControls {
 
             public double From { get; set; }
             public double To { get; set; }
+            public double SourceInterval { get; set; }
         }
 
         public delegate void PositionEventHandler(object sender, PositionEventArgs e);
@@ -111,11 +113,15 @@ namespace AudioAlign.WaveControls {
             if (mouseUpPosition == mouseDownPosition) {
                 // pseudo click event
                 //Debug.WriteLine("CaretOverlay PseudoClick @ " + mouseDownPosition);
-                RaiseEvent(new PositionEventArgs(PositionSelectedEvent, this) { Position = mouseDownPosition.X });
+                RaiseEvent(new PositionEventArgs(PositionSelectedEvent, this) {
+                    Position = mouseDownPosition.X, SourceInterval = ActualWidth
+                });
             }
             else {
                 // interval selection event
-                RaiseEvent(new IntervalEventArgs(IntervalSelectedEvent, this) { From = mouseDownPosition.X, To = mouseUpPosition.X });
+                RaiseEvent(new IntervalEventArgs(IntervalSelectedEvent, this) {
+                    From = mouseDownPosition.X, To = mouseUpPosition.X, SourceInterval = ActualWidth
+                });
             }
         }
 
