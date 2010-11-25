@@ -135,6 +135,7 @@ namespace AudioAlign.WaveControls {
                 RaiseEvent(new PositionEventArgs(PositionSelectedEvent, this) {
                     Position = mouseDownPosition.X, SourceInterval = ActualWidth
                 });
+                Keyboard.Focus(this);
             }
             else {
                 // interval selection event

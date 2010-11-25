@@ -19,6 +19,7 @@
 
     <Style TargetType="{x:Type local:CaretOverlay}">
         <Setter Property="ClipToBounds" Value="True"/>
+        <Setter Property="Focusable" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:CaretOverlay}">
@@ -29,7 +30,7 @@
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 Padding="{TemplateBinding Padding}">
                             <Canvas Name="CaretContainer">
-                                <Rectangle Name="PART_Caret" 
+                                <Rectangle Name="PART_Caret"
                                            Width="1" 
                                            Fill="Black" 
                                            Height="{Binding ElementName=CaretContainer, Path=ActualHeight}" 
@@ -37,6 +38,24 @@
                             </Canvas>
                         </Border>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsFocused" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard Name="CaretBlink">
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <ColorAnimationUsingKeyFrames BeginTime="00:00:00" Duration="00:00:01"
+                                                                    Storyboard.TargetName="PART_Caret"
+                                                                    Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)">
+                                            <DiscreteColorKeyFrame KeyTime="00:00:00.5" Value="White"/>
+                                        </ColorAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <StopStoryboard BeginStoryboardName="CaretBlink"/>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
