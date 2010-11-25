@@ -10,6 +10,7 @@ using System.Windows.Threading;
 using System.Threading;
 using System.Windows.Media;
 using System.ComponentModel;
+using System.Windows.Controls.Primitives;
 
 namespace AudioAlign.WaveControls {
     [TemplatePart(Name = "PART_Caret", Type = typeof(UIElement))]
@@ -75,6 +76,24 @@ namespace AudioAlign.WaveControls {
             CaretOverlay caretOverlay = d as CaretOverlay;
             //Debug.WriteLine("CaretOverlay OnVirtualCaretOffsetChanged {0} -> {1} ({2})", e.OldValue, e.NewValue, caretOverlay.Name);
             caretOverlay.PhysicalCaretOffset = caretOverlay.VirtualToPhysicalOffset((long)e.NewValue);
+        }
+
+        public CaretOverlay() {
+            Loaded += new RoutedEventHandler(CaretOverlay_Loaded);
+        }
+
+        private void CaretOverlay_Loaded(object sender, RoutedEventArgs e) {
+            Thumb thumb = GetTemplateChild("PART_Caret") as Thumb;
+            if (thumb != null) {
+                // if the caret is a thumb, enhance the caret overview's functionality
+                thumb.DragDelta += new DragDeltaEventHandler(thumb_DragDelta);
+            }
+        }
+
+        private void thumb_DragDelta(object sender, DragDeltaEventArgs e) {
+            RaiseEvent(new PositionEventArgs(PositionSelectedEvent, this) {
+                Position = PhysicalCaretOffset + e.HorizontalChange, SourceInterval = ActualWidth
+            });
         }
 
         private Point mouseDownPosition;
