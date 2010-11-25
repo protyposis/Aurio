@@ -18,6 +18,7 @@
     </Style>
 
     <Style TargetType="{x:Type local:CaretOverlay}">
+        <Setter Property="ClipToBounds" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:CaretOverlay}">
@@ -27,15 +28,13 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 Padding="{TemplateBinding Padding}">
-                            <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Rectangle Grid.Column="0" Width="{TemplateBinding PhysicalCaretOffset}"/>
-                                <Rectangle Name="PART_Caret" Grid.Column="1" Fill="Black" 
-                                           Width="1" SnapsToDevicePixels="True" VerticalAlignment="Stretch"/>
-                            </Grid>
+                            <Canvas Name="CaretContainer">
+                                <Rectangle Name="PART_Caret" 
+                                           Width="1" 
+                                           Fill="Black" 
+                                           Height="{Binding ElementName=CaretContainer, Path=ActualHeight}" 
+                                           Canvas.Left="{TemplateBinding PhysicalCaretOffset}"/>
+                            </Canvas>
                         </Border>
                     </Grid>
                 </ControlTemplate>
@@ -53,13 +52,12 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 Padding="{TemplateBinding Padding}">
-                            <Grid HorizontalAlignment="Left" VerticalAlignment="Stretch">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Rectangle Grid.Column="0" Width="{TemplateBinding PhysicalCaretOffset}"/>
-                                <Thumb Name="PART_Caret" Grid.Column="1" Width="1" Height="1" VerticalAlignment="Bottom">
+                            <Canvas Name="CaretContainer">
+                                <Thumb Name="PART_Caret" 
+                                       Width="1" 
+                                       Height="1" 
+                                       Canvas.Left="{TemplateBinding PhysicalCaretOffset}" 
+                                       Canvas.Bottom="0">
                                     <Thumb.Template>
                                         <ControlTemplate TargetType="{x:Type Thumb}">
                                             <Canvas SnapsToDevicePixels="True">
@@ -170,7 +168,7 @@
                                         </ControlTemplate>
                                     </Thumb.Template>
                                 </Thumb>
-                            </Grid>
+                            </Canvas>
                         </Border>
                     </Grid>
                 </ControlTemplate>
