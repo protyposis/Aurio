@@ -70,9 +70,18 @@ namespace AudioAlign.WaveControls {
 
         internal static object CoerceVirtualCaretOffset(DependencyObject d, object value) {
             long newValue = (long)value;
-            if (newValue < 0) {
-                return 0L;
+
+            long lowerBound = 0L;
+            if (newValue < lowerBound) {
+                return lowerBound;
             }
+
+            // TODO create dependency property Virtual(Content)ViewBase.VirtualWidth with default long.MaxValue and replace all occurences of 100000000000 with the property
+            long upperBound = 100000000000L;
+            if (newValue > upperBound) {
+                return upperBound;
+            }
+
             return newValue;
         }
 

@@ -81,24 +81,24 @@ namespace AudioAlign.WaveControls {
             // calculate new viewport offset (don't care about the valid offset range here - it's handled by the property value coercion)
             long viewportWidthDelta = currentViewportInterval.Length - newViewportWidth;
             long newViewportOffset;
-            if (zoomToCaret) { // zoom the viewport and move it towards the caret
+            if (zoomToCaret) {
+                // zoom the viewport and move it towards the caret
                 long caretPosition = VirtualCaretOffset;
-
-                if (caretPosition <= currentViewportInterval.From) {
-                    newViewportOffset = currentViewportInterval.From - Math.Abs(viewportWidthDelta);
-                }
-                else if (caretPosition >= currentViewportInterval.To) {
-                    newViewportOffset = currentViewportInterval.From + Math.Abs(viewportWidthDelta);
+                if (!currentViewportInterval.Contains(caretPosition)) {
+                    // if caret is out of the viewport, just skip there
+                    newViewportOffset = caretPosition - newViewportWidth / 2;
                 }
                 else {
+                    // if caret is visible, approach it smoothly
                     // TODO simplify the following calculation
-                    newViewportOffset = VirtualViewportOffset + viewportWidthDelta / 2;
+                    newViewportOffset = currentViewportInterval.From + viewportWidthDelta / 2;
                     long caretTargetPosition = newViewportOffset + newViewportWidth / 2;
                     long caretPositionsDelta = caretPosition - caretTargetPosition;
                     newViewportOffset += caretPositionsDelta / 2;
                 }
             }
-            else { // straight viewport zoom
+            else {
+                // straight viewport zoom
                 newViewportOffset = VirtualViewportOffset + viewportWidthDelta / 2;
             }
 

@@ -28,9 +28,12 @@ namespace AudioAlign.WaveControls {
 
         private static object CoerceVirtualViewportOffset(DependencyObject d, object value) {
             long newValue = (long)value;
-            if (newValue < 0) {
-                return 0L;
+            
+            long lowerBound = 0L;
+            if (newValue < lowerBound) {
+                return lowerBound;
             }
+
             return newValue;
         }
 
