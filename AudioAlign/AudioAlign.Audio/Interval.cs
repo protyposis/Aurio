@@ -48,6 +48,21 @@ namespace AudioAlign.Audio {
             to += offset;
         }
 
+        public void Divide(long at, out Interval left, out Interval right) {
+            if (at <= from) {
+                left = new Interval(from, from);
+                right = new Interval(from, to);
+            }
+            else if (at >= to) {
+                left = new Interval(from, to);
+                right = new Interval(to, to);
+            }
+            else {
+                left = new Interval(from, at);
+                right = new Interval(at, to);
+            }
+        }
+
         #region IEquatable<Interval> Members
 
         public bool Equals(Interval other) {

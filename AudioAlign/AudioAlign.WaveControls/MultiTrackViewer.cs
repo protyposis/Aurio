@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Data;
 using System.Diagnostics;
+using AudioAlign.Audio;
 
 namespace AudioAlign.WaveControls {
     [TemplatePart(Name = "PART_TimeScale", Type = typeof(TimeScale))]
@@ -67,17 +68,39 @@ namespace AudioAlign.WaveControls {
 
             // add/remove percentage for a zoom command
             double scalePercentage = 0.25d;
+            bool zoomToCaret = true;
+
+            Interval currentViewportInterval = VirtualViewportInterval;
 
             // calculate new viewport width
-            long currentViewportWidth = VirtualViewportWidth;
-            long newViewportWidth = (long)(e.Delta < 0 ? 
-                currentViewportWidth * (1 + scalePercentage) : 
-                currentViewportWidth * (1 - scalePercentage));
+            long newViewportWidth = (long)(e.Delta < 0 ?
+                currentViewportInterval.Length * (1 + scalePercentage) :
+                currentViewportInterval.Length * (1 - scalePercentage));
             //Debug.WriteLine("MultiTrackViewer viewport width change: {0} -> {1}", currentViewportWidth, newViewportWidth);
             
             // calculate new viewport offset (don't care about the valid offset range here - it's handled by the property value coercion)
-            long viewportWidthDelta = currentViewportWidth - newViewportWidth;
-            long newViewportOffset = VirtualViewportOffset + viewportWidthDelta / 2;
+            long viewportWidthDelta = currentViewportInterval.Length - newViewportWidth;
+            long newViewportOffset;
+            if (zoomToCaret) { // zoom the viewport and move it towards the caret
+                long caretPosition = VirtualCaretOffset;
+
+                if (caretPosition <= currentViewportInterval.From) {
+                    newViewportOffset = currentViewportInterval.From - Math.Abs(viewportWidthDelta);
+                }
+                else if (caretPosition >= currentViewportInterval.To) {
+                    newViewportOffset = currentViewportInterval.From + Math.Abs(viewportWidthDelta);
+                }
+                else {
+                    // TODO simplify the following calculation
+                    newViewportOffset = VirtualViewportOffset + viewportWidthDelta / 2;
+                    long caretTargetPosition = newViewportOffset + newViewportWidth / 2;
+                    long caretPositionsDelta = caretPosition - caretTargetPosition;
+                    newViewportOffset += caretPositionsDelta / 2;
+                }
+            }
+            else { // straight viewport zoom
+                newViewportOffset = VirtualViewportOffset + viewportWidthDelta / 2;
+            }
 
             // set new values
             VirtualViewportOffset = newViewportOffset;
@@ -85,11 +108,5 @@ namespace AudioAlign.WaveControls {
 
             e.Handled = true;
         }
-
-        //protected override void OnViewportWidthChanged(long oldValue, long newValue) {
-        //    long viewportWidthDifference = newValue - oldValue;
-        //    long viewportOffset = VirtualViewportOffset;
-        //    long caretPosition = VirtualCaretOffset;
-        //}
     }
 }
