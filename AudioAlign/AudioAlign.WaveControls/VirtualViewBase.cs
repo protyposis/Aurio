@@ -5,19 +5,43 @@ using System.Text;
 using System.Windows.Controls;
 using System.Windows;
 using AudioAlign.Audio;
+using System.Diagnostics;
 
 namespace AudioAlign.WaveControls {
     public class VirtualViewBase: Control {
 
         public static readonly DependencyProperty VirtualViewportOffsetProperty = DependencyProperty.Register(
             "VirtualViewportOffset", typeof(long), typeof(VirtualViewBase),
-                new FrameworkPropertyMetadata { Inherits = true, AffectsRender = true,
-                PropertyChangedCallback = OnViewportOffsetChanged});
+                new FrameworkPropertyMetadata {
+                    Inherits = true, AffectsRender = true,
+                    CoerceValueCallback = CoerceVirtualViewportOffset,
+                    PropertyChangedCallback = OnViewportOffsetChanged
+                });
 
         public static readonly DependencyProperty VirtualViewportWidthProperty = DependencyProperty.Register(
             "VirtualViewportWidth", typeof(long), typeof(VirtualViewBase),
-                new FrameworkPropertyMetadata { Inherits = true, AffectsRender = true, 
-                    PropertyChangedCallback = OnViewportWidthChanged, DefaultValue = 1000L });
+                new FrameworkPropertyMetadata {
+                    Inherits = true, AffectsRender = true,
+                    CoerceValueCallback = CoerceVirtualViewportWidth,
+                    PropertyChangedCallback = OnViewportWidthChanged, DefaultValue = 1000L
+                });
+
+        private static object CoerceVirtualViewportOffset(DependencyObject d, object value) {
+            long newValue = (long)value;
+            if (newValue < 0) {
+                return 0L;
+            }
+            return newValue;
+        }
+
+        private static object CoerceVirtualViewportWidth(DependencyObject d, object value) {
+            //Debug.WriteLine("CoerceVirtualViewportWidth @ " + ((FrameworkElement)d).Name);
+            long newValue = (long)value;
+            if (newValue < 1) {
+                return 1L;
+            }
+            return newValue;
+        }
 
         private static void OnViewportOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             VirtualViewBase ctrl = (VirtualViewBase)d;

@@ -19,7 +19,9 @@ namespace AudioAlign.WaveControls {
                 new FrameworkPropertyMetadata(typeof(MultiTrackViewer)));
 
             VirtualCaretOffsetProperty = CaretOverlay.VirtualCaretOffsetProperty
-                .AddOwner(typeof(MultiTrackViewer), new FrameworkPropertyMetadata() { Inherits = true });
+                .AddOwner(typeof(MultiTrackViewer), new FrameworkPropertyMetadata() { 
+                    Inherits = true, CoerceValueCallback = CaretOverlay.CoerceVirtualCaretOffset 
+                });
         }
 
         public MultiTrackViewer() {
@@ -33,14 +35,12 @@ namespace AudioAlign.WaveControls {
 
         private void MultiTrackViewer_CaretPositionSelected(object sender, CaretOverlay.PositionEventArgs e) {
             //Debug.WriteLine("MultiTrackViewer CaretPositionSelected @ " + e.Position);
-            //SetValue(PhysicalCaretOffsetProperty, e.Position);
             SetValue(VirtualCaretOffsetProperty, PhysicalToVirtualOffset(VirtualViewportInterval, e.SourceInterval, e.Position));
             e.Handled = true;
         }
 
         private void MultiTrackViewer_CaretIntervalSelected(object sender, CaretOverlay.IntervalEventArgs e) {
             //Debug.WriteLine("MultiTrackViewer CaretIntervalSelected {0} -> {1} ", e.From, e.To);
-            //SetValue(PhysicalCaretOffsetProperty, e.Position);
             e.Handled = true;
         }
 
@@ -55,5 +55,41 @@ namespace AudioAlign.WaveControls {
                 return itemsControl.Items;
             }
         }
+
+        /// <summary>
+        /// Preview event is used because the bubbling mousewheel event (ehich is already handled at this time)
+        /// arrives after the listbox has done it's work on the event - which we want to avoid.
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnPreviewMouseWheel(System.Windows.Input.MouseWheelEventArgs e) {
+            base.OnPreviewMouseWheel(e);
+            //Debug.WriteLine("MultiTrackViewer OnPreviewMouseWheel: " + e.Delta);
+
+            // add/remove percentage for a zoom command
+            double scalePercentage = 0.25d;
+
+            // calculate new viewport width
+            long currentViewportWidth = VirtualViewportWidth;
+            long newViewportWidth = (long)(e.Delta < 0 ? 
+                currentViewportWidth * (1 + scalePercentage) : 
+                currentViewportWidth * (1 - scalePercentage));
+            //Debug.WriteLine("MultiTrackViewer viewport width change: {0} -> {1}", currentViewportWidth, newViewportWidth);
+            
+            // calculate new viewport offset (don't care about the valid offset range here - it's handled by the property value coercion)
+            long viewportWidthDelta = currentViewportWidth - newViewportWidth;
+            long newViewportOffset = VirtualViewportOffset + viewportWidthDelta / 2;
+
+            // set new values
+            VirtualViewportOffset = newViewportOffset;
+            VirtualViewportWidth = newViewportWidth;
+
+            e.Handled = true;
+        }
+
+        //protected override void OnViewportWidthChanged(long oldValue, long newValue) {
+        //    long viewportWidthDifference = newValue - oldValue;
+        //    long viewportOffset = VirtualViewportOffset;
+        //    long caretPosition = VirtualCaretOffset;
+        //}
     }
 }

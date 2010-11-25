@@ -300,7 +300,8 @@
                                        Grid.Column="0"
                                        Value="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=VirtualViewportOffset}"
                                        Minimum="0"
-                                       Maximum="1000000000000"
+                                       Maximum="100000000000"
+                                       LargeChange="{Binding RelativeSource={RelativeSource Mode=Self}, Path=ViewportSize}"
                                        ViewportSize="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=VirtualViewportWidth}"/>
                             
                             <ScrollBar Name="hiddenPlaceHolderForCorrectColumnWidth" 

@@ -57,7 +57,8 @@ namespace AudioAlign.WaveControls {
 
             VirtualCaretOffsetProperty = DependencyProperty.Register("VirtualCaretOffset",
                 typeof(long), typeof(CaretOverlay),
-                new FrameworkPropertyMetadata(new PropertyChangedCallback(OnVirtualCaretOffsetChanged)) { Inherits = true });
+                new FrameworkPropertyMetadata(new PropertyChangedCallback(OnVirtualCaretOffsetChanged)) { Inherits = true,
+                CoerceValueCallback = CoerceVirtualCaretOffset});
 
 
             PositionSelectedEvent = EventManager.RegisterRoutedEvent("PositionSelected", RoutingStrategy.Bubble,
@@ -65,6 +66,14 @@ namespace AudioAlign.WaveControls {
 
             IntervalSelectedEvent = EventManager.RegisterRoutedEvent("IntervalSelected", RoutingStrategy.Bubble,
                 typeof(IntervalEventHandler), typeof(CaretOverlay));
+        }
+
+        internal static object CoerceVirtualCaretOffset(DependencyObject d, object value) {
+            long newValue = (long)value;
+            if (newValue < 0) {
+                return 0L;
+            }
+            return newValue;
         }
 
         private static void OnPhysicalCaretOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {

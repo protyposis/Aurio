@@ -69,12 +69,17 @@ namespace AudioAlign.WaveControls {
             GuidelineSet guidelineSet = new GuidelineSet();
             drawingContext.PushGuidelineSet(guidelineSet);
 
-            // draw interval start & end time
+            // draw interval start, length & end time
             FormattedText formattedStartText = new FormattedText(
                         new TimeSpan(viewportInterval.From).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
                         new Typeface("Tahoma"), SCALE_FONT_SIZE, Brushes.Gray) { TextAlignment = TextAlignment.Left };
             drawingContext.DrawText(formattedStartText, new Point(1, 0));
+            FormattedText formattedLengthText = new FormattedText(
+                        new TimeSpan(viewportInterval.Length).ToString(SCALE_TEXT_FORMAT),
+                        CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, Brushes.Gray) { TextAlignment = TextAlignment.Center };
+            drawingContext.DrawText(formattedLengthText, new Point(actualWidth / 2, 0));
             FormattedText formattedEndText = new FormattedText(
                         new TimeSpan(viewportInterval.To).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
