@@ -61,6 +61,8 @@ namespace AudioAlign.WaveControls {
                 double drawingOffset = ((audioToLoadIntervalAligned.From - audioToLoadInterval.From) + (visibleAudioInterval.From - viewportInterval.From)) * viewportToDrawingScaleFactor;
                 double drawingWidth = (samplesToLoad - 1) * sampleLength * viewportToDrawingScaleFactor;
 
+                DateTime beforeLoading = DateTime.Now;
+
                 // load audio samples
                 audioStream.TimePosition = new TimeSpan(audioToLoadIntervalAligned.From);
                 bool peaks;
@@ -68,24 +70,16 @@ namespace AudioAlign.WaveControls {
                 List<Point>[] samples = audioStream.Read(audioToLoadIntervalAligned, samplesToLoad > drawingWidth ? (int)drawingWidth : samplesToLoad, out readInterval, out peaks);
                 int samplesLoaded = peaks ? samples[0].Count / 2 : samples[0].Count;
 
-                //Debug.WriteLine("sampleCount:                  " + sampleCount);
-                //Debug.WriteLine("sampleLength:                 " + sampleLength);
-                //Debug.WriteLine("viewportToDrawingScaleFactor: " + viewportToDrawingScaleFactor);
+                //Debug.WriteLine("drawing width: {0} offset: {1}, samples requested: {2}, samples loaded: {3}", drawingWidth, drawingOffset, samplesToLoad, samplesLoaded);
 
-                //Debug.WriteLine("audioInterval:                " + audioInterval);
-                //Debug.WriteLine("viewportInterval:             " + viewportInterval);
-                //Debug.WriteLine("visibleAudioInterval:         " + visibleAudioInterval);
-                //Debug.WriteLine("audioToLoadInterval:          " + audioToLoadInterval + " (" + audioToLoadInterval.Length / sampleLength + ")");
-                //Debug.WriteLine("audioToLoadIntervalAligned:   " + audioToLoadIntervalAligned + " (" + audioToLoadIntervalAligned.Length / sampleLength + ")");
-
-                //Debug.WriteLine((audioToLoadIntervalAligned.From - visibleAudioInterval.From) + " * " + viewportToDrawingScaleFactor + " = " + drawingOffset);
-                //Debug.WriteLine((visibleAudioInterval.From - ViewportOffset) + " * " + viewportToDrawingScaleFactor + " = " + drawingOffset);
-                //Debug.WriteLine(sampleCount + " samples, drawingWidth: " + audioToLoadIntervalAligned.Length + " * " + viewportToDrawingScaleFactor + " = " + drawingWidth);
+                DateTime afterLoading = DateTime.Now;
 
                 if (samplesLoaded <= 1) {
                     drawingContext.DrawText(DebugText("SAMPLE WARNING: " + samplesLoaded), new Point(0, 0));
                     return;
                 }
+
+                DateTime beforeDrawing = DateTime.Now;
 
                 // draw background
                 drawingContext.DrawRectangle(WaveformBackground, null, new Rect(drawingOffset, 0, drawingWidth, ActualHeight));
@@ -116,35 +110,30 @@ namespace AudioAlign.WaveControls {
                 }
 
                 // draw waveforms
-                Geometry[] audioforms = peaks ? 
-                    CreatePeakforms(samples) : 
-                    CreateWaveforms(samples);
-                for (int channel = 0; channel < channels; channel++) {
-                    TransformGroup transformGroup = new TransformGroup();
-                    transformGroup.Children.Add(new ScaleTransform(drawingWidth / audioforms[channel].Bounds.Width, channelHalfHeight * -1));
-                    transformGroup.Children.Add(new TranslateTransform(drawingOffset, channelHalfHeight + (channelHalfHeight * channel * 2)));
-                    audioforms[channel].Transform = transformGroup;
-                    drawingContext.DrawGeometry(WaveformFill, new Pen(WaveformLine, 1), audioforms[channel]);
-
-                    if (!peaks) {
-                        // draw sample dots on high zoom factors
-                        float zoomFactor = (float)(drawingWidth / samplesLoaded);
-                        if (zoomFactor > 0.05) {
-                            float sampleDotSize = zoomFactor < 30 ? zoomFactor / 10 : 3;
-                            GeometryGroup geometryGroup = new GeometryGroup();
-                            foreach (Point point in samples[channel]) {
-                                EllipseGeometry sampleDot = new EllipseGeometry(transformGroup.Transform(point), sampleDotSize, sampleDotSize);
-                                geometryGroup.Children.Add(sampleDot);
-                            }
-                            drawingContext.DrawGeometry(WaveformSamplePoint, null, geometryGroup);
-                        }
-                    }
+                IWaveformRenderer<object> renderer = null;
+                switch (RenderMode) {
+                    case WaveViewRenderMode.Bitmap:
+                        renderer = (IWaveformRenderer<object>)new WaveformBitmapRenderer();
+                        break;
+                    case WaveViewRenderMode.Geometry:
+                        renderer = (IWaveformRenderer<object>)new WaveformGeometryRenderer();
+                        break;
                 }
+                for (int channel = 0; channel < channels; channel++) {
+                    int width = (int)Math.Ceiling(drawingWidth);
+                    int height = (int)channelHeight;
+                    Point position = new Point((int)drawingOffset, (int)(channelHeight * channel));
+                    renderer.Draw(samples[channel], width, height, drawingContext, position);
+                }
+
+                DateTime afterDrawing = DateTime.Now;
 
                 drawingContext.Pop();
 
                 if (debug) {
                     // DEBUG OUTPUT
+                    drawingContext.DrawText(DebugText(String.Format("source:" + audioStream.Stats.ToString() + " load:{0}ms render:{1}ms", (afterLoading - beforeLoading).TotalMilliseconds, (afterDrawing - beforeDrawing).TotalMilliseconds)),
+                        new Point(0, 0));
                     drawingContext.DrawText(DebugText("visibleAudioInterval: " + visibleAudioInterval + ", audioToLoadInterval: " + audioToLoadInterval + ", audioToLoadIntervalAligned: " + audioToLoadIntervalAligned),
                         new Point(0, ActualHeight) + new Vector(0, -50));
                     drawingContext.DrawText(DebugText("Drawing Offset: " + drawingOffset + ", Width: " + drawingWidth + ", ScalingFactor: " + viewportToDrawingScaleFactor + ", Samples: " + samplesLoaded),
@@ -161,49 +150,6 @@ namespace AudioAlign.WaveControls {
                 drawingContext.DrawText(DebugText("ViewportOffset: " + VirtualViewportOffset + ", ViewportWidth: " + VirtualViewportWidth),
                     new Point(0, ActualHeight) + new Vector(0, -10));
             }
-        }
-
-        private Geometry[] CreateWaveforms(List<Point>[] samplePoints) {
-            int channels = samplePoints.Length;
-            Geometry[] waveforms = new Geometry[channels];
-
-            if (samplePoints[0].Count() < 2) {
-                for (int channel = 0; channel < channels; channel++) {
-                    waveforms[channel] = Geometry.Empty;
-                }
-            }
-            else {
-                for (int channel = 0; channel < channels; channel++) {
-                    PathGeometry geometry = new PathGeometry();
-                    PathFigure pathFigure = new PathFigure();
-                    pathFigure.IsClosed = false;
-                    pathFigure.IsFilled = false;
-                    pathFigure.StartPoint = samplePoints[channel][0];
-                    pathFigure.Segments.Add(new PolyLineSegment(samplePoints[channel], true)); // first point gets added a second time
-                    geometry.Figures.Add(pathFigure);
-                    //geometry.Freeze();
-                    waveforms[channel] = geometry;
-                }
-            }
-            return waveforms;
-        }
-
-        private Geometry[] CreatePeakforms(List<Point>[] peakLines) {
-            int channels = peakLines.Length;
-            Geometry[] peakforms = new Geometry[channels];
-
-            for (int channel = 0; channel < channels; channel++) {
-                PathGeometry geometry = new PathGeometry();
-                PathFigure pathFigure = new PathFigure();
-                pathFigure.IsClosed = true;
-                pathFigure.IsFilled = true;
-                pathFigure.StartPoint = peakLines[channel][0];
-                pathFigure.Segments.Add(new PolyLineSegment(peakLines[channel], true)); // first point gets added a second time
-                geometry.Figures.Add(pathFigure);
-                peakforms[channel] = geometry;
-            }
-
-            return peakforms;
         }
 
         private FormattedText DebugText(string text) {

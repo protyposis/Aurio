@@ -12,6 +12,7 @@ namespace AudioAlign.WaveControls
     public partial class WaveView {
 
         public static readonly DependencyProperty AudioStreamProperty;
+        public static readonly DependencyProperty RenderModeProperty;
 
         public static readonly DependencyProperty WaveformBackgroundProperty;
         public static readonly DependencyProperty WaveformLineProperty;
@@ -33,6 +34,9 @@ namespace AudioAlign.WaveControls
             AudioStreamProperty = DependencyProperty.Register("AudioStream", typeof(VisualizingAudioStream16), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = null, AffectsRender = true, 
                     PropertyChangedCallback = OnAudioStreamChanged });
+
+            RenderModeProperty = DependencyProperty.Register("RenderMode", typeof(WaveViewRenderMode), typeof(WaveView),
+                new FrameworkPropertyMetadata { DefaultValue = WaveViewRenderMode.Bitmap, AffectsRender = true });
 
             WaveformBackgroundProperty = DependencyProperty.Register("WaveformBackground", typeof(Brush), typeof(WaveView), 
                 new FrameworkPropertyMetadata { DefaultValue = Brushes.White, AffectsRender = true });
@@ -95,6 +99,11 @@ namespace AudioAlign.WaveControls
         public VisualizingAudioStream16 AudioStream {
             get { return (VisualizingAudioStream16)GetValue(AudioStreamProperty); }
             set { SetValue(AudioStreamProperty, value); }
+        }
+
+        public WaveViewRenderMode RenderMode {
+            get { return (WaveViewRenderMode)GetValue(RenderModeProperty); }
+            set { SetValue(RenderModeProperty, value); }
         }
 
         [Bindable(true), Category("Brushes")]

@@ -125,7 +125,11 @@
     <Compile Include="CaretOverlay.cs" />
     <Compile Include="VirtualContentViewBase.cs" />
     <Compile Include="VirtualViewBase.cs" />
+    <Compile Include="WaveformBitmapRenderer.cs" />
+    <Compile Include="WaveformGeometryRenderer.cs" />
+    <Compile Include="IWaveformRenderer.cs" />
     <Compile Include="WaveView.cs" />
+    <Compile Include="WaveViewRenderMode.cs" />
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -9,6 +9,20 @@ using System.Runtime.CompilerServices;
 namespace AudioAlign.Audio {
     public class VisualizingAudioStream16: AudioStreamWrapper<float>, IAudioStream16 {
 
+        public class SourceStats {
+            public int BytesRead { get; set; }
+            public string Source { get; set; }
+
+            public void Clear() {
+                BytesRead = 0;
+                Source = "none";
+            }
+
+            public override string ToString() {
+                return "Stats: " + Source + " " + BytesRead + " bytes";
+            }
+        }
+
         private const int SAMPLES_PER_PEAK = 1024;
         private const int BUFFER_SIZE = 65536;
 
@@ -16,6 +30,9 @@ namespace AudioAlign.Audio {
 
         private PeakStore peakStore;
         private BinaryReader[] peakReaders;
+
+        private SourceStats stats = new SourceStats();
+        public SourceStats Stats { get { return stats; } }
 
         public VisualizingAudioStream16(IAudioStream16 audioStream, PeakStore peakStore)
             : base(audioStream) {
@@ -43,6 +60,8 @@ namespace AudioAlign.Audio {
         /// <param name="peaks"></param>
         /// <returns></returns>
         public List<Point>[] Read(Interval requestedInterval, long targetSamples, out Interval readInterval, out bool peaks) {
+            stats.Clear();
+
             if (targetSamples == 0) {
                 //throw new ArgumentException(targetSamples + " samples requested!?");
                 peaks = false;
@@ -110,6 +129,9 @@ namespace AudioAlign.Audio {
                         break;
                 }
             }
+
+            stats.Source = "filestream";
+            stats.BytesRead = totalSamplesRead * 2;
 
             return samplePoints;
         }
@@ -186,6 +208,9 @@ namespace AudioAlign.Audio {
                     peaks[channel].Add(peakReaders[channel].ReadPeak());
                 }
             }
+
+            stats.Source = "peakstore";
+            stats.BytesRead = peakCount * channels * 4 * 2;
 
             return peaks;
         }
