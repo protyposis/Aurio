@@ -6,8 +6,8 @@ using System.Windows.Media;
 using System.Windows;
 
 namespace AudioAlign.WaveControls {
-    class WaveformGeometryRenderer : IWaveformRenderer<Drawing> {
-        #region IWaveformRenderer<Drawing> Members
+    class WaveformGeometryRenderer : IWaveformRenderer {
+        #region IWaveformRenderer Members
 
         public Drawing Render(List<Point> samples, int width, int height) {
             SolidColorBrush WaveformFill = Brushes.LightBlue;
@@ -40,14 +40,6 @@ namespace AudioAlign.WaveControls {
             }
 
             return waveformDrawing;
-        }
-
-        public void Draw(List<Point> samples, int width, int height, DrawingContext drawingContext, Point position) {
-            Drawing waveform = Render(samples, width, height);
-            DrawingGroup drawing = new DrawingGroup();
-            drawing.Children.Add(waveform);
-            drawing.Transform = new TranslateTransform(position.X, position.Y);
-            drawingContext.DrawDrawing(drawing);
         }
 
         #endregion

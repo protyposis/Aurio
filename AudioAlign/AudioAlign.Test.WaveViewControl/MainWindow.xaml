@@ -43,6 +43,6 @@
         <CheckBox Content="DebugMode" HorizontalAlignment="Left" Margin="215,0,0,117" Name="debugMode" Height="16" VerticalAlignment="Bottom" IsChecked="{Binding ElementName=waveView, Path=DebugMode}" />
         <CheckBox Content="ClipToBounds" HorizontalAlignment="Left" Margin="305,0,0,117" Name="clipToBounds" Height="16" VerticalAlignment="Bottom" IsChecked="{Binding ElementName=waveView, Path=ClipToBounds}" />
         <CheckBox Content="SnapsToDevicePixels" HorizontalAlignment="Left" Margin="401,0,0,117" Name="snapToDevicePixels" Height="16" VerticalAlignment="Bottom" IsChecked="{Binding ElementName=waveView, Path=SnapsToDevicePixels}" />
-        <ComboBox Height="23" HorizontalAlignment="Left" Margin="541,359,0,0" Name="comboBox1" VerticalAlignment="Top" Width="75" ItemsSource="{Binding Source={StaticResource RenderModeValues}}" SelectedValue="{Binding ElementName=waveView, Path=RenderMode, Mode=TwoWay}" />
+        <ComboBox Height="23" HorizontalAlignment="Left" Margin="541,0,0,114" Name="comboBox1" VerticalAlignment="Bottom" Width="75" ItemsSource="{Binding Source={StaticResource RenderModeValues}}" SelectedValue="{Binding ElementName=waveView, Path=RenderMode, Mode=TwoWay}" />
     </Grid>
 </Window>

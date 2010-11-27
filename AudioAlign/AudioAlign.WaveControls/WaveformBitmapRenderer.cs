@@ -7,16 +7,12 @@ using System.Windows;
 using System.Windows.Media;
 
 namespace AudioAlign.WaveControls {
-    class WaveformBitmapRenderer : IWaveformRenderer<BitmapSource> {
-        #region IWaveformRenderer<BitmapSource> Members
+    class WaveformBitmapRenderer : IWaveformRenderer {
+        #region IWaveformRenderer Members
 
-        public BitmapSource Render(List<Point> samples, int width, int height) {
-            return DrawPeakforms(samples, width, height);
-        }
-
-        public void Draw(List<Point> samples, int width, int height, DrawingContext drawingContext, Point position) {
-            BitmapSource waveform = Render(samples, width, height);
-            drawingContext.DrawImage(waveform, new Rect(position.X, position.Y, waveform.Width, waveform.Height));
+        public Drawing Render(List<Point> samples, int width, int height) {
+            BitmapSource waveform = DrawPeakforms(samples, width, height);
+            return new ImageDrawing(waveform, new Rect(0, 0, width, height));
         }
 
         #endregion

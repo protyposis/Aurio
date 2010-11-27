@@ -110,20 +110,21 @@ namespace AudioAlign.WaveControls {
                 }
 
                 // draw waveforms
-                IWaveformRenderer<object> renderer = null;
+                IWaveformRenderer renderer = null;
                 switch (RenderMode) {
                     case WaveViewRenderMode.Bitmap:
-                        renderer = (IWaveformRenderer<object>)new WaveformBitmapRenderer();
+                        renderer = new WaveformBitmapRenderer();
                         break;
                     case WaveViewRenderMode.Geometry:
-                        renderer = (IWaveformRenderer<object>)new WaveformGeometryRenderer();
+                        renderer = new WaveformGeometryRenderer();
                         break;
                 }
                 for (int channel = 0; channel < channels; channel++) {
-                    int width = (int)Math.Ceiling(drawingWidth);
-                    int height = (int)channelHeight;
-                    Point position = new Point((int)drawingOffset, (int)(channelHeight * channel));
-                    renderer.Draw(samples[channel], width, height, drawingContext, position);
+                    Drawing waveform = renderer.Render(samples[channel], (int)Math.Ceiling(drawingWidth), (int)channelHeight);
+                    DrawingGroup drawing = new DrawingGroup();
+                    drawing.Children.Add(waveform);
+                    drawing.Transform = new TranslateTransform((int)drawingOffset, (int)(channelHeight * channel));
+                    drawingContext.DrawDrawing(drawing);
                 }
 
                 DateTime afterDrawing = DateTime.Now;
