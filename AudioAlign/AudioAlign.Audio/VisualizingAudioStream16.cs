@@ -184,6 +184,9 @@ namespace AudioAlign.Audio {
                         peaks[channel].Add(new Peak(temp.Min(), temp.Max()));
                         pointCount++;
                         temp.Clear();
+                        // add last sample of previous peak as first sample of current peak to make consecutive peaks overlap
+                        // this gives the impression of a continuous waveform
+                        temp.Add(samples[channel][sample]);
                     }
                 }
             }

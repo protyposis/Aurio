@@ -5,14 +5,21 @@ using System.Text;
 using System.Windows.Media.Imaging;
 using System.Windows;
 using System.Windows.Media;
+using System.Diagnostics;
 
 namespace AudioAlign.WaveControls {
     class WaveformBitmapRenderer : IWaveformRenderer {
         #region IWaveformRenderer Members
 
         public Drawing Render(List<Point> samples, int width, int height) {
-            BitmapSource waveform = DrawPeakforms(samples, width, height);
-            return new ImageDrawing(waveform, new Rect(0, 0, width, height));
+            if (samples.Count < width * 2) {
+                // draw points
+                return new ImageDrawing();
+            }
+            else {
+                BitmapSource waveform = DrawPeakforms(samples, width, height);
+                return new ImageDrawing(waveform, new Rect(0, 0, width, height));
+            }
         }
 
         #endregion
@@ -22,7 +29,6 @@ namespace AudioAlign.WaveControls {
             SolidColorBrush WaveformLine = Brushes.CornflowerBlue;
             SolidColorBrush WaveformSamplePoint = Brushes.RoyalBlue;
 
-            //width = peakLines[0].Count / 2;
             WriteableBitmap wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
             int bytesPerPixel = wb.Format.BitsPerPixel / 8;
             int[] pixels = new int[width * height];
@@ -30,43 +36,48 @@ namespace AudioAlign.WaveControls {
             Color border = WaveformLine.Color;
             Color fill = WaveformFill.Color;
 
-            if (peakLines.Count <= width) {
-                // draw points
-                int i;
+            int halfheight = height / 2;
+            int peaks = peakLines.Count / 2;
+            int x, y, top, bottom, prevTop = 0, prevBottom = height;
+            for (int peak = 0; peak < peaks; peak++) {
+                Point pMin = peakLines[peak];
+                Point pMax = peakLines[peakLines.Count - 1 - peak];
 
-            }
-            else {
-                // draw peaks
+                int pp1 = (int)(halfheight * pMin.Y);
+                int pp2 = (int)(halfheight * pMax.Y);
 
-                int halfheight = height / 2;
-                int top, bottom, prevTop = 0, prevBottom = height;
-                for (int x = 0; x < peakLines.Count / 2; x++) {
-                    Point pMin = peakLines[x];
-                    Point pMax = peakLines[peakLines.Count - 1 - x];
+                // NOTE:
+                // The peaks are distributed among the available width. If more peaks than pixel columns are
+                // given, columns can contain multiple peaks, which could lead to drawing errors:
+                // If the two peaks 10->20 and 20->30 are merged, the resulting column has a hole 
+                // between 20->30. Solution would be to combine them to a single column 10->30 (if it is
+                // ever getting noticeable).
+                // TODO resolve drawing issues of combined peaks if noticeable
+                x = (int)Math.Round((float)peak / peaks * width);
 
-                    int pp1 = (int)(halfheight * pMin.Y);
-                    int pp2 = (int)(halfheight * pMax.Y);
+                top = halfheight - pp2;
+                bottom = halfheight - pp1;
 
-                    top = halfheight + pp1;
-                    bottom = halfheight + pp2;
-
-                    for (int y = top; y <= bottom; y++) {
-                        //bool useBorderColor = 
-                        //    y == top // topmost peak pixel
-                        //    || y == bottom // bottommost peak pixel
-                        //    || (x > 0 && top < prevTop && y > top && y < prevTop) // upper rising lines
-                        //    || (x > 0 && bottom > prevBottom && y < bottom && y > prevBottom); // lower falling lines
-                        bool useBorderColor = true;
-
-                        int pixelOffset = (y * wb.PixelWidth + x);
-                        Color c = (useBorderColor) ? border : fill;
-
-                        pixels[pixelOffset] = c.A << 24 | c.R << 16 | c.G << 8 | c.B;
-                    }
-
-                    prevTop = top;
-                    prevBottom = bottom;
+                if (bottom == height) {
+                    bottom--; // for even heights the last line needs to be stripped
                 }
+
+                for (y = top; y <= bottom; y++) {
+                    //bool useBorderColor = 
+                    //    y == top // topmost peak pixel
+                    //    || y == bottom // bottommost peak pixel
+                    //    || (x > 0 && top < prevTop && y > top && y < prevTop) // upper rising lines
+                    //    || (x > 0 && bottom > prevBottom && y < bottom && y > prevBottom); // lower falling lines
+                    bool useBorderColor = true;
+
+                    int pixelOffset = (y * wb.PixelWidth + x);
+                    Color c = (useBorderColor) ? border : fill;
+
+                    pixels[pixelOffset] = c.A << 24 | c.R << 16 | c.G << 8 | c.B;
+                }
+
+                prevTop = top;
+                prevBottom = bottom;
             }
 
             int stride = (wb.PixelWidth * wb.Format.BitsPerPixel) / 8;

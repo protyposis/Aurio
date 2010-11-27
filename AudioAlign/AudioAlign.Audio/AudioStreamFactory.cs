@@ -64,6 +64,9 @@ namespace AudioAlign.Audio {
                                 for (int channel = 0; channel < channels; channel++) {
                                     peakWriters[channel].Write(new Peak(minMax[channel].Min(), minMax[channel].Max()));
                                     minMax[channel].Clear();
+                                    // add last sample of previous peak as first sample of current peak to make consecutive peaks overlap
+                                    // this gives the impression of a continuous waveform
+                                    minMax[channel].Add(buffer[channel][x]);
                                 }
                                 sampleCount = 0;
                             }
