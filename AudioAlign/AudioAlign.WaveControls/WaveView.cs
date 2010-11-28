@@ -52,6 +52,11 @@ namespace AudioAlign.WaveControls {
                 Interval visibleAudioInterval = audioInterval.Intersect(viewportInterval);
                 Interval audioToLoadInterval = visibleAudioInterval - TrackOffset;
 
+                if (visibleAudioInterval.Length < sampleLength) {
+                    drawingContext.DrawText(DebugText("VISIBLE INTERVAL WARNING: " + visibleAudioInterval.Length + " < SAMPLE LENGTH " + sampleLength), new Point(0, 0));
+                    return;
+                }
+
                 // align interval to samples
                 Interval audioToLoadIntervalAligned = AudioUtil.AlignToSamples(audioToLoadInterval, audioStream.Properties);
                 int samplesToLoad = AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(audioToLoadIntervalAligned.Length));

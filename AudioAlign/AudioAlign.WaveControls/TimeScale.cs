@@ -14,7 +14,7 @@ namespace AudioAlign.WaveControls {
 
         private const int SCALE_HEIGHT = 8;
         private const int SCALE_FONT_SIZE = 8;
-        private const string SCALE_TEXT_FORMAT = @"d\.hh\.mm\:ss\.fff";
+        private const string SCALE_TEXT_FORMAT = @"hh\:mm\:ss\.fff"; // leave out day (d\.) for now - won't be a problem for timelines < 24h
 
         private readonly long[] TICK_LEVELS = { 
                                             10L * 1000,                         // MS
