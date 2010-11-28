@@ -31,7 +31,7 @@ namespace AudioAlign.Audio {
             IAudioStream16 audioInputStream = audioTrack.CreateAudioStream();
 
             PeakStore peakStore = new PeakStore(audioInputStream.Properties.Channels,
-                (int)Math.Ceiling((float)audioInputStream.SampleCount / audioInputStream.Properties.Channels / SAMPLES_PER_PEAK * 2));
+                (int)Math.Ceiling((float)audioInputStream.SampleCount / SAMPLES_PER_PEAK));
             
             // search for existing peakfile
             if (audioTrack.HasPeakFile) {
