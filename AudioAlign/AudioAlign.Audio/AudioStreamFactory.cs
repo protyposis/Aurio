@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using AudioAlign.Audio.Project;
+using AudioAlign.Audio.TaskMonitor;
 
 namespace AudioAlign.Audio {
     public static class AudioStreamFactory {
@@ -47,6 +48,7 @@ namespace AudioAlign.Audio {
                 BinaryWriter[] peakWriters = peakStore.CreateMemoryStreams().WrapWithBinaryWriters();
 
                 Task.Factory.StartNew(() => {
+                    ProgressReporter progress = ProgressMonitor.Instance.BeginTask("Generating peaks for " + audioTrack.FileInfo.Name, true);
                     DateTime startTime = DateTime.Now;
                     int sampleCount = 0;
                     int peakCount = 0;
@@ -72,9 +74,10 @@ namespace AudioAlign.Audio {
                             }
                         }
 
-                        Debug.WriteLine((100.0f / audioInputStream2.SampleCount * audioInputStream2.SamplePosition) + "% of peaks generated...");
+                        progress.ReportProgress(100.0f / audioInputStream2.SampleCount * audioInputStream2.SamplePosition);
                     }
                     Debug.WriteLine("peak generation finished - " + (DateTime.Now - startTime) + ", " + (peakWriters[0].BaseStream.Length * channels) + " bytes");
+                    ProgressMonitor.Instance.EndTask(progress);
 
                     // write peakfile to disk
                     FileStream peakOutputFile = File.OpenWrite(audioTrack.PeakFile.FullName);
