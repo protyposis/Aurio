@@ -19,7 +19,6 @@ namespace AudioAlign.WaveControls {
     public partial class WaveView : VirtualViewBase {
 
         private VisualizingAudioStream16 audioStream;
-        private bool debug = false;
 
         public WaveView() {
             // event gets triggered when ActualWidth or ActualHeight change
@@ -31,13 +30,9 @@ namespace AudioAlign.WaveControls {
             set { SetValue(RenderOptions.EdgeModeProperty, !value ? EdgeMode.Aliased : EdgeMode.Unspecified); }
         }
 
-        public bool DebugMode {
-            get { return debug; }
-            set { debug = value; InvalidateVisual(); }
-        }
-
         protected override void OnRender(DrawingContext drawingContext) {
             base.OnRender(drawingContext);
+            bool debug = DebugOutput;
 
             if (audioStream != null) {
                 Interval audioInterval = new Interval(TrackOffset, TrackOffset + audioStream.TimeLength.Ticks);
@@ -147,7 +142,7 @@ namespace AudioAlign.WaveControls {
                 if (debug) {
                     // DEBUG OUTPUT
                     drawingContext.DrawText(DebugText(String.Format("source:" + audioStream.Stats.ToString() + " load:{0}ms render:{1}ms", (afterLoading - beforeLoading).TotalMilliseconds, (afterDrawing - beforeDrawing).TotalMilliseconds)),
-                        new Point(0, 0));
+                        new Point(0, 20));
                     drawingContext.DrawText(DebugText("visibleAudioInterval: " + visibleAudioInterval + ", audioToLoadInterval: " + audioToLoadInterval + ", audioToLoadIntervalAligned: " + audioToLoadIntervalAligned),
                         new Point(0, ActualHeight) + new Vector(0, -50));
                     drawingContext.DrawText(DebugText("Drawing Offset: " + drawingOffset + ", Width: " + drawingWidth + ", ScalingFactor: " + viewportToDrawingScaleFactor + ", Samples: " + samplesLoaded),

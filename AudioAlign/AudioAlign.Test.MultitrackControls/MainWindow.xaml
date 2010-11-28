@@ -15,5 +15,6 @@
         <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualViewportWidth}" ContentStringFormat="VirtualViewportWidth: {0}" HorizontalAlignment="Left" Margin="495,0,0,43" Name="label3" Width="241" Height="28" VerticalAlignment="Bottom" />
         <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualViewportOffset}" ContentStringFormat="VirtualViewportOffset: {0}" HorizontalAlignment="Left" Margin="495,0,0,15" Name="label4" Width="241" Height="28" VerticalAlignment="Bottom" />
         <Slider HorizontalAlignment="Left" Margin="12,0,0,20" Maximum="100000000000" Minimum="0" Name="logSlider1" Width="477" Height="23" VerticalAlignment="Bottom" Value="0" />
+        <CheckBox Content="Debug" HorizontalAlignment="Right" Margin="0,0,12,43" Name="debugMode" Height="16" VerticalAlignment="Bottom" IsChecked="{Binding ElementName=multiTrackViewer1, Path=DebugOutput}" />
     </Grid>
 </Window>

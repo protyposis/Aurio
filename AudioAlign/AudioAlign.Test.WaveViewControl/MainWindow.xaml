@@ -40,9 +40,9 @@
         <Slider Height="23" Margin="134,0,12,41" Name="trackOffsetSlider" VerticalAlignment="Bottom" Minimum="0" Maximum="{Binding ElementName=waveView, Path=TrackLength}" AutoToolTipPlacement="TopLeft" LargeChange="20" />
         <Slider Height="23" Margin="134,0,12,12" Name="trackLengthSlider" VerticalAlignment="Bottom" Minimum="0" Maximum="100000000000" AutoToolTipPlacement="TopLeft" LargeChange="20" />
         <CheckBox Content="Antialiased" HorizontalAlignment="Left" Margin="134,0,0,117" Name="antialiased" Height="16" VerticalAlignment="Bottom" IsChecked="{Binding ElementName=waveView, Path=Antialiased}" />
-        <CheckBox Content="DebugMode" HorizontalAlignment="Left" Margin="215,0,0,117" Name="debugMode" Height="16" VerticalAlignment="Bottom" IsChecked="{Binding ElementName=waveView, Path=DebugMode}" />
-        <CheckBox Content="ClipToBounds" HorizontalAlignment="Left" Margin="305,0,0,117" Name="clipToBounds" Height="16" VerticalAlignment="Bottom" IsChecked="{Binding ElementName=waveView, Path=ClipToBounds}" />
-        <CheckBox Content="SnapsToDevicePixels" HorizontalAlignment="Left" Margin="401,0,0,117" Name="snapToDevicePixels" Height="16" VerticalAlignment="Bottom" IsChecked="{Binding ElementName=waveView, Path=SnapsToDevicePixels}" />
-        <ComboBox Height="23" HorizontalAlignment="Left" Margin="541,0,0,114" Name="comboBox1" VerticalAlignment="Bottom" Width="75" ItemsSource="{Binding Source={StaticResource RenderModeValues}}" SelectedValue="{Binding ElementName=waveView, Path=RenderMode, Mode=TwoWay}" />
+        <CheckBox Content="Debug" HorizontalAlignment="Left" Margin="215,0,0,117" Name="debugMode" Height="16" VerticalAlignment="Bottom" IsChecked="{Binding ElementName=waveView, Path=DebugOutput}" />
+        <CheckBox Content="ClipToBounds" HorizontalAlignment="Left" Margin="274,0,0,117" Name="clipToBounds" Height="16" VerticalAlignment="Bottom" IsChecked="{Binding ElementName=waveView, Path=ClipToBounds}" />
+        <CheckBox Content="SnapsToDevicePixels" HorizontalAlignment="Left" Margin="370,0,0,117" Name="snapToDevicePixels" Height="16" VerticalAlignment="Bottom" IsChecked="{Binding ElementName=waveView, Path=SnapsToDevicePixels}" />
+        <ComboBox Height="23" HorizontalAlignment="Left" Margin="502,0,0,114" Name="comboBox1" VerticalAlignment="Bottom" Width="75" ItemsSource="{Binding Source={StaticResource RenderModeValues}}" SelectedValue="{Binding ElementName=waveView, Path=RenderMode, Mode=TwoWay}" />
     </Grid>
 </Window>
