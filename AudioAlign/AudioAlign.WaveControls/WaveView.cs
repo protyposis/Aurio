@@ -125,7 +125,7 @@ namespace AudioAlign.WaveControls {
                         break;
                 }
                 for (int channel = 0; channel < channels; channel++) {
-                    Drawing waveform = renderer.Render(samples[channel], (int)Math.Ceiling(drawingWidth), (int)channelHeight);
+                    Drawing waveform = renderer.Render(samples[channel], peaks, (int)Math.Ceiling(drawingWidth), (int)channelHeight);
                     DrawingGroup drawing = new DrawingGroup();
                     drawing.Children.Add(waveform);
                     drawing.Transform = new TranslateTransform((int)drawingOffset, (int)(channelHeight * channel));

@@ -11,9 +11,8 @@ namespace AudioAlign.WaveControls {
     class WaveformBitmapRenderer : IWaveformRenderer {
         #region IWaveformRenderer Members
 
-        public Drawing Render(List<Point> samples, int width, int height) {
-            if (samples.Count < width * 2) {
-                // draw points
+        public Drawing Render(List<Point> samples, bool peaks, int width, int height) {
+            if (!peaks) {
                 BitmapSource waveform = DrawWaveform(samples, width, height);
                 return new ImageDrawing(waveform, new Rect(0, 0, width, height));
             }

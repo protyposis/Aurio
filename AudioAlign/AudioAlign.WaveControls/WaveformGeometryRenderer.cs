@@ -9,13 +9,11 @@ namespace AudioAlign.WaveControls {
     class WaveformGeometryRenderer : IWaveformRenderer {
         #region IWaveformRenderer Members
 
-        public Drawing Render(List<Point> samples, int width, int height) {
+        public Drawing Render(List<Point> samples, bool peaks, int width, int height) {
             SolidColorBrush WaveformFill = Brushes.LightBlue;
             SolidColorBrush WaveformLine = Brushes.CornflowerBlue;
             SolidColorBrush WaveformSamplePoint = Brushes.RoyalBlue;
             DrawingGroup waveformDrawing = new DrawingGroup();
-
-            bool peaks = samples.Count > width; // for peaks, samples.Count should actually be width*2, but in any case it's > width
 
             Geometry audioform = peaks ? CreatePeakform(samples) : CreateWaveform(samples);
             TransformGroup transformGroup = new TransformGroup();
