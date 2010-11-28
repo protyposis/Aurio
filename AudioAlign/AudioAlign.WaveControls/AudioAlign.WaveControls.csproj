@@ -120,8 +120,9 @@
     <Compile Include="MultiTrackListBox.cs" />
     <Compile Include="MultiTrackViewer.cs" />
     <Compile Include="ResizeDecorator.cs" />
+    <Compile Include="MultiplicationConverter.cs" />
     <Compile Include="TimeScale.cs" />
-    <Compile Include="TimeSpanConverter.cs" />
+	<Compile Include="TimeSpanConverter.cs" />
     <Compile Include="CaretOverlay.cs" />
     <Compile Include="VirtualContentViewBase.cs" />
     <Compile Include="VirtualViewBase.cs" />

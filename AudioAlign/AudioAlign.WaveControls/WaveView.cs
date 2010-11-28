@@ -18,6 +18,7 @@ using AudioAlign.Audio;
 namespace AudioAlign.WaveControls {
     public partial class WaveView : VirtualViewBase {
 
+        private VisualizingAudioStream16 audioStream;
         private bool debug = false;
 
         public WaveView() {
@@ -37,7 +38,6 @@ namespace AudioAlign.WaveControls {
 
         protected override void OnRender(DrawingContext drawingContext) {
             base.OnRender(drawingContext);
-            VisualizingAudioStream16 audioStream = AudioStream;
 
             if (audioStream != null) {
                 Interval audioInterval = new Interval(TrackOffset, TrackOffset + audioStream.TimeLength.Ticks);
@@ -64,6 +64,7 @@ namespace AudioAlign.WaveControls {
                 // calculate drawing measures
                 double viewportToDrawingScaleFactor = ActualWidth / VirtualViewportWidth;
                 double drawingOffset = ((audioToLoadIntervalAligned.From - audioToLoadInterval.From) + (visibleAudioInterval.From - viewportInterval.From)) * viewportToDrawingScaleFactor;
+                double drawingOffset2 = (visibleAudioInterval.From - viewportInterval.From) * viewportToDrawingScaleFactor;
                 double drawingWidth = (samplesToLoad - 1) * sampleLength * viewportToDrawingScaleFactor;
 
                 DateTime beforeLoading = DateTime.Now;
@@ -115,26 +116,33 @@ namespace AudioAlign.WaveControls {
                 }
 
                 // draw waveforms
-                IWaveformRenderer renderer = null;
-                switch (RenderMode) {
-                    case WaveViewRenderMode.Bitmap:
-                        renderer = new WaveformBitmapRenderer();
-                        break;
-                    case WaveViewRenderMode.Geometry:
-                        renderer = new WaveformGeometryRenderer();
-                        break;
-                }
-                for (int channel = 0; channel < channels; channel++) {
-                    Drawing waveform = renderer.Render(samples[channel], peaks, (int)Math.Ceiling(drawingWidth), (int)channelHeight);
-                    DrawingGroup drawing = new DrawingGroup();
-                    drawing.Children.Add(waveform);
-                    drawing.Transform = new TranslateTransform((int)drawingOffset, (int)(channelHeight * channel));
-                    drawingContext.DrawDrawing(drawing);
+                if (channelHeight >= 1) {
+                    IWaveformRenderer renderer = null;
+                    switch (RenderMode) {
+                        case WaveViewRenderMode.Bitmap:
+                            renderer = new WaveformBitmapRenderer();
+                            break;
+                        case WaveViewRenderMode.Geometry:
+                            renderer = new WaveformGeometryRenderer();
+                            break;
+                    }
+                    for (int channel = 0; channel < channels; channel++) {
+                        Drawing waveform = renderer.Render(samples[channel], peaks, (int)Math.Round(drawingWidth), (int)channelHeight);
+                        DrawingGroup drawing = new DrawingGroup();
+                        drawing.Children.Add(waveform);
+                        drawing.Transform = new TranslateTransform((int)drawingOffset, (int)(channelHeight * channel));
+                        drawingContext.DrawDrawing(drawing);
+                    }
                 }
 
                 DateTime afterDrawing = DateTime.Now;
 
                 drawingContext.Pop();
+
+                // draw track name
+                FormattedText formattedTrackName = new FormattedText(AudioTrack.FileInfo.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface("Segoe UI"), 10f, Brushes.White);
+                drawingContext.DrawRectangle(Brushes.Black, null, new Rect(4 + drawingOffset2, 5, formattedTrackName.Width + 4, formattedTrackName.Height + 2));
+                drawingContext.DrawText(formattedTrackName, new Point(6 + drawingOffset2, 6));
 
                 if (debug) {
                     // DEBUG OUTPUT

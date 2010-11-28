@@ -6,12 +6,13 @@ using System.Windows;
 using System.Windows.Media;
 using System.ComponentModel;
 using AudioAlign.Audio;
+using AudioAlign.Audio.Project;
 
 namespace AudioAlign.WaveControls
 {
     public partial class WaveView {
 
-        public static readonly DependencyProperty AudioStreamProperty;
+        public static readonly DependencyProperty AudioTrackProperty;
         public static readonly DependencyProperty RenderModeProperty;
 
         public static readonly DependencyProperty WaveformBackgroundProperty;
@@ -31,9 +32,9 @@ namespace AudioAlign.WaveControls
             DefaultStyleKeyProperty.OverrideMetadata(typeof(WaveView),
                 new FrameworkPropertyMetadata(typeof(WaveView)));
 
-            AudioStreamProperty = DependencyProperty.Register("AudioStream", typeof(VisualizingAudioStream16), typeof(WaveView),
+            AudioTrackProperty = DependencyProperty.Register("AudioTrack", typeof(AudioTrack), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = null, AffectsRender = true, 
-                    PropertyChangedCallback = OnAudioStreamChanged });
+                    PropertyChangedCallback = OnAudioTrackChanged });
 
             RenderModeProperty = DependencyProperty.Register("RenderMode", typeof(WaveViewRenderMode), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = WaveViewRenderMode.Bitmap, AffectsRender = true });
@@ -66,11 +67,12 @@ namespace AudioAlign.WaveControls
             ViewportZoomProperty = ViewportZoomPropertyKey.DependencyProperty;
         }
 
-        private static void OnAudioStreamChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        private static void OnAudioTrackChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             WaveView waveView = d as WaveView;
-            VisualizingAudioStream16 audioStream = e.NewValue as VisualizingAudioStream16;
-            if (waveView != null && audioStream != null) {
-                 waveView.TrackLength = audioStream.TimeLength.Ticks;
+            AudioTrack audioTrack = e.NewValue as AudioTrack;
+            if (waveView != null && audioTrack != null) {
+                waveView.audioStream = AudioStreamFactory.FromAudioTrackForGUI(audioTrack);
+                waveView.TrackLength = waveView.audioStream.TimeLength.Ticks;
             }
         }
 
@@ -96,9 +98,9 @@ namespace AudioAlign.WaveControls
             d.SetValue(ViewportZoomPropertyKey, (float)(actualWidth / viewportWidth));
         }
 
-        public VisualizingAudioStream16 AudioStream {
-            get { return (VisualizingAudioStream16)GetValue(AudioStreamProperty); }
-            set { SetValue(AudioStreamProperty, value); }
+        public AudioTrack AudioTrack {
+            get { return (AudioTrack)GetValue(AudioTrackProperty); }
+            set { SetValue(AudioTrackProperty, value); }
         }
 
         public WaveViewRenderMode RenderMode {
