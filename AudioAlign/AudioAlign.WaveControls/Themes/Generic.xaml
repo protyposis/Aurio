@@ -286,19 +286,18 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
                                 <RowDefinition/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             
                             <local:MultiTrackListBox x:Name="PART_TrackListBox" 
-                                                     Grid.Row="1" 
+                                                     Grid.Row="0" 
                                                      Grid.Column="0" 
                                                      Grid.ColumnSpan="2" 
                                                      VirtualViewportWidth="{TemplateBinding VirtualViewportWidth}"/>
 
                             <ScrollBar Orientation="Horizontal" 
-                                       Grid.Row="2" 
+                                       Grid.Row="1" 
                                        Grid.Column="0"
                                        Value="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=VirtualViewportOffset}"
                                        Minimum="0"
