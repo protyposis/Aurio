@@ -93,7 +93,7 @@ namespace AudioAlign.WaveControls {
         private static void OnVirtualCaretOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             CaretOverlay caretOverlay = d as CaretOverlay;
             //Debug.WriteLine("CaretOverlay OnVirtualCaretOffsetChanged {0} -> {1} ({2})", e.OldValue, e.NewValue, caretOverlay.Name);
-            caretOverlay.PhysicalCaretOffset = caretOverlay.VirtualToPhysicalOffset((long)e.NewValue);
+            caretOverlay.PhysicalCaretOffset = caretOverlay.VirtualToPhysicalIntervalOffset((long)e.NewValue);
         }
 
         public CaretOverlay() {
@@ -165,12 +165,12 @@ namespace AudioAlign.WaveControls {
 
         protected override void OnViewportWidthChanged(long oldValue, long newValue) {
             base.OnViewportWidthChanged(oldValue, newValue);
-            PhysicalCaretOffset = VirtualToPhysicalOffset(VirtualCaretOffset);
+            PhysicalCaretOffset = VirtualToPhysicalIntervalOffset(VirtualCaretOffset);
         }
 
         protected override void OnViewportOffsetChanged(long oldValue, long newValue) {
             base.OnViewportOffsetChanged(oldValue, newValue);
-            PhysicalCaretOffset = VirtualToPhysicalOffset(VirtualCaretOffset);
+            PhysicalCaretOffset = VirtualToPhysicalIntervalOffset(VirtualCaretOffset);
         }
     }
 }

@@ -81,23 +81,39 @@ namespace AudioAlign.WaveControls {
             get { return new Interval(VirtualViewportOffset, VirtualViewportOffset + VirtualViewportWidth); }
         }
 
-        public static long PhysicalToVirtualOffset(Interval virtualViewportInterval, double controlWidth, double physicalOffset) {
+        public static long PhysicalToVirtualOffset(long virtualViewportWidth, double controlWidth, double physicalOffset) {
+            return (long)Math.Round(virtualViewportWidth / controlWidth * physicalOffset);
+        }
+
+        public static double VirtualToPhysicalOffset(long virtualViewportWidth, double controlWidth, long virtualOffset) {
+            return controlWidth / virtualViewportWidth * virtualOffset;
+        }
+
+        public static long PhysicalToVirtualIntervalOffset(Interval virtualViewportInterval, double controlWidth, double physicalOffset) {
             long visibleIntervalOffset = (long)Math.Round(virtualViewportInterval.Length / controlWidth * physicalOffset);
             return virtualViewportInterval.From + visibleIntervalOffset;
         }
 
-        public static double VirtualToPhysicalOffset(Interval virtualViewportInterval, double controlWidth, long virtualOffset) {
+        public static double VirtualToPhysicalIntervalOffset(Interval virtualViewportInterval, double controlWidth, long virtualOffset) {
             virtualOffset -= virtualViewportInterval.From;
             double physicalOffset = controlWidth / virtualViewportInterval.Length * virtualOffset;
             return physicalOffset;
         }
 
         public long PhysicalToVirtualOffset(double physicalOffset) {
-            return PhysicalToVirtualOffset(VirtualViewportInterval, ActualWidth, physicalOffset);
+            return PhysicalToVirtualOffset(VirtualViewportWidth, ActualWidth, physicalOffset);
         }
 
         public double VirtualToPhysicalOffset(long virtualOffset) {
-            return VirtualToPhysicalOffset(VirtualViewportInterval, ActualWidth, virtualOffset);
+            return VirtualToPhysicalOffset(VirtualViewportWidth, ActualWidth, virtualOffset);
+        }
+
+        public long PhysicalToVirtualIntervalOffset(double physicalOffset) {
+            return PhysicalToVirtualIntervalOffset(VirtualViewportInterval, ActualWidth, physicalOffset);
+        }
+
+        public double VirtualToPhysicalIntervalOffset(long virtualOffset) {
+            return VirtualToPhysicalIntervalOffset(VirtualViewportInterval, ActualWidth, virtualOffset);
         }
 
         protected virtual void OnViewportOffsetChanged(long oldValue, long newValue) { }

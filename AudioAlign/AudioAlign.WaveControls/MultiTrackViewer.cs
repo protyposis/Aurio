@@ -36,7 +36,7 @@ namespace AudioAlign.WaveControls {
 
         private void MultiTrackViewer_CaretPositionSelected(object sender, CaretOverlay.PositionEventArgs e) {
             //Debug.WriteLine("MultiTrackViewer CaretPositionSelected @ " + e.Position);
-            SetValue(VirtualCaretOffsetProperty, PhysicalToVirtualOffset(VirtualViewportInterval, e.SourceInterval, e.Position));
+            SetValue(VirtualCaretOffsetProperty, PhysicalToVirtualIntervalOffset(VirtualViewportInterval, e.SourceInterval, e.Position));
             e.Handled = true;
         }
 

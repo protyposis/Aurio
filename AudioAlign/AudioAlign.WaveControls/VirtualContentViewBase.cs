@@ -51,11 +51,19 @@ namespace AudioAlign.WaveControls {
         }
 
         public long PhysicalToVirtualOffset(double physicalOffset) {
-            return VirtualViewBase.PhysicalToVirtualOffset(VirtualViewportInterval, ActualWidth, physicalOffset);
+            return VirtualViewBase.PhysicalToVirtualOffset(VirtualViewportWidth, ActualWidth, physicalOffset);
         }
 
         public double VirtualToPhysicalOffset(long virtualOffset) {
-            return VirtualViewBase.VirtualToPhysicalOffset(VirtualViewportInterval, ActualWidth, virtualOffset);
+            return VirtualViewBase.VirtualToPhysicalOffset(VirtualViewportWidth, ActualWidth, virtualOffset);
+        }
+
+        public long PhysicalToVirtualIntervalOffset(double physicalOffset) {
+            return VirtualViewBase.PhysicalToVirtualIntervalOffset(VirtualViewportInterval, ActualWidth, physicalOffset);
+        }
+
+        public double VirtualToPhysicalIntervalOffset(long virtualOffset) {
+            return VirtualViewBase.VirtualToPhysicalIntervalOffset(VirtualViewportInterval, ActualWidth, virtualOffset);
         }
 
         protected virtual void OnViewportOffsetChanged(long oldValue, long newValue) { }

@@ -186,15 +186,10 @@ namespace AudioAlign.WaveControls {
             if (dragging) {
                 if (e.LeftButton == MouseButtonState.Pressed) {
                     Point mouseMovePosition = Mouse.GetPosition(this);
-                    Debug.WriteLine("WaveView OnMouseMove @ " + mouseMovePosition);
-
+                    //Debug.WriteLine("WaveView OnMouseMove @ " + mouseMovePosition);
                     double physicalDelta = mouseMovePosition.X - previousMousePosition.X;
-                    //long virtualDelta = PhysicalToVirtualOffset((long)physicalDelta);
-
                     previousMousePosition = mouseMovePosition;
-                    //Debug.WriteLine("WaveView DragDelta: " + physicalDelta + "p / " + virtualDelta + "v");
-
-                    TrackOffset += (long)(VirtualViewportWidth / ActualWidth * physicalDelta);
+                    TrackOffset += PhysicalToVirtualOffset((long)physicalDelta);
                     e.Handled = true;
                 }
                 else {
