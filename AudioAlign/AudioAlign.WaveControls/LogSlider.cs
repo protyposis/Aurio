@@ -53,7 +53,7 @@ namespace AudioAlign.WaveControls {
 
         public double LogValue {
             get { return (double)GetValue(LogValueProperty); }
-            private set { SetValue(LogValueProperty, value); }
+            set { SetValue(LogValueProperty, value); }
         }
 
         protected override void OnValueChanged(double oldValue, double newValue) {

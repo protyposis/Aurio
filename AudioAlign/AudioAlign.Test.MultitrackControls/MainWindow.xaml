@@ -7,14 +7,14 @@
     </Window.Resources>
     <Grid>
         <Button Content="Add Waveform" Margin="0,0,12,12" Name="btnAddWaveform" Height="23" VerticalAlignment="Bottom" Click="btnAddWaveform_Click" HorizontalAlignment="Right" Width="101" />
-        <my:MultiTrackViewer Margin="12,12,12,106" Name="multiTrackViewer1" VirtualViewportWidth="{Binding ElementName=slider1, Path=LogValue, Mode=TwoWay}" VirtualViewportOffset="{Binding ElementName=logSlider1, Path=Value, Mode=TwoWay}" />
-        <my:LogSlider Height="23" HorizontalAlignment="Left" Margin="12,0,0,48" Name="slider1" VerticalAlignment="Bottom" Width="477" Maximum="100000000000" Minimum="1" />
+        <my:MultiTrackViewer Margin="12,12,12,106" Name="multiTrackViewer1" VirtualViewportWidth="{Binding ElementName=viewportWidthSlider, Path=LogValue, Mode=TwoWay}" VirtualViewportOffset="{Binding ElementName=virtualOffsetSlider, Path=Value, Mode=TwoWay}" />
+        <my:LogSlider Height="23" HorizontalAlignment="Left" Margin="12,0,0,48" Name="viewportWidthSlider" VerticalAlignment="Bottom" Width="477" Maximum="100000000000" Minimum="1" LogValue="10000000000" />
         <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualCaretOffset, Converter={StaticResource TimeSpanConverter}, ConverterParameter='d\\.hh\\.mm\\:ss\\.fffffff'}" Height="28" Margin="0,0,12,82" Name="label2" VerticalAlignment="Bottom" FontSize="14" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Width="146" ToolTip="Caret" FontFamily="Segoe UI" />
         <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualViewportOffset, Converter={StaticResource TimeSpanConverter}, ConverterParameter='d\\.hh\\.mm\\:ss\\.fffffff'}" Height="28" Margin="12,0,0,82" VerticalAlignment="Bottom" FontSize="14" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Width="146" ToolTip="Offset" FontFamily="Segoe UI" />
         <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualViewportWidth, Converter={StaticResource TimeSpanConverter}, ConverterParameter='d\\.hh\\.mm\\:ss\\.fffffff'}" Height="28" Margin="361,0,363,82" VerticalAlignment="Bottom" FontSize="14" HorizontalContentAlignment="Center" ToolTip="Width" FontFamily="Segoe UI" />
         <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualViewportWidth}" ContentStringFormat="VirtualViewportWidth: {0}" HorizontalAlignment="Left" Margin="495,0,0,43" Name="label3" Width="241" Height="28" VerticalAlignment="Bottom" />
         <Label Content="{Binding ElementName=multiTrackViewer1, Path=VirtualViewportOffset}" ContentStringFormat="VirtualViewportOffset: {0}" HorizontalAlignment="Left" Margin="495,0,0,15" Name="label4" Width="241" Height="28" VerticalAlignment="Bottom" />
-        <Slider HorizontalAlignment="Left" Margin="12,0,0,20" Maximum="100000000000" Minimum="0" Name="logSlider1" Width="477" Height="23" VerticalAlignment="Bottom" Value="0" />
+        <Slider HorizontalAlignment="Left" Margin="12,0,0,20" Maximum="100000000000" Minimum="0" Name="virtualOffsetSlider" Width="477" Height="23" VerticalAlignment="Bottom" Value="0" />
         <CheckBox Content="Debug" HorizontalAlignment="Right" Margin="0,0,12,43" Name="debugMode" Height="16" VerticalAlignment="Bottom" IsChecked="{Binding ElementName=multiTrackViewer1, Path=DebugOutput}" />
     </Grid>
 </Window>
