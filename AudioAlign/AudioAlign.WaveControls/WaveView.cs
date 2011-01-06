@@ -172,41 +172,50 @@ namespace AudioAlign.WaveControls {
                 new Typeface("Tahoma"), 8, Brushes.Black);
         }
 
-        protected override void OnMouseDown(MouseButtonEventArgs e) {
+        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e) {
             base.OnMouseDown(e);
             Point mouseDownPosition = Mouse.GetPosition(this);
             //Debug.WriteLine("WaveView OnMouseDown @ " + mouseDownPosition);
             dragging = true;
             previousMousePosition = mouseDownPosition;
+            e.Handled = true;
         }
 
         protected override void OnMouseMove(MouseEventArgs e) {
             base.OnMouseMove(e);
             if (dragging) {
-                Point mouseMovePosition = Mouse.GetPosition(this);
-                //Debug.WriteLine("WaveView OnMouseMove @ " + mouseMovePosition);
+                if (e.LeftButton == MouseButtonState.Pressed) {
+                    Point mouseMovePosition = Mouse.GetPosition(this);
+                    Debug.WriteLine("WaveView OnMouseMove @ " + mouseMovePosition);
 
-                double physicalDelta = mouseMovePosition.X - previousMousePosition.X;
-                //long virtualDelta = PhysicalToVirtualOffset((long)physicalDelta);
+                    double physicalDelta = mouseMovePosition.X - previousMousePosition.X;
+                    //long virtualDelta = PhysicalToVirtualOffset((long)physicalDelta);
 
-                previousMousePosition = mouseMovePosition;
-                //Debug.WriteLine("WaveView DragDelta: " + physicalDelta + "p / " + virtualDelta + "v");
+                    previousMousePosition = mouseMovePosition;
+                    //Debug.WriteLine("WaveView DragDelta: " + physicalDelta + "p / " + virtualDelta + "v");
 
-                TrackOffset += (long)(VirtualViewportWidth / ActualWidth * physicalDelta);
+                    TrackOffset += (long)(VirtualViewportWidth / ActualWidth * physicalDelta);
+                    e.Handled = true;
+                }
+                else {
+                    dragging = false;
+                }
             }
         }
 
-        protected override void OnMouseUp(MouseButtonEventArgs e) {
+        protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e) {
             base.OnMouseUp(e);
             Point mouseUpPosition = Mouse.GetPosition(this);
             //Debug.WriteLine("WaveView OnMouseUp @ " + mouseUpPosition);
             dragging = false;
+            e.Handled = true;
         }
 
         protected override void OnMouseLeave(MouseEventArgs e) {
             base.OnMouseLeave(e);
             //Debug.WriteLine("WaveView OnMouseLeave");
             dragging = false;
+            e.Handled = true;
         }
     }
 }
