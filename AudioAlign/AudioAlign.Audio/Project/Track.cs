@@ -12,23 +12,13 @@ namespace AudioAlign.Audio.Project {
                 throw new ArgumentException("the specified file does not exist");
             }
             this.FileInfo = fileInfo;
-        }
-
-        public Track(FileInfo fileInfo, TimeSpan length, TimeSpan offset)
-            : this(fileInfo) {
-            this.Length = length;
-            this.Offset = offset;
+            this.Name = fileInfo.Name;
         }
 
         public static MediaType MediaType { get; protected set; }
         public TimeSpan Length { get; set; }
         public TimeSpan Offset { get; set; }
         public FileInfo FileInfo { get; private set; }
-
-        public string Name {
-            get {
-                return FileInfo.Name;
-            }
-        }
+        public string Name { get; set; }
     }
 }

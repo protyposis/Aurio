@@ -254,7 +254,8 @@
                                             </TextBlock>
                                         </Label.Content>
                                     </Label>
-                                    <Label Content="{Binding Path=Length}"/>
+                                    <Label Content="{Binding Path=Offset}" ContentStringFormat="{}({0})" ToolTip="offset"/>
+                                    <Label Content="{Binding Path=Length}" ToolTip="length"/>
                                 </StackPanel>
                             </Border>
                             <local:WaveView AudioTrack="{Binding}" 

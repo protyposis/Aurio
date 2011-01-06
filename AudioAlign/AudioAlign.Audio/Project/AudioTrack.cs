@@ -11,8 +11,9 @@ namespace AudioAlign.Audio.Project {
             MediaType = MediaType.Audio;
         }
 
-        public AudioTrack(FileInfo fileInfo) : base(fileInfo) { }
-        public AudioTrack(FileInfo fileInfo, TimeSpan length, TimeSpan offset) : base(fileInfo, length, offset) { }
+        public AudioTrack(FileInfo fileInfo) : base(fileInfo) {
+            this.Length = CreateAudioStream().TimeLength;
+        }
 
         public IAudioStream16 CreateAudioStream() {
             return AudioStreamFactory.FromFileInfo(FileInfo);
