@@ -5,6 +5,9 @@ using System.Text;
 using System.Windows.Data;
 
 namespace AudioAlign.WaveControls {
+    /// <summary>
+    /// Converts a TimeSpan struct to its string representative by formatting it with the format specified by the parameter.
+    /// </summary>
     public class TimeSpanConverter : IValueConverter {
         #region IValueConverter Members
 

@@ -76,8 +76,6 @@ namespace AudioAlign.WaveControls
             AudioTrack audioTrack = e.NewValue as AudioTrack;
             if (waveView != null && audioTrack != null) {
                 waveView.audioStream = AudioStreamFactory.FromAudioTrackForGUI(audioTrack);
-                waveView.TrackLength = waveView.audioStream.TimeLength.Ticks;
-                waveView.TrackOffset = audioTrack.Offset.Ticks;
             }
         }
 

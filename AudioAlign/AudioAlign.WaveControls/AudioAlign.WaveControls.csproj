@@ -125,6 +125,7 @@
     <Compile Include="TimeScale.cs" />
     <Compile Include="TimeSpanConverter.cs" />
     <Compile Include="CaretOverlay.cs" />
+    <Compile Include="TimeSpanTicksConverter.cs" />
     <Compile Include="VirtualContentViewBase.cs" />
     <Compile Include="VirtualViewBase.cs" />
     <Compile Include="WaveformBitmapRenderer.cs" />

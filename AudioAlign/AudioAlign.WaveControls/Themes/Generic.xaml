@@ -6,6 +6,7 @@
 
     <local:MultiplicationConverter x:Key="MultiplicationConverter"/>
     <local:ChannelsToTextConverter x:Key="ChannelsToTextConverter"/>
+    <local:TimeSpanTicksConverter x:Key="TimeSpanTicksConverter"/>
 
     <Style TargetType="{x:Type local:WaveView}">
         <Setter Property="Template">
@@ -261,7 +262,9 @@
                             <local:WaveView AudioTrack="{Binding}" 
                                             Grid.Row="1"
                                             Margin="0,2" 
-                                            VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"/>
+                                            VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"
+                                            TrackLength="{Binding Path=Length, Converter={StaticResource TimeSpanTicksConverter}}"
+                                            TrackOffset="{Binding Path=Offset, Mode=TwoWay, Converter={StaticResource TimeSpanTicksConverter}}"/>
                         </Grid>
                     </local:ResizeDecorator>
                 </DataTemplate>
