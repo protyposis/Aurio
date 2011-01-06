@@ -41,9 +41,7 @@ namespace AudioAlign.Test.MultitrackControls {
             if (result == true) {
                 // Open document
                 AudioTrack audioTrack = new AudioTrack(new FileInfo(dlg.FileName));
-                //WaveView waveView = new WaveView();
-                //waveView.AudioStream = AudioStreamFactory.FromAudioTrackForGUI(audioTrack);
-                //multiTrackPanel.Children.Add(waveView);
+                audioTrack.Offset = new TimeSpan(new Random().Next((int)new TimeSpan(0, 10, 0).Ticks));
                 multiTrackViewer1.Items.Add(audioTrack);
             }
         }

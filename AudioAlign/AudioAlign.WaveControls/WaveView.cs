@@ -135,9 +135,11 @@ namespace AudioAlign.WaveControls {
                 drawingContext.Pop();
 
                 // draw track name
-                FormattedText formattedTrackName = new FormattedText(AudioTrack.FileInfo.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface("Segoe UI"), 10f, Brushes.White);
-                drawingContext.DrawRectangle(Brushes.Black, null, new Rect(4 + drawingOffset2, 5, formattedTrackName.Width + 4, formattedTrackName.Height + 2));
-                drawingContext.DrawText(formattedTrackName, new Point(6 + drawingOffset2, 6));
+                if (DrawTrackName) {
+                    FormattedText formattedTrackName = new FormattedText(AudioTrack.FileInfo.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface("Segoe UI"), 10f, Brushes.White);
+                    drawingContext.DrawRectangle(Brushes.Black, null, new Rect(4 + drawingOffset2, 5, formattedTrackName.Width + 4, formattedTrackName.Height + 2));
+                    drawingContext.DrawText(formattedTrackName, new Point(6 + drawingOffset2, 6));
+                }
 
                 if (debug) {
                     // DEBUG OUTPUT

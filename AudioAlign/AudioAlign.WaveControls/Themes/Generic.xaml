@@ -5,6 +5,7 @@
     xmlns:local="clr-namespace:AudioAlign.WaveControls">
 
     <local:MultiplicationConverter x:Key="MultiplicationConverter"/>
+    <local:ChannelsToTextConverter x:Key="ChannelsToTextConverter"/>
 
     <Style TargetType="{x:Type local:WaveView}">
         <Setter Property="Template">
@@ -210,11 +211,58 @@
         <Setter Property="ItemTemplate">
             <Setter.Value>
                 <DataTemplate>
-                        <local:ResizeDecorator Height="100">
+                    <local:ResizeDecorator Height="100">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Border Grid.Row="0" BorderThickness="0,1" BorderBrush="Black" Background="DimGray">
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel.Resources>
+                                        <Style TargetType="Label">
+                                            <Setter Property="FontSize" Value="9"/>
+                                            <Setter Property="Padding" Value="5,2"/>
+                                        </Style>
+                                    </StackPanel.Resources>
+                                    <Label FontWeight="Bold" ToolTip="{Binding Path=Name}">
+                                        <Label.Content>
+                                            <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
+                                        </Label.Content>
+                                    </Label>
+                                    <Label>
+                                        <Label.Content>
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0} Hz / {1} bit">
+                                                        <Binding Path="Properties.SampleRate" />
+                                                        <Binding Path="Properties.BitDepth" />
+                                                     </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </Label.Content>
+                                    </Label>
+                                    <Label>
+                                        <Label.Content>
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0} channels ({1})">
+                                                        <Binding Path="Properties.Channels" />
+                                                        <Binding Path="Properties.Channels" Converter="{StaticResource ChannelsToTextConverter}" />
+                                                     </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </Label.Content>
+                                    </Label>
+                                    <Label Content="{Binding Path=Length}"/>
+                                </StackPanel>
+                            </Border>
                             <local:WaveView AudioTrack="{Binding}" 
+                                            Grid.Row="1"
                                             Margin="0,2" 
                                             VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"/>
-                        </local:ResizeDecorator>
+                        </Grid>
+                    </local:ResizeDecorator>
                 </DataTemplate>
             </Setter.Value>
         </Setter>
@@ -238,12 +286,11 @@
                                     <local:CaretOverlay VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}" 
                                                         Style="{StaticResource TimeScaleCaretOverlay}">
                                         <local:TimeScale x:Name="PART_TimeScale" 
-                                                         Grid.Column="0" 
-                                                         Grid.Row="0" 
                                                          VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"/>
                                     </local:CaretOverlay>
 
-                                    <local:CaretOverlay Grid.Row="1" VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}">
+                                    <local:CaretOverlay Grid.Row="1"
+                                                        VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}">
                                         <Grid>
                                             <Border Name="invisibleBorderToForceInputEvents" Background="Transparent"/> <!-- without this, the empty parts of the scroll viewer wouldn't provoke events -->
                                             <ScrollContentPresenter/>

@@ -29,5 +29,12 @@ namespace AudioAlign.Audio.Project {
                 return PeakFile.Exists;
             }
         }
+
+        public AudioProperties Properties {
+            get {
+                // TODO check how often this is called... on frequent calls cache the properties locally
+                return CreateAudioStream().Properties;
+            }
+        }
     }
 }

@@ -115,6 +115,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChannelsToTextConverter.cs" />
     <Compile Include="DragDropDecorator.cs" />
     <Compile Include="LogSlider.cs" />
     <Compile Include="MultiTrackListBox.cs" />
@@ -122,7 +123,7 @@
     <Compile Include="ResizeDecorator.cs" />
     <Compile Include="MultiplicationConverter.cs" />
     <Compile Include="TimeScale.cs" />
-	<Compile Include="TimeSpanConverter.cs" />
+    <Compile Include="TimeSpanConverter.cs" />
     <Compile Include="CaretOverlay.cs" />
     <Compile Include="VirtualContentViewBase.cs" />
     <Compile Include="VirtualViewBase.cs" />

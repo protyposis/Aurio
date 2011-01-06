@@ -58,7 +58,7 @@ namespace AudioAlign.WaveControls {
         }
 
         /// <summary>
-        /// Preview event is used because the bubbling mousewheel event (ehich is already handled at this time)
+        /// Preview event is used because the bubbling mousewheel event (which is already handled at this time)
         /// arrives after the listbox has done it's work on the event - which we want to avoid.
         /// </summary>
         /// <param name="e"></param>

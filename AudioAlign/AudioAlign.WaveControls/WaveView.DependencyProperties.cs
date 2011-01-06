@@ -14,6 +14,7 @@ namespace AudioAlign.WaveControls
 
         public static readonly DependencyProperty AudioTrackProperty;
         public static readonly DependencyProperty RenderModeProperty;
+        public static readonly DependencyProperty DrawTrackNameProperty;
 
         public static readonly DependencyProperty WaveformBackgroundProperty;
         public static readonly DependencyProperty WaveformLineProperty;
@@ -38,6 +39,9 @@ namespace AudioAlign.WaveControls
 
             RenderModeProperty = DependencyProperty.Register("RenderMode", typeof(WaveViewRenderMode), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = WaveViewRenderMode.Bitmap, AffectsRender = true });
+
+            DrawTrackNameProperty = DependencyProperty.Register("DrawTrackName", typeof(bool), typeof(WaveView),
+                new FrameworkPropertyMetadata { DefaultValue = false, AffectsRender = true });
 
             WaveformBackgroundProperty = DependencyProperty.Register("WaveformBackground", typeof(Brush), typeof(WaveView), 
                 new FrameworkPropertyMetadata { DefaultValue = Brushes.White, AffectsRender = true });
@@ -73,6 +77,7 @@ namespace AudioAlign.WaveControls
             if (waveView != null && audioTrack != null) {
                 waveView.audioStream = AudioStreamFactory.FromAudioTrackForGUI(audioTrack);
                 waveView.TrackLength = waveView.audioStream.TimeLength.Ticks;
+                waveView.TrackOffset = audioTrack.Offset.Ticks;
             }
         }
 
@@ -106,6 +111,11 @@ namespace AudioAlign.WaveControls
         public WaveViewRenderMode RenderMode {
             get { return (WaveViewRenderMode)GetValue(RenderModeProperty); }
             set { SetValue(RenderModeProperty, value); }
+        }
+
+        public bool DrawTrackName {
+            get { return (bool)GetValue(DrawTrackNameProperty); }
+            set { SetValue(DrawTrackNameProperty, value); }
         }
 
         [Bindable(true), Category("Brushes")]

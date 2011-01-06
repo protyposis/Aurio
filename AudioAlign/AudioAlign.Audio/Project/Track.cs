@@ -24,5 +24,11 @@ namespace AudioAlign.Audio.Project {
         public TimeSpan Length { get; set; }
         public TimeSpan Offset { get; set; }
         public FileInfo FileInfo { get; private set; }
+
+        public string Name {
+            get {
+                return FileInfo.Name;
+            }
+        }
     }
 }
