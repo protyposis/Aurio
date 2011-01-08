@@ -54,8 +54,9 @@ namespace AudioAlign.Test.MultitrackPlayback {
         }
 
         private void btnPlay_Click(object sender, RoutedEventArgs e) {
-            //List<AudioTrack> tracks = new List<AudioTrack>();
-            //tracks.AddRange(trackListBox.Items.Cast<AudioTrack>());
+            if (wavePlayer != null) {
+                wavePlayer.Dispose();
+            }
 
             WaveMixerStream32 mixer = new WaveMixerStream32();
             foreach (AudioTrack audioTrack in trackListBox.Items) {
@@ -64,13 +65,19 @@ namespace AudioAlign.Test.MultitrackPlayback {
                 mixer.AddInputStream(channel);
             }
 
-            VolumeMeteringStream meteringStream = new VolumeMeteringStream(mixer);
-            meteringStream.StreamVolume += new EventHandler<StreamVolumeEventArgs>(meteringStream_StreamVolume);
+            VolumeControlStream volumeControlStream = new VolumeControlStream(mixer);
+            VolumeMeteringStream volumeMeteringStream = new VolumeMeteringStream(volumeControlStream);
+            volumeMeteringStream.StreamVolume += new EventHandler<StreamVolumeEventArgs>(meteringStream_StreamVolume);
 
-            playbackStream = meteringStream;
+            playbackStream = volumeMeteringStream;
 
             wavePlayer = new WaveOut();
             wavePlayer.Init(playbackStream);
+
+            volumeSlider.ValueChanged += new RoutedPropertyChangedEventHandler<double>(
+                delegate(object vsender, RoutedPropertyChangedEventArgs<double> ve) {
+                    volumeControlStream.Volume = (float)ve.NewValue;
+            });
 
             wavePlayer.Play();
         }

@@ -78,6 +78,7 @@
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -117,6 +118,7 @@
     <Compile Include="IAudioStream16.cs" />
     <Compile Include="Interval.cs" />
     <Compile Include="NAudio16BitWaveFileReaderWrapperStream.cs" />
+    <Compile Include="NAudio\VolumeControlStream.cs" />
     <Compile Include="NAudio\VolumeMeteringStream.cs" />
     <Compile Include="Peak.cs" />
     <Compile Include="PeakStore.cs" />
