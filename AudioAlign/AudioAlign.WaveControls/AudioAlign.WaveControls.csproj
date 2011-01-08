@@ -128,6 +128,7 @@
     <Compile Include="TimeSpanTicksConverter.cs" />
     <Compile Include="VirtualContentViewBase.cs" />
     <Compile Include="VirtualViewBase.cs" />
+    <Compile Include="VUMeter.cs" />
     <Compile Include="WaveformBitmapRenderer.cs" />
     <Compile Include="WaveformGeometryRenderer.cs" />
     <Compile Include="IWaveformRenderer.cs" />

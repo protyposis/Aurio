@@ -219,45 +219,60 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <Border Grid.Row="0" BorderThickness="0,1" BorderBrush="Black" Background="DimGray">
-                                <StackPanel Orientation="Horizontal">
-                                    <StackPanel.Resources>
+                                <DockPanel LastChildFill="False">
+                                    <DockPanel.Resources>
                                         <Style TargetType="Label">
                                             <Setter Property="FontSize" Value="9"/>
                                             <Setter Property="Padding" Value="5,2"/>
                                         </Style>
-                                    </StackPanel.Resources>
-                                    <Label FontWeight="Bold" ToolTip="{Binding Path=Name}">
-                                        <Label.Content>
-                                            <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
-                                        </Label.Content>
-                                    </Label>
-                                    <Label>
-                                        <Label.Content>
-                                            <TextBlock>
-                                                <TextBlock.Text>
-                                                    <MultiBinding StringFormat="{}{0} Hz / {1} bit">
-                                                        <Binding Path="Properties.SampleRate" />
-                                                        <Binding Path="Properties.BitDepth" />
-                                                     </MultiBinding>
-                                                </TextBlock.Text>
-                                            </TextBlock>
-                                        </Label.Content>
-                                    </Label>
-                                    <Label>
-                                        <Label.Content>
-                                            <TextBlock>
-                                                <TextBlock.Text>
-                                                    <MultiBinding StringFormat="{}{0} channels ({1})">
-                                                        <Binding Path="Properties.Channels" />
-                                                        <Binding Path="Properties.Channels" Converter="{StaticResource ChannelsToTextConverter}" />
-                                                     </MultiBinding>
-                                                </TextBlock.Text>
-                                            </TextBlock>
-                                        </Label.Content>
-                                    </Label>
-                                    <Label Content="{Binding Path=Offset}" ContentStringFormat="{}({0})" ToolTip="offset"/>
-                                    <Label Content="{Binding Path=Length}" ToolTip="length"/>
-                                </StackPanel>
+                                        <Style TargetType="ToggleButton">
+                                            <Setter Property="FontSize" Value="9"/>
+                                            <Setter Property="Padding" Value="5,2"/>
+                                        </Style>
+                                        <Style TargetType="Slider">
+                                            <Setter Property="FontSize" Value="9"/>
+                                            <Setter Property="Padding" Value="5,2"/>
+                                        </Style>
+                                    </DockPanel.Resources>
+                                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                                        <Label FontWeight="Bold" ToolTip="{Binding Path=Name}">
+                                            <Label.Content>
+                                                <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
+                                            </Label.Content>
+                                        </Label>
+                                        <Label>
+                                            <Label.Content>
+                                                <TextBlock>
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0} Hz / {1} bit">
+                                                            <Binding Path="Properties.SampleRate" />
+                                                            <Binding Path="Properties.BitDepth" />
+                                                         </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </Label.Content>
+                                        </Label>
+                                        <Label>
+                                            <Label.Content>
+                                                <TextBlock>
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0} channels ({1})">
+                                                            <Binding Path="Properties.Channels" />
+                                                            <Binding Path="Properties.Channels" Converter="{StaticResource ChannelsToTextConverter}" />
+                                                         </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </Label.Content>
+                                        </Label>
+                                        <Label Content="{Binding Path=Offset}" ContentStringFormat="{}({0})" ToolTip="offset"/>
+                                        <Label Content="{Binding Path=Length}" ToolTip="length"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                                        <Slider Width="100"/>
+                                        <ToggleButton Content="X"/>
+                                        <ToggleButton Content="!"/>
+                                    </StackPanel>
+                                </DockPanel>
                             </Border>
                             <local:WaveView AudioTrack="{Binding}" 
                                             Grid.Row="1"
@@ -414,6 +429,42 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsDragOver" Value="True">
                             <Setter TargetName="DropMarker" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type local:VUMeter}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:VUMeter}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Name="decibelLabel" Content="{TemplateBinding Decibel}" ContentStringFormat="{}{0:0.0}" FontSize="9" Padding="0" HorizontalAlignment="Center"/>
+                        <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1">
+                            <Grid Margin="0">
+                                <Rectangle Name="PART_IndicatorContainer" Margin="0">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                            <GradientStop Color="Red" Offset="0"/>
+                                            <GradientStop Color="#FF2BFF00" Offset="1"/>
+                                            <GradientStop Color="#FFF1FF00" Offset="0.1"/>
+                                            <GradientStop Color="#FF53FF00" Offset="0.25"/>
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                <Rectangle Name="PART_Indicator" Fill="#A7898989" VerticalAlignment="Top"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsOverdriven" Value="True">
+                            <Setter TargetName="decibelLabel" Property="Foreground" Value="Red"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
