@@ -23,6 +23,11 @@ namespace AudioAlign.Audio.NAudio {
         /// </summary>
         public float Volume { get; set; }
 
+        /// <summary>
+        /// Gets or sets if the track is muted.
+        /// </summary>
+        public bool Mute { get; set; }
+
         public override WaveFormat WaveFormat {
             get { return SourceStream.WaveFormat; }
         }
@@ -48,7 +53,13 @@ namespace AudioAlign.Audio.NAudio {
                 fixed (byte* sampleBuffer = &buffer[offset]) {
                     float* samples = (float*)sampleBuffer;
                     for (int x = 0; x < bytesRead / 4; x++) {
-                        samples[x] *= Volume;
+                        if (Mute) {
+                            // in mute mode, just set the samples to zero (-inf dB).
+                            samples[x] = 0.0f;
+                        }
+                        else {
+                            samples[x] *= Volume;
+                        }
                     }
                 }
             }

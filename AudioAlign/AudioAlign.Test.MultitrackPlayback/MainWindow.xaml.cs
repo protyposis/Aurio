@@ -18,6 +18,7 @@ using AudioAlign.Audio.NAudio;
 using System.Timers;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using AudioAlign.Audio;
 
 namespace AudioAlign.Test.MultitrackPlayback {
     /// <summary>
@@ -26,7 +27,7 @@ namespace AudioAlign.Test.MultitrackPlayback {
     public partial class MainWindow : Window {
 
         private Timer timer;
-        private IWavePlayer wavePlayer;
+        private WaveOut wavePlayer;
         private WaveStream playbackStream;
 
         public MainWindow() {
@@ -62,7 +63,46 @@ namespace AudioAlign.Test.MultitrackPlayback {
             foreach (AudioTrack audioTrack in trackListBox.Items) {
                 WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
                 WaveChannel32 channel = new WaveChannel32(reader);
-                mixer.AddInputStream(channel);
+                VolumeControlStream volumeControl = new VolumeControlStream(channel) {
+                    Mute = audioTrack.Mute,
+                    Volume = audioTrack.Volume
+                };
+
+                audioTrack.MuteChanged += new EventHandler<ValueEventArgs<bool>>(
+                    delegate(object vsender, ValueEventArgs<bool> ve) {
+                        volumeControl.Mute = ve.Value;
+                    });
+
+                audioTrack.SoloChanged += new EventHandler<ValueEventArgs<bool>>(
+                    delegate(object vsender, ValueEventArgs<bool> ve) {
+                        AudioTrack senderTrack = (AudioTrack)vsender;
+                        bool isOtherTrackSoloed = false;
+
+                        foreach (AudioTrack vaudioTrack in trackListBox.Items) {
+                            if (vaudioTrack != senderTrack && vaudioTrack.Solo) {
+                                isOtherTrackSoloed = true;
+                                break;
+                            }
+                        }
+
+                        if (isOtherTrackSoloed) {
+                            senderTrack.Mute = !ve.Value;
+                        }
+                        else {
+                            foreach (AudioTrack vaudioTrack in trackListBox.Items) {
+                                if (vaudioTrack != senderTrack && !vaudioTrack.Solo) {
+                                    vaudioTrack.Mute = ve.Value;
+                                }
+                            }
+                        }
+                    });
+
+                audioTrack.VolumeChanged += new EventHandler<ValueEventArgs<float>>(
+                    delegate(object vsender, ValueEventArgs<float> ve) {
+                        volumeControl.Volume = ve.Value;
+                    });
+
+                mixer.AddInputStream(volumeControl);
             }
 
             VolumeControlStream volumeControlStream = new VolumeControlStream(mixer);
@@ -72,6 +112,7 @@ namespace AudioAlign.Test.MultitrackPlayback {
             playbackStream = volumeMeteringStream;
 
             wavePlayer = new WaveOut();
+            wavePlayer.DesiredLatency = 100;
             wavePlayer.Init(playbackStream);
 
             volumeSlider.ValueChanged += new RoutedPropertyChangedEventHandler<double>(
