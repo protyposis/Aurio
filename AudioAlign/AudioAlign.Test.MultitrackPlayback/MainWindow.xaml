@@ -4,29 +4,37 @@
         Title="MultitrackPlaybackTest" Height="350" Width="1026" Loaded="Window_Loaded" xmlns:my="clr-namespace:AudioAlign.WaveControls;assembly=AudioAlign.WaveControls" Closed="Window_Closed">
     <Window.Resources>
         <DataTemplate x:Key="TrackListBoxItem">
-            <Border BorderThickness="0" BorderBrush="Black" HorizontalAlignment="Stretch">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                    <Label Content="{Binding Path=Name}" FontWeight="Bold"/>
-                    <Label Content="{Binding Path=Properties.SampleRate}"/>
-                    <Label Content="{Binding Path=Properties.BitDepth}"/>
-                    <Label Content="{Binding Path=Properties.Channels}"/>
-                    <Label Content="{Binding Path=Offset}"/>
-                    <Label Content="{Binding Path=Length}"/>
-                    <Slider Width="100" Minimum="0" Maximum="2" SmallChange="0.001" LargeChange="0.01" Value="{Binding Path=Volume}"/>
-                    <ToggleButton Content="X" IsChecked="{Binding Path=Mute, Mode=TwoWay}"/>
-                    <ToggleButton Content="!" IsChecked="{Binding Path=Solo, Mode=TwoWay}"/>
-                </StackPanel>
+            <Border BorderThickness="0" BorderBrush="Black">
+                <DockPanel LastChildFill="True">
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                        <Label Content="{Binding Path=Name}" FontWeight="Bold"/>
+                        <Label Content="{Binding Path=Properties.SampleRate}"/>
+                        <Label Content="{Binding Path=Properties.BitDepth}"/>
+                        <Label Content="{Binding Path=Properties.Channels}"/>
+                        <Label Content="{Binding Path=Offset}"/>
+                        <Label Content="{Binding Path=Length}"/>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Slider Width="100" Minimum="0" Maximum="2" SmallChange="0.001" LargeChange="0.01" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Margin="3" Value="{Binding Path=Volume}"/>
+                        <ToggleButton IsChecked="{Binding Path=Mute, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
+                            <Image Source="{StaticResource IconSoundMute}" Width="16" Height="16" />
+                        </ToggleButton>
+                        <ToggleButton IsChecked="{Binding Path=Solo, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
+                            <Image Source="{StaticResource IconSound}" Width="16" Height="16" />
+                        </ToggleButton>
+                    </StackPanel>
+                </DockPanel>
             </Border>
         </DataTemplate>
     </Window.Resources>
     
     <Grid>
-        <ListBox Margin="12,12,291,69" Name="trackListBox" ItemTemplate="{StaticResource TrackListBoxItem}" />
+        <ListBox Margin="12,12,291,69" Name="trackListBox" ItemTemplate="{StaticResource TrackListBoxItem}" HorizontalContentAlignment="Stretch"/>
         <Button Content="Add File" Height="23" HorizontalAlignment="Right" Margin="0,0,203,12" Name="btnAddFile" VerticalAlignment="Bottom" Width="75" Click="btnAddFile_Click" />
         <Button Content="Play" Height="23" HorizontalAlignment="Left" Margin="12,0,0,12" Name="btnPlay" VerticalAlignment="Bottom" Width="42" Click="btnPlay_Click" />
         <Button Content="Pause" Height="23" HorizontalAlignment="Left" Margin="60,0,0,12" Name="btnPause" VerticalAlignment="Bottom" Width="42" Click="btnPause_Click" />
         <Button Content="Stop" Height="23" HorizontalAlignment="Left" Margin="108,0,0,12" Name="btnStop" VerticalAlignment="Bottom" Width="42" Click="btnStop_Click" />
-        <Label Content="time..." Height="28" HorizontalAlignment="Left" Margin="156,275,0,0" Name="lblCurrentPlaybackTime" VerticalAlignment="Top" Width="79" />
+        <Label Content="time..." Height="28" HorizontalAlignment="Left" Margin="156,275,0,0" Name="lblCurrentPlaybackTime" VerticalAlignment="Top" Width="138" />
         <my:VUMeter HorizontalAlignment="Right" Margin="0,12,265,69" Name="vUMeterCh1" Width="20" />
         <my:VUMeter HorizontalAlignment="Right" Margin="0,12,239,69" Name="vUMeterCh2" Width="20" />
         <GroupBox Header="Control tests" HorizontalAlignment="Right" Margin="0,12,12,12" Name="groupBox1" Width="163">

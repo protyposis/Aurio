@@ -63,16 +63,20 @@ namespace AudioAlign.Test.MultitrackPlayback {
             foreach (AudioTrack audioTrack in trackListBox.Items) {
                 WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
                 WaveChannel32 channel = new WaveChannel32(reader);
+
+                // necessary to control each track individually
                 VolumeControlStream volumeControl = new VolumeControlStream(channel) {
                     Mute = audioTrack.Mute,
                     Volume = audioTrack.Volume
                 };
 
+                // when the AudioTrack.Mute property changes, just set it accordingly on the audio stream
                 audioTrack.MuteChanged += new EventHandler<ValueEventArgs<bool>>(
                     delegate(object vsender, ValueEventArgs<bool> ve) {
                         volumeControl.Mute = ve.Value;
                     });
 
+                // when the AudioTrack.Solo property changes, we have to react in different ways:
                 audioTrack.SoloChanged += new EventHandler<ValueEventArgs<bool>>(
                     delegate(object vsender, ValueEventArgs<bool> ve) {
                         AudioTrack senderTrack = (AudioTrack)vsender;
@@ -85,9 +89,17 @@ namespace AudioAlign.Test.MultitrackPlayback {
                             }
                         }
 
+                        /* if there's at least one other track that is soloed, we set the mute property of 
+                         * the current track to the opposite of the solo property:
+                         * - if the track is soloed, we unmute it
+                         * - if the track is unsoloed, we mute it
+                         */
                         if (isOtherTrackSoloed) {
                             senderTrack.Mute = !ve.Value;
                         }
+                        /* if this is the only soloed track, we mute all other tracks
+                         * if this track just got unsoloed, we unmute all other tracks
+                         */
                         else {
                             foreach (AudioTrack vaudioTrack in trackListBox.Items) {
                                 if (vaudioTrack != senderTrack && !vaudioTrack.Solo) {
@@ -97,6 +109,7 @@ namespace AudioAlign.Test.MultitrackPlayback {
                         }
                     });
 
+                // when the AudioTrack.Volume property changes, just set it accordingly on the audio stream
                 audioTrack.VolumeChanged += new EventHandler<ValueEventArgs<float>>(
                     delegate(object vsender, ValueEventArgs<float> ve) {
                         volumeControl.Volume = ve.Value;
@@ -115,6 +128,7 @@ namespace AudioAlign.Test.MultitrackPlayback {
             wavePlayer.DesiredLatency = 100;
             wavePlayer.Init(playbackStream);
 
+            // master volume setting
             volumeSlider.ValueChanged += new RoutedPropertyChangedEventHandler<double>(
                 delegate(object vsender, RoutedPropertyChangedEventArgs<double> ve) {
                     volumeControlStream.Volume = (float)ve.NewValue;
@@ -124,6 +138,9 @@ namespace AudioAlign.Test.MultitrackPlayback {
         }
 
         private void btnPause_Click(object sender, RoutedEventArgs e) {
+            if (wavePlayer == null)
+                return;
+
             if (wavePlayer.PlaybackState == PlaybackState.Paused) {
                 wavePlayer.Play();
             }
@@ -133,6 +150,9 @@ namespace AudioAlign.Test.MultitrackPlayback {
         }
 
         private void btnStop_Click(object sender, RoutedEventArgs e) {
+            if (wavePlayer == null)
+                return;
+
             wavePlayer.Stop();
         }
 
