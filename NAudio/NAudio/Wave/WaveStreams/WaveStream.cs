@@ -128,11 +128,18 @@ namespace NAudio.Wave
         {
             get
             {
-                return TimeSpan.FromSeconds((double)Position / WaveFormat.AverageBytesPerSecond);                
+                return TimeSpan.FromSeconds((double)Position / WaveFormat.AverageBytesPerSecond);
             }
             set
             {
-                Position = (long) (value.TotalSeconds * WaveFormat.AverageBytesPerSecond);
+                long newPositionUnaligned = (long)(value.TotalSeconds * WaveFormat.AverageBytesPerSecond);
+                /* Avoid setting the position to non-blockaligned values which can result in various problems:
+                 * - reading invalid samples
+                 * - changing the order of channels (e.g. left and right channel get interchanged when setting
+                 *   the position between two samples of one point of time)
+                 * - provoking asserts and exceptions in encapsulating streams that check for block alignment
+                 */
+                Position = newPositionUnaligned - (newPositionUnaligned % BlockAlign);
             }
         }
 
