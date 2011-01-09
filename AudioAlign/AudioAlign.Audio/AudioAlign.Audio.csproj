@@ -118,6 +118,7 @@
     <Compile Include="IAudioStream16.cs" />
     <Compile Include="Interval.cs" />
     <Compile Include="NAudio16BitWaveFileReaderWrapperStream.cs" />
+    <Compile Include="NAudio\TolerantWaveStream.cs" />
     <Compile Include="NAudio\VolumeControlStream.cs" />
     <Compile Include="NAudio\VolumeMeteringStream.cs" />
     <Compile Include="Peak.cs" />

@@ -26,6 +26,8 @@ namespace AudioAlign.Test.MultitrackPlayback {
     /// </summary>
     public partial class MainWindow : Window {
 
+        private const ulong SEEKER_PROGRAMMATIC_VALUECHANGED_TAG = 0xDEADC0DEDEADC0DE;
+
         private Timer timer;
         private WaveOut wavePlayer;
         private WaveStream playbackStream;
@@ -62,7 +64,8 @@ namespace AudioAlign.Test.MultitrackPlayback {
             WaveMixerStream32 mixer = new WaveMixerStream32();
             foreach (AudioTrack audioTrack in trackListBox.Items) {
                 WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
-                WaveChannel32 channel = new WaveChannel32(reader);
+                TolerantWaveStream tolerantReader = new TolerantWaveStream(reader);
+                WaveChannel32 channel = new WaveChannel32(tolerantReader);
 
                 // necessary to control each track individually
                 VolumeControlStream volumeControl = new VolumeControlStream(channel) {
@@ -180,7 +183,10 @@ namespace AudioAlign.Test.MultitrackPlayback {
                 lblCurrentPlaybackTime.Dispatcher.BeginInvoke(DispatcherPriority.Normal, 
                     new DispatcherOperationCallback(delegate {
                         lblCurrentPlaybackTime.Content = playbackStream.CurrentTime;
+
+                        playbackSeeker.Tag = SEEKER_PROGRAMMATIC_VALUECHANGED_TAG;
                         playbackSeeker.Value = playbackStream.CurrentTime.TotalSeconds;
+
                         return null;
                    }), null);
             }
@@ -194,6 +200,11 @@ namespace AudioAlign.Test.MultitrackPlayback {
         }
 
         private void playbackSeeker_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (playbackSeeker.Tag != null && (ulong)playbackSeeker.Tag == SEEKER_PROGRAMMATIC_VALUECHANGED_TAG) {
+                playbackSeeker.Tag = null;
+                return;
+            }
+
             if (playbackStream != null) {
                 playbackStream.CurrentTime = TimeSpan.FromSeconds(playbackSeeker.Value);
             }
