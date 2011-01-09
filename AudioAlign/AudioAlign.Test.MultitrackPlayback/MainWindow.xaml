@@ -11,8 +11,8 @@
                         <Label Content="{Binding Path=Properties.SampleRate}"/>
                         <Label Content="{Binding Path=Properties.BitDepth}"/>
                         <Label Content="{Binding Path=Properties.Channels}"/>
-                        <Label Content="{Binding Path=Offset}"/>
-                        <Label Content="{Binding Path=Length}"/>
+                        <Label Content="{Binding Path=Offset}" ContentStringFormat="{}{0:hh\:mm\:ss\,fff}"/>
+                        <Label Content="{Binding Path=Length}" ContentStringFormat="{}{0:hh\:mm\:ss\,fff}"/>
                     </StackPanel>
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
                         <my:ExtendedSlider Width="100" Minimum="0" Maximum="2" SmallChange="0.001" LargeChange="0.01" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Margin="3" Value="{Binding Path=Volume}" DefaultValue="1"/>
@@ -34,7 +34,7 @@
         <Button Content="Play" Height="23" HorizontalAlignment="Left" Margin="12,0,0,12" Name="btnPlay" VerticalAlignment="Bottom" Width="42" Click="btnPlay_Click" />
         <Button Content="Pause" Height="23" HorizontalAlignment="Left" Margin="60,0,0,12" Name="btnPause" VerticalAlignment="Bottom" Width="42" Click="btnPause_Click" />
         <Button Content="Stop" Height="23" HorizontalAlignment="Left" Margin="108,0,0,12" Name="btnStop" VerticalAlignment="Bottom" Width="42" Click="btnStop_Click" />
-        <Label Content="time..." Height="28" HorizontalAlignment="Left" Margin="156,275,0,0" Name="lblCurrentPlaybackTime" VerticalAlignment="Top" Width="138" />
+        <Label Content="time..." ContentStringFormat="{}{0:hh\:mm\:ss\,fff}"  Height="28" HorizontalAlignment="Left" Margin="156,275,0,0" Name="lblCurrentPlaybackTime" VerticalAlignment="Top" Width="138" />
         <my:VUMeter HorizontalAlignment="Right" Margin="0,12,265,69" Name="vUMeterCh1" Width="20" />
         <my:VUMeter HorizontalAlignment="Right" Margin="0,12,239,69" Name="vUMeterCh2" Width="20" />
         <GroupBox Header="Control tests" HorizontalAlignment="Right" Margin="0,12,12,12" Name="groupBox1" Width="163">
@@ -44,5 +44,7 @@
             </Grid>
         </GroupBox>
         <my:ExtendedSlider AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" HorizontalAlignment="Right" Margin="0,25,203,69" Maximum="2" Name="volumeSlider" Orientation="Vertical" SmallChange="0.001" TickFrequency="0.1" TickPlacement="Both" Value="1" Width="30" LargeChange="0.01" DefaultValue="1" />
+        <Slider Height="23" Margin="12,0,291,40" Name="playbackSeeker" VerticalAlignment="Bottom" LargeChange="10" SmallChange="1" ValueChanged="playbackSeeker_ValueChanged" />
+        <Label Content="time..." ContentStringFormat="{}{0:hh\:mm\:ss\,fff}" Height="28" HorizontalAlignment="Left" Margin="300,275,0,0" Name="lblTotalPlaybackTime" VerticalAlignment="Top" Width="138" />
     </Grid>
 </Window>

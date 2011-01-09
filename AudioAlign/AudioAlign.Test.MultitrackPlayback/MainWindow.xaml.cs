@@ -134,6 +134,9 @@ namespace AudioAlign.Test.MultitrackPlayback {
                     volumeControlStream.Volume = (float)ve.NewValue;
             });
 
+            lblTotalPlaybackTime.Content = playbackStream.TotalTime;
+            playbackSeeker.Maximum = playbackStream.TotalTime.TotalSeconds;
+
             wavePlayer.Play();
         }
 
@@ -176,7 +179,8 @@ namespace AudioAlign.Test.MultitrackPlayback {
             if (wavePlayer != null) {
                 lblCurrentPlaybackTime.Dispatcher.BeginInvoke(DispatcherPriority.Normal, 
                     new DispatcherOperationCallback(delegate {
-                        lblCurrentPlaybackTime.Content = playbackStream.CurrentTime.ToString();
+                        lblCurrentPlaybackTime.Content = playbackStream.CurrentTime;
+                        playbackSeeker.Value = playbackStream.CurrentTime.TotalSeconds;
                         return null;
                    }), null);
             }
@@ -186,6 +190,12 @@ namespace AudioAlign.Test.MultitrackPlayback {
             if (e.MaxSampleValues.Length >= 2) {
                 vUMeterCh1.Amplitude = e.MaxSampleValues[0];
                 vUMeterCh2.Amplitude = e.MaxSampleValues[1];
+            }
+        }
+
+        private void playbackSeeker_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (playbackStream != null) {
+                playbackStream.CurrentTime = TimeSpan.FromSeconds(playbackSeeker.Value);
             }
         }
     }
