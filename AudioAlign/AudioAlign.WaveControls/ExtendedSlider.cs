@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Controls;
 using System.Windows;
 using System.ComponentModel;
+using System.Windows.Controls.Primitives;
 
 namespace AudioAlign.WaveControls {
     public class ExtendedSlider : Slider {
@@ -38,10 +39,17 @@ namespace AudioAlign.WaveControls {
         }
 
         public ExtendedSlider() {
-            this.MouseDoubleClick += new System.Windows.Input.MouseButtonEventHandler(ExtendedSlider_MouseDoubleClick);
+            this.Loaded += new RoutedEventHandler(ExtendedSlider_Loaded);
         }
 
-        private void ExtendedSlider_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+        private void ExtendedSlider_Loaded(object sender, RoutedEventArgs e) {
+            Thumb thumb = GetThumb(this);
+            if (thumb != null) {
+                thumb.MouseDoubleClick += new System.Windows.Input.MouseButtonEventHandler(thumb_MouseDoubleClick);
+            }
+        }
+
+        void thumb_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
             Value = DefaultValue;
         }
 
@@ -54,5 +62,15 @@ namespace AudioAlign.WaveControls {
             set { SetValue(DefaultValueProperty, value); }
         }
 
+        /// <summary>
+        /// Gets the Thumb of a Slider.
+        /// Source: http://stackoverflow.com/questions/3233000/get-the-thumb-of-a-slider
+        /// </summary>
+        /// <param name="slider"></param>
+        /// <returns></returns>
+        private static Thumb GetThumb(Slider slider) {
+            var track = slider.Template.FindName("PART_Track", slider) as Track;
+            return track == null ? null : track.Thumb;
+        }
     }
 }

@@ -114,11 +114,13 @@
     <Compile Include="AudioStreamWrapper.cs" />
     <Compile Include="AudioUtil.cs" />
     <Compile Include="BinaryIOExtensions.cs" />
+    <Compile Include="VolumeUtil.cs" />
     <Compile Include="IAudioStream.cs" />
     <Compile Include="IAudioStream16.cs" />
     <Compile Include="Interval.cs" />
     <Compile Include="NAudio16BitWaveFileReaderWrapperStream.cs" />
     <Compile Include="NAudio\TolerantWaveStream.cs" />
+    <Compile Include="NAudio\VolumeClipStream.cs" />
     <Compile Include="NAudio\VolumeControlStream.cs" />
     <Compile Include="NAudio\VolumeMeteringStream.cs" />
     <Compile Include="Peak.cs" />

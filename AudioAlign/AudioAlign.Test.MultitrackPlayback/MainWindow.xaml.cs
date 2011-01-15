@@ -124,8 +124,9 @@ namespace AudioAlign.Test.MultitrackPlayback {
             VolumeControlStream volumeControlStream = new VolumeControlStream(mixer);
             VolumeMeteringStream volumeMeteringStream = new VolumeMeteringStream(volumeControlStream);
             volumeMeteringStream.StreamVolume += new EventHandler<StreamVolumeEventArgs>(meteringStream_StreamVolume);
+            VolumeClipStream volumeClipStream = new VolumeClipStream(volumeMeteringStream);
 
-            playbackStream = volumeMeteringStream;
+            playbackStream = volumeClipStream;
 
             wavePlayer = new WaveOut();
             wavePlayer.DesiredLatency = 100;
@@ -194,8 +195,8 @@ namespace AudioAlign.Test.MultitrackPlayback {
 
         private void meteringStream_StreamVolume(object sender, StreamVolumeEventArgs e) {
             if (e.MaxSampleValues.Length >= 2) {
-                vUMeterCh1.Amplitude = e.MaxSampleValues[0];
-                vUMeterCh2.Amplitude = e.MaxSampleValues[1];
+                stereoVUMeter1.AmplitudeLeft = e.MaxSampleValues[0];
+                stereoVUMeter1.AmplitudeRight = e.MaxSampleValues[1];
             }
         }
 

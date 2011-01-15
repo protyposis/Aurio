@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MultitrackPlaybackTest" Height="350" Width="1026" Loaded="Window_Loaded" xmlns:my="clr-namespace:AudioAlign.WaveControls;assembly=AudioAlign.WaveControls" Closed="Window_Closed">
     <Window.Resources>
+        <my:LinearDecibelConverter x:Key="LinearDecibelConverter"/>
         <DataTemplate x:Key="TrackListBoxItem">
             <Border BorderThickness="0" BorderBrush="Black">
                 <DockPanel LastChildFill="True">
@@ -15,7 +16,8 @@
                         <Label Content="{Binding Path=Length}" ContentStringFormat="{}{0:hh\:mm\:ss\,fff}"/>
                     </StackPanel>
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <my:ExtendedSlider Width="100" Minimum="0" Maximum="2" SmallChange="0.001" LargeChange="0.01" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Margin="3" Value="{Binding Path=Volume}" DefaultValue="1"/>
+                        <my:ExtendedSlider Name="volumeSlider" Width="100" Minimum="0" Maximum="2" SmallChange="0.001" LargeChange="0.01" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Margin="3" Value="{Binding Path=Volume}" DefaultValue="1"/>
+                        <Label Name="decibelLabel" Content="{Binding ElementName=volumeSlider, Path=Value, FallbackValue=dB, Converter={StaticResource LinearDecibelConverter}}" ContentStringFormat="{}{0:0.0}" HorizontalAlignment="Right" Width="40"/>
                         <ToggleButton IsChecked="{Binding Path=Mute, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
                             <Image Source="{StaticResource IconSoundMute}" Width="16" Height="16" />
                         </ToggleButton>
@@ -29,22 +31,29 @@
     </Window.Resources>
     
     <Grid>
-        <ListBox Margin="12,12,291,69" Name="trackListBox" ItemTemplate="{StaticResource TrackListBoxItem}" HorizontalContentAlignment="Stretch"/>
+        <ListBox Margin="12,12,308,69" Name="trackListBox" ItemTemplate="{StaticResource TrackListBoxItem}" HorizontalContentAlignment="Stretch"/>
         <Button Content="Add File" Height="23" HorizontalAlignment="Right" Margin="0,0,203,12" Name="btnAddFile" VerticalAlignment="Bottom" Width="75" Click="btnAddFile_Click" />
         <Button Content="Play" Height="23" HorizontalAlignment="Left" Margin="12,0,0,12" Name="btnPlay" VerticalAlignment="Bottom" Width="42" Click="btnPlay_Click" />
         <Button Content="Pause" Height="23" HorizontalAlignment="Left" Margin="60,0,0,12" Name="btnPause" VerticalAlignment="Bottom" Width="42" Click="btnPause_Click" />
         <Button Content="Stop" Height="23" HorizontalAlignment="Left" Margin="108,0,0,12" Name="btnStop" VerticalAlignment="Bottom" Width="42" Click="btnStop_Click" />
-        <Label Content="time..." ContentStringFormat="{}{0:hh\:mm\:ss\,fff}"  Height="28" HorizontalAlignment="Left" Margin="156,275,0,0" Name="lblCurrentPlaybackTime" VerticalAlignment="Top" Width="138" />
-        <my:VUMeter HorizontalAlignment="Right" Margin="0,12,265,69" Name="vUMeterCh1" Width="20" />
-        <my:VUMeter HorizontalAlignment="Right" Margin="0,12,239,69" Name="vUMeterCh2" Width="20" />
+        <Label Content="current time..." ContentStringFormat="{}{0:hh\:mm\:ss\,fff}"  Height="28" HorizontalAlignment="Left" Margin="156,0,0,8" Name="lblCurrentPlaybackTime" VerticalAlignment="Bottom" Width="138" />
         <GroupBox Header="Control tests" HorizontalAlignment="Right" Margin="0,12,12,12" Name="groupBox1" Width="163">
             <Grid>
                 <my:VUMeter HorizontalAlignment="Left" Margin="34,6,0,6" Name="vUMeter1" Width="20" Amplitude="{Binding Path=Value, ElementName=slider1}" />
                 <Slider HorizontalAlignment="Left" Margin="6,6,0,6" Name="slider1" Width="22" Maximum="1.1" Value="0.5" Orientation="Vertical" SmallChange="0.001" TickFrequency="0.1" TickPlacement="BottomRight" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" />
+                <my:ExtendedTickBar HorizontalAlignment="Left" Margin="54,6,0,6" Name="decibelTickBar1" Width="20" Maximum="0" Ticks="0,-6,-12,-18,-24,-30,-36,-42,-48,-54,-60" />
             </Grid>
         </GroupBox>
-        <my:ExtendedSlider AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" HorizontalAlignment="Right" Margin="0,25,203,69" Maximum="2" Name="volumeSlider" Orientation="Vertical" SmallChange="0.001" TickFrequency="0.1" TickPlacement="Both" Value="1" Width="30" LargeChange="0.01" DefaultValue="1" />
+        <Grid Margin="0,25,272,69" HorizontalAlignment="Right" Width="30">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <my:ExtendedSlider AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Maximum="4" Name="volumeSlider" Orientation="Vertical" SmallChange="0.01" TickFrequency="0.1" TickPlacement="Both" Value="1" Width="30" LargeChange="0.1" DefaultValue="1" />
+            <Label Grid.Row="1" Name="decibelLabel" Grid.Column="0" Grid.ColumnSpan="3" Content="{Binding ElementName=volumeSlider, Path=Value, FallbackValue=dB, Converter={StaticResource LinearDecibelConverter}}" ContentStringFormat="{}{0:0.0}" FontSize="9" Padding="0" HorizontalAlignment="Center"/>
+        </Grid>
         <Slider Height="23" Margin="12,0,291,40" Name="playbackSeeker" VerticalAlignment="Bottom" LargeChange="10" SmallChange="1" ValueChanged="playbackSeeker_ValueChanged" />
-        <Label Content="time..." ContentStringFormat="{}{0:hh\:mm\:ss\,fff}" Height="28" HorizontalAlignment="Left" Margin="300,275,0,0" Name="lblTotalPlaybackTime" VerticalAlignment="Top" Width="138" />
+        <Label Content="total time..." ContentStringFormat="{}{0:hh\:mm\:ss\,fff}" Height="28" HorizontalAlignment="Left" Margin="300,0,0,8" Name="lblTotalPlaybackTime" VerticalAlignment="Bottom" Width="138" />
+        <my:StereoVUMeter HorizontalAlignment="Right" Margin="0,12,203,69" Name="stereoVUMeter1" Width="63" />
     </Grid>
 </Window>

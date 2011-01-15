@@ -117,13 +117,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChannelsToTextConverter.cs" />
+    <Compile Include="ExtendedTickBar.cs" />
     <Compile Include="DragDropDecorator.cs" />
     <Compile Include="ExtendedSlider.cs" />
+    <Compile Include="LinearDecibelConverter.cs" />
     <Compile Include="LogSlider.cs" />
     <Compile Include="MultiTrackListBox.cs" />
     <Compile Include="MultiTrackViewer.cs" />
     <Compile Include="ResizeDecorator.cs" />
     <Compile Include="MultiplicationConverter.cs" />
+    <Compile Include="StereoVUMeter.cs" />
     <Compile Include="TimeScale.cs" />
     <Compile Include="TimeSpanConverter.cs" />
     <Compile Include="CaretOverlay.cs" />
