@@ -15,6 +15,7 @@ namespace AudioAlign.WaveControls {
         public static readonly DependencyProperty TicksProperty;
         public static readonly DependencyProperty TickRenderModeProperty;
         public static readonly DependencyProperty TextAlignmentProperty;
+        public static readonly DependencyProperty FillProperty;
 
         static ExtendedTickBar() {
             MinimumProperty = DependencyProperty.Register("Minimum", typeof(double), typeof(ExtendedTickBar),
@@ -31,6 +32,9 @@ namespace AudioAlign.WaveControls {
 
             TextAlignmentProperty = DependencyProperty.Register("TextAlignment", typeof(TextAlignment), typeof(ExtendedTickBar), 
                 new FrameworkPropertyMetadata(TextAlignment.Right) { AffectsRender = true });
+
+            FillProperty = DependencyProperty.Register("Fill", typeof(Brush), typeof(ExtendedTickBar),
+                new FrameworkPropertyMetadata((Brush)null) {  AffectsRender = true });
         }
 
         public ExtendedTickBar() {
@@ -61,6 +65,11 @@ namespace AudioAlign.WaveControls {
             set { SetValue(TextAlignmentProperty, value); }
         }
 
+        public Brush Fill {
+            get { return (Brush)GetValue(FillProperty); }
+            set { SetValue(FillProperty, value); }
+        }
+
         protected override void OnRender(System.Windows.Media.DrawingContext drawingContext) {
             double textMaxWidth = 0;
             double textX = ActualWidth;
@@ -77,12 +86,12 @@ namespace AudioAlign.WaveControls {
                     break;
             }
 
-            if (TickRenderMode == WaveControls.TickRenderMode.Text || TickRenderMode == WaveControls.TickRenderMode.Both) {
+            if (TickRenderMode == TickRenderMode.Text || TickRenderMode == TickRenderMode.Both) {
                 foreach (double value in Ticks) {
                     double y = CalculateY(value);
 
                     FormattedText text = new FormattedText(value.ToString(), CultureInfo.CurrentUICulture,
-                        FlowDirection.LeftToRight, new Typeface("Tahoma"), 8.0d, Brushes.Black) {
+                        FlowDirection.LeftToRight, new Typeface("Tahoma"), 8.0d, Fill) {
                             TextAlignment = TextAlignment
                         };
                     drawingContext.DrawText(text, new Point(textX, y - text.Height / 2));
@@ -92,14 +101,16 @@ namespace AudioAlign.WaveControls {
                 textMaxWidth += 3;
             }
 
-            if (TickRenderMode == WaveControls.TickRenderMode.Tick || TickRenderMode == WaveControls.TickRenderMode.Both) {
+            if (TickRenderMode == TickRenderMode.Tick || TickRenderMode == TickRenderMode.Both) {
+                Pen pen = new Pen(Fill, 1.0d);
+
                 GuidelineSet guidelineSet = new GuidelineSet();
                 drawingContext.PushGuidelineSet(guidelineSet);
 
                 foreach (double value in Ticks) {
                     double y = CalculateY(value) + 1;
-                    drawingContext.DrawLine(new Pen(Brushes.Black, 1.0f), new Point(0, y), new Point(ActualWidth - textMaxWidth, y));
-                    guidelineSet.GuidelinesY.Add(y + 0.5);
+                    drawingContext.DrawLine(pen, new Point(0, y), new Point(ActualWidth - textMaxWidth, y));
+                    guidelineSet.GuidelinesY.Add(y - 0.5);
                 }
 
                 drawingContext.Pop();

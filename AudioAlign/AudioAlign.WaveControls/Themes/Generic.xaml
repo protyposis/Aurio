@@ -464,6 +464,7 @@
 
     <Style TargetType="{x:Type local:StereoVUMeter}">
         <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Foreground" Value="#FFC4C4C4"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:StereoVUMeter}">
@@ -485,9 +486,9 @@
                         <Label Name="decibelLabelRight" Grid.Column="4" Grid.ColumnSpan="3" Content="{Binding ElementName=decibelMeterRight, Path=Decibel, FallbackValue=dB}" ContentStringFormat="{}{0:0.0}" FontSize="9" Padding="0" HorizontalAlignment="Center"/>
                         <local:VUMeter x:Name="decibelMeterLeft" Grid.Row="1" Grid.Column="1" Amplitude="{TemplateBinding AmplitudeLeft}"/>
                         <local:VUMeter x:Name="decibelMeterRight" Grid.Row="1" Grid.Column="5" Amplitude="{TemplateBinding AmplitudeRight}"/>
-                        <local:ExtendedTickBar Grid.Column="2" Grid.Row="1" Maximum="0" Ticks="0,-6,-12,-18,-24,-30,-36,-42,-48,-54,-60" TickRenderMode="Tick" />
-                        <local:ExtendedTickBar Grid.Column="3" Grid.Row="1" Maximum="0" Ticks="0,-6,-12,-18,-24,-30,-36,-42,-48,-54,-60" TickRenderMode="Text" TextAlignment="Center" />
-                        <local:ExtendedTickBar Grid.Column="4" Grid.Row="1" Maximum="0" Ticks="0,-6,-12,-18,-24,-30,-36,-42,-48,-54,-60" TickRenderMode="Tick" />
+                        <local:ExtendedTickBar Grid.Column="2" Grid.Row="1" Fill="{TemplateBinding Foreground}" Maximum="0" Ticks="0,-6,-12,-18,-24,-30,-36,-42,-48,-54,-60" TickRenderMode="Tick" />
+                        <local:ExtendedTickBar Grid.Column="3" Grid.Row="1" Fill="{TemplateBinding Foreground}" Maximum="0" Ticks="0,-6,-12,-18,-24,-30,-36,-42,-48,-54,-60" TickRenderMode="Text" TextAlignment="Center" />
+                        <local:ExtendedTickBar Grid.Column="4" Grid.Row="1" Fill="{TemplateBinding Foreground}" Maximum="0" Ticks="0,-6,-12,-18,-24,-30,-36,-42,-48,-54,-60" TickRenderMode="Tick" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger SourceName="decibelMeterLeft" Property="IsOverdriven" Value="True">
