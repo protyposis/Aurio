@@ -136,7 +136,7 @@ namespace AudioAlign.Test.MultitrackPlayback {
             playbackStream = volumeClipStream;
 
             wavePlayer = new WaveOut();
-            wavePlayer.DesiredLatency = 100;
+            wavePlayer.DesiredLatency = 250;
             wavePlayer.Init(playbackStream);
 
             // master volume setting
