@@ -207,6 +207,15 @@
             <Setter.Value>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                                <Border Background="Transparent">
+                                    <ContentPresenter />
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
             </Setter.Value>
         </Setter>
@@ -283,6 +292,18 @@
                                             TrackOffset="{Binding Path=Offset, Mode=TwoWay, Converter={StaticResource TimeSpanTicksConverter}}"/>
                         </Grid>
                     </local:ResizeDecorator>
+                    <DataTemplate.Resources>
+                        <Style TargetType="local:WaveView">
+                            <Setter Property="WaveformLine" Value="CornflowerBlue"/>
+                            <Setter Property="WaveformBackground" Value="White"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
+                                    <Setter Property="WaveformLine" Value="White"/>
+                                    <Setter Property="WaveformBackground" Value="CornflowerBlue"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataTemplate.Resources>
                 </DataTemplate>
             </Setter.Value>
         </Setter>

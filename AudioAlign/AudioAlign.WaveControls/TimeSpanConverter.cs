@@ -27,6 +27,16 @@ namespace AudioAlign.WaveControls {
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
+            string input = (string)value;
+            string format = parameter as string;
+
+            if (targetType == typeof(long)) {
+                return TimeSpan.ParseExact(input, format, null).Ticks;
+            }
+            else if (targetType == typeof(TimeSpan)) {
+                return TimeSpan.ParseExact(input, format, null);
+            }
+
             return null;
         }
 

@@ -43,7 +43,7 @@ namespace AudioAlign.WaveControls {
                 Interval viewportInterval = VirtualViewportInterval;
 
                 if (!audioInterval.Intersects(viewportInterval)) {
-                    Debug.WriteLine("nothing to draw!");
+                    //Debug.WriteLine("nothing to draw!");
                     return;
                 }
 
@@ -119,10 +119,10 @@ namespace AudioAlign.WaveControls {
                     IWaveformRenderer renderer = null;
                     switch (RenderMode) {
                         case WaveViewRenderMode.Bitmap:
-                            renderer = new WaveformBitmapRenderer();
+                            renderer = new WaveformBitmapRenderer() { WaveformLine = WaveformLine as SolidColorBrush };
                             break;
                         case WaveViewRenderMode.Geometry:
-                            renderer = new WaveformGeometryRenderer();
+                            renderer = new WaveformGeometryRenderer() { WaveformLine = WaveformLine as SolidColorBrush };
                             break;
                     }
                     for (int channel = 0; channel < channels; channel++) {

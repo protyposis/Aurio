@@ -7,12 +7,20 @@ using System.Windows;
 
 namespace AudioAlign.WaveControls {
     class WaveformGeometryRenderer : IWaveformRenderer {
+
+        public WaveformGeometryRenderer() {
+            WaveformFill = Brushes.LightBlue;
+            WaveformLine = Brushes.CornflowerBlue;
+            WaveformSamplePoint = Brushes.RoyalBlue;
+        }
+
+        public SolidColorBrush WaveformFill { get; set; }
+        public SolidColorBrush WaveformLine { get; set; }
+        public SolidColorBrush WaveformSamplePoint { get; set; }
+
         #region IWaveformRenderer Members
 
         public Drawing Render(List<Point> samples, bool peaks, int width, int height) {
-            SolidColorBrush WaveformFill = Brushes.LightBlue;
-            SolidColorBrush WaveformLine = Brushes.CornflowerBlue;
-            SolidColorBrush WaveformSamplePoint = Brushes.RoyalBlue;
             DrawingGroup waveformDrawing = new DrawingGroup();
 
             Geometry audioform = peaks ? CreatePeakform(samples) : CreateWaveform(samples);

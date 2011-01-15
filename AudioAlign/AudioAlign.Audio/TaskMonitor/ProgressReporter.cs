@@ -44,9 +44,13 @@ namespace AudioAlign.Audio.TaskMonitor {
                 throw new ArgumentException("this task doesn't support progress reporting");
             }
 
-            if (progress < 0 || progress > 100) {
-                throw new ArgumentException("invalid progress " + progress + " (must be a value between 0 and 100)");
+            if (progress < 0) {
+                progress = 0;
             }
+            else if (progress > 100) {
+                progress = 100;
+            }
+
             this.progress = progress;
             OnPropertyChanged("Progress");
         }

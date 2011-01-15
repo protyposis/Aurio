@@ -9,6 +9,17 @@ using System.Diagnostics;
 
 namespace AudioAlign.WaveControls {
     class WaveformBitmapRenderer : IWaveformRenderer {
+
+        public WaveformBitmapRenderer() {
+            WaveformFill = Brushes.LightBlue;
+            WaveformLine = Brushes.CornflowerBlue;
+            WaveformSamplePoint = Brushes.RoyalBlue;
+        }
+
+        public SolidColorBrush WaveformFill { get; set; }
+        public SolidColorBrush WaveformLine { get; set; }
+        public SolidColorBrush WaveformSamplePoint { get; set; }
+
         #region IWaveformRenderer Members
 
         public Drawing Render(List<Point> samples, bool peaks, int width, int height) {
@@ -25,10 +36,6 @@ namespace AudioAlign.WaveControls {
         #endregion
 
         private WriteableBitmap DrawPeakform(List<Point> peakLines, int width, int height) {
-            SolidColorBrush WaveformFill = Brushes.LightBlue;
-            SolidColorBrush WaveformLine = Brushes.CornflowerBlue;
-            SolidColorBrush WaveformSamplePoint = Brushes.RoyalBlue;
-
             WriteableBitmap wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
             int[] pixels = new int[width * height];
 
@@ -85,10 +92,6 @@ namespace AudioAlign.WaveControls {
         }
 
         private WriteableBitmap DrawWaveform(List<Point> peakLines, int width, int height) {
-            SolidColorBrush WaveformFill = Brushes.LightBlue;
-            SolidColorBrush WaveformLine = Brushes.CornflowerBlue;
-            SolidColorBrush WaveformSamplePoint = Brushes.RoyalBlue;
-
             WriteableBitmap wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
             int[] pixels = new int[width * height];
 
