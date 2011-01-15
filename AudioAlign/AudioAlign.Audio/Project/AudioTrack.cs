@@ -8,6 +8,8 @@ using System.ComponentModel;
 namespace AudioAlign.Audio.Project {
     public class AudioTrack : Track, INotifyPropertyChanged {
 
+        public const string PEAKFILE_EXTENSION = ".aapeaks";
+
         static AudioTrack() {
             MediaType = MediaType.Audio;
         }
@@ -30,7 +32,7 @@ namespace AudioAlign.Audio.Project {
 
         public FileInfo PeakFile {
             get {
-                return new FileInfo(FileInfo.FullName + AudioStreamFactory.PEAKFILE_EXTENSION);
+                return new FileInfo(FileInfo.FullName + PEAKFILE_EXTENSION);
             }
         }
 

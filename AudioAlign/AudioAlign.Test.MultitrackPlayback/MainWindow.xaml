@@ -31,29 +31,26 @@
     </Window.Resources>
     
     <Grid>
-        <ListBox Margin="12,12,308,69" Name="trackListBox" ItemTemplate="{StaticResource TrackListBoxItem}" HorizontalContentAlignment="Stretch"/>
-        <Button Content="Add File" Height="23" HorizontalAlignment="Right" Margin="0,0,203,12" Name="btnAddFile" VerticalAlignment="Bottom" Width="75" Click="btnAddFile_Click" />
+        <ListBox Margin="12,12,142,69" Name="trackListBox" ItemTemplate="{StaticResource TrackListBoxItem}" HorizontalContentAlignment="Stretch" AllowDrop="True" Drop="trackListBox_Drop" />
+        <Button Content="Add File" Height="23" HorizontalAlignment="Right" Margin="0,0,142,12" Name="btnAddFile" VerticalAlignment="Bottom" Width="75" Click="btnAddFile_Click" />
         <Button Content="Play" Height="23" HorizontalAlignment="Left" Margin="12,0,0,12" Name="btnPlay" VerticalAlignment="Bottom" Width="42" Click="btnPlay_Click" />
         <Button Content="Pause" Height="23" HorizontalAlignment="Left" Margin="60,0,0,12" Name="btnPause" VerticalAlignment="Bottom" Width="42" Click="btnPause_Click" />
         <Button Content="Stop" Height="23" HorizontalAlignment="Left" Margin="108,0,0,12" Name="btnStop" VerticalAlignment="Bottom" Width="42" Click="btnStop_Click" />
         <Label Content="current time..." ContentStringFormat="{}{0:hh\:mm\:ss\,fff}"  Height="28" HorizontalAlignment="Left" Margin="156,0,0,8" Name="lblCurrentPlaybackTime" VerticalAlignment="Bottom" Width="138" />
-        <GroupBox Header="Control tests" HorizontalAlignment="Right" Margin="0,12,12,12" Name="groupBox1" Width="163">
+        <GroupBox Header="Master Control" HorizontalAlignment="Right" Margin="0,12,12,69" Name="groupBox1" Width="124">
             <Grid>
-                <my:VUMeter HorizontalAlignment="Left" Margin="34,6,0,6" Name="vUMeter1" Width="20" Amplitude="{Binding Path=Value, ElementName=slider1}" />
-                <Slider HorizontalAlignment="Left" Margin="6,6,0,6" Name="slider1" Width="22" Maximum="1.1" Value="0.5" Orientation="Vertical" SmallChange="0.001" TickFrequency="0.1" TickPlacement="BottomRight" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" />
-                <my:ExtendedTickBar HorizontalAlignment="Left" Margin="54,6,0,6" Name="decibelTickBar1" Width="20" Maximum="0" Ticks="0,-6,-12,-18,-24,-30,-36,-42,-48,-54,-60" />
+                <Grid Margin="6,19,0,6" HorizontalAlignment="Left" Width="30">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <my:ExtendedSlider AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Maximum="4" Name="volumeSlider" Orientation="Vertical" SmallChange="0.01" TickFrequency="0.1" TickPlacement="Both" Value="1" Width="30" LargeChange="0.1" DefaultValue="1" />
+                    <Label Grid.Row="1" Name="decibelLabel" Grid.Column="0" Grid.ColumnSpan="3" Content="{Binding ElementName=volumeSlider, Path=Value, FallbackValue=dB, Converter={StaticResource LinearDecibelConverter}}" ContentStringFormat="{}{0:0.0}" FontSize="9" Padding="0" HorizontalAlignment="Center"/>
+                </Grid>
+                <my:StereoVUMeter HorizontalAlignment="Left" Margin="43,6,0,6" Name="stereoVUMeter1" Width="63" />
             </Grid>
         </GroupBox>
-        <Grid Margin="0,25,272,69" HorizontalAlignment="Right" Width="30">
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <my:ExtendedSlider AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Maximum="4" Name="volumeSlider" Orientation="Vertical" SmallChange="0.01" TickFrequency="0.1" TickPlacement="Both" Value="1" Width="30" LargeChange="0.1" DefaultValue="1" />
-            <Label Grid.Row="1" Name="decibelLabel" Grid.Column="0" Grid.ColumnSpan="3" Content="{Binding ElementName=volumeSlider, Path=Value, FallbackValue=dB, Converter={StaticResource LinearDecibelConverter}}" ContentStringFormat="{}{0:0.0}" FontSize="9" Padding="0" HorizontalAlignment="Center"/>
-        </Grid>
-        <Slider Height="23" Margin="12,0,291,40" Name="playbackSeeker" VerticalAlignment="Bottom" LargeChange="10" SmallChange="1" ValueChanged="playbackSeeker_ValueChanged" />
+        <Slider Height="23" Margin="12,0,142,40" Name="playbackSeeker" VerticalAlignment="Bottom" LargeChange="10" SmallChange="1" ValueChanged="playbackSeeker_ValueChanged" />
         <Label Content="total time..." ContentStringFormat="{}{0:hh\:mm\:ss\,fff}" Height="28" HorizontalAlignment="Left" Margin="300,0,0,8" Name="lblTotalPlaybackTime" VerticalAlignment="Bottom" Width="138" />
-        <my:StereoVUMeter HorizontalAlignment="Right" Margin="0,12,203,69" Name="stereoVUMeter1" Width="63" />
     </Grid>
 </Window>

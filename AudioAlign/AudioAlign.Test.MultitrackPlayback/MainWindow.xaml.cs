@@ -50,8 +50,13 @@ namespace AudioAlign.Test.MultitrackPlayback {
             // Process open file dialog box results
             if (result == true) {
                 // Open document
-                AudioTrack audioTrack = new AudioTrack(new FileInfo(dlg.FileName));
-                //audioTrack.Offset = new TimeSpan(new Random().Next((int)new TimeSpan(0, 10, 0).Ticks));
+                AddFile(dlg.FileName);
+            }
+        }
+
+        private void AddFile(string fileName) {
+            if (AudioStreamFactory.IsSupportedFile(fileName)) {
+                AudioTrack audioTrack = new AudioTrack(new FileInfo(fileName));
                 trackListBox.Items.Add(audioTrack);
             }
         }
@@ -121,7 +126,9 @@ namespace AudioAlign.Test.MultitrackPlayback {
                 mixer.AddInputStream(volumeControl);
             }
 
-            VolumeControlStream volumeControlStream = new VolumeControlStream(mixer);
+            VolumeControlStream volumeControlStream = new VolumeControlStream(mixer) {
+                Volume = (float)volumeSlider.Value
+            };
             VolumeMeteringStream volumeMeteringStream = new VolumeMeteringStream(volumeControlStream);
             volumeMeteringStream.StreamVolume += new EventHandler<StreamVolumeEventArgs>(meteringStream_StreamVolume);
             VolumeClipStream volumeClipStream = new VolumeClipStream(volumeMeteringStream);
@@ -208,6 +215,15 @@ namespace AudioAlign.Test.MultitrackPlayback {
 
             if (playbackStream != null) {
                 playbackStream.CurrentTime = TimeSpan.FromSeconds(playbackSeeker.Value);
+            }
+        }
+
+        private void trackListBox_Drop(object sender, DragEventArgs e) {
+            // source: http://stackoverflow.com/questions/332859/detect-dragndrop-file-in-wpf
+            if (e.Data is DataObject && ((DataObject)e.Data).ContainsFileDropList()) {
+                foreach (string filePath in ((DataObject)e.Data).GetFileDropList()) {
+                    AddFile(filePath);
+                }
             }
         }
     }
