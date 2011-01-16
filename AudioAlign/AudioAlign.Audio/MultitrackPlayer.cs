@@ -86,6 +86,9 @@ namespace AudioAlign.Audio {
             audioOutput.Stop();
             timer.Enabled = false;
             OnPlaybackPaused();
+            OnVolumeAnnounced(new StreamVolumeEventArgs() { 
+                MaxSampleValues = new float[] { float.NegativeInfinity, float.NegativeInfinity } 
+            });
             return true;
         }
 

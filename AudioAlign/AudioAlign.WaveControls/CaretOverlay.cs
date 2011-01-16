@@ -20,7 +20,8 @@ namespace AudioAlign.WaveControls {
 
         public static readonly DependencyProperty PhysicalCaretOffsetProperty;
         public static readonly DependencyProperty VirtualCaretOffsetProperty;
-
+        public static readonly DependencyProperty SuppressEventsProperty;
+  
         public class PositionEventArgs : RoutedEventArgs {
             public PositionEventArgs() : base() { }
             public PositionEventArgs(RoutedEvent routedEvent) : base(routedEvent) { }
@@ -60,6 +61,9 @@ namespace AudioAlign.WaveControls {
                 new FrameworkPropertyMetadata(new PropertyChangedCallback(OnVirtualCaretOffsetChanged)) { Inherits = true,
                 CoerceValueCallback = CoerceVirtualCaretOffset});
 
+            SuppressEventsProperty = DependencyProperty.RegisterAttached("SuppressEvents", typeof(bool),
+                  typeof(CaretOverlay), new FrameworkPropertyMetadata(false, OnSuppressEventsChanged));
+
 
             PositionSelectedEvent = EventManager.RegisterRoutedEvent("PositionSelected", RoutingStrategy.Bubble,
                 typeof(PositionEventHandler), typeof(CaretOverlay));
@@ -94,6 +98,16 @@ namespace AudioAlign.WaveControls {
             CaretOverlay caretOverlay = d as CaretOverlay;
             //Debug.WriteLine("CaretOverlay OnVirtualCaretOffsetChanged {0} -> {1} ({2})", e.OldValue, e.NewValue, caretOverlay.Name);
             caretOverlay.PhysicalCaretOffset = caretOverlay.VirtualToPhysicalIntervalOffset((long)e.NewValue);
+        }
+
+        public static void OnSuppressEventsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) {
+        }
+
+        public static void SetSuppressEvents(DependencyObject element, Boolean value) {
+            element.SetValue(SuppressEventsProperty, value);
+        }
+        public static bool GetSuppressEvents(DependencyObject element) {
+            return (bool)element.GetValue(SuppressEventsProperty);
         }
 
         public CaretOverlay() {
@@ -140,11 +154,35 @@ namespace AudioAlign.WaveControls {
             base.OnPreviewMouseDown(e);
             //Debug.WriteLine("CaretOverlay OnPreviewMouseDown @ " + Mouse.GetPosition(this));
             mouseDownPosition = Mouse.GetPosition(this);
+
+            bool suppressEvent = false;
+            VisualTreeHelper.HitTest(this,
+                new HitTestFilterCallback(delegate(DependencyObject target) {
+                    //Debug.WriteLine("HitTestFilter: " + target.GetType());
+                    return HitTestFilterBehavior.Continue; 
+                }),
+                new HitTestResultCallback(delegate(HitTestResult target) {
+                    //Debug.WriteLine("HitTestResult: " + target.VisualHit + " / " 
+                    //    + target.VisualHit.GetValue(SuppressEventsProperty));
+                    if ((bool)target.VisualHit.GetValue(SuppressEventsProperty) == true) {
+                        suppressEvent = true;
+                        return HitTestResultBehavior.Stop;
+                    }
+                    return HitTestResultBehavior.Continue; 
+                }), 
+                new PointHitTestParameters(mouseDownPosition));
+            if (suppressEvent) {
+                mouseDownPosition = new Point(-1, -1);
+            }
         }
 
         protected override void OnPreviewMouseUp(System.Windows.Input.MouseButtonEventArgs e) {
             base.OnPreviewMouseUp(e);
             //Debug.WriteLine("CaretOverlay OnPreviewMouseUp @ " + Mouse.GetPosition(this));
+
+            if (mouseDownPosition == new Point(-1, -1)) {
+                return;
+            }
 
             Point mouseUpPosition = Mouse.GetPosition(this);
             if (mouseUpPosition == mouseDownPosition) {

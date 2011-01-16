@@ -233,7 +233,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
-                            <Border Grid.Row="0" BorderThickness="0,1" BorderBrush="Black" Background="DimGray">
+                            <Border Grid.Row="0" BorderThickness="0,1" BorderBrush="Black" Background="DimGray" local:CaretOverlay.SuppressEvents="True">
                                 <DockPanel LastChildFill="False">
                                     <DockPanel.Resources>
                                         <Style TargetType="Label">

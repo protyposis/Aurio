@@ -87,6 +87,7 @@ namespace AudioAlign.WaveControls {
                 DateTime beforeDrawing = DateTime.Now;
 
                 // draw background
+                drawingContext.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, ActualWidth, ActualHeight));
                 drawingContext.DrawRectangle(WaveformBackground, null, new Rect(drawingOffset, 0, drawingWidth, ActualHeight));
                 if (debug) {
                     drawingContext.DrawRectangle(null, new Pen(Brushes.Brown, 4), new Rect(drawingOffset, 0, drawingWidth, ActualHeight));
