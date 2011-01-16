@@ -189,6 +189,10 @@
     <Resource Include="Resources\key_m.png" />
     <Resource Include="Resources\key_s.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\arrow_switch.png" />
+    <Resource Include="Resources\draw_wave.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

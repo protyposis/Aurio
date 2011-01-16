@@ -8,7 +8,7 @@ namespace AudioAlign.Audio.Project {
     public class TrackList<T> : IEnumerable where T : Track {
         private readonly List<T> list;
 
-        public class TrackListEventArgs<T> : EventArgs {
+        public class TrackListEventArgs : EventArgs {
 
             public TrackListEventArgs(T track, int index) {
                 this.Track = track;
@@ -19,7 +19,7 @@ namespace AudioAlign.Audio.Project {
             public int Index { get; private set; }
         }
 
-        public delegate void TrackListChangedEventHandler(object sender, TrackListEventArgs<T> e);
+        public delegate void TrackListChangedEventHandler(object sender, TrackListEventArgs e);
         public event TrackListChangedEventHandler TrackAdded;
         public event TrackListChangedEventHandler TrackRemoved;
 
@@ -27,13 +27,13 @@ namespace AudioAlign.Audio.Project {
             list = new List<T>();
         }
 
-        private void OnTrackAdded(TrackListEventArgs<T> e) {
+        private void OnTrackAdded(TrackListEventArgs e) {
             if (TrackAdded != null) {
                 TrackAdded(this, e);
             }
         }
 
-        private void OnTrackRemoved(TrackListEventArgs<T> e) {
+        private void OnTrackRemoved(TrackListEventArgs e) {
             if (TrackRemoved != null) {
                 TrackRemoved(this, e);
             }
@@ -41,7 +41,7 @@ namespace AudioAlign.Audio.Project {
 
         public void Add(T track) {
             list.Add(track);
-            OnTrackAdded(new TrackListEventArgs<T>(track, list.IndexOf(track)));
+            OnTrackAdded(new TrackListEventArgs(track, list.IndexOf(track)));
         }
 
         public bool Contains(T item) {
@@ -56,7 +56,7 @@ namespace AudioAlign.Audio.Project {
             if (list.Contains(track)) {
                 int index = list.IndexOf(track);
                 if (list.Remove(track)) {
-                    OnTrackRemoved(new TrackListEventArgs<T>(track, index));
+                    OnTrackRemoved(new TrackListEventArgs(track, index));
                     return true;
                 }
             }

@@ -10,6 +10,7 @@ namespace AudioAlign.WaveControls {
     public class LogSlider: Slider {
 
         static LogSlider() {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(LogSlider), new FrameworkPropertyMetadata(typeof(LogSlider)));
             MinimumProperty.OverrideMetadata(typeof(LogSlider), new FrameworkPropertyMetadata(1.0d));
         }
 

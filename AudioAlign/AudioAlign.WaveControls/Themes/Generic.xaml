@@ -3,11 +3,16 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:s="clr-namespace:System;assembly=mscorlib"
     xmlns:local="clr-namespace:AudioAlign.WaveControls">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/AudioAlign.WaveControls;component/Themes/Images.xaml" />
+    </ResourceDictionary.MergedDictionaries>
 
     <local:MultiplicationConverter x:Key="MultiplicationConverter"/>
     <local:ChannelsToTextConverter x:Key="ChannelsToTextConverter"/>
     <local:TimeSpanTicksConverter x:Key="TimeSpanTicksConverter"/>
     <local:LinearDecibelConverter x:Key="LinearDecibelConverter"/>
+
+    <Style BasedOn="{StaticResource {x:Type Slider}}" TargetType="{x:Type local:LogSlider}"/>
 
     <Style TargetType="{x:Type local:WaveView}">
         <Setter Property="Template">
@@ -278,9 +283,17 @@
                                         <Label Content="{Binding Path=Length}" ToolTip="length"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                                        <Slider Width="100"/>
-                                        <ToggleButton Content="X"/>
-                                        <ToggleButton Content="!"/>
+                                        <local:ExtendedSlider x:Name="volumeSlider" Width="100" Minimum="0" Maximum="2" SmallChange="0.001" LargeChange="0.01" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Margin="3" Value="{Binding Path=Volume}" DefaultValue="1"/>
+                                        <Label Name="decibelLabel" Content="{Binding ElementName=volumeSlider, Path=Value, FallbackValue=dB, Converter={StaticResource LinearDecibelConverter}}" ContentStringFormat="{}{0:0.0}" HorizontalAlignment="Right" Width="40"/>
+                                        <ToggleButton IsChecked="{Binding Path=Mute, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
+                                            <Image Source="{StaticResource IconSoundMute}" Width="16" Height="16" />
+                                        </ToggleButton>
+                                        <ToggleButton IsChecked="{Binding Path=Solo, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
+                                            <Image Source="{StaticResource IconSound}" Width="16" Height="16" />
+                                        </ToggleButton>
+                                        <ToggleButton IsChecked="{Binding Path=InvertedPhase, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
+                                            <Image Source="{StaticResource IconSwitch}" Width="16" Height="16" />
+                                        </ToggleButton>
                                     </StackPanel>
                                 </DockPanel>
                             </Border>
@@ -475,7 +488,7 @@
                                     </LinearGradientBrush>
                                 </Rectangle.Fill>
                             </Rectangle>
-                            <Rectangle Name="PART_Indicator" Fill="#A7898989" VerticalAlignment="Top"/>
+                            <Rectangle Name="PART_Indicator" Fill="#7E000000" VerticalAlignment="Top"/>
                         </Grid>
                     </Border>
                 </ControlTemplate>

@@ -114,6 +114,8 @@
     <Compile Include="AudioStreamWrapper.cs" />
     <Compile Include="AudioUtil.cs" />
     <Compile Include="BinaryIOExtensions.cs" />
+    <Compile Include="MultitrackPlayer.cs" />
+    <Compile Include="NAudio\PhaseInversionStream.cs" />
     <Compile Include="VolumeUtil.cs" />
     <Compile Include="IAudioStream.cs" />
     <Compile Include="IAudioStream16.cs" />

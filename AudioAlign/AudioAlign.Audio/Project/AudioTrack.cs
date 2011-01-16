@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using System.ComponentModel;
 
 namespace AudioAlign.Audio.Project {
-    public class AudioTrack : Track, INotifyPropertyChanged {
+    public class AudioTrack : Track {
 
         public const string PEAKFILE_EXTENSION = ".aapeaks";
 
@@ -17,10 +16,12 @@ namespace AudioAlign.Audio.Project {
         public event EventHandler<ValueEventArgs<bool>> MuteChanged;
         public event EventHandler<ValueEventArgs<bool>> SoloChanged;
         public event EventHandler<ValueEventArgs<float>> VolumeChanged;
+        public event EventHandler<ValueEventArgs<bool>> InvertedPhaseChanged;
 
         private bool mute = false;
         private bool solo = false;
         private float volume = 1.0f;
+        private bool invertedPhase = false;
 
         public AudioTrack(FileInfo fileInfo) : base(fileInfo) {
             this.Length = CreateAudioStream().TimeLength;
@@ -67,6 +68,11 @@ namespace AudioAlign.Audio.Project {
         /// </summary>
         public float Volume { get { return volume; } set { volume = value; OnVolumeChanged(); } }
 
+        /// <summary>
+        /// Gets or sets a value telling is this track' audio phase is inverted.
+        /// </summary>
+        public bool InvertedPhase { get { return invertedPhase; } set { invertedPhase = value; OnInvertedPhaseChanged(); } }
+
         private void OnMuteChanged() {
             if (MuteChanged != null) {
                 MuteChanged(this, new ValueEventArgs<bool>(mute));
@@ -92,16 +98,11 @@ namespace AudioAlign.Audio.Project {
             OnPropertyChanged("Volume");
         }
 
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void OnPropertyChanged(string name) {
-            if (PropertyChanged != null) {
-                PropertyChanged(this, new PropertyChangedEventArgs(name));
+        private void OnInvertedPhaseChanged() {
+            if (InvertedPhaseChanged != null) {
+                InvertedPhaseChanged(this, new ValueEventArgs<bool>(invertedPhase));
             }
+            OnPropertyChanged("InvertedPhase");
         }
-
-        #endregion
     }
 }
