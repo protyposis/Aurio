@@ -6,6 +6,7 @@ using AudioAlign.Audio.NAudio;
 using AudioAlign.Audio.Project;
 using NAudio.Wave;
 using System.Timers;
+using System.Diagnostics;
 
 namespace AudioAlign.Audio {
     public class MultitrackPlayer : IDisposable {
@@ -24,7 +25,7 @@ namespace AudioAlign.Audio {
         private WaveMixerStream32 audioMixer;
         private VolumeControlStream audioVolumeControlStream;
         private WaveStream audioOutputStream;
-        private WaveOut audioOutput;
+        private IWavePlayer audioOutput;
 
         private Timer timer;
 
@@ -102,13 +103,12 @@ namespace AudioAlign.Audio {
 
             audioOutputStream = volumeClipStream;
 
-            audioOutput = new WaveOut();
+            audioOutput = new WasapiOut(global::NAudio.CoreAudioApi.AudioClientShareMode.Shared, true, 10);
             audioOutput.PlaybackStopped += new EventHandler(
                 delegate(object sender, EventArgs e) {
                     Pause();
                     OnPlaybackPaused();
                 });
-            audioOutput.DesiredLatency = 250;
             audioOutput.Init(audioOutputStream);
         }
 
