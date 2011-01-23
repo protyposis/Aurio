@@ -75,7 +75,7 @@ namespace NAudio.Wave
                     this.length = 0;
                     foreach (WaveStream inputStream in inputStreams)
                     {
-                        this.length = Math.Max(this.length, waveStream.Length);
+                        this.length = Math.Max(this.length, inputStream.Length);
                     }
                 }
             }
