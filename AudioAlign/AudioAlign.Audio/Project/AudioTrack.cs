@@ -16,11 +16,13 @@ namespace AudioAlign.Audio.Project {
         public event EventHandler<ValueEventArgs<bool>> MuteChanged;
         public event EventHandler<ValueEventArgs<bool>> SoloChanged;
         public event EventHandler<ValueEventArgs<float>> VolumeChanged;
+        public event EventHandler<ValueEventArgs<float>> BalanceChanged;
         public event EventHandler<ValueEventArgs<bool>> InvertedPhaseChanged;
 
         private bool mute = false;
         private bool solo = false;
         private float volume = 1.0f;
+        private float balance = 0.0f;
         private bool invertedPhase = false;
 
         public AudioTrack(FileInfo fileInfo) : base(fileInfo) {
@@ -69,7 +71,12 @@ namespace AudioAlign.Audio.Project {
         public float Volume { get { return volume; } set { volume = value; OnVolumeChanged(); } }
 
         /// <summary>
-        /// Gets or sets a value telling is this track' audio phase is inverted.
+        /// Gets or sets the panning of this track.
+        /// </summary>
+        public float Balance { get { return balance; } set { balance = value; OnBalanceChanged(); } }
+
+        /// <summary>
+        /// Gets or sets a value telling if this track' audio phase is inverted.
         /// </summary>
         public bool InvertedPhase { get { return invertedPhase; } set { invertedPhase = value; OnInvertedPhaseChanged(); } }
 
@@ -96,6 +103,13 @@ namespace AudioAlign.Audio.Project {
                 VolumeChanged(this, new ValueEventArgs<float>(volume));
             }
             OnPropertyChanged("Volume");
+        }
+
+        private void OnBalanceChanged() {
+            if (BalanceChanged != null) {
+                BalanceChanged(this, new ValueEventArgs<float>(balance));
+            }
+            OnPropertyChanged("Balance");
         }
 
         private void OnInvertedPhaseChanged() {

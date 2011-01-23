@@ -42,7 +42,7 @@ namespace AudioAlign.Audio.NAudio {
         public override int Read(byte[] buffer, int offset, int count) {
             int bytesRead = SourceStream.Read(buffer, offset, count);
 
-            if (Clip) {
+            if (Clip && bytesRead > 0) {
                 unsafe {
                     fixed (byte* sampleBuffer = &buffer[offset]) {
                         float* samples = (float*)sampleBuffer;

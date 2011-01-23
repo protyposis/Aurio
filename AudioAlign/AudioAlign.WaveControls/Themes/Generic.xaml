@@ -283,16 +283,18 @@
                                         <Label Content="{Binding Path=Length}" ToolTip="length"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                                        <local:ExtendedSlider x:Name="volumeSlider" Width="100" Minimum="0" Maximum="2" SmallChange="0.001" LargeChange="0.01" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Margin="3" Value="{Binding Path=Volume}" DefaultValue="1"/>
+                                        <local:ExtendedSlider x:Name="balanceSlider" Width="100" Minimum="-1" Maximum="1" SmallChange="0.001" LargeChange="0.01" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Margin="1" Value="{Binding Path=Balance}" DefaultValue="0" Height="15"/>
+                                        <Label Name="balanceLabel" Content="{Binding ElementName=balanceSlider, Path=Value, FallbackValue=0}" ContentStringFormat="{}{0:0.00}" HorizontalAlignment="Right" Width="40"/>
+                                        <local:ExtendedSlider x:Name="volumeSlider" Width="100" Minimum="0" Maximum="2" SmallChange="0.001" LargeChange="0.01" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Margin="1" Value="{Binding Path=Volume}" DefaultValue="1" Height="15"/>
                                         <Label Name="decibelLabel" Content="{Binding ElementName=volumeSlider, Path=Value, FallbackValue=dB, Converter={StaticResource LinearDecibelConverter}}" ContentStringFormat="{}{0:0.0}" HorizontalAlignment="Right" Width="40"/>
-                                        <ToggleButton IsChecked="{Binding Path=Mute, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
-                                            <Image Source="{StaticResource IconSoundMute}" Width="16" Height="16" />
+                                        <ToggleButton IsChecked="{Binding Path=Mute, Mode=TwoWay}" Margin="1" Padding="0" Height="15" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
+                                            <Image Source="{StaticResource IconSoundMute}" Width="12" Height="12" />
                                         </ToggleButton>
-                                        <ToggleButton IsChecked="{Binding Path=Solo, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
-                                            <Image Source="{StaticResource IconSound}" Width="16" Height="16" />
+                                        <ToggleButton IsChecked="{Binding Path=Solo, Mode=TwoWay}" Margin="1" Padding="0" Height="15" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
+                                            <Image Source="{StaticResource IconSound}" Width="12" Height="12" />
                                         </ToggleButton>
-                                        <ToggleButton IsChecked="{Binding Path=InvertedPhase, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
-                                            <Image Source="{StaticResource IconSwitch}" Width="16" Height="16" />
+                                        <ToggleButton IsChecked="{Binding Path=InvertedPhase, Mode=TwoWay}" Margin="1" Padding="0" Height="15" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
+                                            <Image Source="{StaticResource IconSwitch}" Width="12" Height="12" />
                                         </ToggleButton>
                                     </StackPanel>
                                 </DockPanel>

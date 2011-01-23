@@ -22,7 +22,7 @@ namespace AudioAlign.Audio {
         private TrackList<AudioTrack> trackList;
         private Dictionary<AudioTrack, WaveStream> trackListStreams;
 
-        private WaveMixerStream32 audioMixer;
+        private ExtendedWaveMixerStream32 audioMixer;
         private VolumeControlStream audioVolumeControlStream;
         private WaveStream audioOutputStream;
         private IWavePlayer audioOutput;
@@ -94,7 +94,7 @@ namespace AudioAlign.Audio {
         }
 
         private void SetupAudioChain() {
-            audioMixer = new WaveMixerStream32();
+            audioMixer = new ExtendedWaveMixerStream32();
 
             audioVolumeControlStream = new VolumeControlStream(audioMixer);
             VolumeMeteringStream volumeMeteringStream = new VolumeMeteringStream(audioVolumeControlStream);
@@ -116,15 +116,16 @@ namespace AudioAlign.Audio {
             WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
             TolerantWaveStream tolerantReader = new TolerantWaveStream(reader);
             WaveOffsetStream offsetStream = new WaveOffsetStream(tolerantReader);
+            ExtendedWaveChannel32 channel = new ExtendedWaveChannel32(offsetStream);
 
             audioTrack.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(
                 delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
                     if (e.PropertyName.Equals("Offset")) {
                         offsetStream.StartTime = audioTrack.Offset;
+                        channel.UpdateLength();
+                        audioMixer.UpdateLength();
                     }
                 });
-
-            WaveChannel32 channel = new WaveChannel32(offsetStream);
 
             // control the track phase
             PhaseInversionStream phaseInversion = new PhaseInversionStream(channel) {
@@ -134,7 +135,8 @@ namespace AudioAlign.Audio {
             // necessary to control each track individually
             VolumeControlStream volumeControl = new VolumeControlStream(phaseInversion) {
                 Mute = audioTrack.Mute,
-                Volume = audioTrack.Volume
+                Volume = audioTrack.Volume,
+                Balance = audioTrack.Balance
             };
 
             // when the AudioTrack.Mute property changes, just set it accordingly on the audio stream
@@ -180,6 +182,11 @@ namespace AudioAlign.Audio {
             audioTrack.VolumeChanged += new EventHandler<ValueEventArgs<float>>(
                 delegate(object vsender, ValueEventArgs<float> ve) {
                     volumeControl.Volume = ve.Value;
+                });
+
+            audioTrack.BalanceChanged += new EventHandler<ValueEventArgs<float>>(
+                delegate(object vsender, ValueEventArgs<float> ve) {
+                    volumeControl.Balance = ve.Value;
                 });
 
             audioTrack.InvertedPhaseChanged += new EventHandler<ValueEventArgs<bool>>(

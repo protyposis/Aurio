@@ -115,6 +115,8 @@
     <Compile Include="AudioUtil.cs" />
     <Compile Include="BinaryIOExtensions.cs" />
     <Compile Include="MultitrackPlayer.cs" />
+    <Compile Include="NAudio\ExtendedWaveChannel32.cs" />
+    <Compile Include="NAudio\ExtendedWaveMixerStream32.cs" />
     <Compile Include="NAudio\PhaseInversionStream.cs" />
     <Compile Include="VolumeUtil.cs" />
     <Compile Include="IAudioStream.cs" />
