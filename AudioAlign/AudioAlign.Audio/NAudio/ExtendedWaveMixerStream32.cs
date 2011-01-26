@@ -48,5 +48,12 @@ namespace AudioAlign.Audio.NAudio {
                 throw new Exception("could not set the length");
             }
         }
+
+        public override int Read(byte[] buffer, int offset, int count) {
+            if (AutoStop && Position > Length) {
+                return 0;
+            }
+            return base.Read(buffer, offset, count);
+        }
     }
 }
