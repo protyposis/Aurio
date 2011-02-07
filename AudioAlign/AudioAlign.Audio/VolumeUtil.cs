@@ -20,7 +20,7 @@ namespace AudioAlign.Audio {
 
         /// <summary>
         /// Converts a linear value (e.g. a sample value) to decibel.
-        /// decibel = 20 * ln(linearValue) / ln(10)
+        /// decibel = 20 * ln(linearValue) / ln(10) = 20 * log10(linearValue)
         /// </summary>
         /// <param name="linear">linear value</param>
         /// <returns>decibel value</returns>

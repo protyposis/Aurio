@@ -120,6 +120,10 @@
     <Compile Include="ExtendedTickBar.cs" />
     <Compile Include="DragDropDecorator.cs" />
     <Compile Include="ExtendedSlider.cs" />
+    <Compile Include="Graph.xaml.cs">
+      <DependentUpon>Graph.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GraphMode.cs" />
     <Compile Include="LinearDecibelConverter.cs" />
     <Compile Include="LogSlider.cs" />
     <Compile Include="MultiTrackListBox.cs" />
@@ -139,6 +143,10 @@
     <Compile Include="IWaveformRenderer.cs" />
     <Compile Include="WaveView.cs" />
     <Compile Include="WaveViewRenderMode.cs" />
+    <Page Include="Graph.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

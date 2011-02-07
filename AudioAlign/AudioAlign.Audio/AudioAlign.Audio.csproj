@@ -98,6 +98,9 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Exocortex.DSP, Version=1.0.1373.38032, Culture=neutral">
+      <HintPath>..\..\libs\Exocortex.DSP.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -114,10 +117,14 @@
     <Compile Include="AudioStreamWrapper.cs" />
     <Compile Include="AudioUtil.cs" />
     <Compile Include="BinaryIOExtensions.cs" />
+    <Compile Include="FFTAnalyzer.cs" />
+    <Compile Include="FFTUtil.cs" />
     <Compile Include="MultitrackPlayer.cs" />
+    <Compile Include="NAudio\DataMonitorStream.cs" />
     <Compile Include="NAudio\ExtendedWaveChannel32.cs" />
     <Compile Include="NAudio\ExtendedWaveMixerStream32.cs" />
     <Compile Include="NAudio\PhaseInversionStream.cs" />
+    <Compile Include="RecursivePeakStore.cs" />
     <Compile Include="VolumeUtil.cs" />
     <Compile Include="IAudioStream.cs" />
     <Compile Include="IAudioStream16.cs" />
@@ -139,6 +146,8 @@
     <Compile Include="TaskMonitor\ProgressReporter.cs" />
     <Compile Include="ValueEventArgs.cs" />
     <Compile Include="VisualizingAudioStream16.cs" />
+    <Compile Include="WindowFunction.cs" />
+    <Compile Include="WindowUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\NAudio\NAudio\NAudio.csproj">

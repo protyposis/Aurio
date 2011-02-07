@@ -18,6 +18,7 @@ namespace AudioAlign.Audio {
 
         public event EventHandler<StreamVolumeEventArgs> VolumeAnnounced;
         public event EventHandler<ValueEventArgs<TimeSpan>> CurrentTimeChanged;
+        public event EventHandler<ValueEventArgs<float[][]>> SamplesMonitored;
 
         private TrackList<AudioTrack> trackList;
         private Dictionary<AudioTrack, WaveStream> trackListStreams;
@@ -97,9 +98,11 @@ namespace AudioAlign.Audio {
             audioMixer = new ExtendedWaveMixerStream32();
 
             audioVolumeControlStream = new VolumeControlStream(audioMixer);
-            VolumeMeteringStream volumeMeteringStream = new VolumeMeteringStream(audioVolumeControlStream);
+            VolumeMeteringStream volumeMeteringStream = new VolumeMeteringStream(audioVolumeControlStream, 2048);
             volumeMeteringStream.StreamVolume += new EventHandler<StreamVolumeEventArgs>(meteringStream_StreamVolume);
-            VolumeClipStream volumeClipStream = new VolumeClipStream(volumeMeteringStream);
+            DataMonitorStream dataMonitorStream = new DataMonitorStream(volumeMeteringStream);
+            dataMonitorStream.DataRead += new EventHandler<StreamDataMonitorEventArgs>(dataMonitorStream_DataRead);
+            VolumeClipStream volumeClipStream = new VolumeClipStream(dataMonitorStream);
 
             audioOutputStream = volumeClipStream;
 
@@ -217,6 +220,28 @@ namespace AudioAlign.Audio {
             OnVolumeAnnounced(e);
         }
 
+        private void dataMonitorStream_DataRead(object sender, StreamDataMonitorEventArgs e) {
+            DataMonitorStream s = (DataMonitorStream)sender;
+            int channels = s.WaveFormat.Channels;
+            float[][] processedSamples = AudioUtil.CreateArray<float>(channels, 
+                e.Length / (s.WaveFormat.BitsPerSample / 8) / channels);
+
+            unsafe {
+                fixed (byte* sampleBuffer = &e.Buffer[e.Offset]) {
+                    float* samples = (float*)sampleBuffer;
+                    int sampleCount = 0;
+                    for (int x = 0; x < e.Length / 4; x += channels) {
+                        for (int channel = 0; channel < channels; channel++) {
+                            processedSamples[channel][sampleCount] = samples[x + channel];
+                        }
+                        sampleCount++;
+                    }
+                }
+            }
+
+            OnSamplesMonitored(processedSamples);
+        }
+
         private void timer_Elapsed(object sender, ElapsedEventArgs e) {
             OnCurrentTimeChanged();
         }
@@ -259,6 +284,12 @@ namespace AudioAlign.Audio {
         protected virtual void OnCurrentTimeChanged() {
             if (CurrentTimeChanged != null) {
                 CurrentTimeChanged(this, new ValueEventArgs<TimeSpan>(audioOutputStream.CurrentTime));
+            }
+        }
+
+        private void OnSamplesMonitored(float[][] samples) {
+            if (SamplesMonitored != null) {
+                SamplesMonitored(this, new ValueEventArgs<float[][]>(samples));
             }
         }
 

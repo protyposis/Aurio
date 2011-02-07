@@ -1,0 +1,24 @@
+﻿<Window x:Class="AudioAlign.Test.FFT.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="320" Width="741" 
+        xmlns:my="clr-namespace:AudioAlign.WaveControls;assembly=AudioAlign.WaveControls"
+        xmlns:audio="clr-namespace:AudioAlign.Audio;assembly=AudioAlign.Audio"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib" Loaded="Window_Loaded">
+    <Window.Resources>
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="WindowTypeValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="audio:WindowType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+    <Grid>
+        <Button Content="Window Functions" Height="23" HorizontalAlignment="Left" Margin="12,12,0,0" Name="button1" VerticalAlignment="Top" Width="161" Click="button1_Click" />
+        <Slider AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" Margin="12,61,0,0" Maximum="65536" Minimum="4" Name="windowSize" TickPlacement="BottomRight" Ticks="4,8,16,32,64,128,256,512,1024,2048,4096,8192,16348,32768,65536" Value="256" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="488" />
+        <my:Graph HorizontalAlignment="Left" Margin="12,89,0,0" Name="inputGraph" VerticalAlignment="Top" Height="181" Width="228" BorderBrush="Black" BorderThickness="1" Maximum="1" Minimum="-1" />
+        <my:Graph BorderBrush="Black" BorderThickness="1" Height="181" HorizontalAlignment="Left" Margin="480,89,0,0" Name="outputGraph" VerticalAlignment="Top" Width="228" Mode="Decibel" Minimum="-150" />
+        <Button Content="Generate" Height="23" HorizontalAlignment="Left" Margin="632,61,0,0" Name="button2" VerticalAlignment="Top" Width="75" Click="button2_Click" />
+        <ComboBox Height="23" HorizontalAlignment="Left" Margin="506,62,0,0" Name="windowTypes" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Source={StaticResource WindowTypeValues}}" SelectedIndex="2" />
+        <my:Graph BorderBrush="Black" BorderThickness="1" Height="181" HorizontalAlignment="Left" Margin="246,89,0,0" Name="input2Graph" VerticalAlignment="Top" Width="228" Maximum="1" Minimum="-1" />
+    </Grid>
+</Window>
