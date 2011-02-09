@@ -63,6 +63,10 @@ namespace AudioAlign.Audio.Project {
             return false;
         }
 
+        public T this[int index] {
+            get { return list[index]; }
+        }
+
         #region IEnumerable Members
 
         IEnumerator IEnumerable.GetEnumerator() {
