@@ -135,12 +135,14 @@
     <Compile Include="Streams\MonoStream.cs" />
     <Compile Include="Streams\NAudioSinkStream.cs" />
     <Compile Include="Streams\NAudioSourceStream.cs" />
+    <Compile Include="Streams\OffsetStream.cs" />
     <Compile Include="Streams\PhaseInversionStream.cs" />
     <Compile Include="Streams\ResamplingQuality.cs" />
     <Compile Include="Streams\ResamplingStream.cs" />
     <Compile Include="Streams\VolumeClipStream.cs" />
     <Compile Include="Streams\VolumeControlStream.cs" />
     <Compile Include="Streams\VolumeMeteringStream.cs" />
+    <Compile Include="TimeUtil.cs" />
     <Compile Include="VolumeUtil.cs" />
     <Compile Include="IAudioStream.cs" />
     <Compile Include="IAudioStream16.cs" />

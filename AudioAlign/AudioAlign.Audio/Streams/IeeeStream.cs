@@ -36,7 +36,7 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public override int SampleBlockSize {
-            get { return properties.SampleByteSize * properties.Channels; }
+            get { return properties.SampleBlockByteSize; }
         }
 
         public override int Read(byte[] buffer, int offset, int count) {

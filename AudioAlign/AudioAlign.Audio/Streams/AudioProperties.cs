@@ -32,6 +32,10 @@ namespace AudioAlign.Audio.Streams {
             get { return BitDepth / 8; }
         }
 
+        public int SampleBlockByteSize {
+            get { return SampleByteSize * Channels; }
+        }
+
         public override string ToString() {
             return String.Format("{0}bit {1}Hz {2}ch {3}", BitDepth, SampleRate, Channels, Format);
         }

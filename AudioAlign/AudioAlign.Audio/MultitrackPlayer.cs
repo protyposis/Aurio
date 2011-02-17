@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.NAudio;
 using AudioAlign.Audio.Project;
 using NAudio.Wave;
 using System.Timers;
 using System.Diagnostics;
+using AudioAlign.Audio.Streams;
 
 namespace AudioAlign.Audio {
     public class MultitrackPlayer : IDisposable {
@@ -21,9 +21,9 @@ namespace AudioAlign.Audio {
         public event EventHandler<ValueEventArgs<float[][]>> SamplesMonitored;
 
         private TrackList<AudioTrack> trackList;
-        private Dictionary<AudioTrack, WaveStream> trackListStreams;
+        private Dictionary<AudioTrack, IAudioStream> trackListStreams;
 
-        private ExtendedWaveMixerStream32 audioMixer;
+        private MixerStream audioMixer;
         private VolumeControlStream audioVolumeControlStream;
         private WaveStream audioOutputStream;
         private IWavePlayer audioOutput;
@@ -32,7 +32,7 @@ namespace AudioAlign.Audio {
 
         public MultitrackPlayer(TrackList<AudioTrack> trackList) {
             this.trackList = trackList;
-            trackListStreams = new Dictionary<AudioTrack, WaveStream>();
+            trackListStreams = new Dictionary<AudioTrack, IAudioStream>();
 
             trackList.TrackAdded += new TrackList<AudioTrack>.TrackListChangedEventHandler(trackList_TrackAdded);
             trackList.TrackRemoved += new TrackList<AudioTrack>.TrackListChangedEventHandler(trackList_TrackRemoved);
@@ -95,7 +95,7 @@ namespace AudioAlign.Audio {
         }
 
         private void SetupAudioChain() {
-            audioMixer = new ExtendedWaveMixerStream32();
+            audioMixer = new MixerStream(2, 44100);
 
             audioVolumeControlStream = new VolumeControlStream(audioMixer);
             VolumeMeteringStream volumeMeteringStream = new VolumeMeteringStream(audioVolumeControlStream, 2048);
@@ -104,7 +104,7 @@ namespace AudioAlign.Audio {
             dataMonitorStream.DataRead += new EventHandler<StreamDataMonitorEventArgs>(dataMonitorStream_DataRead);
             VolumeClipStream volumeClipStream = new VolumeClipStream(dataMonitorStream);
 
-            audioOutputStream = volumeClipStream;
+            audioOutputStream = new NAudioSinkStream(volumeClipStream);
 
             audioOutput = new WasapiOut(global::NAudio.CoreAudioApi.AudioClientShareMode.Shared, true, 10);
             audioOutput.PlaybackStopped += new EventHandler(
@@ -117,15 +117,14 @@ namespace AudioAlign.Audio {
 
         private void AddTrack(AudioTrack audioTrack) {
             WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
-            TolerantWaveStream tolerantReader = new TolerantWaveStream(reader);
-            WaveOffsetStream offsetStream = new WaveOffsetStream(tolerantReader);
-            ExtendedWaveChannel32 channel = new ExtendedWaveChannel32(offsetStream);
+            //TolerantWaveStream tolerantReader = new TolerantWaveStream(reader);
+            OffsetStream offsetStream = new OffsetStream(new NAudioSourceStream(reader));
+            IeeeStream channel = new IeeeStream(offsetStream);
 
             audioTrack.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(
                 delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
                     if (e.PropertyName.Equals("Offset")) {
-                        offsetStream.StartTime = audioTrack.Offset;
-                        channel.UpdateLength();
+                        offsetStream.Offset = TimeUtil.TimeSpanToBytes(audioTrack.Offset, offsetStream.Properties);
                         audioMixer.UpdateLength();
                     }
                 });
@@ -197,14 +196,14 @@ namespace AudioAlign.Audio {
                     phaseInversion.Invert = ve.Value;
                 });
 
-            WaveStream trackStream = volumeControl;
+            IAudioStream trackStream = volumeControl;
 
-            audioMixer.AddInputStream(trackStream);
+            audioMixer.Add(trackStream);
             trackListStreams.Add(audioTrack, trackStream);
         }
 
         private void RemoveTrack(AudioTrack audioTrack) {
-            audioMixer.RemoveInputStream(trackListStreams[audioTrack]);
+            audioMixer.Remove(trackListStreams[audioTrack]);
             trackListStreams.Remove(audioTrack);
         }
 
@@ -222,9 +221,9 @@ namespace AudioAlign.Audio {
 
         private void dataMonitorStream_DataRead(object sender, StreamDataMonitorEventArgs e) {
             DataMonitorStream s = (DataMonitorStream)sender;
-            int channels = s.WaveFormat.Channels;
+            int channels = s.Properties.Channels;
             float[][] processedSamples = AudioUtil.CreateArray<float>(channels, 
-                e.Length / (s.WaveFormat.BitsPerSample / 8) / channels);
+                e.Length / (s.Properties.BitDepth / 8) / channels);
 
             unsafe {
                 fixed (byte* sampleBuffer = &e.Buffer[e.Offset]) {
