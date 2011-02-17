@@ -55,5 +55,12 @@ namespace AudioAlign.Audio.NAudio {
             }
             return base.Read(buffer, offset, count);
         }
+
+        public void ClearInputStreams() {
+            List<WaveStream> temp = new List<WaveStream>(inputStreams);
+            foreach (WaveStream ws in temp) {
+                RemoveInputStream(ws);
+            }
+        }
     }
 }
