@@ -17,7 +17,7 @@ namespace AudioAlign.Audio.Streams {
 
             properties = new AudioProperties(1, sourceStream.Properties.SampleRate, 
                 sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
-            sourceBuffer = new byte[sourceStream.SampleBlockSize * 4096];
+            sourceBuffer = new byte[0];
         }
 
         public override AudioProperties Properties {
@@ -45,8 +45,7 @@ namespace AudioAlign.Audio.Streams {
                 Debug.WriteLine("MonoStream: buffer size increased: " + oldSize + " -> " + count);
             }
 
-            int sourceBytesToRead = count / SampleBlockSize * sourceStream.SampleBlockSize;
-            int sourceBytesRead = sourceStream.Read(sourceBuffer, 0, sourceBytesToRead);
+            int sourceBytesRead = sourceStream.Read(sourceBuffer, 0, count);
 
             int sourceChannels = sourceStream.Properties.Channels;
             int sourceFloats = sourceBytesRead / 4;
@@ -55,7 +54,7 @@ namespace AudioAlign.Audio.Streams {
             float targetSample;
 
             unsafe {
-                fixed(byte* sourceByteBuffer = & sourceBuffer[0], targetByteBuffer = &buffer[offset]) {
+                fixed (byte* sourceByteBuffer = &sourceBuffer[0], targetByteBuffer = &buffer[offset]) {
                     float* sourceFloatBuffer = (float*)sourceByteBuffer;
                     float* targetFloatBuffer = (float*)targetByteBuffer;
 

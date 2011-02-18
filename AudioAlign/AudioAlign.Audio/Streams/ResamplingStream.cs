@@ -25,7 +25,7 @@ namespace AudioAlign.Audio.Streams {
                 sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
 
             src = new SampleRateConverter((ConverterType)quality, properties.Channels);
-            sourceBuffer = new byte[32768 * properties.SampleByteSize];
+            sourceBuffer = new byte[0];
             sourceBufferFillLevel = 0;
             sourceBufferPosition = 0;
 
@@ -50,6 +50,13 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public override int Read(byte[] buffer, int offset, int count) {
+            // dynamically increase buffer size
+            if (sourceBuffer.Length < count) {
+                int oldSize = sourceBuffer.Length;
+                sourceBuffer = new byte[count];
+                Debug.WriteLine("ResamplingStream: buffer size increased: " + oldSize + " -> " + count);
+            }
+
             int inputLengthUsed, outputLengthGenerated;
 
             do {

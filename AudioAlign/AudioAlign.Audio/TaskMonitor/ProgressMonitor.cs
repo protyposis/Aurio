@@ -12,6 +12,7 @@ namespace AudioAlign.Audio.TaskMonitor {
         private static ProgressMonitor singletonInstance = null;
 
         private List<ProgressReporter> reporters;
+        private int globalProgress = -1;
 
         public event EventHandler ProcessingStarted;
         public event EventHandler<ValueEventArgs<float>> ProcessingProgressChanged;
@@ -59,7 +60,10 @@ namespace AudioAlign.Audio.TaskMonitor {
 
         private void progressReporter_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
             ProgressReporter senderTaskStatus = (ProgressReporter)sender;
-            Debug.WriteLine(senderTaskStatus.Name + ": " + Math.Round(senderTaskStatus.Progress, 2) +"%");
+            if (globalProgress < (int)senderTaskStatus.Progress) {
+                globalProgress = (int)senderTaskStatus.Progress;
+                Debug.WriteLine(senderTaskStatus.Name + ": " + globalProgress +"%");
+            }
             OnProcessingProgressChanged();
         }
 
