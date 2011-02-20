@@ -48,5 +48,24 @@ namespace AudioAlign.Audio {
         public static void FFT(float[] values) {
             Fourier.RFFT(values, FourierDirection.Forward);
         }
+
+        /// <summary>
+        /// Calculates a number of logarithmically distributed frequency bands between a minimum and maximum frequency.
+        /// source: http://www.cs.cmu.edu/~yke/musicretrieval/ FFTDisplayPanel.java
+        /// </summary>
+        /// <param name="minFrequency">the minimum frequency</param>
+        /// <param name="maxFrequency">the maximum frequency</param>
+        /// <param name="numBands">the number of bands to calculate between the min and max frequency</param>
+        /// <returns>an array with numBands + 1 values each representing subsequentially the lower and upper frequency of a band</returns>
+        public static double[] CalculateFrequencyBoundaries(int minFrequency, int maxFrequency, int numBands) {
+            double logRatio = Math.Log((double)(maxFrequency) / (double)(minFrequency));
+            double x = Math.Exp(logRatio / numBands);
+            double[] freqs = new double[numBands + 1];
+            freqs[0] = minFrequency;
+            for (int i = 1; i <= numBands; i++) {
+                freqs[i] = freqs[i - 1] * x;
+            }
+            return freqs;
+        }
     }
 }

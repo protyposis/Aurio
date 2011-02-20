@@ -118,5 +118,9 @@ namespace AudioAlign.Audio.Project {
             }
             OnPropertyChanged("InvertedPhase");
         }
+
+        public override string ToString() {
+            return "Audio" + base.ToString();
+        }
     }
 }

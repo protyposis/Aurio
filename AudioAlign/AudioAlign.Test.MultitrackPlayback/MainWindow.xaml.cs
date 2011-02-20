@@ -14,7 +14,7 @@ using System.Windows.Shapes;
 using AudioAlign.Audio.Project;
 using System.IO;
 using NAudio.Wave;
-using AudioAlign.Audio.NAudio;
+using AudioAlign.Audio.Streams;
 using System.Timers;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -30,7 +30,7 @@ namespace AudioAlign.Test.MultitrackPlayback {
 
         private Timer timer;
         private WaveOut wavePlayer;
-        private WaveStream playbackStream;
+        private IAudioStream playbackStream;
 
         public MainWindow() {
             InitializeComponent();
@@ -66,11 +66,10 @@ namespace AudioAlign.Test.MultitrackPlayback {
                 wavePlayer.Dispose();
             }
 
-            WaveMixerStream32 mixer = new WaveMixerStream32();
+            MixerStream mixer = new MixerStream(2, 44100);
             foreach (AudioTrack audioTrack in trackListBox.Items) {
                 WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
-                TolerantWaveStream tolerantReader = new TolerantWaveStream(reader);
-                WaveChannel32 channel = new WaveChannel32(tolerantReader);
+                IeeeStream channel = new IeeeStream(new NAudioSourceStream(reader));
 
                 // necessary to control each track individually
                 VolumeControlStream volumeControl = new VolumeControlStream(channel) {
@@ -123,7 +122,7 @@ namespace AudioAlign.Test.MultitrackPlayback {
                         volumeControl.Volume = ve.Value;
                     });
 
-                mixer.AddInputStream(volumeControl);
+                mixer.Add(volumeControl);
             }
 
             VolumeControlStream volumeControlStream = new VolumeControlStream(mixer) {
@@ -137,7 +136,7 @@ namespace AudioAlign.Test.MultitrackPlayback {
 
             wavePlayer = new WaveOut();
             wavePlayer.DesiredLatency = 250;
-            wavePlayer.Init(playbackStream);
+            wavePlayer.Init(new NAudioSinkStream(playbackStream));
 
             // master volume setting
             volumeSlider.ValueChanged += new RoutedPropertyChangedEventHandler<double>(
@@ -145,8 +144,8 @@ namespace AudioAlign.Test.MultitrackPlayback {
                     volumeControlStream.Volume = (float)ve.NewValue;
             });
 
-            lblTotalPlaybackTime.Content = playbackStream.TotalTime;
-            playbackSeeker.Maximum = playbackStream.TotalTime.TotalSeconds;
+            lblTotalPlaybackTime.Content = TimeUtil.BytesToTimeSpan(playbackStream.Length, playbackStream.Properties);
+            playbackSeeker.Maximum = TimeUtil.BytesToTimeSpan(playbackStream.Length, playbackStream.Properties).TotalSeconds;
 
             wavePlayer.Play();
         }
@@ -178,7 +177,7 @@ namespace AudioAlign.Test.MultitrackPlayback {
 
         private void Window_Closed(object sender, EventArgs e) {
             if (playbackStream != null) {
-                playbackStream.Close();
+                //playbackStream.Close();
             }
 
             if (wavePlayer != null) {
@@ -190,10 +189,10 @@ namespace AudioAlign.Test.MultitrackPlayback {
             if (wavePlayer != null) {
                 lblCurrentPlaybackTime.Dispatcher.BeginInvoke(DispatcherPriority.Normal, 
                     new DispatcherOperationCallback(delegate {
-                        lblCurrentPlaybackTime.Content = playbackStream.CurrentTime;
+                        lblCurrentPlaybackTime.Content = TimeUtil.BytesToTimeSpan(playbackStream.Position, playbackStream.Properties);
 
                         playbackSeeker.Tag = SEEKER_PROGRAMMATIC_VALUECHANGED_TAG;
-                        playbackSeeker.Value = playbackStream.CurrentTime.TotalSeconds;
+                        playbackSeeker.Value = TimeUtil.BytesToTimeSpan(playbackStream.Position, playbackStream.Properties).TotalSeconds;
 
                         return null;
                    }), null);
@@ -214,7 +213,7 @@ namespace AudioAlign.Test.MultitrackPlayback {
             }
 
             if (playbackStream != null) {
-                playbackStream.CurrentTime = TimeSpan.FromSeconds(playbackSeeker.Value);
+                playbackStream.Position = TimeUtil.TimeSpanToBytes(TimeSpan.FromSeconds(playbackSeeker.Value), playbackStream.Properties);
             }
         }
 

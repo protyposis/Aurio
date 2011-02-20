@@ -50,5 +50,9 @@ namespace AudioAlign.Audio.Project {
         }
 
         #endregion
+
+        public override string ToString() {
+            return "Track {" + GetHashCode() + " / " + name + " / " + length + " / " + offset + "}";
+        }
     }
 }

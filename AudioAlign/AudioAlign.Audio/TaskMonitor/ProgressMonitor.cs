@@ -12,7 +12,7 @@ namespace AudioAlign.Audio.TaskMonitor {
         private static ProgressMonitor singletonInstance = null;
 
         private List<ProgressReporter> reporters;
-        private int globalProgress = -1;
+        private Dictionary<ProgressReporter, int> reporterProgress;
 
         public event EventHandler ProcessingStarted;
         public event EventHandler<ValueEventArgs<float>> ProcessingProgressChanged;
@@ -20,6 +20,7 @@ namespace AudioAlign.Audio.TaskMonitor {
 
         private ProgressMonitor() {
             reporters = new List<ProgressReporter>();
+            reporterProgress = new Dictionary<ProgressReporter, int>();
         }
 
         public static ProgressMonitor Instance {
@@ -46,6 +47,7 @@ namespace AudioAlign.Audio.TaskMonitor {
             }
             reporters.Add(reporter);
             reporter.PropertyChanged += progressReporter_PropertyChanged;
+            reporterProgress.Add(reporter, 0);
             return reporter;
         }
 
@@ -53,6 +55,7 @@ namespace AudioAlign.Audio.TaskMonitor {
         public void EndTask(ProgressReporter reporter) {
             reporter.PropertyChanged -= progressReporter_PropertyChanged;
             reporters.Remove(reporter);
+            reporterProgress.Remove(reporter);
             if (reporters.Count == 0) {
                 OnProcessingFinished();
             }
@@ -60,9 +63,9 @@ namespace AudioAlign.Audio.TaskMonitor {
 
         private void progressReporter_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
             ProgressReporter senderTaskStatus = (ProgressReporter)sender;
-            if (globalProgress < (int)senderTaskStatus.Progress) {
-                globalProgress = (int)senderTaskStatus.Progress;
-                Debug.WriteLine(senderTaskStatus.Name + ": " + globalProgress +"%");
+            if (reporterProgress[senderTaskStatus] != (int)senderTaskStatus.Progress) {
+                reporterProgress[senderTaskStatus] = (int)senderTaskStatus.Progress;
+                Debug.WriteLine(senderTaskStatus.Name + ": " + reporterProgress[senderTaskStatus] + "%");
             }
             OnProcessingProgressChanged();
         }

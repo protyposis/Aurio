@@ -1,0 +1,27 @@
+﻿<Window x:Class="AudioAlign.Test.Fingerprinting.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="523" Width="869" Loaded="Window_Loaded">
+    <Grid>
+        <Button Content="Load File" Height="23" HorizontalAlignment="Left" Margin="12,12,0,0" Name="button1" VerticalAlignment="Top" Width="75" Click="button1_Click" />
+        <ProgressBar Height="21" HorizontalAlignment="Left" Margin="12,41,0,0" Name="progressBar1" VerticalAlignment="Top" Width="479" />
+        
+        <Button Content="Refresh" Height="23" HorizontalAlignment="Left" Margin="93,12,0,0" Name="btnRefresh" VerticalAlignment="Top" Width="75" Click="btnRefresh_Click" />
+        
+        <Grid Margin="12,80,12,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height=".3*"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <ListBox Name="trackListBox"/>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width=".5*"/>
+                    <ColumnDefinition Width=".5*"/>
+                </Grid.ColumnDefinitions>
+                <ListBox Grid.Column="0" Name="trackFingerprintListBox" />
+                <ListBox Grid.Column="1" Name="fingerprintMatchListBox" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

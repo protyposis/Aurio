@@ -12,16 +12,13 @@ using AudioAlign.Audio.TaskMonitor;
 namespace AudioAlign.Audio {
     public static class AudioStreamFactory {
 
-        public static IAudioStream16 FromFilename(string filename) {
-            return new NAudio16BitWaveFileReaderWrapperStream(new WaveFileReader(filename));
+        public static AudioAlign.Audio.Streams.IAudioStream FromFileInfoIeee32(FileInfo fileInfo) {
+            return new AudioAlign.Audio.Streams.IeeeStream(new AudioAlign.Audio.Streams.NAudioSourceStream(
+                new WaveFileReader(fileInfo.FullName)));
         }
 
         public static IAudioStream16 FromFileInfo(FileInfo fileInfo) {
             return new NAudio16BitWaveFileReaderWrapperStream(new WaveFileReader(fileInfo.FullName));
-        }
-
-        public static IAudioStream16 FromStream(Stream stream) {
-            return new NAudio16BitWaveFileReaderWrapperStream(new WaveFileReader(stream));
         }
 
         public static VisualizingAudioStream16 FromAudioTrackForGUI(AudioTrack audioTrack) {
@@ -86,10 +83,6 @@ namespace AudioAlign.Audio {
             }
 
             return new VisualizingAudioStream16(audioInputStream, peakStore);
-        }
-
-        public static VisualizingAudioStream16 FromFilenameForGUI(string fileName) {
-            return FromAudioTrackForGUI(new AudioTrack(new FileInfo(fileName)));
         }
 
         /// <summary>
