@@ -65,7 +65,7 @@ namespace AudioAlign.Test.Fingerprinting {
                     });
 
                     fpg.Generate();
-                    store.Analyze();
+                    //store.Analyze();
                     ProgressMonitor.Instance.EndTask(progressReporter);
                 });
             }
@@ -82,12 +82,12 @@ namespace AudioAlign.Test.Fingerprinting {
             trackFingerprintListBox.Items.Clear();
             if (trackListBox.SelectedItems.Count > 0) {
                 AudioTrack audioTrack = (AudioTrack)trackListBox.SelectedItem;
-                SubFingerprint prevSfp = new SubFingerprint(0);
+                Dictionary<SubFingerprint, object> hashFilter = new Dictionary<SubFingerprint, object>();
                 foreach (SubFingerprint sfp in store.AudioTracks[audioTrack]) {
-                    if (sfp != prevSfp && store.LookupTable[sfp].Count > 1) {
+                    if (store.LookupTable[sfp].Count > 1 && !hashFilter.ContainsKey(sfp)) {
                         trackFingerprintListBox.Items.Add(sfp);
+                        hashFilter.Add(sfp, null);
                     }
-                    prevSfp = sfp;
                 }
             }
         }
@@ -96,10 +96,48 @@ namespace AudioAlign.Test.Fingerprinting {
             fingerprintMatchListBox.Items.Clear();
             if (trackFingerprintListBox.SelectedItems.Count > 0) {
                 SubFingerprint subFingerprint = (SubFingerprint)trackFingerprintListBox.SelectedItem;
-                foreach (FingerprintStore.SubFingerprintLookupEntry lookupEntry in store.LookupTable[subFingerprint]) {
+                foreach (SubFingerprintLookupEntry lookupEntry in store.LookupTable[subFingerprint]) {
                     fingerprintMatchListBox.Items.Add(lookupEntry);
                 }
             }
+        }
+
+        private void btnFindMatches_Click(object sender, RoutedEventArgs e) {
+            if (trackFingerprintListBox.SelectedItems.Count > 0) {
+                SubFingerprint subFingerprint = (SubFingerprint)trackFingerprintListBox.SelectedItem;
+                PrintMatchResult(store.FindMatches(subFingerprint));
+            }
+        }
+
+        private void btnFindAllMatches_Click(object sender, RoutedEventArgs e) {
+            PrintMatchResult(store.FindAllMatches());
+        }
+
+        private void PrintMatchResult(List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>> matches) {
+            Debug.WriteLine("MATCHES:");
+            foreach (Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float> match in matches) {
+                Debug.WriteLine(match.Item1.AudioTrack.Name + "@" + FingerprintGenerator.SubFingerprintIndexToTimeSpan(match.Item1.Index) + " <=> " +
+                    match.Item2.AudioTrack.Name + "@" + FingerprintGenerator.SubFingerprintIndexToTimeSpan(match.Item2.Index) + ": " + match.Item3);
+            }
+            Debug.WriteLine(matches.Count + " matches total");
+        }
+
+        private void fingerprintMatchListBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (fingerprintMatchListBox.SelectedItems.Count == 2) {
+                List<SubFingerprint> fp1 = store.GetFingerprint(fingerprintMatchListBox.SelectedItems[0] as SubFingerprintLookupEntry);
+                List<SubFingerprint> fp2 = store.GetFingerprint(fingerprintMatchListBox.SelectedItems[1] as SubFingerprintLookupEntry);
+                List<SubFingerprint> fpDifference = new List<SubFingerprint>();
+                for (int x = 0; x < fp1.Count; x++) {
+                    fpDifference.Add(fp1[x].Difference(fp2[x]));
+                }
+                fingerprintView1.SubFingerprints = fp1;
+                fingerprintView2.SubFingerprints = fp2;
+                fingerprintView3.SubFingerprints = fpDifference;
+            }
+        }
+
+        private void btnStats_Click(object sender, RoutedEventArgs e) {
+            store.PrintStats();
         }
     }
 }

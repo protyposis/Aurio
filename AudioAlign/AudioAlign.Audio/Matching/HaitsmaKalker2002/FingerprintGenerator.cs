@@ -128,5 +128,9 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, subFingerprint));
             }
         }
+
+        public static TimeSpan SubFingerprintIndexToTimeSpan(int index) {
+            return new TimeSpan((long)((double)index * FRAME_STEP / SAMPLERATE * 1000 * 1000 * 10));
+        }
     }
 }

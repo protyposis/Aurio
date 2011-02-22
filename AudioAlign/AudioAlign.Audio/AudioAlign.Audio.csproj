@@ -124,6 +124,7 @@
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintStore.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprint.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintEventArgs.cs" />
+    <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintLookupEntry.cs" />
     <Compile Include="MultitrackPlayer.cs" />
     <Compile Include="Streams\AbstractAudioStreamWrapper.cs" />
     <Compile Include="Streams\AudioFormat.cs" />
@@ -139,6 +140,7 @@
     <Compile Include="Streams\PhaseInversionStream.cs" />
     <Compile Include="Streams\ResamplingQuality.cs" />
     <Compile Include="Streams\ResamplingStream.cs" />
+    <Compile Include="Streams\VisualizingStream.cs" />
     <Compile Include="Streams\VolumeClipStream.cs" />
     <Compile Include="Streams\VolumeControlStream.cs" />
     <Compile Include="Streams\VolumeMeteringStream.cs" />

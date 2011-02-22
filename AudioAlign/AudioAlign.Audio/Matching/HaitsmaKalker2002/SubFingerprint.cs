@@ -21,12 +21,16 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             this.value = value;
         }
 
+        public UInt32 Value { 
+            get { return this.value; } 
+        }
+
         public bool this[int bit] {
             get {
                 if (bit < 0 || bit > 31) {
                     throw new IndexOutOfRangeException();
                 }
-                return (this.value & bitMasks[bit]) == this.value;
+                return (this.value & bitMasks[bit]) == bitMasks[bit];
             }
             set {
                 if (bit < 0 || bit > 31) {
@@ -75,6 +79,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
         public static bool operator ==(SubFingerprint a, SubFingerprint b) {
             return a.value == b.value;
+        }
+
+        public SubFingerprint Difference(SubFingerprint subFingerprint) {
+            return new SubFingerprint(this.value ^ subFingerprint.value);
         }
     }
 }
