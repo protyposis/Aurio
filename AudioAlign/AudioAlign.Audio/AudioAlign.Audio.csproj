@@ -120,6 +120,7 @@
     <Compile Include="FFTAnalyzer.cs" />
     <Compile Include="FFTUtil.cs" />
     <Compile Include="Matching\CrossCorrelation.cs" />
+    <Compile Include="Matching\HaitsmaKalker2002\Fingerprint.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintGenerator.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintStore.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprint.cs" />

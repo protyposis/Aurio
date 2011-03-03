@@ -84,6 +84,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                             indexOffset = Math.Min(indexOffset, -FINGERPRINT_SIZE + store[entry2.AudioTrack].Count - entry2.Index);
                         }
 
+                        if (indexOffset < 0) {
+                            continue;
+                        }
+
                         // sum up the bit errors
                         for (int s = 0; s < FINGERPRINT_SIZE; s++) {
                             bitErrors += store[entry1.AudioTrack][entry1.Index + indexOffset + s].HammingDistance(store[entry2.AudioTrack][entry2.Index + indexOffset + s]);
@@ -113,19 +117,19 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                     temp[x] = !temp[x];
                     matches.AddRange(FindMatches(temp));
                 }
-                if (matches.Count == 0) {
-                    // again no match found, generate 32*32 subfingerprints of distance 2
-                    int cycle = 0;
-                    for (int i = 0; i < 32; i++) {
-                        for (int j = cycle; j < 32; j++) {
-                            SubFingerprint temp = new SubFingerprint(subFingerprint.Value);
-                            temp[i] = !temp[i];
-                            temp[j] = !temp[j];
-                            matches.AddRange(FindMatches(temp));
-                        }
-                        cycle++;
-                    }
-                }
+                //if (matches.Count == 0) {
+                //    // again no match found, generate 32*32 subfingerprints of distance 2
+                //    int cycle = 0;
+                //    for (int i = 0; i < 32; i++) {
+                //        for (int j = cycle; j < 32; j++) {
+                //            SubFingerprint temp = new SubFingerprint(subFingerprint.Value);
+                //            temp[i] = !temp[i];
+                //            temp[j] = !temp[j];
+                //            matches.AddRange(FindMatches(temp));
+                //        }
+                //        cycle++;
+                //    }
+                //}
             }
             return matches;
         }
@@ -148,12 +152,12 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             return matches;
         }
 
-        public List<SubFingerprint> GetFingerprint(SubFingerprintLookupEntry entry) {
+        public Fingerprint GetFingerprint(SubFingerprintLookupEntry entry) {
             int indexOffset = 0;
             if (store[entry.AudioTrack].Count - entry.Index < FINGERPRINT_SIZE) {
                 indexOffset = Math.Min(indexOffset, -FINGERPRINT_SIZE + store[entry.AudioTrack].Count - entry.Index);
             }
-            return store[entry.AudioTrack].GetRange(entry.Index + indexOffset, FINGERPRINT_SIZE);
+            return new Fingerprint(store[entry.AudioTrack], entry.Index + indexOffset, FINGERPRINT_SIZE);
         }
 
         public void PrintStats() {
@@ -176,6 +180,17 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             totalSize += lookupCount * (sizeof(int) + sizeof(int));
 
             Debug.WriteLine("total size: " + totalSize + " bytes = " + (totalSize / 1024) + " kb = " + (totalSize / 1024 / 1024) + " mb");
+        }
+
+        public float CalculateBER(Fingerprint fp1, Fingerprint fp2) {
+            int bitErrors = 0;
+
+            // sum up the bit errors
+            for (int s = 0; s < FINGERPRINT_SIZE; s++) {
+                bitErrors += fp1[s].HammingDistance(fp2[s]);
+            }
+
+            return bitErrors / 8192f; // 8192 = 256 sub-fingerprints * 32 bits
         }
     }
 }

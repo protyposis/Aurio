@@ -25,20 +25,20 @@ namespace AudioAlign.Test.Fingerprinting {
             InitializeComponent();
         }
 
-        public List<SubFingerprint> SubFingerprints {
-            get { return (List<SubFingerprint>)GetValue(SubFingerprintsProperty); }
+        public Fingerprint SubFingerprints {
+            get { return (Fingerprint)GetValue(SubFingerprintsProperty); }
             set { SetValue(SubFingerprintsProperty, value); }
         }
 
         public static readonly DependencyProperty SubFingerprintsProperty =
-            DependencyProperty.Register("SubFingerprints", typeof(List<SubFingerprint>), typeof(FingerprintView), new UIPropertyMetadata(new List<SubFingerprint>(),
+            DependencyProperty.Register("SubFingerprints", typeof(Fingerprint), typeof(FingerprintView), new UIPropertyMetadata(null,
                 new PropertyChangedCallback(OnSubFingerprintsChanged)));
 
         public static void OnSubFingerprintsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             FingerprintView fv = (FingerprintView)d;
 
             int width = 32;
-            int height = fv.SubFingerprints.Count;
+            int height = fv.SubFingerprints.Length;
             int dpi = 96;
             byte[] pixelData = new byte[width * height];
 
