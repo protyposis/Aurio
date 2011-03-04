@@ -14,6 +14,7 @@ namespace AudioAlign.Audio.Streams {
         private int sourceBufferPosition;
         private int sourceBufferFillLevel;
         private double targetSampleRate;
+        private double sampleRateRatio;
 
         public ResamplingStream(IAudioStream sourceStream, ResamplingQuality quality)
             : base(sourceStream) {
@@ -39,13 +40,34 @@ namespace AudioAlign.Audio.Streams {
 
         public double TargetSampleRate {
             get { return targetSampleRate; }
-            set { targetSampleRate = value; src.SetRatio(value / sourceStream.Properties.SampleRate); }
+            set {
+                targetSampleRate = value;
+                sampleRateRatio = value / sourceStream.Properties.SampleRate;
+                src.SetRatio(sampleRateRatio);
+            }
         }
 
         public override AudioProperties Properties {
             get {
                 properties.SampleRate = (int)TargetSampleRate;
                 return properties; 
+            }
+        }
+
+        public override long Length {
+            get { return (long)Math.Ceiling(sourceStream.Length * sampleRateRatio); }
+        }
+
+        public override long Position {
+            get { 
+                long pos = (long)Math.Ceiling(sourceStream.Position * sampleRateRatio);
+                pos -= pos % SampleBlockSize;
+                return pos;
+            }
+            set { 
+                long pos = (long)Math.Ceiling(value / sampleRateRatio);
+                pos -= pos % sourceStream.SampleBlockSize;
+                sourceStream.Position = pos;
             }
         }
 

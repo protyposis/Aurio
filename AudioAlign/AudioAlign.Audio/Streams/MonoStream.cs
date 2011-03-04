@@ -45,7 +45,8 @@ namespace AudioAlign.Audio.Streams {
                 Debug.WriteLine("MonoStream: buffer size increased: " + oldSize + " -> " + count);
             }
 
-            int sourceBytesRead = sourceStream.Read(sourceBuffer, 0, count);
+            int sourceBytesToRead = count - count % sourceStream.SampleBlockSize;
+            int sourceBytesRead = sourceStream.Read(sourceBuffer, 0, sourceBytesToRead);
 
             int sourceChannels = sourceStream.Properties.Channels;
             int sourceFloats = sourceBytesRead / 4;

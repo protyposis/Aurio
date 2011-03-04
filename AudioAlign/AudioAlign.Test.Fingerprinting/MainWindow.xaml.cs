@@ -60,8 +60,8 @@ namespace AudioAlign.Test.Fingerprinting {
                     int subFingerprintsCalculated = 0;
                     fpg.SubFingerprintCalculated += new EventHandler<SubFingerprintEventArgs>(delegate(object s2, SubFingerprintEventArgs e2) {
                         subFingerprintsCalculated++;
-                        progressReporter.ReportProgress(100 / ((double)trackSamples / (subFingerprintsCalculated * 64)));
-                        store.Add(e2.AudioTrack, e2.SubFingerprint);
+                        progressReporter.ReportProgress((double)e2.Timestamp.Ticks / audioTrack.Length.Ticks * 100);
+                        store.Add(e2.AudioTrack, e2.SubFingerprint, e2.Timestamp);
                     });
 
                     fpg.Generate();

@@ -51,6 +51,9 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public override int Read(byte[] buffer, int offset, int count) {
+            if (count % BlockAlign != 0) {
+                throw new Exception("misaligned read length!");
+            }
             return sourceStream.Read(buffer, offset, count);
         }
     }

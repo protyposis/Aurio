@@ -29,9 +29,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         public FingerprintGenerator(AudioTrack track) {
             this.inputTrack = track;
             this.windowFunction = WindowUtil.GetFunction(WindowType.Hann, FRAME_SIZE);
-            this.frequencyBands = FFTUtil.CalculateFrequencyBoundaries(FREQ_MIN, FREQ_MAX, FREQ_BANDS);
+            this.frequencyBands = FFTUtil.CalculateFrequencyBoundariesLog(FREQ_MIN, FREQ_MAX, FREQ_BANDS);
         }
 
+        private TimeSpan timestamp = TimeSpan.Zero;
         public void Generate() {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(inputTrack.FileInfo)),
@@ -48,6 +49,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                     float* streamBufferF = (float*)streamBufferB;
 
                     while (audioStream.Position <= audioStream.Length) {
+                        long audioStreamPositionF = audioStream.Position / sampleBytes;
                         // fill the stream input buffer, if no bytes returned we have reached the end of the stream
                         int streamBufferOffsetB = streamBufferOffsetF * sampleBytes;
                         streamBufferLevelF = StreamUtil.ForceRead(audioStream, streamBuffer,
@@ -64,6 +66,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                                 frameBufferF[x] = streamBufferF[x + frameOffsetF];
                             }
 
+                            long audioStreamFramePositionF = audioStreamPositionF + frameOffsetF;
+                            timestamp = new TimeSpan((long)((double)audioStreamFramePositionF / SAMPLERATE * 1000 * 1000 * 10));
                             ProcessFrame(frameBufferF);
 
                             frameOffsetF += FRAME_STEP;
@@ -125,7 +129,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
 
             if (SubFingerprintCalculated != null) {
-                SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, subFingerprint));
+                SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, subFingerprint, timestamp));
             }
         }
 

@@ -12,11 +12,17 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             Index = index;
         }
 
+        public SubFingerprintLookupEntry(AudioTrack audioTrack, int index, TimeSpan timestamp)
+            : this(audioTrack, index) {
+            Timestamp = timestamp;
+        }
+
         public AudioTrack AudioTrack { get; private set; }
         public int Index { get; private set; }
+        public TimeSpan Timestamp { get; private set; }
 
         public override string ToString() {
-            return "SubFingerprintLookupEntry {" + AudioTrack.GetHashCode() + " / " + Index + "}";
+            return "SubFingerprintLookupEntry {" + AudioTrack.GetHashCode() + " / " + Index + " / " + Timestamp + "}";
         }
     }
 }
