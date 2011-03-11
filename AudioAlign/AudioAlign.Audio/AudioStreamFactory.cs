@@ -8,39 +8,34 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using AudioAlign.Audio.Project;
 using AudioAlign.Audio.TaskMonitor;
+using AudioAlign.Audio.Streams;
 
 namespace AudioAlign.Audio {
     public static class AudioStreamFactory {
 
-        public static AudioAlign.Audio.Streams.IAudioStream FromFileInfoIeee32(FileInfo fileInfo) {
-            return new AudioAlign.Audio.Streams.IeeeStream(new AudioAlign.Audio.Streams.NAudioSourceStream(
-                new WaveFileReader(fileInfo.FullName)));
+        public static IAudioStream FromFileInfoIeee32(FileInfo fileInfo) {
+            return new IeeeStream(new NAudioSourceStream(new WaveFileReader(fileInfo.FullName)));
         }
 
-        public static IAudioStream16 FromFileInfo(FileInfo fileInfo) {
-            return new NAudio16BitWaveFileReaderWrapperStream(new WaveFileReader(fileInfo.FullName));
-        }
+        public static AudioAlign.Audio.Streams.VisualizingStream FromAudioTrackForGUI(AudioTrack audioTrack) {
+            int SAMPLES_PER_PEAK = 256;
 
-        public static VisualizingAudioStream16 FromAudioTrackForGUI(AudioTrack audioTrack) {
-            int SAMPLES_PER_PEAK = 1024;
+            IAudioStream audioInputStream = FromFileInfoIeee32(audioTrack.FileInfo);
 
-            AudioAlign.Audio.Streams.IAudioStream audioInputStream = FromFileInfoIeee32(audioTrack.FileInfo);
-
-            PeakStore peakStore = new PeakStore(audioInputStream.Properties.Channels,
+            PeakStore peakStore = new PeakStore(SAMPLES_PER_PEAK, audioInputStream.Properties.Channels,
                 (int)Math.Ceiling((float)audioInputStream.Length / audioInputStream.SampleBlockSize / SAMPLES_PER_PEAK));
-            
+
             // search for existing peakfile
             if (audioTrack.HasPeakFile) {
                 // load peakfile from disk
                 peakStore.ReadFrom(File.OpenRead(audioTrack.PeakFile.FullName));
             }
-                // generate peakfile
+            // generate peakfile
             else {
                 int channels = peakStore.Channels;
-                int bufferSize = 65536;
-                //float[][] buffer = AudioUtil.CreateArray<float>(channels, bufferSize);
-                byte[] buffer = new byte[bufferSize * audioInputStream.SampleBlockSize];
-                List<float>[] minMax = AudioUtil.CreateList<float>(channels, SAMPLES_PER_PEAK);
+                byte[] buffer = new byte[65536 * audioInputStream.SampleBlockSize];
+                float[] min = new float[channels];
+                float[] max = new float[channels];
                 BinaryWriter[] peakWriters = peakStore.CreateMemoryStreams().WrapWithBinaryWriters();
 
                 Task.Factory.StartNew(() => {
@@ -51,6 +46,11 @@ namespace AudioAlign.Audio {
                     int bytesRead;
                     long totalSampleBlocks = audioInputStream.Length / audioInputStream.SampleBlockSize;
                     long totalSamplesRead = 0;
+
+                    for (int i = 0; i < channels; i++) {
+                        min[i] = float.MaxValue;
+                        max[i] = float.MinValue;
+                    }
 
                     unsafe {
                         fixed (byte* bufferB = &buffer[0]) {
@@ -64,23 +64,26 @@ namespace AudioAlign.Audio {
 
                                 do {
                                     for (int channel = 0; channel < channels; channel++) {
-                                        minMax[channel].Add(bufferF[samplesProcessed]);
+                                        if (min[channel] > bufferF[samplesProcessed]) {
+                                            min[channel] = bufferF[samplesProcessed];
+                                        }
+                                        if (max[channel] < bufferF[samplesProcessed]) {
+                                            max[channel] = bufferF[samplesProcessed];
+                                        }
                                         samplesProcessed++;
                                         totalSamplesRead++;
                                     }
 
-                                    if (++sampleBlockCount == SAMPLES_PER_PEAK || sampleBlockCount == totalSampleBlocks) {
+                                    if (++sampleBlockCount % SAMPLES_PER_PEAK == 0 || sampleBlockCount == totalSampleBlocks) {
                                         // write peak
                                         peakCount++;
                                         for (int channel = 0; channel < channels; channel++) {
-                                            peakWriters[channel].Write(new Peak(minMax[channel].Min(), minMax[channel].Max()));
-                                            float last = minMax[channel].Last();
-                                            minMax[channel].Clear();
+                                            peakWriters[channel].Write(new Peak(min[channel], max[channel]));
                                             // add last sample of previous peak as first sample of current peak to make consecutive peaks overlap
                                             // this gives the impression of a continuous waveform
-                                            minMax[channel].Add(last);
+                                            min[channel] = max[channel] = bufferF[samplesProcessed - channels];
                                         }
-                                        sampleBlockCount = 0;
+                                        //sampleBlockCount = 0;
                                     }
                                 }
                                 while (samplesProcessed < samplesRead);
@@ -90,7 +93,6 @@ namespace AudioAlign.Audio {
                         }
                     }
 
-                    
                     Debug.WriteLine("peak generation finished - " + (DateTime.Now - startTime) + ", " + (peakWriters[0].BaseStream.Length * channels) + " bytes");
                     ProgressMonitor.Instance.EndTask(progress);
 
@@ -101,7 +103,7 @@ namespace AudioAlign.Audio {
                 });
             }
 
-            return new VisualizingAudioStream16(audioTrack.CreateAudioStream(), peakStore);
+            return new VisualizingStream(audioTrack.CreateAudioStream(), peakStore);
         }
 
         /// <summary>

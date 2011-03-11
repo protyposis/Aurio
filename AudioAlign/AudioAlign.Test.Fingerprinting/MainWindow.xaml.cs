@@ -17,6 +17,7 @@ using AudioAlign.Audio.Project;
 using System.Threading.Tasks;
 using AudioAlign.Audio.TaskMonitor;
 using System.Diagnostics;
+using AudioAlign.Audio.Streams;
 
 namespace AudioAlign.Test.Fingerprinting {
     /// <summary>
@@ -51,7 +52,8 @@ namespace AudioAlign.Test.Fingerprinting {
 
             if (dlg.ShowDialog() == true) {
                 AudioTrack audioTrack = new AudioTrack(new FileInfo(dlg.FileName));
-                long trackSamples = audioTrack.CreateAudioStream().SampleCount / 4 / 2;
+                IAudioStream audioStream = audioTrack.CreateAudioStream();
+                long trackSamples = audioStream.Length / audioStream.SampleBlockSize / 4 / 2;
 
                 Task.Factory.StartNew(() => {
                     ProgressReporter progressReporter = ProgressMonitor.Instance.BeginTask("Generating sub-fingerprints for " + audioTrack.FileInfo.Name, true);

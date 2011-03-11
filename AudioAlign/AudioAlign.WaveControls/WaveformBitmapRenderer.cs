@@ -6,6 +6,7 @@ using System.Windows.Media.Imaging;
 using System.Windows;
 using System.Windows.Media;
 using System.Diagnostics;
+using AudioAlign.Audio;
 
 namespace AudioAlign.WaveControls {
     class WaveformBitmapRenderer : IWaveformRenderer {
@@ -22,20 +23,21 @@ namespace AudioAlign.WaveControls {
 
         #region IWaveformRenderer Members
 
-        public Drawing Render(List<Point> samples, bool peaks, int width, int height) {
+        public Drawing Render(float[] sampleData, int sampleCount, int width, int height) {
+            bool peaks = sampleCount >= width;
             if (!peaks) {
-                BitmapSource waveform = DrawWaveform(samples, width, height);
+                BitmapSource waveform = DrawWaveform(sampleData, sampleCount, width, height);
                 return new ImageDrawing(waveform, new Rect(0, 0, width, height));
             }
             else {
-                BitmapSource waveform = DrawPeakform(samples, width, height);
+                BitmapSource waveform = DrawPeakform(sampleData, sampleCount, width, height);
                 return new ImageDrawing(waveform, new Rect(0, 0, width, height));
             }
         }
 
         #endregion
 
-        private WriteableBitmap DrawPeakform(List<Point> peakLines, int width, int height) {
+        private WriteableBitmap DrawPeakform(float[] peakData, int peakCount, int width, int height) {
             WriteableBitmap wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
             int[] pixels = new int[width * height];
 
@@ -43,14 +45,11 @@ namespace AudioAlign.WaveControls {
             int fillColor = BrushToColorValue(WaveformFill);
 
             int halfheight = height / 2;
-            int peaks = peakLines.Count / 2;
+            int peaks = peakCount;
             int x, y, top, bottom, prevX = 0, prevY = 0, prevTop = 0, prevBottom = height;
-            for (int peak = 0; peak < peaks; peak++) {
-                Point pMin = peakLines[peak];
-                Point pMax = peakLines[peakLines.Count - 1 - peak];
-
-                int pp1 = (int)(halfheight * pMin.Y);
-                int pp2 = (int)(halfheight * pMax.Y);
+            for (int peak = 0; peak < peaks * 2; peak += 2) {
+                int pp1 = (int)(halfheight * peakData[peak]);
+                int pp2 = (int)(halfheight * peakData[peak + 1]);
 
                 // NOTE:
                 // The peaks are distributed among the available width. If more peaks than pixel columns are
@@ -59,7 +58,7 @@ namespace AudioAlign.WaveControls {
                 // between 20->30. Solution would be to combine them to a single column 10->30 (if it is
                 // ever getting noticeable).
                 // TODO resolve drawing issues of combined peaks if noticeable
-                x = (int)Math.Round((float)peak / (peaks - 1) * (width - 1));
+                x = (int)Math.Round((float)peak / 2 / (peaks - 1) * (width - 1));
 
                 top = halfheight - pp2;
                 bottom = halfheight - pp1;
@@ -91,7 +90,7 @@ namespace AudioAlign.WaveControls {
             return wb;
         }
 
-        private WriteableBitmap DrawWaveform(List<Point> peakLines, int width, int height) {
+        private WriteableBitmap DrawWaveform(float[] sampleData, int sampleCount, int width, int height) {
             WriteableBitmap wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
             int[] pixels = new int[width * height];
 
@@ -99,11 +98,11 @@ namespace AudioAlign.WaveControls {
             int sampleColor = BrushToColorValue(WaveformSamplePoint);
 
             int halfheight = height / 2;
-            int peaks = peakLines.Count;
+            int peaks = sampleCount;
             int x, y, prevX = 0, prevY = 0;
             for (int peak = 0; peak < peaks; peak++) {
                 x = (int)Math.Round((float)peak / (peaks - 1) * (width - 1));
-                y = halfheight - (int)(halfheight * peakLines[peak].Y);
+                y = halfheight - (int)(halfheight * sampleData[peak]);
                 if (y == height) {
                     y--; // for even heights the last line needs to be stripped
                 }

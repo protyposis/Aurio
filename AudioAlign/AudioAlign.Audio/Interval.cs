@@ -103,8 +103,20 @@ namespace AudioAlign.Audio {
             return !interval1.Equals(interval2);
         }
 
+        public TimeSpan TimeFrom {
+            get { return new TimeSpan(From); }
+        }
+
+        public TimeSpan TimeTo {
+            get { return new TimeSpan(To); }
+        }
+
+        public TimeSpan TimeLength {
+            get { return new TimeSpan(Length); }
+        }
+
         public override string ToString() {
-            return "[" + from + ";" + to + "]";
+            return "[" + TimeFrom + ";" + TimeTo + ";" + TimeLength + "]";
         }
     }
 }

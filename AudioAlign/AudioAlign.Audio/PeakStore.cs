@@ -8,20 +8,34 @@ using System.Runtime.CompilerServices;
 namespace AudioAlign.Audio {
     public class PeakStore {
 
-        private const int PEAK_BYTE_SIZE = 2 * 4; // 2 4-byte single numbers
+        private static readonly int PEAK_BYTE_SIZE;
 
+        static PeakStore() {
+            unsafe { PEAK_BYTE_SIZE = sizeof(Peak); }
+        }
+
+        private int samplesPerPeak;
         private byte[][] data;
-        private MemoryStream[] streams;
+        private Dictionary<int, byte[][]> scaledData;
 
         /// <summary>
         /// Creates a PeakStore that stores a given number of peaks for a given number of channels.
         /// </summary>
         /// <param name="channels">the number of channels to store peaks for</param>
         /// <param name="peaksPerChannel">the number of peaks to store for each channel</param>
-        public PeakStore(int channels, int peaksPerChannel) {
+        /// <param name="samplesPerPeak">the number of samples that are merged into a peak</param>
+        public PeakStore(int samplesPerPeak, int channels, int peaksPerChannel) {
+            this.samplesPerPeak = samplesPerPeak;
             data = AudioUtil.CreateArray<byte>(channels, peaksPerChannel * PEAK_BYTE_SIZE);
-            streams = CreateMemoryStreams();
+
+            scaledData = new Dictionary<int, byte[][]>();
         }
+
+        /// <summary>
+        /// Gets the number of samples that are contained in one peak. 
+        /// This is the threshold from which the PeakStore can be used to render a waveform.
+        /// </summary>
+        public int SamplesPerPeak { get { return samplesPerPeak; } }
 
         /// <summary>
         /// Gets the number of channels that this PeakStore is storing peaks for.
@@ -45,6 +59,10 @@ namespace AudioAlign.Audio {
                 streams[channel] = new MemoryStream(data[channel]);
             }
             return streams;
+        }
+
+        public byte[][] Data {
+            get { return data; }
         }
 
         /// <summary>

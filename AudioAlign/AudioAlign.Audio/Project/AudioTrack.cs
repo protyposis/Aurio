@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using AudioAlign.Audio.Streams;
 
 namespace AudioAlign.Audio.Project {
     public class AudioTrack : Track {
@@ -26,11 +27,12 @@ namespace AudioAlign.Audio.Project {
         private bool invertedPhase = false;
 
         public AudioTrack(FileInfo fileInfo) : base(fileInfo) {
-            this.Length = CreateAudioStream().TimeLength;
+            IAudioStream audioStream = CreateAudioStream();
+            this.Length = TimeUtil.BytesToTimeSpan(audioStream.Length, audioStream.Properties);
         }
 
-        public IAudioStream16 CreateAudioStream() {
-            return AudioStreamFactory.FromFileInfo(FileInfo);
+        public IAudioStream CreateAudioStream() {
+            return AudioStreamFactory.FromFileInfoIeee32(FileInfo);
         }
 
         public FileInfo PeakFile {

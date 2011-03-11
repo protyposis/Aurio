@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AudioAlign.Audio.Streams;
 
 namespace AudioAlign.Audio {
     public static class AudioUtil {

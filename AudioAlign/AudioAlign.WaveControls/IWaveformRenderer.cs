@@ -16,6 +16,6 @@ namespace AudioAlign.WaveControls {
         /// <param name="width">the width of the resulting drawing</param>
         /// <param name="height">the height of the resulting drawing</param>
         /// <returns></returns>
-        Drawing Render(List<Point> samples, bool peaks, int width, int height);
+        Drawing Render(float[] sampleData, int sampleCount, int width, int height);
     }
 }

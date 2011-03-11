@@ -48,6 +48,10 @@ namespace AudioAlign.WaveControls {
             return waveformDrawing;
         }
 
+        public Drawing Render(float[] sampleData, int sampleCount, int width, int height) {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         private Geometry CreateWaveform(List<Point> samplePoints) {

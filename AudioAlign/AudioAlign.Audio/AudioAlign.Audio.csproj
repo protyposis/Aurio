@@ -111,10 +111,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbstractAudioStream.cs" />
-    <Compile Include="AudioProperties.cs" />
     <Compile Include="AudioStreamFactory.cs" />
-    <Compile Include="AudioStreamWrapper.cs" />
     <Compile Include="AudioUtil.cs" />
     <Compile Include="BinaryIOExtensions.cs" />
     <Compile Include="FFTAnalyzer.cs" />
@@ -148,10 +145,7 @@
     <Compile Include="StreamUtil.cs" />
     <Compile Include="TimeUtil.cs" />
     <Compile Include="VolumeUtil.cs" />
-    <Compile Include="IAudioStream.cs" />
-    <Compile Include="IAudioStream16.cs" />
     <Compile Include="Interval.cs" />
-    <Compile Include="NAudio16BitWaveFileReaderWrapperStream.cs" />
     <Compile Include="Peak.cs" />
     <Compile Include="PeakStore.cs" />
     <Compile Include="Project\AudioTrack.cs" />
@@ -163,7 +157,6 @@
     <Compile Include="TaskMonitor\ProgressMonitor.cs" />
     <Compile Include="TaskMonitor\ProgressReporter.cs" />
     <Compile Include="ValueEventArgs.cs" />
-    <Compile Include="VisualizingAudioStream16.cs" />
     <Compile Include="WindowFunction.cs" />
     <Compile Include="WindowUtil.cs" />
   </ItemGroup>

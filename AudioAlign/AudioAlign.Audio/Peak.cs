@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace AudioAlign.Audio {
-    public class Peak {
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Peak {
         private float min, max;
 
         public Peak(float min, float max) {
@@ -22,8 +24,21 @@ namespace AudioAlign.Audio {
             set { max = value; }
         }
 
+        public void Merge(Peak p) {
+            Merge(p.min, p.max);
+        }
+
+        public void Merge(float min, float max) {
+            if (this.min > min) {
+                this.min = min;
+            }
+            if (this.max < max) {
+                this.max = max;
+            }
+        }
+
         public override string ToString() {
-            return "[" + min + ";" + max + "]";
+            return "Peak [" + min + ";" + max + "]";
         }
     }
 }
