@@ -20,10 +20,11 @@ namespace AudioAlign.WaveControls {
 
         #region IWaveformRenderer Members
 
-        public Drawing Render(List<Point> samples, bool peaks, int width, int height) {
+        public Drawing Render(float[] sampleData, int sampleCount, int width, int height) {
+            bool peaks = sampleCount >= width;
             DrawingGroup waveformDrawing = new DrawingGroup();
 
-            Geometry audioform = peaks ? CreatePeakform(samples) : CreateWaveform(samples);
+            Geometry audioform = peaks ? CreatePeakform(sampleData, sampleCount) : CreateWaveform(sampleData, sampleCount);
             TransformGroup transformGroup = new TransformGroup();
             transformGroup.Children.Add(new ScaleTransform(width / audioform.Bounds.Width, height / 2 * -1));
             transformGroup.Children.Add(new TranslateTransform(0, height / 2));
@@ -33,12 +34,12 @@ namespace AudioAlign.WaveControls {
 
             if (!peaks) {
                 // draw sample dots on high zoom factors
-                float zoomFactor = (float)(width / samples.Count);
+                float zoomFactor = (float)(width / sampleCount);
                 if (zoomFactor > 0.05) {
                     float sampleDotSize = zoomFactor < 30 ? zoomFactor / 10 : 3;
                     GeometryGroup geometryGroup = new GeometryGroup();
-                    foreach (Point point in samples) {
-                        EllipseGeometry sampleDot = new EllipseGeometry(audioform.Transform.Transform(point), sampleDotSize, sampleDotSize);
+                    for(int x = 0; x < sampleCount; x++) {
+                        EllipseGeometry sampleDot = new EllipseGeometry(audioform.Transform.Transform(new Point(x, sampleData[x])), sampleDotSize, sampleDotSize);
                         geometryGroup.Children.Add(sampleDot);
                     }
                     waveformDrawing.Children.Add(new GeometryDrawing(WaveformSamplePoint, null, geometryGroup));
@@ -48,14 +49,10 @@ namespace AudioAlign.WaveControls {
             return waveformDrawing;
         }
 
-        public Drawing Render(float[] sampleData, int sampleCount, int width, int height) {
-            throw new NotImplementedException();
-        }
-
         #endregion
 
-        private Geometry CreateWaveform(List<Point> samplePoints) {
-            if (samplePoints.Count() < 2) { // cannot draw a line if I have just one point
+        private Geometry CreateWaveform(float[] sampleData, int sampleCount) {
+            if (sampleData.Length < 2) { // cannot draw a line if I have just one point
                 return Geometry.Empty;
             }
             else {
@@ -63,20 +60,27 @@ namespace AudioAlign.WaveControls {
                 PathFigure pathFigure = new PathFigure();
                 pathFigure.IsClosed = false;
                 pathFigure.IsFilled = false;
-                pathFigure.StartPoint = samplePoints[0];
-                pathFigure.Segments.Add(new PolyLineSegment(samplePoints, true)); // first point gets added a second time
+                pathFigure.StartPoint = new Point(0, sampleData[0]);
+                for (int x = 1; x < sampleCount; x++) {
+                    pathFigure.Segments.Add(new LineSegment(new Point(x, sampleData[x]), true));
+                }
                 waveformGeometry.Figures.Add(pathFigure);
                 return waveformGeometry;
             }
         }
 
-        private Geometry CreatePeakform(List<Point> peakLines) {
+        private Geometry CreatePeakform(float[] sampleData, int sampleCount) {
             PathGeometry peakformGeometry = new PathGeometry();
             PathFigure pathFigure = new PathFigure();
             pathFigure.IsClosed = true;
             pathFigure.IsFilled = true;
-            pathFigure.StartPoint = peakLines[0];
-            pathFigure.Segments.Add(new PolyLineSegment(peakLines, true)); // first point gets added a second time
+            pathFigure.StartPoint = new Point(0, sampleData[0]);
+            for (int x = 1; x < sampleData.Length / 2; x++) {
+                pathFigure.Segments.Add(new LineSegment(new Point(x, sampleData[x * 2]), true));
+            }
+            for (int x = sampleData.Length / 2 - 1; x >= 0; x--) {
+                pathFigure.Segments.Add(new LineSegment(new Point(x, sampleData[x * 2 + 1]), true));
+            }
             peakformGeometry.Figures.Add(pathFigure);
             return peakformGeometry;
         }
