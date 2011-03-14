@@ -29,6 +29,7 @@ namespace AudioAlign.Audio {
             if (audioTrack.HasPeakFile) {
                 // load peakfile from disk
                 peakStore.ReadFrom(File.OpenRead(audioTrack.PeakFile.FullName));
+                peakStore.CalculateScaledData(8, 6);
             }
             // generate peakfile
             else {
@@ -92,6 +93,9 @@ namespace AudioAlign.Audio {
                             }
                         }
                     }
+
+                    Debug.WriteLine("generating downscaled peaks...");
+                    peakStore.CalculateScaledData(8, 6);
 
                     Debug.WriteLine("peak generation finished - " + (DateTime.Now - startTime) + ", " + (peakWriters[0].BaseStream.Length * channels) + " bytes");
                     ProgressMonitor.Instance.EndTask(progress);

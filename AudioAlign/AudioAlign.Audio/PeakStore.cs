@@ -26,7 +26,7 @@ namespace AudioAlign.Audio {
         /// <param name="samplesPerPeak">the number of samples that are merged into a peak</param>
         public PeakStore(int samplesPerPeak, int channels, int peaksPerChannel) {
             this.samplesPerPeak = samplesPerPeak;
-            data = AudioUtil.CreateArray<byte>(channels, peaksPerChannel * PEAK_BYTE_SIZE);
+            this.data = AudioUtil.CreateArray<byte>(channels, peaksPerChannel * PEAK_BYTE_SIZE);
 
             scaledData = new Dictionary<int, byte[][]>();
         }
@@ -61,8 +61,15 @@ namespace AudioAlign.Audio {
             return streams;
         }
 
-        public byte[][] Data {
-            get { return data; }
+        public byte[][] GetData(int requestedSamplesPerPeak, out int samplesPerPeak) {
+            foreach (int downscaledSamplesPerPeak in scaledData.Keys.Reverse()) {
+                if (requestedSamplesPerPeak > downscaledSamplesPerPeak) {
+                    samplesPerPeak = downscaledSamplesPerPeak;
+                    return scaledData[downscaledSamplesPerPeak];
+                }
+            }
+            samplesPerPeak = SamplesPerPeak;
+            return data;
         }
 
         /// <summary>
@@ -94,6 +101,49 @@ namespace AudioAlign.Audio {
                 for (int channel = 0; channel < Channels; channel++) {
                     bw.Write(peakReaders[channel].ReadPeak());
                 }
+            }
+        }
+
+        public void CalculateScaledData(int scaleFactor, int steps) {
+            int peakSize = 0;
+            unsafe {
+                peakSize = sizeof(Peak);
+            }
+
+            int previousStepSamplesPerPeak = SamplesPerPeak;
+            for(int step = 1; step <= steps; step++) {
+                int samplesPerPeak = previousStepSamplesPerPeak * scaleFactor;
+                int peaksPerPeak = steps * scaleFactor;
+                byte[][] peakData = step == 1 ? data : scaledData[previousStepSamplesPerPeak];
+                int downscaledPeakDataLength = (int)Math.Ceiling((float)peakData[0].Length / scaleFactor);
+                if(downscaledPeakDataLength % peakSize != 0) {
+                    downscaledPeakDataLength += peakSize - (downscaledPeakDataLength % peakSize);
+                }
+                byte[][] downscaledPeakData = AudioUtil.CreateArray<byte>(peakData.Length, downscaledPeakDataLength);
+
+                unsafe {
+                    // calculate scaled peaks
+                    for (int channel = 0; channel < Channels; channel++) {
+                        int peakCount = peakData[0].Length / sizeof(Peak);
+                        fixed (byte* peaksB = &peakData[channel][0], downscaledPeaksB = &downscaledPeakData[channel][0]) {
+                            Peak* peaks = (Peak*)peaksB;
+                            Peak* downscaledPeaks = (Peak*)downscaledPeaksB;
+                            Peak downscaledPeak = new Peak(float.MaxValue, float.MinValue);
+                            int downscaledPeakIndex = 0;
+                            for (int p = 0; p < peakCount; p++) {
+                                downscaledPeak.Merge(peaks[p]);
+                                if ((p > 0 && p % scaleFactor == 0) || p == peakCount - 1) {
+                                    downscaledPeaks[downscaledPeakIndex++] = downscaledPeak;
+                                    downscaledPeak = new Peak(float.MaxValue, float.MinValue);
+                                    //downscaledPeaks += sizeof(Peak);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                this.scaledData.Add(samplesPerPeak, downscaledPeakData);
+                previousStepSamplesPerPeak = samplesPerPeak;
             }
         }
     }
