@@ -118,7 +118,7 @@ namespace AudioAlign.Audio {
         private void AddTrack(AudioTrack audioTrack) {
             WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
             //TolerantWaveStream tolerantReader = new TolerantWaveStream(reader);
-            OffsetStream offsetStream = new OffsetStream(new NAudioSourceStream(reader));
+            OffsetStream offsetStream = new OffsetStream(new TolerantStream(new NAudioSourceStream(reader)));
             IeeeStream channel = new IeeeStream(offsetStream);
 
             audioTrack.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(

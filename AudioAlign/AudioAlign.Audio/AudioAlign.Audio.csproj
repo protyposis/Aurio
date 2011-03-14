@@ -138,6 +138,7 @@
     <Compile Include="Streams\PhaseInversionStream.cs" />
     <Compile Include="Streams\ResamplingQuality.cs" />
     <Compile Include="Streams\ResamplingStream.cs" />
+    <Compile Include="Streams\TolerantStream.cs" />
     <Compile Include="Streams\VisualizingStream.cs" />
     <Compile Include="Streams\VolumeClipStream.cs" />
     <Compile Include="Streams\VolumeControlStream.cs" />
