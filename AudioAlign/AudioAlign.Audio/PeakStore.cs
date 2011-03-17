@@ -135,7 +135,6 @@ namespace AudioAlign.Audio {
                                 if ((p > 0 && p % scaleFactor == 0) || p == peakCount - 1) {
                                     downscaledPeaks[downscaledPeakIndex++] = downscaledPeak;
                                     downscaledPeak = new Peak(float.MaxValue, float.MinValue);
-                                    //downscaledPeaks += sizeof(Peak);
                                 }
                             }
                         }

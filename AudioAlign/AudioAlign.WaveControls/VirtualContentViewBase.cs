@@ -17,6 +17,10 @@ namespace AudioAlign.WaveControls {
             VirtualViewBase.VirtualViewportWidthProperty.AddOwner(typeof(VirtualContentViewBase),
             new FrameworkPropertyMetadata() { Inherits = true, PropertyChangedCallback = OnViewportWidthChanged });
 
+        public static readonly DependencyProperty VirtualViewportMinWidthProperty =
+            VirtualViewBase.VirtualViewportMinWidthProperty.AddOwner(typeof(VirtualContentViewBase),
+            new FrameworkPropertyMetadata() { Inherits = true, PropertyChangedCallback = OnViewportMinWidthChanged });
+
         public static readonly DependencyProperty DebugOutputProperty =
             VirtualViewBase.DebugOutputProperty.AddOwner(typeof(VirtualContentViewBase),
             new FrameworkPropertyMetadata() { Inherits = true });
@@ -31,6 +35,9 @@ namespace AudioAlign.WaveControls {
             ctrl.OnViewportWidthChanged((long)e.OldValue, (long)e.NewValue);
         }
 
+        private static void OnViewportMinWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        }
+
         public long VirtualViewportOffset {
             get { return (long)GetValue(VirtualViewportOffsetProperty); }
             set { SetValue(VirtualViewportOffsetProperty, value); }
@@ -39,6 +46,11 @@ namespace AudioAlign.WaveControls {
         public long VirtualViewportWidth {
             get { return (long)GetValue(VirtualViewportWidthProperty); }
             set { SetValue(VirtualViewportWidthProperty, value); }
+        }
+
+        public long VirtualViewportMinWidth {
+            get { return (long)GetValue(VirtualViewportMinWidthProperty); }
+            set { SetValue(VirtualViewportMinWidthProperty, value); }
         }
 
         public bool DebugOutput {

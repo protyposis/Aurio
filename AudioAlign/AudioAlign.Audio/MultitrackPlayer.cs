@@ -25,7 +25,7 @@ namespace AudioAlign.Audio {
 
         private MixerStream audioMixer;
         private VolumeControlStream audioVolumeControlStream;
-        private WaveStream audioOutputStream;
+        private IAudioStream audioOutputStream;
         private IWavePlayer audioOutput;
 
         private Timer timer;
@@ -53,12 +53,12 @@ namespace AudioAlign.Audio {
         }
 
         public TimeSpan TotalTime {
-            get { return audioOutputStream.TotalTime; }
+            get { return TimeUtil.BytesToTimeSpan(audioOutputStream.Length, audioOutputStream.Properties); }
         }
 
         public TimeSpan CurrentTime {
-            get { return audioOutputStream.CurrentTime; }
-            set { audioOutputStream.CurrentTime = value; }
+            get { return TimeUtil.BytesToTimeSpan(audioOutputStream.Position, audioOutputStream.Properties); }
+            set { audioOutputStream.Position = TimeUtil.TimeSpanToBytes(value, audioOutputStream.Properties); }
         }
 
         public bool CanPlay {
@@ -104,15 +104,16 @@ namespace AudioAlign.Audio {
             dataMonitorStream.DataRead += new EventHandler<StreamDataMonitorEventArgs>(dataMonitorStream_DataRead);
             VolumeClipStream volumeClipStream = new VolumeClipStream(dataMonitorStream);
 
-            audioOutputStream = new NAudioSinkStream(volumeClipStream);
+            audioOutputStream = volumeClipStream;
 
             audioOutput = new WasapiOut(global::NAudio.CoreAudioApi.AudioClientShareMode.Shared, true, 10);
             audioOutput.PlaybackStopped += new EventHandler(
                 delegate(object sender, EventArgs e) {
+                    OnCurrentTimeChanged();
                     Pause();
                     OnPlaybackPaused();
                 });
-            audioOutput.Init(audioOutputStream);
+            audioOutput.Init(new NAudioSinkStream(audioOutputStream));
         }
 
         private void AddTrack(AudioTrack audioTrack) {
@@ -282,7 +283,7 @@ namespace AudioAlign.Audio {
 
         protected virtual void OnCurrentTimeChanged() {
             if (CurrentTimeChanged != null) {
-                CurrentTimeChanged(this, new ValueEventArgs<TimeSpan>(audioOutputStream.CurrentTime));
+                CurrentTimeChanged(this, new ValueEventArgs<TimeSpan>(CurrentTime));
             }
         }
 
@@ -297,7 +298,6 @@ namespace AudioAlign.Audio {
         #region IDisposable Members
 
         public void Dispose() {
-            audioOutputStream.Dispose();
             audioOutput.Dispose();
         }
 

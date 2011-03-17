@@ -6,7 +6,7 @@ using System.Text;
 namespace AudioAlign.Audio {
     public static class TimeUtil {
 
-        private static readonly double SECS_TO_TICKS;
+        public static readonly long SECS_TO_TICKS;
 
         static TimeUtil() {
             // 1 sec * 1000 = millisecs | * 1000 = microsecs | * 10 = ticks (100-nanosecond units)

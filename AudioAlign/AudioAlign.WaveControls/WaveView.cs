@@ -53,14 +53,16 @@ namespace AudioAlign.WaveControls {
 
                 // align interval to samples
                 Interval audioToLoadIntervalAligned = AudioUtil.AlignToSamples(audioToLoadInterval, audioStream.Properties);
+                int samplesToLoad = AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(audioToLoadIntervalAligned.Length)) + 1;
+                double sampleLength = AudioUtil.CalculateSampleTicks(audioStream.Properties);
 
                 // calculate drawing measures
                 double viewportToDrawingScaleFactor = ActualWidth / VirtualViewportWidth;
-                int drawingOffsetAligned = (int)(((audioToLoadIntervalAligned.From - audioToLoadInterval.From) + (visibleAudioInterval.From - viewportInterval.From)) * viewportToDrawingScaleFactor);
-                int drawingWidthAligned = (int)(audioToLoadIntervalAligned.Length * viewportToDrawingScaleFactor);
+                int drawingOffsetAligned = (int)((-(audioToLoadInterval.From - audioToLoadIntervalAligned.From)
+                    + (visibleAudioInterval.From - viewportInterval.From)) * viewportToDrawingScaleFactor);
+                int drawingWidthAligned = (int)((samplesToLoad - 1) * sampleLength * viewportToDrawingScaleFactor);
                 int drawingOffset = (int)((visibleAudioInterval.From - viewportInterval.From) * viewportToDrawingScaleFactor);
 
-                double sampleLength = AudioUtil.CalculateSampleTicks(audioStream.Properties);
                 if (visibleAudioInterval.Length < sampleLength) {
                     drawingContext.DrawText(DebugText("VISIBLE INTERVAL WARNING: " + visibleAudioInterval.Length + " < SAMPLE LENGTH " + sampleLength), new Point(0, 0));
                     return;
@@ -71,10 +73,8 @@ namespace AudioAlign.WaveControls {
                     return;
                 }
 
-                int samplesToLoad = AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(audioToLoadIntervalAligned.Length));
-                DateTime beforeLoading = DateTime.Now;
-
                 // load audio samples
+                DateTime beforeLoading = DateTime.Now;
                 bool peaks = samplesToLoad > drawingWidthAligned;
                 // TODO don't recreate the array every time -> resize on demand
                 float[][] samples = AudioUtil.CreateArray<float>(audioStream.Properties.Channels, drawingWidthAligned * 2);
@@ -86,7 +86,6 @@ namespace AudioAlign.WaveControls {
                 else {
                     sampleCount = audioStream.ReadSamples(samples, samplesToLoad);
                 }
-
                 DateTime afterLoading = DateTime.Now;
 
                 if (sampleCount <= 1) {
@@ -147,8 +146,6 @@ namespace AudioAlign.WaveControls {
 
                 DateTime afterDrawing = DateTime.Now;
 
-                
-
                 // draw track name
                 if (DrawTrackName) {
                     FormattedText formattedTrackName = new FormattedText(AudioTrack.FileInfo.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface("Segoe UI"), 10f, Brushes.White);
@@ -162,8 +159,8 @@ namespace AudioAlign.WaveControls {
                         new Point(0, 20));
                     drawingContext.DrawText(DebugText("visibleAudioInterval: " + visibleAudioInterval + ", audioToLoadInterval: " + audioToLoadInterval + ", audioToLoadIntervalAligned: " + audioToLoadIntervalAligned),
                         new Point(0, ActualHeight) + new Vector(0, -50));
-                    //drawingContext.DrawText(DebugText("Drawing Offset: " + drawingOffsetAligned + ", Width: " + drawingWidthAligned + ", ScalingFactor: " + viewportToDrawingScaleFactor + ", Samples: " + samplesLoaded + ", Peakratio 1:" + Math.Round(VirtualViewportWidth / sampleLength / ActualWidth, 2)),
-                    //    new Point(0, ActualHeight) + new Vector(0, -40));
+                    drawingContext.DrawText(DebugText("Drawing Offset: " + drawingOffsetAligned + ", Width: " + drawingWidthAligned + ", ScalingFactor: " + viewportToDrawingScaleFactor + ", Samples: " + sampleCount + ", Peakratio 1:" + Math.Round(VirtualViewportWidth / sampleLength / ActualWidth, 2)),
+                        new Point(0, ActualHeight) + new Vector(0, -40));
                 }
             }
 
@@ -179,7 +176,7 @@ namespace AudioAlign.WaveControls {
         }
 
         private FormattedText DebugText(string text) {
-            return new FormattedText(text, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, 
+            return new FormattedText(text, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
                 new Typeface("Tahoma"), 8, Brushes.Black);
         }
 

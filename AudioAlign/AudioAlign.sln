@@ -30,10 +30,22 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Test.Fingerprint
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Test.Streams", "AudioAlign.Test.Streams\AudioAlign.Test.Streams.csproj", "{C7062944-F8C0-4FF6-8B3A-E30588F39612}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Audio.UnitTest", "AudioAlign.Audio.UnitTest\AudioAlign.Audio.UnitTest.csproj", "{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0AF26727-F1F0-4DA1-A9C8-6DDCCF1F1E56}"
+	ProjectSection(SolutionItems) = preProject
+		AudioAlign.vsmdi = AudioAlign.vsmdi
+		Local.testsettings = Local.testsettings
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
 		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = AudioAlign.vsmdi
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -175,6 +187,16 @@ Global
 		{C7062944-F8C0-4FF6-8B3A-E30588F39612}.Release|Mixed Platforms.Build.0 = Release|x86
 		{C7062944-F8C0-4FF6-8B3A-E30588F39612}.Release|x86.ActiveCfg = Release|x86
 		{C7062944-F8C0-4FF6-8B3A-E30588F39612}.Release|x86.Build.0 = Release|x86
+		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

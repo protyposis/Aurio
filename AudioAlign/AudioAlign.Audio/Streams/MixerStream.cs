@@ -85,7 +85,7 @@ namespace AudioAlign.Audio.Streams {
 
                 // clear output buffer
                 Array.Clear(buffer, offset, count);
-
+                int maxTotalBytesRead = 0;
                 unsafe {
                     fixed (byte* outputByteBuffer = &buffer[offset], inputByteBuffer = &sourceBuffer[0]) {
                         float* outputFloatBuffer = (float*)outputByteBuffer;
@@ -105,16 +105,19 @@ namespace AudioAlign.Audio.Streams {
                             }
 
                             // add stream data to output buffer
-                            for (int x = 0; x < count / 4; x++) {
+                            for (int x = 0; x < totalBytesRead / sizeof(float); x++) {
                                 outputFloatBuffer[x] += inputFloatBuffer[x];
+                            }
+
+                            if (totalBytesRead > maxTotalBytesRead) {
+                                maxTotalBytesRead = totalBytesRead;
                             }
                         }
                     }
                 }
+                position += maxTotalBytesRead;
+                return maxTotalBytesRead;
             }
-
-            position += count;
-            return count;
         }
 
         public void UpdateLength() {

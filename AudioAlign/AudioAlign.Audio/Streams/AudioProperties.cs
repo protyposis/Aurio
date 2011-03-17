@@ -6,7 +6,7 @@ using System.Text;
 namespace AudioAlign.Audio.Streams {
     public class AudioProperties {
 
-        internal AudioProperties(int channels, int sampleRate, int bitDepth, AudioFormat format) {
+        public AudioProperties(int channels, int sampleRate, int bitDepth, AudioFormat format) {
             if (channels < 1) {
                 throw new Exception("invalid number of channels: " + channels);
             }

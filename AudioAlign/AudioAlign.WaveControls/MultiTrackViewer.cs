@@ -7,6 +7,10 @@ using System.Windows;
 using System.Windows.Data;
 using System.Diagnostics;
 using AudioAlign.Audio;
+using System.Windows.Documents;
+using AudioAlign.Audio.Project;
+using System.Windows.Media;
+using System.Windows.Input;
 
 namespace AudioAlign.WaveControls {
     [TemplatePart(Name = "PART_TimeScale", Type = typeof(TimeScale))]
@@ -25,6 +29,8 @@ namespace AudioAlign.WaveControls {
                 });
         }
 
+        private MultiTrackListBox multiTrackListBox;
+
         public MultiTrackViewer() {
             this.Loaded += new RoutedEventHandler(MultiTrackViewer_Loaded);
         }
@@ -32,6 +38,7 @@ namespace AudioAlign.WaveControls {
         private void MultiTrackViewer_Loaded(object sender, RoutedEventArgs e) {
             AddHandler(CaretOverlay.PositionSelectedEvent, new CaretOverlay.PositionEventHandler(MultiTrackViewer_CaretPositionSelected));
             AddHandler(CaretOverlay.IntervalSelectedEvent, new CaretOverlay.IntervalEventHandler(MultiTrackViewer_CaretIntervalSelected));
+            multiTrackListBox = (MultiTrackListBox)GetTemplateChild("PART_TrackListBox");
         }
 
         private void MultiTrackViewer_CaretPositionSelected(object sender, CaretOverlay.PositionEventArgs e) {
@@ -51,16 +58,35 @@ namespace AudioAlign.WaveControls {
         }
 
         public ItemCollection Items {
-            get {
-                ItemsControl itemsControl = GetTemplateChild("PART_TrackListBox") as ItemsControl;
-                return itemsControl.Items;
-            }
+            get { return multiTrackListBox.Items; }
         }
 
         public object SelectedItem {
-            get {
-                ListBox itemsControl = GetTemplateChild("PART_TrackListBox") as ListBox;
-                return itemsControl.SelectedItem;
+            get { return multiTrackListBox.SelectedItem; }
+        }
+
+        public void RefreshAdornerLayer() {
+            if (Items.IsEmpty)
+                return;
+
+            AdornerLayer adornerLayer = AdornerLayer.GetAdornerLayer((ListBoxItem)multiTrackListBox.ItemContainerGenerator.ContainerFromItem(Items[0]));
+
+            foreach (AudioTrack audioTrack in Items) {
+                ListBoxItem item = (ListBoxItem)multiTrackListBox.ItemContainerGenerator.ContainerFromItem(audioTrack);
+
+                // taken from: http://msdn.microsoft.com/en-us/library/system.windows.frameworktemplate.findname.aspx
+                ContentPresenter itemContentPresenter = FindVisualChild<ContentPresenter>(item);
+                DataTemplate itemDataTemplate = itemContentPresenter.ContentTemplate;
+                WaveView waveView = (WaveView)itemDataTemplate.FindName("waveView", itemContentPresenter);
+
+                if (adornerLayer.GetAdorners(waveView) == null) {
+                    adornerLayer.Add(new WaveViewAdorner(waveView));
+                }
+                else {
+                    foreach (Adorner adorner in adornerLayer.GetAdorners(waveView)) {
+                        adorner.InvalidateVisual();
+                    }
+                }
             }
         }
 
@@ -71,19 +97,21 @@ namespace AudioAlign.WaveControls {
         /// <param name="e"></param>
         protected override void OnPreviewMouseWheel(System.Windows.Input.MouseWheelEventArgs e) {
             base.OnPreviewMouseWheel(e);
-            //Debug.WriteLine("MultiTrackViewer OnPreviewMouseWheel: " + e.Delta);
+            //Debug.WriteLine("MultiTrackViewer OnPreviewMouseWheel: " + e.Delta + " (" + e.Delta / Mouse.MouseWheelDeltaForOneLine + " lines)");
 
             // add/remove percentage for a zoom command
-            double scalePercentage = 0.25d;
+            double scalePercentage = 0.20d;
             bool zoomToCaret = true;
 
             Interval currentViewportInterval = VirtualViewportInterval;
 
             // calculate new viewport width
             long newViewportWidth = (long)(e.Delta < 0 ?
-                currentViewportInterval.Length * (1 + scalePercentage) :
-                currentViewportInterval.Length * (1 - scalePercentage));
+                currentViewportInterval.Length * (1 + scalePercentage * (-e.Delta / Mouse.MouseWheelDeltaForOneLine)) :
+                currentViewportInterval.Length * (1 - scalePercentage * (e.Delta / Mouse.MouseWheelDeltaForOneLine)));
             //Debug.WriteLine("MultiTrackViewer viewport width change: {0} -> {1}", currentViewportWidth, newViewportWidth);
+            VirtualViewportWidth = newViewportWidth; // force coercion
+            newViewportWidth = VirtualViewportWidth; // get coerced value
             
             // calculate new viewport offset (don't care about the valid offset range here - it's handled by the property value coercion)
             long viewportWidthDelta = currentViewportInterval.Length - newViewportWidth;
@@ -114,6 +142,23 @@ namespace AudioAlign.WaveControls {
             VirtualViewportWidth = newViewportWidth;
 
             e.Handled = true;
+        }
+
+        /// <summary>
+        /// Copied from: http://msdn.microsoft.com/en-us/library/system.windows.frameworktemplate.findname.aspx
+        /// </summary>
+        private childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++) {
+                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                if (child != null && child is childItem)
+                    return (childItem)child;
+                else {
+                    childItem childOfChild = FindVisualChild<childItem>(child);
+                    if (childOfChild != null)
+                        return childOfChild;
+                }
+            }
+            return null;
         }
     }
 }

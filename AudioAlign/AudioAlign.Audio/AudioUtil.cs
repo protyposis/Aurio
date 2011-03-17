@@ -13,9 +13,7 @@ namespace AudioAlign.Audio {
         /// <param name="audioProperties">the audio properties of an audio stream containing the sample rate</param>
         /// <returns>the length of a sample in floating point ticks</returns>
         public static double CalculateSampleTicks(AudioProperties audioProperties) {
-            // 1 sec * 1000 = millisecs | * 1000 = microsecs | * 10 = ticks (100-nanosecond units)
-            // http://msdn.microsoft.com/en-us/library/zz841zbz.aspx
-            return (double) 1 * 1000 * 1000 * 10 / audioProperties.SampleRate;
+            return (double)TimeUtil.SECS_TO_TICKS / audioProperties.SampleRate;
         }
 
         /// <summary>
@@ -25,7 +23,7 @@ namespace AudioAlign.Audio {
         /// <param name="timeSpan">the time span for which the number of samples should be calculated</param>
         /// <returns>the number of samples that the given time span contains in an audio stream with the given properties</returns>
         public static int CalculateSamples(AudioProperties audioProperties, TimeSpan timeSpan) {
-            return (int)Math.Ceiling(timeSpan.Ticks / CalculateSampleTicks(audioProperties)) + 1;
+            return (int)Math.Round(timeSpan.Ticks / CalculateSampleTicks(audioProperties));
         }
 
         /// <summary>
@@ -36,9 +34,9 @@ namespace AudioAlign.Audio {
         /// usage may therefore enlarge the output interval with every execution.
         /// 
         /// Example:
-        /// audio stream samples:    X-----X-----X-----X-----X-----X-----X-----X-----X-----X-----X
-        /// input interval:                   (---------------)
-        /// output interval:               (-----------------------)
+        /// audio stream samples:    X-----X-----X-----X-----X-----X-----X-----X-----X-----X-----
+        /// input interval:                   [---------------]
+        /// output interval:               [-----------------------)
         /// </summary>
         /// <param name="intervalToAlign">the interval that should be sample-aligned</param>
         /// <param name="audioProperties">the audio properties containing the sample rate</param>
@@ -47,7 +45,7 @@ namespace AudioAlign.Audio {
             double sampleLength = CalculateSampleTicks(audioProperties);
             return new Interval(
                     (long)(intervalToAlign.From - ((double)intervalToAlign.From % sampleLength)),
-                    (long)(intervalToAlign.To + ((double)intervalToAlign.To % sampleLength)));
+                    (long)(intervalToAlign.To + (sampleLength - ((double)intervalToAlign.To % sampleLength))));
         }
 
         /// <summary>

@@ -72,12 +72,11 @@ namespace AudioAlign.Audio.Streams {
 
             int samplesPerPeak = (int)Math.Ceiling((float)sampleCount / peakCount);
             unsafe {
-
                 // if the samplesPerPeak count is beyond the PeakStore threshold, load the peaks from there
                 if (samplesPerPeak > peakStore.SamplesPerPeak) {
                     byte[][] peakData = peakStore.GetData(samplesPerPeak, out samplesPerPeak);
                     int positionOffset = (int)(streamPosition / SampleBlockSize / samplesPerPeak) * sizeof(Peak);
-                    int sourcePeakCount = (int)Math.Ceiling((float)sampleCount / samplesPerPeak);
+                    int sourcePeakCount = (int)Math.Round((float)sampleCount / samplesPerPeak);
                     float sourceToTargetIndex = 1 / ((float)sourcePeakCount / peakCount);
 
                     for (int channel = 0; channel < Properties.Channels; channel++) {

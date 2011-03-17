@@ -98,20 +98,20 @@ namespace AudioAlign.WaveControls {
             int sampleColor = BrushToColorValue(WaveformSamplePoint);
 
             int halfheight = height / 2;
-            int peaks = sampleCount;
+            int samples = sampleCount;
             int x, y, prevX = 0, prevY = 0;
-            for (int peak = 0; peak < peaks; peak++) {
-                x = (int)Math.Round((float)peak / (peaks - 1) * (width - 1));
-                y = halfheight - (int)(halfheight * sampleData[peak]);
+            for (int sample = 0; sample < samples; sample++) {
+                x = (int)Math.Round((float)sample / (samples - 1) * (width - 1));
+                y = halfheight - (int)(halfheight * sampleData[sample]);
                 if (y == height) {
                     y--; // for even heights the last line needs to be stripped
                 }
 
-                if (peak > 0) {
+                if (sample > 0) {
                     DrawLine(prevX, prevY, x, y, pixels, width, height, borderColor);
                 }
 
-                if (width / peaks > 4) {
+                if (width / samples > 4) {
                     DrawPointMarker(x, y, pixels, width, height, sampleColor);
                 }
 

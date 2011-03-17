@@ -302,6 +302,7 @@
                             <local:WaveView AudioTrack="{Binding}" 
                                             Grid.Row="1"
                                             Margin="0,2" 
+                                            x:Name="waveView"
                                             VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"
                                             TrackLength="{Binding Path=Length, Converter={StaticResource TimeSpanTicksConverter}}"
                                             TrackOffset="{Binding Path=Offset, Mode=TwoWay, Converter={StaticResource TimeSpanTicksConverter}}"/>
@@ -349,7 +350,9 @@
                                                         VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}">
                                         <Grid>
                                             <Border Name="invisibleBorderToForceInputEvents" Background="Transparent"/> <!-- without this, the empty parts of the scroll viewer wouldn't provoke events -->
-                                            <ScrollContentPresenter/>
+                                            <AdornerDecorator>
+                                                <ScrollContentPresenter/>
+                                            </AdornerDecorator>
                                         </Grid>
                                     </local:CaretOverlay>
 
