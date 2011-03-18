@@ -38,7 +38,13 @@ namespace AudioAlign.WaveControls {
 
         private static void OnAmplitudeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             VUMeter vuMeter = d as VUMeter;
-            vuMeter.Decibel = 20 * Math.Log10((double)e.NewValue);
+            double newValue = (double)e.NewValue;
+            if (newValue == double.NegativeInfinity) {
+                vuMeter.Decibel = double.NegativeInfinity;
+            }
+            else {
+                vuMeter.Decibel = 20 * Math.Log10(newValue);
+            }
         }
 
         private static void OnDecibelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
