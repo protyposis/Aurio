@@ -61,6 +61,26 @@ namespace AudioAlign.Audio.TaskMonitor {
             }
         }
 
+        public string StatusMessage {
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            get {
+                string message = "";
+                if (reporters.Count == 1) {
+                    message += reporters[0].Name;
+                }
+                else if (reporters.Count > 1) {
+                    message += "(" + reporters.Count + " tasks) ";
+                    for (int x = 0; x < reporters.Count; x++) {
+                        message += reporters[x].Name;
+                        if (x + 1 != reporters.Count) {
+                            message += "; ";
+                        }
+                    }
+                }
+                return message;
+            }
+        }
+
         private void progressReporter_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
             ProgressReporter senderTaskStatus = (ProgressReporter)sender;
             if (reporterProgress[senderTaskStatus] != (int)senderTaskStatus.Progress) {

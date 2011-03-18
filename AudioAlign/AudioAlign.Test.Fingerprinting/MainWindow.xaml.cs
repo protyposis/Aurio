@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using AudioAlign.Audio.TaskMonitor;
 using System.Diagnostics;
 using AudioAlign.Audio.Streams;
+using AudioAlign.Audio.Matching;
 
 namespace AudioAlign.Test.Fingerprinting {
     /// <summary>
@@ -48,28 +49,30 @@ namespace AudioAlign.Test.Fingerprinting {
         private void button1_Click(object sender, RoutedEventArgs e) {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.DefaultExt = ".wav";
+            dlg.Multiselect = true;
             dlg.Filter = "Wave files|*.wav";
 
             if (dlg.ShowDialog() == true) {
-                AudioTrack audioTrack = new AudioTrack(new FileInfo(dlg.FileName));
-                IAudioStream audioStream = audioTrack.CreateAudioStream();
-                long trackSamples = audioStream.Length / audioStream.SampleBlockSize / 4 / 2;
+                foreach (string file in dlg.FileNames) {
+                    AudioTrack audioTrack = new AudioTrack(new FileInfo(file));
+                    IAudioStream audioStream = audioTrack.CreateAudioStream();
 
-                Task.Factory.StartNew(() => {
-                    ProgressReporter progressReporter = ProgressMonitor.Instance.BeginTask("Generating sub-fingerprints for " + audioTrack.FileInfo.Name, true);
+                    Task.Factory.StartNew(() => {
+                        ProgressReporter progressReporter = ProgressMonitor.Instance.BeginTask("Generating sub-fingerprints for " + audioTrack.FileInfo.Name, true);
 
-                    FingerprintGenerator fpg = new FingerprintGenerator(audioTrack);
-                    int subFingerprintsCalculated = 0;
-                    fpg.SubFingerprintCalculated += new EventHandler<SubFingerprintEventArgs>(delegate(object s2, SubFingerprintEventArgs e2) {
-                        subFingerprintsCalculated++;
-                        progressReporter.ReportProgress((double)e2.Timestamp.Ticks / audioTrack.Length.Ticks * 100);
-                        store.Add(e2.AudioTrack, e2.SubFingerprint, e2.Timestamp);
+                        FingerprintGenerator fpg = new FingerprintGenerator(audioTrack);
+                        int subFingerprintsCalculated = 0;
+                        fpg.SubFingerprintCalculated += new EventHandler<SubFingerprintEventArgs>(delegate(object s2, SubFingerprintEventArgs e2) {
+                            subFingerprintsCalculated++;
+                            progressReporter.ReportProgress((double)e2.Timestamp.Ticks / audioTrack.Length.Ticks * 100);
+                            store.Add(e2.AudioTrack, e2.SubFingerprint, e2.Timestamp);
+                        });
+
+                        fpg.Generate();
+                        //store.Analyze();
+                        ProgressMonitor.Instance.EndTask(progressReporter);
                     });
-
-                    fpg.Generate();
-                    //store.Analyze();
-                    ProgressMonitor.Instance.EndTask(progressReporter);
-                });
+                }
             }
         }
 
@@ -122,11 +125,11 @@ namespace AudioAlign.Test.Fingerprinting {
             PrintMatchResult(store.FindAllMatches());
         }
 
-        private void PrintMatchResult(List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>> matches) {
+        private void PrintMatchResult(List<Match> matches) {
             Debug.WriteLine("MATCHES:");
-            foreach (Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float> match in matches) {
-                Debug.WriteLine(match.Item1.AudioTrack.Name + "@" + FingerprintGenerator.SubFingerprintIndexToTimeSpan(match.Item1.Index) + " <=> " +
-                    match.Item2.AudioTrack.Name + "@" + FingerprintGenerator.SubFingerprintIndexToTimeSpan(match.Item2.Index) + ": " + match.Item3);
+            foreach (Match match in matches) {
+                Debug.WriteLine(match.Track1.Name + "@" + match.Track1Time + " <=> " +
+                    match.Track2.Name + "@" + match.Track2Time + ": " + match.Similarity);
             }
             Debug.WriteLine(matches.Count + " matches total");
         }

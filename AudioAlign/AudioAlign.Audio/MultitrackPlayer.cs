@@ -106,7 +106,7 @@ namespace AudioAlign.Audio {
 
             audioOutputStream = volumeClipStream;
 
-            audioOutput = new WasapiOut(global::NAudio.CoreAudioApi.AudioClientShareMode.Shared, true, 10);
+            audioOutput = new WasapiOut(global::NAudio.CoreAudioApi.AudioClientShareMode.Shared, true, 200);
             audioOutput.PlaybackStopped += new EventHandler(
                 delegate(object sender, EventArgs e) {
                     OnCurrentTimeChanged();

@@ -55,8 +55,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             Debug.WriteLine("analysis finished");
         }
 
-        public List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>> FindMatches(SubFingerprint subFingerprint) {
-            List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>> matches = new List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>>();
+        public List<Match> FindMatches(SubFingerprint subFingerprint) {
+            List<Match> matches = new List<Match>();
             float threshold = 0.35f;
 
             if (!lookupTable.ContainsKey(subFingerprint)) {
@@ -96,7 +96,13 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                         float bitErrorRate = bitErrors / 8192f; // 8192 = 256 sub-fingerprints * 32 bits
                         //Debug.WriteLine("BER: " + bitErrorRate + " <- " + (bitErrorRate < threshold ? "MATCH!!!" : "no match"));
                         if (bitErrorRate < threshold) {
-                            matches.Add(new Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>(entry1, entry2, bitErrorRate));
+                            matches.Add(new Match { 
+                                Similarity = 1 - bitErrorRate, 
+                                Track1 = entry1.AudioTrack, 
+                                Track1Time = entry1.Timestamp, 
+                                Track2 = entry2.AudioTrack, 
+                                Track2Time = entry2.Timestamp 
+                            });
                         }
                     }
                 }
@@ -107,8 +113,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             return matches;
         }
 
-        public List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>> FindSoftMatches(SubFingerprint subFingerprint) {
-            List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>> matches = new List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>>();
+        public List<Match> FindSoftMatches(SubFingerprint subFingerprint) {
+            List<Match> matches = new List<Match>();
             matches.AddRange(FindMatches(subFingerprint));
             if (matches.Count == 0) {
                 // no match found, generate 32 subfingerprints of distance 1
@@ -134,16 +140,16 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             return matches;
         }
 
-        public List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>> FindAllMatchingMatches() {
-            List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>> matches = new List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>>();
+        public List<Match> FindAllMatchingMatches() {
+            List<Match> matches = new List<Match>();
             foreach (SubFingerprint subFingerprint in lookupTable.Keys) {
                 matches.AddRange(FindSoftMatches(subFingerprint));
             }
             return matches;
         }
 
-        public List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>> FindAllMatches() {
-            List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>> matches = new List<Tuple<SubFingerprintLookupEntry, SubFingerprintLookupEntry, float>>();
+        public List<Match> FindAllMatches() {
+            List<Match> matches = new List<Match>();
             foreach (AudioTrack audioTrack in store.Keys) {
                 foreach (SubFingerprint subFingerprint in store[audioTrack]) {
                     matches.AddRange(FindSoftMatches(subFingerprint));

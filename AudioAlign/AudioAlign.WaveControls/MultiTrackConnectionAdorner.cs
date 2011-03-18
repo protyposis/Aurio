@@ -21,16 +21,11 @@ namespace AudioAlign.WaveControls {
             : base(adornedElement) {
                 this.multiTrackListBox = multiTrackListBox;
                 Matches = new ObservableCollection<Match>();
+                Matches.CollectionChanged += Matches_CollectionChanged;
 
                 brushGreen = Brushes.Green;
                 brushYellow = Brushes.Yellow;
                 brushRed = Brushes.Red;
-
-                Matches.Add(new Match() { Track1Time = new TimeSpan(0, 1, 0), Track2Time = new TimeSpan(0, 2, 0), Similarity = 1 });
-                Matches.Add(new Match() { Track1Time = new TimeSpan(0, 1, 10), Track2Time = new TimeSpan(0, 2, 10), Similarity = 0.75f });
-                Matches.Add(new Match() { Track1Time = new TimeSpan(0, 1, 20), Track2Time = new TimeSpan(0, 2, 20), Similarity = 0.5f });
-                Matches.Add(new Match() { Track1Time = new TimeSpan(0, 1, 30), Track2Time = new TimeSpan(0, 2, 30), Similarity = 0.25f });
-                Matches.Add(new Match() { Track1Time = new TimeSpan(0, 1, 40), Track2Time = new TimeSpan(0, 2, 40), Similarity = 0 });
         }
 
         public ObservableCollection<Match> Matches {
@@ -39,23 +34,24 @@ namespace AudioAlign.WaveControls {
         } 
 
         protected override void OnRender(DrawingContext drawingContext) {
-            List<WaveView> waveViews = new List<WaveView>();
+            // NOTE the dictionary needs to be built every time because the ListBox.items.CollectionChanged event is inaccessible (protected)
+            Dictionary<AudioTrack, WaveView> waveViewMappings = new Dictionary<AudioTrack, WaveView>();
             foreach (AudioTrack audioTrack in multiTrackListBox.Items) {
                 ListBoxItem item = (ListBoxItem)multiTrackListBox.ItemContainerGenerator.ContainerFromItem(audioTrack);
                 ContentPresenter itemContentPresenter = UIUtil.FindVisualChild<ContentPresenter>(item);
                 DataTemplate itemDataTemplate = itemContentPresenter.ContentTemplate;
                 WaveView waveView = (WaveView)itemDataTemplate.FindName("waveView", itemContentPresenter);
-                waveViews.Add(waveView);
+                waveViewMappings.Add(audioTrack, waveView);
             }
 
             foreach (Match match in Matches) {
-                for(int i1 = 0; i1 < waveViews.Count; i1++) {
-                    WaveView waveView1 = waveViews[i1];
+                //for(int i1 = 0; i1 < waveViews.Count; i1++) {
+                WaveView waveView1 = waveViewMappings[match.Track1];
                     double x1 = waveView1.VirtualToPhysicalIntervalOffset(waveView1.AudioTrack.Offset.Ticks + match.Track1Time.Ticks);
                     Point origin1 = waveView1.TranslatePoint(new Point(0, 0), this);
                     
-                    for (int i2 = i1 + 1; i2 < waveViews.Count; i2++) {
-                        WaveView waveView2 = waveViews[i2];
+                    //for (int i2 = i1 + 1; i2 < waveViews.Count; i2++) {
+                    WaveView waveView2 = waveViewMappings[match.Track2];
                         double x2 = waveView2.VirtualToPhysicalIntervalOffset(waveView2.AudioTrack.Offset.Ticks + match.Track2Time.Ticks);
                         Point origin2 = waveView2.TranslatePoint(new Point(0, 0), this);
 
@@ -92,9 +88,13 @@ namespace AudioAlign.WaveControls {
                             drawingContext.DrawLine(new Pen(brushGreen, 3) { DashStyle = DashStyles.Dash, EndLineCap = PenLineCap.Triangle, StartLineCap = PenLineCap.Triangle },
                                 p1, p2);
                         }
-                    }
-                }
+                    //}
+                //}
             }
+        }
+
+        private void Matches_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+            InvalidateVisual();
         }
 
         private static SolidColorBrush SetAlpha(SolidColorBrush brush, byte alpha) {

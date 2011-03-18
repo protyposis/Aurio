@@ -11,6 +11,8 @@ using System.Windows.Documents;
 using AudioAlign.Audio.Project;
 using System.Windows.Media;
 using System.Windows.Input;
+using AudioAlign.Audio.Matching;
+using System.Collections.ObjectModel;
 
 namespace AudioAlign.WaveControls {
     [TemplatePart(Name = "PART_TimeScale", Type = typeof(TimeScale))]
@@ -73,6 +75,10 @@ namespace AudioAlign.WaveControls {
 
         public object SelectedItem {
             get { return multiTrackListBox.SelectedItem; }
+        }
+
+        public Collection<Match> Matches {
+            get { return multiTrackConnectionAdorner.Matches; }
         }
 
         public void RefreshAdornerLayer() {

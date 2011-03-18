@@ -123,6 +123,7 @@
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprint.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintEventArgs.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintLookupEntry.cs" />
+    <Compile Include="Matching\Match.cs" />
     <Compile Include="MultitrackPlayer.cs" />
     <Compile Include="Streams\AbstractAudioStreamWrapper.cs" />
     <Compile Include="Streams\AudioFormat.cs" />
@@ -164,7 +165,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\NAudio\NAudio\NAudio.csproj">
       <Project>{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}</Project>
-      <Name>NAudio %28NAudio\NAudio%29</Name>
+      <Name>NAudio</Name>
     </ProjectReference>
     <ProjectReference Include="..\AudioAlign.LibSampleRate\AudioAlign.LibSampleRate.csproj">
       <Project>{CC813B15-06BB-4334-96C6-DD252BE37D1B}</Project>
