@@ -30,6 +30,7 @@ namespace AudioAlign.WaveControls {
         }
 
         private MultiTrackListBox multiTrackListBox;
+        MultiTrackConnectionAdorner multiTrackConnectionAdorner;
 
         public MultiTrackViewer() {
             this.Loaded += new RoutedEventHandler(MultiTrackViewer_Loaded);
@@ -38,7 +39,12 @@ namespace AudioAlign.WaveControls {
         private void MultiTrackViewer_Loaded(object sender, RoutedEventArgs e) {
             AddHandler(CaretOverlay.PositionSelectedEvent, new CaretOverlay.PositionEventHandler(MultiTrackViewer_CaretPositionSelected));
             AddHandler(CaretOverlay.IntervalSelectedEvent, new CaretOverlay.IntervalEventHandler(MultiTrackViewer_CaretIntervalSelected));
+            AddHandler(WaveView.TrackOffsetChangedEvent, new RoutedEventHandler(MultiTrackViewer_WaveViewTrackOffsetChanged));
             multiTrackListBox = (MultiTrackListBox)GetTemplateChild("PART_TrackListBox");
+
+            StackPanel itemContainer = UIUtil.FindVisualChild<StackPanel>(multiTrackListBox);
+            multiTrackConnectionAdorner = new MultiTrackConnectionAdorner(itemContainer, multiTrackListBox);
+            AdornerLayer.GetAdornerLayer(itemContainer).Add(multiTrackConnectionAdorner);
         }
 
         private void MultiTrackViewer_CaretPositionSelected(object sender, CaretOverlay.PositionEventArgs e) {
@@ -50,6 +56,10 @@ namespace AudioAlign.WaveControls {
         private void MultiTrackViewer_CaretIntervalSelected(object sender, CaretOverlay.IntervalEventArgs e) {
             //Debug.WriteLine("MultiTrackViewer CaretIntervalSelected {0} -> {1} ", e.From, e.To);
             e.Handled = true;
+        }
+
+        private void MultiTrackViewer_WaveViewTrackOffsetChanged(object sender, RoutedEventArgs e) {
+            RefreshAdornerLayer();
         }
 
         public long VirtualCaretOffset {
@@ -66,40 +76,8 @@ namespace AudioAlign.WaveControls {
         }
 
         public void RefreshAdornerLayer() {
-            if (Items.IsEmpty)
-                return;
-
-            AdornerLayer adornerLayer = AdornerLayer.GetAdornerLayer((ListBoxItem)multiTrackListBox.ItemContainerGenerator.ContainerFromItem(Items[0]));
-            StackPanel itemContainer = UIUtil.FindVisualChild<StackPanel>(multiTrackListBox);
-
-            MultiTrackConnectionAdorner connectionAdorner;
-            if (adornerLayer.GetAdorners(itemContainer) == null) {
-                connectionAdorner = new MultiTrackConnectionAdorner(itemContainer, multiTrackListBox);
-                adornerLayer.Add(connectionAdorner);
-            }
-            else {
-                connectionAdorner = (MultiTrackConnectionAdorner)adornerLayer.GetAdorners(itemContainer)[0];
-                foreach (Adorner adorner in adornerLayer.GetAdorners(itemContainer)) {
-                    adorner.InvalidateVisual();
-                }
-            }
-
-            foreach (AudioTrack audioTrack in Items) {
-                ListBoxItem item = (ListBoxItem)multiTrackListBox.ItemContainerGenerator.ContainerFromItem(audioTrack);
-
-                // taken from: http://msdn.microsoft.com/en-us/library/system.windows.frameworktemplate.findname.aspx
-                ContentPresenter itemContentPresenter = UIUtil.FindVisualChild<ContentPresenter>(item);
-                DataTemplate itemDataTemplate = itemContentPresenter.ContentTemplate;
-                WaveView waveView = (WaveView)itemDataTemplate.FindName("waveView", itemContentPresenter);
-
-                if (adornerLayer.GetAdorners(waveView) == null) {
-                    adornerLayer.Add(new WaveViewAdorner(waveView, connectionAdorner));
-                }
-                else {
-                    foreach (Adorner adorner in adornerLayer.GetAdorners(waveView)) {
-                        adorner.InvalidateVisual();
-                    }
-                }
+            if (multiTrackConnectionAdorner != null) {
+                multiTrackConnectionAdorner.InvalidateVisual();
             }
         }
 
@@ -155,6 +133,16 @@ namespace AudioAlign.WaveControls {
             VirtualViewportWidth = newViewportWidth;
 
             e.Handled = true;
+        }
+
+        protected override void OnViewportOffsetChanged(long oldValue, long newValue) {
+            base.OnViewportOffsetChanged(oldValue, newValue);
+            RefreshAdornerLayer();
+        }
+
+        protected override void OnViewportWidthChanged(long oldValue, long newValue) {
+            base.OnViewportWidthChanged(oldValue, newValue);
+            RefreshAdornerLayer();
         }
     }
 }

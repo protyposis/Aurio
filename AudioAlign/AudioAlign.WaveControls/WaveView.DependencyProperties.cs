@@ -29,6 +29,8 @@ namespace AudioAlign.WaveControls
         private static readonly DependencyPropertyKey ViewportZoomPropertyKey; // ActualWidth / ViewportWidth
         public static readonly DependencyProperty ViewportZoomProperty;
 
+        public static readonly RoutedEvent TrackOffsetChangedEvent;
+
         static WaveView() {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(WaveView),
                 new FrameworkPropertyMetadata(typeof(WaveView)));
@@ -60,7 +62,8 @@ namespace AudioAlign.WaveControls
                     PropertyChangedCallback = OnTrackLengthChanged });
 
             TrackOffsetProperty = DependencyProperty.Register("TrackOffset", typeof(long), typeof(WaveView),
-                new FrameworkPropertyMetadata { AffectsRender = true });
+                new FrameworkPropertyMetadata { AffectsRender = true,
+                PropertyChangedCallback = OnTrackOffsetChanged });
 
             TrackScrollLengthPropertyKey = DependencyProperty.RegisterReadOnly("TrackScrollLength", typeof(long), typeof(WaveView),
                 new FrameworkPropertyMetadata());
@@ -69,6 +72,9 @@ namespace AudioAlign.WaveControls
             ViewportZoomPropertyKey = DependencyProperty.RegisterReadOnly("ViewportZoom", typeof(float), typeof(WaveView),
                 new FrameworkPropertyMetadata());
             ViewportZoomProperty = ViewportZoomPropertyKey.DependencyProperty;
+
+            TrackOffsetChangedEvent = EventManager.RegisterRoutedEvent("TrackOffsetChanged", RoutingStrategy.Bubble,
+                typeof(RoutedEventHandler), typeof(WaveView));
         }
 
         private static void OnAudioTrackChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
@@ -81,6 +87,11 @@ namespace AudioAlign.WaveControls
 
         private static void OnTrackLengthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             UpdateTrackScrollLength(d);
+        }
+
+        private static void OnTrackOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+            WaveView waveView = d as WaveView;
+            waveView.RaiseEvent(new RoutedEventArgs(TrackOffsetChangedEvent, waveView));
         }
 
         private static object CoerceTrackLength(DependencyObject d, object value) {
