@@ -70,17 +70,30 @@ namespace AudioAlign.WaveControls {
                 return;
 
             AdornerLayer adornerLayer = AdornerLayer.GetAdornerLayer((ListBoxItem)multiTrackListBox.ItemContainerGenerator.ContainerFromItem(Items[0]));
+            StackPanel itemContainer = UIUtil.FindVisualChild<StackPanel>(multiTrackListBox);
+
+            MultiTrackConnectionAdorner connectionAdorner;
+            if (adornerLayer.GetAdorners(itemContainer) == null) {
+                connectionAdorner = new MultiTrackConnectionAdorner(itemContainer, multiTrackListBox);
+                adornerLayer.Add(connectionAdorner);
+            }
+            else {
+                connectionAdorner = (MultiTrackConnectionAdorner)adornerLayer.GetAdorners(itemContainer)[0];
+                foreach (Adorner adorner in adornerLayer.GetAdorners(itemContainer)) {
+                    adorner.InvalidateVisual();
+                }
+            }
 
             foreach (AudioTrack audioTrack in Items) {
                 ListBoxItem item = (ListBoxItem)multiTrackListBox.ItemContainerGenerator.ContainerFromItem(audioTrack);
 
                 // taken from: http://msdn.microsoft.com/en-us/library/system.windows.frameworktemplate.findname.aspx
-                ContentPresenter itemContentPresenter = FindVisualChild<ContentPresenter>(item);
+                ContentPresenter itemContentPresenter = UIUtil.FindVisualChild<ContentPresenter>(item);
                 DataTemplate itemDataTemplate = itemContentPresenter.ContentTemplate;
                 WaveView waveView = (WaveView)itemDataTemplate.FindName("waveView", itemContentPresenter);
 
                 if (adornerLayer.GetAdorners(waveView) == null) {
-                    adornerLayer.Add(new WaveViewAdorner(waveView));
+                    adornerLayer.Add(new WaveViewAdorner(waveView, connectionAdorner));
                 }
                 else {
                     foreach (Adorner adorner in adornerLayer.GetAdorners(waveView)) {
@@ -142,23 +155,6 @@ namespace AudioAlign.WaveControls {
             VirtualViewportWidth = newViewportWidth;
 
             e.Handled = true;
-        }
-
-        /// <summary>
-        /// Copied from: http://msdn.microsoft.com/en-us/library/system.windows.frameworktemplate.findname.aspx
-        /// </summary>
-        private childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++) {
-                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
-                if (child != null && child is childItem)
-                    return (childItem)child;
-                else {
-                    childItem childOfChild = FindVisualChild<childItem>(child);
-                    if (childOfChild != null)
-                        return childOfChild;
-                }
-            }
-            return null;
         }
     }
 }

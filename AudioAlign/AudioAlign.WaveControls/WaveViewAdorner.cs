@@ -10,7 +10,7 @@ using System.Windows.Data;
 using AudioAlign.Audio;
 
 namespace AudioAlign.WaveControls {
-    public class WaveViewAdorner : Adorner {
+    class WaveViewAdorner : Adorner {
 
         public static readonly DependencyProperty VirtualViewportOffsetProperty =
             VirtualViewBase.VirtualViewportOffsetProperty.AddOwner(typeof(WaveViewAdorner),
@@ -30,8 +30,10 @@ namespace AudioAlign.WaveControls {
 
         private WaveView adornedWaveView;
         private List<TimeSpan> markers;
+        private MultiTrackConnectionAdorner connectionAdorner;
 
-        public WaveViewAdorner(WaveView adornedWaveView) : base(adornedWaveView) {
+        public WaveViewAdorner(WaveView adornedWaveView)
+            : base(adornedWaveView) {
             this.adornedWaveView = adornedWaveView;
 
             Binding trackLengthBinding = new Binding("TrackLength") { Source = adornedWaveView };
@@ -45,6 +47,11 @@ namespace AudioAlign.WaveControls {
             for (int i = 0; i < 50; i++) {
                 markers.Add(new TimeSpan((long)Math.Round(sampleLength * i)));
             }
+        }
+
+        public WaveViewAdorner(WaveView adornedWaveView, MultiTrackConnectionAdorner connectionAdorner)
+            : this(adornedWaveView) {
+                this.connectionAdorner = connectionAdorner;
         }
 
         protected override void OnRender(DrawingContext drawingContext) {
@@ -71,6 +78,10 @@ namespace AudioAlign.WaveControls {
             foreach (TimeSpan marker in markers) {
                 double offset = adornedWaveView.VirtualToPhysicalIntervalOffset(audioTrack.Offset.Ticks + marker.Ticks) - 0.5d;
                 drawingContext.DrawLine(new Pen(Brushes.Orange, 1d), new Point(offset, 0), new Point(offset, adornedElementRect.Height));
+            }
+
+            if (connectionAdorner != null) {
+                connectionAdorner.InvalidateVisual();
             }
         }
     }

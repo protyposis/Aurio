@@ -126,10 +126,12 @@
     <Compile Include="GraphMode.cs" />
     <Compile Include="LinearDecibelConverter.cs" />
     <Compile Include="LogSlider.cs" />
+    <Compile Include="MultiTrackConnectionAdorner.cs" />
     <Compile Include="MultiTrackListBox.cs" />
     <Compile Include="MultiTrackViewer.cs" />
     <Compile Include="ResizeDecorator.cs" />
     <Compile Include="MultiplicationConverter.cs" />
+    <Compile Include="UIUtil.cs" />
     <Compile Include="WaveViewAdorner.cs" />
     <Compile Include="StereoVUMeter.cs" />
     <Compile Include="TimeScale.cs" />
