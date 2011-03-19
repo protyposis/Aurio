@@ -121,10 +121,6 @@ namespace AudioAlign.Test.Fingerprinting {
             }
         }
 
-        private void btnFindAllMatches_Click(object sender, RoutedEventArgs e) {
-            PrintMatchResult(store.FindAllMatches());
-        }
-
         private void PrintMatchResult(List<Match> matches) {
             Debug.WriteLine("MATCHES:");
             foreach (Match match in matches) {
@@ -148,6 +144,14 @@ namespace AudioAlign.Test.Fingerprinting {
 
         private void btnStats_Click(object sender, RoutedEventArgs e) {
             store.PrintStats();
+        }
+
+        private void btnFindAllMatches_Click(object sender, RoutedEventArgs e) {
+            PrintMatchResult(store.FindAllMatches());
+        }
+
+        private void btnFindAllMatchingMatches_Click(object sender, RoutedEventArgs e) {
+            PrintMatchResult(store.FindAllMatchingMatches());
         }
     }
 }

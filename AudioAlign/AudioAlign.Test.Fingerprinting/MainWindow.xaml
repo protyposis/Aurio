@@ -39,8 +39,9 @@
                 </Grid>
             </Grid>
         </Grid>
-        <Button Content="Find Matches" Height="23" HorizontalAlignment="Left" Margin="174,12,0,0" Name="btnFindMatches" VerticalAlignment="Top" Width="99" Click="btnFindMatches_Click" />
-        <Button Content="Find All Matches" Height="23" HorizontalAlignment="Left" Margin="279,12,0,0" Name="btnFindAllMatches" VerticalAlignment="Top" Width="109" Click="btnFindAllMatches_Click" />
-        <Button Content="Print Stats" Height="23" HorizontalAlignment="Left" Margin="394,12,0,0" Name="btnStats" VerticalAlignment="Top" Width="75" Click="btnStats_Click" />
+        <Button Content="Find Matches for selected SFB" Height="23" HorizontalAlignment="Left" Margin="174,12,0,0" Name="btnFindMatches" VerticalAlignment="Top" Width="183" Click="btnFindMatches_Click" />
+        <Button Content="Find All Matches" Height="23" HorizontalAlignment="Left" Margin="363,12,0,0" Name="btnFindAllMatches" VerticalAlignment="Top" Width="109" Click="btnFindAllMatches_Click" />
+        <Button Content="Find All Matching Matches" Height="23" HorizontalAlignment="Left" Margin="478,12,0,0" Name="btnFindAllMatchingMatches" VerticalAlignment="Top" Width="166" Click="btnFindAllMatchingMatches_Click" />
+        <Button Content="Print Stats" Height="23" HorizontalAlignment="Left" Margin="652,12,0,0" Name="btnStats" VerticalAlignment="Top" Width="75" Click="btnStats_Click" />
     </Grid>
 </Window>

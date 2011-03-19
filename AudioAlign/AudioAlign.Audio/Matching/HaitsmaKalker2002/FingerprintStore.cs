@@ -125,15 +125,13 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 }
                 //if (matches.Count == 0) {
                 //    // again no match found, generate 32*32 subfingerprints of distance 2
-                //    int cycle = 0;
                 //    for (int i = 0; i < 32; i++) {
-                //        for (int j = cycle; j < 32; j++) {
+                //        for (int j = i + 1; j < 32; j++) {
                 //            SubFingerprint temp = new SubFingerprint(subFingerprint.Value);
                 //            temp[i] = !temp[i];
                 //            temp[j] = !temp[j];
                 //            matches.AddRange(FindMatches(temp));
                 //        }
-                //        cycle++;
                 //    }
                 //}
             }
@@ -143,7 +141,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         public List<Match> FindAllMatchingMatches() {
             List<Match> matches = new List<Match>();
             foreach (SubFingerprint subFingerprint in lookupTable.Keys) {
-                matches.AddRange(FindSoftMatches(subFingerprint));
+                matches.AddRange(FindMatches(subFingerprint));
             }
             return matches;
         }
