@@ -95,6 +95,38 @@ namespace AudioAlign.Audio {
             return new Interval(interval.from / scalar, interval.to / scalar);
         }
 
+        public static bool operator <(Interval interval, long scalar) {
+            return scalar < interval.From;
+        }
+
+        public static bool operator >(Interval interval, long scalar) {
+            return scalar > interval.From;
+        }
+
+        public static bool operator <=(Interval interval, long scalar) {
+            return scalar <= interval.From;
+        }
+
+        public static bool operator >=(Interval interval, long scalar) {
+            return scalar >= interval.From;
+        }
+
+        public static bool operator <(long scalar, Interval interval) {
+            return scalar < interval.From;
+        }
+
+        public static bool operator >(long scalar, Interval interval) {
+            return scalar > interval.From;
+        }
+
+        public static bool operator <=(long scalar, Interval interval) {
+            return scalar <= interval.From;
+        }
+
+        public static bool operator >=(long scalar, Interval interval) {
+            return scalar >= interval.From;
+        }
+
         public static bool operator ==(Interval interval1, Interval interval2) {
             return interval1.Equals(interval2);
         }

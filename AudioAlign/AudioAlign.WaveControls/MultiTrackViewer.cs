@@ -94,6 +94,17 @@ namespace AudioAlign.WaveControls {
         /// <param name="e"></param>
         protected override void OnPreviewMouseWheel(System.Windows.Input.MouseWheelEventArgs e) {
             base.OnPreviewMouseWheel(e);
+
+            // if the ctrl-key is held, we scroll the viewport
+            if (Keyboard.Modifiers == ModifierKeys.Control) {
+                double scrollPercentage = 0.01d;
+                double scrollOffset = ActualWidth * scrollPercentage * (e.Delta / Mouse.MouseWheelDeltaForOneLine);
+                VirtualViewportOffset += PhysicalToVirtualOffset(scrollOffset);
+                e.Handled = true;
+                return;
+            }
+            // else the viewport gets zoomed
+
             //Debug.WriteLine("MultiTrackViewer OnPreviewMouseWheel: " + e.Delta + " (" + e.Delta / Mouse.MouseWheelDeltaForOneLine + " lines)");
 
             // add/remove percentage for a zoom command
