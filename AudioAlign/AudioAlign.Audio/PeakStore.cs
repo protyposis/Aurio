@@ -14,6 +14,8 @@ namespace AudioAlign.Audio {
             unsafe { PEAK_BYTE_SIZE = sizeof(Peak); }
         }
 
+        public event EventHandler PeaksChanged;
+
         private int samplesPerPeak;
         private byte[][] data;
         private Dictionary<int, byte[][]> scaledData;
@@ -143,6 +145,12 @@ namespace AudioAlign.Audio {
 
                 this.scaledData.Add(samplesPerPeak, downscaledPeakData);
                 previousStepSamplesPerPeak = samplesPerPeak;
+            }
+        }
+
+        public void OnPeaksChanged() {
+            if (PeaksChanged != null) {
+                PeaksChanged(this, EventArgs.Empty);
             }
         }
     }

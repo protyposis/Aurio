@@ -7,6 +7,8 @@ using System.Diagnostics;
 namespace AudioAlign.Audio.Streams {
     public class VisualizingStream : AbstractAudioStreamWrapper {
 
+        public event EventHandler WaveformChanged;
+
         private byte[] buffer;
         private long bufferPosition; // the stream position from which the data in the buffer originates
         private long bufferLength; // the length of the currently buffered data
@@ -20,8 +22,12 @@ namespace AudioAlign.Audio.Streams {
             buffer = new byte[0];
         }
 
-        public VisualizingStream(IAudioStream sourceStream, PeakStore peakStore) : this(sourceStream) {
+        public VisualizingStream(IAudioStream sourceStream, PeakStore peakStore)
+            : this(sourceStream) {
                 this.peakStore = peakStore;
+                this.peakStore.PeaksChanged += new EventHandler(delegate(object sender, EventArgs e) {
+                    OnWaveformChanged();
+                });
         }
 
         public TimeSpan TimeLength {
@@ -157,6 +163,12 @@ namespace AudioAlign.Audio.Streams {
             if (requiredSize > buffer.Length) {
                 Debug.WriteLine("VisualizingStream buffer resize: " + buffer.Length + " -> " + requiredSize);
                 buffer = new byte[requiredSize];
+            }
+        }
+
+        private void OnWaveformChanged() {
+            if(WaveformChanged != null) {
+                WaveformChanged(this, EventArgs.Empty);
             }
         }
     }

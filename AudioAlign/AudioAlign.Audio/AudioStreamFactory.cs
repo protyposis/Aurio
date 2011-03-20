@@ -29,6 +29,8 @@ namespace AudioAlign.Audio {
             PeakStore peakStore = new PeakStore(SAMPLES_PER_PEAK, audioInputStream.Properties.Channels,
                 (int)Math.Ceiling((float)audioInputStream.Length / audioInputStream.SampleBlockSize / SAMPLES_PER_PEAK));
 
+            VisualizingStream visualizingStream = new VisualizingStream(new IeeeStream(audioTrack.CreateAudioStream()), peakStore);
+
             // search for existing peakfile
             if (audioTrack.HasPeakFile) {
                 // load peakfile from disk
@@ -44,13 +46,14 @@ namespace AudioAlign.Audio {
                 BinaryWriter[] peakWriters = peakStore.CreateMemoryStreams().WrapWithBinaryWriters();
 
                 Task.Factory.StartNew(() => {
-                    ProgressReporter progress = ProgressMonitor.Instance.BeginTask("Generating peaks for " + audioTrack.FileInfo.Name, true);
+                    ProgressReporter progressReporter = ProgressMonitor.Instance.BeginTask("Generating peaks for " + audioTrack.FileInfo.Name, true);
                     DateTime startTime = DateTime.Now;
                     int sampleBlockCount = 0;
                     int peakCount = 0;
                     int bytesRead;
                     long totalSampleBlocks = audioInputStream.Length / audioInputStream.SampleBlockSize;
                     long totalSamplesRead = 0;
+                    int progress = 0;
 
                     for (int i = 0; i < channels; i++) {
                         min[i] = float.MaxValue;
@@ -93,7 +96,11 @@ namespace AudioAlign.Audio {
                                 }
                                 while (samplesProcessed < samplesRead);
 
-                                progress.ReportProgress(100.0f / audioInputStream.Length * audioInputStream.Position);
+                                progressReporter.ReportProgress(100.0f / audioInputStream.Length * audioInputStream.Position);
+                                if((int)(100.0f / audioInputStream.Length * audioInputStream.Position) > progress) {
+                                    progress = (int)(100.0f / audioInputStream.Length * audioInputStream.Position);
+                                    peakStore.OnPeaksChanged();
+                                }
                             }
                         }
                     }
@@ -102,7 +109,7 @@ namespace AudioAlign.Audio {
                     peakStore.CalculateScaledData(8, 6);
 
                     Debug.WriteLine("peak generation finished - " + (DateTime.Now - startTime) + ", " + (peakWriters[0].BaseStream.Length * channels) + " bytes");
-                    ProgressMonitor.Instance.EndTask(progress);
+                    ProgressMonitor.Instance.EndTask(progressReporter);
 
                     // write peakfile to disk
                     FileStream peakOutputFile = File.OpenWrite(audioTrack.PeakFile.FullName);
@@ -111,7 +118,7 @@ namespace AudioAlign.Audio {
                 });
             }
 
-            return new VisualizingStream(new IeeeStream(audioTrack.CreateAudioStream()), peakStore);
+            return visualizingStream;
         }
 
         /// <summary>

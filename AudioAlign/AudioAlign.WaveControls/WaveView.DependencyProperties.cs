@@ -82,7 +82,16 @@ namespace AudioAlign.WaveControls
             AudioTrack audioTrack = e.NewValue as AudioTrack;
             if (waveView != null && audioTrack != null) {
                 waveView.audioStream = AudioStreamFactory.FromAudioTrackForGUI(audioTrack);
+                waveView.audioStream.WaveformChanged += new EventHandler(delegate(object sender2, EventArgs e2) {
+                    waveView.Dispatcher.BeginInvoke((Action)delegate {
+                        waveView.InvalidateVisual();
+                    });
+                });
             }
+        }
+
+        private static void audioStream_WaveformChanged(object sender, EventArgs e) {
+            throw new NotImplementedException();
         }
 
         private static void OnTrackLengthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
