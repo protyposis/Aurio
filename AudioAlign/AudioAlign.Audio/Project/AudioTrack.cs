@@ -32,7 +32,7 @@ namespace AudioAlign.Audio.Project {
         }
 
         public IAudioStream CreateAudioStream() {
-            return AudioStreamFactory.FromFileInfoIeee32(FileInfo);
+            return AudioStreamFactory.FromFileInfo(FileInfo);
         }
 
         public FileInfo PeakFile {

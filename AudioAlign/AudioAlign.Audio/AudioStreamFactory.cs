@@ -13,11 +13,15 @@ using AudioAlign.Audio.Streams;
 namespace AudioAlign.Audio {
     public static class AudioStreamFactory {
 
+        public static IAudioStream FromFileInfo(FileInfo fileInfo) {
+            return new NAudioSourceStream(new WaveFileReader(fileInfo.FullName));
+        }
+
         public static IAudioStream FromFileInfoIeee32(FileInfo fileInfo) {
             return new IeeeStream(new NAudioSourceStream(new WaveFileReader(fileInfo.FullName)));
         }
 
-        public static AudioAlign.Audio.Streams.VisualizingStream FromAudioTrackForGUI(AudioTrack audioTrack) {
+        public static VisualizingStream FromAudioTrackForGUI(AudioTrack audioTrack) {
             int SAMPLES_PER_PEAK = 256;
 
             IAudioStream audioInputStream = FromFileInfoIeee32(audioTrack.FileInfo);
@@ -107,7 +111,7 @@ namespace AudioAlign.Audio {
                 });
             }
 
-            return new VisualizingStream(audioTrack.CreateAudioStream(), peakStore);
+            return new VisualizingStream(new IeeeStream(audioTrack.CreateAudioStream()), peakStore);
         }
 
         /// <summary>

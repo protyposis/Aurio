@@ -48,24 +48,20 @@ namespace AudioAlign.WaveControls {
             foreach (Match match in Matches) {
                 WaveView waveView1 = waveViewMappings[match.Track1];
                 long timestamp1 = waveView1.AudioTrack.Offset.Ticks + match.Track1Time.Ticks;
-                double x1 = waveView1.VirtualToPhysicalIntervalOffset(timestamp1);
-                Point origin1 = waveView1.TranslatePoint(new Point(0, 0), this);
+                Point p1 = waveView1.TranslatePoint(
+                    new Point(waveView1.VirtualToPhysicalIntervalOffset(timestamp1), 0), this);
                     
                 WaveView waveView2 = waveViewMappings[match.Track2];
                 long timestamp2 = waveView2.AudioTrack.Offset.Ticks + match.Track2Time.Ticks;
-                double x2 = waveView2.VirtualToPhysicalIntervalOffset(timestamp2);
-                Point origin2 = waveView2.TranslatePoint(new Point(0, 0), this);
+                Point p2 = waveView2.TranslatePoint(
+                    new Point(waveView2.VirtualToPhysicalIntervalOffset(timestamp2), 0), this);
 
-                double y1 = 0, y2 = 0;
-                if (origin1.Y < origin2.Y) {
-                    y1 = waveView1.ActualHeight;
+                if (p1.Y < p2.Y) {
+                    p1.Y += waveView1.ActualHeight;
                 }
                 else {
-                    y2 = waveView2.ActualHeight;
+                    p2.Y += waveView2.ActualHeight;
                 }
-
-                Point p1 = new Point(x1 + origin1.X, y1 + origin1.Y);
-                Point p2 = new Point(x2 + origin2.X, y2 + origin2.Y);
 
                 // make p1 always the left point, p2 the right point
                 if (p1.X > p2.X) {
@@ -75,15 +71,13 @@ namespace AudioAlign.WaveControls {
                 }
 
                 // find out if a match is invisible and can be skipped
-                Interval viewportInterval = waveView1.VirtualViewportInterval;
-                if (viewportInterval.Contains(timestamp1)
-                    || viewportInterval.Contains(timestamp2)
-                    || (timestamp1 < viewportInterval && timestamp2 > viewportInterval)
-                    || (timestamp1 > viewportInterval && timestamp2 < viewportInterval)) {
+                double bx1 = 0; // x-coord of left drawing boundary
+                double bx2 = ActualWidth; // x-coord of right drawing boundary
+                if ((p1.X >= bx1 && p1.X <= bx2)
+                    || (p2.X >= bx1 && p2.X <= bx2)
+                    || (p1.X < bx1 && p2.X > bx2)) {
                     // calculate bounded line drawing coordinates to avoid that lines with very long lengths need to be rendered
-                    // drawing of lines with lengths > 100000 is very very slow or makes the pallication even stop
-                    double bx1 = 0; // x-coord of left drawing boundary
-                    double bx2 = ActualWidth; // x-coord of right drawing boundary
+                    // drawing of lines with lengths > 100000 is very very slow or makes the application even stop
                     double k = (p2.Y - p1.Y) / (p2.X - p1.X); // line gradient
                     if (p1.X < bx1) {
                         double delta = Math.Abs(p1.X - bx1);
@@ -136,10 +130,6 @@ namespace AudioAlign.WaveControls {
                 B = brush.Color.B,
                 A = alpha
             });
-        }
-
-        private static void ClipLine(ref double x1, ref double y1, ref double x2, ref double y2, double visibleIntervalStart, double visibleIntervalEnd) {
-            //
         }
     }
 }
