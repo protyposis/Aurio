@@ -132,13 +132,8 @@ namespace AudioAlign.Test.Fingerprinting {
 
         private void fingerprintMatchListBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             if (fingerprintMatchListBox.SelectedItems.Count == 2) {
-                Fingerprint fp1 = store.GetFingerprint(fingerprintMatchListBox.SelectedItems[0] as SubFingerprintLookupEntry);
-                Fingerprint fp2 = store.GetFingerprint(fingerprintMatchListBox.SelectedItems[1] as SubFingerprintLookupEntry);
-                Fingerprint fpDifference = fp1.Difference(fp2);
-                fingerprintView1.SubFingerprints = fp1;
-                fingerprintView2.SubFingerprints = fp2;
-                fingerprintView3.SubFingerprints = fpDifference;
-                berLabel.Content = store.CalculateBER(fp1, fp2);
+                ShowFingerprints(fingerprintMatchListBox.SelectedItems[0] as SubFingerprintLookupEntry,
+                    fingerprintMatchListBox.SelectedItems[1] as SubFingerprintLookupEntry);
             }
         }
 
@@ -147,11 +142,36 @@ namespace AudioAlign.Test.Fingerprinting {
         }
 
         private void btnFindAllMatches_Click(object sender, RoutedEventArgs e) {
-            PrintMatchResult(store.FindAllMatches());
+            List<Match> matches = store.FindAllMatches();
+            PrintMatchResult(matches);
+            matchGrid.ItemsSource = matches;
         }
 
         private void btnFindAllMatchingMatches_Click(object sender, RoutedEventArgs e) {
-            PrintMatchResult(store.FindAllMatchingMatches());
+            List<Match> matches = store.FindAllMatchingMatches();
+            PrintMatchResult(matches);
+            matchGrid.ItemsSource = matches;
+        }
+
+        private void matchGrid_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            Match match = matchGrid.SelectedItem as Match;
+            if (match == null) {
+                return;
+            }
+            int index1 = FingerprintGenerator.TimeStampToSubFingerprintIndex(match.Track1Time);
+            int index2 = FingerprintGenerator.TimeStampToSubFingerprintIndex(match.Track2Time);
+            ShowFingerprints(new SubFingerprintLookupEntry(match.Track1, index1),
+                new SubFingerprintLookupEntry(match.Track2, index2));
+        }
+
+        private void ShowFingerprints(SubFingerprintLookupEntry sfp1, SubFingerprintLookupEntry sfp2) {
+            Fingerprint fp1 = store.GetFingerprint(sfp1);
+            Fingerprint fp2 = store.GetFingerprint(sfp2);
+            Fingerprint fpDifference = fp1.Difference(fp2);
+            fingerprintView1.SubFingerprints = fp1;
+            fingerprintView2.SubFingerprints = fp2;
+            fingerprintView3.SubFingerprints = fpDifference;
+            berLabel.Content = store.CalculateBER(fp1, fp2);
         }
     }
 }

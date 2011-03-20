@@ -43,13 +43,13 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             int streamBufferOffsetF = 0;
             int streamBufferLevelF = 0;
             int frameOffsetF = 0;
+            int index = 0;
 
             unsafe {
                 fixed (byte* streamBufferB = streamBuffer) {
                     float* streamBufferF = (float*)streamBufferB;
 
                     while (audioStream.Position <= audioStream.Length) {
-                        long audioStreamPositionF = audioStream.Position / sampleBytes;
                         // fill the stream input buffer, if no bytes returned we have reached the end of the stream
                         int streamBufferOffsetB = streamBufferOffsetF * sampleBytes;
                         streamBufferLevelF = StreamUtil.ForceRead(audioStream, streamBuffer,
@@ -58,6 +58,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                             Debug.WriteLine("subfingerprint generation finished - end position {0}/{1}", audioStream.Position, audioStream.Length);
                             return; // whole stream has been processed
                         }
+                        streamBufferLevelF += streamBufferOffsetF;
+                        streamBufferOffsetF = 0;
 
                         // iterate through windows in current buffer
                         while (frameOffsetF + FRAME_SIZE <= streamBufferLevelF) {
@@ -66,8 +68,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                                 frameBufferF[x] = streamBufferF[x + frameOffsetF];
                             }
 
-                            long audioStreamFramePositionF = audioStreamPositionF + frameOffsetF;
-                            timestamp = new TimeSpan((long)((double)audioStreamFramePositionF / SAMPLERATE * 1000 * 1000 * 10));
+                            timestamp = SubFingerprintIndexToTimeSpan(index++);
                             ProcessFrame(frameBufferF);
 
                             frameOffsetF += FRAME_STEP;
@@ -76,7 +77,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                         // carry over unprocessed samples from the end of the stream buffer to its beginning
                         streamBufferOffsetF = streamBufferLevelF - frameOffsetF;
                         for (int x = 0; x < streamBufferOffsetF; x++) {
-                            streamBufferF[x] = streamBufferF[x + frameOffsetF];
+                            streamBufferF[x] = streamBufferF[frameOffsetF + x];
                         }
                         frameOffsetF = 0;
                     }
@@ -134,7 +135,11 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         }
 
         public static TimeSpan SubFingerprintIndexToTimeSpan(int index) {
-            return new TimeSpan((long)((double)index * FRAME_STEP / SAMPLERATE * 1000 * 1000 * 10));
+            return new TimeSpan((long)Math.Round((double)index * FRAME_STEP / SAMPLERATE * 1000 * 1000 * 10));
+        }
+
+        public static int TimeStampToSubFingerprintIndex(TimeSpan timeSpan) {
+            return (int)Math.Round((double)timeSpan.Ticks / 10 / 1000 / 1000 * SAMPLERATE / FRAME_STEP);
         }
     }
 }

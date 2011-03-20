@@ -12,6 +12,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height=".3*"/>
                 <RowDefinition/>
+                <RowDefinition Height=".3*"/>
             </Grid.RowDefinitions>
             <ListBox Name="trackListBox"/>
             <Grid Grid.Row="1">
@@ -35,9 +36,18 @@
                     <my:FingerprintView Grid.Column="0" x:Name="fingerprintView1" />
                     <my:FingerprintView Grid.Column="1" x:Name="fingerprintView2" />
                     <my:FingerprintView Grid.Column="2" x:Name="fingerprintView3" />
-                    <Label Content="0" Grid.Row="1" Grid.ColumnSpan="3" ContentStringFormat="{}BER: {0}" HorizontalContentAlignment="Center" Name="berLabel"/>
+                    <Label Content="0" Grid.Row="1" Grid.Column="2" ContentStringFormat="{}BER: {0}" HorizontalContentAlignment="Center" Name="berLabel"/>
                 </Grid>
             </Grid>
+            <DataGrid Name="matchGrid" Grid.Row="2" SelectionUnit="FullRow" AutoGenerateColumns="False" GridLinesVisibility="Horizontal" HeadersVisibility="Column" SelectionChanged="matchGrid_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Track A" Width="SizeToCells" Binding="{Binding Track1.Name}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Track B" Width="SizeToCells" Binding="{Binding Track2.Name}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Track A Position" Width="SizeToCells" Binding="{Binding Track1Time}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Track B Position" Width="SizeToCells" Binding="{Binding Track2Time}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Similarity" Binding="{Binding Similarity}" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
         </Grid>
         <Button Content="Find Matches for selected SFB" Height="23" HorizontalAlignment="Left" Margin="174,12,0,0" Name="btnFindMatches" VerticalAlignment="Top" Width="183" Click="btnFindMatches_Click" />
         <Button Content="Find All Matches" Height="23" HorizontalAlignment="Left" Margin="363,12,0,0" Name="btnFindAllMatches" VerticalAlignment="Top" Width="109" Click="btnFindAllMatches_Click" />
