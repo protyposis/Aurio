@@ -25,6 +25,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         private double[] frequencyBands;
 
         public event EventHandler<SubFingerprintEventArgs> SubFingerprintCalculated;
+        public event EventHandler Completed;
 
         public FingerprintGenerator(AudioTrack track) {
             this.inputTrack = track;
@@ -56,6 +57,11 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                             streamBufferOffsetB, streamBuffer.Length - streamBufferOffsetB) / sampleBytes;
                         if (streamBufferLevelF == 0) {
                             Debug.WriteLine("subfingerprint generation finished - end position {0}/{1}", audioStream.Position, audioStream.Length);
+
+                            if (Completed != null) {
+                                Completed(this, EventArgs.Empty);
+                            }
+                            
                             return; // whole stream has been processed
                         }
                         streamBufferLevelF += streamBufferOffsetF;
