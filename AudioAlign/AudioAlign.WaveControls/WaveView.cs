@@ -75,23 +75,27 @@ namespace AudioAlign.WaveControls {
 
                 // load audio samples
                 DateTime beforeLoading = DateTime.Now;
-                bool peaks = samplesToLoad > drawingWidthAligned;
-                // TODO don't recreate the array every time -> resize on demand
-                float[][] samples = AudioUtil.CreateArray<float>(audioStream.Properties.Channels, drawingWidthAligned * 2);
-                audioStream.TimePosition = new TimeSpan(audioToLoadIntervalAligned.From);
+                float[][] samples = null;
                 int sampleCount = 0;
-                if (peaks) {
-                    sampleCount = audioStream.ReadPeaks(samples, samplesToLoad, drawingWidthAligned);
-                }
-                else {
-                    sampleCount = audioStream.ReadSamples(samples, samplesToLoad);
+                if (RenderMode != WaveViewRenderMode.None) {
+                    bool peaks = samplesToLoad > drawingWidthAligned;
+                    // TODO don't recreate the array every time -> resize on demand
+                    samples = AudioUtil.CreateArray<float>(audioStream.Properties.Channels, drawingWidthAligned * 2);
+                    audioStream.TimePosition = new TimeSpan(audioToLoadIntervalAligned.From);
+
+                    if (peaks) {
+                        sampleCount = audioStream.ReadPeaks(samples, samplesToLoad, drawingWidthAligned);
+                    }
+                    else {
+                        sampleCount = audioStream.ReadSamples(samples, samplesToLoad);
+                    }
+
+                    if (sampleCount <= 1) {
+                        drawingContext.DrawText(DebugText("SAMPLE WARNING: " + sampleCount), new Point(0, 0));
+                        return;
+                    }
                 }
                 DateTime afterLoading = DateTime.Now;
-
-                if (sampleCount <= 1) {
-                    drawingContext.DrawText(DebugText("SAMPLE WARNING: " + sampleCount), new Point(0, 0));
-                    return;
-                }
 
                 DateTime beforeDrawing = DateTime.Now;
 
@@ -128,6 +132,9 @@ namespace AudioAlign.WaveControls {
                 if (channelHeight >= 1) {
                     IWaveformRenderer renderer = null;
                     switch (RenderMode) {
+                        case WaveViewRenderMode.None:
+                            renderer = null;
+                            break;
                         case WaveViewRenderMode.Bitmap:
                             renderer = new WaveformBitmapRenderer() { WaveformLine = WaveformLine as SolidColorBrush };
                             break;
@@ -135,12 +142,14 @@ namespace AudioAlign.WaveControls {
                             renderer = new WaveformGeometryRenderer() { WaveformLine = WaveformLine as SolidColorBrush };
                             break;
                     }
-                    for (int channel = 0; channel < channels; channel++) {
-                        Drawing waveform = renderer.Render(samples[channel], sampleCount, drawingWidthAligned, (int)channelHeight);
-                        DrawingGroup drawing = new DrawingGroup();
-                        drawing.Children.Add(waveform);
-                        drawing.Transform = new TranslateTransform((int)drawingOffsetAligned, (int)(channelHeight * channel));
-                        drawingContext.DrawDrawing(drawing);
+                    if (renderer != null) {
+                        for (int channel = 0; channel < channels; channel++) {
+                            Drawing waveform = renderer.Render(samples[channel], sampleCount, drawingWidthAligned, (int)channelHeight);
+                            DrawingGroup drawing = new DrawingGroup();
+                            drawing.Children.Add(waveform);
+                            drawing.Transform = new TranslateTransform((int)drawingOffsetAligned, (int)(channelHeight * channel));
+                            drawingContext.DrawDrawing(drawing);
+                        }
                     }
                 }
 

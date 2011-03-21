@@ -5,6 +5,7 @@ using System.Text;
 
 namespace AudioAlign.WaveControls {
     public enum WaveViewRenderMode {
+        None,
         Bitmap,
         Geometry
     }
