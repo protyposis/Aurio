@@ -114,6 +114,7 @@
     <Compile Include="AudioStreamFactory.cs" />
     <Compile Include="AudioUtil.cs" />
     <Compile Include="BinaryIOExtensions.cs" />
+    <Compile Include="CommonUtil.cs" />
     <Compile Include="FFTAnalyzer.cs" />
     <Compile Include="FFTUtil.cs" />
     <Compile Include="Matching\CrossCorrelation.cs" />

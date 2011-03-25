@@ -196,5 +196,41 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
             return bitErrors / 8192f; // 8192 = 256 sub-fingerprints * 32 bits
         }
+
+        public void FindAllMatches(int maxSubFingerprintDistance, bool calculateFingerprintBER) {
+            for (int i = 0; i < store.Keys.Count; i++) {
+                AudioTrack audioTrack1 = store.Keys.ElementAt(i);
+                for (int j = i + 1; j < store.Keys.Count; j++) {
+                    AudioTrack audioTrack2 = store.Keys.ElementAt(j);
+                    int sfp1Index = 0;
+                    foreach (SubFingerprint subFingerprint1 in store[audioTrack1]) {
+                        int sfp2Index = 0;
+                        foreach (SubFingerprint subFingerprint2 in store[audioTrack2]) {
+                            int sfpDistance = subFingerprint1.HammingDistance(subFingerprint2);
+                            if (sfpDistance <= maxSubFingerprintDistance) {
+                                float ber = 0;
+                                if (calculateFingerprintBER) {
+                                    ber = CalculateBER(
+                                        GetFingerprint(new SubFingerprintLookupEntry(audioTrack1, sfp1Index)), 
+                                        GetFingerprint(new SubFingerprintLookupEntry(audioTrack2, sfp2Index)));
+                                }
+                                if (ber < 0.35f) {
+                                    Match match = new Match {
+                                        Similarity = 1 - ber,
+                                        Track1 = audioTrack1,
+                                        Track1Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(sfp1Index),
+                                        Track2 = audioTrack2,
+                                        Track2Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(sfp2Index)
+                                    };
+                                    Debug.WriteLine(match + " [SFP distance: " + sfpDistance + "]");
+                                }
+                            }
+                            sfp2Index++;
+                        }
+                        sfp1Index++;
+                    }
+                }
+            }
+        }
     }
 }
