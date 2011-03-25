@@ -77,8 +77,13 @@ namespace AudioAlign.WaveControls {
             get { return multiTrackListBox.SelectedItem; }
         }
 
-        public Collection<Match> Matches {
+        public ObservableCollection<Match> Matches {
             get { return multiTrackConnectionAdorner.Matches; }
+        }
+
+        public Match SelectedMatch {
+            get { return multiTrackConnectionAdorner.SelectedMatch; }
+            set { multiTrackConnectionAdorner.SelectedMatch = value; }
         }
 
         public void RefreshAdornerLayer() {

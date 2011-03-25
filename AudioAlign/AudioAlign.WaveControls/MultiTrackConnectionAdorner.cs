@@ -17,12 +17,14 @@ namespace AudioAlign.WaveControls {
 
         private MultiTrackListBox multiTrackListBox;
         private SolidColorBrush brushGreen, brushYellow, brushRed;
+        private ObservableCollection<Match> matches;
+        private Match selectedMatch;
 
         public MultiTrackConnectionAdorner(UIElement adornedElement, MultiTrackListBox multiTrackListBox)
             : base(adornedElement) {
                 this.multiTrackListBox = multiTrackListBox;
-                Matches = new ObservableCollection<Match>();
-                Matches.CollectionChanged += Matches_CollectionChanged;
+                matches = new ObservableCollection<Match>();
+                matches.CollectionChanged += Matches_CollectionChanged;
 
                 brushGreen = Brushes.Green;
                 brushYellow = Brushes.Yellow;
@@ -30,9 +32,19 @@ namespace AudioAlign.WaveControls {
         }
 
         public ObservableCollection<Match> Matches {
-            get;
-            private set;
-        } 
+            get { return matches; }
+        }
+
+        public Match SelectedMatch {
+            get { return selectedMatch; }
+            set {
+                if (value != null && !matches.Contains(value)) {
+                    throw new Exception("match to be selected isn't part of the match collection");
+                }
+                selectedMatch = value;
+                InvalidateVisual();
+            }
+        }
 
         protected override void OnRender(DrawingContext drawingContext) {
             // NOTE the dictionary needs to be built every time because the ListBox.items.CollectionChanged event is inaccessible (protected)
@@ -65,9 +77,11 @@ namespace AudioAlign.WaveControls {
 
                 // make p1 always the left point, p2 the right point
                 if (p1.X > p2.X) {
-                    Point temp = p1;
-                    p1 = p2;
-                    p2 = temp;
+                    CommonUtil.Swap<Point>(ref p1, ref p2);
+                }
+                // make p1 always the top point, p2 the bottom point
+                if (p1.Y > p2.Y) {
+                    CommonUtil.Swap<Point>(ref p1, ref p2);
                 }
 
                 // find out if a match is invisible and can be skipped
@@ -107,6 +121,10 @@ namespace AudioAlign.WaveControls {
                         brushGreen = SetAlpha(brushGreen, (byte)(255 * (2 * (match.Similarity - 0.5))));
                     }
 
+                    //if (match == SelectedMatch) {
+                    //    drawingContext.DrawLine(new Pen(Brushes.Black, 7) { EndLineCap = PenLineCap.Triangle, StartLineCap = PenLineCap.Triangle },
+                    //        p1, p2);
+                    //}
                     // draw 3 stacked lines for the 3 basic colors
                     // depending on their alpha values the resulting visible line will be gradually different
                     drawingContext.DrawLine(new Pen(brushRed, 3) { DashStyle = DashStyles.Dash, EndLineCap = PenLineCap.Triangle, StartLineCap = PenLineCap.Triangle },
@@ -115,6 +133,12 @@ namespace AudioAlign.WaveControls {
                         p1, p2);
                     drawingContext.DrawLine(new Pen(brushGreen, 3) { DashStyle = DashStyles.Dash, EndLineCap = PenLineCap.Triangle, StartLineCap = PenLineCap.Triangle },
                         p1, p2);
+
+                    // draw selection markers
+                    if (match == SelectedMatch) {
+                        DrawTriangle(drawingContext, Brushes.Red, p1, 6); // top triangle
+                        DrawTriangle(drawingContext, Brushes.Red, p2, -6); // bottom triangle
+                    }
                 }
             }
         }
@@ -130,6 +154,14 @@ namespace AudioAlign.WaveControls {
                 B = brush.Color.B,
                 A = alpha
             });
+        }
+
+        private static void DrawTriangle(DrawingContext drawingContext, Brush brush, Point origin, double size) {
+            Point start = origin;
+            LineSegment[] segments = new LineSegment[] { new LineSegment(new Point(origin.X - size, origin.Y + size), true), new LineSegment(new Point(origin.X + size, origin.Y + size), true) };
+            PathFigure figure = new PathFigure(start, segments, true);
+            PathGeometry geo = new PathGeometry(new PathFigure[]{figure});
+            drawingContext.DrawGeometry(brush, null, geo);
         }
     }
 }
