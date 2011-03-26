@@ -306,6 +306,7 @@
                                             VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"
                                             TrackLength="{Binding Path=Length, Converter={StaticResource TimeSpanTicksConverter}}"
                                             TrackOffset="{Binding Path=Offset, Mode=TwoWay, Converter={StaticResource TimeSpanTicksConverter}}"/>
+                            <Border Grid.Row="1" Background="Black" Opacity="0.5" Name="muteIndicator" Visibility="Hidden"/>
                         </Grid>
                     </local:ResizeDecorator>
                     <DataTemplate.Resources>
@@ -317,9 +318,15 @@
                                     <Setter Property="WaveformLine" Value="White"/>
                                     <Setter Property="WaveformBackground" Value="CornflowerBlue"/>
                                 </DataTrigger>
+
                             </Style.Triggers>
                         </Style>
                     </DataTemplate.Resources>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Path=Mute}" Value="True">
+                            <Setter TargetName="muteIndicator" Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
                 </DataTemplate>
             </Setter.Value>
         </Setter>
