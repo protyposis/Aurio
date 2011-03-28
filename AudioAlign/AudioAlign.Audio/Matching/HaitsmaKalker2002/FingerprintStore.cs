@@ -42,6 +42,11 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
         }
 
+        public void Clear() {
+            lookupTable.Clear();
+            store.Clear();
+        }
+
         public void Analyze() {
             Debug.WriteLine("analyzing fingerprint store...");
             foreach (SubFingerprint sfp in lookupTable.Keys) {
@@ -74,23 +79,17 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                     SubFingerprintLookupEntry entry2 = entries[y];
                     if (entry1.AudioTrack != entry2.AudioTrack) { // don't compare tracks with themselves
                         //Debug.WriteLine("Comparing " + entry1.AudioTrack.Name + " with " + entry2.AudioTrack.Name + ":");
-                        int bitErrors = 0;
-
-                        int indexOffset = 0;
-                        if (store[entry1.AudioTrack].Count - entry1.Index < FINGERPRINT_SIZE) {
-                            indexOffset = Math.Min(indexOffset, -FINGERPRINT_SIZE + store[entry1.AudioTrack].Count - entry1.Index);
-                        }
-                        if (store[entry2.AudioTrack].Count - entry2.Index < FINGERPRINT_SIZE) {
-                            indexOffset = Math.Min(indexOffset, -FINGERPRINT_SIZE + store[entry2.AudioTrack].Count - entry2.Index);
-                        }
-
-                        if (indexOffset < 0) {
-                            continue;
+                        if (store[entry1.AudioTrack].Count - entry1.Index < FINGERPRINT_SIZE
+                            || store[entry2.AudioTrack].Count - entry2.Index < FINGERPRINT_SIZE) {
+                                // the end of at least one track has been reached and there are not enough subfingerprints left
+                                // to do a fingerprint comparison
+                                continue;
                         }
 
                         // sum up the bit errors
+                        int bitErrors = 0;
                         for (int s = 0; s < FINGERPRINT_SIZE; s++) {
-                            bitErrors += store[entry1.AudioTrack][entry1.Index + indexOffset + s].HammingDistance(store[entry2.AudioTrack][entry2.Index + indexOffset + s]);
+                            bitErrors += store[entry1.AudioTrack][entry1.Index + s].HammingDistance(store[entry2.AudioTrack][entry2.Index + s]);
                         }
 
                         float bitErrorRate = bitErrors / 8192f; // 8192 = 256 sub-fingerprints * 32 bits
@@ -147,12 +146,14 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         }
 
         public List<Match> FindAllMatches() {
+            DateTime startTime = DateTime.Now;
             List<Match> matches = new List<Match>();
             foreach (AudioTrack audioTrack in store.Keys) {
                 foreach (SubFingerprint subFingerprint in store[audioTrack]) {
                     matches.AddRange(FindSoftMatches(subFingerprint));
                 }
             }
+            Debug.WriteLine("duration: " + (DateTime.Now - startTime));
             return matches;
         }
 
@@ -198,10 +199,11 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         }
 
         public void FindAllMatches(int maxSubFingerprintDistance, bool calculateFingerprintBER) {
-            for (int i = 0; i < store.Keys.Count; i++) {
-                AudioTrack audioTrack1 = store.Keys.ElementAt(i);
-                for (int j = i + 1; j < store.Keys.Count; j++) {
-                    AudioTrack audioTrack2 = store.Keys.ElementAt(j);
+            List<AudioTrack> audioTracks = new List<AudioTrack>(store.Keys.OrderByDescending(at => at.Length.Ticks));
+            for (int i = 0; i < audioTracks.Count; i++) {
+                AudioTrack audioTrack1 = audioTracks[i];
+                for (int j = i + 1; j < audioTracks.Count; j++) {
+                    AudioTrack audioTrack2 = audioTracks[j];
                     int sfp1Index = 0;
                     foreach (SubFingerprint subFingerprint1 in store[audioTrack1]) {
                         int sfp2Index = 0;
