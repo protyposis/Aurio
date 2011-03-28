@@ -24,13 +24,20 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         private WindowFunction windowFunction;
         private double[] frequencyBands;
 
+        private int flipWeakestBits;
+
         public event EventHandler<SubFingerprintEventArgs> SubFingerprintCalculated;
         public event EventHandler Completed;
 
-        public FingerprintGenerator(AudioTrack track) {
+        public FingerprintGenerator(AudioTrack track)
+            : this(track, 0) {
+        }
+
+        public FingerprintGenerator(AudioTrack track, int flipWeakestBits) {
             this.inputTrack = track;
             this.windowFunction = WindowUtil.GetFunction(WindowType.Hann, FRAME_SIZE);
             this.frequencyBands = FFTUtil.CalculateFrequencyBoundariesLog(FREQ_MIN, FREQ_MAX, FREQ_BANDS);
+            this.flipWeakestBits = flipWeakestBits;
         }
 
         private TimeSpan timestamp = TimeSpan.Zero;
@@ -130,13 +137,28 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
         private void CalculateSubFingerprint(float[] energyBands, float[] previousEnergyBands) {
             SubFingerprint subFingerprint = new SubFingerprint();
+            Dictionary<int, float> bitReliability = new Dictionary<int, float>();
 
             for (int m = 0; m < 32; m++) {
-                subFingerprint[m] = (energyBands[m] - energyBands[m + 1] - (previousEnergyBands[m] - previousEnergyBands[m + 1])) > 0;
+                float difference = energyBands[m] - energyBands[m + 1] - (previousEnergyBands[m] - previousEnergyBands[m + 1]);
+                subFingerprint[m] = difference > 0;
+                bitReliability.Add(m, difference);
             }
 
             if (SubFingerprintCalculated != null) {
                 SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, subFingerprint, timestamp));
+            }
+
+            if (flipWeakestBits > 0) {
+                // calculate probable subfingerprints by flipping the most unreliable bits (the bits with the least energy differences)
+                List<int> weakestBits = new List<int>(bitReliability.Keys.OrderByDescending(key => bitReliability[key]));
+                for (int i = 0; i < flipWeakestBits; i++) {
+                    SubFingerprint flippedSubFingerprint = new SubFingerprint(subFingerprint.Value);
+                    flippedSubFingerprint[weakestBits[i]] = !flippedSubFingerprint[weakestBits[i]];
+                    if (SubFingerprintCalculated != null) {
+                        SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, flippedSubFingerprint, timestamp));
+                    }
+                }
             }
         }
 
