@@ -199,6 +199,10 @@ namespace AudioAlign.Audio {
 
             IAudioStream trackStream = volumeControl;
 
+            if (trackStream.Properties.Channels == 1 && audioMixer.Properties.Channels > 1) {
+                trackStream = new MonoStream(trackStream, audioMixer.Properties.Channels);
+            }
+
             audioMixer.Add(trackStream);
             trackListStreams.Add(audioTrack, trackStream);
         }
