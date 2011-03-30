@@ -5,7 +5,7 @@ using System.Text;
 using System.Collections;
 
 namespace AudioAlign.Audio.Project {
-    public class TrackList<T> : IEnumerable where T : Track {
+    public class TrackList<T> : IEnumerable<T> where T : Track {
         private readonly List<T> list;
 
         public class TrackListEventArgs : EventArgs {
@@ -67,10 +67,14 @@ namespace AudioAlign.Audio.Project {
             get { return list[index]; }
         }
 
-        #region IEnumerable Members
+        #region IEnumerable<T> Members
 
         IEnumerator IEnumerable.GetEnumerator() {
             return ((IEnumerable)list).GetEnumerator();
+        }
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() {
+            return list.GetEnumerator();
         }
 
         #endregion
