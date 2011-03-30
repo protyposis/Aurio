@@ -120,8 +120,8 @@ namespace AudioAlign.WaveControls {
 
             // calculate new viewport width
             long newViewportWidth = (long)(e.Delta < 0 ?
-                currentViewportInterval.Length * (1 + scalePercentage * (-e.Delta / Mouse.MouseWheelDeltaForOneLine)) :
-                currentViewportInterval.Length * (1 - scalePercentage * (e.Delta / Mouse.MouseWheelDeltaForOneLine)));
+                currentViewportInterval.Length * (1 + scalePercentage) :
+                currentViewportInterval.Length * (1 - scalePercentage));
             //Debug.WriteLine("MultiTrackViewer viewport width change: {0} -> {1}", currentViewportWidth, newViewportWidth);
             VirtualViewportWidth = newViewportWidth; // force coercion
             newViewportWidth = VirtualViewportWidth; // get coerced value
