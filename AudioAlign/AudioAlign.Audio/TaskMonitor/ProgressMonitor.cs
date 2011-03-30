@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-using System.Threading;
 using System.Runtime.CompilerServices;
+using System.Timers;
 
 namespace AudioAlign.Audio.TaskMonitor {
     public class ProgressMonitor {
@@ -14,6 +14,8 @@ namespace AudioAlign.Audio.TaskMonitor {
         private List<ProgressReporter> reporters;
         private Dictionary<ProgressReporter, int> reporterProgress;
 
+        private Timer timer;
+
         public event EventHandler ProcessingStarted;
         public event EventHandler<ValueEventArgs<float>> ProcessingProgressChanged;
         public event EventHandler ProcessingFinished;
@@ -21,6 +23,8 @@ namespace AudioAlign.Audio.TaskMonitor {
         private ProgressMonitor() {
             reporters = new List<ProgressReporter>();
             reporterProgress = new Dictionary<ProgressReporter, int>();
+            timer = new Timer(100) { Enabled = false };
+            timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
         }
 
         public static ProgressMonitor Instance {
@@ -87,10 +91,10 @@ namespace AudioAlign.Audio.TaskMonitor {
                 reporterProgress[senderTaskStatus] = (int)senderTaskStatus.Progress;
                 Debug.WriteLine(senderTaskStatus.Name + ": " + reporterProgress[senderTaskStatus] + "%");
             }
-            OnProcessingProgressChanged();
         }
 
         private void OnProcessingStarted() {
+            timer.Enabled = true;
             if(ProcessingStarted != null) {
                 ProcessingStarted(this, EventArgs.Empty);
             }
@@ -109,9 +113,14 @@ namespace AudioAlign.Audio.TaskMonitor {
         }
 
         private void OnProcessingFinished() {
+            timer.Enabled = false;
             if (ProcessingFinished != null) {
                 ProcessingFinished(this, EventArgs.Empty);
             }
+        }
+
+        private void timer_Elapsed(object sender, ElapsedEventArgs e) {
+            OnProcessingProgressChanged();
         }
     }
 }
