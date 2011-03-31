@@ -102,7 +102,7 @@ namespace AudioAlign.Audio.TaskMonitor {
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnProcessingProgressChanged() {
-            if (ProcessingProgressChanged != null) {
+            if (ProcessingProgressChanged != null && reporters.Count > 0) {
                 float progress = 0;
                 foreach (ProgressReporter reporter in reporters) {
                     progress += (float)reporter.Progress;
