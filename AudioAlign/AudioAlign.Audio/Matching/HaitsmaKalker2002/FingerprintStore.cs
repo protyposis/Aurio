@@ -26,13 +26,15 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             get { return store; }
         }
 
-        public void Add(AudioTrack audioTrack, SubFingerprint subFingerprint, TimeSpan timestamp) {
+        public void Add(AudioTrack audioTrack, SubFingerprint subFingerprint, TimeSpan timestamp, bool variation) {
             lock (this) {
-                // store the sub-fingerprint in the sequential list of the audio track
-                if (!store.ContainsKey(audioTrack)) {
-                    store.Add(audioTrack, new List<SubFingerprint>());
+                if (!variation) {
+                    // store the sub-fingerprint in the sequential list of the audio track
+                    if (!store.ContainsKey(audioTrack)) {
+                        store.Add(audioTrack, new List<SubFingerprint>());
+                    }
+                    store[audioTrack].Add(subFingerprint);
                 }
-                store[audioTrack].Add(subFingerprint);
 
                 // insert a track/index lookup entry for the sub-fingerprint
                 if (!lookupTable.ContainsKey(subFingerprint)) {

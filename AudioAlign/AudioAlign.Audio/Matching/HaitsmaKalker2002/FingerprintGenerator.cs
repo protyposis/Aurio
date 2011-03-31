@@ -148,7 +148,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
 
             if (SubFingerprintCalculated != null) {
-                SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, subFingerprint, timestamp));
+                SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, subFingerprint, timestamp, false));
             }
 
             if (flipWeakestBits > 0) {
@@ -160,7 +160,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                         SubFingerprint flippedSubFingerprint = new SubFingerprint(subFingerprint.Value);
                         flippedSubFingerprint[weakestBits[i]] = !flippedSubFingerprint[weakestBits[i]];
                         if (SubFingerprintCalculated != null) {
-                            SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, flippedSubFingerprint, timestamp));
+                            SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, flippedSubFingerprint, timestamp, true));
                         }
                     }
                 }
