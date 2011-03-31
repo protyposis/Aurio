@@ -144,7 +144,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             for (int m = 0; m < 32; m++) {
                 float difference = energyBands[m] - energyBands[m + 1] - (previousEnergyBands[m] - previousEnergyBands[m + 1]);
                 subFingerprint[m] = difference > 0;
-                bitReliability.Add(m, difference);
+                bitReliability.Add(m, difference > 0 ? difference : -difference); // take absolute value as reliability weight
             }
 
             if (SubFingerprintCalculated != null) {
@@ -153,7 +153,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
             if (flipWeakestBits > 0) {
                 // calculate probable subfingerprints by flipping the most unreliable bits (the bits with the least energy differences)
-                List<int> weakestBits = new List<int>(bitReliability.Keys.OrderByDescending(key => bitReliability[key]));
+                List<int> weakestBits = new List<int>(bitReliability.Keys.OrderBy(key => bitReliability[key]));
                 if (!generateAllBitCombinations) {
                     // generate fingerprints with one bit flipped
                     for (int i = 0; i < flipWeakestBits; i++) {
@@ -167,13 +167,15 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 else {
                     // generate fingerprints with all possible bit combinations flipped
                     int variations = 1 << flipWeakestBits;
-                    for (int i = 1; i <= variations; i++) {
+                    for (int i = 1; i < variations; i++) { // start at 1 since i0 equals to the original subfingerprint
                         SubFingerprint flippedSubFingerprint = new SubFingerprint(subFingerprint.Value);
                         for (int j = 0; j < flipWeakestBits; j++) {
-                            flippedSubFingerprint[weakestBits[j]] = !flippedSubFingerprint[weakestBits[j]];
+                            if (((i >> j) & 1) == 1) {
+                                flippedSubFingerprint[weakestBits[j]] = !flippedSubFingerprint[weakestBits[j]];
+                            }
                         }
                         if (SubFingerprintCalculated != null) {
-                            SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, flippedSubFingerprint, timestamp));
+                            SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, flippedSubFingerprint, timestamp, true));
                         }
                     }
                 }
