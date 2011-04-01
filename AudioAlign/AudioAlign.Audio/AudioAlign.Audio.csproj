@@ -98,9 +98,6 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Exocortex.DSP, Version=1.0.1373.38032, Culture=neutral">
-      <HintPath>..\..\libs\Exocortex.DSP.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -164,6 +161,10 @@
     <Compile Include="WindowUtil.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ExocortexDSP\Exocortex.DSP.csproj">
+      <Project>{1904A41B-D1B8-40E5-ADBB-728DDCF7C816}</Project>
+      <Name>Exocortex.DSP</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\NAudio\NAudio\NAudio.csproj">
       <Project>{DA4F02E3-0B5E-42CD-B8D9-5583FA51D66E}</Project>
       <Name>NAudio</Name>
