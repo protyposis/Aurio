@@ -32,5 +32,11 @@ namespace AudioAlign.Audio.Streams {
         public virtual int Read(byte[] buffer, int offset, int count) {
             return sourceStream.Read(buffer, offset, count);
         }
+
+        protected void ValidateSampleBlockAlignment(long value) {
+            if (value % SampleBlockSize != 0) {
+                throw new Exception("misaligned stream position (not aligned to the sample block size");
+            }
+        }
     }
 }

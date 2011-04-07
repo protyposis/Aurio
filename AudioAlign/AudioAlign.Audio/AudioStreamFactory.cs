@@ -130,33 +130,8 @@ namespace AudioAlign.Audio {
             return fileName.EndsWith(".wav");
         }
 
-        ///// <summary>
-        ///// Creates an NAudio audio stream from a file if the file format is supported.
-        ///// Source: NAudio AudioPlaybackForm.cs / CreateInputStream
-        ///// </summary>
-        ///// <param name="fileName">name of the file to open</param>
-        ///// <returns>an audio stream or null if the format is unsupported</returns>
-        //public static WaveStream CreateInputStream(string fileName) {
-        //    if (fileName.EndsWith(".wav")) {
-        //        WaveStream readerStream = new WaveFileReader(fileName);
-        //        if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm) {
-        //            readerStream = WaveFormatConversionStream.CreatePcmStream(readerStream);
-        //            readerStream = new BlockAlignReductionStream(readerStream);
-        //        }
-        //        if (readerStream.WaveFormat.BitsPerSample != 16) {
-        //            var format = new WaveFormat(readerStream.WaveFormat.SampleRate, 16, readerStream.WaveFormat.Channels);
-        //            readerStream = new WaveFormatConversionStream(format, readerStream);
-        //        }
-        //        return readerStream;
-        //    }
-        //    else if (fileName.EndsWith(".mp3")) {
-        //        WaveStream mp3Reader = new Mp3FileReader(fileName);
-        //        WaveStream pcmStream = WaveFormatConversionStream.CreatePcmStream(mp3Reader);
-        //        WaveStream blockAlignedStream = new BlockAlignReductionStream(pcmStream);
-        //        return blockAlignedStream;
-        //    }
-
-        //    return null;
-        //}
+        public static void WriteToFile(IAudioStream stream, string targetFileName) {
+            WaveFileWriter.CreateWaveFile(targetFileName, new NAudioSinkStream(stream));
+        }
     }
 }

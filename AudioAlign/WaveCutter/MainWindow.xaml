@@ -1,0 +1,16 @@
+﻿<Window x:Class="WaveCutter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Wave Cutter" Height="201" Width="525">
+    <Grid>
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="94,14,0,0" Name="minLengthText" VerticalAlignment="Top" Width="120" Text="180" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="304,14,0,0" Name="maxLengthText" VerticalAlignment="Top" Width="120" Text="600" />
+        <Label Content="Min. Length:" Height="28" HorizontalAlignment="Left" Margin="12,12,0,0" Name="label1" VerticalAlignment="Top" />
+        <Label Content="Max. Length:" Height="28" HorizontalAlignment="Left" Margin="220,12,0,0" Name="label2" VerticalAlignment="Top" />
+        <ProgressBar Height="23" Margin="12,0,93,12" Name="progressBar1" VerticalAlignment="Bottom" />
+        <Button Content="Cancel" Height="23" HorizontalAlignment="Right" Margin="0,0,12,12" Name="cancelButton" VerticalAlignment="Bottom" Width="75" Click="cancelButton_Click" IsEnabled="False" />
+        <Label Content="Filename...." Height="28" HorizontalAlignment="Left" Margin="12,93,0,0" Name="fileNameLabel" VerticalAlignment="Top" />
+        <Button Content="Cut File..." Height="23" HorizontalAlignment="Left" Margin="12,64,0,0" Name="openFileButton" VerticalAlignment="Top" Width="75" Click="openFileButton_Click" />
+        <Label Content="(seconds)" Height="28" HorizontalAlignment="Left" Margin="431,12,0,0" Name="label3" VerticalAlignment="Top" />
+    </Grid>
+</Window>

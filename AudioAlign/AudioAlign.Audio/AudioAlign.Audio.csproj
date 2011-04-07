@@ -126,6 +126,7 @@
     <Compile Include="Streams\AbstractAudioStreamWrapper.cs" />
     <Compile Include="Streams\AudioFormat.cs" />
     <Compile Include="Streams\AudioProperties.cs" />
+    <Compile Include="Streams\CropStream.cs" />
     <Compile Include="Streams\DataMonitorStream.cs" />
     <Compile Include="Streams\IAudioStream.cs" />
     <Compile Include="Streams\IeeeStream.cs" />

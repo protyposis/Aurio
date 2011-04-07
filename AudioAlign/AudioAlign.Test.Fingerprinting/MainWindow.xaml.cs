@@ -60,7 +60,7 @@ namespace AudioAlign.Test.Fingerprinting {
                     Task.Factory.StartNew(() => {
                         ProgressReporter progressReporter = ProgressMonitor.Instance.BeginTask("Generating sub-fingerprints for " + audioTrack.FileInfo.Name, true);
 
-                        FingerprintGenerator fpg = new FingerprintGenerator(audioTrack);
+                        FingerprintGenerator fpg = new FingerprintGenerator(audioTrack, 3, true);
                         int subFingerprintsCalculated = 0;
                         fpg.SubFingerprintCalculated += new EventHandler<SubFingerprintEventArgs>(delegate(object s2, SubFingerprintEventArgs e2) {
                             subFingerprintsCalculated++;

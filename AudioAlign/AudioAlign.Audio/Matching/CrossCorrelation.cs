@@ -34,6 +34,9 @@ namespace AudioAlign.Audio.Matching {
                 s2 = new MonoStream(s2);
             }
 
+            s1 = new ResamplingStream(s1, ResamplingQuality.SincFastest, 11050);
+            s2 = new ResamplingStream(s2, ResamplingQuality.SincFastest, 11050);
+
             ProgressReporter progress = ProgressMonitor.Instance.BeginTask("calculating cross-correlation", true);
 
             float seconds = (float)(i1.Length / 10d / 1000 / 1000);
@@ -53,8 +56,8 @@ namespace AudioAlign.Audio.Matching {
 
             DateTime timeBeforeDataRead = DateTime.Now;
 
-            ReadStreamIntoArray(s1, i1, x);
-            ReadStreamIntoArray(s2, i2, y);
+            StreamUtil.ForceReadIntervalSamples(s1, i1, x);
+            StreamUtil.ForceReadIntervalSamples(s2, i2, y);
 
             TimeSpan timeOfDataRead = DateTime.Now - timeBeforeDataRead;
             Debug.WriteLine("data read duration: " + timeOfDataRead);
@@ -101,11 +104,11 @@ namespace AudioAlign.Audio.Matching {
 
                 /* r is the correlation coefficient at "delay" */
 
-                progress.ReportProgress(((double)delay + maxdelay) / n * 100);
+                progress.ReportProgress(((double)delay + maxdelay) / maxdelay * 100);
             }
 
             float maxval = float.MinValue;
-            float maxindex = 0;
+            int maxindex = 0;
             for (int i = 0; i < r.Length; i++) {
                 if (r[i] > maxval) {
                     maxval = r[i];
@@ -126,33 +129,16 @@ namespace AudioAlign.Audio.Matching {
             });
         }
 
-        private static long ReadStreamIntoArray(IAudioStream s, Interval i, float[] array) {
-            s.Position = TimeUtil.TimeSpanToBytes(i.TimeFrom, s.Properties);
-            long bytesRead = 0;
-            long samplesToRead = (long)(i.Length / 10d / 1000 / 1000 * s.Properties.SampleRate);
-            long totalSamplesRead = 0;
-            int channels = s.Properties.Channels;
-            byte[] temp = new byte[1024 * 32 * channels];
-
-            while ((bytesRead = s.Read(temp, 0, temp.Length)) > 0) {
-                unsafe {
-                    fixed (byte* sampleBuffer = &temp[0]) {
-                        float* samples = (float*)sampleBuffer;
-                        for (int x = 0; x < bytesRead / 4; x += channels) {
-                            for (int channel = 0; channel < channels; channel++) {
-                                if (channel == 0) {
-                                    array[totalSamplesRead++] = samples[x + channel];
-                                    if (samplesToRead == totalSamplesRead) {
-                                        return totalSamplesRead;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return totalSamplesRead;
+        public static void Adjust(Match match) {
+            long secfactor = 1000 * 1000 * 10;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            long intervalLength = secfactor * 1;
+            TimeSpan offset = Calculate(
+                match.Track1.CreateAudioStream(), new Interval(match.Track1Time.Ticks - intervalLength / 2, match.Track1Time.Ticks + intervalLength / 2),
+                match.Track2.CreateAudioStream(), new Interval(match.Track2Time.Ticks - intervalLength / 2, match.Track2Time.Ticks + intervalLength / 2));
+            Debug.WriteLine("CC: " + match + ": " + offset + " (" + sw.Elapsed + ")");
+            match.Track2.Offset -= offset;
         }
     }
 }

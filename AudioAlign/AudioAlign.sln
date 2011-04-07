@@ -41,6 +41,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exocortex.DSP", "..\ExocortexDSP\Exocortex.DSP.csproj", "{1904A41B-D1B8-40E5-ADBB-728DDCF7C816}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaveCutter", "WaveCutter\WaveCutter.csproj", "{880B333B-3ADA-469A-A333-A9023B4D8F6F}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -210,6 +212,16 @@ Global
 		{1904A41B-D1B8-40E5-ADBB-728DDCF7C816}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{1904A41B-D1B8-40E5-ADBB-728DDCF7C816}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{1904A41B-D1B8-40E5-ADBB-728DDCF7C816}.Release|x86.ActiveCfg = Release|Any CPU
+		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Debug|x86.ActiveCfg = Debug|x86
+		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Debug|x86.Build.0 = Debug|x86
+		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Release|Any CPU.ActiveCfg = Release|x86
+		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Release|Mixed Platforms.Build.0 = Release|x86
+		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Release|x86.ActiveCfg = Release|x86
+		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
