@@ -236,5 +236,35 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 }
             }
         }
+
+        public static List<Match> FilterDuplicateMatches(List<Match> matches) {
+            List<Match> filteredMatches = new List<Match>();
+            Dictionary<TimeSpan, List<Match>> filter = new Dictionary<TimeSpan, List<Match>>();
+            foreach (Match match in matches) {
+                bool duplicateFound = false;
+                // at first group the matches by the sum of their matching times (only matches with the same sum can be duplicates)
+                TimeSpan sum = match.Track1Time + match.Track2Time;
+                if (!filter.ContainsKey(sum)) {
+                    filter[sum] = new List<Match>();
+                }
+                else {
+                    // if there are matches with the same time sum, check if they're indeed duplicates
+                    foreach (Match sumMatch in filter[sum]) {
+                        if (((sumMatch.Track1 == match.Track1 && sumMatch.Track2 == match.Track2 && sumMatch.Track1Time == match.Track1Time)
+                            || (sumMatch.Track1 == match.Track2 && sumMatch.Track2 == match.Track1 && sumMatch.Track1Time == match.Track2Time))
+                            && sumMatch.Similarity == match.Similarity) {
+                            // duplicate match found
+                            duplicateFound = true;
+                            break;
+                        }
+                    }
+                }
+                if (!duplicateFound) {
+                    filter[sum].Add(match);
+                    filteredMatches.Add(match);
+                }
+            }
+            return filteredMatches;
+        }
     }
 }
