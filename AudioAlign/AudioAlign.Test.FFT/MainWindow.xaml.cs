@@ -29,10 +29,13 @@ namespace AudioAlign.Test.FFT {
 
         private void button2_Click(object sender, RoutedEventArgs e) {
             int ws = (int)windowSize.Value;
+            float frequency = float.Parse(frequencyTextBox.Text);
+            float frequencyFactor = ws / frequency;
+
             float[] input = new float[ws];
 
             for (int x = 0; x < ws; x++) {
-                input[x] = (float)Math.Sin(x);
+                input[x] = (float)Math.Sin(x / frequencyFactor * Math.PI * 2);
             }
 
             inputGraph.Values = input;

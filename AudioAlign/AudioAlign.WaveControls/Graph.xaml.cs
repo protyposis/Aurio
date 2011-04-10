@@ -60,6 +60,14 @@ namespace AudioAlign.WaveControls {
         public static readonly DependencyProperty LineBrushProperty =
             DependencyProperty.Register("LineBrush", typeof(Brush), typeof(Graph), new UIPropertyMetadata(Brushes.Green));
 
+        public double LineThickness {
+            get { return (double)GetValue(LineThicknessProperty); }
+            set { SetValue(LineThicknessProperty, value); }
+        }
+
+        public static readonly DependencyProperty LineThicknessProperty =
+            DependencyProperty.Register("LineThickness", typeof(double), typeof(Graph), new UIPropertyMetadata(1.0d));
+
         private static void ValuesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             Graph graph = (Graph)d;
             graph.GraphLine.Points.Clear();

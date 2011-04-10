@@ -14,11 +14,15 @@
     </Window.Resources>
     <Grid>
         <Button Content="Window Functions" Height="23" HorizontalAlignment="Left" Margin="12,12,0,0" Name="button1" VerticalAlignment="Top" Width="161" Click="button1_Click" />
-        <Slider AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" Margin="12,61,0,0" Maximum="65536" Minimum="4" Name="windowSize" TickPlacement="BottomRight" Ticks="4,8,16,32,64,128,256,512,1024,2048,4096,8192,16348,32768,65536" Value="256" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="488" />
+        <Slider AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" Margin="138,61,0,0" Maximum="65536" Minimum="4" Name="windowSize" TickPlacement="BottomRight" Ticks="4,8,16,32,64,128,256,512,1024,2048,4096,8192,16348,32768,65536" Value="2048" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="318" />
         <my:Graph HorizontalAlignment="Left" Margin="12,89,0,0" Name="inputGraph" VerticalAlignment="Top" Height="181" Width="228" BorderBrush="Black" BorderThickness="1" Maximum="1" Minimum="-1" />
         <my:Graph BorderBrush="Black" BorderThickness="1" Height="181" HorizontalAlignment="Left" Margin="480,89,0,0" Name="outputGraph" VerticalAlignment="Top" Width="228" Mode="Decibel" Minimum="-150" />
         <Button Content="Generate" Height="23" HorizontalAlignment="Left" Margin="632,61,0,0" Name="button2" VerticalAlignment="Top" Width="75" Click="button2_Click" />
         <ComboBox Height="23" HorizontalAlignment="Left" Margin="506,62,0,0" Name="windowTypes" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Source={StaticResource WindowTypeValues}}" SelectedIndex="2" />
         <my:Graph BorderBrush="Black" BorderThickness="1" Height="181" HorizontalAlignment="Left" Margin="246,89,0,0" Name="input2Graph" VerticalAlignment="Top" Width="228" Maximum="1" Minimum="-1" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="12,62,0,0" Name="frequencyTextBox" VerticalAlignment="Top" Width="120" Text="500" />
+        <Label Content="Frequency" Height="28" HorizontalAlignment="Left" Margin="12,39,0,0" Name="label1" VerticalAlignment="Top" />
+        <Label Content="Window Size" Height="28" HorizontalAlignment="Left" Margin="138,39,0,0" Name="label2" VerticalAlignment="Top" />
+        <Label Height="28" HorizontalAlignment="Left" Margin="462,60,0,0" Name="label3" VerticalAlignment="Top" Content="{Binding ElementName=windowSize, Path=Value}" />
     </Grid>
 </Window>
