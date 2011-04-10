@@ -92,6 +92,13 @@ namespace AudioAlign.WaveControls {
             }
         }
 
+        public void Display(TimeSpan time, bool adjustCaret) {
+            VirtualViewportOffset = time.Ticks - VirtualViewportWidth / 2;
+            if (adjustCaret) {
+                VirtualCaretOffset = time.Ticks;
+            }
+        }
+
         /// <summary>
         /// Preview event is used because the bubbling mousewheel event (which is already handled at this time)
         /// arrives after the listbox has done it's work on the event - which we want to avoid.

@@ -15,5 +15,15 @@ namespace AudioAlign.Audio.Matching {
         public override string ToString() {
             return "Match {" + Track1.Name + "@" + Track1Time + "<->" + Track2.Name + "@" + Track2Time + ":" + Similarity + "}";
         }
+
+        public void SwapTracks() {
+            AudioTrack tempTrack = Track1;
+            Track1 = Track2;
+            Track2 = tempTrack;
+
+            TimeSpan tempTime = Track1Time;
+            Track1Time = Track2Time;
+            Track2Time = tempTime;
+        }
     }
 }
