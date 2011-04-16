@@ -91,6 +91,10 @@ namespace AudioAlign.Audio.Streams {
                         float* outputFloatBuffer = (float*)outputByteBuffer;
                         float* inputFloatBuffer = (float*)inputByteBuffer;
                         foreach (IAudioStream sourceStream in sourceStreams) {
+                            if (sourceStream.Length <= position) {
+                                continue;
+                            }
+
                             int bytesRead = 0;
                             int totalBytesRead = 0;
 
