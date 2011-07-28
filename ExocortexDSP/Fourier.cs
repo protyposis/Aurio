@@ -33,6 +33,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Runtime.CompilerServices;
 
 //using Exocortex.Imaging;
 
@@ -328,6 +329,13 @@ namespace Exocortex.DSP {
 		private static	float[,][]	_uRLookupF	= null;
 		private static	float[,][]	_uILookupF	= null;
 
+        /// <summary>
+        /// Synchronized to avoid illegal states and exceptions in multithreaded environments.
+        /// This must be further optimized for cases where the length dynamically changes and the first call 
+        /// isn't the one with the maximum length.
+        /// </summary>
+        /// <param name="length"></param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
 		private static void	SyncLookupTableLength( int length ) {
 			Debug.Assert( length < 1024*10 );
 			Debug.Assert( length >= 0 );
