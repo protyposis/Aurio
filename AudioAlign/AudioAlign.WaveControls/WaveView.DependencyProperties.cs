@@ -40,7 +40,7 @@ namespace AudioAlign.WaveControls
                     PropertyChangedCallback = OnAudioTrackChanged });
 
             RenderModeProperty = DependencyProperty.Register("RenderMode", typeof(WaveViewRenderMode), typeof(WaveView),
-                new FrameworkPropertyMetadata { DefaultValue = WaveViewRenderMode.Geometry, AffectsRender = true });
+                new FrameworkPropertyMetadata { DefaultValue = WaveViewRenderMode.Bitmap, AffectsRender = true });
 
             DrawTrackNameProperty = DependencyProperty.Register("DrawTrackName", typeof(bool), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = false, AffectsRender = true });
