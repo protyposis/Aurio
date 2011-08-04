@@ -125,7 +125,6 @@ namespace AudioAlign.Audio.Streams {
             }
 
             // call the current function a second time... this time the front buffer will contain the requested data
-            Debug.WriteLine("rec call");
             return this.Read(buffer, offset, count);
         }
 
@@ -144,9 +143,6 @@ namespace AudioAlign.Audio.Streams {
             Task.Factory.StartNew(() => {
                 FillBufferSync(buffer, position);
                 buffer.locked = false;
-                Console.WriteLine("async finished: front {0} -> {1} / {2} back {3} -> {4} / {5}",
-                    frontBuffer.streamPosition, frontBuffer.validDataLength, frontBuffer.streamPosition + frontBuffer.validDataLength,
-                    backBuffer.streamPosition, backBuffer.validDataLength, backBuffer.streamPosition + backBuffer.validDataLength);
             });
         }
     }
