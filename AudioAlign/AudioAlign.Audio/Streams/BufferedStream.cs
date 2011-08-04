@@ -4,36 +4,70 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace AudioAlign.Audio.Streams {
     public class BufferedStream : AbstractAudioStreamWrapper {
 
         private class Buffer {
+            /// <summary>
+            /// The data storage that the buffer can use.
+            /// </summary>
             public byte[] data;
+
+            /// <summary>
+            /// The position in the source stream where the buffered data starts.
+            /// </summary>
             public long streamPosition = 0;
+
+            /// <summary>
+            /// The length of the valid data that has been buffered.
+            /// </summary>
             public long validDataLength = 0;
+
+            /// <summary>
+            /// Tells if the buffer is being filled. If it is locked, data is being written to the buffer
+            /// and no data should be read.
+            /// </summary>
             public bool locked = false;
 
+            /// <summary>
+            /// Returs true if the buffer contains valid data.
+            /// </summary>
             public bool IsFilled {
                 get { return validDataLength > 0; }
             }
 
+            /// <summary>
+            /// Clears the buffer and makes it empty.
+            /// </summary>
             public void Clear() {
                 streamPosition = 0;
                 validDataLength = 0;
             }
 
+            /// <summary>
+            /// Returns true if a given position in the source stream is contained in the buffered data.
+            /// </summary>
+            /// <param name="position">the position in the source stream that should be checked for being buffered</param>
+            /// <returns>true if the position is contained in the buffer, else false</returns>
             public bool Contains(long position) {
                 return position >= streamPosition && position < streamPosition + validDataLength;
             }
 
+            /// <summary>
+            /// Returns true if a given data interval of the source stream is contained in the buffered data.
+            /// </summary>
+            /// <param name="position">the start of the interval in the source stream that should be checked for being buffered</param>
+            /// <param name="count">the length of the interval in the source stream that should be checked for being buffered</param>
+            /// <returns>true if the interval is contained in the buffer, else false</returns>
             public bool Contains(long position, int count) {
                 return position >= streamPosition && position + count <= streamPosition + validDataLength;
             }
         }
 
         private long position;
-        private Buffer frontBuffer;
+        private Buffer frontBuffer; // the front buffer can always be read from, it never gets asynchronically accessed
         private Buffer backBuffer;
         private bool doubleBuffered;
 
@@ -78,29 +112,28 @@ namespace AudioAlign.Audio.Streams {
                 position += bufferCount;
                 return (int)bufferCount;
             }
-            else {
-                // fill buffer
-                if (doubleBuffered && !backBuffer.locked && backBuffer.IsFilled) {
-                    // switch buffers
-                    CommonUtil.Swap<Buffer>(ref frontBuffer, ref backBuffer);
+            else if (doubleBuffered && !backBuffer.locked && backBuffer.IsFilled && backBuffer.Contains(position)) {
+                // swap buffers (requested data is contained in the back buffer so turn it to the front buffer)
+                CommonUtil.Swap<Buffer>(ref frontBuffer, ref backBuffer);
+                FillBufferAsync(backBuffer, frontBuffer.streamPosition + frontBuffer.validDataLength);
+            } else {
+                // both buffers empty (happens at start or a position change beyond the buffered area)
+                FillBufferSync(frontBuffer, position);
+                if (doubleBuffered && !backBuffer.locked) {
                     FillBufferAsync(backBuffer, frontBuffer.streamPosition + frontBuffer.validDataLength);
                 }
-                else {
-                    FillBufferSync(frontBuffer, position);
-                    if (doubleBuffered && !backBuffer.locked) {
-                        FillBufferAsync(backBuffer, frontBuffer.streamPosition + frontBuffer.validDataLength);
-                    }
-                }
-
-                // call the current function a second time... this time the buffer will contain the requested data
-                return this.Read(buffer, offset, count);
             }
+
+            // call the current function a second time... this time the front buffer will contain the requested data
+            Debug.WriteLine("rec call");
+            return this.Read(buffer, offset, count);
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)] // synchronized because we can only read once at a time from the same source stream
         private void FillBufferSync(Buffer buffer, long position) {
             buffer.streamPosition = position;
             sourceStream.Position = position;
-            buffer.validDataLength = StreamUtil.ForceRead(sourceStream, frontBuffer.data, 0, frontBuffer.data.Length);
+            buffer.validDataLength = StreamUtil.ForceRead(sourceStream, buffer.data, 0, buffer.data.Length);
         }
 
         private void FillBufferAsync(Buffer buffer, long position) {
@@ -111,6 +144,9 @@ namespace AudioAlign.Audio.Streams {
             Task.Factory.StartNew(() => {
                 FillBufferSync(buffer, position);
                 buffer.locked = false;
+                Console.WriteLine("async finished: front {0} -> {1} / {2} back {3} -> {4} / {5}",
+                    frontBuffer.streamPosition, frontBuffer.validDataLength, frontBuffer.streamPosition + frontBuffer.validDataLength,
+                    backBuffer.streamPosition, backBuffer.validDataLength, backBuffer.streamPosition + backBuffer.validDataLength);
             });
         }
     }
