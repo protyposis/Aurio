@@ -20,13 +20,14 @@ namespace AudioAlign.WaveControls {
 
         #region IWaveformRenderer Members
 
-        public Drawing Render(float[] sampleData, int sampleCount, int width, int height) {
+        public Drawing Render(float[] sampleData, int sampleCount, int width, int height, float volume) {
             bool peaks = sampleCount >= width;
             DrawingGroup waveformDrawing = new DrawingGroup();
 
             Geometry audioform = peaks ? CreatePeakform(sampleData, sampleCount) : CreateWaveform(sampleData, sampleCount);
+            // TODO integrate volume into transform
             TransformGroup transformGroup = new TransformGroup();
-            transformGroup.Children.Add(new ScaleTransform(width / audioform.Bounds.Width, height / 2 * -1));
+            transformGroup.Children.Add(new ScaleTransform(width / audioform.Bounds.Width, height / 2 * -1 * volume));
             transformGroup.Children.Add(new TranslateTransform(0, height / 2));
             audioform.Transform = transformGroup;
 
@@ -45,6 +46,8 @@ namespace AudioAlign.WaveControls {
                     waveformDrawing.Children.Add(new GeometryDrawing(WaveformSamplePoint, null, geometryGroup));
                 }
             }
+
+            waveformDrawing.ClipGeometry = new RectangleGeometry(new Rect(0, 0, width, height));
 
             return waveformDrawing;
         }

@@ -23,21 +23,21 @@ namespace AudioAlign.WaveControls {
 
         #region IWaveformRenderer Members
 
-        public Drawing Render(float[] sampleData, int sampleCount, int width, int height) {
+        public Drawing Render(float[] sampleData, int sampleCount, int width, int height, float volume) {
             bool peaks = sampleCount >= width;
             if (!peaks) {
-                BitmapSource waveform = DrawWaveform(sampleData, sampleCount, width, height);
+                BitmapSource waveform = DrawWaveform(sampleData, sampleCount, width, height, volume);
                 return new ImageDrawing(waveform, new Rect(0, 0, width, height));
             }
             else {
-                BitmapSource waveform = DrawPeakform(sampleData, sampleCount, width, height);
+                BitmapSource waveform = DrawPeakform(sampleData, sampleCount, width, height, volume);
                 return new ImageDrawing(waveform, new Rect(0, 0, width, height));
             }
         }
 
         #endregion
 
-        private WriteableBitmap DrawPeakform(float[] peakData, int peakCount, int width, int height) {
+        private WriteableBitmap DrawPeakform(float[] peakData, int peakCount, int width, int height, float volume) {
             WriteableBitmap wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
             int[] pixels = new int[width * height];
 
@@ -48,8 +48,24 @@ namespace AudioAlign.WaveControls {
             int peaks = peakCount;
             int x, y, top, bottom, prevX = 0, prevY = 0, prevTop = 0, prevBottom = height;
             for (int peak = 0; peak < peaks * 2; peak += 2) {
-                int pp1 = (int)(halfheight * peakData[peak]);
-                int pp2 = (int)(halfheight * peakData[peak + 1]);
+                float p1 = peakData[peak] * volume;
+                float p2 = peakData[peak + 1] * volume;
+
+                if (p1 > 1.0f) {
+                    p1 = 1.0f;
+                }
+                else if (p1 < -1.0f) {
+                    p1 = -1.0f;
+                }
+                if (p2 > 1.0f) {
+                    p2 = 1.0f;
+                }
+                else if (p2 < -1.0f) {
+                    p2 = -1.0f;
+                }
+
+                int pp1 = (int)(halfheight * p1);
+                int pp2 = (int)(halfheight * p2);
 
                 // NOTE:
                 // The peaks are distributed among the available width. If more peaks than pixel columns are
@@ -90,7 +106,7 @@ namespace AudioAlign.WaveControls {
             return wb;
         }
 
-        private WriteableBitmap DrawWaveform(float[] sampleData, int sampleCount, int width, int height) {
+        private WriteableBitmap DrawWaveform(float[] sampleData, int sampleCount, int width, int height, float volume) {
             WriteableBitmap wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
             int[] pixels = new int[width * height];
 
@@ -101,8 +117,17 @@ namespace AudioAlign.WaveControls {
             int samples = sampleCount;
             int x, y, prevX = 0, prevY = 0;
             for (int sample = 0; sample < samples; sample++) {
+                float v = sampleData[sample] * volume;
+
+                if (v > 1.0f) {
+                    v = 1.0f;
+                }
+                else if (v < -1.0f) {
+                    v = -1.0f;
+                }
+
                 x = (int)Math.Round((float)sample / (samples - 1) * (width - 1));
-                y = halfheight - (int)(halfheight * sampleData[sample]);
+                y = halfheight - (int)(halfheight * v);
                 if (y == height) {
                     y--; // for even heights the last line needs to be stripped
                 }

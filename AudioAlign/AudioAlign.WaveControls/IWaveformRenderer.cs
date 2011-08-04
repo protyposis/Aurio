@@ -15,7 +15,8 @@ namespace AudioAlign.WaveControls {
         /// <param name="peaks">true is the supplied list contains peaks, else false for samples</param>
         /// <param name="width">the width of the resulting drawing</param>
         /// <param name="height">the height of the resulting drawing</param>
+        /// <param name="volume">volume scale factor, default value is 1.0f</param>
         /// <returns></returns>
-        Drawing Render(float[] sampleData, int sampleCount, int width, int height);
+        Drawing Render(float[] sampleData, int sampleCount, int width, int height, float volume);
     }
 }

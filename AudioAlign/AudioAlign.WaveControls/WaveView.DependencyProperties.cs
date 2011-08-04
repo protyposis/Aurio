@@ -40,7 +40,7 @@ namespace AudioAlign.WaveControls
                     PropertyChangedCallback = OnAudioTrackChanged });
 
             RenderModeProperty = DependencyProperty.Register("RenderMode", typeof(WaveViewRenderMode), typeof(WaveView),
-                new FrameworkPropertyMetadata { DefaultValue = WaveViewRenderMode.Bitmap, AffectsRender = true });
+                new FrameworkPropertyMetadata { DefaultValue = WaveViewRenderMode.Geometry, AffectsRender = true });
 
             DrawTrackNameProperty = DependencyProperty.Register("DrawTrackName", typeof(bool), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = false, AffectsRender = true });
@@ -83,6 +83,16 @@ namespace AudioAlign.WaveControls
             if (waveView != null && audioTrack != null) {
                 waveView.audioStream = AudioStreamFactory.FromAudioTrackForGUI(audioTrack);
                 waveView.audioStream.WaveformChanged += new EventHandler(delegate(object sender2, EventArgs e2) {
+                    waveView.Dispatcher.BeginInvoke((Action)delegate {
+                        waveView.InvalidateVisual();
+                    });
+                });
+                audioTrack.VolumeChanged += new EventHandler<ValueEventArgs<float>>(delegate(object sender2, ValueEventArgs<float> e2) {
+                    waveView.Dispatcher.BeginInvoke((Action)delegate {
+                        waveView.InvalidateVisual();
+                    });
+                });
+                audioTrack.BalanceChanged += new EventHandler<ValueEventArgs<float>>(delegate(object sender2, ValueEventArgs<float> e2) {
                     waveView.Dispatcher.BeginInvoke((Action)delegate {
                         waveView.InvalidateVisual();
                     });

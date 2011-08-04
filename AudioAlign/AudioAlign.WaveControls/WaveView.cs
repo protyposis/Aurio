@@ -144,7 +144,16 @@ namespace AudioAlign.WaveControls {
                     }
                     if (renderer != null) {
                         for (int channel = 0; channel < channels; channel++) {
-                            Drawing waveform = renderer.Render(samples[channel], sampleCount, drawingWidthAligned, (int)channelHeight);
+                            // calculate the balance factor for the first two channels only (balance only applies to stereo)
+                            // TODO extend for multichannel (needs implementation of a multichannel balance adjustment control)
+                            float balanceFactor = 1;
+                            if(channel == 0) {
+                                balanceFactor = AudioTrack.Balance < 0 ? 1 - AudioTrack.Balance : 1;
+                            } else if(channel == 1) {
+                                balanceFactor = AudioTrack.Balance > 0 ? 1 + AudioTrack.Balance : 1;
+                            }
+
+                            Drawing waveform = renderer.Render(samples[channel], sampleCount, drawingWidthAligned, (int)channelHeight, AudioTrack.Volume * balanceFactor);
                             DrawingGroup drawing = new DrawingGroup();
                             drawing.Children.Add(waveform);
                             drawing.Transform = new TranslateTransform((int)drawingOffsetAligned, (int)(channelHeight * channel));
