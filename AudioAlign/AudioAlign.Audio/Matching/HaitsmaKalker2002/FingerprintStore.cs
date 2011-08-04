@@ -200,7 +200,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             return bitErrors / 8192f; // 8192 = 256 sub-fingerprints * 32 bits
         }
 
-        public void FindAllMatches(int maxSubFingerprintDistance, bool calculateFingerprintBER) {
+        public void FindAllMatches(int maxSubFingerprintDistance, float maxBER) {
             List<AudioTrack> audioTracks = new List<AudioTrack>(store.Keys.OrderByDescending(at => at.Length.Ticks));
             for (int i = 0; i < audioTracks.Count; i++) {
                 AudioTrack audioTrack1 = audioTracks[i];
@@ -212,13 +212,13 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                         foreach (SubFingerprint subFingerprint2 in store[audioTrack2]) {
                             int sfpDistance = subFingerprint1.HammingDistance(subFingerprint2);
                             if (sfpDistance <= maxSubFingerprintDistance) {
-                                float ber = 0;
-                                if (calculateFingerprintBER) {
+                                float ber = -1;
+                                if (maxBER < 1) {
                                     ber = CalculateBER(
                                         GetFingerprint(new SubFingerprintLookupEntry(audioTrack1, sfp1Index)), 
                                         GetFingerprint(new SubFingerprintLookupEntry(audioTrack2, sfp2Index)));
                                 }
-                                if (ber < 0.35f) {
+                                if (ber != -1 && ber <= maxBER) {
                                     Match match = new Match {
                                         Similarity = 1 - ber,
                                         Track1 = audioTrack1,
