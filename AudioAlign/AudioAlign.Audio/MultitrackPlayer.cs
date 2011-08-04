@@ -18,13 +18,14 @@ namespace AudioAlign.Audio {
 
         public event EventHandler<StreamVolumeEventArgs> VolumeAnnounced;
         public event EventHandler<ValueEventArgs<TimeSpan>> CurrentTimeChanged;
-        public event EventHandler<ValueEventArgs<float[][]>> SamplesMonitored;
+        public event EventHandler<StreamDataMonitorEventArgs> SamplesMonitored;
 
         private TrackList<AudioTrack> trackList;
         private Dictionary<AudioTrack, IAudioStream> trackListStreams;
 
         private MixerStream audioMixer;
         private VolumeControlStream audioVolumeControlStream;
+        private VolumeMeteringStream audioVolumeMeteringStream;
         private IAudioStream audioOutputStream;
         private IWavePlayer audioOutput;
 
@@ -98,9 +99,8 @@ namespace AudioAlign.Audio {
             audioMixer = new MixerStream(2, 44100);
 
             audioVolumeControlStream = new VolumeControlStream(audioMixer);
-            VolumeMeteringStream volumeMeteringStream = new VolumeMeteringStream(audioVolumeControlStream, 2048);
-            volumeMeteringStream.StreamVolume += new EventHandler<StreamVolumeEventArgs>(meteringStream_StreamVolume);
-            DataMonitorStream dataMonitorStream = new DataMonitorStream(volumeMeteringStream);
+            audioVolumeMeteringStream = new VolumeMeteringStream(audioVolumeControlStream);
+            DataMonitorStream dataMonitorStream = new DataMonitorStream(audioVolumeMeteringStream);
             dataMonitorStream.DataRead += new EventHandler<StreamDataMonitorEventArgs>(dataMonitorStream_DataRead);
             VolumeClipStream volumeClipStream = new VolumeClipStream(dataMonitorStream);
 
@@ -118,7 +118,6 @@ namespace AudioAlign.Audio {
 
         private void AddTrack(AudioTrack audioTrack) {
             WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
-            //TolerantWaveStream tolerantReader = new TolerantWaveStream(reader);
             OffsetStream offsetStream = new OffsetStream(new TolerantStream(new BufferedStream(new NAudioSourceStream(reader), 1024 * 1024, true)));
             IeeeStream channel = new IeeeStream(offsetStream);
 
@@ -220,34 +219,13 @@ namespace AudioAlign.Audio {
             RemoveTrack(e.Track);
         }
 
-        private void meteringStream_StreamVolume(object sender, StreamVolumeEventArgs e) {
-            OnVolumeAnnounced(e);
-        }
-
         private void dataMonitorStream_DataRead(object sender, StreamDataMonitorEventArgs e) {
-            DataMonitorStream s = (DataMonitorStream)sender;
-            int channels = s.Properties.Channels;
-            float[][] processedSamples = AudioUtil.CreateArray<float>(channels, 
-                e.Length / (s.Properties.BitDepth / 8) / channels);
-
-            unsafe {
-                fixed (byte* sampleBuffer = &e.Buffer[e.Offset]) {
-                    float* samples = (float*)sampleBuffer;
-                    int sampleCount = 0;
-                    for (int x = 0; x < e.Length / 4; x += channels) {
-                        for (int channel = 0; channel < channels; channel++) {
-                            processedSamples[channel][sampleCount] = samples[x + channel];
-                        }
-                        sampleCount++;
-                    }
-                }
-            }
-
-            OnSamplesMonitored(processedSamples);
+            OnSamplesMonitored(e);
         }
 
         private void timer_Elapsed(object sender, ElapsedEventArgs e) {
             OnCurrentTimeChanged();
+            OnVolumeAnnounced(new StreamVolumeEventArgs { MaxSampleValues = audioVolumeMeteringStream.GetMaxSampleValues() });
         }
 
         #region Event firing
@@ -291,9 +269,9 @@ namespace AudioAlign.Audio {
             }
         }
 
-        private void OnSamplesMonitored(float[][] samples) {
+        private void OnSamplesMonitored(StreamDataMonitorEventArgs e) {
             if (SamplesMonitored != null) {
-                SamplesMonitored(this, new ValueEventArgs<float[][]>(samples));
+                SamplesMonitored(this, e);
             }
         }
 

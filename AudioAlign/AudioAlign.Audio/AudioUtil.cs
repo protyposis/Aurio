@@ -75,5 +75,25 @@ namespace AudioAlign.Audio {
             }
             return list;
         }
+
+        public static float[][] Uninterleave(AudioProperties audioProperties, byte[] buffer, int offset, int count) {
+            float[][] uninterleavedSamples = CreateArray<float>(audioProperties.Channels,
+                count / (audioProperties.BitDepth / 8) / audioProperties.Channels);
+
+            unsafe {
+                fixed (byte* sampleBuffer = &buffer[offset]) {
+                    float* samples = (float*)sampleBuffer;
+                    int sampleCount = 0;
+                    for (int x = 0; x < count / 4; x += audioProperties.Channels) {
+                        for (int channel = 0; channel < audioProperties.Channels; channel++) {
+                            uninterleavedSamples[channel][sampleCount] = samples[x + channel];
+                        }
+                        sampleCount++;
+                    }
+                }
+            }
+
+            return uninterleavedSamples;
+        }
     }
 }

@@ -18,7 +18,7 @@ namespace AudioAlign.Audio.Streams {
         public override int Read(byte[] buffer, int offset, int count) {
             int bytesRead = sourceStream.Read(buffer, offset, count);
             if (DataRead != null) {
-                DataRead(this, new StreamDataMonitorEventArgs(buffer, offset, bytesRead));
+                DataRead(this, new StreamDataMonitorEventArgs(Properties, buffer, offset, bytesRead));
             }
             return bytesRead;
         }
@@ -26,7 +26,8 @@ namespace AudioAlign.Audio.Streams {
 
     public class StreamDataMonitorEventArgs : EventArgs {
 
-        public StreamDataMonitorEventArgs(byte[] buffer, int offset, int length) {
+        public StreamDataMonitorEventArgs(AudioProperties properties, byte[] buffer, int offset, int length) {
+            Properties = properties;
             Buffer = buffer;
             Offset = offset;
             Length = length;
@@ -43,6 +44,11 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public int Length {
+            get;
+            private set;
+        }
+
+        public AudioProperties Properties {
             get;
             private set;
         }

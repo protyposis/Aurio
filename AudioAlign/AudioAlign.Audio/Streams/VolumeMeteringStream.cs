@@ -7,6 +7,11 @@ using NAudio.Wave;
 namespace AudioAlign.Audio.Streams {
     public class VolumeMeteringStream : AbstractAudioStreamWrapper {
 
+        /// <summary>
+        /// Gets or sets the number of processed samples after which the StreamVolume event
+        /// will be automatically fired. Set the value to 0 to deactivate automatic firing
+        /// of the event.
+        /// </summary>
         public int SamplesPerNotification { get; set; }
 
         private float[] maxSamples;
@@ -15,7 +20,7 @@ namespace AudioAlign.Audio.Streams {
         public event EventHandler<StreamVolumeEventArgs> StreamVolume;
 
         public VolumeMeteringStream(IAudioStream sourceStream) :
-            this(sourceStream, sourceStream.Properties.SampleRate / 10) {
+            this(sourceStream, 0) {
         }
 
         public VolumeMeteringStream(IAudioStream sourceStream, int samplesPerNotification)
@@ -47,10 +52,9 @@ namespace AudioAlign.Audio.Streams {
                             channel = ++channel % sourceStream.Properties.Channels;
                             sampleCount++;
 
-                            if (sampleCount >= SamplesPerNotification) {
+                            if (SamplesPerNotification > 0 && sampleCount >= SamplesPerNotification) {
                                 RaiseStreamVolumeNotification();
                                 sampleCount = 0;
-                                Array.Clear(maxSamples, 0, maxSamples.Length);
                             }
                         }
                     }
@@ -60,9 +64,22 @@ namespace AudioAlign.Audio.Streams {
             return bytesRead;
         }
 
+        /// <summary>
+        /// Gets the maximum absolute sample values for all channels. Calling this
+        /// function resets the internal maximum values to 0 (but they will be updated
+        /// by calling the read function). That means that the function returns the
+        /// maximum values that are detected between two calls of this function.
+        /// </summary>
+        /// <returns></returns>
+        public float[] GetMaxSampleValues() {
+            float[] maxSampleValues = (float[])maxSamples.Clone();
+            Array.Clear(maxSamples, 0, maxSamples.Length);
+            return maxSampleValues;
+        }
+
         private void RaiseStreamVolumeNotification() {
             if (StreamVolume != null) {
-                StreamVolume(this, new StreamVolumeEventArgs() { MaxSampleValues = (float[])maxSamples.Clone() });
+                StreamVolume(this, new StreamVolumeEventArgs() { MaxSampleValues = GetMaxSampleValues() });
             }
         }
     }
