@@ -237,6 +237,14 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
         }
 
+        /// <summary>
+        /// Detects duplicate matches and returns a list without those duplicates.
+        /// A match is considered as a duplicate of another match, if both refer to the same two tracks 
+        /// and positions within the tracks, and the similarity is the same (which automatically results from
+        /// the identic track positions).
+        /// </summary>
+        /// <param name="matches">a list of matches to check for duplicates</param>
+        /// <returns>a filtered list without duplicate matches</returns>
         public static List<Match> FilterDuplicateMatches(List<Match> matches) {
             List<Match> filteredMatches = new List<Match>();
             Dictionary<TimeSpan, List<Match>> filter = new Dictionary<TimeSpan, List<Match>>();
