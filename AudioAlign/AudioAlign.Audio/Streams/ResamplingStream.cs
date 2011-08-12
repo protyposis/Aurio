@@ -15,6 +15,7 @@ namespace AudioAlign.Audio.Streams {
         private int sourceBufferFillLevel;
         private double targetSampleRate;
         private double sampleRateRatio;
+        private long position;
 
         public ResamplingStream(IAudioStream sourceStream, ResamplingQuality quality)
             : base(sourceStream) {
@@ -31,6 +32,8 @@ namespace AudioAlign.Audio.Streams {
             sourceBufferPosition = 0;
 
             TargetSampleRate = properties.SampleRate;
+
+            position = 0;
         }
 
         public ResamplingStream(IAudioStream sourceStream, ResamplingQuality quality, int outputSampleRate)
@@ -44,13 +47,7 @@ namespace AudioAlign.Audio.Streams {
                 targetSampleRate = value;
                 sampleRateRatio = value / sourceStream.Properties.SampleRate;
                 src.SetRatio(sampleRateRatio);
-            }
-        }
-
-        public override AudioProperties Properties {
-            get {
-                properties.SampleRate = (int)TargetSampleRate;
-                return properties; 
+                properties.SampleRate = (int)targetSampleRate;
             }
         }
 
@@ -59,15 +56,13 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public override long Position {
-            get { 
-                long pos = (long)Math.Ceiling(sourceStream.Position * sampleRateRatio);
-                pos -= pos % SampleBlockSize;
-                return pos;
-            }
-            set { 
+            get { return position; }
+            set {
+                position = value;
                 long pos = (long)Math.Ceiling(value / sampleRateRatio);
                 pos -= pos % sourceStream.SampleBlockSize;
                 sourceStream.Position = pos;
+                src.Reset(); // clear buffered data in the SRC
             }
         }
 
@@ -101,11 +96,15 @@ namespace AudioAlign.Audio.Streams {
                 // if the sourceBufferFillLevel is 0 at this position, the end of the source stream has been reached,
                 // and endOfInput needs to be set to true in order to retrieve eventually buffered samples from
                 // the sample rate converter
+                // this is also the reason why the source stream's Read() method may be called multiple times although
+                // it already signalled that it has reached the end of the stream
                 src.Process(sourceBuffer, sourceBufferPosition, sourceBufferFillLevel - sourceBufferPosition,
                     buffer, offset, count, sourceBufferFillLevel == 0, out inputLengthUsed, out outputLengthGenerated);
                 sourceBufferPosition += inputLengthUsed;
             } 
             while (inputLengthUsed > 0 && outputLengthGenerated == 0);
+
+            position += outputLengthGenerated;
 
             return outputLengthGenerated;
         }

@@ -129,6 +129,8 @@
     <Compile Include="Streams\BufferedStream.cs" />
     <Compile Include="Streams\CropStream.cs" />
     <Compile Include="Streams\DataMonitorStream.cs" />
+    <Compile Include="Streams\DebugStream.cs" />
+    <Compile Include="Streams\DebugStreamController.cs" />
     <Compile Include="Streams\IAudioStream.cs" />
     <Compile Include="Streams\IeeeStream.cs" />
     <Compile Include="Streams\MixerStream.cs" />

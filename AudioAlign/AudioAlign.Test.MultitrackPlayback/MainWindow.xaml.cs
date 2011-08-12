@@ -31,6 +31,7 @@ namespace AudioAlign.Test.MultitrackPlayback {
         private Timer timer;
         private WaveOut wavePlayer;
         private IAudioStream playbackStream;
+        private DebugStreamController debugStreamController;
 
         public MainWindow() {
             InitializeComponent();
@@ -65,14 +66,16 @@ namespace AudioAlign.Test.MultitrackPlayback {
             if (wavePlayer != null) {
                 wavePlayer.Dispose();
             }
+            debugStreamController = new DebugStreamController();
 
             MixerStream mixer = new MixerStream(2, 44100);
             foreach (AudioTrack audioTrack in trackListBox.Items) {
                 WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
-                IeeeStream channel = new IeeeStream(new NAudioSourceStream(reader));
+                IeeeStream channel = new IeeeStream(new DebugStream(new NAudioSourceStream(reader), debugStreamController));
+                ResamplingStream res = new ResamplingStream(new DebugStream(channel, debugStreamController), ResamplingQuality.SincBest, 22050);
 
                 // necessary to control each track individually
-                VolumeControlStream volumeControl = new VolumeControlStream(channel) {
+                VolumeControlStream volumeControl = new VolumeControlStream(new DebugStream(res, debugStreamController)) {
                     Mute = audioTrack.Mute,
                     Volume = audioTrack.Volume
                 };
@@ -122,21 +125,21 @@ namespace AudioAlign.Test.MultitrackPlayback {
                         volumeControl.Volume = ve.Value;
                     });
 
-                mixer.Add(volumeControl);
+                mixer.Add(new DebugStream(volumeControl));
             }
 
-            VolumeControlStream volumeControlStream = new VolumeControlStream(mixer) {
+            VolumeControlStream volumeControlStream = new VolumeControlStream(new DebugStream(mixer, debugStreamController)) {
                 Volume = (float)volumeSlider.Value
             };
-            VolumeMeteringStream volumeMeteringStream = new VolumeMeteringStream(volumeControlStream);
+            VolumeMeteringStream volumeMeteringStream = new VolumeMeteringStream(new DebugStream(volumeControlStream, debugStreamController), 5000);
             volumeMeteringStream.StreamVolume += new EventHandler<StreamVolumeEventArgs>(meteringStream_StreamVolume);
-            VolumeClipStream volumeClipStream = new VolumeClipStream(volumeMeteringStream);
+            VolumeClipStream volumeClipStream = new VolumeClipStream(new DebugStream(volumeMeteringStream, debugStreamController));
 
             playbackStream = volumeClipStream;
 
             wavePlayer = new WaveOut();
             wavePlayer.DesiredLatency = 250;
-            wavePlayer.Init(new NAudioSinkStream(playbackStream));
+            wavePlayer.Init(new NAudioSinkStream(new DebugStream(playbackStream, debugStreamController)));
 
             // master volume setting
             volumeSlider.ValueChanged += new RoutedPropertyChangedEventHandler<double>(
@@ -213,7 +216,11 @@ namespace AudioAlign.Test.MultitrackPlayback {
             }
 
             if (playbackStream != null) {
-                playbackStream.Position = TimeUtil.TimeSpanToBytes(TimeSpan.FromSeconds(playbackSeeker.Value), playbackStream.Properties);
+                debugStreamController.PrintPositions("before");
+                playbackStream.Position = Math.Min(
+                    TimeUtil.TimeSpanToBytes(TimeSpan.FromSeconds(playbackSeeker.Value), playbackStream.Properties), 
+                    playbackStream.Length);
+                debugStreamController.PrintPositions("after");
             }
         }
 

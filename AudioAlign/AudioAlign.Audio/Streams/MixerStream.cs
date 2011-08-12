@@ -83,7 +83,7 @@ namespace AudioAlign.Audio.Streams {
                     Debug.WriteLine("MixerStream: buffer size increased: " + oldSize + " -> " + count);
                 }
 
-                // clear output buffer
+                // clear output buffer (because data won't be overwritten, but summed up)
                 Array.Clear(buffer, offset, count);
                 int maxTotalBytesRead = 0;
                 unsafe {
@@ -101,11 +101,6 @@ namespace AudioAlign.Audio.Streams {
                             // try to read requested amount of bytes
                             while (count - totalBytesRead > 0 && (bytesRead = sourceStream.Read(sourceBuffer, totalBytesRead, count - totalBytesRead)) > 0) {
                                 totalBytesRead += bytesRead;
-                            }
-
-                            // if end of underlying stream has been reached, fill up with zeros
-                            if (totalBytesRead < count) {
-                                Array.Clear(sourceBuffer, totalBytesRead, count - totalBytesRead);
                             }
 
                             // add stream data to output buffer
