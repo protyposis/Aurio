@@ -8,13 +8,15 @@ namespace AudioAlign.LibSampleRate {
 
         private bool disposed = false;
         private IntPtr srcState = IntPtr.Zero;
+        private SRC_DATA srcData;
+        private int error;
         private int channels;
         private double ratio;
 
         public SampleRateConverter(ConverterType type, int channels) {
-            int error = 0;
             srcState = Interop.src_new(type, channels, out error);
             ThrowExceptionForError(error);
+            srcData = new SRC_DATA();
 
             SetRatio(1d);
 
@@ -58,13 +60,21 @@ namespace AudioAlign.LibSampleRate {
         #endregion
 
         public void Reset() {
-            int error = Interop.src_reset(srcState);
+            error = Interop.src_reset(srcState);
             ThrowExceptionForError(error);
         }
 
         public void SetRatio(double ratio) {
-            int error = Interop.src_set_ratio(srcState, ratio);
-            ThrowExceptionForError(error);
+            SetRatio(ratio, true);
+        }
+
+        public void SetRatio(double ratio, bool step) {
+            if (step) {
+                // force the ratio for the next #Process call instead of linearly interpolating from the previous
+                // ratio to the current ratio
+                error = Interop.src_set_ratio(srcState, ratio);
+                ThrowExceptionForError(error);
+            }
             this.ratio = ratio;
         }
 
@@ -74,45 +84,42 @@ namespace AudioAlign.LibSampleRate {
 
         public void Process(byte[] input, int inputOffset, int inputLength,
             byte[] output, int outputOffset, int outputLength,
-            bool endOfStream, out int inputLengthUsed, out int outputLengthGenerated) {
-            SRC_DATA data = new SRC_DATA();
+            bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated) {
             unsafe {
                 fixed (byte* inputBytes = &input[inputOffset], outputBytes = &output[outputOffset]) {
-                    data.data_in = (float*)inputBytes;
-                    data.data_out = (float*)outputBytes;
-                    data.end_of_input = endOfStream ? 1 : 0;
-                    data.input_frames = inputLength / 4 / channels;
-                    data.output_frames = outputLength / 4 / channels;
-                    data.src_ratio = ratio;
-
-                    int error = Interop.src_process(srcState, ref data);
-                    ThrowExceptionForError(error);
-
-                    inputLengthUsed = data.input_frames_used * 4 * channels;
-                    outputLengthGenerated = data.output_frames_gen * 4 * channels;
+                    Process((float*)inputBytes, inputLength / 4, (float*)outputBytes, outputLength / 4, endOfInput,
+                        out inputLengthUsed, out outputLengthGenerated);
+                    inputLengthUsed *= 4;
+                    outputLengthGenerated *= 4;
                 }
             }
         }
 
         public void Process(float[] input, int inputOffset, int inputLength,
             float[] output, int outputOffset, int outputLength,
-            bool endOfStream, out int inputLengthUsed, out int outputLengthGenerated) {
-            SRC_DATA data = new SRC_DATA();
+            bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated) {
             unsafe {
                 fixed (float* inputFloats = &input[inputOffset], outputFloats = &output[outputOffset]) {
-                    data.data_in = inputFloats;
-                    data.data_out = outputFloats;
-                    data.end_of_input = endOfStream ? 1 : 0;
-                    data.input_frames = inputLength / channels;
-                    data.output_frames = outputLength / channels;
-
-                    int error = Interop.src_process(srcState, ref data);
-                    ThrowExceptionForError(error);
-
-                    inputLengthUsed = data.input_frames_used * channels;
-                    outputLengthGenerated = data.output_frames_gen * channels;
+                    Process(inputFloats, inputLength, outputFloats, outputLength, endOfInput, 
+                        out inputLengthUsed, out outputLengthGenerated);
                 }
             }
+        }
+
+        private unsafe void Process(float* input, int inputLength, float* output, int outputLength,
+            bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated) {
+            srcData.data_in = input;
+            srcData.data_out = output;
+            srcData.end_of_input = endOfInput ? 1 : 0;
+            srcData.input_frames = inputLength / channels;
+            srcData.output_frames = outputLength / channels;
+            srcData.src_ratio = ratio;
+
+            error = Interop.src_process(srcState, ref srcData);
+            ThrowExceptionForError(error);
+
+            inputLengthUsed = srcData.input_frames_used * channels;
+            outputLengthGenerated = srcData.output_frames_gen * channels;
         }
 
         private void ThrowExceptionForError(int error) {

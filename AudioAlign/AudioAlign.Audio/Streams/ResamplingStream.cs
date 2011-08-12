@@ -71,6 +71,16 @@ namespace AudioAlign.Audio.Streams {
             }
         }
 
+        /// <summary>
+        /// Reads resampled data from the stream.
+        /// </summary>
+        /// <remarks>
+        /// this function has been extensively analyzed and should not contain any bugs
+        /// </remarks>
+        /// <param name="buffer"></param>
+        /// <param name="offset"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
         public override int Read(byte[] buffer, int offset, int count) {
             // dynamically increase buffer size
             if (sourceBuffer.Length < count) {
@@ -81,17 +91,18 @@ namespace AudioAlign.Audio.Streams {
 
             int inputLengthUsed, outputLengthGenerated;
 
+            // loop while the sample rate converter consumes samples until it produces an output
             do {
                 if (sourceBufferFillLevel == 0 || sourceBufferPosition == sourceBufferFillLevel) {
                     // buffer is empty or all data has already been read -> refill
                     sourceBufferPosition = 0;
                     sourceBufferFillLevel = sourceStream.Read(sourceBuffer, 0, count);
-                    //Debug.WriteLine("source read {0}", sourceBufferFillLevel);
                 }
-                src.Process(sourceBuffer, sourceBufferPosition, sourceBufferFillLevel - sourceBufferPosition, 
-                    buffer, offset, count, false, out inputLengthUsed, out outputLengthGenerated);
-                //Debug.WriteLine("source available {0} used {1} / target requested {2} generated {3}", 
-                //    sourceBufferFillLevel - sourceBufferPosition, inputLengthUsed, count, outputLengthGenerated);
+                // if the sourceBufferFillLevel is 0 at this position, the end of the source stream has been reached,
+                // and endOfInput needs to be set to true in order to retrieve eventually buffered samples from
+                // the sample rate converter
+                src.Process(sourceBuffer, sourceBufferPosition, sourceBufferFillLevel - sourceBufferPosition,
+                    buffer, offset, count, sourceBufferFillLevel == 0, out inputLengthUsed, out outputLengthGenerated);
                 sourceBufferPosition += inputLengthUsed;
             } 
             while (inputLengthUsed > 0 && outputLengthGenerated == 0);
