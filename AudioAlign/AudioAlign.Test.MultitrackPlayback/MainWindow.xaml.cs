@@ -72,10 +72,15 @@ namespace AudioAlign.Test.MultitrackPlayback {
             foreach (AudioTrack audioTrack in trackListBox.Items) {
                 WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
                 IeeeStream channel = new IeeeStream(new DebugStream(new NAudioSourceStream(reader), debugStreamController));
-                ResamplingStream res = new ResamplingStream(new DebugStream(channel, debugStreamController), ResamplingQuality.SincBest, 22050);
+                //ResamplingStream res = new ResamplingStream(new DebugStream(channel, debugStreamController), ResamplingQuality.SincBest, 22050);
+
+                TimeWarpStream warp = new TimeWarpStream(new DebugStream(channel, debugStreamController), ResamplingQuality.SincBest);
+                warp.AddMapping(new Mapping { From = channel.Length / 5 * 2, To = channel.Length / 3 / 2 });
+                warp.AddMapping(new Mapping { From = channel.Length / 5 * 2 + channel.Length / 5, To = channel.Length / 3 / 2 * 2 });
+                warp.AddMapping(new Mapping { From = channel.Length, To = channel.Length / 3 / 2 * 3 });
 
                 // necessary to control each track individually
-                VolumeControlStream volumeControl = new VolumeControlStream(new DebugStream(res, debugStreamController)) {
+                VolumeControlStream volumeControl = new VolumeControlStream(new DebugStream(warp, debugStreamController)) {
                     Mute = audioTrack.Mute,
                     Volume = audioTrack.Volume
                 };

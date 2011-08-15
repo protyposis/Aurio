@@ -30,6 +30,9 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public virtual int Read(byte[] buffer, int offset, int count) {
+            if (offset < 0 || offset >= buffer.Length || count < 0 || count > buffer.Length) {
+                throw new ArgumentException("invalid parameters");
+            }
             return sourceStream.Read(buffer, offset, count);
         }
 

@@ -41,6 +41,11 @@ namespace AudioAlign.Audio.Streams {
                 TargetSampleRate = outputSampleRate;
         }
 
+        public ResamplingStream(IAudioStream sourceStream, ResamplingQuality quality, double sampleRateRatio)
+            : this(sourceStream, quality) {
+                SampleRateRatio = sampleRateRatio;
+        }
+
         public double TargetSampleRate {
             get { return targetSampleRate; }
             set {
@@ -49,6 +54,11 @@ namespace AudioAlign.Audio.Streams {
                 src.SetRatio(sampleRateRatio);
                 properties.SampleRate = (int)targetSampleRate;
             }
+        }
+
+        public double SampleRateRatio {
+            get { return sampleRateRatio; }
+            set { TargetSampleRate = sourceStream.Properties.SampleRate * value; }
         }
 
         public override long Length {

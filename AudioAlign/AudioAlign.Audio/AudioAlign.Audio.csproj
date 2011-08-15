@@ -131,12 +131,14 @@
     <Compile Include="Streams\DataMonitorStream.cs" />
     <Compile Include="Streams\DebugStream.cs" />
     <Compile Include="Streams\DebugStreamController.cs" />
+    <Compile Include="Streams\TimeWarpStream.cs" />
     <Compile Include="Streams\IAudioStream.cs" />
     <Compile Include="Streams\IeeeStream.cs" />
     <Compile Include="Streams\MixerStream.cs" />
     <Compile Include="Streams\MonoStream.cs" />
     <Compile Include="Streams\NAudioSinkStream.cs" />
     <Compile Include="Streams\NAudioSourceStream.cs" />
+    <Compile Include="Streams\NullStream.cs" />
     <Compile Include="Streams\OffsetStream.cs" />
     <Compile Include="Streams\PhaseInversionStream.cs" />
     <Compile Include="Streams\ResamplingQuality.cs" />
