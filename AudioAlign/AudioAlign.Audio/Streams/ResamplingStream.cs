@@ -61,6 +61,12 @@ namespace AudioAlign.Audio.Streams {
             set { TargetSampleRate = sourceStream.Properties.SampleRate * value; }
         }
 
+        public int BufferedBytes {
+            get { return src.BufferedBytes; }
+        }
+
+        //public IAudioStream SourceStream { get { return sourceStream; } }
+
         public override long Length {
             get { return (long)Math.Ceiling(sourceStream.Length * sampleRateRatio); }
         }
@@ -116,11 +122,25 @@ namespace AudioAlign.Audio.Streams {
 
             position += outputLengthGenerated;
 
+            // in some cases it can happen that the SRC returns more data than the stream length suggests,
+            // this data is cut off here to avoid a stream position that is greater than the stream's length.
+            // NOTE max observed overflow: 8 bytes (1 2ch 32bit sample)
+            if (position > Length) {
+                int overflow = (int)(position - Length);
+                Debug.WriteLine("ResamplingStream OVERFLOW WARNING: {0} bytes cut off", overflow);
+                position -= overflow;
+                return outputLengthGenerated - overflow;
+            }
+
             return outputLengthGenerated;
         }
 
         public bool CheckTargetSampleRate(double sampleRate) {
-            return src.CheckRatio(sampleRate / sourceStream.Properties.SampleRate);
+            return CheckSampleRateRatio(sampleRate / sourceStream.Properties.SampleRate);
+        }
+
+        public bool CheckSampleRateRatio(double ratio) {
+            return src.CheckRatio(ratio);
         }
     }
 }

@@ -394,7 +394,7 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto" MinWidth="{Binding ElementName=PART_TrackListBox, Path=MinWidth}"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
@@ -421,6 +421,17 @@
                                        Grid.Row="0" 
                                        Grid.Column="1" 
                                        Visibility="Hidden"/>
+                            
+                            <Button Grid.Row="1" Grid.Column="1">
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Item 1"/>
+                                        <MenuItem Header="Item 2"/>
+                                        <MenuItem Header="Item 3"/>
+                                        <CheckBox Content="Test"/>
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
                         </Grid>
                     </Border>
                     

@@ -2,10 +2,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace AudioAlign.Audio.UnitTest
-{
-    
-    
+namespace AudioAlign.Audio.UnitTest {
+
+
     /// <summary>
     ///This is a test class for DynamicResamplingStreamTest and is intended
     ///to contain all DynamicResamplingStreamTest Unit Tests
@@ -38,7 +37,7 @@ namespace AudioAlign.Audio.UnitTest
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext) {
             stream = new TimeWarpStream(
-                new NullStream(new AudioProperties(1, 44100, 32, AudioFormat.IEEE), 70), 
+                new NullStream(new AudioProperties(1, 44100, 32, AudioFormat.IEEE), 70),
                 ResamplingQuality.SincBest);
             stream.AddMapping(new Mapping { From = 10, To = 15 });
             stream.AddMapping(new Mapping { From = 20, To = 30 });
@@ -127,10 +126,10 @@ namespace AudioAlign.Audio.UnitTest
         [TestMethod()]
         public void SetPosition01() {
             TimeWarpStream s = new TimeWarpStream(
-                new NullStream(new AudioProperties(2, 44100, 32, AudioFormat.IEEE), 100000), 
+                new NullStream(new AudioProperties(2, 44100, 32, AudioFormat.IEEE), 100000),
                 ResamplingQuality.SincBest);
-            s.AddMapping(new Mapping{ From = s.Length / 2, To = s.Length / 4 });
-            s.AddMapping(new Mapping{ From = s.Length, To = s.Length / 4 * 2 });
+            s.AddMapping(new Mapping { From = s.Length / 2, To = s.Length / 4 });
+            s.AddMapping(new Mapping { From = s.Length, To = s.Length / 4 * 2 });
 
             byte[] buffer = new byte[5000];
             int bytesRead;
@@ -150,14 +149,22 @@ namespace AudioAlign.Audio.UnitTest
             TimeWarpStream s = new TimeWarpStream(
                 new NullStream(new AudioProperties(2, 44100, 32, AudioFormat.IEEE), 100000),
                 ResamplingQuality.SincBest);
-            s.AddMapping(new Mapping { From = s.Length / 2, To = s.Length / 4 });
+            //s.AddMapping(new Mapping { From = s.Length / 2, To = s.Length / 4 });
             s.AddMapping(new Mapping { From = s.Length, To = s.Length / 4 * 2 });
 
             byte[] buffer = new byte[5000];
+            int bytesRead;
+            long totalBytesRead;
 
             Assert.AreEqual(0, s.Position);
-            s.Position = 11111;
-            while (s.Read(buffer, 0, buffer.Length) > 0) { }
+            totalBytesRead = 0;
+            s.Position = 11104;
+            Assert.AreEqual(11104, s.Position);
+            //Assert.AreEqual(0, s.BufferedBytes);
+            while ((bytesRead = s.Read(buffer, 0, buffer.Length)) > 0) {
+                totalBytesRead += bytesRead;
+            }
+            Assert.AreEqual(totalBytesRead, s.Position - 11104);
             Assert.AreEqual(s.Length, s.Position);
         }
 
@@ -173,7 +180,7 @@ namespace AudioAlign.Audio.UnitTest
 
             Assert.AreEqual(0, s.Position);
             s.Read(buffer, 0, buffer.Length);
-            s.Position = 44444;
+            s.Position = 44440;
             while (s.Read(buffer, 0, buffer.Length) > 0) { }
             Assert.AreEqual(s.Length, s.Position);
         }
@@ -195,8 +202,10 @@ namespace AudioAlign.Audio.UnitTest
                 if (++count == 5) {
                     positionSet = true;
                     long posBefore = s.Position;
+                    //long sourcePosBefore = s.SourceStream.Position - s.BufferedBytes;
                     s.Position = posBefore;
                     Assert.AreEqual(posBefore, s.Position);
+                    //Assert.AreEqual(sourcePosBefore, s.SourceStream.Position);
                 }
             }
             Assert.IsTrue(positionSet); // if the position hasn't been set, the whole test case is pointless

@@ -75,9 +75,9 @@ namespace AudioAlign.Test.MultitrackPlayback {
                 //ResamplingStream res = new ResamplingStream(new DebugStream(channel, debugStreamController), ResamplingQuality.SincBest, 22050);
 
                 TimeWarpStream warp = new TimeWarpStream(new DebugStream(channel, debugStreamController), ResamplingQuality.SincBest);
-                warp.AddMapping(new Mapping { From = channel.Length / 5 * 2, To = channel.Length / 3 / 2 });
-                warp.AddMapping(new Mapping { From = channel.Length / 5 * 2 + channel.Length / 5, To = channel.Length / 3 / 2 * 2 });
-                warp.AddMapping(new Mapping { From = channel.Length, To = channel.Length / 3 / 2 * 3 });
+                warp.AddMapping(new Mapping { From = channel.Length / 10 * 4, To = channel.Length / 9 });
+                warp.AddMapping(new Mapping { From = channel.Length / 10 * 5, To = channel.Length / 9 * 2 });
+                warp.AddMapping(new Mapping { From = channel.Length / 10 * 10, To = channel.Length / 9 * 3 });
 
                 // necessary to control each track individually
                 VolumeControlStream volumeControl = new VolumeControlStream(new DebugStream(warp, debugStreamController)) {

@@ -12,6 +12,7 @@ namespace AudioAlign.LibSampleRate {
         private int error;
         private int channels;
         private double ratio;
+        private double bufferedSamples;
 
         public SampleRateConverter(ConverterType type, int channels) {
             srcState = Interop.src_new(type, channels, out error);
@@ -21,6 +22,7 @@ namespace AudioAlign.LibSampleRate {
             SetRatio(1d);
 
             this.channels = channels;
+            this.bufferedSamples = 0;
         }
 
         #region IDisposable & destructor
@@ -59,9 +61,18 @@ namespace AudioAlign.LibSampleRate {
 
         #endregion
 
+        /// <summary>
+        /// Gets the number of bytes buffered by the SRC. Buffering may happen since the SRC may read more
+        /// data than it outputs during one #Process call.
+        /// </summary>
+        public int BufferedBytes {
+            get { return (int)(bufferedSamples * 4); }
+        }
+
         public void Reset() {
             error = Interop.src_reset(srcState);
             ThrowExceptionForError(error);
+            bufferedSamples = 0;
         }
 
         public void SetRatio(double ratio) {
@@ -120,6 +131,8 @@ namespace AudioAlign.LibSampleRate {
 
             inputLengthUsed = srcData.input_frames_used * channels;
             outputLengthGenerated = srcData.output_frames_gen * channels;
+
+            bufferedSamples += inputLengthUsed - (outputLengthGenerated / ratio);
         }
 
         private void ThrowExceptionForError(int error) {
