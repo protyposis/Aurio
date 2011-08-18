@@ -34,19 +34,19 @@ namespace AudioAlign.Audio.UnitTest {
         //You can use the following additional attributes as you write your tests:
         //
         //Use ClassInitialize to run code before running the first test in the class
-        [ClassInitialize()]
-        public static void MyClassInitialize(TestContext testContext) {
-            stream = new TimeWarpStream(
-                new NullStream(new AudioProperties(1, 44100, 32, AudioFormat.IEEE), 70),
-                ResamplingQuality.SincBest);
-            stream.AddMapping(new Mapping { From = 10, To = 15 });
-            stream.AddMapping(new Mapping { From = 20, To = 30 });
-            stream.AddMapping(new Mapping { From = 30, To = 45 });
-            stream.AddMapping(new Mapping { From = 40, To = 48 });
-            stream.AddMapping(new Mapping { From = 50, To = 50 });
-            stream.AddMapping(new Mapping { From = 60, To = 55 });
-            stream.AddMapping(new Mapping { From = 65, To = 60 });
-        }
+        //[ClassInitialize()]
+        //public static void MyClassInitialize(TestContext testContext) {
+        //    stream = new TimeWarpStream(
+        //        new NullStream(new AudioProperties(1, 44100, 32, AudioFormat.IEEE), 70),
+        //        ResamplingQuality.SincBest);
+        //    stream.AddMapping(new Mapping { From = 10, To = 15 });
+        //    stream.AddMapping(new Mapping { From = 20, To = 30 });
+        //    stream.AddMapping(new Mapping { From = 30, To = 45 });
+        //    stream.AddMapping(new Mapping { From = 40, To = 48 });
+        //    stream.AddMapping(new Mapping { From = 50, To = 50 });
+        //    stream.AddMapping(new Mapping { From = 60, To = 55 });
+        //    stream.AddMapping(new Mapping { From = 65, To = 60 });
+        //}
         //
         //Use ClassCleanup to run code after all tests in a class have run
         //[ClassCleanup()]
@@ -69,59 +69,59 @@ namespace AudioAlign.Audio.UnitTest {
 
         #endregion
 
-        [TestMethod()]
-        public void Mapping01() {
-            Assert.AreEqual(7, stream.CalculateWarpedPosition(5));
-            //Assert.AreEqual(5, stream.CalculateSourcePosition(7));
-        }
+        //[TestMethod()]
+        //public void Mapping01() {
+        //    Assert.AreEqual(7, stream.CalculateWarpedPosition(5));
+        //    //Assert.AreEqual(5, stream.CalculateSourcePosition(7));
+        //}
 
-        [TestMethod()]
-        public void Mapping02() {
-            Assert.AreEqual(37, stream.CalculateWarpedPosition(25));
-            //Assert.AreEqual(25, stream.CalculateSourcePosition(37));
-        }
+        //[TestMethod()]
+        //public void Mapping02() {
+        //    Assert.AreEqual(37, stream.CalculateWarpedPosition(25));
+        //    //Assert.AreEqual(25, stream.CalculateSourcePosition(37));
+        //}
 
-        [TestMethod()]
-        public void Mapping03() {
-            Assert.AreEqual(46, stream.CalculateWarpedPosition(35));
-            //Assert.AreEqual(35, stream.CalculateSourcePosition(46));
-        }
+        //[TestMethod()]
+        //public void Mapping03() {
+        //    Assert.AreEqual(46, stream.CalculateWarpedPosition(35));
+        //    //Assert.AreEqual(35, stream.CalculateSourcePosition(46));
+        //}
 
-        [TestMethod()]
-        public void Mapping04() {
-            Assert.AreEqual(52, stream.CalculateWarpedPosition(55));
-            //Assert.AreEqual(55, stream.CalculateSourcePosition(52));
-        }
+        //[TestMethod()]
+        //public void Mapping04() {
+        //    Assert.AreEqual(52, stream.CalculateWarpedPosition(55));
+        //    //Assert.AreEqual(55, stream.CalculateSourcePosition(52));
+        //}
 
-        [TestMethod()]
-        public void Mapping05() {
-            Assert.AreEqual(55, stream.CalculateWarpedPosition(60));
-            //Assert.AreEqual(60, stream.CalculateSourcePosition(55));
-        }
+        //[TestMethod()]
+        //public void Mapping05() {
+        //    Assert.AreEqual(55, stream.CalculateWarpedPosition(60));
+        //    //Assert.AreEqual(60, stream.CalculateSourcePosition(55));
+        //}
 
-        [TestMethod()]
-        public void Mapping06() {
-            // test warp with equal offset of boundary mappings
-            Assert.AreEqual(55, stream.CalculateWarpedPosition(60));
-            Assert.AreEqual(57, stream.CalculateWarpedPosition(62));
-            Assert.AreEqual(60, stream.CalculateWarpedPosition(65));
+        //[TestMethod()]
+        //public void Mapping06() {
+        //    // test warp with equal offset of boundary mappings
+        //    Assert.AreEqual(55, stream.CalculateWarpedPosition(60));
+        //    Assert.AreEqual(57, stream.CalculateWarpedPosition(62));
+        //    Assert.AreEqual(60, stream.CalculateWarpedPosition(65));
 
-            //Assert.AreEqual(60, stream.CalculateSourcePosition(55));
-            //Assert.AreEqual(62, stream.CalculateSourcePosition(57));
-            //Assert.AreEqual(65, stream.CalculateSourcePosition(60));
-        }
+        //    //Assert.AreEqual(60, stream.CalculateSourcePosition(55));
+        //    //Assert.AreEqual(62, stream.CalculateSourcePosition(57));
+        //    //Assert.AreEqual(65, stream.CalculateSourcePosition(60));
+        //}
 
-        [TestMethod()]
-        public void Mapping07() {
-            Assert.AreEqual(64, stream.CalculateWarpedPosition(67));
-            //Assert.AreEqual(67, stream.CalculateSourcePosition(64));
-        }
+        //[TestMethod()]
+        //public void Mapping07() {
+        //    Assert.AreEqual(64, stream.CalculateWarpedPosition(67));
+        //    //Assert.AreEqual(67, stream.CalculateSourcePosition(64));
+        //}
 
-        [TestMethod()]
-        public void Mapping08() {
-            Assert.AreEqual(70, stream.CalculateWarpedPosition(70));
-            //Assert.AreEqual(70, stream.CalculateSourcePosition(70));
-        }
+        //[TestMethod()]
+        //public void Mapping08() {
+        //    Assert.AreEqual(70, stream.CalculateWarpedPosition(70));
+        //    //Assert.AreEqual(70, stream.CalculateSourcePosition(70));
+        //}
 
         [TestMethod()]
         public void SetPosition01() {

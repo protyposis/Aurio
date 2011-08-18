@@ -26,12 +26,10 @@ namespace AudioAlign.Audio.Streams {
                 resamplingQuality = quality;
 
                 ResetStream();
-                SortAndValidateMappings();
         }
 
         public void ClearMappings() {
             mappings.Clear();
-            UpdateLengthAndPosition();
             ResetStream();
         }
 
@@ -44,7 +42,6 @@ namespace AudioAlign.Audio.Streams {
             else {
                 mappingOmega = mappings.Last();
             }
-            UpdateLengthAndPosition();
             ResetStream();
         }
 
@@ -56,27 +53,9 @@ namespace AudioAlign.Audio.Streams {
                     if (mappings[x].To > mappings[y].To) {
                         throw new Exception(mappings[x] + " is overlapping " + mappings[y]);
                     }
-                    else if (!resamplingStream.CheckSampleRateRatio(
-                        (mappings[y].To - mappings[x].To) / ((double)mappings[y].From - mappings[x].From))) {
+                    else if (!resamplingStream.CheckSampleRateRatio(CalculateSampleRateRatio(mappings[x], mappings[y]))) {
                         throw new Exception("invalid sample ratio");
                     }
-                }
-            }
-        }
-
-        private void GetBoundingMappingsForSourcePosition(long sourcePosition,
-                out Mapping lowerMapping, out Mapping upperMapping) {
-            lowerMapping = mappingAlpha;
-            upperMapping = mappingOmega;
-            for (int x = 0; x < mappings.Count; x++) {
-                if (sourcePosition < mappings[x].From) {
-                    lowerMapping = x == 0 ? mappingAlpha : mappings[x - 1];
-                    upperMapping = mappings[x];
-                    break;
-                }
-                else if (x == mappings.Count - 1) {
-                    lowerMapping = mappings[x];
-                    upperMapping = mappingOmega;
                 }
             }
         }
@@ -98,64 +77,26 @@ namespace AudioAlign.Audio.Streams {
             }
         }
 
-        public long CalculateWarpedPosition(long sourcePosition) {
-            Mapping m1 = null;
-            Mapping m2 = null;
-            GetBoundingMappingsForSourcePosition(sourcePosition, out m1, out m2);
-
-            if (m1.Offset != m2.Offset) {
-                return (long)(m1.To + (sourcePosition - m1.From) * 
-                    ((double)(m2.To - m1.To) / (m2.From - m1.From)));
+        private void ResetStream() {
+            if (position > mappingOmega.To) {
+                throw new Exception("position beyond length");
             }
-            else {
-                // offsets are equal
-                return sourcePosition - m1.From + m1.To;
-            }
-        }
 
-        public long CalculateSourcePosition(long warpedPosition) {
-            Mapping m1 = null;
-            Mapping m2 = null;
-            GetBoundingMappingsForWarpedPosition(warpedPosition, out m1, out m2);
+            length = mappingOmega.To;
 
-            if (m1.Offset != m2.Offset) {
-                return (long)(m1.From + (warpedPosition - m1.To) / 
-                    ((double)(m2.To - m1.To) / (m2.From - m1.From)));
-            }
-            else {
-                // offsets are equal
-                return warpedPosition - m1.To + m1.From;
+            Mapping mL, mH;
+            GetBoundingMappingsForWarpedPosition(position, out mL, out mH);
+
+            if (cropStream == null || cropStream.Begin != mL.From || cropStream.End != mH.From || resamplingStream.Length != mappingOmega.To) {
+                // mapping has changed, stream subsection must be renewed
+                cropStream = new CropStream(sourceStream, mL.From, mH.From);
+                resamplingStream = new ResamplingStream(cropStream, resamplingQuality, CalculateSampleRateRatio(mL, mH));
+                resamplingStream.Position = position - mL.To;
             }
         }
 
-        private void UpdateLengthAndPosition() {
-            length = CalculateWarpedPosition(sourceStream.Length);
-        }
-
-        private bool ResetStream() {
-            return ResetStream(sourceStream.Position);
-        }
-
-        private bool ResetStream(long sourcePosition) {
-            Mapping m1 = null, m2 = null;
-            double sampleRateRatio = 1;
-
-            GetBoundingMappingsForSourcePosition(sourcePosition, out m1, out m2);
-            if (m1 != null) {
-                if (cropStream != null && m1.From == m2.From && m2.From == cropStream.End) {
-                    // end of stream has been reached
-                    // return false to indicate that no new data section is following
-                    return false;
-                }
-                cropStream = new CropStream(sourceStream, m1.From, m2.From);
-                sampleRateRatio = (m2.To - m1.To) / (double)(m2.From - m1.From);
-            }
-            else {
-                cropStream = new CropStream(sourceStream, 0, length);
-            }
-            resamplingStream = new ResamplingStream(cropStream, resamplingQuality, sampleRateRatio);
-
-            return true;
+        private double CalculateSampleRateRatio(Mapping mL, Mapping mH) {
+            return (mH.To - mL.To) / (double)(mH.From - mL.From);
         }
 
         public override long Length {
@@ -165,35 +106,33 @@ namespace AudioAlign.Audio.Streams {
         public override long Position {
             get { return position; }
             set {
-                PrintDebugStatus();
+                if (value < 0 || value > length) {
+                    throw new ArgumentException("invalid position");
+                }
+
+                Mapping mL, mH;
+                GetBoundingMappingsForWarpedPosition(value, out mL, out mH);
+
+                if (position < mL.To || position >= mH.To) {
+                    // new stream subsection required
+                    cropStream = new CropStream(sourceStream, mL.From, mH.From);
+                    resamplingStream = new ResamplingStream(cropStream, resamplingQuality, CalculateSampleRateRatio(mL, mH));
+                }
+
+                resamplingStream.Position = value - mL.To;
                 position = value;
-                //sourceStream.Position = Math.Min(
-                //    CalculateSourcePosition(value) + resamplingStream.BufferedBytes, 
-                //    sourceStream.Length);
-                //PrintDebugStatus();
-                ResetStream(Math.Min(
-                    CalculateSourcePosition(value) + resamplingStream.BufferedBytes, 
-                    sourceStream.Length));
-                PrintDebugStatus();
-                Mapping m1, m2;
-                GetBoundingMappingsForWarpedPosition(value, out m1, out m2);
-                resamplingStream.Position = value - m1.To;
-                PrintDebugStatus();
             }
         }
 
-        //public IAudioStream SourceStream { get { return sourceStream; } }
-        //public int BufferedBytes { get { return resamplingStream.BufferedBytes; } }
-
         public override int Read(byte[] buffer, int offset, int count) {
             int bytesRead = resamplingStream.Read(buffer, offset, count);
-            if (bytesRead == 0) {
-                Debug.WriteLine("SRC buffer: " + resamplingStream.BufferedBytes);
-                if (ResetStream()) {
-                    return this.Read(buffer, offset, count);
-                }
-                PrintDebugStatus();
+
+            if (bytesRead == 0 && cropStream.End != sourceStream.Length) {
+                //PrintDebugStatus();
+                ResetStream(); // switch to next subsection
+                return this.Read(buffer, offset, count);
             }
+
             position += bytesRead;
             return bytesRead;
         }
@@ -201,7 +140,7 @@ namespace AudioAlign.Audio.Streams {
         private void PrintDebugStatus() {
             Debug.WriteLine("TimeWarpStream len {0,10}, pos {1,10}", length, position);
             Debug.WriteLine("     resampler len {0,10}, pos {1,10} src buffer {2,4}", resamplingStream.Length, resamplingStream.Position, resamplingStream.BufferedBytes);
-            Debug.WriteLine("          crop len {0,10}, pos {1,10}", cropStream.Length, cropStream.Position);
+            Debug.WriteLine("          crop len {0,10}, pos {1,10}, beg {2,10}, end {3,10}", cropStream.Length, cropStream.Position, cropStream.Begin, cropStream.End);
             Debug.WriteLine("        source len {0,10}, pos {1,10}", sourceStream.Length, sourceStream.Position);
         }
     }

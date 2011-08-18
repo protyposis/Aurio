@@ -65,8 +65,6 @@ namespace AudioAlign.Audio.Streams {
             get { return src.BufferedBytes; }
         }
 
-        //public IAudioStream SourceStream { get { return sourceStream; } }
-
         public override long Length {
             get { return (long)Math.Ceiling(sourceStream.Length * sampleRateRatio); }
         }
