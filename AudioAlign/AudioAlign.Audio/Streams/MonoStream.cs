@@ -52,17 +52,25 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public override int Read(byte[] buffer, int offset, int count) {
-            // dynamically increase buffer size
-            if (sourceBuffer.Length < count) {
-                int oldSize = sourceBuffer.Length;
-                sourceBuffer = new byte[count];
-                Debug.WriteLine("MonoStream: buffer size increased: " + oldSize + " -> " + count);
-            }
-
             int sourceChannels = sourceStream.Properties.Channels;
             int targetChannels = Properties.Channels;
 
-            int sourceBytesToRead = (count / targetChannels) - (count / targetChannels) % sourceStream.SampleBlockSize;
+            // dynamically increase buffer size
+            /* NOTE: The buffer size must be at least of a size that can hold as much data as is required
+             *       to generate the number of requested bytes. For a stereo to mono conversion, twice the
+             *       amount of bytes needs to be read in order to generate the requested number of bytes.
+             *       The other way, returning half the amount of bytes requested, doesn't work in some border
+             *       cases, e.g. when just one 32bit sample is requested, because a request for 4 bytes from
+             *       a 32bit stereo stream will result in zero bytes returned and it also could not be converted
+             *       from stereo to mono (since 1 single sample isn't "stereo"). */
+            int bufferSize = count * sourceChannels / targetChannels;
+            if (sourceBuffer.Length < bufferSize) {
+                int oldSize = sourceBuffer.Length;
+                sourceBuffer = new byte[bufferSize];
+                Debug.WriteLine("MonoStream: buffer size increased: " + oldSize + " -> " + bufferSize);
+            }
+
+            int sourceBytesToRead = bufferSize - bufferSize % sourceStream.SampleBlockSize;
             int sourceBytesRead = sourceStream.Read(sourceBuffer, 0, sourceBytesToRead);
 
             int sourceFloats = sourceBytesRead / 4;

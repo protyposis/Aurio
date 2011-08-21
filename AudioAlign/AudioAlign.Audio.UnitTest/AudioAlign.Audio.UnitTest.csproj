@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AudioUtilTest.cs" />
+    <Compile Include="MonoStreamTest.cs" />
     <Compile Include="TimeWarpStreamTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResamplingStreamTest.cs" />

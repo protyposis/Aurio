@@ -65,6 +65,10 @@ namespace AudioAlign.Audio.Streams {
             get { return src.BufferedBytes; }
         }
 
+        public override AudioProperties Properties {
+            get { return properties; }
+        }
+
         public override long Length {
             get { return (long)Math.Ceiling(sourceStream.Length * sampleRateRatio); }
         }
@@ -113,7 +117,8 @@ namespace AudioAlign.Audio.Streams {
                 // this is also the reason why the source stream's Read() method may be called multiple times although
                 // it already signalled that it has reached the end of the stream
                 src.Process(sourceBuffer, sourceBufferPosition, sourceBufferFillLevel - sourceBufferPosition,
-                    buffer, offset, count, sourceBufferFillLevel == 0, out inputLengthUsed, out outputLengthGenerated);
+                    buffer, offset, count, sourceStream.Position >= sourceStream.Length && sourceBufferFillLevel == 0, 
+                    out inputLengthUsed, out outputLengthGenerated);
                 sourceBufferPosition += inputLengthUsed;
             } 
             while (inputLengthUsed > 0 && outputLengthGenerated == 0);
