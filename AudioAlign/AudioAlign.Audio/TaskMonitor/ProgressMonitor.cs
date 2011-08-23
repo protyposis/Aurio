@@ -20,14 +20,29 @@ namespace AudioAlign.Audio.TaskMonitor {
         public event EventHandler<ValueEventArgs<float>> ProcessingProgressChanged;
         public event EventHandler ProcessingFinished;
 
-        private ProgressMonitor() {
+        #region Child Monitor handling
+
+        /* A child monitor serves to monitor a subset of progress reporters of a parent monitor. 
+         * The parent monitor monitors all of its progress reporters and all progress reporters of
+         * its child monitors.
+         */
+
+        private List<ProgressMonitor> childMonitors;
+
+        private event EventHandler<ValueEventArgs<ProgressReporter>> TaskBegun;
+        private event EventHandler<ValueEventArgs<ProgressReporter>> TaskEnded;
+
+        #endregion
+
+        public ProgressMonitor() {
             reporters = new List<ProgressReporter>();
             reporterProgress = new Dictionary<ProgressReporter, int>();
             timer = new Timer(100) { Enabled = false };
             timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
+            childMonitors = new List<ProgressMonitor>();
         }
 
-        public static ProgressMonitor Instance {
+        public static ProgressMonitor GlobalInstance {
             get {
                 if (singletonInstance == null) {
                     singletonInstance = new ProgressMonitor();
@@ -52,11 +67,13 @@ namespace AudioAlign.Audio.TaskMonitor {
             reporters.Add(reporter);
             reporter.PropertyChanged += progressReporter_PropertyChanged;
             reporterProgress.Add(reporter, 0);
+            OnTaskBegun(reporter);
             return reporter;
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void EndTask(ProgressReporter reporter) {
+            OnTaskEnded(reporter);
             reporter.PropertyChanged -= progressReporter_PropertyChanged;
             reporters.Remove(reporter);
             reporterProgress.Remove(reporter);
@@ -85,6 +102,10 @@ namespace AudioAlign.Audio.TaskMonitor {
             }
         }
 
+        public bool Active {
+            get { return reporters.Count > 0; }
+        }
+
         private void progressReporter_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
             ProgressReporter senderTaskStatus = (ProgressReporter)sender;
             if (reporterProgress[senderTaskStatus] != (int)senderTaskStatus.Progress) {
@@ -94,7 +115,9 @@ namespace AudioAlign.Audio.TaskMonitor {
         }
 
         private void OnProcessingStarted() {
-            timer.Enabled = true;
+            if (TaskBegun == null) {
+                timer.Enabled = true;
+            }
             if(ProcessingStarted != null) {
                 ProcessingStarted(this, EventArgs.Empty);
             }
@@ -110,10 +133,19 @@ namespace AudioAlign.Audio.TaskMonitor {
                 progress /= reporters.Count;
                 ProcessingProgressChanged(this, new ValueEventArgs<float>(progress));
             }
+            if (childMonitors.Count > 0) {
+                foreach (ProgressMonitor childMonitor in childMonitors) {
+                    if (childMonitor.Active) {
+                        childMonitor.OnProcessingProgressChanged();
+                    }
+                }
+            }
         }
 
         private void OnProcessingFinished() {
-            timer.Enabled = false;
+            if (TaskEnded == null) {
+                timer.Enabled = false;
+            }
             if (ProcessingFinished != null) {
                 ProcessingFinished(this, EventArgs.Empty);
             }
@@ -122,5 +154,44 @@ namespace AudioAlign.Audio.TaskMonitor {
         private void timer_Elapsed(object sender, ElapsedEventArgs e) {
             OnProcessingProgressChanged();
         }
+
+        #region Child Monitor handling
+
+        public void AddChild(ProgressMonitor childMonitor) {
+            childMonitors.Add(childMonitor);
+            childMonitor.TaskBegun += childMonitor_TaskBegun;
+            childMonitor.TaskEnded += childMonitor_TaskEnded;
+        }
+
+        public bool RemoveChild(ProgressMonitor childMonitor) {
+            if (childMonitors.Remove(childMonitor)) {
+                childMonitor.TaskBegun -= childMonitor_TaskBegun;
+                childMonitor.TaskEnded -= childMonitor_TaskEnded;
+                return true;
+            }
+            return false;
+        }
+
+        private void childMonitor_TaskBegun(object sender, ValueEventArgs<ProgressReporter> e) {
+            BeginTask(e.Value);
+        }
+
+        private void childMonitor_TaskEnded(object sender, ValueEventArgs<ProgressReporter> e) {
+            EndTask(e.Value);
+        }
+
+        private void OnTaskBegun(ProgressReporter reporter) {
+            if (TaskBegun != null) {
+                TaskBegun(this, new ValueEventArgs<ProgressReporter>(reporter));
+            }
+        }
+
+        private void OnTaskEnded(ProgressReporter reporter) {
+            if (TaskEnded != null) {
+                TaskEnded(this, new ValueEventArgs<ProgressReporter>(reporter));
+            }
+        }
+
+        #endregion
     }
 }

@@ -19,7 +19,7 @@ namespace AudioAlign.Audio.Matching {
             s1 = PrepareStream(s1, 11050);
             s2 = PrepareStream(s2, 11050);
 
-            ProgressReporter progress = ProgressMonitor.Instance.BeginTask("calculating cross-correlation", true);
+            ProgressReporter progress = ProgressMonitor.GlobalInstance.BeginTask("calculating cross-correlation", true);
 
             float seconds = (float)(i1.Length / 10d / 1000 / 1000);
             int sampleRate = s1.Properties.SampleRate;
@@ -111,7 +111,7 @@ namespace AudioAlign.Audio.Matching {
                 Debug.WriteLine("max val: {0} index: {1} adjusted index: {2}", maxval, maxindex, maxindex - maxdelay);
             TimeSpan offset = new TimeSpan((long)((maxindex - maxdelay) / (float)sampleRate * 1000 * 1000 * 10));
             Debug.WriteLine("peak offset @ " + offset);
-            ProgressMonitor.Instance.EndTask(progress);
+            ProgressMonitor.GlobalInstance.EndTask(progress);
             return offset;
         }
 
@@ -183,7 +183,7 @@ namespace AudioAlign.Audio.Matching {
             s1 = PrepareStream(s1, 11050);
             s2 = PrepareStream(s2, 11050);
 
-            ProgressReporter progress = ProgressMonitor.Instance.BeginTask("calculating correlation", true);
+            ProgressReporter progress = ProgressMonitor.GlobalInstance.BeginTask("calculating correlation", true);
 
             float seconds = (float)(i1.Length / 10d / 1000 / 1000);
             int sampleRate = s1.Properties.SampleRate;
@@ -206,7 +206,7 @@ namespace AudioAlign.Audio.Matching {
             progress.ReportProgress(100);
 
             Debug.WriteLine("C result: " + r);
-            ProgressMonitor.Instance.EndTask(progress);
+            ProgressMonitor.GlobalInstance.EndTask(progress);
             return r;
         }
 
