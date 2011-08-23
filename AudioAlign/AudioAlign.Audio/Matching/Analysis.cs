@@ -5,11 +5,13 @@ using System.Text;
 using AudioAlign.Audio.Project;
 using AudioAlign.Audio.Streams;
 using System.Diagnostics;
+using AudioAlign.Audio.TaskMonitor;
+using System.Threading.Tasks;
 
 namespace AudioAlign.Audio.Matching {
     public class Analysis {
 
-        public static void Analyze(TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength) {
+        public static void AnalyzeAlignment(TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, ProgressMonitor progressMonitor) {
             if (audioTracks.Count < 2) {
                 // there must be at least 2 tracks, otherwise there's nothing to compare
                 return;
@@ -17,6 +19,8 @@ namespace AudioAlign.Audio.Matching {
             if (intervalLength < windowLength) {
                 throw new ArgumentException("intervalLength must be at least as long as the windowLength");
             }
+
+            IProgressReporter reporter = progressMonitor.BeginTask("Analyzing alignment...", true);
 
             List<IAudioStream> streams = new List<IAudioStream>(audioTracks.Count);
             TimeSpan start = TimeSpan.MaxValue;
@@ -77,11 +81,19 @@ namespace AudioAlign.Audio.Matching {
                                 }
                             }
                         }
+                        reporter.ReportProgress((double)position / analysisIntervalLength * 100);
                     }
                 }
             }
+            reporter.Finish();
             Debug.WriteLine("Finished. sum: {0}, sum+: {1}, sum-: {2}, sumAbs: {3}", 
                 sumPositive + sumNegative, sumPositive, sumNegative, sumPositive + (sumNegative * -1));
+        }
+
+        public static void AnalyzeAlignmentAsync(TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, ProgressMonitor progressMonitor) {
+            Task.Factory.StartNew(() => {
+                AnalyzeAlignment(audioTracks, windowLength, intervalLength, progressMonitor);
+            });
         }
     }
 }
