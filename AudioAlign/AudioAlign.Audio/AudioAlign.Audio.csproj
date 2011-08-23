@@ -114,6 +114,7 @@
     <Compile Include="CommonUtil.cs" />
     <Compile Include="FFTAnalyzer.cs" />
     <Compile Include="FFTUtil.cs" />
+    <Compile Include="Matching\Analysis.cs" />
     <Compile Include="Matching\CrossCorrelation.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\Fingerprint.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintGenerator.cs" />
