@@ -46,7 +46,7 @@ namespace AudioAlign.Audio {
                 BinaryWriter[] peakWriters = peakStore.CreateMemoryStreams().WrapWithBinaryWriters();
 
                 Task.Factory.StartNew(() => {
-                    ProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating peaks for " + audioTrack.FileInfo.Name, true);
+                    IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating peaks for " + audioTrack.FileInfo.Name, true);
                     DateTime startTime = DateTime.Now;
                     int sampleBlockCount = 0;
                     int peakCount = 0;
@@ -109,7 +109,7 @@ namespace AudioAlign.Audio {
                     peakStore.CalculateScaledData(8, 6);
 
                     Debug.WriteLine("peak generation finished - " + (DateTime.Now - startTime) + ", " + (peakWriters[0].BaseStream.Length * channels) + " bytes");
-                    ProgressMonitor.GlobalInstance.EndTask(progressReporter);
+                    progressReporter.Finish();
 
                     // write peakfile to disk
                     FileStream peakOutputFile = File.OpenWrite(audioTrack.PeakFile.FullName);

@@ -150,6 +150,7 @@
     <Compile Include="Streams\VolumeControlStream.cs" />
     <Compile Include="Streams\VolumeMeteringStream.cs" />
     <Compile Include="StreamUtil.cs" />
+    <Compile Include="TaskMonitor\IProgressReporter.cs" />
     <Compile Include="TimeUtil.cs" />
     <Compile Include="VolumeUtil.cs" />
     <Compile Include="Interval.cs" />
@@ -162,7 +163,6 @@
     <Compile Include="Project\TrackList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TaskMonitor\ProgressMonitor.cs" />
-    <Compile Include="TaskMonitor\ProgressReporter.cs" />
     <Compile Include="ValueEventArgs.cs" />
     <Compile Include="WindowFunction.cs" />
     <Compile Include="WindowUtil.cs" />

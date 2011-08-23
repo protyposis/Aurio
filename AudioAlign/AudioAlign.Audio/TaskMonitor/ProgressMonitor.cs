@@ -5,9 +5,82 @@ using System.Text;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Timers;
+using System.ComponentModel;
 
 namespace AudioAlign.Audio.TaskMonitor {
-    public class ProgressMonitor {
+    public sealed class ProgressMonitor {
+
+        private class ProgressReporter : IProgressReporter {
+
+            private ProgressMonitor monitor;
+            private string name;
+            private double progress;
+            private bool isProgressReporting;
+            private bool isFinished;
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            public ProgressReporter(ProgressMonitor monitor) {
+                this.monitor = monitor;
+                this.isProgressReporting = false;
+                this.isFinished = false;
+            }
+
+            public ProgressReporter(ProgressMonitor monitor, string name)
+                : this(monitor) {
+                this.name = name;
+            }
+
+            public ProgressReporter(ProgressMonitor monitor, string name, bool reportProgress)
+                : this(monitor, name) {
+                this.isProgressReporting = reportProgress;
+            }
+
+            public string Name {
+                get { return name; }
+            }
+
+            public bool IsProgressReporting {
+                get { return isProgressReporting; }
+            }
+
+            public double Progress {
+                get { return progress; }
+            }
+
+            public void ReportProgress(double progress) {
+                if (!isProgressReporting) {
+                    throw new ArgumentException("this task doesn't support progress reporting");
+                }
+
+                if (progress < 0) {
+                    progress = 0;
+                }
+                else if (progress > 100) {
+                    progress = 100;
+                }
+
+                this.progress = progress;
+                OnPropertyChanged("Progress");
+            }
+
+            public void Finish() {
+                monitor.EndTask(this);
+                monitor = null;
+                isFinished = true;
+            }
+
+            public bool IsFinished {
+                get { return isFinished; }
+            }
+
+            private void OnPropertyChanged(string propertyName) {
+                PropertyChangedEventHandler handler = PropertyChanged;
+                if (handler != null) {
+                    handler(this, new PropertyChangedEventArgs(propertyName));
+                }
+            }
+        }
 
         private static ProgressMonitor singletonInstance = null;
 
@@ -51,12 +124,12 @@ namespace AudioAlign.Audio.TaskMonitor {
             }
         }
 
-        public ProgressReporter BeginTask(string taskName) {
-            return BeginTask(new ProgressReporter(taskName));
+        public IProgressReporter BeginTask(string taskName) {
+            return BeginTask(new ProgressReporter(this, taskName));
         }
 
-        public ProgressReporter BeginTask(string taskName, bool reportProgress) {
-            return BeginTask(new ProgressReporter(taskName, reportProgress));
+        public IProgressReporter BeginTask(string taskName, bool reportProgress) {
+            return BeginTask(new ProgressReporter(this, taskName, reportProgress));
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -72,7 +145,7 @@ namespace AudioAlign.Audio.TaskMonitor {
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void EndTask(ProgressReporter reporter) {
+        private void EndTask(ProgressReporter reporter) {
             OnTaskEnded(reporter);
             reporter.PropertyChanged -= progressReporter_PropertyChanged;
             reporters.Remove(reporter);

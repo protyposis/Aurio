@@ -11,7 +11,7 @@ using AudioAlign.Audio.Streams;
 namespace AudioAlign.Audio.Matching {
     public class CrossCorrelation {
 
-        public static TimeSpan Calculate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2) {
+        public static TimeSpan Calculate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor) {
             if (i1.Length != i2.Length) {
                 throw new ArgumentException("interval lengths do not match");
             }
@@ -19,7 +19,7 @@ namespace AudioAlign.Audio.Matching {
             s1 = PrepareStream(s1, 11050);
             s2 = PrepareStream(s2, 11050);
 
-            ProgressReporter progress = ProgressMonitor.GlobalInstance.BeginTask("calculating cross-correlation", true);
+            IProgressReporter progress = progressMonitor.BeginTask("calculating cross-correlation", true);
 
             float seconds = (float)(i1.Length / 10d / 1000 / 1000);
             int sampleRate = s1.Properties.SampleRate;
@@ -98,7 +98,7 @@ namespace AudioAlign.Audio.Matching {
                 }
             }
 
-            float test = Correlate(s1, i1, s2, i2);
+            float test = Correlate(s1, i1, s2, i2, progressMonitor);
             //float test = Correlate(x, y);
             Debug.WriteLine("correlation = {0}, r[zero] = {1}", test, r[maxdelay]);
             for (int i = 0; i < r.Length; i++) {
@@ -111,24 +111,25 @@ namespace AudioAlign.Audio.Matching {
                 Debug.WriteLine("max val: {0} index: {1} adjusted index: {2}", maxval, maxindex, maxindex - maxdelay);
             TimeSpan offset = new TimeSpan((long)((maxindex - maxdelay) / (float)sampleRate * 1000 * 1000 * 10));
             Debug.WriteLine("peak offset @ " + offset);
-            ProgressMonitor.GlobalInstance.EndTask(progress);
+            progress.Finish();
             return offset;
         }
 
-        public static void CalculateAsync(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2) {
+        public static void CalculateAsync(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor) {
             Task.Factory.StartNew(() => {
-                Calculate(s1, i1, s2, i2);
+                Calculate(s1, i1, s2, i2, progressMonitor);
             });
         }
 
-        public static void Adjust(Match match) {
+        public static void Adjust(Match match, ProgressMonitor progressMonitor) {
             long secfactor = 1000 * 1000 * 10;
             Stopwatch sw = new Stopwatch();
             sw.Start();
             long intervalLength = secfactor * 1;
             TimeSpan offset = Calculate(
                 match.Track1.CreateAudioStream(), new Interval(match.Track1Time.Ticks - intervalLength / 2, match.Track1Time.Ticks + intervalLength / 2),
-                match.Track2.CreateAudioStream(), new Interval(match.Track2Time.Ticks - intervalLength / 2, match.Track2Time.Ticks + intervalLength / 2));
+                match.Track2.CreateAudioStream(), new Interval(match.Track2Time.Ticks - intervalLength / 2, match.Track2Time.Ticks + intervalLength / 2),
+                progressMonitor);
             Debug.WriteLine("CC: " + match + ": " + offset + " (" + sw.Elapsed + ")");
             match.Track2.Offset -= offset;
         }
@@ -175,7 +176,7 @@ namespace AudioAlign.Audio.Matching {
             }
         }
 
-        public static float Correlate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2) {
+        public static float Correlate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor) {
             if (i1.Length != i2.Length) {
                 throw new ArgumentException("interval lengths do not match");
             }
@@ -183,7 +184,7 @@ namespace AudioAlign.Audio.Matching {
             s1 = PrepareStream(s1, 11050);
             s2 = PrepareStream(s2, 11050);
 
-            ProgressReporter progress = ProgressMonitor.GlobalInstance.BeginTask("calculating correlation", true);
+            IProgressReporter progress = progressMonitor.BeginTask("calculating correlation", true);
 
             float seconds = (float)(i1.Length / 10d / 1000 / 1000);
             int sampleRate = s1.Properties.SampleRate;
@@ -206,7 +207,7 @@ namespace AudioAlign.Audio.Matching {
             progress.ReportProgress(100);
 
             Debug.WriteLine("C result: " + r);
-            ProgressMonitor.GlobalInstance.EndTask(progress);
+            progress.Finish();
             return r;
         }
 

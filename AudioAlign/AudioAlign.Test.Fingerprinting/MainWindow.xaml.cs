@@ -58,7 +58,7 @@ namespace AudioAlign.Test.Fingerprinting {
                     IAudioStream audioStream = audioTrack.CreateAudioStream();
 
                     Task.Factory.StartNew(() => {
-                        ProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating sub-fingerprints for " + audioTrack.FileInfo.Name, true);
+                        IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating sub-fingerprints for " + audioTrack.FileInfo.Name, true);
 
                         FingerprintGenerator fpg = new FingerprintGenerator(audioTrack, 3, true);
                         int subFingerprintsCalculated = 0;
@@ -70,7 +70,7 @@ namespace AudioAlign.Test.Fingerprinting {
 
                         fpg.Generate();
                         //store.Analyze();
-                        ProgressMonitor.GlobalInstance.EndTask(progressReporter);
+                        progressReporter.Finish();
                     });
                 }
             }
