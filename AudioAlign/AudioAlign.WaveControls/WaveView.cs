@@ -148,9 +148,9 @@ namespace AudioAlign.WaveControls {
                             // TODO extend for multichannel (needs implementation of a multichannel balance adjustment control)
                             float balanceFactor = 1;
                             if(channel == 0) {
-                                balanceFactor = AudioTrack.Balance < 0 ? 1 - AudioTrack.Balance : 1;
+                                balanceFactor = AudioTrack.Balance < 0 ? 1 : 1 - AudioTrack.Balance;
                             } else if(channel == 1) {
-                                balanceFactor = AudioTrack.Balance > 0 ? 1 + AudioTrack.Balance : 1;
+                                balanceFactor = AudioTrack.Balance > 0 ? 1 : 1 + AudioTrack.Balance;
                             }
 
                             Drawing waveform = renderer.Render(samples[channel], sampleCount, drawingWidthAligned, (int)channelHeight, AudioTrack.Volume * balanceFactor);

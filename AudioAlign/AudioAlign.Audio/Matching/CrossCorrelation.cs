@@ -124,7 +124,7 @@ namespace AudioAlign.Audio.Matching {
             match.Track2.Offset -= offset;
         }
 
-        public static unsafe float Correlate(float* x, float* y, int length) {
+        public static unsafe double Correlate(float* x, float* y, int length) {
             int n = length;
 
             // the following code is taken and adapted from: http://local.wasp.uwa.edu.au/~pbourke/miscellaneous/correlate/
@@ -154,10 +154,10 @@ namespace AudioAlign.Audio.Matching {
                 sxy += (x[i] - mx) * (y[i] - my);
             }
             
-            return (float)(sxy / denom);
+            return sxy / denom;
         }
 
-        public static unsafe float Correlate(float[] x, float[] y) {
+        public static unsafe double Correlate(float[] x, float[] y) {
             if (x.Length != y.Length) {
                 throw new ArgumentException("interval lengths do not match");
             }
@@ -166,7 +166,7 @@ namespace AudioAlign.Audio.Matching {
             }
         }
 
-        public static float Correlate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor) {
+        public static double Correlate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor) {
             if (i1.Length != i2.Length) {
                 throw new ArgumentException("interval lengths do not match");
             }
@@ -192,7 +192,7 @@ namespace AudioAlign.Audio.Matching {
             TimeSpan timeOfDataRead = DateTime.Now - timeBeforeDataRead;
             Debug.WriteLine("C data read duration: " + timeOfDataRead);
 
-            float r = Correlate(x, y);
+            double r = Correlate(x, y);
 
             progress.ReportProgress(100);
 

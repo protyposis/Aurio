@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace AudioAlign.Audio.Matching {
     public class Analysis {
 
-        public static void AnalyzeAlignment(TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, ProgressMonitor progressMonitor) {
+        public static void AnalyzeAlignment(TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, int sampleRate, ProgressMonitor progressMonitor) {
             if (audioTracks.Count < 2) {
                 // there must be at least 2 tracks, otherwise there's nothing to compare
                 return;
@@ -26,7 +26,7 @@ namespace AudioAlign.Audio.Matching {
             TimeSpan start = TimeSpan.MaxValue;
             TimeSpan end = TimeSpan.MinValue;
             foreach (AudioTrack audioTrack in audioTracks) {
-                streams.Add(CrossCorrelation.PrepareStream(audioTrack.CreateAudioStream(), 11050));
+                streams.Add(CrossCorrelation.PrepareStream(audioTrack.CreateAudioStream(), 22050));
                 if (audioTrack.Offset < start) {
                     start = audioTrack.Offset;
                 }
@@ -49,12 +49,12 @@ namespace AudioAlign.Audio.Matching {
             byte[] y = new byte[windowLengthInBytes];
             long positionX;
             long positionY;
-            float sumNegative = 0;
-            float sumPositive = 0;
+            double sumNegative = 0;
+            double sumPositive = 0;
             int countNegative = 0;
             int countPositive = 0;
-            float min = float.MaxValue;
-            float max = float.MinValue;
+            double min = float.MaxValue;
+            double max = float.MinValue;
             int measurementPoints = 0;
             unsafe {
                 fixed (byte* xB = &x[0], yB = &y[0]) {
@@ -74,7 +74,7 @@ namespace AudioAlign.Audio.Matching {
                                         streams[j].Position = positionY;
                                         StreamUtil.ForceRead(streams[j], y, 0, windowLengthInBytes);
 
-                                        float val = CrossCorrelation.Correlate(xF, yF, windowLengthInSamples);
+                                        double val = CrossCorrelation.Correlate(xF, yF, windowLengthInSamples);
                                         if (val > 0) {
                                             sumPositive += val;
                                             countPositive++;
@@ -105,11 +105,13 @@ namespace AudioAlign.Audio.Matching {
                 (sumPositive + sumNegative) / (countPositive + countNegative), sumPositive / countPositive,
                 sumNegative / countNegative, (sumPositive + (sumNegative * -1)) / (countPositive + countNegative),
                 min, max, measurementPoints);
+            double score = (sumPositive + (sumNegative * -1)) / measurementPoints;
+            Debug.WriteLine("Score: {0} => {1}%", score, Math.Round(score * 100));
         }
 
-        public static void AnalyzeAlignmentAsync(TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, ProgressMonitor progressMonitor) {
+        public static void AnalyzeAlignmentAsync(TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, int sampleRate, ProgressMonitor progressMonitor) {
             Task.Factory.StartNew(() => {
-                AnalyzeAlignment(audioTracks, windowLength, intervalLength, progressMonitor);
+                AnalyzeAlignment(audioTracks, windowLength, intervalLength, sampleRate, progressMonitor);
             });
         }
     }
