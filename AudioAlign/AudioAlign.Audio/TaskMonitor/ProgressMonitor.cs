@@ -17,6 +17,7 @@ namespace AudioAlign.Audio.TaskMonitor {
             private double progress;
             private bool isProgressReporting;
             private bool isFinished;
+            private int prevProgress;
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -24,6 +25,7 @@ namespace AudioAlign.Audio.TaskMonitor {
                 this.monitor = monitor;
                 this.isProgressReporting = false;
                 this.isFinished = false;
+                this.prevProgress = -1;
             }
 
             public ProgressReporter(ProgressMonitor monitor, string name)
@@ -62,6 +64,11 @@ namespace AudioAlign.Audio.TaskMonitor {
 
                 this.progress = progress;
                 OnPropertyChanged("Progress");
+
+                if (prevProgress != (int)progress) {
+                    prevProgress = (int)progress;
+                    Debug.WriteLine(Name + ": " + prevProgress + "%");
+                }
             }
 
             public void Finish() {
@@ -85,7 +92,6 @@ namespace AudioAlign.Audio.TaskMonitor {
         private static ProgressMonitor singletonInstance = null;
 
         private List<ProgressReporter> reporters;
-        private Dictionary<ProgressReporter, int> reporterProgress;
 
         private Timer timer;
 
@@ -109,7 +115,6 @@ namespace AudioAlign.Audio.TaskMonitor {
 
         public ProgressMonitor() {
             reporters = new List<ProgressReporter>();
-            reporterProgress = new Dictionary<ProgressReporter, int>();
             timer = new Timer(100) { Enabled = false };
             timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
             childMonitors = new List<ProgressMonitor>();
@@ -138,8 +143,6 @@ namespace AudioAlign.Audio.TaskMonitor {
                 OnProcessingStarted();
             }
             reporters.Add(reporter);
-            reporter.PropertyChanged += progressReporter_PropertyChanged;
-            reporterProgress.Add(reporter, 0);
             OnTaskBegun(reporter);
             return reporter;
         }
@@ -147,9 +150,7 @@ namespace AudioAlign.Audio.TaskMonitor {
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void EndTask(ProgressReporter reporter) {
             OnTaskEnded(reporter);
-            reporter.PropertyChanged -= progressReporter_PropertyChanged;
             reporters.Remove(reporter);
-            reporterProgress.Remove(reporter);
             if (reporters.Count == 0) {
                 OnProcessingFinished();
             }
@@ -177,14 +178,6 @@ namespace AudioAlign.Audio.TaskMonitor {
 
         public bool Active {
             get { return reporters.Count > 0; }
-        }
-
-        private void progressReporter_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-            ProgressReporter senderTaskStatus = (ProgressReporter)sender;
-            if (reporterProgress[senderTaskStatus] != (int)senderTaskStatus.Progress) {
-                reporterProgress[senderTaskStatus] = (int)senderTaskStatus.Progress;
-                Debug.WriteLine(senderTaskStatus.Name + ": " + reporterProgress[senderTaskStatus] + "%");
-            }
         }
 
         private void OnProcessingStarted() {

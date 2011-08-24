@@ -51,6 +51,11 @@ namespace AudioAlign.Audio.Matching {
             long positionY;
             float sumNegative = 0;
             float sumPositive = 0;
+            int countNegative = 0;
+            int countPositive = 0;
+            float min = float.MaxValue;
+            float max = float.MinValue;
+            int measurementPoints = 0;
             unsafe {
                 fixed (byte* xB = &x[0], yB = &y[0]) {
                     float* xF = (float*)xB;
@@ -72,11 +77,20 @@ namespace AudioAlign.Audio.Matching {
                                         float val = CrossCorrelation.Correlate(xF, yF, windowLengthInSamples);
                                         if (val > 0) {
                                             sumPositive += val;
+                                            countPositive++;
                                         }
                                         else {
                                             sumNegative += val;
+                                            countNegative++;
+                                        }
+                                        if (min > val) {
+                                            min = val;
+                                        }
+                                        if (max < val) {
+                                            max = val;
                                         }
                                         Debug.WriteLine("{0,2}->{1,2}: {2}", i, j, val);
+                                        measurementPoints++;
                                     }
                                 }
                             }
@@ -86,8 +100,11 @@ namespace AudioAlign.Audio.Matching {
                 }
             }
             reporter.Finish();
-            Debug.WriteLine("Finished. sum: {0}, sum+: {1}, sum-: {2}, sumAbs: {3}", 
-                sumPositive + sumNegative, sumPositive, sumNegative, sumPositive + (sumNegative * -1));
+            Debug.WriteLine("Finished. sum: {0}, sum+: {1}, sum-: {2}, sumAbs: {3}, avg: {4}, avg+: {5}, avg-: {6}, avgAbs: {7}, min: {8}, max: {9}, points: {10}", 
+                sumPositive + sumNegative, sumPositive, sumNegative, sumPositive + (sumNegative * -1), 
+                (sumPositive + sumNegative) / (countPositive + countNegative), sumPositive / countPositive,
+                sumNegative / countNegative, (sumPositive + (sumNegative * -1)) / (countPositive + countNegative),
+                min, max, measurementPoints);
         }
 
         public static void AnalyzeAlignmentAsync(TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, ProgressMonitor progressMonitor) {

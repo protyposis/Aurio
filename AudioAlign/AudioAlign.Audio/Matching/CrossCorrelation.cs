@@ -98,17 +98,7 @@ namespace AudioAlign.Audio.Matching {
                 }
             }
 
-            float test = Correlate(s1, i1, s2, i2, progressMonitor);
-            //float test = Correlate(x, y);
-            Debug.WriteLine("correlation = {0}, r[zero] = {1}", test, r[maxdelay]);
-            for (int i = 0; i < r.Length; i++) {
-                if (r[i] == test) {
-                    Debug.WriteLine("!!!!!! " + i);
-                    break;
-                }
-            }
-
-                Debug.WriteLine("max val: {0} index: {1} adjusted index: {2}", maxval, maxindex, maxindex - maxdelay);
+            Debug.WriteLine("max val: {0} index: {1} adjusted index: {2}", maxval, maxindex, maxindex - maxdelay);
             TimeSpan offset = new TimeSpan((long)((maxindex - maxdelay) / (float)sampleRate * 1000 * 1000 * 10));
             Debug.WriteLine("peak offset @ " + offset);
             progress.Finish();
