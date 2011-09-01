@@ -11,17 +11,20 @@ using System.Threading.Tasks;
 namespace AudioAlign.Audio.Matching {
     public class Analysis {
 
+        private AnalysisMode type;
         private TrackList<AudioTrack> audioTracks;
         private TimeSpan windowLength;
         private TimeSpan intervalLength;
         private int sampleRate;
         private ProgressMonitor progressMonitor;
 
+        private unsafe Func<byte[], byte[], double> analyzeSection;
+
         public event EventHandler Started;
         public event EventHandler<AnalysisEventArgs> WindowAnalysed;
         public event EventHandler<AnalysisEventArgs> Finished;
 
-        public Analysis(TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, int sampleRate) {
+        public Analysis(AnalysisMode type, TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, int sampleRate) {
             if (audioTracks.Count < 2) {
                 // there must be at least 2 tracks, otherwise there's nothing to compare
                 throw new Exception("there must be at least 2 audio tracks");
@@ -30,16 +33,28 @@ namespace AudioAlign.Audio.Matching {
                 throw new ArgumentException("intervalLength must be at least as long as the windowLength");
             }
 
+            this.type = type;
             this.audioTracks = audioTracks;
             this.windowLength = windowLength;
             this.intervalLength = intervalLength;
             this.sampleRate = sampleRate;
             this.progressMonitor = ProgressMonitor.GlobalInstance;
+
+            switch (type) {
+                case AnalysisMode.Correlation:
+                    analyzeSection = CrossCorrelation.Correlate;
+                    break;
+                case AnalysisMode.InvertedInterference:
+                    analyzeSection = Interference.DestructiveInverted;
+                    break;
+                default:
+                    throw new NotImplementedException(type + " not implemented");
+            }
         }
 
-        public Analysis(TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, int sampleRate,
+        public Analysis(AnalysisMode type, TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, int sampleRate,
             ProgressMonitor progressMonitor)
-            : this(audioTracks, windowLength, intervalLength, sampleRate) {
+            : this(type, audioTracks, windowLength, intervalLength, sampleRate) {
                 this.progressMonitor = progressMonitor;
         }
 
@@ -83,69 +98,65 @@ namespace AudioAlign.Audio.Matching {
             int countPositive = 0;
             double min = 0;
             double max = 0;
-            unsafe {
-                fixed (byte* xB = &x[0], yB = &y[0]) {
-                    float* xF = (float*)xB;
-                    float* yF = (float*)yB;
-                    for (long position = 0; position < analysisIntervalLength; position += intervalLengthInBytes) {
-                        double windowSumNegative = 0;
-                        double windowSumPositive = 0;
-                        int windowCountNegative = 0;
-                        int windowCountPositive = 0;
-                        double windowMin = 0;
-                        double windowMax = 0;
 
-                        Debug.WriteLine("Analyzing {0} @ {1} / {2}", intervalLengthInBytes, position, analysisIntervalLength);
-                        // at each position in the analysis interval, compare each stream with each other
-                        for (int i = 0; i < streams.Count; i++) {
-                            positionX = position - streamOffsets[i];
-                            if (positionX >= 0 && positionX < streams[i].Length) {
-                                streams[i].Position = positionX;
-                                StreamUtil.ForceRead(streams[i], x, 0, windowLengthInBytes);
-                                for (int j = i + 1; j < streams.Count; j++) {
-                                    positionY = position - streamOffsets[j];
-                                    if (positionY >= 0 && positionY < streams[j].Length) {
-                                        streams[j].Position = positionY;
-                                        StreamUtil.ForceRead(streams[j], y, 0, windowLengthInBytes);
+            for (long position = 0; position < analysisIntervalLength; position += intervalLengthInBytes) {
+                double windowSumNegative = 0;
+                double windowSumPositive = 0;
+                int windowCountNegative = 0;
+                int windowCountPositive = 0;
+                double windowMin = 0;
+                double windowMax = 0;
 
-                                        double val = CrossCorrelation.Correlate(xF, yF, windowLengthInSamples);
-                                        if (val > 0) {
-                                            windowSumPositive += val;
-                                            windowCountPositive++;
-                                        }
-                                        else {
-                                            windowSumNegative += val;
-                                            windowCountNegative++;
-                                        }
-                                        if (windowMin > val) {
-                                            windowMin = val;
-                                        }
-                                        if (windowMax < val) {
-                                            windowMax = val;
-                                        }
-                                        Debug.WriteLine("{0,2}->{1,2}: {2}", i, j, val);
-                                    }
+                Debug.WriteLine("Analyzing {0} @ {1} / {2}", intervalLengthInBytes, position, analysisIntervalLength);
+                // at each position in the analysis interval, compare each stream with each other
+                for (int i = 0; i < streams.Count; i++) {
+                    positionX = position - streamOffsets[i];
+                    if (positionX >= 0 && positionX < streams[i].Length) {
+                        streams[i].Position = positionX;
+                        StreamUtil.ForceRead(streams[i], x, 0, windowLengthInBytes);
+                        for (int j = i + 1; j < streams.Count; j++) {
+                            positionY = position - streamOffsets[j];
+                            if (positionY >= 0 && positionY < streams[j].Length) {
+                                streams[j].Position = positionY;
+                                StreamUtil.ForceRead(streams[j], y, 0, windowLengthInBytes);
+
+                                double val = analyzeSection(x, y);
+                                if (val > 0) {
+                                    windowSumPositive += val;
+                                    windowCountPositive++;
                                 }
+                                else {
+                                    windowSumNegative += val;
+                                    windowCountNegative++;
+                                }
+                                if (windowMin > val) {
+                                    windowMin = val;
+                                }
+                                if (windowMax < val) {
+                                    windowMax = val;
+                                }
+                                Debug.WriteLine("{0,2}->{1,2}: {2}", i, j, val);
                             }
                         }
-                        sumPositive += windowSumPositive;
-                        countPositive += windowCountPositive;
-                        sumNegative += windowSumNegative;
-                        countNegative += windowCountNegative;
-                        if (min > windowMin) {
-                            min = windowMin;
-                        }
-                        if (max < windowMax) {
-                            max = windowMax;
-                        }
-                        reporter.ReportProgress((double)position / analysisIntervalLength * 100);
-                        OnWindowAnalyzed(start + TimeUtil.BytesToTimeSpan(position, streams[0].Properties),
-                            windowCountPositive, windowCountNegative, 
-                            windowMin, windowMax, 
-                            windowSumPositive, windowSumNegative);
                     }
                 }
+                sumPositive += windowSumPositive;
+                countPositive += windowCountPositive;
+                sumNegative += windowSumNegative;
+                countNegative += windowCountNegative;
+                if (min > windowMin) {
+                    min = windowMin;
+                }
+                if (max < windowMax) {
+                    max = windowMax;
+                }
+                reporter.ReportProgress((double)position / analysisIntervalLength * 100);
+                OnWindowAnalyzed(start + TimeUtil.BytesToTimeSpan(position, streams[0].Properties),
+                    windowCountPositive, windowCountNegative, 
+                    windowMin, windowMax, 
+                    windowSumPositive, windowSumNegative);
             }
+
             reporter.Finish();
             Debug.WriteLine("Finished. sum: {0}, sum+: {1}, sum-: {2}, sumAbs: {3}, avg: {4}, avg+: {5}, avg-: {6}, avgAbs: {7}, min: {8}, max: {9}, points: {10}", 
                 sumPositive + sumNegative, sumPositive, sumNegative, sumPositive + (sumNegative * -1), 

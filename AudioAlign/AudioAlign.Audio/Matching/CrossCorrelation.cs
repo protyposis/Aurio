@@ -162,7 +162,16 @@ namespace AudioAlign.Audio.Matching {
                 throw new ArgumentException("interval lengths do not match");
             }
             fixed(float* xF = &x[0], yF = &y[0]) {
-                return Correlate(xF, yF, x.Length / sizeof(float));
+                return Correlate(xF, yF, x.Length);
+            }
+        }
+
+        public static unsafe double Correlate(byte[] x, byte[] y) {
+            if (x.Length != y.Length) {
+                throw new ArgumentException("interval lengths do not match");
+            }
+            fixed (byte* xB = &x[0], yB = &y[0]) {
+                return Correlate((float*)xB, (float*)yB, x.Length / sizeof(float));
             }
         }
 
