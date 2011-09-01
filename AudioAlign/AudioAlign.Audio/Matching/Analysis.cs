@@ -209,9 +209,9 @@ namespace AudioAlign.Audio.Matching {
 
         public int MeasurementPoints { get { return MeasurementPointsPositive + MeasurementPointsNegative; } }
         public double SumAbsolute { get { return SumPositive - SumNegative; } }
-        public double AveragePositive { get { return SumPositive / MeasurementPointsPositive; } }
-        public double AverageNegative { get { return SumNegative / MeasurementPointsNegative; } }
-        public double AverageAbsolute { get { return SumAbsolute / MeasurementPoints; } }
-        public double Score { get { return SumAbsolute / MeasurementPoints; } }
+        public double AveragePositive { get { return MeasurementPointsPositive != 0 ? SumPositive / MeasurementPointsPositive : 0; } }
+        public double AverageNegative { get { return MeasurementPointsNegative != 0 ? SumNegative / MeasurementPointsNegative : 0; } }
+        public double AverageAbsolute { get { return MeasurementPoints != 0 ? SumAbsolute / MeasurementPoints : 0; } }
+        public double Score { get { return MeasurementPoints != 0 ? SumAbsolute / MeasurementPoints : 0; } }
     }
 }
