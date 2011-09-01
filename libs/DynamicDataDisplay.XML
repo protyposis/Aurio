@@ -1,0 +1,3106 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DynamicDataDisplay</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Common.D3Collection`1">
+            <summary>
+            This is a base class for some DynamicDataDisplay collections.
+            It provides means to be notified about item adding and added events, which enables successors to, for example,
+            check if adding item is not equal to null.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.D3Collection`1.OnItemAdding(`0)">
+            <summary>
+            Called before item added to collection. Enables to perform validation.
+            </summary>
+            <param name="item">The adding item.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.D3Collection`1.OnItemAdded(`0)">
+            <summary>
+            Called when item is added.
+            </summary>
+            <param name="item">The added item.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.D3Collection`1.OnItemRemoving(`0)">
+            <summary>
+            Called when item is being removed, but before it is actually removed.
+            </summary>
+            <param name="item">The removing item.</param>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.CoordinateTransform">
+            <summary>
+            A central class in 2d coordinate transformation in DynamicDataDisplay.
+            Provides methods to transform point from one coordinate system to another.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransform.WithDataTransform(Microsoft.Research.DynamicDataDisplay.DataTransform)">
+            <summary>
+            Creates a new instance of CoordinateTransform with the given data transform.
+            </summary>
+            <param name="dataTransform">The data transform.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransform.DataToScreen(System.Windows.Point)">
+            <summary>
+            Transforms point from data coordinates to screen.
+            </summary>
+            <param name="dataPoint">The point in data coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransform.ScreenToData(System.Windows.Point)">
+            <summary>
+            Transforms point from screen coordinates to data coordinates.
+            </summary>
+            <param name="screenPoint">The point in screen coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransform.ViewportToScreen(System.Windows.Point)">
+            <summary>
+            Transforms point from viewport coordinates to screen coordinates.
+            </summary>
+            <param name="viewportPoint">The point in viewport coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransform.ScreenToViewport(System.Windows.Point)">
+            <summary>
+            Transforms point from screen coordinates to viewport coordinates.
+            </summary>
+            <param name="screenPoint">The point in screen coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.CoordinateTransform.ViewportRect">
+            <summary>
+            Gets the viewport rectangle.
+            </summary>
+            <value>The viewport rect.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.CoordinateTransform.ScreenRect">
+            <summary>
+            Gets the screen rectangle.
+            </summary>
+            <value>The screen rect.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.CoordinateTransform.DataTransform">
+            <summary>
+            Gets the data transform.
+            </summary>
+            <value>The data transform.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataSources.EmptyDataSource">
+            <summary>
+            Empty data source - for testing purposes, represents data source with 0 points inside.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource">
+            <summary>Data source that returns sequence of 2D points.</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource.GetEnumerator(System.Windows.DependencyObject)">
+            <summary>Returns object to enumerate points in source.</summary>
+        </member>
+        <member name="E:Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource.DataChanged">
+            <summary>This event is raised when contents of source are changed.</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.DataSources.IPointEnumerator.MoveNext">
+            <summary>Move to next point in sequence</summary>
+            <returns>True if successfully moved to next point 
+            or false if end of sequence is reached</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.DataSources.IPointEnumerator.GetCurrent(System.Windows.Point@)">
+            <summary>Stores current value(s) in given point.</summary>
+            <param name="p">Reference to store value</param>
+            <remarks>Depending on implementing class this method may set only X or Y
+            fiels in specified point. That's why GetCurrent is a regular method and
+            not a property as in stardard enumerators</remarks>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Segment">
+            <summary>
+            Represents a segment with start and end points bound to viewport coordinates.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.ViewportShape">
+            <summary>
+            ViewportShape is a base class for simple shapes with viewport-bound coordinates.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.IPlotterElement">
+            <summary>
+            Main interface of DynamicDataDisplay - each item that is going to be added to Plotter should implement it.
+            Contains methods that are called by parent plotter when item is added to it or removed from it.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.IPlotterElement.OnPlotterAttached(Microsoft.Research.DynamicDataDisplay.Plotter)">
+            <summary>
+            Called when parent plotter is attached.
+            Allows to, for example, add custom UI parts to ChartPlotter's visual tree or subscribe to ChartPlotter's events.
+            </summary>
+            <param name="plotter">The parent plotter.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.IPlotterElement.OnPlotterDetaching(Microsoft.Research.DynamicDataDisplay.Plotter)">
+            <summary>
+            Called when item is being detached from parent plotter.
+            Allows to remove added in OnPlotterAttached method UI parts or unsubscribe from events.
+            This should be done as each chart can be added only one Plotter at one moment of time.
+            </summary>
+            <param name="plotter">The plotter.</param>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.IPlotterElement.Plotter">
+            <summary>
+            Gets the parent plotter of chart.
+            Should be equal to null if item is not connected to any plotter.
+            </summary>
+            <value>The plotter.</value>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.ViewportShape.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.ViewportShape"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Segment.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Segment"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Segment.#ctor(System.Windows.Point,System.Windows.Point)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Segment"/> class.
+            </summary>
+            <param name="startPoint">The start point of segment.</param>
+            <param name="endPoint">The end point of segment.</param>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.Segment.StartPointProperty">
+            <summary>
+            Identifies the StartPoint dependency property.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.Segment.EndPointProperty">
+            <summary>
+            Identifies the EndPoint dependency property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Segment.StartPoint">
+            <summary>
+            Gets or sets the start point of segment.
+            </summary>
+            <value>The start point.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Segment.EndPoint">
+            <summary>
+            Gets or sets the end point of segment.
+            </summary>
+            <value>The end point.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Navigation.RectangleSelectionAdorner">
+            <summary>Helper class to draw semitransparent rectangle over the
+            selection area</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Navigation.KeyboardNavigation">
+            <summary>Provides keyboard navigation around viewport of ChartPlotter.</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Navigation.KeyboardNavigation.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Navigation.KeyboardNavigation"/> class.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.MinorTickInfo`1">
+            <summary>
+            Contains information about one minor tick - its value (relative size) and its tick.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.ITicksInfo`1">
+            <summary>
+            Contains data for all generated ticks.
+            Used by TicksLabelProvider.
+            </summary>
+            <typeparam name="T">Type of axis tick.</typeparam>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.ITicksInfo`1.Ticks">
+            <summary>
+            Gets the array of axis ticks.
+            </summary>
+            <value>The ticks.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.ITicksInfo`1.TickSizes">
+            <summary>
+            Gets the tick sizes.
+            </summary>
+            <value>The tick sizes.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.ITicksInfo`1.Info">
+            <summary>
+            Gets the additional information, added to ticks info and specifying range's features.
+            </summary>
+            <value>The info.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.TicksInfo`1.Ticks">
+            <summary>
+            Gets the array of axis ticks.
+            </summary>
+            <value>The ticks.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.TicksInfo`1.TickSizes">
+            <summary>
+            Gets the tick sizes.
+            </summary>
+            <value>The tick sizes.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.TicksInfo`1.Info">
+            <summary>
+            Gets the additional information, added to ticks info and specifying range's features.
+            </summary>
+            <value>The info.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.ITicksProvider`1">
+            <summary>
+            Base interface for ticks generator.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.ITicksProvider`1.GetTicks(Microsoft.Research.DynamicDataDisplay.Charts.Range{`0},System.Int32)">
+            <summary>
+            Generates ticks for given range and preferred ticks count.
+            </summary>
+            <param name="range">The range.</param>
+            <param name="ticksCount">The ticks count.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.ITicksProvider`1.DecreaseTickCount(System.Int32)">
+            <summary>
+            Decreases the tick count.
+            Returned value should be later passed as ticksCount parameter in GetTicks method.
+            </summary>
+            <param name="ticksCount">The ticks count.</param>
+            <returns>New ticks count.</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.ITicksProvider`1.IncreaseTickCount(System.Int32)">
+            <summary>
+            Increases the tick count.
+            Returned value should be later passed as ticksCount parameter in GetTicks method.
+            </summary>
+            <param name="ticksCount">The ticks count.</param>
+            <returns>New ticks count.</returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.ITicksProvider`1.MinorProvider">
+            <summary>
+            Gets the minor ticks provider, used to generate ticks between each two adjacent ticks.
+            </summary>
+            <value>The minor provider.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.ITicksProvider`1.MayorProvider">
+            <summary>
+            Gets the mayor provider, used to generate mayor ticks - for example, years for common ticks as months.
+            </summary>
+            <value>The mayor provider.</value>
+        </member>
+        <member name="E:Microsoft.Research.DynamicDataDisplay.Charts.ITicksProvider`1.Changed">
+            <summary>
+            Occurs when properties of ticks provider changeds.
+            Notifies axis to rebuild its view.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.DateTimeAxis">
+            <summary>
+            Base class for DateTime axis.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1">
+            <summary>
+            Represents a base class for all axes in ChartPlotter.
+            Contains a real UI representation of axis - AxisControl, and means to adjust number of ticks, algorythms of their generating and 
+            look of ticks' labels.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.ITypedAxis`1">
+            <summary>
+            Describes axis as having ticks type.
+            Provides access to some typed properties.
+            </summary>
+            <typeparam name="T">Axis tick's type.</typeparam>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.IAxis">
+            <summary>
+            Represents interface that is implemented by each axis and provides uniform access to some non-generic properties.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.IAxis.Placement">
+            <summary>
+            Gets or sets the axis placement.
+            </summary>
+            <value>The placement.</value>
+        </member>
+        <member name="E:Microsoft.Research.DynamicDataDisplay.Charts.IAxis.TicksChanged">
+            <summary>
+            Occurs when ticks are changed.
+            Used by AxisGrid.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.IAxis.ScreenTicks">
+            <summary>
+            Gets the screen coordinates of ticks.
+            Used by AxisGrid.
+            </summary>
+            <value>The screen ticks.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.IAxis.MinorScreenTicks">
+            <summary>
+            Gets the screen coordinates of minor ticks.
+            used by AxisGrid.
+            </summary>
+            <value>The minor screen ticks.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.ITypedAxis`1.TicksProvider">
+            <summary>
+            Gets the ticks provider.
+            </summary>
+            <value>The ticks provider.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.ITypedAxis`1.LabelProvider">
+            <summary>
+            Gets the label provider.
+            </summary>
+            <value>The label provider.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.ITypedAxis`1.ConvertFromDouble">
+            <summary>
+            Gets or sets the convertion of tick from double.
+            Should not be null.
+            </summary>
+            <value>The convert from double.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.ITypedAxis`1.ConvertToDouble">
+            <summary>
+            Gets or sets the convertion of tick to double.
+            Should not be null.
+            </summary>
+            <value>The convert to double.</value>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.#ctor(Microsoft.Research.DynamicDataDisplay.Charts.AxisControl{`0},System.Func{System.Double,`0},System.Func{`0,System.Double})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1"/> class.
+            </summary>
+            <param name="axisControl">The axis control.</param>
+            <param name="convertFromDouble">The convert from double.</param>
+            <param name="convertToDouble">The convert to double.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.Microsoft#Research#DynamicDataDisplay#IPlotterElement#OnPlotterDetaching(Microsoft.Research.DynamicDataDisplay.Plotter)">
+            <summary>
+            Called when item is being detached from parent plotter.
+            Allows to remove added in OnPlotterAttached method UI parts or unsubscribe from events.
+            This should be done as each chart can be added only one Plotter at one moment of time.
+            </summary>
+            <param name="plotter">The plotter.</param>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.IsDefaultAxis">
+            <summary>
+            Gets or sets a value indicating whether this axis is default axis.
+            ChartPlotter's AxisGrid gets axis ticks to display from two default axes - horizontal and vertical.
+            </summary>
+            <value>
+            	<c>true</c> if this instance is default axis; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.Placement">
+            <summary>
+            Gets or sets the placement of axis - place in ChartPlotter where it should be placed.
+            </summary>
+            <value>The placement.</value>
+        </member>
+        <member name="E:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.TicksChanged">
+            <summary>
+            Occurs when ticks changes.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.ScreenTicks">
+            <summary>
+            Gets the screen coordinates of axis ticks.
+            </summary>
+            <value>The screen ticks.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.MinorScreenTicks">
+            <summary>
+            Gets the screen coordinates of minor ticks.
+            </summary>
+            <value>The minor screen ticks.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.AxisControl">
+            <summary>
+            Gets the axis control - actual UI representation of axis.
+            </summary>
+            <value>The axis control.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.TicksProvider">
+            <summary>
+            Gets the ticks provider, which is used to generate ticks in given range.
+            </summary>
+            <value>The ticks provider.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.LabelProvider">
+            <summary>
+            Gets or sets the label provider, used to create UI look of axis ticks.
+            
+            Should not be null.
+            </summary>
+            <value>The label provider.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.LabelStringFormat">
+            <summary>
+            Gets or sets the label string format, used to create simple formats of each tick's label, such as
+            changing tick label from "1.2" to "$1.2".
+            Should be in format "*{0}*", where '*' is any number of any chars.
+            
+            If value is null, format string will not be used.
+            </summary>
+            <value>The label string format.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.ShowMinorTicks">
+            <summary>
+            Gets or sets a value indicating whether to show minor ticks.
+            </summary>
+            <value><c>true</c> if show minor ticks; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.ShowMayorLabels">
+            <summary>
+            Gets or sets a value indicating whether to show mayor labels.
+            </summary>
+            <value><c>true</c> if show mayor labels; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.ConvertFromDouble">
+            <summary>
+            Gets or sets the delegate that is used to create each tick from double.
+            Should not be null.
+            </summary>
+            <value>The convert from double.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisBase`1.ConvertToDouble">
+            <summary>
+            Gets or sets the delegate that is used to convert each tick to double.
+            Should not be null.
+            </summary>
+            <value>The convert to double.</value>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.DateTimeAxis.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.DateTimeAxis"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.DateTimeAxis.SetConversion(System.Double,System.DateTime,System.Double,System.DateTime)">
+            <summary>
+            Sets the conversion of ticks.
+            </summary>
+            <param name="min">The minimal double value.</param>
+            <param name="minDate">The minimal date, corresponding to minimal double value.</param>
+            <param name="max">The maximal double value.</param>
+            <param name="maxDate">The maximal date, correspondong to maximal double value.</param>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1">
+            <summary>
+            Defines a base class for axis UI representation.
+            Contains a number of properties that can be used to adjust ticks set and their look.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.GetBetterPlacement(Microsoft.Research.DynamicDataDisplay.Charts.AxisPlacement)">
+            <summary>
+            This conversion is performed to make horizontal one-string and two-string labels
+            stay at one height.
+            </summary>
+            <param name="placement"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.Placement">
+            <summary>
+            Gets or sets the placement of axis control.
+            Relative positioning of parts of axis depends on this value.
+            </summary>
+            <value>The placement.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.Range">
+            <summary>
+            Gets or sets the range, which ticks are generated for.
+            </summary>
+            <value>The range.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.ShowMinorTicks">
+            <summary>
+            Gets or sets a value indicating whether to show minor ticks.
+            </summary>
+            <value><c>true</c> if show minor ticks; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.ShowMayorLabels">
+            <summary>
+            Gets or sets a value indicating whether to show mayor labels.
+            </summary>
+            <value><c>true</c> if show mayor labels; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.TicksProvider">
+            <summary>
+            Gets or sets the ticks provider - generator of ticks for given range.
+            
+            Should not be null.
+            </summary>
+            <value>The ticks provider.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.MayorLabelProvider">
+            <summary>
+            Gets or sets the mayor label provider, which creates labels for mayor ticks.
+            If null, mayor labels will not be shown.
+            </summary>
+            <value>The mayor label provider.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.LabelProvider">
+            <summary>
+            Gets or sets the label provider, which generates labels for axis ticks.
+            Should not be null.
+            </summary>
+            <value>The label provider.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.TicksPath">
+            <summary>
+            Gets the Path with ticks strokes.
+            </summary>
+            <value>The ticks path.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.TickSize">
+            <summary>
+            Gets or sets the size of main axis ticks.
+            </summary>
+            <value>The size of the tick.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.DrawTicksOnEmptyLabel">
+            <summary>
+            Gets or sets a value indicating whether to draw ticks on empty label.
+            </summary>
+            <value>
+            	<c>true</c> if draw ticks on empty label; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.IsStaticAxis">
+            <summary>
+            Gets or sets a value indicating whether this instance is static axis.
+            If axis is static, its labels from sides are shifted so that they are not clipped by axis bounds.
+            </summary>
+            <value>
+            	<c>true</c> if this instance is static axis; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.AxisControl`1.ConvertToDouble">
+            <summary>
+            Gets or sets the convertion of tick to double.
+            Should not be null.
+            </summary>
+            <value>The convert to double.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Filters.IPointsFilter">
+            <summary>Provides algorithm for filtering point lists in screen coordinates</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Filters.IPointsFilter.Filter(System.Collections.Generic.List{System.Windows.Point})">
+            <summary>Performs filtering</summary>
+            <param name="points">List of source points</param>
+            <returns>List of filtered points</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Filters.IPointsFilter.SetScreenRect(System.Windows.Rect)">
+            <summary>Sets visible rectangle in screen coordinates</summary>
+            <param name="rect">Screen rectangle</param>
+            <remarks>Should be invoked before first call to <see cref="M:Microsoft.Research.DynamicDataDisplay.Filters.IPointsFilter.Filter(System.Collections.Generic.List{System.Windows.Point})"/></remarks>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.PointMarkers.ShapeElementPointMarker">
+            <summary>Abstract class that extends ElementPointMarker and contains
+            marker property as Pen, Brush and Size</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.PointMarkers.ElementPointMarker">
+            <summary>Provides elements that represent markers along the graph</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.PointMarkers.ElementPointMarker.CreateMarker">
+            <summary>Creates marker element at specified point</summary>
+            <returns>UIElement representing marker</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.PointMarkers.ElementPointMarker.SetPosition(System.Windows.UIElement,System.Windows.Point)">
+            <summary>Moves specified marker so its center is located at specified screen point</summary>
+            <param name="marker">UIElement created using CreateMarker</param>
+            <param name="screenPoint">Point to center element around</param>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.PointMarkers.ShapeElementPointMarker.Size">
+            <summary>Size of marker in points</summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.PointMarkers.ShapeElementPointMarker.ToolTipText">
+            <summary>Tooltip to show when cursor on over</summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.PointMarkers.ShapeElementPointMarker.Pen">
+            <summary>Pen to outline marker</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.ChartPlotter">
+            <summary>Chart plotter is a plotter that renders axis and grid</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Plotter2D">
+            <summary>Control for plotting 2d images</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Plotter">
+            <summary>Plotter is a base control for displaying various graphs. It provides
+            means to draw chart itself and side space for axes, annotations, etc</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Plotter"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter.SaveScreenshot(System.String)">
+            <summary>Saves screenshot to file.</summary>
+            <param name="filePath">File path.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter.SaveScreenshotToStream(System.IO.Stream,System.String)">
+            <summary>
+            Saves screenshot to stream.
+            </summary>
+            <param name="stream">The stream.</param>
+            <param name="fileExtension">The file type extension.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter.CopyScreenshotToClipboard">
+            <summary>Copies the screenshot to clipboard.</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter.GetIsDefaultElement(System.Windows.DependencyObject)">
+            <summary>Gets a value whether specified graphics object is default to this plotter or not</summary>
+            <param name="obj">Graphics object to check</param>
+            <returns>True if it is default or false otherwise</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter.RemoveUserElements(System.Collections.Generic.IList{Microsoft.Research.DynamicDataDisplay.IPlotterElement})">
+            <summary>Removes all user graphs from given UIElementCollection, 
+            leaving only default graphs</summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Plotter.Children">
+            <summary>
+            Provides access to Plotter's children charts.
+            </summary>
+            <value>The children.</value>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter2D.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Plotter2D"/> class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Plotter2D.Viewport">
+            <summary>
+            Gets the viewport.
+            </summary>
+            <value>The viewport.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AboutWindow">
+            <summary>
+            Interaction logic for AboutWindow.xaml
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AboutWindow.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelTickInfo`1">
+            <summary>
+            Contains data for custom generation of tick's label.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelTickInfo`1.Tick">
+            <summary>
+            Gets or sets the tick.
+            </summary>
+            <value>The tick.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelTickInfo`1.Info">
+            <summary>
+            Gets or sets the additional info about range.
+            </summary>
+            <value>The info.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelTickInfo`1.Index">
+            <summary>
+            Gets or sets the index of tick in ticks array.
+            </summary>
+            <value>The index.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelProviderBase`1">
+            <summary>
+            Base class for all label providers.
+            Contains a number of properties that can be used to adjust generated labels.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelProviderBase`1.CreateLabels(Microsoft.Research.DynamicDataDisplay.Charts.ITicksInfo{`0})">
+            <summary>
+            Creates the labels by given ticks info.
+            </summary>
+            <param name="ticksInfo">The ticks info.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelProviderBase`1.SetCustomFormatter(System.Func{Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelTickInfo{`0},System.String})">
+            <summary>
+            Sets the custom formatter.
+            </summary>
+            <param name="formatter">The formatter.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelProviderBase`1.SetCustomView(System.Action{Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelTickInfo{`0},System.Windows.UIElement})">
+            <summary>
+            Sets the custom view.
+            </summary>
+            <param name="view">The view.</param>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelProviderBase`1.LabelStringFormat">
+            <summary>
+            Gets or sets the label string format.
+            </summary>
+            <value>The label string format.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelProviderBase`1.CustomFormatter">
+            <summary>
+            Gets or sets the custom formatter - delegate that can be called to create custom string representation of tick.
+            </summary>
+            <value>The custom formatter.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelProviderBase`1.CustomView">
+            <summary>
+            Gets or sets the custom view - delegate that is used to create a custom, non-default look of axis label.
+            Can be used to adjust some properties of generated label.
+            </summary>
+            <value>The custom view.</value>
+        </member>
+        <member name="E:Microsoft.Research.DynamicDataDisplay.Charts.Axes.LabelProviderBase`1.Changed">
+            <summary>
+            Occurs when label provider is changed.
+            Notifies axis to update its view.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Axes.CollectionLabelProvider`1.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Axes.CollectionLabelProvider`1"/> class with empty labels collection.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.ViewportRestrictions.PhysicalProportionsRestriction">
+            <summary>
+            Represents a restriction where actual visible rect's proportions depends on 
+            actual output rect's proportions.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.ViewportRestrictions.PhysicalProportionsRestriction.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.ViewportRestrictions.PhysicalProportionsRestriction"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.ViewportRestrictions.PhysicalProportionsRestriction.#ctor(System.Double)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.ViewportRestrictions.PhysicalProportionsRestriction"/> class with given proportion ratio.
+            </summary>
+            <param name="proportionRatio">The proportion ratio.</param>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.PointMarkers.TrianglePointMarker">
+            <summary>Class that renders triangular marker at every point of graph</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.PointMarkers.ShapePointMarker">
+            <summary>Abstract class that extends PointMarker and contains
+            marker property as Pen, Brush and Size</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.PointMarkers.PointMarker">
+            <summary>Renders markers along graph</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.PointMarkers.PointMarker.Render(System.Windows.Media.DrawingContext,System.Windows.Point)">
+            <summary>Renders marker on screen</summary>
+            <param name="dc">Drawing context to render marker on</param>
+            <param name="dataPoint">Point from data source</param>
+            <param name="screenPoint">Marker center coordinates on drawing context</param>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.PointMarkers.ShapePointMarker.Size">
+            <summary>Size of marker in points</summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.PointMarkers.ShapePointMarker.Pen">
+            <summary>Pen to outline marker</summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.DataSources.ObservableDataSource`1.collectionChanged">
+            <summary>True if collection was changed between SuspendUpdate and ResumeUpdate
+            or false otherwise</summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.DataSources.ObservableDataSource`1.updatesEnabled">
+            <summary>True if event should be raised on each collection change
+            or false otherwise</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.ViewportElement2D">
+            <summary>ViewportElement2D is intended to be a child of Viewport2D. Specifics
+            of ViewportElement2D is Viewport2D attached property</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.PlotterElement.OnPlotterAttached(Microsoft.Research.DynamicDataDisplay.Plotter)">
+            <summary>This method is invoked when element is attached to plotter. It is the place
+            to put additional controls to Plotter</summary>
+            <param name="plotter">Plotter for this element</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.PlotterElement.OnPlotterDetaching(Microsoft.Research.DynamicDataDisplay.Plotter)">
+            <summary>This method is invoked when element is being detached from plotter. If additional
+            controls were put on plotter in OnPlotterAttached method, they should be removed here</summary>
+            <remarks>This method is always called in pair with OnPlotterAttached</remarks>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.ViewportElement2D.CreateDefaultDescription">
+            <summary>
+            Creates the default description.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ViewportElement2D.Description">
+            <summary>
+            Gets or sets the description.
+            </summary>
+            <value>The description.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ViewportElement2D.IsTranslated">
+            <summary>
+            Gets a value indicating whether this instance is translated.
+            </summary>
+            <value>
+            	<c>true</c> if this instance is translated; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ViewportElement2D.ManualClip">
+            <summary>
+            Gets or sets a value indicating whether descendant graph class 
+            relies on autotic clipping by Viewport.Output or
+            does its own clipping.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ViewportElement2D.ManualTranslate">
+            <summary>
+            Gets or sets a value indicating whether descendant graph class
+            relies on automatic translation of it, or does its own.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ViewportElement2D.RenderTarget">
+            <summary>
+            Gets or sets a value indicating whether descendant graph class 
+            uses cached rendering of its content to image, or not.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.ElementMarkerPointsGraph.markers">
+            <summary>List with markers for all points</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.ElementMarkerPointsGraph.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.MarkerPointsGraph"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.ElementMarkerPointsGraph.#ctor(Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.MarkerPointsGraph"/> class.
+            </summary>
+            <param name="dataSource">The data source.</param>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.VerticalRange">
+            <summary>
+            Paints vertical filled and outlined range in viewport coordinates.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.RangeHighlight">
+            <summary>
+            Represents rectangle with corners bound to viewport coordinates.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.RangeHighlight.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.RangeHighlight"/> class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.RangeHighlight.Value1">
+            <summary>
+            Gets or sets the first value determining position of rectangle in viewport coordinates.
+            </summary>
+            <value>The value1.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.RangeHighlight.Value2">
+            <summary>
+            Gets or sets the second value determining position of rectangle in viewport coordinates.
+            </summary>
+            <value>The value2.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.RectangleHighlight">
+            <summary>
+            Represents a rectangle with corners bound to viewport coordinates.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.Palettes.IPalette.GetColor(System.Double)">
+            <summary>
+            Gets the color by interpolation coefficient.
+            </summary>
+            <param name="t">Interpolation coefficient, should belong to [0..1].</param>
+            <returns>Color.</returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineGenerationException">
+            <summary>
+            The exception that is thrown when error occurs while building isolines.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.BrushHelper.CreateBrushWithRandomHue">
+            <summary>
+            Creates a SolidColorBrush with random hue of its color.
+            </summary>
+            <returns>A SolicColorBrush with random hue of its color.</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.BrushHelper.MakeTransparent(System.Windows.Media.SolidColorBrush,System.Int32)">
+            <summary>
+            Makes SolidColorBrush transparent.
+            </summary>
+            <param name="brush">The brush.</param>
+            <param name="alpha">The alpha, [0..255]</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.BrushHelper.MakeTransparent(System.Windows.Media.SolidColorBrush,System.Double)">
+            <summary>
+            Makes SolidColorBrush transparent.
+            </summary>
+            <param name="brush">The brush.</param>
+            <param name="alpha">The alpha, [0.0 .. 1.0].</param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Navigation.MouseNavigation">
+            <summary>Provides common methods of mouse navigation around viewport</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Navigation.NavigationBase">
+            <summary>Base class for all navigation providers</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Navigation.MouseNavigation.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Navigation.MouseNavigation"/> class.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.ViewportListView">
+            <summary>
+            Interaction logic for ViewportListView.xaml
+            </summary>
+            <summary>
+            ViewportListView
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.ViewportListView.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.DataToScreen(System.Windows.Point,Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms point in data coordinates to screen coordinates.
+            </summary>
+            <param name="dataPoint">Point in data coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Point in screen coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.ScreenToData(System.Windows.Point,Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms point in screen coordinates to data coordinates.
+            </summary>
+            <param name="screenPoint">Point in screen coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Point in data coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.ScreenToViewport(System.Windows.Point,Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms point in screen coordinates to viewport coordinates.
+            </summary>
+            <param name="screenPoint">Point in screen coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Point in viewport coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.ViewportToScreen(System.Windows.Point,Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms point in viewport coordinates to screen coordinates.
+            </summary>
+            <param name="viewportPoint">Point in viewport coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Point in screen coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.ViewportToData(System.Windows.Point,Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms point in viewport coordinates to data coordinates.
+            </summary>
+            <param name="viewportPoint">Point in viewport coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Point in data coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.DataToViewport(System.Windows.Point,Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms point in data coordinates to viewport coordinates.
+            </summary>
+            <param name="dataPoint">Point in data coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Point in viewport coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.DataToViewport(System.Windows.Point,Microsoft.Research.DynamicDataDisplay.DataTransform)">
+            <summary>
+            Transforms point in data coordinates to viewport coordinates.
+            </summary>
+            <param name="dataPoint">Point in data coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Point in viewport coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.ScreenToData(System.Windows.Rect,Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms rectangle from screen coordinates to data coordinates.
+            </summary>
+            <param name="screenRect">Rectangle in screen coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Rectangle in data coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.DataToScreen(System.Windows.Rect,Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms rectangle from data coordinates to screen coordinates.
+            </summary>
+            <param name="dataRect">Rectangle in data coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Rectangle in screen coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.ScreenToViewport(System.Windows.Rect,Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms rectangle from screen coordinates to viewport coordinates.
+            </summary>
+            <param name="screenRect">Rectangle in screen coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Rectangle in viewport coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.ViewportToScreen(System.Windows.Rect,Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms rectangle from viewport coordinates to screen coordinates.
+            </summary>
+            <param name="viewportRect">Rectangle in viewport coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Rectangle in screen coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.ViewportToData(System.Windows.Rect,Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms rectangle from viewport coordinates to data coordinates.
+            </summary>
+            <param name="viewportRect">Rectangle in viewport coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Rectangle in data coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.DataToViewport(System.Windows.Rect,Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms rectangle from data coordinates to viewport coordinates.
+            </summary>
+            <param name="dataRect">Rectangle in data coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Rectangle in viewport coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.ViewportToData(System.Windows.Rect,Microsoft.Research.DynamicDataDisplay.DataTransform)">
+            <summary>
+            Transforms rectangle from viewport coordinates to data coordinates.
+            </summary>
+            <param name="viewportRect">Rectangle in viewport coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Rectangle in data coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.DataToViewport(System.Windows.Rect,Microsoft.Research.DynamicDataDisplay.DataTransform)">
+            <summary>
+            Transforms rectangle from data coordinates to viewport coordinates.
+            </summary>
+            <param name="dataRect">Rectangle in data coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Rectangle in viewport coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.DataToScreen(System.Collections.Generic.IEnumerable{System.Windows.Point},Microsoft.Research.DynamicDataDisplay.CoordinateTransform)">
+            <summary>
+            Transforms list of points from data coordinates to screen coordinates.
+            </summary>
+            <param name="dataPoints">Points in data coordinates</param>
+            <param name="transform">CoordinateTransform used to perform transformation</param>
+            <returns>Points in screen coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.DataToScreen(Microsoft.Research.DynamicDataDisplay.CoordinateTransform,System.Collections.Generic.IEnumerable{System.Windows.Point})">
+            <summary>
+            Transforms list of points from data coordinates to screen coordinates.
+            </summary>
+            <param name="transform">Coordinate transform used to perform transformation</param>
+            <param name="dataPoints">Points in data coordinates</param>
+            <returns>List of points in screen coordinates</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CoordinateTransformExtensions.DataToViewport(System.Collections.Generic.IEnumerable{System.Windows.Point},Microsoft.Research.DynamicDataDisplay.DataTransform)">
+            <summary>
+            Transforms list of points from data coordinates to viewport coordinates.
+            </summary>
+            <param name="dataPoints">Points in data coordinates</param>
+            <param name="transform">Data transform used to perform transformation</param>
+            <returns>List of points in viewport coordinates</returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataSources.IDataSource2D`1">
+            <summary>
+            General interface for two-dimensional data source. Contains two-dimensional array of data items.
+            </summary>
+            <typeparam name="T">Data type - type of each data piece.</typeparam>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataSources.IGridSource2D">
+            <summary>
+            General interface for two-dimensional data grids. Contains two-dimensional array of data points.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DataSources.IGridSource2D.Grid">
+            <summary>
+            Gets the grid of data source.
+            </summary>
+            <value>The grid.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DataSources.IGridSource2D.Width">
+            <summary>
+            Gets data grid width.
+            </summary>
+            <value>The width.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DataSources.IGridSource2D.Height">
+            <summary>
+            Gets data grid height.
+            </summary>
+            <value>The height.</value>
+        </member>
+        <member name="E:Microsoft.Research.DynamicDataDisplay.DataSources.IGridSource2D.Changed">
+            <summary>
+            Occurs when data source changes.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DataSources.IDataSource2D`1.Data">
+            <summary>
+            Gets two-dimensional data array.
+            </summary>
+            <value>The data.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Navigation.DefaultContextMenu">
+            <summary>This class is responsible for displaying and populating default context menu of ChartPlotter</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Navigation.DefaultContextMenu.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Navigation.DefaultContextMenu"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Navigation.DefaultContextMenu.GetPlotterContextMenu(System.Windows.DependencyObject)">
+            <summary>
+            Gets the plotter context menu.
+            </summary>
+            <param name="obj">The obj.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Navigation.DefaultContextMenu.SetPlotterContextMenu(System.Windows.DependencyObject,Microsoft.Research.DynamicDataDisplay.Navigation.ObjectCollection)">
+            <summary>
+            Sets the plotter context menu.
+            </summary>
+            <param name="obj">The obj.</param>
+            <param name="value">The value.</param>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Navigation.DefaultContextMenu.PlotterContextMenuProperty">
+            <summary>
+            Identifies the PlotterContextMenu attached property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Navigation.DefaultContextMenu.StaticMenuItems">
+            <summary>
+            Gets the static menu items.
+            </summary>
+            <value>The static menu items.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Navigation.ObjectCollection">
+            <summary>
+            This is a collection to hold additional items ChartPlotter's context menu.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.TimeTicksProviderBase`1.DecreaseTickCount(System.Int32)">
+            <summary>
+            Decreases the tick count.
+            </summary>
+            <param name="tickCount">The tick count.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.TimeTicksProviderBase`1.IncreaseTickCount(System.Int32)">
+            <summary>
+            Increases the tick count.
+            </summary>
+            <param name="tickCount">The tick count.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.IsolineTrackingGraph">
+            <summary>
+            Draws one isoline line throw mouse position.
+            </summary>
+            <summary>
+            IsolineTrackingGraph
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineGraphBase.UpdateDataSource">
+            <summary>
+            This method is called when data source changes.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineGraphBase.StrokeThicknessProperty">
+            <summary>
+            Identifies the StrokeThickness dependency property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineGraphBase.Palette">
+            <summary>
+            Gets or sets the palette for coloring isoline lines.
+            </summary>
+            <value>The palette.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineGraphBase.DrawLabels">
+            <summary>
+            Gets or sets a value indicating whether to draw text labels.
+            </summary>
+            <value><c>true</c> if isolines draws labels; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineGraphBase.DataSource">
+            <summary>
+            Gets or sets the data source.
+            </summary>
+            <value>The data source.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineGraphBase.StrokeThickness">
+            <summary>
+            Gets or sets thickness of isoline lines.
+            </summary>
+            <value>The stroke thickness.</value>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.IsolineTrackingGraph.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.IsolineTrackingGraph"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.IsolineTrackingGraph.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.IsolineTrackingGraph.PathStyle">
+            <summary>
+            Gets or sets style, applied to line path.
+            </summary>
+            <value>The path style.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.HsbColor">
+            <summary>
+            Represents color in Hue Saturation Brightness color space.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.HsbColor.#ctor(System.Double,System.Double,System.Double)">
+            <summary>
+            Initializes a new instance of the <see cref="!:HSBColor"/> struct.
+            </summary>
+            <param name="hue">The hue; [0; 360]</param>
+            <param name="saturation">The saturation; [0, 1]</param>
+            <param name="brightness">The brightness; [0, 1]</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.HsbColor.#ctor(System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            Initializes a new instance of the <see cref="!:HSBColor"/> struct.
+            </summary>
+            <param name="hue">The hue; [0, 360]</param>
+            <param name="saturation">The saturation; [0, 1]</param>
+            <param name="brightness">The brightness; [0, 1]</param>
+            <param name="alpha">The alpha; [0, 1]</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.HsbColor.FromArgb(System.Windows.Media.Color)">
+            <summary>
+            Creates HSBColor from the ARGB color.
+            </summary>
+            <param name="color">The color.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.HsbColor.ToArgb">
+            <summary>
+            Converts HSBColor to ARGB color space.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.HsbColor.Hue">
+            <summary>Hue; [0, 360]</summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.HsbColor.Saturation">
+            <summary>Saturation; [0, 1]</summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.HsbColor.Brightness">
+            <summary>Brightness; [0, 1]</summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.HsbColor.Alpha">
+            <summary>Alpha; [0, 1]</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.ColorExtensions.ToHsbColor(System.Windows.Media.Color)">
+            <summary>
+            Converts the ARGB color to the HSB color.
+            </summary>
+            <param name="color">The color.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataSources.EnumerableDataSourceBase`1">
+            <summary>Base class for all sources who receive data for charting 
+            from any IEnumerable of T</summary>
+            <typeparam name="T">Type of items in IEnumerable</typeparam>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.MagnifyingGlass">
+            <summary>
+            MagnifyingGlass
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.MagnifyingGlass.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.HorizontalLine">
+            <summary>
+            Represents horizontal line with specified y-coordinate.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.SimpleLine">
+            <summary>
+            Represents simple line bound to viewport coordinates.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.SimpleLine.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.SimpleLine"/> class.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.SimpleLine.ValueProperty">
+            <summary>
+            Identifies Value dependency property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.SimpleLine.Value">
+            <summary>
+            Gets or sets the value of line - e.g., its horizontal or vertical coordinate.
+            </summary>
+            <value>The value.</value>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.HorizontalLine.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.HorizontalLine"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.HorizontalLine.#ctor(System.Double)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.HorizontalLine"/> class.
+            </summary>
+            <param name="yCoordinate">The y coordinate of line.</param>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AxisNavigation">
+            <summary>
+            Represents a navigation methods upon one axis - mouse panning and zooming.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AxisNavigation.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AxisNavigation"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AxisNavigation.#ctor(System.Windows.Controls.Orientation)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AxisNavigation"/> class.
+            </summary>
+            <param name="orientation">The orientation.</param>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AxisNavigation.Orientation">
+            <summary>
+            Gets or sets the orientation of AxisNavigation.
+            </summary>
+            <value>The orientation.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Navigation.MessagesHelper">
+            <summary>Helper class to parse Windows messages</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Footer">
+            <summary>
+            Represents a text situated in ChartPlotter's footer.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Footer.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Footer"/> class.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.DraggablePoint">
+            <summary>
+            Represents a simple draggable point with position bound to point in viewport coordinates, which allows to drag iself by mouse.
+            </summary>
+            <summary>
+            DraggablePoint
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.DraggablePoint.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.DraggablePoint"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.DraggablePoint.#ctor(System.Windows.Point)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.DraggablePoint"/> class.
+            </summary>
+            <param name="position">The position of DraggablePoint.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.DraggablePoint.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph">
+            <summary>
+            Adds to ChartPlotter two crossed lines, bound to mouse cursor position, and two labels near axes with mouse position in its text.
+            </summary>
+            <summary>
+            CursorCoordinateGraph
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph"/> class.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph.PositionProperty">
+            <summary>
+            Identifies Position dependency property.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph.AutoHide">
+            <summary>
+            Gets or sets a value indicating whether to hide automatically cursor lines when mouse leaves plotter.
+            </summary>
+            <value><c>true</c> if auto hide; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph.CustomXFormat">
+            <summary>
+            Gets or sets the custom format string of x label.
+            </summary>
+            <value>The custom X format.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph.CustomYFormat">
+            <summary>
+            Gets or sets the custom format string of y label.
+            </summary>
+            <value>The custom Y format.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph.XTextMapping">
+            <summary>
+            Gets or sets the text mapping of x label - function that builds text from x-coordinate of mouse in data.
+            </summary>
+            <value>The X text mapping.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph.YTextMapping">
+            <summary>
+            Gets or sets the text mapping of y label - function that builds text from y-coordinate of mouse in data.
+            </summary>
+            <value>The Y text mapping.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph.ShowHorizontalLine">
+            <summary>
+            Gets or sets a value indicating whether to show horizontal line.
+            </summary>
+            <value><c>true</c> if horizontal line is shown; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph.ShowVerticalLine">
+            <summary>
+            Gets or sets a value indicating whether to show vertical line.
+            </summary>
+            <value><c>true</c> if vertical line is shown; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.CursorCoordinateGraph.Position">
+            <summary>
+            Gets or sets the mouse position in screen coordinates.
+            </summary>
+            <value>The position.</value>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.Auxiliary.ScreenshotHelper.GetEncoderByExtension(System.String)">
+            <summary>Gets the encoder by extension</summary>
+            <param name="extension">The extension</param>
+            <returns>BitmapEncoder object</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.Auxiliary.ScreenshotHelper.CreateScreenshot(System.Windows.UIElement,System.Windows.Int32Rect)">
+            <summary>Creates the screenshot of entire plotter element</summary>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataSources.TableDataSource">
+            <summary>Data source that extracts sequence of points and their attributes from DataTable</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.MathHelper.Clamp(System.Double)">
+            <summary>Clamps specified value to [0,1]</summary>
+            <param name="d">Value to clamp</param>
+            <returns>Value in range [0,1]</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.MathHelper.ToAngle(System.Windows.Vector)">
+            <summary>
+            Converts vector into angle.
+            </summary>
+            <param name="vector">The vector.</param>
+            <returns>Angle in degrees.</returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataTransform">
+            <summary>
+            Base class for all data transforms.
+            Defines methods to transform point from data coordinate system to viewport coordinates and vice versa.
+            Should be ????? TODO I FORGOT THIS TERM !!!
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.DataTransform.DataToViewport(System.Windows.Point)">
+            <summary>
+            Transforms the point in data coordinates to viewport coordinates.
+            </summary>
+            <param name="pt">The point in data coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.DataTransform.ViewportToData(System.Windows.Point)">
+            <summary>
+            Transforms the point in viewport coordinates to data coordinates.
+            </summary>
+            <param name="pt">The point in viewport coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DataTransform.DataDomain">
+            <summary>
+            Gets the data domain.
+            </summary>
+            <value>The data domain.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.IdentityTransform">
+            <summary>
+            Represents identity data transform, which applies no transformation.
+            is by default in CoordinateTransform.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.IdentityTransform.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.IdentityTransform"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.IdentityTransform.DataToViewport(System.Windows.Point)">
+            <summary>
+            Transforms the point in data coordinates to viewport coordinates.
+            </summary>
+            <param name="pt">The point in data coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.IdentityTransform.ViewportToData(System.Windows.Point)">
+            <summary>
+            Transforms the point in viewport coordinates to data coordinates.
+            </summary>
+            <param name="pt">The point in viewport coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Log10XTransform">
+            <summary>
+            Represents a logarithmic transform of x-values of points.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Log10XTransform.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Log10XTransform"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Log10XTransform.DataToViewport(System.Windows.Point)">
+            <summary>
+            Transforms the point in data coordinates to viewport coordinates.
+            </summary>
+            <param name="pt">The point in data coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Log10XTransform.ViewportToData(System.Windows.Point)">
+            <summary>
+            Transforms the point in viewport coordinates to data coordinates.
+            </summary>
+            <param name="pt">The point in viewport coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Log10XTransform.DataDomain">
+            <summary>
+            Gets the data domain.
+            </summary>
+            <value>The data domain.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.MercatorTransform">
+            <summary>
+            Represents a mercator transform, used in maps.
+            Transforms y coordinates.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.MercatorTransform.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.MercatorTransform"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.MercatorTransform.#ctor(System.Double)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.MercatorTransform"/> class.
+            </summary>
+            <param name="maxLatitude">The maximal latitude.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.MercatorTransform.DataToViewport(System.Windows.Point)">
+            <summary>
+            Transforms the point in data coordinates to viewport coordinates.
+            </summary>
+            <param name="pt">The point in data coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.MercatorTransform.ViewportToData(System.Windows.Point)">
+            <summary>
+            Transforms the point in viewport coordinates to data coordinates.
+            </summary>
+            <param name="pt">The point in viewport coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.MercatorTransform.Scale">
+            <summary>
+            Gets the scale.
+            </summary>
+            <value>The scale.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.MercatorTransform.MaxLatitude">
+            <summary>
+            Gets the maximal latitude.
+            </summary>
+            <value>The max latitude.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.PolarToRectTransform">
+            <summary>
+            Represents transform from polar coordinate system to rectangular coordinate system.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.PolarToRectTransform.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.PolarToRectTransform"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.PolarToRectTransform.DataToViewport(System.Windows.Point)">
+            <summary>
+            Transforms the point in data coordinates to viewport coordinates.
+            </summary>
+            <param name="pt">The point in data coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.PolarToRectTransform.ViewportToData(System.Windows.Point)">
+            <summary>
+            Transforms the point in viewport coordinates to data coordinates.
+            </summary>
+            <param name="pt">The point in viewport coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.RotateDataTransform">
+            <summary>
+            Represents a data transform which applies rotation around specified center at specified angle.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.RotateDataTransform.#ctor(System.Double)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.RotateDataTransform"/> class.
+            </summary>
+            <param name="angleInRadians">The angle in radians.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.RotateDataTransform.#ctor(System.Double,System.Windows.Point)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.RotateDataTransform"/> class.
+            </summary>
+            <param name="angleInRadians">The angle in radians.</param>
+            <param name="center">The center of rotation.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.RotateDataTransform.DataToViewport(System.Windows.Point)">
+            <summary>
+            Transforms the point in data coordinates to viewport coordinates.
+            </summary>
+            <param name="pt">The point in data coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.RotateDataTransform.ViewportToData(System.Windows.Point)">
+            <summary>
+            Transforms the point in viewport coordinates to data coordinates.
+            </summary>
+            <param name="pt">The point in viewport coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.RotateDataTransform.Center">
+            <summary>
+            Gets the center of rotation.
+            </summary>
+            <value>The center.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.RotateDataTransform.Angle">
+            <summary>
+            Gets the rotation angle.
+            </summary>
+            <value>The angle.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.MatrixDataTransform">
+            <summary>
+            Represents data transform performed by multiplication on given matrix.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.MatrixDataTransform.#ctor(System.Windows.Media.Matrix)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.MatrixDataTransform"/> class.
+            </summary>
+            <param name="matrix">The transform matrix.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.MatrixDataTransform.DataToViewport(System.Windows.Point)">
+            <summary>
+            Transforms the point in data coordinates to viewport coordinates.
+            </summary>
+            <param name="pt">The point in data coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.MatrixDataTransform.ViewportToData(System.Windows.Point)">
+            <summary>
+            Transforms the point in viewport coordinates to data coordinates.
+            </summary>
+            <param name="pt">The point in viewport coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.CompositeDataTransform">
+            <summary>
+            Represents a chain of transforms which are being applied consequently.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CompositeDataTransform.#ctor(Microsoft.Research.DynamicDataDisplay.DataTransform[])">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.CompositeDataTransform"/> class.
+            </summary>
+            <param name="transforms">The transforms.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CompositeDataTransform.#ctor(System.Collections.Generic.IEnumerable{Microsoft.Research.DynamicDataDisplay.DataTransform})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.CompositeDataTransform"/> class.
+            </summary>
+            <param name="transforms">The transforms.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CompositeDataTransform.DataToViewport(System.Windows.Point)">
+            <summary>
+            Transforms the point in data coordinates to viewport coordinates.
+            </summary>
+            <param name="pt">The point in data coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.CompositeDataTransform.ViewportToData(System.Windows.Point)">
+            <summary>
+            Transforms the point in viewport coordinates to data coordinates.
+            </summary>
+            <param name="pt">The point in viewport coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.CompositeDataTransform.Transforms">
+            <summary>
+            Gets the transforms.
+            </summary>
+            <value>The transforms.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DelegateDataTransform">
+            <summary>
+            Represents a data transform, performed by given delegate.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.DelegateDataTransform.#ctor(System.Func{System.Windows.Point,System.Windows.Point},System.Func{System.Windows.Point,System.Windows.Point})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.DelegateDataTransform"/> class.
+            </summary>
+            <param name="dataToViewport">The data to viewport transform delegate.</param>
+            <param name="viewportToData">The viewport to data transform delegate.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.DelegateDataTransform.DataToViewport(System.Windows.Point)">
+            <summary>
+            Transforms the point in data coordinates to viewport coordinates.
+            </summary>
+            <param name="pt">The point in data coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.DelegateDataTransform.ViewportToData(System.Windows.Point)">
+            <summary>
+            Transforms the point in viewport coordinates to data coordinates.
+            </summary>
+            <param name="pt">The point in viewport coordinates.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DelegateDataTransform.DataToViewportFunc">
+            <summary>
+            Gets the data to viewport transform delegate.
+            </summary>
+            <value>The data to viewport func.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DelegateDataTransform.ViewportToDataFunc">
+            <summary>
+            Gets the viewport to data transform delegate.
+            </summary>
+            <value>The viewport to data func.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataTransforms">
+            <summary>
+            Contains default data transforms.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DataTransforms.Identity">
+            <summary>
+            Gets the default identity data transform.
+            </summary>
+            <value>The identity.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Common.ChildrenCollection">
+            <summary>
+            Contains all charts added to ChartPlotter.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.ChildrenCollection.ClearItems">
+            <summary>
+            This override enables notifying about removing each element, instead of
+            notifying about collection reset.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.PointMarkers.CirclePointMarker">
+            <summary>Renders circle around each point of graph</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.LineGraph">
+            <summary>Series of points connected by one polyline</summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.LineGraph.filters">
+            <summary>Filters applied to points before rendering</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.LineGraph.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.LineGraph"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.LineGraph.#ctor(Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.LineGraph"/> class.
+            </summary>
+            <param name="pointSource">The point source.</param>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.LineGraph.Filters">
+            <summary>Provides access to filters collection</summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.LineGraph.Stroke">
+            <summary>
+            Gets or sets the brush, using which polyline is plotted.
+            </summary>
+            <value>The line brush.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.LineGraph.StrokeThickness">
+            <summary>
+            Gets or sets the line thickness.
+            </summary>
+            <value>The line thickness.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.LineGraph.LinePen">
+            <summary>
+            Gets or sets the line pen.
+            </summary>
+            <value>The line pen.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Common.DataRect">
+            <summary>
+            Describes a width, a height and location of a rectangle.
+            This type is very similar to <see cref="T:System.Windows.Rect"/>, but has one important difference:
+            while <see cref="T:System.Windows.Rect"/> describes a rectangle in screen coordinates, where y axis
+            points to bottom (that's why <see cref="T:System.Windows.Rect"/>'s Bottom property is greater than Top).
+            This type describes rectange in usual coordinates, and y axis point to top.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.DataRect.#ctor(System.Windows.Rect)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Common.DataRect"/> struct.
+            </summary>
+            <param name="rect">Source rect.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.DataRect.#ctor(System.Windows.Size)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Common.DataRect"/> struct.
+            </summary>
+            <param name="size">The size.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.DataRect.#ctor(System.Windows.Point,System.Windows.Size)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Common.DataRect"/> struct.
+            </summary>
+            <param name="location">The location.</param>
+            <param name="size">The size.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.DataRect.#ctor(System.Windows.Point,System.Windows.Point)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Common.DataRect"/> struct.
+            </summary>
+            <param name="point1">The point1.</param>
+            <param name="point2">The point2.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.DataRect.#ctor(System.Windows.Point,System.Windows.Vector)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Common.DataRect"/> struct.
+            </summary>
+            <param name="point">The point.</param>
+            <param name="vector">The vector.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Common.DataRect.#ctor(System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Common.DataRect"/> struct.
+            </summary>
+            <param name="x">The x.</param>
+            <param name="y">The y.</param>
+            <param name="width">The width.</param>
+            <param name="height">The height.</param>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Common.DataRect.IsEmpty">
+            <summary>
+            Gets a value indicating whether this instance is empty.
+            </summary>
+            <value><c>true</c> if this instance is empty; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Common.DataRect.YMin">
+            <summary>
+            Gets the bottom.
+            </summary>
+            <value>The bottom.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Common.DataRect.YMax">
+            <summary>
+            Gets the top.
+            </summary>
+            <value>The top.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Common.DataRect.XMin">
+            <summary>
+            Gets the left.
+            </summary>
+            <value>The left.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Common.DataRect.XMax">
+            <summary>
+            Gets the right.
+            </summary>
+            <value>The right.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Common.DataRect.Location">
+            <summary>
+            Gets or sets the location.
+            </summary>
+            <value>The location.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Common.DataRect.Size">
+            <summary>
+            Gets or sets the size.
+            </summary>
+            <value>The size.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Navigation.TouchpadScroll">
+            <summary>This class allows convenient navigation around viewport using touchpad on
+            some notebooks</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.DateTimeAxisControl">
+            <summary>
+            AxisControl for DateTime axes.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.DateTimeAxisControl.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.DateTimeAxisControl"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.ListExtensions.GetLast``1(System.Collections.Generic.List{``0})">
+            <summary>
+            Gets last element of list.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="list"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_1">
+            <summary>
+              Looks up a localized string similar to is in «Auto Fit» mode by default. Using mouse with.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_10">
+            <summary>
+              Looks up a localized string similar to Mouse drag.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_11">
+            <summary>
+              Looks up a localized string similar to — Select an area with current aspect ratio.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_12">
+            <summary>
+              Looks up a localized string similar to — Select an area to zoom in.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_13">
+            <summary>
+              Looks up a localized string similar to — Fit to view.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_14">
+            <summary>
+              Looks up a localized string similar to — Copy screenshot of chart to clipboard.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_15">
+            <summary>
+              Looks up a localized string similar to — Save screenshot of chart.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_2">
+            <summary>
+              Looks up a localized string similar to or.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_3">
+            <summary>
+              Looks up a localized string similar to pressed down you can manually select an area to display..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_4">
+            <summary>
+              Looks up a localized string similar to Mouse wheel.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_5">
+            <summary>
+              Looks up a localized string similar to and.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_6">
+            <summary>
+              Looks up a localized string similar to .
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_7">
+            <summary>
+              Looks up a localized string similar to keys  —  Zoom in/Zoom out.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_8">
+            <summary>
+              Looks up a localized string similar to Mouse drag.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.About_9">
+            <summary>
+              Looks up a localized string similar to — Pan the display area.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.AboutTitle">
+            <summary>
+              Looks up a localized string similar to About DynamicDataDisplay.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ArrayHeightShouldBePositive">
+            <summary>
+              Looks up a localized string similar to Array height should be positive..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ArrayWidthShouldBePositive">
+            <summary>
+              Looks up a localized string similar to Array width should be positive..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.AssertionFailed">
+            <summary>
+              Looks up a localized string similar to Assertion failed..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.AssertionFailedSearch">
+            <summary>
+              Looks up a localized string similar to Assertion failed - search for reasons in code, that is calling method, where this assertion is performed.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.CannotDetermineImageTypeByExtension">
+            <summary>
+              Looks up a localized string similar to Cannot determine desired type of output image by given file extension..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.CannotGetLastElement">
+            <summary>
+              Looks up a localized string similar to Cannot get last element of empty list..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.CannotModifyEmptyRect">
+            <summary>
+              Looks up a localized string similar to Cannot modify an empty rect..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ContextMenuCopyScreenshot">
+            <summary>
+              Looks up a localized string similar to Copy screenshot.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ContextMenuCopyScreenshotTooltip">
+            <summary>
+              Looks up a localized string similar to Copy screenshot of charts to clipboard.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ContextMenuFitToView">
+            <summary>
+              Looks up a localized string similar to Fit to view.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ContextMenuFitToViewTooltip">
+            <summary>
+              Looks up a localized string similar to Make visible area fit to display entire contents.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ContextMenuQuickHelp">
+            <summary>
+              Looks up a localized string similar to Quick help.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ContextMenuQuickHelpTooltip">
+            <summary>
+              Looks up a localized string similar to Show brief instructions.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ContextMenuSaveScreenshot">
+            <summary>
+              Looks up a localized string similar to Save screenshot.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ContextMenuSaveScreenshotTooltip">
+            <summary>
+              Looks up a localized string similar to Specify name of image file to save screenshot to.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.EachTransformShouldNotBeNull">
+            <summary>
+              Looks up a localized string similar to Each transform in transforms should not be null..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ExtensionCannotBeNullOrEmpty">
+            <summary>
+              Looks up a localized string similar to Extension cannot be null or empty..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.FilePathCannotbeNullOrEmpty">
+            <summary>
+              Looks up a localized string similar to Filepath cannot be null or empty..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.HorizontalAxisCannotBeVertical">
+            <summary>
+              Looks up a localized string similar to Horizontal axis can be placed only from bottom or top..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.InvalidAxisPlacement">
+            <summary>
+              Looks up a localized string similar to Axis placement is incorrect..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.InvalidGenericAxis">
+            <summary>
+              Looks up a localized string similar to {0} can hold axis only of {1} type..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.InvalidParentPlotterValue">
+            <summary>
+              Looks up a localized string similar to Invalid value of child&apos;s parent plotter - it should be equal to plotter that child is added to..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.InvalidParentPlotterValueRemoving">
+            <summary>
+              Looks up a localized string similar to Invalid value of child&apos;s parent plotter - it should be equal to plotter that child is being removed from..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.IsolinesDataIsUndetailized">
+            <summary>
+              Looks up a localized string similar to Input data must be more detailized to build isolines..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.IsolinesDataSourceShouldBeSet">
+            <summary>
+              Looks up a localized string similar to Data source should be set before building isolines..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.IsolinesUnsupportedCase">
+            <summary>
+              Looks up a localized string similar to Possible mistake: unsupported case in isoline building..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.IsolinesValueIsOutOfCell">
+            <summary>
+              Looks up a localized string similar to Value is not between values in corners..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.PaletteTooFewColors">
+            <summary>
+              Looks up a localized string similar to Length of colors should be greater or equal to 2..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ParameterShouldBePositive">
+            <summary>
+              Looks up a localized string similar to Parameter should be positive..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.ParentPlotterNotNull">
+            <summary>
+              Looks up a localized string similar to Child&apos;s parent plotter should be equal to null after it was removed from plotter..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.PlotterElementAddedToAnotherPlotter">
+            <summary>
+              Looks up a localized string similar to Cannot add item to Plotter - first it should be removed from another Plotter..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.PlotterElementDidnotCleanedAfterItself">
+            <summary>
+              Looks up a localized string similar to IPlotterElement {0} did not removed all its contents from plotter&apos;s visual tree. Change this wrong behaviour in OnPlotterDetaching method of this IPlotterElement..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.TextOfTickShouldNotBeNull">
+            <summary>
+              Looks up a localized string similar to Text of tick returned by GetStringCore should not be null..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.UnsupportedRangeInAxis">
+            <summary>
+              Looks up a localized string similar to Ticks cannot be generated for this range..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.VerticalAxisCannotBeHorizontal">
+            <summary>
+              Looks up a localized string similar to Vertical axis can be placed only from left or right..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.VisualBindingsWrongState">
+            <summary>
+              Looks up a localized string similar to Wrong state of VisualBindings..
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Properties.Resources.WidthAndHeightCannotBeNegative">
+            <summary>
+              Looks up a localized string similar to Width and height cannot be negative..
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Legend">
+            <summary>
+            Legend - shows list of annotations to charts.
+            </summary>
+            <summary>
+            Legend
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Legend.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Legend"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Legend.AddLegendItem(Microsoft.Research.DynamicDataDisplay.LegendItem)">
+            <summary>
+            Adds new legend item.
+            </summary>
+            <param name="legendItem">The legend item.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Legend.RemoveLegendItem(Microsoft.Research.DynamicDataDisplay.LegendItem)">
+            <summary>
+            Removes the legend item.
+            </summary>	
+            <param name="legendItem">The legend item.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Legend.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Legend.AutoShowAndHide">
+            <summary>
+            Gets or sets a value indicating whether legend automatically shows or hides itself
+            when chart collection changes.
+            </summary>
+            <value><c>true</c> if legend automatically shows and hides itself when chart collection changes; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.Quad">
+            <summary>
+            Represents quadrangle; its points are arranged by round in one direction.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.Quad.Contains(System.Windows.Point)">
+            <summary>
+            Determines whether this quad contains the specified point.
+            </summary>
+            <param name="v">The point</param>
+            <returns>
+            	<c>true</c> if quad contains the specified point; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.IsolineGraph">
+            <summary>
+            Draws isolines on given two-dimensional scalar data.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.IsolineGraph.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.IsolineGraph"/> class.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.LevelLine">
+            <summary>
+            LevelLine contains all data for one isoline line - its start point, other points and value in field.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.LevelLine.GetSegments">
+            <summary>
+            Gets all the segments of lines.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.LevelLine.Value01">
+            <summary>
+            Gets or sets the value of line in limits of [0..1].
+            </summary>
+            <value>The value01.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.LevelLine.RealValue">
+            <summary>
+            Gets or sets the real value of line - without scaling to [0..1] segment.
+            </summary>
+            <value>The real value.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.LevelLine.StartPoint">
+            <summary>
+            Gets or sets the start point of line.
+            </summary>
+            <value>The start point.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.LevelLine.OtherPoints">
+            <summary>
+            Gets other points of line, except first point.
+            </summary>
+            <value>The other points.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.LevelLine.AllPoints">
+            <summary>
+            Gets all points of line, including start point.
+            </summary>
+            <value>All points.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineTextLabel">
+            <summary>
+            IsolineTextLabel contains information about one label in isoline - its text, position and rotation.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineTextLabel.Rotation">
+            <summary>
+            Gets or sets the rotation of isoline text label.
+            </summary>
+            <value>The rotation.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineTextLabel.Text">
+            <summary>
+            Gets or sets the text of isoline label.
+            </summary>
+            <value>The text.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineTextLabel.Position">
+            <summary>
+            Gets or sets the position of isoline text label.
+            </summary>
+            <value>The position.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineCollection">
+            <summary>
+            Collection which contains all data generated by <seealso cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineBuilder"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineCollection.Lines">
+            <summary>
+            Gets the list of isoline lines.
+            </summary>
+            <value>The lines.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataSources.CompositeDataSource">
+            <summary>Data source that is a composer from several other data sources.</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.DataSources.CompositeDataSource.#ctor">
+            <summary>Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.DataSources.CompositeDataSource"/> class</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.DataSources.CompositeDataSource.#ctor(Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource[])">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.DataSources.CompositeDataSource"/> class.
+            </summary>
+            <param name="dataSources">Data sources.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.DataSources.CompositeDataSource.AddDataPart(Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource)">
+            <summary>
+            Adds data part.
+            </summary>
+            <param name="dataPart">The data part.</param>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Viewport2D">
+            <summary>Viewport2D is a specialized version of canvas providing additional
+            virtual coordinates</summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Viewport2D.ClipToBoundsFactor">
+            <summary>
+            Gets or sets the clip to bounds factor.
+            </summary>
+            <value>The clip to bounds factor.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Viewport2D.AutoFitToView">
+            <summary>Gets or sets a value indicating whether viewport automatically clips 
+            in its initial visible rect to bounds of graphs.</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.AxisPlacement">
+            <summary>
+            Defines the position of axis inside ChartPlotter.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.AxisPlacement.Left">
+            <summary>
+            Axis is placed to the left.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.AxisPlacement.Right">
+            <summary>
+            Axis is placed to the right.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.AxisPlacement.Top">
+            <summary>
+            Axis is placed to the top.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.AxisPlacement.Bottom">
+            <summary>
+            Axis is placed to the bottom.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.RenderTo">
+            <summary>
+            Target of rendering
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.RenderTo.Screen">
+            <summary>
+            Rendering directly to screen
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.RenderTo.Image">
+            <summary>
+            Rendering to bitmap, which will be drawn to screen later.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataSources.Mapping`1">
+            <summary>Mapping class holds information about mapping of TSource type
+            to some DependencyProperty.</summary>
+            <typeparam name="TSource">Mapping source type.</typeparam>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DataSources.Mapping`1.Property">
+            <summary>Property that will be set.</summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DataSources.Mapping`1.F">
+            <summary>Function that computes value for property from TSource type.</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataSources.EnumerablePointEnumerator`1">
+            <summary>This enumerator enumerates given enumerable object as sequence of points</summary>
+            <typeparam name="T">Type parameter of source IEnumerable</typeparam>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.MarkerPointsGraph.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.MarkerPointsGraph"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.MarkerPointsGraph.#ctor(Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.MarkerPointsGraph"/> class.
+            </summary>
+            <param name="dataSource">The data source.</param>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.HorizontalRange">
+            <summary>
+            Paints horizontal filled and outlined range in viewport coordinates.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Filters.FrequencyFilter.screenRect">
+            <summary>Visible region in screen coordinates</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AxisCursorGraph">
+            <summary>
+            Adds to ChartPlotter two lines upon axes, showing current cursor position.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AxisCursorGraph.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AxisCursorGraph"/> class.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AxisCursorGraph.ShowVerticalLineProperty">
+            <summary>
+            Identifies ShowVerticalLine dependency property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AxisCursorGraph.ShowVerticalLine">
+            <summary>
+            Gets or sets a value indicating whether to show line upon vertical axis.
+            </summary>
+            <value><c>true</c> if line upon vertical axis is shown; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Navigation.AxisCursorGraph.ShowHorizontalLine">
+            <summary>
+            Gets or sets a value indicating whether to show line upon horizontal axis.
+            </summary>
+            <value><c>true</c> if lien upon horizontal axis is shown; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.Edge">
+            <summary>
+            Edge identifier - indicates which side of cell isoline crosses.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.Edge.Left">
+            <summary>
+            Isoline crosses left boundary of cell (bit 0)
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.Edge.Top">
+            <summary>
+            Isoline crosses top boundary of cell (bit 1)
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.Edge.Right">
+            <summary>
+            Isoline crosses right boundary of cell (bit 2)
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.Edge.Bottom">
+            <summary>
+            Isoline crosses bottom boundary of cell (bit 3)
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.AxisGrid">
+            <summary>This element draws grid over viewport. Number of 
+            grid lines depends on horizontal and vertical axes</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.PointMarkers.CenteredTextMarker">
+            <summary>Renders specified text near the point</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.BoundsHelper.GetDataBounds(System.Collections.Generic.IEnumerable{System.Windows.Point})">
+            <summary>Computes bounding rectangle for sequence of points</summary>
+            <param name="points">Points sequence</param>
+            <returns>Minimal axis-aligned bounding rectangle</returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.LineLegendItem">
+            <summary>
+            Interaction logic for LineLegendItem.xaml
+            </summary>
+            <summary>
+            LineLegendItem
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.LegendItem">
+            <summary>
+            <see cref="T:Microsoft.Research.DynamicDataDisplay.LegendItem"/> is a base class for item in legend, that represents some chart. 
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.LegendItem.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.LegendItem"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.LegendItem.#ctor(Microsoft.Research.DynamicDataDisplay.Description)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.LegendItem"/> class.
+            </summary>
+            <param name="description">The description.</param>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.LegendItem.Description">
+            <summary>
+            Gets or sets the description.
+            </summary>
+            <value>The description.</value>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.LineLegendItem.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataSources.MultiDimensional.WarpedDataSource2D`1">
+            <summary>
+            Defines warped two-dimensional data source.
+            </summary>
+            <typeparam name="T">Data piece type</typeparam>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.DataSources.MultiDimensional.WarpedDataSource2D`1.#ctor(`0[0:,0:],System.Windows.Point[0:,0:])">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.DataSources.MultiDimensional.WarpedDataSource2D`1"/> class.
+            </summary>
+            <param name="data">Data.</param>
+            <param name="grid">Grid.</param>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DataSources.MultiDimensional.WarpedDataSource2D`1.Data">
+            <summary>
+            Gets two-dimensional data array.
+            </summary>
+            <value>The data.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DataSources.MultiDimensional.WarpedDataSource2D`1.Grid">
+            <summary>
+            Gets the grid of data source.
+            </summary>
+            <value>The grid.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DataSources.MultiDimensional.WarpedDataSource2D`1.Width">
+            <summary>
+            Gets data grid width.
+            </summary>
+            <value>The width.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.DataSources.MultiDimensional.WarpedDataSource2D`1.Height">
+            <summary>
+            Gets data grid height.
+            </summary>
+            <value>The height.</value>
+        </member>
+        <member name="E:Microsoft.Research.DynamicDataDisplay.DataSources.MultiDimensional.WarpedDataSource2D`1.Changed">
+            <summary>
+            Occurs when data source changes.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Range`1">
+            <summary>
+            An ordered pair of values, representing a segment.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Range`1.#ctor(`0,`0)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Range`1"/> struct.
+            </summary>
+            <param name="min">The minimal value of segment.</param>
+            <param name="max">The maximal value of segment.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Range`1.Equals(System.Object)">
+            <summary>
+            Indicates whether this instance and a specified object are equal.
+            </summary>
+            <param name="obj">Another object to compare to.</param>
+            <returns>
+            true if <paramref name="obj"/> and this instance are the same type and represent the same value; otherwise, false.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Range`1.GetHashCode">
+            <summary>
+            Returns the hash code for this instance.
+            </summary>
+            <returns>
+            A 32-bit signed integer that is the hash code for this instance.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Range`1.ToString">
+            <summary>
+            Returns the fully qualified type name of this instance.
+            </summary>
+            <returns>
+            A <see cref="T:System.String"/> containing a fully qualified type name.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Range`1.Equals(Microsoft.Research.DynamicDataDisplay.Charts.Range{`0})">
+            <summary>
+            Indicates whether the current object is equal to another object of the same type.
+            </summary>
+            <param name="other">An object to compare with this object.</param>
+            <returns>
+            true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
+            </returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Range`1.Min">
+            <summary>
+            Gets the minimal value of segment.
+            </summary>
+            <value>The min.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Range`1.Max">
+            <summary>
+            Gets the maximal value of segment.
+            </summary>
+            <value>The max.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Range`1.IsEmpty">
+            <summary>
+            Gets a value indicating whether this segment is empty.
+            </summary>
+            <value><c>true</c> if this instance is empty; otherwise, <c>false</c>.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.Arrow">
+            <summary>
+            Paints an arrow with start and end points in viewport coordinates.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.Arrow.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.Arrow"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.Arrow.#ctor(System.Windows.Point,System.Windows.Point)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.Arrow"/> class.
+            </summary>
+            <param name="startPoint">The start point of arrow.</param>
+            <param name="endPoint">The end pointof arrow .</param>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.Arrow.ArrowLengthProperty">
+            <summary>
+            Identifies ArrowLength dependency property.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.Arrow.ArrowAngleProperty">
+            <summary>
+            Identifies ArrowAngle dependency property.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.Arrow.ArrowLength">
+            <summary>
+            Gets or sets the length of the arrow.
+            </summary>
+            <value>The length of the arrow.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Shapes.Arrow.ArrowAngle">
+            <summary>
+            Gets or sets the arrow angle in degrees.
+            </summary>
+            <value>The arrow angle.</value>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.ColorHelper.CreateColorWithRandomHue">
+            <summary>
+            Creates color from HSB color space with random hue and saturation and brighness equal to 1.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.ColorHelper.CreateRandomHsbColor">
+            <summary>
+            Creates color with fully random hue and slightly random saturation and brightness.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ColorHelper.RandomColor">
+            <summary>
+            Gets the random color (this property is created to use it from Xaml).
+            </summary>
+            <value>The random color.</value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ColorHelper.RandomBrush">
+            <summary>
+            Gets the random brush.
+            </summary>
+            <value>The random brush.</value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.PointMarkers.DelegatePointMarker">
+            <summary>Invokes specified delegate for rendering custon marker
+            at every point of graph</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.DataSources.MultiDimensional.EmptyDataSource2D`1">
+            <summary>
+            Defines empty two-dimensional data source.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.ChartCommands">
+            <summary>Common chart plotter commands</summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.ZoomOutToMouse">
+            <summary>
+            Gets the value that represents the Zoom Out To Mouse command.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.ZoomInToMouse">
+            <summary>
+            Gets the value that represents the zoom in to mouse command.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.ZoomWithParameter">
+            <summary>
+            Gets the value that represents the zoom with parameter command.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.ZoomIn">
+            <summary>
+            Gets the value that represents the zoom in command.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.ZoomOut">
+            <summary>
+            Gets the value that represents the zoom out command.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.FitToView">
+            <summary>
+            Gets the value that represents the fit to view command.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.ScrollLeft">
+            <summary>
+            Gets the value that represents the scroll left command.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.ScrollRight">
+            <summary>
+            Gets the value that represents the scroll right command.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.ScrollUp">
+            <summary>
+            Gets the value that represents the scroll up command.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.ScrollDown">
+            <summary>
+            Gets the value that represents the scroll down command.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.SaveScreenshot">
+            <summary>
+            Gets the value that represents the save screenshot command.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.CopyScreenshot">
+            <summary>
+            Gets the value that represents the copy screenshot command.
+            </summary>
+            <value></value>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.ChartCommands.ShowHelp">
+            <summary>
+            Gets the value that represents the show help command.
+            </summary>
+            <value></value>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineTextAnnotater">
+            <summary>
+            IsolineTextAnnotater defines methods to annotate isolines - create a list of labels with its position.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineTextAnnotater.Annotate(Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineCollection,System.Windows.Rect)">
+            <summary>
+            Annotates the specified isoline collection.
+            </summary>
+            <param name="collection">The collection.</param>
+            <param name="visible">The visible rectangle.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineTextAnnotater.WayBeforeText">
+            <summary>
+            Gets or sets the distance between text labels.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.ICell">
+            <summary>
+            Isoline's grid cell
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.ValuesInCell.GetCellValue(System.Double)">
+            <summary>
+            Returns bitmask of comparison of values at cell corners with reference value.
+            Corresponding bit is set to one if value at cell corner is greater than reference value. 
+            a------b
+            | Cell |
+            d------c
+            </summary>
+            <param name="a">Value at corner (see figure)</param>
+            <param name="b">Value at corner (see figure)</param>
+            <param name="c">Value at corner (see figure)</param>
+            <param name="d">Value at corner (see figure)</param>
+            <param name="value">Reference value</param>
+            <returns>Bitmask</returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Plotter2DExtensions">
+            <summary>
+            Extensions for <see cref="T:Microsoft.Research.DynamicDataDisplay.Plotter2D"/> - simplified methods to add line and marker charts.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter2DExtensions.AddLineGraph(Microsoft.Research.DynamicDataDisplay.Plotter2D,Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource)">
+            <summary>Adds one dimensional graph with random color of line.</summary>
+            <param name="pointSource">The point source.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter2DExtensions.AddLineGraph(Microsoft.Research.DynamicDataDisplay.Plotter2D,Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource,System.Windows.Media.Color)">
+            <summary>
+            Adds one dimensional graph with specified color of line.
+            </summary>
+            <param name="pointSource">The point source.</param>
+            <param name="lineColor">Color of the line.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter2DExtensions.AddLineGraph(Microsoft.Research.DynamicDataDisplay.Plotter2D,Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource,System.Double)">
+            <summary>
+            Adds one dimensional graph with random color if line.
+            </summary>
+            <param name="pointSource">The point source.</param>
+            <param name="lineThickness">The line thickness.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter2DExtensions.AddLineGraph(Microsoft.Research.DynamicDataDisplay.Plotter2D,Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource,System.Windows.Media.Color,System.Double,System.String)">
+            <summary>
+            Adds one dimensional graph.
+            </summary>
+            <param name="pointSource">The point source.</param>
+            <param name="lineColor">Color of the line.</param>
+            <param name="lineThickness">The line thickness.</param>
+            <param name="description">Description of data</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter2DExtensions.AddLineGraph(Microsoft.Research.DynamicDataDisplay.Plotter2D,Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource,System.Windows.Media.Color,System.Double)">
+            <summary>
+            Adds one dimensional graph.
+            </summary>
+            <param name="pointSource">The point source.</param>
+            <param name="lineColor">Color of the line.</param>
+            <param name="lineThickness">The line thickness.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter2DExtensions.AddLineGraph(Microsoft.Research.DynamicDataDisplay.Plotter2D,Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource,System.String)">
+            <summary>
+            Adds one dimensional graph.
+            </summary>
+            <param name="pointSource">The point source.</param>
+            <param name="description">The description.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter2DExtensions.AddLineGraph(Microsoft.Research.DynamicDataDisplay.Plotter2D,Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource,System.Double,System.String)">
+            <summary>
+            Adds one dimensional graph.
+            </summary>
+            <param name="pointSource">The point source.</param>
+            <param name="lineThickness">The line thickness.</param>
+            <param name="description">The description.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter2DExtensions.AddLineGraph(Microsoft.Research.DynamicDataDisplay.Plotter2D,Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource,System.Windows.Media.Pen,Microsoft.Research.DynamicDataDisplay.PointMarkers.PointMarker,Microsoft.Research.DynamicDataDisplay.Description)">
+            <summary>Adds one dimensional graph to plotter. This method allows you to specify
+            as much graph parameters as possible</summary>
+            <param name="pointSource">Source of points to plot</param>
+            <param name="linePen">Pen to draw the line. If pen is null no lines will be drawn</param>
+            <param name="marker">Marker to draw on points. If marker is null no points will be drawn</param>
+            <param name="description">Description of graph to put in legend</param>
+            <returns></returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Plotter2DExtensions.AddLineGraph(Microsoft.Research.DynamicDataDisplay.Plotter2D,Microsoft.Research.DynamicDataDisplay.DataSources.IPointDataSource,System.Windows.Media.Pen,Microsoft.Research.DynamicDataDisplay.PointMarkers.ElementPointMarker,Microsoft.Research.DynamicDataDisplay.Description)">
+            <summary>Adds one dimensional graph to plotter. This method allows you to specify
+            as much graph parameters as possible</summary>
+            <param name="pointSource">Source of points to plot</param>
+            <param name="linePen">Pen to draw the line. If pen is null no lines will be drawn</param>
+            <param name="marker">Marker to draw on points. If marker is null no points will be drawn</param>
+            <param name="description">Description of graph to put in legend</param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.PointMarkers.CompositePointMarker">
+            <summary>Composite point markers renders a specified set of markers
+            at every point of graph</summary>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.PointMarkers.CircleElementPointMarker">
+            <summary>Adds Circle element at every point of graph</summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.PenDescription.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.PenDescription"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.PenDescription.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.PenDescription"/> class.
+            </summary>
+            <param name="description">Custom description.</param>
+        </member>
+        <member name="T:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineBuilder">
+            <summary>
+            Generates geometric object for isolines of the input 2d scalar field.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineBuilder.density">
+            <summary>
+            The density of isolines means the number of levels to draw.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineBuilder.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineBuilder"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineBuilder.#ctor(Microsoft.Research.DynamicDataDisplay.DataSources.IDataSource2D{System.Double})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineBuilder"/> class for specified 2d scalar data source.
+            </summary>
+            <param name="dataSource">The data source with 2d scalar data.</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineBuilder.PrepareCells(System.Double)">
+            <summary>Finds isoline for specified reference value</summary>
+            <param name="value">Reference value</param>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineBuilder.Build">
+            <summary>
+            Builds isoline data by 2d scalar field containing in data source.
+            </summary>
+            <returns>Collection of data describing built isolines</returns>
+        </member>
+        <member name="M:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineBuilder.Build(System.Double)">
+            <summary>
+            Builds isoline data for the specified level in 2d scalar field.
+            </summary>
+            <param name="level">The level.</param>
+            <returns></returns>
+        </member>
+        <member name="P:Microsoft.Research.DynamicDataDisplay.Charts.Isolines.IsolineBuilder.DataSource">
+            <summary>
+            Gets or sets the data source - 2d scalar field.
+            </summary>
+            <value>The data source.</value>
+        </member>
+        <member name="T:XamlGeneratedNamespace.GeneratedInternalTypeHelper">
+            <summary>
+            GeneratedInternalTypeHelper
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateInstance(System.Type,System.Globalization.CultureInfo)">
+            <summary>
+            CreateInstance
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.GetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            GetPropertyValue
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.SetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            SetPropertyValue
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateDelegate(System.Type,System.Object,System.String)">
+            <summary>
+            CreateDelegate
+            </summary>
+        </member>
+        <member name="M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.AddEventHandler(System.Reflection.EventInfo,System.Object,System.Delegate)">
+            <summary>
+            AddEventHandler
+            </summary>
+        </member>
+    </members>
+</doc>
