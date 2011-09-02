@@ -143,7 +143,7 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public bool CheckSampleRateRatio(double ratio) {
-            return src.CheckRatio(ratio);
+            return SampleRateConverter.CheckRatio(ratio);
         }
     }
 }

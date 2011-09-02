@@ -7,9 +7,9 @@ using System.Diagnostics;
 namespace AudioAlign.Audio.Streams {
     public class TimeWarpStream : AbstractAudioStreamWrapper {
 
-        private Mapping mappingAlpha;
-        private Mapping mappingOmega;
-        private List<Mapping> mappings;
+        private TimeWarp mappingAlpha;
+        private TimeWarp mappingOmega;
+        private TimeWarpCollection mappings;
         private long length;
         private long position;
         private CropStream cropStream;
@@ -18,9 +18,9 @@ namespace AudioAlign.Audio.Streams {
 
         public TimeWarpStream(IAudioStream sourceStream, ResamplingQuality quality)
             : base(sourceStream) {
-                mappingAlpha = new Mapping { From = 0, To = 0 };
-                mappingOmega = new Mapping { From = sourceStream.Length, To = sourceStream.Length };
-                mappings = new List<Mapping>();
+                mappingAlpha = new TimeWarp { From = 0, To = 0 };
+                mappingOmega = new TimeWarp { From = sourceStream.Length, To = sourceStream.Length };
+                Mappings = new TimeWarpCollection();
                 length = sourceStream.Length;
                 position = sourceStream.Position;
                 resamplingQuality = quality;
@@ -28,16 +28,26 @@ namespace AudioAlign.Audio.Streams {
                 ResetStream();
         }
 
-        public void ClearMappings() {
-            mappings.Clear();
-            ResetStream();
+        public TimeWarpStream(IAudioStream sourceStream, ResamplingQuality quality, TimeWarpCollection mappings)
+            : this(sourceStream, quality) {
+                Mappings = mappings;
         }
 
-        public void AddMapping(Mapping mapping) {
-            mappings.Add(mapping);
-            SortAndValidateMappings();
+        public TimeWarpCollection Mappings {
+            get { return mappings; }
+            set {
+                if (mappings != null) {
+                    mappings.CollectionChanged -= mappings_CollectionChanged;
+                }
+                mappings = value;
+                mappings.CollectionChanged += mappings_CollectionChanged;
+                
+            }
+        }
+
+        private void mappings_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
             if (mappings.Last().From < length) {
-                mappingOmega = new Mapping { From = length, To = length };
+                mappingOmega = new TimeWarp { From = length, To = length };
             }
             else {
                 mappingOmega = mappings.Last();
@@ -45,23 +55,8 @@ namespace AudioAlign.Audio.Streams {
             ResetStream();
         }
 
-        private void SortAndValidateMappings() {
-            mappings = new List<Mapping>(mappings.OrderBy(mapping => mapping.From));
-            // validate that no mapping is overlapping with another one
-            for (int x = 0; x < mappings.Count - 1; x++) {
-                for (int y = x + 1; y < mappings.Count; y++) {
-                    if (mappings[x].To > mappings[y].To) {
-                        throw new Exception(mappings[x] + " is overlapping " + mappings[y]);
-                    }
-                    else if (!resamplingStream.CheckSampleRateRatio(CalculateSampleRateRatio(mappings[x], mappings[y]))) {
-                        throw new Exception("invalid sample ratio");
-                    }
-                }
-            }
-        }
-
         private void GetBoundingMappingsForWarpedPosition(long warpedPosition,
-                out Mapping lowerMapping, out Mapping upperMapping) {
+                out TimeWarp lowerMapping, out TimeWarp upperMapping) {
             lowerMapping = mappingAlpha;
             upperMapping = mappingOmega;
             for (int x = 0; x < mappings.Count; x++) {
@@ -84,20 +79,18 @@ namespace AudioAlign.Audio.Streams {
 
             length = mappingOmega.To;
 
-            Mapping mL, mH;
+            TimeWarp mL, mH;
             GetBoundingMappingsForWarpedPosition(position, out mL, out mH);
 
             if (cropStream == null || cropStream.Begin != mL.From || cropStream.End != mH.From || resamplingStream.Length != mappingOmega.To) {
                 // mapping has changed, stream subsection must be renewed
                 cropStream = new CropStream(sourceStream, mL.From, mH.From);
-                resamplingStream = new ResamplingStream(cropStream, resamplingQuality, CalculateSampleRateRatio(mL, mH));
+                resamplingStream = new ResamplingStream(cropStream, resamplingQuality, TimeWarp.CalculateSampleRateRatio(mL, mH));
                 resamplingStream.Position = position - mL.To;
             }
         }
 
-        private double CalculateSampleRateRatio(Mapping mL, Mapping mH) {
-            return (mH.To - mL.To) / (double)(mH.From - mL.From);
-        }
+        
 
         public override long Length {
             get { return length; }
@@ -110,13 +103,13 @@ namespace AudioAlign.Audio.Streams {
                     throw new ArgumentException("invalid position");
                 }
 
-                Mapping mL, mH;
+                TimeWarp mL, mH;
                 GetBoundingMappingsForWarpedPosition(value, out mL, out mH);
 
                 if (position < mL.To || position >= mH.To) {
                     // new stream subsection required
                     cropStream = new CropStream(sourceStream, mL.From, mH.From);
-                    resamplingStream = new ResamplingStream(cropStream, resamplingQuality, CalculateSampleRateRatio(mL, mH));
+                    resamplingStream = new ResamplingStream(cropStream, resamplingQuality, TimeWarp.CalculateSampleRateRatio(mL, mH));
                 }
 
                 resamplingStream.Position = value - mL.To;
@@ -142,33 +135,6 @@ namespace AudioAlign.Audio.Streams {
             Debug.WriteLine("     resampler len {0,10}, pos {1,10} src buffer {2,4}", resamplingStream.Length, resamplingStream.Position, resamplingStream.BufferedBytes);
             Debug.WriteLine("          crop len {0,10}, pos {1,10}, beg {2,10}, end {3,10}", cropStream.Length, cropStream.Position, cropStream.Begin, cropStream.End);
             Debug.WriteLine("        source len {0,10}, pos {1,10}", sourceStream.Length, sourceStream.Position);
-        }
-    }
-
-    /// <summary>
-    /// Maps a position of a linear source stream to a position in a time warped target stream.
-    /// </summary>
-    public class Mapping {
-
-        /// <summary>
-        /// The position in the unwarped source stream.
-        /// </summary>
-        public long From { get; set; }
-
-        /// <summary>
-        /// The warped position in the target stream.
-        /// </summary>
-        public long To { get; set; }
-
-        /// <summary>
-        /// The position difference between the source and target stream.
-        /// </summary>
-        public long Offset {
-            get { return To - From; }
-        }
-
-        public override string ToString() {
-            return String.Format("Mapping({0} -> {1})", From, To);
         }
     }
 }

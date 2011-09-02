@@ -89,7 +89,7 @@ namespace AudioAlign.LibSampleRate {
             this.ratio = ratio;
         }
 
-        public bool CheckRatio(double ratio) {
+        public static bool CheckRatio(double ratio) {
             return Interop.src_is_valid_ratio(ratio) == 1;
         }
 

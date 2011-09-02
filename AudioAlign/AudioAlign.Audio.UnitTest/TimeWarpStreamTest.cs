@@ -39,13 +39,13 @@ namespace AudioAlign.Audio.UnitTest {
         //    stream = new TimeWarpStream(
         //        new NullStream(new AudioProperties(1, 44100, 32, AudioFormat.IEEE), 70),
         //        ResamplingQuality.SincBest);
-        //    stream.AddMapping(new Mapping { From = 10, To = 15 });
-        //    stream.AddMapping(new Mapping { From = 20, To = 30 });
-        //    stream.AddMapping(new Mapping { From = 30, To = 45 });
-        //    stream.AddMapping(new Mapping { From = 40, To = 48 });
-        //    stream.AddMapping(new Mapping { From = 50, To = 50 });
-        //    stream.AddMapping(new Mapping { From = 60, To = 55 });
-        //    stream.AddMapping(new Mapping { From = 65, To = 60 });
+        //    stream.Mappings.Add(new TimeWarp { From = 10, To = 15 });
+        //    stream.Mappings.Add(new TimeWarp { From = 20, To = 30 });
+        //    stream.Mappings.Add(new TimeWarp { From = 30, To = 45 });
+        //    stream.Mappings.Add(new TimeWarp { From = 40, To = 48 });
+        //    stream.Mappings.Add(new TimeWarp { From = 50, To = 50 });
+        //    stream.Mappings.Add(new TimeWarp { From = 60, To = 55 });
+        //    stream.Mappings.Add(new TimeWarp { From = 65, To = 60 });
         //}
         //
         //Use ClassCleanup to run code after all tests in a class have run
@@ -128,8 +128,8 @@ namespace AudioAlign.Audio.UnitTest {
             TimeWarpStream s = new TimeWarpStream(
                 new NullStream(new AudioProperties(2, 44100, 32, AudioFormat.IEEE), 100000),
                 ResamplingQuality.SincBest);
-            s.AddMapping(new Mapping { From = s.Length / 2, To = s.Length / 4 });
-            s.AddMapping(new Mapping { From = s.Length, To = s.Length / 4 * 2 });
+            s.Mappings.Add(new TimeWarp { From = s.Length / 2, To = s.Length / 4 });
+            s.Mappings.Add(new TimeWarp { From = s.Length, To = s.Length / 4 * 2 });
 
             byte[] buffer = new byte[5000];
             int bytesRead;
@@ -150,7 +150,7 @@ namespace AudioAlign.Audio.UnitTest {
                 new NullStream(new AudioProperties(2, 44100, 32, AudioFormat.IEEE), 100000),
                 ResamplingQuality.SincBest);
             //s.AddMapping(new Mapping { From = s.Length / 2, To = s.Length / 4 });
-            s.AddMapping(new Mapping { From = s.Length, To = s.Length / 4 * 2 });
+            s.Mappings.Add(new TimeWarp { From = s.Length, To = s.Length / 4 * 2 });
 
             byte[] buffer = new byte[5000];
             int bytesRead;
@@ -173,8 +173,8 @@ namespace AudioAlign.Audio.UnitTest {
             TimeWarpStream s = new TimeWarpStream(
                 new NullStream(new AudioProperties(2, 44100, 32, AudioFormat.IEEE), 100000),
                 ResamplingQuality.SincBest);
-            s.AddMapping(new Mapping { From = s.Length / 2, To = s.Length / 4 });
-            s.AddMapping(new Mapping { From = s.Length, To = s.Length / 4 * 2 });
+            s.Mappings.Add(new TimeWarp { From = s.Length / 2, To = s.Length / 4 });
+            s.Mappings.Add(new TimeWarp { From = s.Length, To = s.Length / 4 * 2 });
 
             byte[] buffer = new byte[5000];
 
@@ -190,8 +190,8 @@ namespace AudioAlign.Audio.UnitTest {
             TimeWarpStream s = new TimeWarpStream(
                 new NullStream(new AudioProperties(2, 44100, 32, AudioFormat.IEEE), 100000),
                 ResamplingQuality.SincBest);
-            s.AddMapping(new Mapping { From = s.Length / 2, To = s.Length / 4 });
-            s.AddMapping(new Mapping { From = s.Length, To = s.Length / 4 * 2 });
+            s.Mappings.Add(new TimeWarp { From = s.Length / 2, To = s.Length / 4 });
+            s.Mappings.Add(new TimeWarp { From = s.Length, To = s.Length / 4 * 2 });
 
             byte[] buffer = new byte[5000];
 
