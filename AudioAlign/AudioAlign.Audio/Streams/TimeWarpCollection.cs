@@ -10,19 +10,31 @@ namespace AudioAlign.Audio.Streams {
     public class TimeWarpCollection : ObservableCollection<TimeWarp> {
 
         private bool sorting = false;
+        private bool rangeAdding = false;
 
         public TimeWarpCollection() {
         }
 
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e) {
-            if (sorting && e.Action == NotifyCollectionChangedAction.Move) {
-                // suppress change event if it is triggered by the sort method
+            if ((sorting && e.Action == NotifyCollectionChangedAction.Move) || 
+                (rangeAdding && e.Action == NotifyCollectionChangedAction.Add)) {
+                // suppress change event if it is triggered by the sort method or a range add
                 return;
             }
 
             base.OnCollectionChanged(e);
             Sort();
             ValidateMappings();
+        }
+
+        public void AddRange(IEnumerable<TimeWarp> range) {
+            rangeAdding = true;
+            foreach (TimeWarp timeWarp in range) {
+                Add(timeWarp);
+            }
+            rangeAdding = false;
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(
+                NotifyCollectionChangedAction.Add, new List<TimeWarp>(range)));
         }
 
         /// <summary>
@@ -53,7 +65,7 @@ namespace AudioAlign.Audio.Streams {
                         throw new Exception(this[x] + " is overlapping " + this[y]);
                     }
                     else if (!SampleRateConverter.CheckRatio(TimeWarp.CalculateSampleRateRatio(this[x], this[y]))) {
-                        throw new Exception("invalid sample ratio");
+                        throw new Exception("invalid sample ratio: " + TimeWarp.CalculateSampleRateRatio(this[x], this[y]));
                     }
                 }
             }

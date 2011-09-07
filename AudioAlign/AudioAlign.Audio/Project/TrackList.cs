@@ -27,6 +27,10 @@ namespace AudioAlign.Audio.Project {
             list = new List<T>();
         }
 
+        public TrackList(IEnumerable<T> collection) {
+            list = new List<T>(collection);
+        }
+
         private void OnTrackAdded(TrackListEventArgs e) {
             if (TrackAdded != null) {
                 TrackAdded(this, e);
@@ -65,6 +69,36 @@ namespace AudioAlign.Audio.Project {
 
         public T this[int index] {
             get { return list[index]; }
+        }
+
+        /// <summary>
+        /// Gets the time at which the earliest track in the tracklist starts.
+        /// </summary>
+        public TimeSpan Start {
+            get {
+                TimeSpan start = TimeSpan.Zero;
+                foreach (T track in this) {
+                    if (start == TimeSpan.Zero || track.Offset < start) {
+                        start = track.Offset;
+                    }
+                }
+                return start;
+            }
+        }
+
+        /// <summary>
+        /// Gets the time at which the latest track in the tracklist ends.
+        /// </summary>
+        public TimeSpan End {
+            get {
+                TimeSpan end = TimeSpan.Zero;
+                foreach (T track in this) {
+                    if (end == TimeSpan.Zero || track.Offset + track.Length > end) {
+                        end = track.Offset + track.Length;
+                    }
+                }
+                return end;
+            }
         }
 
         #region IEnumerable<T> Members

@@ -260,8 +260,8 @@
                                                 <TextBlock>
                                                     <TextBlock.Text>
                                                         <MultiBinding StringFormat="{}{0} Hz / {1} bit">
-                                                            <Binding Path="Properties.SampleRate" />
-                                                            <Binding Path="Properties.BitDepth" />
+                                                            <Binding Path="SourceProperties.SampleRate" />
+                                                            <Binding Path="SourceProperties.BitDepth" />
                                                          </MultiBinding>
                                                     </TextBlock.Text>
                                                 </TextBlock>
@@ -272,8 +272,8 @@
                                                 <TextBlock>
                                                     <TextBlock.Text>
                                                         <MultiBinding StringFormat="{}{0} channels ({1})">
-                                                            <Binding Path="Properties.Channels" />
-                                                            <Binding Path="Properties.Channels" Converter="{StaticResource ChannelsToTextConverter}" />
+                                                            <Binding Path="SourceProperties.Channels" />
+                                                            <Binding Path="SourceProperties.Channels" Converter="{StaticResource ChannelsToTextConverter}" />
                                                          </MultiBinding>
                                                     </TextBlock.Text>
                                                 </TextBlock>

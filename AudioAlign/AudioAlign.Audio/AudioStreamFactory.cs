@@ -22,17 +22,39 @@ namespace AudioAlign.Audio {
         }
 
         public static VisualizingStream FromAudioTrackForGUI(AudioTrack audioTrack) {
+            VisualizingStream visualizingStream = 
+                new VisualizingStream(audioTrack.CreateAudioStream(), CreatePeakStore(audioTrack, true));
+
+            audioTrack.LengthChanged += delegate(object sender, ValueEventArgs<TimeSpan> e) {
+                visualizingStream.PeakStore = CreatePeakStore(audioTrack, false);
+            };
+
+            return visualizingStream;
+        }
+
+        /// <summary>
+        /// Checks if a file has a supported format.
+        /// </summary>
+        /// <param name="fileName">the filename to check</param>
+        /// <returns>true if the file is supported, else false</returns>
+        public static bool IsSupportedFile(string fileName) {
+            return fileName.EndsWith(".wav");
+        }
+
+        public static void WriteToFile(IAudioStream stream, string targetFileName) {
+            WaveFileWriter.CreateWaveFile(targetFileName, new NAudioSinkStream(stream));
+        }
+
+        private static PeakStore CreatePeakStore(AudioTrack audioTrack, bool fileSupport) {
             int SAMPLES_PER_PEAK = 256;
 
-            IAudioStream audioInputStream = FromFileInfoIeee32(audioTrack.FileInfo);
+            IAudioStream audioInputStream = audioTrack.CreateAudioStream();
 
             PeakStore peakStore = new PeakStore(SAMPLES_PER_PEAK, audioInputStream.Properties.Channels,
                 (int)Math.Ceiling((float)audioInputStream.Length / audioInputStream.SampleBlockSize / SAMPLES_PER_PEAK));
 
-            VisualizingStream visualizingStream = new VisualizingStream(new IeeeStream(audioTrack.CreateAudioStream()), peakStore);
-
             // search for existing peakfile
-            if (audioTrack.HasPeakFile) {
+            if (audioTrack.HasPeakFile && fileSupport) {
                 // load peakfile from disk
                 peakStore.ReadFrom(File.OpenRead(audioTrack.PeakFile.FullName));
                 peakStore.CalculateScaledData(8, 6);
@@ -97,7 +119,7 @@ namespace AudioAlign.Audio {
                                 while (samplesProcessed < samplesRead);
 
                                 progressReporter.ReportProgress(100.0f / audioInputStream.Length * audioInputStream.Position);
-                                if((int)(100.0f / audioInputStream.Length * audioInputStream.Position) > progress) {
+                                if ((int)(100.0f / audioInputStream.Length * audioInputStream.Position) > progress) {
                                     progress = (int)(100.0f / audioInputStream.Length * audioInputStream.Position);
                                     peakStore.OnPeaksChanged();
                                 }
@@ -111,27 +133,16 @@ namespace AudioAlign.Audio {
                     Debug.WriteLine("peak generation finished - " + (DateTime.Now - startTime) + ", " + (peakWriters[0].BaseStream.Length * channels) + " bytes");
                     progressReporter.Finish();
 
-                    // write peakfile to disk
-                    FileStream peakOutputFile = File.OpenWrite(audioTrack.PeakFile.FullName);
-                    peakStore.StoreTo(peakOutputFile);
-                    peakOutputFile.Close();
+                    if (fileSupport) {
+                        // write peakfile to disk
+                        FileStream peakOutputFile = File.OpenWrite(audioTrack.PeakFile.FullName);
+                        peakStore.StoreTo(peakOutputFile);
+                        peakOutputFile.Close();
+                    }
                 });
             }
 
-            return visualizingStream;
-        }
-
-        /// <summary>
-        /// Checks if a file has a supported format.
-        /// </summary>
-        /// <param name="fileName">the filename to check</param>
-        /// <returns>true if the file is supported, else false</returns>
-        public static bool IsSupportedFile(string fileName) {
-            return fileName.EndsWith(".wav");
-        }
-
-        public static void WriteToFile(IAudioStream stream, string targetFileName) {
-            WaveFileWriter.CreateWaveFile(targetFileName, new NAudioSinkStream(stream));
+            return peakStore;
         }
     }
 }

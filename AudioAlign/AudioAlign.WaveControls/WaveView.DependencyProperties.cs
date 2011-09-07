@@ -87,6 +87,11 @@ namespace AudioAlign.WaveControls
                         waveView.InvalidateVisual();
                     });
                 });
+                audioTrack.LengthChanged += new EventHandler<ValueEventArgs<TimeSpan>>(delegate(object sender2, ValueEventArgs<TimeSpan> e2) {
+                    waveView.Dispatcher.BeginInvoke((Action)delegate {
+                        waveView.InvalidateVisual();
+                    });
+                });
                 audioTrack.VolumeChanged += new EventHandler<ValueEventArgs<float>>(delegate(object sender2, ValueEventArgs<float> e2) {
                     waveView.Dispatcher.BeginInvoke((Action)delegate {
                         waveView.InvalidateVisual();

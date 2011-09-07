@@ -120,6 +120,9 @@ namespace AudioAlign.Audio {
             WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
             OffsetStream offsetStream = new OffsetStream(new TolerantStream(new BufferedStream(new NAudioSourceStream(reader), 1024 * 1024, true)));
             IeeeStream channel = new IeeeStream(offsetStream);
+            TimeWarpStream timeWarpStream = new TimeWarpStream(channel, ResamplingQuality.SincBest) {
+                Mappings = audioTrack.TimeWarps
+            };
 
             audioTrack.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(
                 delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
@@ -130,7 +133,7 @@ namespace AudioAlign.Audio {
                 });
 
             // control the track phase
-            PhaseInversionStream phaseInversion = new PhaseInversionStream(channel) {
+            PhaseInversionStream phaseInversion = new PhaseInversionStream(timeWarpStream) {
                 Invert = audioTrack.InvertedPhase
             };
 

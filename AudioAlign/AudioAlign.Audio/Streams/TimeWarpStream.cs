@@ -41,16 +41,18 @@ namespace AudioAlign.Audio.Streams {
                 }
                 mappings = value;
                 mappings.CollectionChanged += mappings_CollectionChanged;
-                
+                mappings_CollectionChanged(null, null);
             }
         }
 
         private void mappings_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
-            if (mappings.Last().From < length) {
-                mappingOmega = new TimeWarp { From = length, To = length };
-            }
-            else {
-                mappingOmega = mappings.Last();
+            if (mappings.Count > 0) {
+                if (mappings.Last().From < length) {
+                    mappingOmega = new TimeWarp { From = length, To = length };
+                }
+                else {
+                    mappingOmega = mappings.Last();
+                }
             }
             ResetStream();
         }
@@ -89,8 +91,6 @@ namespace AudioAlign.Audio.Streams {
                 resamplingStream.Position = position - mL.To;
             }
         }
-
-        
 
         public override long Length {
             get { return length; }

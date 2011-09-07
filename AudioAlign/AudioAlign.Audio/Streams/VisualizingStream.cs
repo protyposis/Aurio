@@ -24,10 +24,20 @@ namespace AudioAlign.Audio.Streams {
 
         public VisualizingStream(IAudioStream sourceStream, PeakStore peakStore)
             : this(sourceStream) {
-                this.peakStore = peakStore;
-                this.peakStore.PeaksChanged += new EventHandler(delegate(object sender, EventArgs e) {
-                    OnWaveformChanged();
-                });
+                PeakStore = peakStore;
+        }
+
+        public PeakStore PeakStore {
+            get { return peakStore; }
+            set {
+                if (peakStore != null) {
+                    peakStore.PeaksChanged -= peakStore_PeaksChanged;
+                }
+                peakStore = value;
+                if (peakStore != null) {
+                    peakStore.PeaksChanged += peakStore_PeaksChanged;
+                }
+            }
         }
 
         public TimeSpan TimeLength {
@@ -170,6 +180,10 @@ namespace AudioAlign.Audio.Streams {
             if(WaveformChanged != null) {
                 WaveformChanged(this, EventArgs.Empty);
             }
+        }
+
+        private void peakStore_PeaksChanged(object sender, EventArgs e) {
+            OnWaveformChanged();
         }
     }
 }

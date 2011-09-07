@@ -20,19 +20,27 @@ namespace AudioAlign.Audio.Project {
         public event EventHandler<ValueEventArgs<float>> BalanceChanged;
         public event EventHandler<ValueEventArgs<bool>> InvertedPhaseChanged;
 
+        private AudioProperties sourceProperties;
         private bool mute = false;
         private bool solo = false;
         private float volume = 1.0f;
         private float balance = 0.0f;
         private bool invertedPhase = false;
+        private TimeWarpCollection timeWarps;
 
         public AudioTrack(FileInfo fileInfo) : base(fileInfo) {
+            this.sourceProperties = AudioStreamFactory.FromFileInfo(FileInfo).Properties;
+            this.TimeWarps = new TimeWarpCollection();
+            InitializeLength();
+        }
+
+        private void InitializeLength() {
             IAudioStream audioStream = CreateAudioStream();
-            this.Length = TimeUtil.BytesToTimeSpan(audioStream.Length, audioStream.Properties);
+            Length = TimeUtil.BytesToTimeSpan(audioStream.Length, audioStream.Properties);
         }
 
         public IAudioStream CreateAudioStream() {
-            return AudioStreamFactory.FromFileInfo(FileInfo);
+            return new TimeWarpStream(AudioStreamFactory.FromFileInfoIeee32(FileInfo), ResamplingQuality.SincBest, timeWarps);
         }
 
         public FileInfo PeakFile {
@@ -47,11 +55,8 @@ namespace AudioAlign.Audio.Project {
             }
         }
 
-        public AudioProperties Properties {
-            get {
-                // TODO check how often this is called... on frequent calls cache the properties locally
-                return CreateAudioStream().Properties;
-            }
+        public AudioProperties SourceProperties {
+            get { return sourceProperties; }
         }
 
         /// <summary>
@@ -81,6 +86,20 @@ namespace AudioAlign.Audio.Project {
         /// Gets or sets a value telling if this track' audio phase is inverted.
         /// </summary>
         public bool InvertedPhase { get { return invertedPhase; } set { invertedPhase = value; OnInvertedPhaseChanged(); } }
+
+        public TimeWarpCollection TimeWarps {
+            get { return timeWarps; }
+            set { 
+                timeWarps = value;
+                timeWarps.CollectionChanged += timeWarps_CollectionChanged;
+            }
+        }
+
+        private void timeWarps_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+            if (e.NewItems != null || e.OldItems != null) {
+                InitializeLength();
+            }
+        }
 
         private void OnMuteChanged() {
             if (MuteChanged != null) {

@@ -64,16 +64,10 @@ namespace AudioAlign.Audio.Matching {
             IProgressReporter reporter = progressMonitor.BeginTask("Analyzing alignment...", true);
 
             List<IAudioStream> streams = new List<IAudioStream>(audioTracks.Count);
-            TimeSpan start = TimeSpan.MaxValue;
-            TimeSpan end = TimeSpan.MinValue;
+            TimeSpan start = audioTracks.Start;
+            TimeSpan end = audioTracks.End;
             foreach (AudioTrack audioTrack in audioTracks) {
                 streams.Add(CrossCorrelation.PrepareStream(audioTrack.CreateAudioStream(), sampleRate));
-                if (audioTrack.Offset < start) {
-                    start = audioTrack.Offset;
-                }
-                if (audioTrack.Offset + audioTrack.Length > end) {
-                    end = audioTrack.Offset + audioTrack.Length;
-                }
             }
 
             long[] streamOffsets = new long[audioTracks.Count];

@@ -125,6 +125,8 @@
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintLookupEntry.cs" />
     <Compile Include="Matching\Interference.cs" />
     <Compile Include="Matching\Match.cs" />
+    <Compile Include="Matching\MatchFilterMode.cs" />
+    <Compile Include="Matching\MatchProcessor.cs" />
     <Compile Include="MultitrackPlayer.cs" />
     <Compile Include="Streams\AbstractAudioStreamWrapper.cs" />
     <Compile Include="Streams\AudioFormat.cs" />
@@ -134,6 +136,7 @@
     <Compile Include="Streams\DataMonitorStream.cs" />
     <Compile Include="Streams\DebugStream.cs" />
     <Compile Include="Streams\DebugStreamController.cs" />
+    <Compile Include="Streams\StreamExtensions.cs" />
     <Compile Include="Streams\TimeWarp.cs" />
     <Compile Include="Streams\TimeWarpCollection.cs" />
     <Compile Include="Streams\TimeWarpStream.cs" />

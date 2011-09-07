@@ -8,6 +8,10 @@ using System.ComponentModel;
 namespace AudioAlign.Audio.Project {
     public abstract class Track : INotifyPropertyChanged {
 
+        public event EventHandler<ValueEventArgs<TimeSpan>> LengthChanged;
+        public event EventHandler<ValueEventArgs<TimeSpan>> OffsetChanged;
+        public event EventHandler<ValueEventArgs<string>> NameChanged;
+
         private TimeSpan length = TimeSpan.Zero;
         private TimeSpan offset = TimeSpan.Zero;
         private string name;
@@ -24,19 +28,19 @@ namespace AudioAlign.Audio.Project {
 
         public TimeSpan Length {
             get { return length; }
-            set { length = value; OnPropertyChanged("Length"); }
+            set { length = value; OnLengthChanged(); }
         }
 
         public TimeSpan Offset {
             get { return offset; }
-            set { offset = value; OnPropertyChanged("Offset"); }
+            set { offset = value; OnOffsetChanged(); }
         }
 
         public FileInfo FileInfo { get; private set; }
 
         public string Name {
             get { return name; }
-            set { name = value; OnPropertyChanged("Name"); }
+            set { name = value; OnNameChanged(); }
         }
 
         #region INotifyPropertyChanged Members
@@ -50,6 +54,27 @@ namespace AudioAlign.Audio.Project {
         }
 
         #endregion
+
+        private void OnLengthChanged() {
+            if (LengthChanged != null) {
+                LengthChanged(this, new ValueEventArgs<TimeSpan>(length));
+            }
+            OnPropertyChanged("Length");
+        }
+
+        private void OnOffsetChanged() {
+            if (OffsetChanged != null) {
+                OffsetChanged(this, new ValueEventArgs<TimeSpan>(offset));
+            }
+            OnPropertyChanged("Offset");
+        }
+
+        private void OnNameChanged() {
+            if (NameChanged != null) {
+                NameChanged(this, new ValueEventArgs<string>(name));
+            }
+            OnPropertyChanged("Name");
+        }
 
         public override string ToString() {
             return "Track {" + GetHashCode() + " / " + name + " / " + length + " / " + offset + "}";

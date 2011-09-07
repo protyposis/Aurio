@@ -112,16 +112,21 @@ namespace AudioAlign.Audio.Matching {
         }
 
         public static void Adjust(Match match, ProgressMonitor progressMonitor) {
-            long secfactor = 1000 * 1000 * 10;
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            long intervalLength = secfactor * 1;
-            TimeSpan offset = Calculate(
-                match.Track1.CreateAudioStream(), new Interval(match.Track1Time.Ticks - intervalLength / 2, match.Track1Time.Ticks + intervalLength / 2),
-                match.Track2.CreateAudioStream(), new Interval(match.Track2Time.Ticks - intervalLength / 2, match.Track2Time.Ticks + intervalLength / 2),
-                progressMonitor);
-            Debug.WriteLine("CC: " + match + ": " + offset + " (" + sw.Elapsed + ")");
-            match.Track2.Offset -= offset;
+            try {
+                long secfactor = 1000 * 1000 * 10;
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                long intervalLength = secfactor * 1;
+                TimeSpan offset = Calculate(
+                    match.Track1.CreateAudioStream(), new Interval(match.Track1Time.Ticks - intervalLength / 2, match.Track1Time.Ticks + intervalLength / 2),
+                    match.Track2.CreateAudioStream(), new Interval(match.Track2Time.Ticks - intervalLength / 2, match.Track2Time.Ticks + intervalLength / 2),
+                    progressMonitor);
+                Debug.WriteLine("CC: " + match + ": " + offset + " (" + sw.Elapsed + ")");
+                match.Track2Time += offset;
+            }
+            catch (Exception e) {
+                Debug.WriteLine("CC adjust failed: " + e.Message);
+            }
         }
 
         public static unsafe double Correlate(float* x, float* y, int length) {

@@ -132,7 +132,6 @@
     <Compile Include="ResizeDecorator.cs" />
     <Compile Include="MultiplicationConverter.cs" />
     <Compile Include="UIUtil.cs" />
-    <Compile Include="WaveViewAdorner.cs" />
     <Compile Include="StereoVUMeter.cs" />
     <Compile Include="TimeScale.cs" />
     <Compile Include="TimeSpanConverter.cs" />
