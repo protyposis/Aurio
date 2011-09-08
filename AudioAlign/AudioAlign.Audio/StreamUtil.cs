@@ -47,5 +47,12 @@ namespace AudioAlign.Audio {
 
             return totalSamplesRead;
         }
+
+        public static long AlignToBlockSize(long value, int blockSize) {
+            if (value % blockSize != blockSize) {
+                return value - (value % blockSize);
+            }
+            return value;
+        }
     }
 }

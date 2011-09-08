@@ -70,7 +70,10 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public override long Length {
-            get { return (long)Math.Ceiling(sourceStream.Length * sampleRateRatio / SampleBlockSize) * SampleBlockSize; }
+            get { 
+                return StreamUtil.AlignToBlockSize(
+                    (long)Math.Ceiling(sourceStream.Length * sampleRateRatio), SampleBlockSize);
+            }
         }
 
         public override long Position {

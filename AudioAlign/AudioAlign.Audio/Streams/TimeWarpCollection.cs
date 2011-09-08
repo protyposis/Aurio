@@ -70,5 +70,71 @@ namespace AudioAlign.Audio.Streams {
                 }
             }
         }
+
+        public void GetBoundingMappingsForSourcePosition(long sourcePosition,
+                out TimeWarp lowerMapping, out TimeWarp upperMapping) {
+            lowerMapping = null;
+            upperMapping = null;
+            for (int x = 0; x < Count; x++) {
+                if (sourcePosition < this[x].From) {
+                    if (x == 0) {
+                        upperMapping = this[x];
+                        break;
+                    }
+                    else {
+                        lowerMapping = this[x - 1];
+                        upperMapping = this[x];
+                        break;
+                    }
+                }
+                else if(x == Count - 1) {
+                    lowerMapping = this[x];
+                    break;
+                }
+            }
+        }
+
+        public void GetBoundingMappingsForWarpedPosition(long warpedPosition,
+                out TimeWarp lowerMapping, out TimeWarp upperMapping) {
+            lowerMapping = null;
+            upperMapping = null;
+            for (int x = 0; x < Count; x++) {
+                if (warpedPosition < this[x].To) {
+                    if (x == 0) {
+                        upperMapping = this[x];
+                        break;
+                    }
+                    else {
+                        lowerMapping = this[x - 1];
+                        upperMapping = this[x];
+                        break;
+                    }
+                }
+                else if (x == Count - 1) {
+                    lowerMapping = this[x];
+                    break;
+                }
+            }
+        }
+
+        public long TranslateSourceToWarpedPosition(long sourcePosition) {
+            TimeWarp lowerMapping;
+            TimeWarp upperMapping;
+            GetBoundingMappingsForSourcePosition(sourcePosition, out lowerMapping, out upperMapping);
+
+            if (lowerMapping == null) {
+                // position is before the first mapping -> linear adjust
+                return sourcePosition + upperMapping.Offset;
+            }
+            else if (upperMapping == null) {
+                // position is after the last mapping -> linear adjust
+                return sourcePosition + lowerMapping.Offset;
+            }
+            else {
+                return lowerMapping.To +
+                    (long)((sourcePosition - lowerMapping.From) *
+                    TimeWarp.CalculateSampleRateRatio(lowerMapping, upperMapping));
+            }
+        }
     }
 }

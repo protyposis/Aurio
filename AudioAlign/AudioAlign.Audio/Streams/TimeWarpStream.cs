@@ -47,8 +47,9 @@ namespace AudioAlign.Audio.Streams {
 
         private void mappings_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
             if (mappings.Count > 0) {
-                if (mappings.Last().From < length) {
-                    mappingOmega = new TimeWarp { From = length, To = length };
+                TimeWarp last = mappings.Last();
+                if (last.From < length) {
+                    mappingOmega = new TimeWarp { From = length, To = mappings.TranslateSourceToWarpedPosition(length) };
                 }
                 else {
                     mappingOmega = mappings.Last();
@@ -59,19 +60,9 @@ namespace AudioAlign.Audio.Streams {
 
         private void GetBoundingMappingsForWarpedPosition(long warpedPosition,
                 out TimeWarp lowerMapping, out TimeWarp upperMapping) {
-            lowerMapping = mappingAlpha;
-            upperMapping = mappingOmega;
-            for (int x = 0; x < mappings.Count; x++) {
-                if (warpedPosition < mappings[x].To) {
-                    lowerMapping = x == 0 ? mappingAlpha : mappings[x - 1];
-                    upperMapping = mappings[x];
-                    break;
-                }
-                else if (x == mappings.Count - 1) {
-                    lowerMapping = mappings[x];
-                    upperMapping = mappingOmega;
-                }
-            }
+            mappings.GetBoundingMappingsForWarpedPosition(warpedPosition, out lowerMapping, out upperMapping);
+            lowerMapping = lowerMapping ?? mappingAlpha;
+            upperMapping = upperMapping ?? mappingOmega;
         }
 
         private void ResetStream() {
