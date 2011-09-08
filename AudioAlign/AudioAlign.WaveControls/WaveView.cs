@@ -201,6 +201,7 @@ namespace AudioAlign.WaveControls {
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e) {
             base.OnMouseDown(e);
             Point mouseDownPosition = Mouse.GetPosition(this);
+            CaptureMouse();
             //Debug.WriteLine("WaveView OnMouseDown @ " + mouseDownPosition);
             dragging = true;
             previousMousePosition = mouseDownPosition;
@@ -227,14 +228,8 @@ namespace AudioAlign.WaveControls {
         protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e) {
             base.OnMouseUp(e);
             Point mouseUpPosition = Mouse.GetPosition(this);
+            ReleaseMouseCapture();
             //Debug.WriteLine("WaveView OnMouseUp @ " + mouseUpPosition);
-            dragging = false;
-            e.Handled = true;
-        }
-
-        protected override void OnMouseLeave(MouseEventArgs e) {
-            base.OnMouseLeave(e);
-            //Debug.WriteLine("WaveView OnMouseLeave");
             dragging = false;
             e.Handled = true;
         }
