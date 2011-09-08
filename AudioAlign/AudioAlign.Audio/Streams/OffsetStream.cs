@@ -7,11 +7,13 @@ namespace AudioAlign.Audio.Streams {
     public class OffsetStream : AbstractAudioStreamWrapper {
 
         private long position;
+        private long offset;
+        private bool positionOrOffsetChanged;
 
         public OffsetStream(IAudioStream sourceStream)
             : base(sourceStream) {
             position = 0;
-            Offset = 0;
+            offset = 0;
         }
 
         public override long Length {
@@ -20,20 +22,35 @@ namespace AudioAlign.Audio.Streams {
 
         public override long Position {
             get { return position; }
-            set { position = value; }
+            set { 
+                position = value;
+                positionOrOffsetChanged = true;
+            }
         }
 
         public long Offset {
-            get;
-            set;
+            get { return offset; }
+            set { 
+                offset = value;
+                positionOrOffsetChanged = true;
+            }
         }
 
         public override int Read(byte[] buffer, int offset, int count) {
+            if (Position >= Length) {
+                return 0;
+            }
+
+            if (positionOrOffsetChanged) {
+                sourceStream.Position = Position < Offset ? 0 : Position - Offset;
+                positionOrOffsetChanged = false;
+            }
+
             long byteOffset = Offset; // local value copy to avoid locking of the whole function
             int bytesRead = 0;
 
-            if (position + count < byteOffset) {
-                // all requested data located in the offset interval
+            if (position + count <= byteOffset) {
+                // all requested data located in the offset interval -> return zeroed samples
                 Array.Clear(buffer, offset, count);
                 bytesRead = count;
             }
@@ -45,7 +62,6 @@ namespace AudioAlign.Audio.Streams {
             }
             else {
                 // all requested data is located after the offset interval
-                sourceStream.Position = position - byteOffset;
                 bytesRead = sourceStream.Read(buffer, offset, count);
             }
 

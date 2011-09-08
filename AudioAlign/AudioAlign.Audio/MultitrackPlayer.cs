@@ -89,8 +89,8 @@ namespace AudioAlign.Audio {
             audioOutput.Stop();
             timer.Enabled = false;
             OnPlaybackPaused();
-            OnVolumeAnnounced(new StreamVolumeEventArgs() { 
-                MaxSampleValues = new float[] { float.NegativeInfinity, float.NegativeInfinity } 
+            OnVolumeAnnounced(new StreamVolumeEventArgs() {
+                MaxSampleValues = new float[] { float.NegativeInfinity, float.NegativeInfinity }
             });
             return true;
         }
@@ -118,22 +118,20 @@ namespace AudioAlign.Audio {
 
         private void AddTrack(AudioTrack audioTrack) {
             WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
-            OffsetStream offsetStream = new OffsetStream(new TolerantStream(new BufferedStream(new NAudioSourceStream(reader), 1024 * 1024, true)));
-            IeeeStream channel = new IeeeStream(offsetStream);
-            TimeWarpStream timeWarpStream = new TimeWarpStream(channel, ResamplingQuality.SincBest) {
+            IAudioStream baseStream = new IeeeStream(new TolerantStream(new BufferedStream(new NAudioSourceStream(reader), 1024 * 1024, true)));
+            TimeWarpStream timeWarpStream = new TimeWarpStream(baseStream, ResamplingQuality.SincBest) {
                 Mappings = audioTrack.TimeWarps
             };
+            OffsetStream offsetStream = new OffsetStream(timeWarpStream);
 
-            audioTrack.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(
-                delegate(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-                    if (e.PropertyName.Equals("Offset")) {
-                        offsetStream.Offset = TimeUtil.TimeSpanToBytes(audioTrack.Offset, offsetStream.Properties);
-                        audioMixer.UpdateLength();
-                    }
+            audioTrack.OffsetChanged += new EventHandler<ValueEventArgs<TimeSpan>>(
+                delegate(object sender, ValueEventArgs<TimeSpan> e) {
+                    offsetStream.Offset = TimeUtil.TimeSpanToBytes(e.Value, offsetStream.Properties);
+                    audioMixer.UpdateLength();
                 });
 
             // control the track phase
-            PhaseInversionStream phaseInversion = new PhaseInversionStream(timeWarpStream) {
+            PhaseInversionStream phaseInversion = new PhaseInversionStream(offsetStream) {
                 Invert = audioTrack.InvertedPhase
             };
 

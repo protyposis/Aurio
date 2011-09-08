@@ -161,18 +161,32 @@ namespace AudioAlign.Audio.Matching {
             return filteredWindowMatches;
         }
 
-        public static void Align(Match match) {
-            if (match.Track1.Offset + match.Track1Time < match.Track2.Offset + match.Track2Time) {
-                // move track 1
+        public static void Align(Match match, AudioTrack trackToAdjust) {
+            if (match.Track1 == trackToAdjust) {
                 match.Track1.Offset = match.Track2.Offset + match.Track2Time - match.Track1Time;
             }
-            else {
-                // move track 2
+            else if(match.Track2 == trackToAdjust) {
                 match.Track2.Offset = match.Track1.Offset + match.Track1Time - match.Track2Time;
+            }
+            else {
+                throw new Exception("the track to adjust doesn't belong to the match");
             }
         }
 
-        public static void TimeWarp(List<Match> matches) {
+        public static AudioTrack Align(Match match) {
+            if (match.Track1.Offset + match.Track1Time < match.Track2.Offset + match.Track2Time) {
+                // move track 1
+                Align(match, match.Track1);
+                return match.Track1;
+            }
+            else {
+                // move track 2
+                Align(match, match.Track2);
+                return match.Track2;
+            }
+        }
+
+        public static AudioTrack TimeWarp(List<Match> matches, AudioTrack trackToWarp) {
             if (matches.Count == 0) {
                 throw new ArgumentException("no matches to filter");
             }
@@ -180,14 +194,21 @@ namespace AudioAlign.Audio.Matching {
                 throw new ArgumentException("matches must contain a single pair of affected tracks");
             }
 
-            AudioTrack track = matches[0].Track2;
+            AudioTrack track = trackToWarp;
             AudioProperties trackProperties = track.CreateAudioStream().Properties;
             List<TimeWarp> timeWarps = new List<TimeWarp>();
+
+            if (track == matches[0].Track1) {
+                // since we always warp the second track and the requested track to warp is currently the
+                // first one, the matches need to be swapped
+                foreach(Match match in matches) {
+                    match.SwapTracks();
+                }
+            }
 
             // calculate time warps from track's matches
             Match m1 = matches[0];
             Match m2 = null;
-            Align(m1);
             for (int i = 1; i < matches.Count; i++) {
                 m2 = matches[i];
                 TimeSpan targetTime = m1.Track2Time + (m2.Track1Time - m1.Track1Time);
@@ -196,21 +217,64 @@ namespace AudioAlign.Audio.Matching {
                     To = TimeUtil.TimeSpanToBytes(targetTime, trackProperties)
                 });
                 m2.Track2Time = targetTime;
+                // TODO alle anderen Matches die Track 2 betreffen anpassen
             }
 
             // apply time warps to the track
             track.TimeWarps.AddRange(timeWarps);
+
+            return track;
         }
 
-        public static void AlignTracks(List<Tuple<AudioTrack, AudioTrack, List<Match>>> trackPairsMatches) {
+        public static void AlignTracks(List<Tuple<AudioTrack, AudioTrack, List<Match>>> trackPairsMatches, List<Match> allMatches) {
+            allMatches = new List<Match>(allMatches); // create a new list for modification purposes
+            List<AudioTrack> alignedTracks = new List<AudioTrack>();
+
             foreach (Tuple<AudioTrack, AudioTrack, List<Match>> trackPairMatches in trackPairsMatches) {
                 trackPairMatches.Item1.TimeWarps.Clear();
                 trackPairMatches.Item2.TimeWarps.Clear();
-                if (trackPairMatches.Item3.Count == 1) {
-                    Align(trackPairMatches.Item3[0]);
+            }
+
+            foreach (Tuple<AudioTrack, AudioTrack, List<Match>> trackPairMatches in trackPairsMatches) {
+                AudioTrack trackToAlign = alignedTracks.Contains(trackPairMatches.Item2) ?
+                    trackPairMatches.Item1 : trackPairMatches.Item2;
+
+                Align(trackPairMatches.Item3[0], trackToAlign);
+                Debug.WriteLine("aligned: " + trackToAlign);
+                if (trackPairMatches.Item3.Count > 1) {
+                    TimeWarp(trackPairMatches.Item3, trackToAlign);
+                    Debug.WriteLine("warped: " + trackToAlign);
+                    // adjust all other matches related to the currently warped track
+                    AudioProperties properties = trackToAlign.CreateAudioStream().Properties;
+                    List<Match> adjustedMatches = new List<Match>();
+                    foreach (Match match in allMatches) {
+                        if (!trackPairMatches.Item3.Contains(match)) {
+                            if (match.Track1 == trackToAlign) {
+                                match.Track1Time = TimeUtil.BytesToTimeSpan(
+                                    trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(
+                                    TimeUtil.TimeSpanToBytes(match.Track1Time, properties)), properties);
+                                adjustedMatches.Remove(match);
+                            }
+                            else if (match.Track2 == trackToAlign) {
+                                match.Track2Time = TimeUtil.BytesToTimeSpan(
+                                    trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(
+                                    TimeUtil.TimeSpanToBytes(match.Track2Time, properties)), properties);
+                                adjustedMatches.Remove(match);
+                            }
+                        }
+                    }
+                    allMatches.RemoveAll(match => adjustedMatches.Contains(match));
                 }
-                else {
-                    TimeWarp(trackPairMatches.Item3);
+                alignedTracks.Add(trackToAlign);
+            }
+        }
+
+        public static void MoveToStartTime(TrackList<AudioTrack> trackList, TimeSpan startTime) {
+            TimeSpan start = trackList.Start;
+            TimeSpan delta = startTime - start;
+            if (start < TimeSpan.Zero) {
+                foreach (AudioTrack audioTrack in trackList) {
+                    audioTrack.Offset += delta;
                 }
             }
         }
