@@ -16,9 +16,9 @@ namespace AudioAlign.WaveControls {
     class MultiTrackConnectionAdorner : Adorner {
 
         private MultiTrackListBox multiTrackListBox;
-        private SolidColorBrush brushGreen, brushYellow, brushRed;
         private ObservableCollection<Match> matches;
         private Match selectedMatch;
+        private Color[] colors;
 
         public MultiTrackConnectionAdorner(UIElement adornedElement, MultiTrackListBox multiTrackListBox)
             : base(adornedElement) {
@@ -26,9 +26,11 @@ namespace AudioAlign.WaveControls {
                 matches = new ObservableCollection<Match>();
                 matches.CollectionChanged += Matches_CollectionChanged;
 
-                brushGreen = Brushes.Green;
-                brushYellow = Brushes.Yellow;
-                brushRed = Brushes.Red;
+                ColorGradient gradient = new ColorGradient(0, 1);
+                gradient.AddStop(Colors.Red, 0);
+                gradient.AddStop(Colors.Yellow, 0.5f);
+                gradient.AddStop(Colors.Green, 1);
+                colors = gradient.GetGradient(1024).ToArray();
         }
 
         public ObservableCollection<Match> Matches {
@@ -66,19 +68,7 @@ namespace AudioAlign.WaveControls {
                 }
 
                 if (waveView1 != waveView2) {
-                    // calculate brush color depending on match similarity
-                    float rRatio = match.Similarity < 0.5f ? 1 - match.Similarity * 2 : 0;
-                    float yRatio = match.Similarity < 0.5f ? match.Similarity * 2 : 1 - (match.Similarity - 0.5f) * 2;
-                    float gRatio = match.Similarity < 0.5f ? 0 : (match.Similarity - 0.5f) * 2;
-                    Color r = Colors.Red;
-                    Color y = Colors.Yellow;
-                    Color g = Colors.Green;
-
-                    Color c = Color.FromArgb((byte)255, // half transparent
-                        (byte)(r.R * rRatio + y.R * yRatio + g.R * gRatio),
-                        (byte)(r.G * rRatio + y.G * yRatio + g.G * gRatio),
-                        (byte)(r.B * rRatio + y.B * yRatio + g.B * gRatio));
-
+                    Color c = colors[(int)(match.Similarity * (colors.Length - 1))];
                     drawingContext.DrawLine(new Pen(new SolidColorBrush(c), 3) {
                         DashStyle = DashStyles.Dash,
                         EndLineCap = PenLineCap.Triangle,
@@ -154,15 +144,6 @@ namespace AudioAlign.WaveControls {
                 return false;
             }
             return true;
-        }
-
-        private static SolidColorBrush SetAlpha(SolidColorBrush brush, byte alpha) {
-            return new SolidColorBrush(new Color() {
-                R = brush.Color.R,
-                G = brush.Color.G,
-                B = brush.Color.B,
-                A = alpha
-            });
         }
 
         private static void DrawTriangle(DrawingContext drawingContext, Brush brush, Point origin, double size) {
