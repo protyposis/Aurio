@@ -97,9 +97,18 @@ namespace AudioAlign.WaveControls {
             for (int x = 0; x < steps; x++) {
                 yield return GetColor(factor * x);
             }
-
         }
 
+        /// <summary>
+        /// Returns a linearly interpolated color between the two given colors. The ratio can be between 0 
+        /// and 1 and specifies how much of each color will be taken into the new color. A ratio of 0 means
+        /// that the first color will be returned, a ratio of 1 means that the second color will be returned.
+        /// All other ratios result in a mixed color.
+        /// </summary>
+        /// <param name="c1">the first color</param>
+        /// <param name="c2">the second color</param>
+        /// <param name="ratio">the mixing ration</param>
+        /// <returns>a color mixed of both input colors according to the ratio</returns>
         public static Color Interpolate(Color c1, Color c2, float ratio) {
             if(ratio < 0 || ratio > 1) {
                 throw new ArgumentException("ratio must be between 0 and 1");
