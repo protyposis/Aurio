@@ -21,6 +21,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Test.MultitrackPlayback", "AudioAlign.Test.MultitrackPlayback\AudioAlign.Test.MultitrackPlayback.csproj", "{53EF9934-4B85-40E4-8846-1D2ACDA6A9E7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Test.FFT", "AudioAlign.Test.FFT\AudioAlign.Test.FFT.csproj", "{7B4A521E-043B-4077-9C01-6DD36CFADE10}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1904A41B-D1B8-40E5-ADBB-728DDCF7C816} = {1904A41B-D1B8-40E5-ADBB-728DDCF7C816}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.LibSampleRate", "AudioAlign.LibSampleRate\AudioAlign.LibSampleRate.csproj", "{CC813B15-06BB-4334-96C6-DD252BE37D1B}"
 EndProject

@@ -7,6 +7,8 @@ namespace AudioAlign.Audio {
     /// <summary>
     /// Volume calculations.
     /// </summary>
+    /// <seealso cref="NAudio.Utils.Decibels"/>
+    /// <seealso cref="http://stackoverflow.com/questions/6627288/audio-spectrum-analysis-using-fft-algorithm-in-java"/>
     public static class VolumeUtil {
 
         private static readonly double LOG_2_DB;

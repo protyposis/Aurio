@@ -111,6 +111,7 @@
     <Compile Include="AudioStreamFactory.cs" />
     <Compile Include="AudioUtil.cs" />
     <Compile Include="BinaryIOExtensions.cs" />
+    <Compile Include="AudioBuffer.cs" />
     <Compile Include="CommonUtil.cs" />
     <Compile Include="FFTAnalyzer.cs" />
     <Compile Include="FFTUtil.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="Streams\DataMonitorStream.cs" />
     <Compile Include="Streams\DebugStream.cs" />
     <Compile Include="Streams\DebugStreamController.cs" />
+    <Compile Include="Streams\SineGeneratorStream.cs" />
     <Compile Include="Streams\StreamExtensions.cs" />
     <Compile Include="Streams\TimeWarp.cs" />
     <Compile Include="Streams\TimeWarpCollection.cs" />

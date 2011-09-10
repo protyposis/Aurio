@@ -114,8 +114,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             FFTUtil.FFT(frame);
 
             // normalize fourier results
-            // TODO check if calculation corrensponds to paper
-            FFTUtil.NormalizeResults(frame, fftResult);
+            // TODO check if calculation corresponds to paper
+            FFTUtil.Results(frame, fftResult);
 
             // sum up the frequency bins
             // TODO check energy computation formula from paper

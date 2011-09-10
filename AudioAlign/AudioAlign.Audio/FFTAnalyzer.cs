@@ -73,7 +73,7 @@ namespace AudioAlign.Audio {
                 WindowFunction.Apply(inputBuffer);
             }
             FFTUtil.FFT(inputBuffer);
-            FFTUtil.NormalizeResults(inputBuffer, outputBuffer);
+            FFTUtil.Results(inputBuffer, outputBuffer);
             OnWindowAnalyzed();
         }
 

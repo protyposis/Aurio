@@ -100,6 +100,10 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ExocortexDSP\Exocortex.DSP.csproj">
+      <Project>{1904A41B-D1B8-40E5-ADBB-728DDCF7C816}</Project>
+      <Name>Exocortex.DSP</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AudioAlign.Audio\AudioAlign.Audio.csproj">
       <Project>{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}</Project>
       <Name>AudioAlign.Audio</Name>
