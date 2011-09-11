@@ -15,16 +15,19 @@
     <Style BasedOn="{StaticResource {x:Type Slider}}" TargetType="{x:Type local:LogSlider}"/>
 
     <Style TargetType="{x:Type local:WaveView}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type local:WaveView}">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}">
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+        <Style.Resources>
+            <SolidColorBrush x:Key="WaveformLineBrush" Color="CornflowerBlue"/>
+            <SolidColorBrush x:Key="WaveformBackgroundBrush" Color="White"/>
+        </Style.Resources>
+        <Setter Property="Background" Value="Purple"/>
+        <Setter Property="WaveformLine" Value="{DynamicResource ResourceKey=WaveformLineBrush}"/>
+        <Setter Property="WaveformBackground" Value="{DynamicResource ResourceKey=WaveformBackgroundBrush}"/>
+        <Style.Triggers>
+            <Trigger Property="Selector.IsSelected" Value="True">
+                <Setter Property="WaveformLine" Value="{DynamicResource ResourceKey=WaveformBackgroundBrush}"/>
+                <Setter Property="WaveformBackground" Value="{DynamicResource ResourceKey=WaveformLineBrush}"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="{x:Type local:CaretOverlay}">
@@ -303,25 +306,13 @@
                                             Grid.Row="1"
                                             Margin="0,2" 
                                             x:Name="waveView"
+                                            Selector.IsSelected="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}, Path=IsSelected}"
                                             VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"
                                             TrackLength="{Binding Path=Length, Converter={StaticResource TimeSpanTicksConverter}}"
                                             TrackOffset="{Binding Path=Offset, Mode=TwoWay, Converter={StaticResource TimeSpanTicksConverter}}"/>
                             <Border Grid.Row="1" Background="Black" Opacity="0.5" Name="muteIndicator" Visibility="Hidden"/>
                         </Grid>
                     </local:ResizeDecorator>
-                    <DataTemplate.Resources>
-                        <Style TargetType="local:WaveView">
-                            <Setter Property="WaveformLine" Value="CornflowerBlue"/>
-                            <Setter Property="WaveformBackground" Value="White"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
-                                    <Setter Property="WaveformLine" Value="White"/>
-                                    <Setter Property="WaveformBackground" Value="CornflowerBlue"/>
-                                </DataTrigger>
-
-                            </Style.Triggers>
-                        </Style>
-                    </DataTemplate.Resources>
                     <DataTemplate.Triggers>
                         <DataTrigger Binding="{Binding Path=Mute}" Value="True">
                             <Setter TargetName="muteIndicator" Property="Visibility" Value="Visible"/>
@@ -386,7 +377,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:MultiTrackViewer}">
                     <Border BorderThickness="{TemplateBinding Border.BorderThickness}" 
-                            Padding="1" BorderBrush="{TemplateBinding Border.BorderBrush}" 
+                            BorderBrush="{TemplateBinding Border.BorderBrush}" 
                             Background="{TemplateBinding Panel.Background}" 
                             Name="Bd" 
                             SnapsToDevicePixels="True">
@@ -422,7 +413,7 @@
                                        Grid.Column="1" 
                                        Visibility="Hidden"/>
                             
-                            <Button Grid.Row="1" Grid.Column="1">
+                            <Button Grid.Row="1" Grid.Column="1" BorderThickness="0">
                                 <Button.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Item 1"/>

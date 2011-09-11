@@ -39,6 +39,9 @@ namespace AudioAlign.WaveControls {
             base.OnRender(drawingContext);
             bool debug = DebugOutput;
 
+            // draw background
+            drawingContext.DrawRectangle(Background, null, new Rect(0, 0, ActualWidth, ActualHeight));
+
             if (audioStream != null) {
                 Interval audioInterval = new Interval(TrackOffset, TrackOffset + audioStream.TimeLength.Ticks);
                 Interval viewportInterval = VirtualViewportInterval;
@@ -100,7 +103,6 @@ namespace AudioAlign.WaveControls {
                 DateTime beforeDrawing = DateTime.Now;
 
                 // draw background
-                drawingContext.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, ActualWidth, ActualHeight));
                 drawingContext.DrawRectangle(WaveformBackground, null, new Rect(drawingOffsetAligned, 0, drawingWidthAligned, ActualHeight));
                 if (debug) {
                     drawingContext.DrawRectangle(null, new Pen(Brushes.Brown, 4), new Rect(drawingOffsetAligned, 0, drawingWidthAligned, ActualHeight));
@@ -201,11 +203,16 @@ namespace AudioAlign.WaveControls {
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e) {
             base.OnMouseDown(e);
             Point mouseDownPosition = Mouse.GetPosition(this);
-            CaptureMouse();
             //Debug.WriteLine("WaveView OnMouseDown @ " + mouseDownPosition);
-            dragging = true;
-            previousMousePosition = mouseDownPosition;
-            e.Handled = true;
+
+            Interval audioInterval = new Interval(TrackOffset, TrackOffset + audioStream.TimeLength.Ticks);
+            long virtualOffset = PhysicalToVirtualOffset(e.GetPosition(this).X);
+            if (audioInterval.Contains(virtualOffset)) {
+                CaptureMouse();
+                dragging = true;
+                previousMousePosition = mouseDownPosition;
+                e.Handled = true;
+            }
         }
 
         protected override void OnMouseMove(MouseEventArgs e) {

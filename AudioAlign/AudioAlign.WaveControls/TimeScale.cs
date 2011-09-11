@@ -12,6 +12,8 @@ using AudioAlign.Audio;
 namespace AudioAlign.WaveControls {
     public class TimeScale: VirtualViewBase {
 
+        public static readonly DependencyProperty IntervalTextColorProperty;
+
         private const int SCALE_HEIGHT = 8;
         private const int SCALE_FONT_SIZE = 8;
         private const string SCALE_TEXT_FORMAT = @"hh\:mm\:ss\.fff"; // leave out day (d\.) for now - won't be a problem for timelines < 24h
@@ -48,6 +50,18 @@ namespace AudioAlign.WaveControls {
             ClipToBoundsProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(true));
             ForegroundProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(Brushes.Gray));
             BackgroundProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(Brushes.Transparent));
+
+            IntervalTextColorProperty = DependencyProperty.Register("IntervalTextColor", typeof(Brush), typeof(TimeScale),
+                new FrameworkPropertyMetadata { DefaultValue = Brushes.Gray, AffectsRender = true });
+
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(TimeScale),
+                new FrameworkPropertyMetadata(typeof(TimeScale)));
+        }
+
+        [Bindable(true), Category("Brushes")]
+        public Brush IntervalTextColor {
+            get { return (Brush)GetValue(IntervalTextColorProperty); }
+            set { SetValue(IntervalTextColorProperty, value); }
         }
 
         protected override void OnRender(System.Windows.Media.DrawingContext drawingContext) {
@@ -73,17 +87,17 @@ namespace AudioAlign.WaveControls {
             FormattedText formattedStartText = new FormattedText(
                         new TimeSpan(viewportInterval.From).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), SCALE_FONT_SIZE, Brushes.Gray) { TextAlignment = TextAlignment.Left };
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor) { TextAlignment = TextAlignment.Left };
             drawingContext.DrawText(formattedStartText, new Point(1, 0));
             FormattedText formattedLengthText = new FormattedText(
                         new TimeSpan(viewportInterval.Length).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), SCALE_FONT_SIZE, Brushes.Gray) { TextAlignment = TextAlignment.Center };
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor) { TextAlignment = TextAlignment.Center };
             drawingContext.DrawText(formattedLengthText, new Point(actualWidth / 2, 0));
             FormattedText formattedEndText = new FormattedText(
                         new TimeSpan(viewportInterval.To).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), SCALE_FONT_SIZE, Brushes.Gray) { TextAlignment = TextAlignment.Right };
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor) { TextAlignment = TextAlignment.Right };
             drawingContext.DrawText(formattedEndText, new Point(actualWidth - 1, 0));
 
             // draw markers and time
