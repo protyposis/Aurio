@@ -133,6 +133,7 @@
     <Compile Include="ResizeDecorator.cs" />
     <Compile Include="MultiplicationConverter.cs" />
     <Compile Include="Spectrogram.cs" />
+    <Compile Include="SpectrogramMode.cs" />
     <Compile Include="UIUtil.cs" />
     <Compile Include="StereoVUMeter.cs" />
     <Compile Include="TimeScale.cs" />
