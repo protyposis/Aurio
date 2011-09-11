@@ -10,9 +10,9 @@ namespace AudioAlign.WaveControls {
         public class Stop {
 
             private Color color;
-            private float offset;
+            private double offset;
 
-            public Stop(Color color, float offset) {
+            public Stop(Color color, double offset) {
                 this.color = color;
                 this.offset = offset;
             }
@@ -21,7 +21,7 @@ namespace AudioAlign.WaveControls {
                 get { return color; }
             }
 
-            public float Offset {
+            public double Offset {
                 get { return offset; }
             }
 
@@ -30,11 +30,11 @@ namespace AudioAlign.WaveControls {
             }
         }
 
-        private float start;
-        private float end;
+        private double start;
+        private double end;
         private List<Stop> stops;
 
-        public ColorGradient(float start, float end) {
+        public ColorGradient(double start, double end) {
             if (start > end) {
                 throw new ArgumentException("start must be <= end");
             }
@@ -43,20 +43,20 @@ namespace AudioAlign.WaveControls {
             this.stops = new List<Stop>();
         }
 
-        public float Start {
+        public double Start {
             get { return start; }
         }
 
-        public float End {
+        public double End {
             get { return end; }
         }
 
-        public void AddStop(Color color, float offset) {
+        public void AddStop(Color color, double offset) {
             stops.Add(new Stop(color, offset));
             stops.Sort((s1, s2) => s1.Offset == s2.Offset ? 0 : (s1.Offset > s2.Offset ? 1 : -1));
         }
 
-        public Color GetColor(float offset) {
+        public Color GetColor(double offset) {
             if (offset < start || offset > end) {
                 throw new ArgumentException("offset is not within the gradient's bounds");
             }
@@ -93,7 +93,7 @@ namespace AudioAlign.WaveControls {
         }
 
         public IEnumerable<Color> GetGradient(int steps) {
-            float factor = (end - start) / (steps - 1);
+            double factor = (end - start) / (steps - 1);
             for (int x = 0; x < steps; x++) {
                 yield return GetColor(factor * x);
             }
@@ -109,17 +109,17 @@ namespace AudioAlign.WaveControls {
         /// <param name="c2">the second color</param>
         /// <param name="ratio">the mixing ration</param>
         /// <returns>a color mixed of both input colors according to the ratio</returns>
-        public static Color Interpolate(Color c1, Color c2, float ratio) {
+        public static Color Interpolate(Color c1, Color c2, double ratio) {
             if(ratio < 0 || ratio > 1) {
                 throw new ArgumentException("ratio must be between 0 and 1");
             }
-            float r1 = 1 - ratio;
-            float r2 = ratio;
+            double r1 = 1 - ratio;
+            double r2 = ratio;
             return Color.FromArgb(
-                (byte)(c1.A * r1 + c2.A * r2), 
-                (byte)(c1.R * r1 + c2.R * r2),
-                (byte)(c1.G * r1 + c2.G * r2),
-                (byte)(c1.B * r1 + c2.B * r2));
+                (byte)Math.Round(c1.A * r1 + c2.A * r2),
+                (byte)Math.Round(c1.R * r1 + c2.R * r2),
+                (byte)Math.Round(c1.G * r1 + c2.G * r2),
+                (byte)Math.Round(c1.B * r1 + c2.B * r2));
         }
     }
 }

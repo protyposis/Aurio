@@ -23,6 +23,8 @@ namespace AudioAlign.WaveControls {
         private SpectrogramMode mode;
 
         private int[] colorPalette;
+        private bool paletteDemo = false;
+        private int paletteDemoIndex = 0;
 
         public SpectrogramMode Mode {
             get { return (SpectrogramMode)GetValue(ModeProperty); }
@@ -79,9 +81,10 @@ namespace AudioAlign.WaveControls {
         public Spectrogram() {
             ColorGradient gradient = new ColorGradient(0, 1);
             gradient.AddStop(Colors.Black, 0);
-            gradient.AddStop(Colors.DarkBlue, 0.3f);
-            gradient.AddStop(Colors.DarkOrange, 0.85f);
-            gradient.AddStop(Colors.Yellow, 1);
+            gradient.AddStop(Colors.DarkBlue, 0.25f);
+            gradient.AddStop(Colors.DarkOrange, 0.7f);
+            gradient.AddStop(Colors.Yellow, 0.9f);
+            gradient.AddStop(Colors.White, 1);
             colorPalette = gradient.GetGradient(1024).Select(c => GetColorValue(c)).ToArray();
 
             ClipToBounds = true;
@@ -115,20 +118,30 @@ namespace AudioAlign.WaveControls {
                     + " but is " + values.Length);
             }
 
-            float factor = 1024f / (Maximum - Minimum);
-            for (int x = 0; x < pixelColumn.Length; x++) {
-                float value = values[x];
-                int color;
-                if (value > Maximum) {
-                    color = colorPalette[255];
+            if (paletteDemo) {
+                for (int x = 0; x < pixelColumn.Length; x++) {
+                    pixelColumn[pixelColumn.Length - 1 - x] = colorPalette[paletteDemoIndex];
                 }
-                else if (value < Minimum) {
-                    color = colorPalette[0];
+                if (++paletteDemoIndex % colorPalette.Length == 0) {
+                    paletteDemoIndex = 0;
                 }
-                else {
-                    color = colorPalette[1024 + (int)(factor * values[x])];
+            }
+            else {
+                float factor = colorPalette.Length / (Maximum - Minimum);
+                for (int x = 0; x < pixelColumn.Length; x++) {
+                    float value = values[x];
+                    int color;
+                    if (value > Maximum) {
+                        color = colorPalette[colorPalette.Length - 1];
+                    }
+                    else if (value < Minimum) {
+                        color = colorPalette[0];
+                    }
+                    else {
+                        color = colorPalette[colorPalette.Length - 1 + (int)(factor * values[x])];
+                    }
+                    pixelColumn[pixelColumn.Length - 1 - x] = color;
                 }
-                pixelColumn[pixelColumn.Length - 1 - x] = color;
             }
 
             writeableBitmap.WritePixels(new Int32Rect(position, 0, 1, values.Length), pixelColumn, 4, 0);
@@ -165,14 +178,16 @@ namespace AudioAlign.WaveControls {
                     else {
                         CopyPixels(writeableBitmap, writeableBitmap);
                     }
+                    position = (int)ActualWidth;
                 }
-                else if (sizeChanged) {
-                    writeableBitmap = new WriteableBitmap((int)ActualWidth,
-                            SpectrogramSize, 96, 96, PixelFormats.Bgra32, null);
+                else if (mode == SpectrogramMode.Static) {
+                    if (sizeChanged) {
+                        writeableBitmap = new WriteableBitmap((int)ActualWidth,
+                                SpectrogramSize, 96, 96, PixelFormats.Bgra32, null);
+                    }
+                    position = 0;
                 }
             }
-            
-            position = mode == SpectrogramMode.Scroll ? (int)ActualWidth : 0;
             InvalidateVisual();
         }
 
@@ -188,9 +203,14 @@ namespace AudioAlign.WaveControls {
             Int32Rect srcRect = new Int32Rect(twoThirds, 0, third, height);
             Int32Rect destRect = new Int32Rect(0, 0, third, height);
 
-            int[] buffer = new int[twoThirds * height];
-            src.CopyPixels(srcRect, buffer, third * 4, 0);
-            dest.WritePixels(destRect, buffer, third * 4, 0);
+            //// pixel copy with intermediate buffer
+            //int[] buffer = new int[twoThirds * height];
+            //src.CopyPixels(srcRect, buffer, third * 4, 0);
+            //dest.WritePixels(destRect, buffer, third * 4, 0);
+
+            // direct pixel copy
+            dest.WritePixels(srcRect, src.BackBuffer, src.BackBufferStride * src.PixelHeight, 
+                src.BackBufferStride, destRect.X, destRect.Y);
         }
     }
 }
