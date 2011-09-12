@@ -37,11 +37,24 @@ namespace AudioAlign.Test.FFT {
             // http://stackoverflow.com/questions/1270018/explain-the-fft-to-me
             // http://stackoverflow.com/questions/6666807/how-to-scale-fft-output-of-wave-file
 
+            /*
+             * FFT max value test:
+             * 16Hz, 1024 samplerate, 512 samples, rectangle window
+             * -> input min/max: -1/1
+             * -> FFT max: 256
+             * -> FFT result max: ~1
+             * -> FFT dB result max: ~1
+             * 
+             * source: "Windowing Functions Improve FFT Results, Part I"
+             * => kann zum Normalisieren für Fensterfunktionen verwendet werden
+             */
+
             float frequency = float.Parse(frequencyTextBox.Text);
             int ws = (int)windowSize.Value;
             float frequencyFactor = ws / frequency;
+            int sampleRate = int.Parse(sampleRateTextBox.Text);
 
-            SineGeneratorStream sine = new SineGeneratorStream(44100, frequency, new TimeSpan(0, 0, 1));
+            SineGeneratorStream sine = new SineGeneratorStream(sampleRate, frequency, new TimeSpan(0, 0, 1));
 
             float[] input = new float[ws];
             sine.Read(input, 0, ws);
@@ -87,12 +100,13 @@ namespace AudioAlign.Test.FFT {
             //FFTUtil.Results(fftIO, fftResult);
 
             // transform complex output to magnitudes
-            int y = 0;
             float sum = 0;
+            int y = 0;
             for (int x = 0; x < fftIO.Length; x += 2) { //  / 2
                 fftResult[y] = FFTUtil.CalculateMagnitude(fftIO[x], fftIO[x + 1]) / ws * 2;
                 sum += fftResult[y++];
             }
+            //FFTUtil.Results(fftIO, fftResult);
 
             //// adjust values for the sum to become 1
             //float sum2 = 0;
@@ -106,9 +120,10 @@ namespace AudioAlign.Test.FFT {
 
             // convert magnitudes to decibel
             float[] fftResultdB = new float[fftResult.Length];
-            for (int x = 0; x < fftResult.Length; x++) {
-                fftResultdB[x] = (float)VolumeUtil.LinearToDecibel(fftResult[x]);
-            }
+            //for (int x = 0; x < fftResult.Length; x++) {
+            //    fftResultdB[x] = (float)VolumeUtil.LinearToDecibel(fftResult[x]);
+            //}
+            FFTUtil.Results(fftIO, fftResultdB);
             fftdBOutputGraph.Values = fftResultdB;
 
             summary.Text = String.Format(

@@ -39,7 +39,7 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public int Read(float[] buffer, int offset, int count) {
-            float frequencyFactor = count / frequency;
+            float frequencyFactor = Properties.SampleRate / frequency;
             for (int x = 0; x < count; x++) {
                 buffer[offset + x] = (float)Math.Sin((position + x) / frequencyFactor * Math.PI * 2);
             }
