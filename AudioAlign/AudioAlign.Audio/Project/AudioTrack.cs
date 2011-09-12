@@ -96,7 +96,7 @@ namespace AudioAlign.Audio.Project {
         }
 
         private void timeWarps_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
-            if (e.NewItems != null || e.OldItems != null) {
+            if (e.NewItems != null || e.OldItems != null || e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset) {
                 InitializeLength();
             }
         }

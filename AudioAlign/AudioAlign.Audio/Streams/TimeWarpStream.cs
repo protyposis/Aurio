@@ -55,6 +55,12 @@ namespace AudioAlign.Audio.Streams {
                     mappingOmega = mappings.Last();
                 }
             }
+            else if (e != null && e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset) {
+                mappingOmega = new TimeWarp { From = sourceStream.Length, To = sourceStream.Length };
+            }
+            if (position > mappingOmega.To) {
+                Position = mappingOmega.To;
+            }
             ResetStream();
         }
 
