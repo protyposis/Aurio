@@ -117,9 +117,25 @@ namespace AudioAlign.Audio.Matching {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 long intervalLength = secfactor * 1;
+
+                Interval iT1 = new Interval(match.Track1Time.Ticks, match.Track1Time.Ticks + intervalLength);
+                Interval iT2 = new Interval(match.Track2Time.Ticks, match.Track2Time.Ticks + intervalLength);
+
+                long iT1overflow = match.Track1.Length.Ticks - iT1.To;
+                long iT2overflow = match.Track2.Length.Ticks - iT2.To;
+                long adjust = 0;
+                if (iT1overflow < 0) {
+                    adjust = iT1overflow;
+                }
+                if (iT2overflow < 0 && iT2overflow < iT1overflow) {
+                    adjust = iT2overflow;
+                }
+                iT1 += adjust;
+                iT2 += adjust;
+
                 TimeSpan offset = Calculate(
-                    match.Track1.CreateAudioStream(), new Interval(match.Track1Time.Ticks - intervalLength / 2, match.Track1Time.Ticks + intervalLength / 2),
-                    match.Track2.CreateAudioStream(), new Interval(match.Track2Time.Ticks - intervalLength / 2, match.Track2Time.Ticks + intervalLength / 2),
+                    match.Track1.CreateAudioStream(), iT1,
+                    match.Track2.CreateAudioStream(), iT2,
                     progressMonitor);
                 Debug.WriteLine("CC: " + match + ": " + offset + " (" + sw.Elapsed + ")");
                 match.Track2Time += offset;
