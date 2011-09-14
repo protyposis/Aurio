@@ -122,7 +122,9 @@ namespace AudioAlign.Audio {
             TimeWarpStream timeWarpStream = new TimeWarpStream(baseStream, ResamplingQuality.SincBest) {
                 Mappings = audioTrack.TimeWarps
             };
-            OffsetStream offsetStream = new OffsetStream(timeWarpStream);
+            OffsetStream offsetStream = new OffsetStream(timeWarpStream) {
+                Offset = TimeUtil.TimeSpanToBytes(audioTrack.Offset, baseStream.Properties) 
+            };
 
             audioTrack.OffsetChanged += new EventHandler<ValueEventArgs<TimeSpan>>(
                 delegate(object sender, ValueEventArgs<TimeSpan> e) {

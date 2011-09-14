@@ -71,6 +71,22 @@ namespace AudioAlign.Audio.Project {
             get { return list[index]; }
         }
 
+        public int IndexOf(T element) {
+            for(int i = 0; i < list.Count; i++) {
+                if (list[i] == element) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public void Clear() {
+            List<T> copy = new List<T>(list);
+            foreach (T track in copy) {
+                Remove(track);
+            }
+        }
+
         /// <summary>
         /// Gets the time at which the earliest track in the tracklist starts.
         /// </summary>

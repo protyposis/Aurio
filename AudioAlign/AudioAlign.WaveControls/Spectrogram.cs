@@ -159,6 +159,10 @@ namespace AudioAlign.WaveControls {
             InvalidateVisual();
         }
 
+        public void Clear() {
+            InitializeSpectrogramBitmap(true);
+        }
+
         private void InitializeSpectrogramBitmap(bool sizeChanged) {
             if (writeableBitmap == null) { // first time initialization
                 writeableBitmap = new WriteableBitmap(

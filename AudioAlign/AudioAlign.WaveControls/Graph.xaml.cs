@@ -119,5 +119,8 @@ namespace AudioAlign.WaveControls {
             InitializeComponent();
         }
 
+        public void Clear() {
+            GraphLine.Points.Clear();
+        }
     }
 }
