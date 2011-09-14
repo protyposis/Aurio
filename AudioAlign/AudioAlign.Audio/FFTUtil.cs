@@ -70,6 +70,10 @@ namespace AudioAlign.Audio {
         /// <param name="result">the result for visualization</param>
         /// <returns>the peak index of the result</returns>
         public static int Results(float[] fftOutput, float[] result) {
+            return Results(fftOutput, result, 0f);
+        }
+
+        public static int Results(float[] fftOutput, float[] result, float decibelOffset) {
             float max = float.MinValue;
             int peak = -1;
             int y = 0;
@@ -79,14 +83,15 @@ namespace AudioAlign.Audio {
                 // multiply by 2 since the FFT result only contains half of the energy (the second half are the negative frequencies of the "full" FFT result)
                 // calculate dB scale value
                 // http://www.mathworks.de/support/tech-notes/1700/1702.html
-                result[y] = (float)VolumeUtil.LinearToDecibel(CalculateMagnitude(fftOutput[x], fftOutput[x + 1]) / fftOutput.Length * 2);
+                result[y] = (float)VolumeUtil.LinearToDecibel(
+                    CalculateMagnitude(fftOutput[x], fftOutput[x + 1]) / fftOutput.Length * 2) + decibelOffset;
                 if (result[y] > max) {
                     max = result[y];
                     peak = y;
                 }
                 y++;
             }
-            return y;
+            return peak;
         }
 
         public static void FFT(float[] values) {

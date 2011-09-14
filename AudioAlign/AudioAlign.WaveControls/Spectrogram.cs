@@ -127,7 +127,7 @@ namespace AudioAlign.WaveControls {
                 }
             }
             else {
-                float factor = colorPalette.Length / (Maximum - Minimum);
+                float factor = (colorPalette.Length - 1) / (Maximum - Minimum);
                 for (int x = 0; x < pixelColumn.Length; x++) {
                     float value = values[x];
                     int color;
