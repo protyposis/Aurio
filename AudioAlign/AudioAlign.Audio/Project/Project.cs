@@ -14,11 +14,10 @@ namespace AudioAlign.Audio.Project {
         private readonly TrackList<AudioTrack> audioTrackList;
         private readonly List<Match> matches;
 
-        private FileInfo projectFile;
-
         public Project() {
             audioTrackList = new TrackList<AudioTrack>();
             matches = new List<Match>();
+            MasterVolume = 1;
         }
 
         public TrackList<AudioTrack> AudioTracks {
@@ -145,6 +144,7 @@ namespace AudioAlign.Audio.Project {
 
             xml.Flush();
             xml.Close();
+            project.File = targetFile;
         }
 
         public static Project Load(FileInfo sourceFile) {
@@ -202,8 +202,6 @@ namespace AudioAlign.Audio.Project {
                             xml.ReadStartElement("timewarps");
                             if (!empty) {
                                 while (xml.IsStartElement("timewarp")) {
-                                    xml.ReadStartElement();
-
                                     TimeWarp warp = new TimeWarp();
 
                                     xml.MoveToAttribute("from");
@@ -212,6 +210,7 @@ namespace AudioAlign.Audio.Project {
                                     xml.MoveToAttribute("to");
                                     warp.To = xml.ReadContentAsLong();
 
+                                    xml.ReadStartElement();
                                     //xml.ReadEndElement(); // not necessary since timewarp is an empty element
 
                                     track.TimeWarps.Add(warp);
@@ -266,6 +265,7 @@ namespace AudioAlign.Audio.Project {
             xml.ReadEndElement();
 
             xml.Close();
+            project.File = sourceFile;
             return project;
         }
     }

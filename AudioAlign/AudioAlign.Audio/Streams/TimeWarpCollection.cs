@@ -57,6 +57,12 @@ namespace AudioAlign.Audio.Streams {
             sorting = false;
         }
 
+        public new void Clear() {
+            if (Count > 0) {
+                base.Clear();
+            }
+        }
+
         public void ValidateMappings() {
             // validate that no mapping is overlapping with another one
             for (int x = 0; x < Count - 1; x++) {
