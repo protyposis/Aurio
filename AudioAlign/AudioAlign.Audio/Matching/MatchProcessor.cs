@@ -9,6 +9,9 @@ using AudioAlign.Audio.Streams;
 namespace AudioAlign.Audio.Matching {
     public class MatchProcessor {
 
+        /// <summary>
+        /// Creates a list of all possible track pairs from a track list.
+        /// </summary>
         public static List<Tuple<AudioTrack, AudioTrack>> GetTrackPairs(TrackList<AudioTrack> trackList) {
             List<Tuple<AudioTrack, AudioTrack>> pairs = new List<Tuple<AudioTrack, AudioTrack>>();
             for (int x = 0; x < trackList.Count; x++) {
@@ -19,6 +22,9 @@ namespace AudioAlign.Audio.Matching {
             return pairs;
         }
 
+        /// <summary>
+        /// Creates a list of track pairs including their matches from a list ot track pairs and a list of matches.
+        /// </summary>
         public static List<Tuple<AudioTrack, AudioTrack, List<Match>>> GetTrackPairsMatches(List<Tuple<AudioTrack, AudioTrack>> trackPairs, IEnumerable<Match> matches) {
             List<Tuple<AudioTrack, AudioTrack, List<Match>>> trackPairMatches = 
                 new List<Tuple<AudioTrack, AudioTrack, List<Match>>>();
@@ -90,6 +96,7 @@ namespace AudioAlign.Audio.Matching {
         /// <summary>
         /// Filters a collection of matches for a pair of tracks according to the specified mode.
         /// </summary>
+        /// <returns>a single match, chosen according to the specified match filter mode</returns>
         public static Match Filter(List<Match> matches, MatchFilterMode mode) {
             if (matches.Count == 0) {
                 throw new ArgumentException("no matches to filter");
@@ -115,6 +122,11 @@ namespace AudioAlign.Audio.Matching {
             }
         }
 
+        /// <summary>
+        /// Filters a collection of matches by applying a sliding window and determining the best match for
+        /// each window according to the specified filter mode.
+        /// </summary>
+        /// <returns>a list of matches containing at least one match</returns>
         public static List<Match> WindowFilter(List<Match> matches, MatchFilterMode mode, TimeSpan windowSize) {
             if (matches.Count == 0) {
                 throw new ArgumentException("no matches to filter");
