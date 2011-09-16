@@ -142,7 +142,14 @@ namespace AudioAlign.Audio.Matching {
             return true; // stream buffer successfully filled
         }
 
-        protected void ReadFrameInternal(float[] frame) {
+        /// <summary>
+        /// Reads a frame from the stream.
+        /// </summary>
+        /// <param name="frame">the target array where the frame will be copied to</param>
+        public virtual void ReadFrame(float[] frame) {
+            if (frame.Length != windowSize) {
+                throw new ArgumentException("the provided frame array has an invalid size");
+            }
             if (frameOffset + frameSize > streamBufferLevel) {
                 // if there's no more frame in the stream buffer, refill it
                 if (!FillBuffer()) {
@@ -152,14 +159,6 @@ namespace AudioAlign.Audio.Matching {
             // copy window to frame buffer
             Buffer.BlockCopy(streamBuffer, frameOffset, frame, 0, frameSize);
             frameOffset += hopSizeB;
-        }
-
-        /// <summary>
-        /// Reads a frame from the stream.
-        /// </summary>
-        /// <param name="frame">the target array where the frame will be copied to</param>
-        public virtual void ReadFrame(float[] frame) {
-            ReadFrameInternal(frame);
         }
     }
 }

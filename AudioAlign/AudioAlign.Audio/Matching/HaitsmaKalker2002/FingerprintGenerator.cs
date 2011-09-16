@@ -21,7 +21,6 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         private const int FREQ_BANDS = 33;
 
         private AudioTrack inputTrack;
-        private WindowFunction windowFunction;
         private double[] frequencyBands;
 
         private int flipWeakestBits;
@@ -36,7 +35,6 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
         public FingerprintGenerator(AudioTrack track, int flipWeakestBits, bool generateAllBitCombinations) {
             this.inputTrack = track;
-            this.windowFunction = WindowUtil.GetFunction(WindowType.Hann, FRAME_SIZE);
             this.frequencyBands = FFTUtil.CalculateFrequencyBoundariesLog(FREQ_MIN, FREQ_MAX, FREQ_BANDS);
             this.flipWeakestBits = flipWeakestBits;
             this.generateAllBitCombinations = generateAllBitCombinations;
@@ -48,13 +46,13 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(inputTrack.FileInfo)),
                 ResamplingQuality.SincFastest, SAMPLERATE);
 
-            StreamWindower windower = new StreamWindower(audioStream, FRAME_SIZE, FRAME_STEP);
-            float[] frameBufferF = new float[FRAME_SIZE];
+            STFT stft = new STFT(audioStream, FRAME_SIZE, FRAME_STEP, WindowType.Hann);
+            float[] frameBuffer = new float[FRAME_SIZE / 2];
             int index = 0;
 
-            while (windower.HasNext()) {
-                windower.ReadFrame(frameBufferF);
-                ProcessFrame(frameBufferF);
+            while (stft.HasNext()) {
+                stft.ReadFrame(frameBuffer);
+                ProcessFrame(frameBuffer);
                 timestamp = SubFingerprintIndexToTimeSpan(index++);
             }
 
@@ -63,22 +61,11 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
         }
 
-        private float[] fftResult = new float[FRAME_SIZE / 2];
         float[] bands, bandsPrev;
-        private void ProcessFrame(float[] frame) {
-            if (frame.Length != FRAME_SIZE) {
+        private void ProcessFrame(float[] fftResult) {
+            if (fftResult.Length != FRAME_SIZE / 2) {
                 throw new Exception();
             }
-
-            // apply window function
-            windowFunction.Apply(frame);
-
-            // do fourier transform
-            FFTUtil.FFT(frame);
-
-            // normalize fourier results
-            // TODO check if calculation corresponds to paper
-            FFTUtil.Results(frame, fftResult);
 
             // sum up the frequency bins
             // TODO check energy computation formula from paper
