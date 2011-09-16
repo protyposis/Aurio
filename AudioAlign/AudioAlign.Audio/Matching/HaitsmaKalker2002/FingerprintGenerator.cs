@@ -47,54 +47,19 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(inputTrack.FileInfo)),
                 ResamplingQuality.SincFastest, SAMPLERATE);
-            int sampleBytes = audioStream.Properties.SampleByteSize;
-            byte[] streamBuffer = new byte[STREAM_INPUT_BUFFER_SIZE * sampleBytes];
+
+            StreamWindower windower = new StreamWindower(audioStream, FRAME_SIZE, FRAME_STEP);
             float[] frameBufferF = new float[FRAME_SIZE];
-            int streamBufferOffsetF = 0;
-            int streamBufferLevelF = 0;
-            int frameOffsetF = 0;
             int index = 0;
 
-            unsafe {
-                fixed (byte* streamBufferB = streamBuffer) {
-                    float* streamBufferF = (float*)streamBufferB;
+            while (windower.HasNext()) {
+                windower.ReadFrame(frameBufferF);
+                ProcessFrame(frameBufferF);
+                timestamp = SubFingerprintIndexToTimeSpan(index++);
+            }
 
-                    while (audioStream.Position <= audioStream.Length) {
-                        // fill the stream input buffer, if no bytes returned we have reached the end of the stream
-                        int streamBufferOffsetB = streamBufferOffsetF * sampleBytes;
-                        streamBufferLevelF = StreamUtil.ForceRead(audioStream, streamBuffer,
-                            streamBufferOffsetB, streamBuffer.Length - streamBufferOffsetB) / sampleBytes;
-                        if (streamBufferLevelF == 0) {
-                            Debug.WriteLine("subfingerprint generation finished - end position {0}/{1}", audioStream.Position, audioStream.Length);
-
-                            if (Completed != null) {
-                                Completed(this, EventArgs.Empty);
-                            }
-                            
-                            return; // whole stream has been processed
-                        }
-                        streamBufferLevelF += streamBufferOffsetF;
-                        streamBufferOffsetF = 0;
-
-                        // iterate through windows in current buffer
-                        while (frameOffsetF + FRAME_SIZE <= streamBufferLevelF) {
-                            // copy window to window buffer
-                            Marshal.Copy((IntPtr)(&streamBufferF[frameOffsetF]), frameBufferF, 0, FRAME_SIZE);
-
-                            timestamp = SubFingerprintIndexToTimeSpan(index++);
-                            ProcessFrame(frameBufferF);
-
-                            frameOffsetF += FRAME_STEP;
-                        }
-
-                        // carry over unprocessed samples from the end of the stream buffer to its beginning
-                        streamBufferOffsetF = streamBufferLevelF - frameOffsetF;
-                        for (int x = 0; x < streamBufferOffsetF; x++) {
-                            streamBufferF[x] = streamBufferF[frameOffsetF + x];
-                        }
-                        frameOffsetF = 0;
-                    }
-                }
+            if (Completed != null) {
+                Completed(this, EventArgs.Empty);
             }
         }
 
