@@ -284,10 +284,8 @@ namespace AudioAlign.Audio.Matching {
         public static void MoveToStartTime(TrackList<AudioTrack> trackList, TimeSpan startTime) {
             TimeSpan start = trackList.Start;
             TimeSpan delta = startTime - start;
-            if (start < TimeSpan.Zero) {
-                foreach (AudioTrack audioTrack in trackList) {
-                    audioTrack.Offset += delta;
-                }
+            foreach (AudioTrack audioTrack in trackList) {
+                audioTrack.Offset += delta;
             }
         }
     }

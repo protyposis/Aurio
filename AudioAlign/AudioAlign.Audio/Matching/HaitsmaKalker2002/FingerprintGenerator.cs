@@ -6,11 +6,11 @@ using AudioAlign.Audio.Project;
 using AudioAlign.Audio.Streams;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
     public class FingerprintGenerator {
 
-        private const int SAMPLE_BYTE_SIZE = 4;
         private const int STREAM_INPUT_BUFFER_SIZE = 32768;
         private const int FRAME_SIZE = 2048; // 2048 samples per window
         private const int FRAME_STEP = 64; // take a window every 64 samples (WINDOW_SIZE / WINDOW_STEP = frame overlap)
@@ -79,9 +79,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                         // iterate through windows in current buffer
                         while (frameOffsetF + FRAME_SIZE <= streamBufferLevelF) {
                             // copy window to window buffer
-                            for (int x = 0; x < FRAME_SIZE; x++) {
-                                frameBufferF[x] = streamBufferF[x + frameOffsetF];
-                            }
+                            Marshal.Copy((IntPtr)(&streamBufferF[frameOffsetF]), frameBufferF, 0, FRAME_SIZE);
 
                             timestamp = SubFingerprintIndexToTimeSpan(index++);
                             ProcessFrame(frameBufferF);

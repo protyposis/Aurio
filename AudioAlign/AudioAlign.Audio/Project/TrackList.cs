@@ -92,9 +92,12 @@ namespace AudioAlign.Audio.Project {
         /// </summary>
         public TimeSpan Start {
             get {
-                TimeSpan start = TimeSpan.Zero;
+                if (Count == 0) {
+                    return TimeSpan.Zero;
+                }
+                TimeSpan start = TimeSpan.MaxValue;
                 foreach (T track in this) {
-                    if (start == TimeSpan.Zero || track.Offset < start) {
+                    if (track.Offset < start) {
                         start = track.Offset;
                     }
                 }
@@ -107,9 +110,12 @@ namespace AudioAlign.Audio.Project {
         /// </summary>
         public TimeSpan End {
             get {
-                TimeSpan end = TimeSpan.Zero;
+                if (Count == 0) {
+                    return TimeSpan.Zero;
+                }
+                TimeSpan end = TimeSpan.MinValue;
                 foreach (T track in this) {
-                    if (end == TimeSpan.Zero || track.Offset + track.Length > end) {
+                    if (track.Offset + track.Length > end) {
                         end = track.Offset + track.Length;
                     }
                 }
