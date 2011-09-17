@@ -41,13 +41,14 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         }
 
         private TimeSpan timestamp = TimeSpan.Zero;
+        private float[] frameBuffer = new float[FRAME_SIZE / 2];
+
         public void Generate() {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(inputTrack.FileInfo)),
                 ResamplingQuality.SincFastest, SAMPLERATE);
 
             STFT stft = new STFT(audioStream, FRAME_SIZE, FRAME_STEP, WindowType.Hann);
-            float[] frameBuffer = new float[FRAME_SIZE / 2];
             int index = 0;
 
             while (stft.HasNext()) {
@@ -61,7 +62,9 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
         }
 
-        float[] bands, bandsPrev;
+        private float[] bands = new float[33];
+        private float[] bandsPrev = new float[33];
+
         private void ProcessFrame(float[] fftResult) {
             if (fftResult.Length != FRAME_SIZE / 2) {
                 throw new Exception();
@@ -70,9 +73,9 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             // sum up the frequency bins
             // TODO check energy computation formula from paper
             // TODO index-mapping can be precomputed
-            bands = new float[33];
             float bandWidth = SAMPLERATE / fftResult.Length;
             for (int x = 0; x < frequencyBands.Length - 1; x++) {
+                bands[x] = 0;
                 int lowerIndex = (int)(frequencyBands[x] / bandWidth);
                 int upperIndex = (int)(frequencyBands[x + 1] / bandWidth);
                 for (int y = lowerIndex; y <= upperIndex; y++) {
@@ -80,11 +83,9 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 }
             }
 
-            if (bandsPrev != null) {
-                CalculateSubFingerprint(bandsPrev, bands);
-            }
+            CalculateSubFingerprint(bandsPrev, bands);
 
-            bandsPrev = bands;
+            CommonUtil.Swap<float[]>(ref bands, ref bandsPrev);
         }
 
         private void CalculateSubFingerprint(float[] energyBands, float[] previousEnergyBands) {
