@@ -11,8 +11,7 @@ namespace AudioAlign.Audio.Matching {
     class STFT: StreamWindower {
 
         private WindowFunction windowFunction;
-        private float[] fftResult;
-        float[] frameBuffer;
+        private float[] frameBuffer;
 
         // <summary>
         /// Initializes a new STFT for the specified stream with the specified window and hop size.
