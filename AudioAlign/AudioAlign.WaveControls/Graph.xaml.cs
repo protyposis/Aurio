@@ -68,8 +68,19 @@ namespace AudioAlign.WaveControls {
         public static readonly DependencyProperty LineThicknessProperty =
             DependencyProperty.Register("LineThickness", typeof(double), typeof(Graph), new UIPropertyMetadata(1.0d));
 
+        private long lastUpdateTime = 0;
+        private long updateTimeDelta = new TimeSpan(0, 0, 1).Ticks / 25; // 25 FPS
         private static void ValuesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             Graph graph = (Graph)d;
+
+            long currentTime = DateTime.Now.Ticks;
+            if (currentTime - graph.lastUpdateTime >= graph.updateTimeDelta) {
+                graph.lastUpdateTime = currentTime;
+            }
+            else {
+                return;
+            }
+
             graph.GraphLine.Points.Clear();
             float[] dc = (float[])e.NewValue;
 
