@@ -72,14 +72,14 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
             // sum up the frequency bins
             // TODO check energy computation formula from paper
-            // TODO index-mapping can be precomputed
-            float bandWidth = SAMPLERATE / fftResult.Length;
+            // TODO index-mapping can be precomputed -> CHECKED slower than now!?!
+            double bandWidth = SAMPLERATE / 2d / fftResult.Length;
             for (int x = 0; x < frequencyBands.Length - 1; x++) {
                 bands[x] = 0;
                 int lowerIndex = (int)(frequencyBands[x] / bandWidth);
                 int upperIndex = (int)(frequencyBands[x + 1] / bandWidth);
-                for (int y = lowerIndex; y <= upperIndex; y++) {
-                    bands[x] += fftResult[x];
+                for (int y = lowerIndex; y < upperIndex; y++) {
+                    bands[x] += fftResult[y];
                 }
             }
 
