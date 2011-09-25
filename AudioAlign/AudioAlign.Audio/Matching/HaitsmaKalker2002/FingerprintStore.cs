@@ -10,10 +10,12 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
         private const int FINGERPRINT_SIZE = 256;
 
+        private IProfile profile;
         private Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>> lookupTable;
         private Dictionary<AudioTrack, List<SubFingerprint>> store;
 
-        public FingerprintStore() {
+        public FingerprintStore(IProfile profile) {
+            this.profile = profile;
             lookupTable = new Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>>();
             store = new Dictionary<AudioTrack, List<SubFingerprint>>();
         }
@@ -222,9 +224,9 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                                     Match match = new Match {
                                         Similarity = 1 - ber,
                                         Track1 = audioTrack1,
-                                        Track1Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(sfp1Index),
+                                        Track1Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, sfp1Index),
                                         Track2 = audioTrack2,
-                                        Track2Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(sfp2Index)
+                                        Track2Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, sfp2Index)
                                     };
                                     Debug.WriteLine(match + " [SFP distance: " + sfpDistance + "]");
                                 }

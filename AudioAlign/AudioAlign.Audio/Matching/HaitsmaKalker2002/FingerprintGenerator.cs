@@ -12,16 +12,9 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
     public class FingerprintGenerator {
 
         private const int STREAM_INPUT_BUFFER_SIZE = 32768;
-        private const int FRAME_SIZE = 2048; // 2048 samples per window
-        private const int FRAME_STEP = 64; // take a window every 64 samples (WINDOW_SIZE / WINDOW_STEP = frame overlap)
-        private const int SAMPLERATE = 5512;
-
-        private const int FREQ_MIN = 300;
-        private const int FREQ_MAX = 2000;
-        private const int FREQ_BANDS = 33;
 
         private AudioTrack inputTrack;
-        private double[] frequencyBands;
+        private IProfile profile;
 
         private int flipWeakestBits;
         private bool generateAllBitCombinations;
@@ -29,32 +22,34 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         public event EventHandler<SubFingerprintEventArgs> SubFingerprintCalculated;
         public event EventHandler Completed;
 
-        public FingerprintGenerator(AudioTrack track)
-            : this(track, 0, false) {
+        public FingerprintGenerator(IProfile profile, AudioTrack track)
+            : this(profile, track, 0, false) {
         }
 
-        public FingerprintGenerator(AudioTrack track, int flipWeakestBits, bool generateAllBitCombinations) {
+        public FingerprintGenerator(IProfile profile, AudioTrack track, int flipWeakestBits, bool generateAllBitCombinations) {
             this.inputTrack = track;
-            this.frequencyBands = FFTUtil.CalculateFrequencyBoundariesLog(FREQ_MIN, FREQ_MAX, FREQ_BANDS);
+            this.profile = profile;
             this.flipWeakestBits = flipWeakestBits;
             this.generateAllBitCombinations = generateAllBitCombinations;
         }
 
         private TimeSpan timestamp = TimeSpan.Zero;
-        private float[] frameBuffer = new float[FRAME_SIZE / 2];
+        private float[] frameBuffer;
 
         public void Generate() {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(inputTrack.FileInfo)),
-                ResamplingQuality.SincFastest, SAMPLERATE);
+                ResamplingQuality.SincFastest, profile.SampleRate);
 
-            STFT stft = new STFT(audioStream, FRAME_SIZE, FRAME_STEP, WindowType.Hann);
+            STFT stft = new STFT(audioStream, profile.FrameSize, profile.FrameStep, WindowType.Hann);
             int index = 0;
+
+            frameBuffer = new float[profile.FrameSize / 2];
 
             while (stft.HasNext()) {
                 stft.ReadFrame(frameBuffer);
                 ProcessFrame(frameBuffer);
-                timestamp = SubFingerprintIndexToTimeSpan(index++);
+                timestamp = SubFingerprintIndexToTimeSpan(profile, index++);
             }
 
             if (Completed != null) {
@@ -66,22 +61,11 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         private float[] bandsPrev = new float[33];
 
         private void ProcessFrame(float[] fftResult) {
-            if (fftResult.Length != FRAME_SIZE / 2) {
+            if (fftResult.Length != profile.FrameSize / 2) {
                 throw new Exception();
             }
 
-            // sum up the frequency bins
-            // TODO check energy computation formula from paper
-            // TODO index-mapping can be precomputed -> CHECKED slower than now!?!
-            double bandWidth = SAMPLERATE / 2d / fftResult.Length;
-            for (int x = 0; x < frequencyBands.Length - 1; x++) {
-                bands[x] = 0;
-                int lowerIndex = (int)(frequencyBands[x] / bandWidth);
-                int upperIndex = (int)(frequencyBands[x + 1] / bandWidth);
-                for (int y = lowerIndex; y < upperIndex; y++) {
-                    bands[x] += fftResult[y];
-                }
-            }
+            profile.MapFrequencies(fftResult, bands);
 
             CalculateSubFingerprint(bandsPrev, bands);
 
@@ -133,12 +117,16 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
         }
 
-        public static TimeSpan SubFingerprintIndexToTimeSpan(int index) {
-            return new TimeSpan((long)Math.Round((double)index * FRAME_STEP / SAMPLERATE * 1000 * 1000 * 10));
+        public static TimeSpan SubFingerprintIndexToTimeSpan(IProfile profile, int index) {
+            return new TimeSpan((long)Math.Round((double)index * profile.FrameStep / profile.SampleRate * 1000 * 1000 * 10));
         }
 
-        public static int TimeStampToSubFingerprintIndex(TimeSpan timeSpan) {
-            return (int)Math.Round((double)timeSpan.Ticks / 10 / 1000 / 1000 * SAMPLERATE / FRAME_STEP);
+        public static int TimeStampToSubFingerprintIndex(IProfile profile, TimeSpan timeSpan) {
+            return (int)Math.Round((double)timeSpan.Ticks / 10 / 1000 / 1000 * profile.SampleRate / profile.FrameStep);
+        }
+
+        public static IProfile[] GetProfiles() {
+            return new IProfile[] { new DefaultProfile(), new BugProfile() };
         }
     }
 }

@@ -120,9 +120,12 @@
     <Compile Include="Matching\CrossCorrelation.cs" />
     <Compile Include="Matching\Graph\Edge.cs" />
     <Compile Include="Matching\Graph\UndirectedGraph.cs" />
+    <Compile Include="Matching\HaitsmaKalker2002\BugProfile.cs" />
+    <Compile Include="Matching\HaitsmaKalker2002\DefaultProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\Fingerprint.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintGenerator.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintStore.cs" />
+    <Compile Include="Matching\HaitsmaKalker2002\IProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprint.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintEventArgs.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintLookupEntry.cs" />
@@ -194,9 +197,7 @@
       <Name>AudioAlign.LibSampleRate</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Matching\Dixon2005\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

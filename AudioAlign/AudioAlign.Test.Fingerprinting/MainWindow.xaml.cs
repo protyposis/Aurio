@@ -27,6 +27,7 @@ namespace AudioAlign.Test.Fingerprinting {
     public partial class MainWindow : Window {
 
         private FingerprintStore store;
+        private IProfile profile;
 
         public MainWindow() {
             InitializeComponent();
@@ -34,7 +35,6 @@ namespace AudioAlign.Test.Fingerprinting {
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             ProgressMonitor.GlobalInstance.ProcessingProgressChanged += new EventHandler<Audio.ValueEventArgs<float>>(Instance_ProcessingProgressChanged);
-            store = new FingerprintStore();
 
             trackListBox.SelectionChanged += new SelectionChangedEventHandler(trackListBox_SelectionChanged);
             trackFingerprintListBox.SelectionChanged += new SelectionChangedEventHandler(trackFingerprintListBox_SelectionChanged);
@@ -53,6 +53,8 @@ namespace AudioAlign.Test.Fingerprinting {
             dlg.Filter = "Wave files|*.wav";
 
             if (dlg.ShowDialog() == true) {
+                profile = FingerprintGenerator.GetProfiles()[0];
+                store = new FingerprintStore(profile);
                 foreach (string file in dlg.FileNames) {
                     AudioTrack audioTrack = new AudioTrack(new FileInfo(file));
                     IAudioStream audioStream = audioTrack.CreateAudioStream();
@@ -60,7 +62,7 @@ namespace AudioAlign.Test.Fingerprinting {
                     Task.Factory.StartNew(() => {
                         IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating sub-fingerprints for " + audioTrack.FileInfo.Name, true);
 
-                        FingerprintGenerator fpg = new FingerprintGenerator(audioTrack, 3, true);
+                        FingerprintGenerator fpg = new FingerprintGenerator(profile, audioTrack, 3, true);
                         int subFingerprintsCalculated = 0;
                         fpg.SubFingerprintCalculated += new EventHandler<SubFingerprintEventArgs>(delegate(object s2, SubFingerprintEventArgs e2) {
                             subFingerprintsCalculated++;
@@ -158,8 +160,8 @@ namespace AudioAlign.Test.Fingerprinting {
             if (match == null) {
                 return;
             }
-            int index1 = FingerprintGenerator.TimeStampToSubFingerprintIndex(match.Track1Time);
-            int index2 = FingerprintGenerator.TimeStampToSubFingerprintIndex(match.Track2Time);
+            int index1 = FingerprintGenerator.TimeStampToSubFingerprintIndex(profile, match.Track1Time);
+            int index2 = FingerprintGenerator.TimeStampToSubFingerprintIndex(profile, match.Track2Time);
             ShowFingerprints(new SubFingerprintLookupEntry(match.Track1, index1),
                 new SubFingerprintLookupEntry(match.Track2, index2));
         }
