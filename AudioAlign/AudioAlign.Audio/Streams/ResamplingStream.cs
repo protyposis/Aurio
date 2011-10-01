@@ -106,6 +106,7 @@ namespace AudioAlign.Audio.Streams {
             }
 
             int inputLengthUsed, outputLengthGenerated;
+            bool endOfStream = false;
 
             // loop while the sample rate converter consumes samples until it produces an output
             do {
@@ -119,9 +120,9 @@ namespace AudioAlign.Audio.Streams {
                 // the sample rate converter
                 // this is also the reason why the source stream's Read() method may be called multiple times although
                 // it already signalled that it has reached the end of the stream
+                endOfStream = sourceStream.Position >= sourceStream.Length && sourceBufferFillLevel == 0;
                 src.Process(sourceBuffer, sourceBufferPosition, sourceBufferFillLevel - sourceBufferPosition,
-                    buffer, offset, count, sourceStream.Position >= sourceStream.Length && sourceBufferFillLevel == 0, 
-                    out inputLengthUsed, out outputLengthGenerated);
+                    buffer, offset, count, endOfStream, out inputLengthUsed, out outputLengthGenerated);
                 sourceBufferPosition += inputLengthUsed;
             } 
             while (inputLengthUsed > 0 && outputLengthGenerated == 0);
@@ -136,6 +137,16 @@ namespace AudioAlign.Audio.Streams {
                 Debug.WriteLine("ResamplingStream OVERFLOW WARNING: {0} bytes cut off", overflow);
                 position -= overflow;
                 return outputLengthGenerated - overflow;
+            }
+            else if (position < Length && inputLengthUsed == 0 && outputLengthGenerated == 0 && endOfStream) {
+                int underflow = (int)(Length - position);
+                if (count < underflow) {
+                    underflow = count;
+                }
+                Debug.WriteLine("ResamplingStream UNDERFLOW WARNING: {0} bytes added", underflow);
+                position += underflow;
+                Array.Clear(buffer, offset, underflow); // set bytes to zero
+                return underflow;
             }
 
             return outputLengthGenerated;
