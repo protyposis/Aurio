@@ -60,6 +60,13 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 currentFrame[41] = fftFreqBins[i];
             }
 
+            // reset negative infinities to zero to avoid side effects in further processing
+            for (int i = 0; i < currentFrame.Length; i++) {
+                if (float.IsNegativeInfinity(currentFrame[i])) {
+                    currentFrame[i] = 0;
+                }
+            }
+
             // TODO calculate final frame representation
             // "half-wave rectified first order difference"
             // http://www.answers.com/topic/first-order-difference

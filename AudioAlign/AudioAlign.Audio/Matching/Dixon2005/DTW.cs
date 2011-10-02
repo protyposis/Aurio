@@ -19,6 +19,11 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             }
         }
 
+        private enum GlobalPathConstraint {
+            None,
+            SakoeChibaBand
+        }
+
         private ProgressMonitor progressMonitor;
 
         public DTW() {
@@ -31,9 +36,9 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
 
             float[][] frames1 = ReadFrames(s1);
             float[][] frames2 = ReadFrames(s2);
-            double[,] dtw = AccumulatedCostMatrix(frames1, frames2);
+            double[,] dtw = AccumulatedCostMatrix(frames1, frames2, GlobalPathConstraint.SakoeChibaBand);
             List<Pair> path = OptimalWarpingPath(dtw);
-            
+
             List<Tuple<TimeSpan, TimeSpan>> pathTimes = new List<Tuple<TimeSpan, TimeSpan>>();
             foreach (Pair pair in path) {
                 pathTimes.Add(new Tuple<TimeSpan, TimeSpan>(IndexToTimeSpan(pair.i1), IndexToTimeSpan(pair.i2)));
@@ -71,28 +76,64 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return frames;
         }
 
-        private double[,] AccumulatedCostMatrix(float[][] X, float[][] Y) {
+        private double[,] AccumulatedCostMatrix(float[][] X, float[][] Y, GlobalPathConstraint constraint) {
             IProgressReporter progressReporter = progressMonitor.BeginTask("Calculating cost matrix...", true);
             int n = X.Length;
             int m = Y.Length;
-            double totalProgressSteps = n + m + n * m;
-            double progressStep = 0;
             double[,] dtw = new double[n + 1, m + 1];
-            dtw[0, 0] = 0;
-            for (int i = 1; i <= n; i++) {
-                dtw[i, 1] = dtw[i - 1, 1] + CalculateCost(X[i - 1], Y[1 - 1]);
-                progressReporter.ReportProgress(progressStep++ / totalProgressSteps * 100);
-            }
-            for (int j = 1; j <= m; j++) {
-                dtw[1, j] = dtw[1, j - 1] + CalculateCost(X[1 - 1], Y[j - 1]);
-                progressReporter.ReportProgress(progressStep++ / totalProgressSteps * 100);
-            }
-            for (int i = 1; i <= n; i++) {
-                for (int j = 1; j <= m; j++) {
-                    dtw[i, j] = CalculateCost(X[i - 1], Y[j - 1]) + Min(dtw[i - 1, j], dtw[i, j - 1], dtw[i - 1, j - 1]);
-                    progressReporter.ReportProgress(progressStep++ / totalProgressSteps * 100);
+
+            // init matrix
+            for (int i = 0; i <= n; i++) {
+                for (int j = 0; j <= m; j++) {
+                    dtw[i, j] = double.PositiveInfinity;
                 }
             }
+            dtw[0, 0] = 0;
+
+            if (constraint == GlobalPathConstraint.None) {
+                double totalProgressSteps = n * m;
+                double progressStep = 0;
+                for (int i = 1; i <= n; i++) {
+                    for (int j = 1; j <= m; j++) {
+                        dtw[i, j] = CalculateCost(X[i - 1], Y[j - 1]) + Min(dtw[i - 1, j], dtw[i, j - 1], dtw[i - 1, j - 1]);
+                        progressReporter.ReportProgress(progressStep++ / totalProgressSteps * 100);
+                    }
+                }
+            }
+            else if (constraint == GlobalPathConstraint.SakoeChibaBand) {
+                int diagonalWidth = 50;
+                double deltaN = (double)n / m;
+                double deltaM = (double)m / n;
+                double progressN = 0;
+                double progressM = 0;
+                int x = 0;
+                int y = 0;
+                while (x < n || y < m) {
+                    x = (int)Math.Round(progressN) + 1;
+                    y = (int)Math.Round(progressM) + 1;
+
+                    int i = x;
+                    int j = y;
+                    for (i = x; i <= Math.Min(x + diagonalWidth, n); i++) {
+                        dtw[i, j] = CalculateCost(X[i - 1], Y[j - 1]) + Min(dtw[i - 1, j], dtw[i, j - 1], dtw[i - 1, j - 1]);
+                    }
+
+                    i = x;
+                    j = y;
+                    for (j = x; j <= Math.Min(y + diagonalWidth, m); j++) {
+                        dtw[i, j] = CalculateCost(X[i - 1], Y[j - 1]) + Min(dtw[i - 1, j], dtw[i, j - 1], dtw[i - 1, j - 1]);
+                    }
+
+                    progressReporter.ReportProgress((double)x / n * 100);
+
+                    progressN += deltaN;
+                    progressM += deltaM;
+                }
+            }
+            else {
+                throw new NotImplementedException("invalid global path constraint");
+            }
+
             progressReporter.Finish();
             return dtw;
         }
@@ -109,10 +150,11 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                     i--;
                 }
                 else {
-                    if (dtw[i - 1, j] == Min(dtw[i - 1, j], dtw[i, j - 1], dtw[i - 1, j - 1])) {
+                    double min = Min(dtw[i - 1, j], dtw[i, j - 1], dtw[i - 1, j - 1]);
+                    if (dtw[i - 1, j] == min) {
                         i--;
                     }
-                    else if (dtw[i, j - 1] == Min(dtw[i - 1, j], dtw[i, j - 1], dtw[i - 1, j - 1])) {
+                    else if (dtw[i, j - 1] == min) {
                         j--;
                     }
                     else {
@@ -139,11 +181,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             for (int i = 0; i < frame1.Length; i++) {
                 result += Math.Pow(frame1[i] - frame2[i], 2);
             }
-            result = Math.Sqrt(result);
-            if (double.IsNaN(result)) {
-                Debug.WriteLine("NaN");
-            }
-            return result;
+            return Math.Sqrt(result);
         }
 
         public static TimeSpan IndexToTimeSpan(int index) {
