@@ -101,7 +101,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 }
             }
             else if (constraint == GlobalPathConstraint.SakoeChibaBand) {
-                int diagonalWidth = 50;
+                int diagonalWidth = 100;
                 double deltaN = (double)n / m;
                 double deltaM = (double)m / n;
                 double progressN = 0;

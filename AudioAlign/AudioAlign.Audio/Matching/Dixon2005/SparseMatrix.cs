@@ -8,15 +8,23 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
     /// Implementation of a sparse matrix by using dictionaries.
     /// taken from: http://www.blackbeltcoder.com/Articles/algorithms/creating-a-sparse-matrix-in-net
     /// </summary>
+    /// <remarks>
+    /// NOT USABLE for DTW -> OutOfMemoryException (1.3GB RAM) at a densely filled matrix of ~4000x3000
+    /// </remarks>
     class SparseMatrix<T> {
         // Master dictionary hold rows of column dictionary
         protected Dictionary<int, Dictionary<int, T>> _rows;
+
+        private int numRows;
+        private int numCols;
 
         /// <summary>
         /// Constructs a SparseMatrix instance.
         /// </summary>
         public SparseMatrix() {
             _rows = new Dictionary<int, Dictionary<int, T>>();
+            numRows = 0;
+            numCols = 0;
         }
 
         /// <summary>
@@ -66,6 +74,12 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 if (!_rows.TryGetValue(row, out cols)) {
                     cols = new Dictionary<int, T>();
                     _rows.Add(row, cols);
+                    if (numRows < row) {
+                        numRows = row;
+                    }
+                    if (numCols < col) {
+                        numCols = col;
+                    }
                 }
                 cols[col] = value;
             }
@@ -139,6 +153,14 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                     result++;
             }
             return result;
+        }
+
+        public int NumRows {
+            get { return numRows; }
+        }
+
+        public int NumCols {
+            get { return numCols; }
         }
     }
 }

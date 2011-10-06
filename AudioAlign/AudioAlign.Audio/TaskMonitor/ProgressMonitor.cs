@@ -18,6 +18,7 @@ namespace AudioAlign.Audio.TaskMonitor {
             private bool isProgressReporting;
             private bool isFinished;
             private int prevProgress;
+            private DateTime startTime;
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -26,6 +27,7 @@ namespace AudioAlign.Audio.TaskMonitor {
                 this.isProgressReporting = false;
                 this.isFinished = false;
                 this.prevProgress = -1;
+                startTime = DateTime.Now;
             }
 
             public ProgressReporter(ProgressMonitor monitor, string name)
@@ -75,6 +77,7 @@ namespace AudioAlign.Audio.TaskMonitor {
                 monitor.EndTask(this);
                 monitor = null;
                 isFinished = true;
+                Debug.WriteLine(name + " duration: " + (DateTime.Now - startTime));
             }
 
             public bool IsFinished {
