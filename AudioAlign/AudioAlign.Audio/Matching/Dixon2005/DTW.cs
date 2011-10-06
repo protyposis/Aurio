@@ -36,7 +36,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
 
             float[][] frames1 = ReadFrames(s1);
             float[][] frames2 = ReadFrames(s2);
-            double[,] dtw = AccumulatedCostMatrix(frames1, frames2, GlobalPathConstraint.SakoeChibaBand);
+            PatchMatrix dtw = AccumulatedCostMatrix(frames1, frames2, GlobalPathConstraint.SakoeChibaBand);
             List<Pair> path = OptimalWarpingPath(dtw);
 
             List<Tuple<TimeSpan, TimeSpan>> pathTimes = new List<Tuple<TimeSpan, TimeSpan>>();
@@ -76,18 +76,16 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return frames;
         }
 
-        private double[,] AccumulatedCostMatrix(float[][] X, float[][] Y, GlobalPathConstraint constraint) {
+        private PatchMatrix AccumulatedCostMatrix(float[][] X, float[][] Y, GlobalPathConstraint constraint) {
             IProgressReporter progressReporter = progressMonitor.BeginTask("Calculating cost matrix...", true);
             int n = X.Length;
             int m = Y.Length;
-            double[,] dtw = new double[n + 1, m + 1];
+            //double[,] dtw = new double[n + 1, m + 1];
+            PatchMatrix dtw = new PatchMatrix(double.PositiveInfinity);
 
             // init matrix
-            for (int i = 0; i <= n; i++) {
-                for (int j = 0; j <= m; j++) {
-                    dtw[i, j] = double.PositiveInfinity;
-                }
-            }
+            // NOTE do not explicitely init the PatchMatrix, otherwise the sparse matrix characteristic would 
+            //      be gone and the matrix would take up all the space like a standard matrix does
             dtw[0, 0] = 0;
 
             if (constraint == GlobalPathConstraint.None) {
@@ -102,15 +100,27 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             }
             else if (constraint == GlobalPathConstraint.SakoeChibaBand) {
                 int diagonalWidth = 100;
-                double deltaN = (double)n / m;
-                double deltaM = (double)m / n;
+                double deltaN;
+                double deltaM;
+                if (m > n) {
+                    deltaN = 1d;
+                    deltaM = (double)(m - 1) / (n - 1);
+                }
+                else if (m < n) {
+                    deltaN = (double)(n - 1) / (m - 1);
+                    deltaM = 1d;
+                }
+                else {
+                    deltaN = 1d;
+                    deltaM = 1d;
+                }
                 double progressN = 0;
                 double progressM = 0;
                 int x = 0;
                 int y = 0;
                 while (x < n || y < m) {
-                    x = (int)Math.Round(progressN) + 1;
-                    y = (int)Math.Round(progressM) + 1;
+                    x = (int)progressN + 1;
+                    y = (int)progressM + 1;
 
                     int i = x;
                     int j = y;
@@ -138,10 +148,10 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return dtw;
         }
 
-        private List<Pair> OptimalWarpingPath(double[,] dtw) {
+        private List<Pair> OptimalWarpingPath(PatchMatrix dtw) {
             List<Pair> path = new List<Pair>();
-            int i = dtw.GetUpperBound(0);
-            int j = dtw.GetUpperBound(1);
+            int i = dtw.LengthX - 1;
+            int j = dtw.LengthY - 1;
             while (i > 1 && j > 1) {
                 if (i == 1) {
                     j--;

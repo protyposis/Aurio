@@ -123,6 +123,7 @@
     <Compile Include="Matching\Dixon2005\OLTW.cs" />
     <Compile Include="Matching\Dixon2005\RingBuffer.cs" />
     <Compile Include="Matching\Dixon2005\SparseMatrix.cs" />
+    <Compile Include="Matching\Dixon2005\PatchMatrix.cs" />
     <Compile Include="Matching\Graph\Edge.cs" />
     <Compile Include="Matching\Graph\UndirectedGraph.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\BugProfile.cs" />
