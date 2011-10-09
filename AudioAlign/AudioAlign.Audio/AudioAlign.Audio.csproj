@@ -127,6 +127,8 @@
     <Compile Include="Matching\Graph\Edge.cs" />
     <Compile Include="Matching\Graph\UndirectedGraph.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\BugProfile.cs" />
+    <Compile Include="Matching\HaitsmaKalker2002\BassProfile.cs" />
+    <Compile Include="Matching\HaitsmaKalker2002\HumanProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\DefaultProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\Fingerprint.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintGenerator.cs" />
@@ -135,9 +137,12 @@
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprint.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintEventArgs.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintLookupEntry.cs" />
+    <Compile Include="Matching\HaitsmaKalker2002\VoiceProfile.cs" />
     <Compile Include="Matching\Interference.cs" />
     <Compile Include="Matching\Match.cs" />
     <Compile Include="Matching\MatchFilterMode.cs" />
+    <Compile Include="Matching\MatchGroup.cs" />
+    <Compile Include="Matching\MatchPair.cs" />
     <Compile Include="Matching\MatchProcessor.cs" />
     <Compile Include="Matching\STFT.cs" />
     <Compile Include="Matching\StreamWindower.cs" />

@@ -93,6 +93,7 @@ namespace AudioAlign.Audio.TaskMonitor {
         }
 
         private static ProgressMonitor singletonInstance = null;
+        private static Object lockObject = new Object();
 
         private List<ProgressReporter> reporters;
 
@@ -140,38 +141,41 @@ namespace AudioAlign.Audio.TaskMonitor {
             return BeginTask(new ProgressReporter(this, taskName, reportProgress));
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         private ProgressReporter BeginTask(ProgressReporter reporter) {
-            if (reporters.Count == 0) {
-                OnProcessingStarted();
+            lock (lockObject) {
+                if (reporters.Count == 0) {
+                    OnProcessingStarted();
+                }
+                reporters.Add(reporter);
+                OnTaskBegun(reporter);
             }
-            reporters.Add(reporter);
-            OnTaskBegun(reporter);
             return reporter;
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         private void EndTask(ProgressReporter reporter) {
-            OnTaskEnded(reporter);
-            reporters.Remove(reporter);
-            if (reporters.Count == 0) {
-                OnProcessingFinished();
+            lock (lockObject) {
+                OnTaskEnded(reporter);
+                reporters.Remove(reporter);
+                if (reporters.Count == 0) {
+                    OnProcessingFinished();
+                }
             }
         }
 
         public string StatusMessage {
-            [MethodImpl(MethodImplOptions.Synchronized)]
             get {
                 string message = "";
-                if (reporters.Count == 1) {
-                    message += reporters[0].Name;
-                }
-                else if (reporters.Count > 1) {
-                    message += "(" + reporters.Count + " tasks) ";
-                    for (int x = 0; x < reporters.Count; x++) {
-                        message += reporters[x].Name;
-                        if (x + 1 != reporters.Count) {
-                            message += "; ";
+                lock (lockObject) {
+                    if (reporters.Count == 1) {
+                        message += reporters[0].Name;
+                    }
+                    else if (reporters.Count > 1) {
+                        message += "(" + reporters.Count + " tasks) ";
+                        for (int x = 0; x < reporters.Count; x++) {
+                            message += reporters[x].Name;
+                            if (x + 1 != reporters.Count) {
+                                message += "; ";
+                            }
                         }
                     }
                 }
@@ -192,15 +196,16 @@ namespace AudioAlign.Audio.TaskMonitor {
             }
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         private void OnProcessingProgressChanged() {
-            if (ProcessingProgressChanged != null && reporters.Count > 0) {
-                float progress = 0;
-                foreach (ProgressReporter reporter in reporters) {
-                    progress += (float)reporter.Progress;
+            lock (lockObject) {
+                if (ProcessingProgressChanged != null && reporters.Count > 0) {
+                    float progress = 0;
+                    foreach (ProgressReporter reporter in reporters) {
+                        progress += (float)reporter.Progress;
+                    }
+                    progress /= reporters.Count;
+                    ProcessingProgressChanged(this, new ValueEventArgs<float>(progress));
                 }
-                progress /= reporters.Count;
-                ProcessingProgressChanged(this, new ValueEventArgs<float>(progress));
             }
             if (childMonitors.Count > 0) {
                 foreach (ProgressMonitor childMonitor in childMonitors) {

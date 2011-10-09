@@ -126,7 +126,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         }
 
         public static IProfile[] GetProfiles() {
-            return new IProfile[] { new DefaultProfile(), new BugProfile() };
+            return new IProfile[] { new DefaultProfile(), new BugProfile(), new VoiceProfile(), new BassProfile(), new HumanProfile() };
         }
     }
 }

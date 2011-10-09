@@ -77,10 +77,10 @@ namespace Exocortex.DSP {
 		
 		//-------------------------------------------------------------------------------------
 		
-		private const int	cMaxLength	= 4096;
+		private const int	cMaxLength	= 16384;
 		private const int	cMinLength	= 1;
 
-		private const int	cMaxBits	= 12;
+		private const int	cMaxBits	= 14;
 		private const int	cMinBits	= 0;
 	
 
