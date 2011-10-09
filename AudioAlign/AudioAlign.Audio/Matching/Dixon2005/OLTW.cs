@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AudioAlign.Audio.Streams;
+using AudioAlign.Audio.TaskMonitor;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class OLTW : DTW {
@@ -34,7 +35,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         private int runCount;
         private int c;
 
-        public OLTW(IAudioStream s1, IAudioStream s2) {
+        public OLTW(IAudioStream s1, IAudioStream s2) : base(new TimeSpan(0), ProgressMonitor.GlobalInstance) {
             this.stream1 = s1;
             this.stream2 = s2;
 
