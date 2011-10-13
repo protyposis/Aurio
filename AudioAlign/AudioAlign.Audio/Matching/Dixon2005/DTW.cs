@@ -5,6 +5,7 @@ using System.Text;
 using AudioAlign.Audio.Streams;
 using AudioAlign.Audio.TaskMonitor;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class DTW {
@@ -31,8 +32,18 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             s1 = PrepareStream(s1);
             s2 = PrepareStream(s2);
 
-            float[][] frames1 = ReadFrames(s1);
-            float[][] frames2 = ReadFrames(s2);
+            float[][] frames1 = null;
+            float[][] frames2 = null;
+
+            Parallel.For(0, 2, index => {
+                if (index == 0) {
+                    frames1 = ReadFrames(s1);
+                }
+                else if (index == 1) {
+                    frames2 = ReadFrames(s2);
+                }
+            });
+
             PatchMatrix dtw = AccumulatedCostMatrix(frames1, frames2);
             List<Pair> path = OptimalWarpingPath(dtw);
 
