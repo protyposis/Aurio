@@ -40,7 +40,7 @@ namespace AudioAlign.Audio.Project {
         }
 
         public IAudioStream CreateAudioStream() {
-            return new TimeWarpStream(AudioStreamFactory.FromFileInfoIeee32(FileInfo), ResamplingQuality.SincBest, timeWarps);
+            return new TimeWarpStream(AudioStreamFactory.FromFileInfoIeee32(FileInfo), ResamplingQuality.SincFastest, timeWarps);
         }
 
         public FileInfo PeakFile {

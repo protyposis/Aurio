@@ -138,7 +138,7 @@
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintEventArgs.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintLookupEntry.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\VoiceProfile.cs" />
-    <Compile Include="Matching\Interference.cs" />
+    <Compile Include="Matching\AnalysisFunctions.cs" />
     <Compile Include="Matching\Match.cs" />
     <Compile Include="Matching\MatchFilterMode.cs" />
     <Compile Include="Matching\MatchGroup.cs" />

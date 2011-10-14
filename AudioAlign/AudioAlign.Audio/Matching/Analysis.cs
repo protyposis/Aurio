@@ -44,8 +44,11 @@ namespace AudioAlign.Audio.Matching {
                 case AnalysisMode.Correlation:
                     analyzeSection = CrossCorrelation.Correlate;
                     break;
-                case AnalysisMode.InvertedInterference:
-                    analyzeSection = Interference.DestructiveInverted;
+                case AnalysisMode.Interference:
+                    analyzeSection = AnalysisFunctions.DestructiveInterference;
+                    break;
+                case AnalysisMode.FrequencyDistribution:
+                    analyzeSection = AnalysisFunctions.FrequencyDistribution;
                     break;
                 default:
                     throw new NotImplementedException(type + " not implemented");
