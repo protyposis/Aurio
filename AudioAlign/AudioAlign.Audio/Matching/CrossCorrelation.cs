@@ -174,8 +174,8 @@ namespace AudioAlign.Audio.Matching {
             for (int i = 0; i < n; i++) {
                 sxy += (x[i] - mx) * (y[i] - my);
             }
-            
-            return sxy / denom;
+
+            return denom != 0 ? sxy / denom : 0;
         }
 
         public static unsafe double Correlate(float[] x, float[] y) {

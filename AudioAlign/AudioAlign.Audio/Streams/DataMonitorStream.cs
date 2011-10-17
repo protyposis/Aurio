@@ -17,7 +17,7 @@ namespace AudioAlign.Audio.Streams {
 
         public override int Read(byte[] buffer, int offset, int count) {
             int bytesRead = sourceStream.Read(buffer, offset, count);
-            if (DataRead != null) {
+            if (DataRead != null && bytesRead > 0) {
                 DataRead(this, new StreamDataMonitorEventArgs(Properties, buffer, offset, bytesRead));
             }
             return bytesRead;

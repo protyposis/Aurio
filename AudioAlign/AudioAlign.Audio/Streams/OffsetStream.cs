@@ -16,6 +16,11 @@ namespace AudioAlign.Audio.Streams {
             offset = 0;
         }
 
+        public OffsetStream(IAudioStream sourceStream, long offset)
+            : this(sourceStream) {
+                Offset = offset;
+        }
+
         public override long Length {
             get { return base.Length + Offset; }
         }

@@ -69,17 +69,24 @@ namespace AudioAlign.Audio.Matching {
         }
 
         /// <summary>
-        /// Gets the window size in samples;
+        /// Gets the window size in samples.
         /// </summary>
         public int WindowSize {
             get { return windowSize; }
         }
 
         /// <summary>
-        /// Gets the hop size in samples;
+        /// Gets the hop size in samples.
         /// </summary>
         public int HopSize {
             get { return hopSize; }
+        }
+
+        /// <summary>
+        /// Gets the total number of windows/frames that can be read.
+        /// </summary>
+        public int WindowCount {
+            get { return (int)(((stream.Length / stream.Properties.SampleBlockByteSize) - WindowSize) / HopSize) + 1; }
         }
 
         private const int STREAM_INPUT_BUFFER_SIZE = 32768;

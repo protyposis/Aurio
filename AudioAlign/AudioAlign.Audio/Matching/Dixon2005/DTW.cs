@@ -11,7 +11,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class DTW {
 
         [DebuggerDisplay("Pair {i1} <-> {i2}")]
-        private struct Pair {
+        protected struct Pair {
             public int i1, i2;
 
             public Pair(int i1, int i2) {
@@ -20,7 +20,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             }
         }
 
-        private ProgressMonitor progressMonitor;
+        protected ProgressMonitor progressMonitor;
         private TimeSpan maxOffset;
 
         public DTW(TimeSpan maxOffset, ProgressMonitor progressMonitor) {
@@ -31,6 +31,22 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         public List<Tuple<TimeSpan, TimeSpan>> Execute(IAudioStream s1, IAudioStream s2) {
             s1 = PrepareStream(s1);
             s2 = PrepareStream(s2);
+
+            //if (s1.Length != s2.Length) {
+            //    throw new ArgumentException("audio streams must be of the same length");
+            //}
+            long s1Offset = 0;
+            long s2Offset = 0;
+            if (s1.Length > s2.Length) {
+                //s1 = new CropStream(s1, 0, s2.Length);
+                s2Offset = s1.Length - s2.Length;
+                s2 = new OffsetStream(s2, s2Offset);
+            }
+            else if (s2.Length > s1.Length) {
+                //s2 = new CropStream(s2, 0, s1.Length);
+                s1Offset = s2.Length - s1.Length;
+                s1 = new OffsetStream(s1, s1Offset);
+            }
 
             float[][] frames1 = null;
             float[][] frames2 = null;
@@ -49,13 +65,18 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
 
             List<Tuple<TimeSpan, TimeSpan>> pathTimes = new List<Tuple<TimeSpan, TimeSpan>>();
             foreach (Pair pair in path) {
-                pathTimes.Add(new Tuple<TimeSpan, TimeSpan>(IndexToTimeSpan(pair.i1), IndexToTimeSpan(pair.i2)));
+                Tuple<TimeSpan, TimeSpan> timePair = new Tuple<TimeSpan, TimeSpan>(
+                    PositionToTimeSpan(pair.i1 * FrameReader.WINDOW_HOP_SIZE - s1Offset / s1.SampleBlockSize),
+                    PositionToTimeSpan(pair.i2 * FrameReader.WINDOW_HOP_SIZE - s2Offset / s2.SampleBlockSize));
+                if (timePair.Item1 >= TimeSpan.Zero && timePair.Item2 >= TimeSpan.Zero) {
+                    pathTimes.Add(timePair);
+                }
             }
 
             return pathTimes;
         }
 
-        private IAudioStream PrepareStream(IAudioStream stream) {
+        protected IAudioStream PrepareStream(IAudioStream stream) {
             if (stream.Properties.Channels > 1) {
                 stream = new MonoStream(stream);
             }
@@ -98,29 +119,10 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             double sakoeChibaBandWidth = maxOffset.TotalSeconds * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE);
             // Kathetenlänge berechnen (Sakoe-Chiba-Bandbreite ist die Hypothenuse des gleichschenkligen rechtwinkligen Dreiecks
             int diagonalWidth = (int)(Math.Sqrt(2) / 2 * sakoeChibaBandWidth);
-            double deltaN;
-            double deltaM;
-            if (m > n) {
-                deltaN = 1d;
-                deltaM = (double)(m - 1) / (n - 1);
-            }
-            else if (m < n) {
-                deltaN = (double)(n - 1) / (m - 1);
-                deltaM = 1d;
-            }
-            else {
-                deltaN = 1d;
-                deltaM = 1d;
-            }
-            double progressN = 0;
-            double progressM = 0;
-            int x = 0;
-            int y = 0;
+            int x = 1;
+            int y = 1;
 
             while (x < n || y < m) {
-                x = (int)progressN + 1;
-                y = (int)progressM + 1;
-
                 int i = x;
                 int j = y;
                 for (i = x; i <= Math.Min(x + diagonalWidth, n); i++) {
@@ -135,18 +137,16 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
 
                 progressReporter.ReportProgress((double)x / n * 100);
 
-                progressN += deltaN;
-                progressM += deltaM;
+                x++;
+                y++;
             }
 
             progressReporter.Finish();
             return dtw;
         }
 
-        private List<Pair> OptimalWarpingPath(PatchMatrix dtw) {
+        protected List<Pair> OptimalWarpingPath(PatchMatrix dtw, int i, int j) {
             List<Pair> path = new List<Pair>();
-            int i = dtw.LengthX - 1;
-            int j = dtw.LengthY - 1;
             while (i > 1 && j > 1) {
                 if (i == 1) {
                     j--;
@@ -173,7 +173,13 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return path;
         }
 
-        private double Min(double val1, double val2, double val3) {
+        protected List<Pair> OptimalWarpingPath(PatchMatrix dtw) {
+            int i = dtw.LengthX - 1;
+            int j = dtw.LengthY - 1;
+            return OptimalWarpingPath(dtw, i, j);
+        }
+
+        protected double Min(double val1, double val2, double val3) {
             return Math.Min(val1, Math.Min(val2, val3));
         }
 
@@ -189,9 +195,12 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return Math.Sqrt(result);
         }
 
+        public static TimeSpan PositionToTimeSpan(long position) {
+            return new TimeSpan((long)Math.Round((double)position / FrameReader.SAMPLERATE * TimeUtil.SECS_TO_TICKS));
+        }
+
         public static TimeSpan IndexToTimeSpan(int index) {
-            return new TimeSpan((long)Math.Round((double)index 
-                * FrameReader.WINDOW_HOP_SIZE / FrameReader.SAMPLERATE * 1000 * 1000 * 10));
+            return PositionToTimeSpan(index * FrameReader.WINDOW_HOP_SIZE);
         }
     }
 }

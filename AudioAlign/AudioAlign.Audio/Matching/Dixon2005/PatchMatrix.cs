@@ -7,7 +7,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
     /// <summary>
     /// Implements a sparse matrix supporting tightly filled regions with minimal memory overhead.
     /// </summary>
-    class PatchMatrix {
+    public class PatchMatrix {
 
         private struct Mapping {
             public int x, y, xOffset, yOffset;
