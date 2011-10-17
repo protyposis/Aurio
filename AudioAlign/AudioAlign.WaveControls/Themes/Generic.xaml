@@ -412,17 +412,6 @@
                                        Grid.Row="0" 
                                        Grid.Column="1" 
                                        Visibility="Hidden"/>
-                            
-                            <Button Grid.Row="1" Grid.Column="1" BorderThickness="0">
-                                <Button.ContextMenu>
-                                    <ContextMenu>
-                                        <MenuItem Header="Item 1"/>
-                                        <MenuItem Header="Item 2"/>
-                                        <MenuItem Header="Item 3"/>
-                                        <CheckBox Content="Test"/>
-                                    </ContextMenu>
-                                </Button.ContextMenu>
-                            </Button>
                         </Grid>
                     </Border>
                     
