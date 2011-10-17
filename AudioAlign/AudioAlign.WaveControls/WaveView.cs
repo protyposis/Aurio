@@ -205,8 +205,8 @@ namespace AudioAlign.WaveControls {
             Point mouseDownPosition = Mouse.GetPosition(this);
             //Debug.WriteLine("WaveView OnMouseDown @ " + mouseDownPosition);
 
-            Interval audioInterval = new Interval(TrackOffset, TrackOffset + audioStream.TimeLength.Ticks);
-            long virtualOffset = PhysicalToVirtualOffset(e.GetPosition(this).X);
+            Interval audioInterval = new Interval(TrackOffset, TrackOffset + TrackLength);
+            long virtualOffset = PhysicalToVirtualIntervalOffset(e.GetPosition(this).X);
             if (audioInterval.Contains(virtualOffset)) {
                 CaptureMouse();
                 dragging = true;
