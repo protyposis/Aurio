@@ -571,8 +571,11 @@
                                         </LinearGradientBrush>
                                     </Rectangle.Fill>
                                 </Rectangle>
-                                <Border Name="PART_Indicator" HorizontalAlignment="Left">
-                                    <Rectangle Width="3" Margin="0,0,-2,0" Fill="#7E000000" HorizontalAlignment="Right"/>
+                                <Border>
+                                    <DockPanel>
+                                        <Rectangle Name="PART_Indicator" Margin="-1,0,1,0" Fill="#7E000000"/>
+                                        <Rectangle Margin="1,0,0,0" Fill="#7E000000"/>
+                                    </DockPanel>
                                 </Border>
                                 <Label Content="{TemplateBinding Value}" ContentStringFormat="{}{0:0.00}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Black"/>
                             </Grid>
