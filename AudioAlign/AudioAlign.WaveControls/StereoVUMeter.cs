@@ -34,5 +34,10 @@ namespace AudioAlign.WaveControls {
             get { return (double)GetValue(AmplitudeRightProperty); }
             set { SetValue(AmplitudeRightProperty, value); }
         }
+
+        public void Reset() {
+            ClearValue(AmplitudeLeftProperty);
+            ClearValue(AmplitudeRightProperty);
+        }
     }
 }

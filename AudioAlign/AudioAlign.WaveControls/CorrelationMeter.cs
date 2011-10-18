@@ -43,6 +43,10 @@ namespace AudioAlign.WaveControls {
             set { SetValue(ValueProperty, value); }
         }
 
+        public void Reset() {
+            ClearValue(ValueProperty);
+        }
+
         private void UpdateValueIndicator() {
             if (valueIndicator != null && valueIndicatorContainer != null) {
                 valueIndicator.Width = valueIndicatorContainer.ActualWidth / 2 * (Value + 1);

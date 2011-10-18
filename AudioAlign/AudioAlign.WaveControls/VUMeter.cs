@@ -80,6 +80,10 @@ namespace AudioAlign.WaveControls {
             private set { SetValue(IsOverdrivenPropertyKey, value); }
         }
 
+        public void Reset() {
+            ClearValue(AmplitudeProperty);
+        }
+
         private void UpdateVolumeIndicator() {
             double decibel = Decibel;
 

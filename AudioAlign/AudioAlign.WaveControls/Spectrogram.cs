@@ -159,7 +159,7 @@ namespace AudioAlign.WaveControls {
             InvalidateVisual();
         }
 
-        public void Clear() {
+        public void Reset() {
             InitializeSpectrogramBitmap(true);
         }
 

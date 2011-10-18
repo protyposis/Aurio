@@ -130,7 +130,7 @@ namespace AudioAlign.WaveControls {
             InitializeComponent();
         }
 
-        public void Clear() {
+        public void Reset() {
             GraphLine.Points.Clear();
         }
     }
