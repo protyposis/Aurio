@@ -196,15 +196,13 @@ namespace AudioAlign.Audio.Matching {
             }
         }
 
-        public static double Correlate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor) {
+        public static double Correlate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2) {
             if (i1.Length != i2.Length) {
                 throw new ArgumentException("interval lengths do not match");
             }
 
             s1 = PrepareStream(s1, 11050);
             s2 = PrepareStream(s2, 11050);
-
-            IProgressReporter progress = progressMonitor.BeginTask("calculating correlation", true);
 
             float seconds = (float)(i1.Length / 10d / 1000 / 1000);
             int sampleRate = s1.Properties.SampleRate;
@@ -224,10 +222,7 @@ namespace AudioAlign.Audio.Matching {
 
             double r = Correlate(x, y);
 
-            progress.ReportProgress(100);
-
             Debug.WriteLine("C result: " + r);
-            progress.Finish();
             return r;
         }
 
