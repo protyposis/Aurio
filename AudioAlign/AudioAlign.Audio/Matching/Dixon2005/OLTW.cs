@@ -5,6 +5,8 @@ using System.Text;
 using AudioAlign.Audio.Streams;
 using AudioAlign.Audio.TaskMonitor;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class OLTW : DTW {
@@ -24,6 +26,9 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
 
         private FrameReader stream1FrameReader;
         private FrameReader stream2FrameReader;
+
+        private BlockingCollection<float[]> stream1FrameQueue;
+        private BlockingCollection<float[]> stream2FrameQueue;
 
         private PatchMatrix matrix;
         private RingBuffer<float[]> rb1;
@@ -56,6 +61,25 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             rb1FrameCount = 0;
             rb2 = new RingBuffer<float[]>(rbCapacity);
             rb2FrameCount = 0;
+
+            stream1FrameQueue = new BlockingCollection<float[]>(20);
+            Task.Factory.StartNew(() => {
+                while (stream1FrameReader.HasNext()) {
+                    float[] frame = new float[FrameReader.FRAME_SIZE];
+                    stream1FrameReader.ReadFrame(frame);
+                    stream1FrameQueue.Add(frame);
+                }
+                stream1FrameQueue.CompleteAdding();
+            });
+            stream2FrameQueue = new BlockingCollection<float[]>(20);
+            Task.Factory.StartNew(() => {
+                while (stream2FrameReader.HasNext()) {
+                    float[] frame = new float[FrameReader.FRAME_SIZE];
+                    stream2FrameReader.ReadFrame(frame);
+                    stream2FrameQueue.Add(frame);
+                }
+                stream2FrameQueue.CompleteAdding();
+            });
 
             // init matrix
             // NOTE do not explicitely init the PatchMatrix, otherwise the sparse matrix characteristic would 
@@ -134,26 +158,22 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             if (rb1FrameCount < t1) {
                 // read frames until position t
                 for (; rb1FrameCount < t1; rb1FrameCount++) {
-                    if (!stream1FrameReader.HasNext()) {
+                    if (stream1FrameQueue.IsCompleted) {
                         rb1FrameCount--;
                         break;
                     }
-                    float[] frame = new float[FrameReader.FRAME_SIZE];
-                    stream1FrameReader.ReadFrame(frame);
-                    rb1.Add(frame);
+                    rb1.Add(stream1FrameQueue.Take());
                 }
             }
 
             if (rb2FrameCount < t2) {
                 // read frames until position k
                 for (; rb2FrameCount < t2; rb2FrameCount++) {
-                    if (!stream2FrameReader.HasNext()) {
+                    if (stream2FrameQueue.IsCompleted) {
                         rb2FrameCount--;
                         break;
                     }
-                    float[] frame = new float[FrameReader.FRAME_SIZE];
-                    stream2FrameReader.ReadFrame(frame);
-                    rb2.Add(frame);
+                    rb2.Add(stream2FrameQueue.Take());
                 }
             }
 
@@ -169,8 +189,8 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             double cost = CalculateCost(frame1, frame2);
             //Debug.WriteLine("cost " + t1 + "/" + t2 + ": " + cost);
             matrix[t1, t2] = Min(
-                matrix[t1, t2 - 1] + cost, 
-                matrix[t1 - 1, t2] + cost, 
+                matrix[t1, t2 - 1] + cost,
+                matrix[t1 - 1, t2] + cost,
                 matrix[t1 - 1, t2 - 1] + 2 * cost);
             //Debug.WriteLine("cost " + t1 + "/" + t2 + ": " + matrix[t1, t2]);
         }

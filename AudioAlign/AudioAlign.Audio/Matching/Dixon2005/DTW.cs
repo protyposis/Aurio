@@ -32,22 +32,6 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             s1 = PrepareStream(s1);
             s2 = PrepareStream(s2);
 
-            //if (s1.Length != s2.Length) {
-            //    throw new ArgumentException("audio streams must be of the same length");
-            //}
-            long s1Offset = 0;
-            long s2Offset = 0;
-            if (s1.Length > s2.Length) {
-                //s1 = new CropStream(s1, 0, s2.Length);
-                s2Offset = s1.Length - s2.Length;
-                s2 = new OffsetStream(s2, s2Offset);
-            }
-            else if (s2.Length > s1.Length) {
-                //s2 = new CropStream(s2, 0, s1.Length);
-                s1Offset = s2.Length - s1.Length;
-                s1 = new OffsetStream(s1, s1Offset);
-            }
-
             float[][] frames1 = null;
             float[][] frames2 = null;
 
@@ -66,8 +50,8 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             List<Tuple<TimeSpan, TimeSpan>> pathTimes = new List<Tuple<TimeSpan, TimeSpan>>();
             foreach (Pair pair in path) {
                 Tuple<TimeSpan, TimeSpan> timePair = new Tuple<TimeSpan, TimeSpan>(
-                    PositionToTimeSpan(pair.i1 * FrameReader.WINDOW_HOP_SIZE - s1Offset / s1.SampleBlockSize),
-                    PositionToTimeSpan(pair.i2 * FrameReader.WINDOW_HOP_SIZE - s2Offset / s2.SampleBlockSize));
+                    PositionToTimeSpan(pair.i1 * FrameReader.WINDOW_HOP_SIZE),
+                    PositionToTimeSpan(pair.i2 * FrameReader.WINDOW_HOP_SIZE));
                 if (timePair.Item1 >= TimeSpan.Zero && timePair.Item2 >= TimeSpan.Zero) {
                     pathTimes.Add(timePair);
                 }
@@ -88,7 +72,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
 
         private float[][] ReadFrames(IAudioStream stream) {
             IProgressReporter progressReporter = progressMonitor.BeginTask("Reading DTW frames...", true);
-            float[][] frames = new float[(stream.Length / stream.SampleBlockSize - FrameReader.WINDOW_SIZE) / 
+            float[][] frames = new float[(stream.Length / stream.SampleBlockSize - FrameReader.WINDOW_SIZE) /
                 FrameReader.WINDOW_HOP_SIZE + 1][];
             FrameReader frameReader = new FrameReader(stream);
             int index = 0;
@@ -117,12 +101,32 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             dtw[0, 0] = 0;
 
             double sakoeChibaBandWidth = maxOffset.TotalSeconds * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE);
-            // Kathetenlänge berechnen (Sakoe-Chiba-Bandbreite ist die Hypothenuse des gleichschenkligen rechtwinkligen Dreiecks
+            // Kathetenlänge berechnen (Sakoe-Chiba-Bandbreite ist die Hypothenuse des gleichschenkligen rechtwinkligen Dreiecks)
             int diagonalWidth = (int)(Math.Sqrt(2) / 2 * sakoeChibaBandWidth);
-            int x = 1;
-            int y = 1;
-
+            double deltaN;
+            double deltaM;
+            if (m > n) {
+                deltaN = 1d;
+                deltaM = (double)(m - 1) / (n - 1);
+            }
+            else if (m < n) {
+                deltaN = (double)(n - 1) / (m - 1);
+                deltaM = 1d;
+            }
+            else {
+                deltaN = 1d;
+                deltaM = 1d;
+            }
+            double progressN = 0;
+            double progressM = 0;
+            int x = 0;
+            int y = 0;
             while (x < n || y < m) {
+                x = (int)progressN + 1;
+                y = (int)progressM + 1;
+
+                Debug.WriteLine(x + " / " + y);
+
                 int i = x;
                 int j = y;
                 for (i = x; i <= Math.Min(x + diagonalWidth, n); i++) {
@@ -137,8 +141,8 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
 
                 progressReporter.ReportProgress((double)x / n * 100);
 
-                x++;
-                y++;
+                progressN += deltaN;
+                progressM += deltaM;
             }
 
             progressReporter.Finish();
