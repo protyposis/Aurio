@@ -106,12 +106,12 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             double deltaN;
             double deltaM;
             if (m > n) {
-                deltaN = 1d;
-                deltaM = (double)(m - 1) / (n - 1);
-            }
-            else if (m < n) {
                 deltaN = (double)(n - 1) / (m - 1);
                 deltaM = 1d;
+            }
+            else if (m < n) {
+                deltaN = 1d;
+                deltaM = (double)(m - 1) / (n - 1);;
             }
             else {
                 deltaN = 1d;
@@ -135,7 +135,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
 
                 i = x;
                 j = y;
-                for (j = x; j <= Math.Min(y + diagonalWidth, m); j++) {
+                for (j = y; j <= Math.Min(y + diagonalWidth, m); j++) {
                     dtw[i, j] = CalculateCost(X[i - 1], Y[j - 1]) + Min(dtw[i - 1, j], dtw[i, j - 1], dtw[i - 1, j - 1]);
                 }
 
