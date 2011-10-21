@@ -22,18 +22,17 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         }
 
         protected ProgressMonitor progressMonitor;
-        private TimeSpan maxOffset;
+        protected TimeSpan searchWidth;
 
         private BlockingCollection<float[]> stream1FrameQueue;
         private BlockingCollection<float[]> stream2FrameQueue;
-        private int diagonalWidth;
         float[][] rb1;
         private int rb1FrameCount;
         float[][] rb2;
         private int rb2FrameCount;
 
-        public DTW(TimeSpan maxOffset, ProgressMonitor progressMonitor) {
-            this.maxOffset = maxOffset;
+        public DTW(TimeSpan searchWidth, ProgressMonitor progressMonitor) {
+            this.searchWidth = searchWidth;
             this.progressMonitor = progressMonitor;
         }
 
@@ -41,7 +40,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             s1 = PrepareStream(s1);
             s2 = PrepareStream(s2);
 
-            diagonalWidth = (int)(maxOffset.TotalSeconds * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE));
+            int diagonalWidth = (int)(searchWidth.TotalSeconds * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE));
 
             // init ring buffers
             rb1 = new float[diagonalWidth][];
@@ -147,7 +146,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                         rb1FrameCount--;
                         break;
                     }
-                    rb1[rb1FrameCount % diagonalWidth] = (stream1FrameQueue.Take());
+                    rb1[rb1FrameCount % rb1.Length] = (stream1FrameQueue.Take());
                 }
             }
 
@@ -157,7 +156,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                         rb2FrameCount--;
                         break;
                     }
-                    rb2[rb2FrameCount % diagonalWidth] = (stream2FrameQueue.Take());
+                    rb2[rb2FrameCount % rb2.Length] = (stream2FrameQueue.Take());
                 }
             }
         }

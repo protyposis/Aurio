@@ -12,7 +12,6 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class OLTW : DTW {
 
         private const int MAX_RUN_COUNT = 3; // MaxRunCount
-        private const int SEARCH_WIDTH = 500; // c = 500 frames = ~10 seconds
 
         private enum GetIncResult {
             None = 0,
@@ -35,19 +34,24 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         private int runCount;
         private int c;
 
+        public OLTW(TimeSpan searchWidth, ProgressMonitor progressMonitor)
+            : base(searchWidth, progressMonitor) {
+        }
+
         public OLTW(ProgressMonitor progressMonitor)
-            : base(new TimeSpan(0), progressMonitor) {
+            : this(new TimeSpan(0, 0, 10), progressMonitor) {
+            // default contructor with default search width (500) like specified in the paper
         }
 
         public new List<Tuple<TimeSpan, TimeSpan>> Execute(IAudioStream s1, IAudioStream s2) {
             s1 = PrepareStream(s1);
             s2 = PrepareStream(s2);
 
-            int rbCapacity = SEARCH_WIDTH; // TODO make min size SEARCH_WIDTH
+            int searchWidth = (int)(this.searchWidth.TotalSeconds * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE));
             matrix = new PatchMatrix(double.PositiveInfinity);
-            rb1 = new RingBuffer<float[]>(rbCapacity);
+            rb1 = new RingBuffer<float[]>(searchWidth);
             rb1FrameCount = 0;
-            rb2 = new RingBuffer<float[]>(rbCapacity);
+            rb2 = new RingBuffer<float[]>(searchWidth);
             rb2FrameCount = 0;
 
             stream1FrameQueue = new BlockingCollection<float[]>(20);
@@ -86,7 +90,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             j = 1;
             previous = GetIncResult.None;
             runCount = 0;
-            c = SEARCH_WIDTH;
+            c = searchWidth;
             EvaluatePathCost(t, j);
             while (rb1FrameCount + rb2FrameCount < totalFrames) {
                 GetIncResult getInc = GetInc(t, j);
