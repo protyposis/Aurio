@@ -17,8 +17,8 @@ namespace AudioAlign.Audio.Streams {
         public CropStream(IAudioStream sourceStream, long begin, long end)
             : this(sourceStream) {
             ValidateCropBounds(begin, end);
-            this.begin = begin;
-            this.end = end;
+            Begin = begin;
+            End = end;
         }
 
         private void ValidateCropBounds(long begin, long end) {
@@ -39,6 +39,9 @@ namespace AudioAlign.Audio.Streams {
                 ValidateCropBounds(value, end); 
                 ValidateSampleBlockAlignment(value);
                 begin = value;
+                if (begin > base.Position) {
+                    Position = 0;
+                }
             }
         }
 
@@ -47,7 +50,10 @@ namespace AudioAlign.Audio.Streams {
             set { 
                 ValidateCropBounds(begin, value); 
                 ValidateSampleBlockAlignment(value); 
-                end = value; 
+                end = value;
+                if (end < base.Position) {
+                    Position = Length;
+                }
             }
         }
 
