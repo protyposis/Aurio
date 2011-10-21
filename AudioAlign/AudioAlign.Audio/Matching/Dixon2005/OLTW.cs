@@ -21,12 +21,6 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             Both
         }
 
-        private IAudioStream stream1;
-        private IAudioStream stream2;
-
-        private FrameReader stream1FrameReader;
-        private FrameReader stream2FrameReader;
-
         private BlockingCollection<float[]> stream1FrameQueue;
         private BlockingCollection<float[]> stream2FrameQueue;
 
@@ -49,12 +43,6 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             s1 = PrepareStream(s1);
             s2 = PrepareStream(s2);
 
-            this.stream1 = s1;
-            this.stream2 = s2;
-
-            stream1FrameReader = new FrameReader(s1);
-            stream2FrameReader = new FrameReader(s2);
-
             int rbCapacity = SEARCH_WIDTH; // TODO make min size SEARCH_WIDTH
             matrix = new PatchMatrix(double.PositiveInfinity);
             rb1 = new RingBuffer<float[]>(rbCapacity);
@@ -63,6 +51,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             rb2FrameCount = 0;
 
             stream1FrameQueue = new BlockingCollection<float[]>(20);
+            FrameReader stream1FrameReader = new FrameReader(s1);
             Task.Factory.StartNew(() => {
                 while (stream1FrameReader.HasNext()) {
                     float[] frame = new float[FrameReader.FRAME_SIZE];
@@ -71,7 +60,9 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 }
                 stream1FrameQueue.CompleteAdding();
             });
+
             stream2FrameQueue = new BlockingCollection<float[]>(20);
+            FrameReader stream2FrameReader = new FrameReader(s2);
             Task.Factory.StartNew(() => {
                 while (stream2FrameReader.HasNext()) {
                     float[] frame = new float[FrameReader.FRAME_SIZE];

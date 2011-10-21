@@ -79,9 +79,10 @@ namespace AudioAlign.WaveControls {
 
             // draw selected match
             if (selectedMatch != null) {
-                CalculatePoints(selectedMatch, waveViewMappings, out p1, out p2);
-                DrawTriangle(drawingContext, Brushes.Red, p1, 6); // top triangle
-                DrawTriangle(drawingContext, Brushes.Red, p2, -6); // bottom triangle
+                if (CalculatePoints(selectedMatch, waveViewMappings, out p1, out p2)) {
+                    DrawTriangle(drawingContext, Brushes.Red, p1, p1.Y > p2.Y ? 6 : -6); // top triangle
+                    DrawTriangle(drawingContext, Brushes.Red, p2, p1.Y > p2.Y ? -6 : 6); // bottom triangle
+                }
             }
         }
 

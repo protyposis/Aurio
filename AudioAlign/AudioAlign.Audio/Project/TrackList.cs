@@ -134,5 +134,13 @@ namespace AudioAlign.Audio.Project {
         }
 
         #endregion
+
+        public IEnumerable<T> EnumerateAtPosition(TimeSpan position) {
+            foreach (T track in this) {
+                if (track.Offset <= position && track.Offset + track.Length >= position) {
+                    yield return track;
+                }
+            }
+        }
     }
 }
