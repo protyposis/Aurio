@@ -36,13 +36,8 @@ namespace AudioAlign.Audio.Matching {
 
             float[] r = new float[maxdelay * 2];
 
-            DateTime timeBeforeDataRead = DateTime.Now;
-
             StreamUtil.ForceReadIntervalSamples(s1, i1, x);
             StreamUtil.ForceReadIntervalSamples(s2, i2, y);
-
-            TimeSpan timeOfDataRead = DateTime.Now - timeBeforeDataRead;
-            Debug.WriteLine("data read duration: " + timeOfDataRead);
 
             // the following code is taken and adapted from: http://local.wasp.uwa.edu.au/~pbourke/miscellaneous/correlate/
 
@@ -86,7 +81,10 @@ namespace AudioAlign.Audio.Matching {
 
                 /* r is the correlation coefficient at "delay" */
 
-                progress.ReportProgress(((double)delay + maxdelay) / maxdelay * 100);
+                progress.ReportProgress(((double)delay + maxdelay) / (maxdelay * 2) * 100);
+                if (progress.Progress >= 100) {
+                    Debug.Write(".");
+                }
             }
 
             float maxval = float.MinValue;
