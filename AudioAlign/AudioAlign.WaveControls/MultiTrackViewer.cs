@@ -99,6 +99,20 @@ namespace AudioAlign.WaveControls {
             }
         }
 
+        public void FitTracksVertically(double minHeight) {
+            double targetHeight = 
+                (multiTrackListBox.ActualHeight - UIUtil.FindVisualChild<TimeScale>(multiTrackListBox).ActualHeight) / 
+                multiTrackListBox.Items.Count;
+            targetHeight = Math.Max(targetHeight, minHeight);
+            foreach (AudioTrack track in multiTrackListBox.Items) {
+                ListBoxItem listBoxItem = multiTrackListBox.ItemContainerGenerator.ContainerFromItem(track) as ListBoxItem;
+                if (listBoxItem != null) {
+                    ResizeDecorator resizeDecorator = UIUtil.FindVisualChild<ResizeDecorator>(listBoxItem);
+                    resizeDecorator.Height = targetHeight;
+                }
+            }
+        }
+
         /// <summary>
         /// Preview event is used because the bubbling mousewheel event (which is already handled at this time)
         /// arrives after the listbox has done it's work on the event - which we want to avoid.
