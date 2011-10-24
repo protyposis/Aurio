@@ -137,8 +137,12 @@ namespace AudioAlign.Audio {
                 Invert = audioTrack.InvertedPhase
             };
 
+            MonoStream monoStream = new MonoStream(phaseInversion, phaseInversion.Properties.Channels) {
+                Downmix = audioTrack.MonoDownmix
+            };
+
             // necessary to control each track individually
-            VolumeControlStream volumeControl = new VolumeControlStream(phaseInversion) {
+            VolumeControlStream volumeControl = new VolumeControlStream(monoStream) {
                 Mute = audioTrack.Mute,
                 Volume = audioTrack.Volume,
                 Balance = audioTrack.Balance
@@ -197,6 +201,10 @@ namespace AudioAlign.Audio {
             audioTrack.InvertedPhaseChanged += new EventHandler<ValueEventArgs<bool>>(
                 delegate(object vsender, ValueEventArgs<bool> ve) {
                     phaseInversion.Invert = ve.Value;
+                });
+            audioTrack.MonoDownmixChanged += new EventHandler<ValueEventArgs<bool>>(
+                delegate(object vsender, ValueEventArgs<bool> ve) {
+                    monoStream.Downmix = ve.Value;
                 });
 
             IAudioStream trackStream = volumeControl;

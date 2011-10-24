@@ -6,4 +6,5 @@
     <BitmapImage x:Key="IconKeyS" UriSource="../Resources/key_s.png" />
     <BitmapImage x:Key="IconSwitch" UriSource="../Resources/arrow_switch.png" />
     <BitmapImage x:Key="IconWave" UriSource="../Resources/draw_wave.png" />
+    <BitmapImage x:Key="IconSpeakers" UriSource="../Resources/speakers.png" />
 </ResourceDictionary>

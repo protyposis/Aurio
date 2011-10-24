@@ -299,6 +299,9 @@
                                         <ToggleButton IsChecked="{Binding Path=InvertedPhase, Mode=TwoWay}" Margin="1" Padding="0" Height="15" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
                                             <Image Source="{StaticResource IconSwitch}" Width="12" Height="12" />
                                         </ToggleButton>
+                                        <ToggleButton IsChecked="{Binding Path=MonoDownmix, Mode=TwoWay}" Margin="1" Padding="0" Height="15" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
+                                            <Image Source="{StaticResource IconSpeakers}" Width="12" Height="12" />
+                                        </ToggleButton>
                                     </StackPanel>
                                 </DockPanel>
                             </Border>

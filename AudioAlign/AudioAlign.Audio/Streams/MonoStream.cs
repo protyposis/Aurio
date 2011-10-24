@@ -9,6 +9,7 @@ namespace AudioAlign.Audio.Streams {
 
         private AudioProperties properties;
         private byte[] sourceBuffer;
+        private bool downmix;
 
         /// <summary>
         /// Creates a MonoStream that downmixes all channels of the source stream into a single mono channel.
@@ -32,6 +33,7 @@ namespace AudioAlign.Audio.Streams {
             properties = new AudioProperties(outputChannels, sourceStream.Properties.SampleRate, 
                 sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
             sourceBuffer = new byte[0];
+            downmix = true;
         }
 
         public override AudioProperties Properties {
@@ -51,7 +53,21 @@ namespace AudioAlign.Audio.Streams {
             get { return properties.SampleByteSize * properties.Channels; }
         }
 
+        public bool Downmix {
+            get { return downmix; }
+            set {
+                if (value == false && sourceStream.Properties.Channels != properties.Channels) {
+                    throw new Exception("downmixing can only be disabled if the number of input channels equals the number of output channels");
+                }
+                downmix = value;
+            }
+        }
+
         public override int Read(byte[] buffer, int offset, int count) {
+            if (!downmix) {
+                return sourceStream.Read(buffer, offset, count);
+            }
+
             int sourceChannels = sourceStream.Properties.Channels;
             int targetChannels = Properties.Channels;
 

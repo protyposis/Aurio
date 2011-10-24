@@ -19,6 +19,7 @@ namespace AudioAlign.Audio.Project {
         public event EventHandler<ValueEventArgs<float>> VolumeChanged;
         public event EventHandler<ValueEventArgs<float>> BalanceChanged;
         public event EventHandler<ValueEventArgs<bool>> InvertedPhaseChanged;
+        public event EventHandler<ValueEventArgs<bool>> MonoDownmixChanged;
 
         private AudioProperties sourceProperties;
         private bool mute = false;
@@ -26,6 +27,7 @@ namespace AudioAlign.Audio.Project {
         private float volume = 1.0f;
         private float balance = 0.0f;
         private bool invertedPhase = false;
+        private bool monoDownmix = false;
         private TimeWarpCollection timeWarps;
 
         public AudioTrack(FileInfo fileInfo) : base(fileInfo) {
@@ -83,9 +85,14 @@ namespace AudioAlign.Audio.Project {
         public float Balance { get { return balance; } set { balance = value; OnBalanceChanged(); } }
 
         /// <summary>
-        /// Gets or sets a value telling if this track' audio phase is inverted.
+        /// Gets or sets a value telling if this track's audio phase is inverted.
         /// </summary>
         public bool InvertedPhase { get { return invertedPhase; } set { invertedPhase = value; OnInvertedPhaseChanged(); } }
+
+        /// <summary>
+        /// Gets or sets a value telling if this track's audio channels should be downmixed to a mono signal.
+        /// </summary>
+        public bool MonoDownmix { get { return monoDownmix; } set { monoDownmix = value; OnMonoDownmixChanged(); } }
 
         public TimeWarpCollection TimeWarps {
             get { return timeWarps; }
@@ -138,6 +145,13 @@ namespace AudioAlign.Audio.Project {
                 InvertedPhaseChanged(this, new ValueEventArgs<bool>(invertedPhase));
             }
             OnPropertyChanged("InvertedPhase");
+        }
+
+        private void OnMonoDownmixChanged() {
+            if (MonoDownmixChanged != null) {
+                MonoDownmixChanged(this, new ValueEventArgs<bool>(monoDownmix));
+            }
+            OnPropertyChanged("MonoDownmix");
         }
 
         public override string ToString() {
