@@ -111,10 +111,9 @@ namespace AudioAlign.Audio.Matching {
 
         public static void Adjust(Match match, ProgressMonitor progressMonitor) {
             try {
-                long secfactor = 1000 * 1000 * 10;
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                long intervalLength = secfactor * 1;
+                long intervalLength = TimeUtil.SECS_TO_TICKS * 1;
 
                 Interval iT1 = new Interval(match.Track1Time.Ticks, match.Track1Time.Ticks + intervalLength);
                 Interval iT2 = new Interval(match.Track2Time.Ticks, match.Track2Time.Ticks + intervalLength);
