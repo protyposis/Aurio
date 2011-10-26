@@ -51,7 +51,8 @@
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile />
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DocumentationFile>doc\Exocortex.DSP.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -88,11 +89,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <DocumentationFile>doc\Exocortex.DSP.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Optimize>true</Optimize>
     <FileAlignment>4096</FileAlignment>
     <DebugType>full</DebugType>
@@ -132,7 +134,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <DocumentationFile>doc\Exocortex.DSP.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <Optimize>true</Optimize>
     <FileAlignment>4096</FileAlignment>
     <DebugType>full</DebugType>
