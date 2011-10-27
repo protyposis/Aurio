@@ -48,6 +48,13 @@ namespace AudioAlign.Audio.Project {
             OnTrackAdded(new TrackListEventArgs(track, list.IndexOf(track)));
         }
 
+        public void Add(IEnumerable<T> tracks) {
+            foreach (T track in tracks) {
+                list.Add(track);
+                OnTrackAdded(new TrackListEventArgs(track, list.IndexOf(track)));
+            }
+        }
+
         public bool Contains(T item) {
             return list.Contains(item);
         }

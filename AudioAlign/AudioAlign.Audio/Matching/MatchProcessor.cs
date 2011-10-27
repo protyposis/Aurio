@@ -5,6 +5,7 @@ using System.Text;
 using AudioAlign.Audio.Project;
 using System.Diagnostics;
 using AudioAlign.Audio.Streams;
+using AudioAlign.Audio.Matching.Graph;
 
 namespace AudioAlign.Audio.Matching {
     public class MatchProcessor {
@@ -285,6 +286,73 @@ namespace AudioAlign.Audio.Matching {
             foreach (AudioTrack audioTrack in trackList) {
                 audioTrack.Offset += delta;
             }
+        }
+
+        /// <summary>
+        /// Determines all groups of tracks that are connected through one or more matches.
+        /// </summary>
+        public static List<MatchGroup> DetermineMatchGroups(MatchFilterMode matchFilterMode, TrackList<AudioTrack> trackList,
+                                              List<Match> matches, bool windowed, TimeSpan windowSize) {
+            List<MatchPair> trackPairs = MatchProcessor.GetTrackPairs(trackList);
+            MatchProcessor.AssignMatches(trackPairs, matches);
+            trackPairs = trackPairs.Where(matchPair => matchPair.Matches.Count > 0).ToList(); // remove all track pairs without matches
+
+            // filter matches
+            foreach (MatchPair trackPair in trackPairs) {
+                List<Match> filteredMatches;
+
+                if (trackPair.Matches.Count > 0) {
+                    if (matchFilterMode == MatchFilterMode.None) {
+                        filteredMatches = trackPair.Matches;
+                    }
+                    else {
+                        if (windowed) {
+                            filteredMatches = MatchProcessor.WindowFilter(trackPair.Matches, matchFilterMode, windowSize);
+                        }
+                        else {
+                            filteredMatches = new List<Match>();
+                            filteredMatches.Add(MatchProcessor.Filter(trackPair.Matches, matchFilterMode));
+                        }
+                    }
+
+                    trackPair.Matches = filteredMatches;
+                }
+            }
+
+            // determine connected tracks
+            UndirectedGraph<AudioTrack, double> trackGraph = new UndirectedGraph<AudioTrack, double>();
+            foreach (MatchPair trackPair in trackPairs) {
+                trackGraph.Add(new Edge<AudioTrack, double>(trackPair.Track1, trackPair.Track2, 1d - trackPair.CalculateAverageSimilarity()) {
+                    Tag = trackPair
+                });
+            }
+
+            List<UndirectedGraph<AudioTrack, double>> trackGraphComponents = trackGraph.GetConnectedComponents();
+            Debug.WriteLine("{0} disconnected components", trackGraphComponents.Count);
+
+            List<MatchGroup> trackGroups = new List<MatchGroup>();
+            foreach (UndirectedGraph<AudioTrack, double> component in trackGraphComponents) {
+                List<MatchPair> connectedTrackPairs = new List<MatchPair>();
+
+                foreach (Edge<AudioTrack, double> edge in component.GetMinimalSpanningTree().Edges) {
+                    connectedTrackPairs.Add((MatchPair)edge.Tag);
+                }
+
+                foreach (MatchPair filteredTrackPair in connectedTrackPairs) {
+                    Debug.WriteLine("TrackPair {0} <-> {1}: {2} matches, similarity = {3}",
+                        filteredTrackPair.Track1, filteredTrackPair.Track2,
+                        filteredTrackPair.Matches.Count, filteredTrackPair.CalculateAverageSimilarity());
+                }
+
+                TrackList<AudioTrack> componentTrackList = new TrackList<AudioTrack>(component.Vertices);
+
+                trackGroups.Add(new MatchGroup {
+                    MatchPairs = connectedTrackPairs,
+                    TrackList = componentTrackList
+                });
+            }
+
+            return trackGroups;
         }
     }
 }
