@@ -8,16 +8,41 @@ using System.Diagnostics;
 namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
     public class FingerprintStore {
 
-        private const int FINGERPRINT_SIZE = 256;
+        public const int DEFAULT_FINGERPRINT_SIZE = 256;
+        public const float DEFAULT_THRESHOLD = 0.35f;
 
+        private int fingerprintSize;
+        private float threshold;
         private IProfile profile;
         private Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>> lookupTable;
         private Dictionary<AudioTrack, List<SubFingerprint>> store;
 
         public FingerprintStore(IProfile profile) {
+            FingerprintSize = DEFAULT_FINGERPRINT_SIZE;
+            Threshold = DEFAULT_THRESHOLD;
             this.profile = profile;
             lookupTable = new Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>>();
             store = new Dictionary<AudioTrack, List<SubFingerprint>>();
+        }
+
+        public int FingerprintSize {
+            get { return fingerprintSize; }
+            set {
+                if (value < 1) {
+                    throw new ArgumentOutOfRangeException("the fingerprint size must be at least 1");
+                }
+                fingerprintSize = value;
+            }
+        }
+
+        public float Threshold {
+            get { return threshold; }
+            set {
+                if (value < 0.0f || value > 1.0f) {
+                    throw new ArgumentOutOfRangeException("the threshold must be between 0 and 1");
+                }
+                threshold = value;
+            }
         }
 
         public Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>> LookupTable {
@@ -66,7 +91,6 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
         public List<Match> FindMatches(SubFingerprint subFingerprint) {
             List<Match> matches = new List<Match>();
-            float threshold = 0.35f;
 
             if (!lookupTable.ContainsKey(subFingerprint)) {
                 return matches;
@@ -83,8 +107,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                     SubFingerprintLookupEntry entry2 = entries[y];
                     if (entry1.AudioTrack != entry2.AudioTrack) { // don't compare tracks with themselves
                         //Debug.WriteLine("Comparing " + entry1.AudioTrack.Name + " with " + entry2.AudioTrack.Name + ":");
-                        if (store[entry1.AudioTrack].Count - entry1.Index < FINGERPRINT_SIZE
-                            || store[entry2.AudioTrack].Count - entry2.Index < FINGERPRINT_SIZE) {
+                        if (store[entry1.AudioTrack].Count - entry1.Index < fingerprintSize
+                            || store[entry2.AudioTrack].Count - entry2.Index < fingerprintSize) {
                                 // the end of at least one track has been reached and there are not enough subfingerprints left
                                 // to do a fingerprint comparison
                                 continue;
@@ -92,11 +116,11 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
                         // sum up the bit errors
                         int bitErrors = 0;
-                        for (int s = 0; s < FINGERPRINT_SIZE; s++) {
+                        for (int s = 0; s < fingerprintSize; s++) {
                             bitErrors += store[entry1.AudioTrack][entry1.Index + s].HammingDistance(store[entry2.AudioTrack][entry2.Index + s]);
                         }
 
-                        float bitErrorRate = bitErrors / 8192f; // 8192 = 256 sub-fingerprints * 32 bits
+                        float bitErrorRate = bitErrors / (float)(fingerprintSize * 32); // sub-fingerprints * 32 bits
                         //Debug.WriteLine("BER: " + bitErrorRate + " <- " + (bitErrorRate < threshold ? "MATCH!!!" : "no match"));
                         if (bitErrorRate < threshold) {
                             matches.Add(new Match { 
@@ -163,10 +187,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
         public Fingerprint GetFingerprint(SubFingerprintLookupEntry entry) {
             int indexOffset = 0;
-            if (store[entry.AudioTrack].Count - entry.Index < FINGERPRINT_SIZE) {
-                indexOffset = Math.Min(indexOffset, -FINGERPRINT_SIZE + store[entry.AudioTrack].Count - entry.Index);
+            if (store[entry.AudioTrack].Count - entry.Index < fingerprintSize) {
+                indexOffset = Math.Min(indexOffset, -fingerprintSize + store[entry.AudioTrack].Count - entry.Index);
             }
-            return new Fingerprint(store[entry.AudioTrack], entry.Index + indexOffset, FINGERPRINT_SIZE);
+            return new Fingerprint(store[entry.AudioTrack], entry.Index + indexOffset, fingerprintSize);
         }
 
         public void PrintStats() {
@@ -192,14 +216,18 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         }
 
         public float CalculateBER(Fingerprint fp1, Fingerprint fp2) {
+            if (fp1.Length != fp2.Length) {
+                throw new ArgumentException("cannot compare fingerprints of different lengths");
+            }
+
             int bitErrors = 0;
 
             // sum up the bit errors
-            for (int s = 0; s < FINGERPRINT_SIZE; s++) {
+            for (int s = 0; s < fp1.Length; s++) {
                 bitErrors += fp1[s].HammingDistance(fp2[s]);
             }
 
-            return bitErrors / 8192f; // 8192 = 256 sub-fingerprints * 32 bits
+            return bitErrors / (float)(fingerprintSize * 32); // sub-fingerprints * 32 bits
         }
 
         public void FindAllMatches(int maxSubFingerprintDistance, float maxBER) {
