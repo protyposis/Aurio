@@ -86,6 +86,11 @@ namespace AudioAlign.WaveControls {
             set { multiTrackConnectionAdorner.SelectedMatch = value; }
         }
 
+        public bool DisplayMatches {
+            get { return multiTrackConnectionAdorner.IsVisible; }
+            set { multiTrackConnectionAdorner.Visibility = (value == true) ? Visibility.Visible : Visibility.Hidden; }
+        }
+
         public void RefreshAdornerLayer() {
             if (multiTrackConnectionAdorner != null) {
                 multiTrackConnectionAdorner.InvalidateVisual();
