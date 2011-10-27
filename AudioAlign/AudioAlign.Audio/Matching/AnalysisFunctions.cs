@@ -9,6 +9,19 @@ namespace AudioAlign.Audio.Matching {
 
         private static WindowFunction windowFunction = null;
 
+        public static unsafe double CrossCorrelationOffset(byte[] x, byte[] y) {
+            if (x.Length != y.Length) {
+                throw new ArgumentException("interval lengths do not match");
+            }
+            fixed (byte* xB = &x[0], yB = &y[0]) {
+                float* xF = (float*)xB;
+                float* yF = (float*)yB;
+                int n = x.Length / sizeof(float);
+                double maxVal;
+                return (1 - Math.Abs(CrossCorrelation.Calculate(xF, yF, n, out maxVal)) / (n / 2d)) * maxVal;
+            }
+        }
+
         /// <summary>
         /// Calculates the similarity of two waves by calculating the differences of all sample pairs, summing
         /// them up and dividing them through the number of samples.

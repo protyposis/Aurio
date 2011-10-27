@@ -11,33 +11,16 @@ using AudioAlign.Audio.Streams;
 namespace AudioAlign.Audio.Matching {
     public class CrossCorrelation {
 
-        public static TimeSpan Calculate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor) {
-            if (i1.Length != i2.Length) {
-                throw new ArgumentException("interval lengths do not match");
-            }
-
-            s1 = PrepareStream(s1, 11050);
-            s2 = PrepareStream(s2, 11050);
-
-            IProgressReporter progress = progressMonitor.BeginTask("calculating cross-correlation", true);
-
-            float seconds = (float)(i1.Length / 10d / 1000 / 1000);
-            int sampleRate = s1.Properties.SampleRate;
-            int n = (int)(seconds * sampleRate);
-            float[] x = new float[n];
-            float[] y = new float[n];
-            int maxdelay = (int)(sampleRate * seconds / 4);
-
+        private static unsafe int Calculate(float* x, float* y, int length, IProgressReporter reporter, out double maxVal) {
+            int n = length;
+            int maxdelay = length / 2;
             if (maxdelay * 2 > n) {
                 throw new Exception("maximum delay must be <= half of the interval to be analyzed");
             }
 
-            Debug.WriteLine("CC window: " + seconds + " secs = " + n + " samples");
+            Debug.WriteLine("CC window: " + n + " samples");
 
             float[] r = new float[maxdelay * 2];
-
-            StreamUtil.ForceReadIntervalSamples(s1, i1, x);
-            StreamUtil.ForceReadIntervalSamples(s2, i2, y);
 
             // the following code is taken and adapted from: http://local.wasp.uwa.edu.au/~pbourke/miscellaneous/correlate/
 
@@ -81,9 +64,8 @@ namespace AudioAlign.Audio.Matching {
 
                 /* r is the correlation coefficient at "delay" */
 
-                progress.ReportProgress(((double)delay + maxdelay) / (maxdelay * 2) * 100);
-                if (progress.Progress >= 100) {
-                    Debug.Write(".");
+                if (reporter != null) {
+                    reporter.ReportProgress(((double)delay + maxdelay) / (maxdelay * 2) * 100);
                 }
             }
 
@@ -97,7 +79,72 @@ namespace AudioAlign.Audio.Matching {
             }
 
             Debug.WriteLine("max val: {0} index: {1} adjusted index: {2}", maxval, maxindex, maxindex - maxdelay);
-            TimeSpan offset = new TimeSpan((long)((maxindex - maxdelay) / (float)sampleRate * 1000 * 1000 * 10));
+            maxVal = maxval;
+            return maxindex - maxdelay;
+        }
+
+        private static unsafe int Calculate(float[] x, float[] y, IProgressReporter reporter, out double maxVal) {
+            if (x.Length != y.Length) {
+                throw new ArgumentException("interval lengths do not match");
+            }
+            fixed (float* xF = &x[0], yF = &y[0]) {
+                return Calculate(xF, yF, x.Length, reporter, out maxVal);
+            }
+        }
+
+        /// <summary>
+        /// Calculates the Cross-Correlation of two time series and returns the adjustment offset.
+        /// </summary>
+        /// <param name="x">the first input series</param>
+        /// <param name="y">the second input series</param>
+        /// <returns>the adjustment offset as the number of samples that the second series if off from the first series</returns>
+        public static int Calculate(float[] x, float[] y, out double maxVal) {
+            return Calculate(x, y, null, out maxVal);
+        }
+
+        /// <summary>
+        /// Calculates the Cross-Correlation of two time series and returns the adjustment offset.
+        /// </summary>
+        /// <param name="x">the first input series</param>
+        /// <param name="y">the second input series</param>
+        /// <param name="length">the length of each input series</param>
+        /// <returns>the adjustment offset as the number of samples that the second series if off from the first series</returns>
+        public static unsafe int Calculate(float* x, float* y, int length, out double maxVal) {
+            return Calculate(x, y, length, null, out maxVal);
+        }
+
+        public static TimeSpan Calculate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor) {
+            if (i1.Length != i2.Length) {
+                throw new ArgumentException("interval lengths do not match");
+            }
+
+            s1 = PrepareStream(s1, 11050);
+            s2 = PrepareStream(s2, 11050);
+
+            IProgressReporter progress = progressMonitor.BeginTask("calculating cross-correlation", true);
+
+            float seconds = (float)(i1.Length / 10d / 1000 / 1000);
+            int sampleRate = s1.Properties.SampleRate;
+            int n = (int)(seconds * sampleRate);
+            float[] x = new float[n];
+            float[] y = new float[n];
+            int maxdelay = (int)(sampleRate * seconds / 4);
+
+            if (maxdelay * 2 > n) {
+                throw new Exception("maximum delay must be <= half of the interval to be analyzed");
+            }
+
+            Debug.WriteLine("CC window: " + seconds + " secs = " + n + " samples");
+
+            float[] r = new float[maxdelay * 2];
+
+            StreamUtil.ForceReadIntervalSamples(s1, i1, x);
+            StreamUtil.ForceReadIntervalSamples(s2, i2, y);
+
+            double maxVal;
+            int indexOffset = Calculate(x, y, progress, out maxVal);
+
+            TimeSpan offset = new TimeSpan((long)(indexOffset / (float)sampleRate * TimeUtil.SECS_TO_TICKS));
             Debug.WriteLine("peak offset @ " + offset);
             progress.Finish();
             return offset;

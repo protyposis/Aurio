@@ -41,6 +41,9 @@ namespace AudioAlign.Audio.Matching {
             this.progressMonitor = ProgressMonitor.GlobalInstance;
 
             switch (type) {
+                case AnalysisMode.CrossCorrelationOffset:
+                    analyzeSection = AnalysisFunctions.CrossCorrelationOffset;
+                    break;
                 case AnalysisMode.Correlation:
                     analyzeSection = CrossCorrelation.Correlate;
                     break;

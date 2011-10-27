@@ -5,6 +5,7 @@ using System.Text;
 
 namespace AudioAlign.Audio.Matching {
     public enum AnalysisMode {
+        CrossCorrelationOffset,
         Correlation,
         Interference,
         FrequencyDistribution
