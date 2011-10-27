@@ -19,6 +19,8 @@ using AudioAlign.Audio.Streams;
 namespace AudioAlign.WaveControls {
     public partial class WaveView : VirtualViewBase {
 
+        private WaveformBitmapRenderer waveformBitmapRenderer;
+        private WaveformGeometryRenderer waveformGeometryRenderer;
         private VisualizingStream audioStream;
 
         // variables used for mouse dragging
@@ -28,6 +30,10 @@ namespace AudioAlign.WaveControls {
         public WaveView() {
             // event gets triggered when ActualWidth or ActualHeight change
             SizeChanged += WaveView_SizeChanged;
+
+            // init renderers
+            waveformBitmapRenderer = new WaveformBitmapRenderer();
+            waveformGeometryRenderer = new WaveformGeometryRenderer();
         }
 
         public bool Antialiased {
@@ -138,10 +144,10 @@ namespace AudioAlign.WaveControls {
                             renderer = null;
                             break;
                         case WaveViewRenderMode.Bitmap:
-                            renderer = new WaveformBitmapRenderer() { WaveformLine = WaveformLine as SolidColorBrush };
+                            renderer = waveformBitmapRenderer;
                             break;
                         case WaveViewRenderMode.Geometry:
-                            renderer = new WaveformGeometryRenderer() { WaveformLine = WaveformLine as SolidColorBrush };
+                            renderer = waveformGeometryRenderer;
                             break;
                     }
                     if (renderer != null) {

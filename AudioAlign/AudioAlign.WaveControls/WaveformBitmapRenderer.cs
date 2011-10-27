@@ -11,6 +11,12 @@ using AudioAlign.Audio;
 namespace AudioAlign.WaveControls {
     class WaveformBitmapRenderer : IWaveformRenderer {
 
+        private WriteableBitmap wb;
+        private int[] pixels;
+        private int pixelWidth;
+        private int pixelHeight;
+        private int pixelStride;
+
         public WaveformBitmapRenderer() {
             WaveformFill = Brushes.LightBlue;
             WaveformLine = Brushes.CornflowerBlue;
@@ -24,22 +30,33 @@ namespace AudioAlign.WaveControls {
         #region IWaveformRenderer Members
 
         public Drawing Render(float[] sampleData, int sampleCount, int width, int height, float volume) {
+            if (width > pixelWidth || height > pixelHeight) {
+                AllocateBitmap(width, height);
+            }
+
             bool peaks = sampleCount >= width;
             if (!peaks) {
                 BitmapSource waveform = DrawWaveform(sampleData, sampleCount, width, height, volume);
-                return new ImageDrawing(waveform, new Rect(0, 0, width, height));
+                return new ImageDrawing(waveform, new Rect(0, 0, pixelWidth, pixelHeight));
             }
             else {
                 BitmapSource waveform = DrawPeakform(sampleData, sampleCount, width, height, volume);
-                return new ImageDrawing(waveform, new Rect(0, 0, width, height));
+                return new ImageDrawing(waveform, new Rect(0, 0, pixelWidth, pixelHeight));
             }
         }
 
         #endregion
 
+        private void AllocateBitmap(int width, int height) {
+            wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
+            pixels = new int[width * height];
+            pixelWidth = width;
+            pixelHeight = height;
+            pixelStride = width;
+        }
+
         private WriteableBitmap DrawPeakform(float[] peakData, int peakCount, int width, int height, float volume) {
-            WriteableBitmap wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
-            int[] pixels = new int[width * height];
+            Array.Clear(pixels, 0, pixels.Length);
 
             int borderColor = BrushToColorValue(WaveformLine);
             int fillColor = BrushToColorValue(WaveformFill);
@@ -90,7 +107,7 @@ namespace AudioAlign.WaveControls {
                     //    || (x > 0 && top < prevTop && y > top && y < prevTop) // upper rising lines
                     //    || (x > 0 && bottom > prevBottom && y < bottom && y > prevBottom); // lower falling lines
                     bool useBorderColor = true;
-                    int pixelOffset = (y * wb.PixelWidth + x);
+                    int pixelOffset = (y * pixelWidth + x);
                     pixels[pixelOffset] = useBorderColor ? borderColor : fillColor;
                 }
 
@@ -101,14 +118,13 @@ namespace AudioAlign.WaveControls {
             }
 
             int stride = (wb.PixelWidth * wb.Format.BitsPerPixel) / 8;
-            wb.WritePixels(new Int32Rect(0, 0, width, height), pixels, stride, 0);
+            wb.WritePixels(new Int32Rect(0, 0, pixelWidth, pixelHeight), pixels, stride, 0);
 
             return wb;
         }
 
         private WriteableBitmap DrawWaveform(float[] sampleData, int sampleCount, int width, int height, float volume) {
-            WriteableBitmap wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
-            int[] pixels = new int[width * height];
+            Array.Clear(pixels, 0, pixels.Length);
 
             int borderColor = BrushToColorValue(WaveformLine);
             int sampleColor = BrushToColorValue(WaveformSamplePoint);
@@ -133,11 +149,11 @@ namespace AudioAlign.WaveControls {
                 }
 
                 if (sample > 0) {
-                    DrawLine(prevX, prevY, x, y, pixels, width, height, borderColor);
+                    DrawLine(prevX, prevY, x, y, pixels, pixelWidth, pixelHeight, borderColor);
                 }
 
                 if (width / samples > 4) {
-                    DrawPointMarker(x, y, pixels, width, height, sampleColor);
+                    DrawPointMarker(x, y, pixels, pixelWidth, pixelHeight, sampleColor);
                 }
 
                 prevX = x;
@@ -145,7 +161,7 @@ namespace AudioAlign.WaveControls {
             }
 
             int stride = (wb.PixelWidth * wb.Format.BitsPerPixel) / 8;
-            wb.WritePixels(new Int32Rect(0, 0, width, height), pixels, stride, 0);
+            wb.WritePixels(new Int32Rect(0, 0, pixelWidth, pixelHeight), pixels, stride, 0);
 
             return wb;
         }

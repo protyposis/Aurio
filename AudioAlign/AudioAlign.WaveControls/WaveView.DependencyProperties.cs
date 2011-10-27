@@ -49,7 +49,8 @@ namespace AudioAlign.WaveControls
                 new FrameworkPropertyMetadata { DefaultValue = Brushes.White, AffectsRender = true });
 
             WaveformLineProperty = DependencyProperty.Register("WaveformLine", typeof(Brush), typeof(WaveView),
-                new FrameworkPropertyMetadata { DefaultValue = Brushes.CornflowerBlue, AffectsRender = true });
+                new FrameworkPropertyMetadata { DefaultValue = Brushes.CornflowerBlue, AffectsRender = true, 
+                    PropertyChangedCallback = OnWaveformLineChanged });
 
             WaveformFillProperty = DependencyProperty.Register("WaveformFill", typeof(Brush), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = Brushes.LightBlue, AffectsRender = true });
@@ -107,6 +108,12 @@ namespace AudioAlign.WaveControls
 
         private static void audioStream_WaveformChanged(object sender, EventArgs e) {
             throw new NotImplementedException();
+        }
+
+        private static void OnWaveformLineChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+            WaveView waveView = (WaveView)d;
+            waveView.waveformBitmapRenderer.WaveformLine = e.NewValue as SolidColorBrush;
+            waveView.waveformGeometryRenderer.WaveformLine = e.NewValue as SolidColorBrush;
         }
 
         private static void OnTrackLengthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {

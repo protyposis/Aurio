@@ -98,6 +98,13 @@ namespace AudioAlign.Audio.Streams {
         /// <param name="count"></param>
         /// <returns></returns>
         public override int Read(byte[] buffer, int offset, int count) {
+            // TODO debug this block (it might give problems if the sampling rate of the stream is changed
+            //      dynamically - there might be source stream position issues (because of the SRC prereading,
+            //      and there might be local buffering issues in terms of the buffer containing unfitting samples)
+            if (properties.SampleRate == sourceStream.Properties.SampleRate) {
+                return sourceStream.Read(buffer, offset, count);
+            }
+
             // dynamically increase buffer size
             if (sourceBuffer.Length < count) {
                 int oldSize = sourceBuffer.Length;
