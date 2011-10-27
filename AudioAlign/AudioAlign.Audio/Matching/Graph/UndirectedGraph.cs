@@ -156,7 +156,7 @@ namespace AudioAlign.Audio.Matching.Graph {
                 Edge<TVertex, TWeight> minEdge = null;
                 foreach (Edge<TVertex, TWeight> e in edges) {
                     if ((mstVertices.Contains(e.Vertex1) && !mstVertices.Contains(e.Vertex2))
-                        || mstVertices.Contains(e.Vertex1) && !mstVertices.Contains(e.Vertex2)) {
+                        || mstVertices.Contains(e.Vertex2) && !mstVertices.Contains(e.Vertex1)) {
                             if (minEdge == null) {
                             minEdge = e;
                         }
@@ -171,10 +171,8 @@ namespace AudioAlign.Audio.Matching.Graph {
                 if (minEdge == null) {
                     break;
                 }
-                if (mstVertices.Contains(minEdge.Vertex1)) {
-                    mstVertices.Add(minEdge.Vertex2);
-                    mstEdges.Add(minEdge);
-                }
+                mstVertices.Add(mstVertices.Contains(minEdge.Vertex1) ? minEdge.Vertex2 : minEdge.Vertex1);
+                mstEdges.Add(minEdge);
             }
 
             UndirectedGraph<TVertex, TWeight> mstGraph = new UndirectedGraph<TVertex, TWeight>();
