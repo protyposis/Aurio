@@ -118,6 +118,9 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="ChannelsToTextConverter.cs" />
     <Compile Include="ColorGradient.cs" />
     <Compile Include="CorrelationMeter.cs" />

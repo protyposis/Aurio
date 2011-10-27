@@ -112,6 +112,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="AudioStreamFactory.cs" />
     <Compile Include="AudioUtil.cs" />
     <Compile Include="BinaryIOExtensions.cs" />
