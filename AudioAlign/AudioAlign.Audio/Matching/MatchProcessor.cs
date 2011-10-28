@@ -153,7 +153,7 @@ namespace AudioAlign.Audio.Matching {
             while (filterWindowStart < matches.Last().Track1Time) {
                 // get matches belonging to the current window
                 foreach (Match match in matches) {
-                    if (match.Track1Time >= filterWindowStart && match.Track1Time <= filterWindowEnd) {
+                    if (match.Track1Time >= filterWindowStart && match.Track1Time < filterWindowEnd) {
                         filterWindowMatches.Add(match);
                     }
                 }
