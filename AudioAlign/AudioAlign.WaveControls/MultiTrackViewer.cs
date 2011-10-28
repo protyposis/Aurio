@@ -91,6 +91,11 @@ namespace AudioAlign.WaveControls {
             set { multiTrackConnectionAdorner.Visibility = (value == true) ? Visibility.Visible : Visibility.Hidden; }
         }
 
+        public bool DisplayTrackHeaders {
+            get { return multiTrackListBox.TrackHeadersVisibility == Visibility.Visible; }
+            set { multiTrackListBox.TrackHeadersVisibility = (value == true) ? Visibility.Visible : Visibility.Collapsed; }
+        }
+
         public void RefreshAdornerLayer() {
             if (multiTrackConnectionAdorner != null) {
                 multiTrackConnectionAdorner.InvalidateVisual();
