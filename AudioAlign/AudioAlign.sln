@@ -42,6 +42,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exocortex.DSP", "..\Exocort
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaveCutter", "WaveCutter\WaveCutter.csproj", "{880B333B-3ADA-469A-A333-A9023B4D8F6F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.FFTW", "AudioAlign.FFTW\AudioAlign.FFTW.csproj", "{880F644B-5370-47D6-A4B6-F98338073631}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -179,6 +181,16 @@ Global
 		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Release|x64.ActiveCfg = Release|x86
 		{880B333B-3ADA-469A-A333-A9023B4D8F6F}.Release|x86.ActiveCfg = Release|x86
+		{880F644B-5370-47D6-A4B6-F98338073631}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{880F644B-5370-47D6-A4B6-F98338073631}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{880F644B-5370-47D6-A4B6-F98338073631}.Debug|x64.ActiveCfg = Debug|x64
+		{880F644B-5370-47D6-A4B6-F98338073631}.Debug|x64.Build.0 = Debug|x64
+		{880F644B-5370-47D6-A4B6-F98338073631}.Debug|x86.ActiveCfg = Debug|x86
+		{880F644B-5370-47D6-A4B6-F98338073631}.Debug|x86.Build.0 = Debug|x86
+		{880F644B-5370-47D6-A4B6-F98338073631}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{880F644B-5370-47D6-A4B6-F98338073631}.Release|Any CPU.Build.0 = Release|Any CPU
+		{880F644B-5370-47D6-A4B6-F98338073631}.Release|x64.ActiveCfg = Release|Any CPU
+		{880F644B-5370-47D6-A4B6-F98338073631}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

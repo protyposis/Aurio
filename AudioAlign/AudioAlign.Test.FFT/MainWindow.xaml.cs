@@ -82,7 +82,15 @@ namespace AudioAlign.Test.FFT {
             input2Graph.Values = window;
 
             float[] fftIO = (float[])window.Clone();
-            FFTUtil.FFT(fftIO);
+
+            FFTLibrary fftLib = (FFTLibrary)fftLibComboBox.SelectedValue;
+            if (fftLib == FFTLibrary.ExocortexDSP) {
+                FFTUtil.FFT(fftIO);
+            }
+            else if (fftLib == FFTLibrary.FFTW) {
+                FFTW.FFTW fftw = new FFTW.FFTW(fftIO.Length);
+                fftw.Execute(fftIO);
+            }
 
             //// convert real input to complex input with im part set to zero
             //float[] fftIO = new float[ws * 2];

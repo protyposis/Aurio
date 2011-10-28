@@ -89,6 +89,9 @@ namespace AudioAlign.Audio {
                     max = result[y];
                     peak = y;
                 }
+                if (float.IsNegativeInfinity(result[y])) {
+                    result[y] = float.MinValue;
+                }
                 y++;
             }
             return peak;

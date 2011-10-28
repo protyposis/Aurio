@@ -12,6 +12,7 @@ namespace AudioAlign.Audio.Matching {
 
         private WindowFunction windowFunction;
         private float[] frameBuffer;
+        private FFTW.FFTW fftw;
 
         // <summary>
         /// Initializes a new STFT for the specified stream with the specified window and hop size.
@@ -24,6 +25,7 @@ namespace AudioAlign.Audio.Matching {
             : base(stream, windowSize, hopSize) {
                 windowFunction = WindowUtil.GetFunction(windowType, WindowSize);
                 frameBuffer = new float[WindowSize];
+                fftw = new FFTW.FFTW(WindowSize);
         }
 
         public override void ReadFrame(float[] fftResult) {
@@ -37,7 +39,8 @@ namespace AudioAlign.Audio.Matching {
             windowFunction.Apply(frameBuffer);
 
             // do fourier transform
-            FFTUtil.FFT(frameBuffer);
+            //FFTUtil.FFT(frameBuffer);
+            fftw.Execute(frameBuffer);
 
             // normalize fourier results
             // TODO check if calculation corresponds to Haitsma & Kalker paper

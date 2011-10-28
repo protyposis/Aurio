@@ -99,9 +99,6 @@
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NAudio, Version=1.3.8.0, Culture=neutral, processorArchitecture=x86">
-      <HintPath>E:\DEVELOPMENT\Diplomarbeit\lib\NAudio-1-3\Binaries\NAudio.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
