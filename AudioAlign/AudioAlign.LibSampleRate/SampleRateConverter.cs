@@ -6,6 +6,17 @@ using System.Text;
 namespace AudioAlign.LibSampleRate {
     public class SampleRateConverter : IDisposable {
 
+        private static IInteropWrapper interop;
+
+        static SampleRateConverter() {
+            if (IntPtr.Size == 8) {
+                interop = new Interop64Wrapper();
+            }
+            else {
+                interop = new Interop32Wrapper();
+            }
+        }
+
         private bool disposed = false;
         private IntPtr srcState = IntPtr.Zero;
         private SRC_DATA srcData;
@@ -15,7 +26,7 @@ namespace AudioAlign.LibSampleRate {
         private double bufferedSamples;
 
         public SampleRateConverter(ConverterType type, int channels) {
-            srcState = Interop.src_new(type, channels, out error);
+            srcState = interop.src_new(type, channels, out error);
             ThrowExceptionForError(error);
             srcData = new SRC_DATA();
 
@@ -43,7 +54,7 @@ namespace AudioAlign.LibSampleRate {
 
                 // There are no unmanaged resources to release, but
                 // if we add them, they need to be released here.
-                srcState = Interop.src_delete(srcState);
+                srcState = interop.src_delete(srcState);
                 if (srcState != IntPtr.Zero) {
                     throw new Exception("could not delete the sample rate converter");
                 }
@@ -70,7 +81,7 @@ namespace AudioAlign.LibSampleRate {
         }
 
         public void Reset() {
-            error = Interop.src_reset(srcState);
+            error = interop.src_reset(srcState);
             ThrowExceptionForError(error);
             bufferedSamples = 0;
         }
@@ -83,14 +94,14 @@ namespace AudioAlign.LibSampleRate {
             if (step) {
                 // force the ratio for the next #Process call instead of linearly interpolating from the previous
                 // ratio to the current ratio
-                error = Interop.src_set_ratio(srcState, ratio);
+                error = interop.src_set_ratio(srcState, ratio);
                 ThrowExceptionForError(error);
             }
             this.ratio = ratio;
         }
 
         public static bool CheckRatio(double ratio) {
-            return Interop.src_is_valid_ratio(ratio) == 1;
+            return interop.src_is_valid_ratio(ratio) == 1;
         }
 
         public void Process(byte[] input, int inputOffset, int inputLength,
@@ -126,7 +137,7 @@ namespace AudioAlign.LibSampleRate {
             srcData.output_frames = outputLength / channels;
             srcData.src_ratio = ratio;
 
-            error = Interop.src_process(srcState, ref srcData);
+            error = interop.src_process(srcState, ref srcData);
             ThrowExceptionForError(error);
 
             inputLengthUsed = srcData.input_frames_used * channels;
@@ -137,7 +148,7 @@ namespace AudioAlign.LibSampleRate {
 
         private void ThrowExceptionForError(int error) {
             if (error != 0) {
-                throw new Exception(Interop.src_strerror(error));
+                throw new Exception(interop.src_strerror(error));
             }
         }
     }
