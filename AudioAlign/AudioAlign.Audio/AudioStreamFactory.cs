@@ -13,12 +13,22 @@ using AudioAlign.Audio.Streams;
 namespace AudioAlign.Audio {
     public static class AudioStreamFactory {
 
+        private static WaveStream OpenFile(FileInfo fileInfo) {
+            if (fileInfo.Extension.Equals(".wav")) {
+                return new WaveFileReader(fileInfo.FullName);
+            }
+            else if (fileInfo.Extension.Equals(".mp3")) {
+                return new Mp3FileReader(fileInfo.FullName);
+            }
+            return null;
+        }
+
         public static IAudioStream FromFileInfo(FileInfo fileInfo) {
-            return new NAudioSourceStream(new WaveFileReader(fileInfo.FullName));
+            return new NAudioSourceStream(OpenFile(fileInfo));
         }
 
         public static IAudioStream FromFileInfoIeee32(FileInfo fileInfo) {
-            return new IeeeStream(new NAudioSourceStream(new WaveFileReader(fileInfo.FullName)));
+            return new IeeeStream(new NAudioSourceStream(OpenFile(fileInfo)));
         }
 
         public static VisualizingStream FromAudioTrackForGUI(AudioTrack audioTrack) {
@@ -40,7 +50,7 @@ namespace AudioAlign.Audio {
         /// <param name="fileName">the filename to check</param>
         /// <returns>true if the file is supported, else false</returns>
         public static bool IsSupportedFile(string fileName) {
-            return fileName.EndsWith(".wav");
+            return fileName.EndsWith(".wav") || fileName.EndsWith(".mp3");
         }
 
         public static void WriteToFile(IAudioStream stream, string targetFileName) {

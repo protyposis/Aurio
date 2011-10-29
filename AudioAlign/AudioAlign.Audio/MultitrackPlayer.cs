@@ -117,8 +117,8 @@ namespace AudioAlign.Audio {
         }
 
         private void AddTrack(AudioTrack audioTrack) {
-            WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
-            IAudioStream baseStream = new IeeeStream(new TolerantStream(new BufferedStream(new NAudioSourceStream(reader), 1024 * 1024, true)));
+            IAudioStream input = AudioStreamFactory.FromFileInfo(audioTrack.FileInfo);
+            IAudioStream baseStream = new IeeeStream(new TolerantStream(new BufferedStream(input, 1024 * 1024, true)));
             TimeWarpStream timeWarpStream = new TimeWarpStream(baseStream, ResamplingQuality.SincFastest) {
                 Mappings = audioTrack.TimeWarps
             };
