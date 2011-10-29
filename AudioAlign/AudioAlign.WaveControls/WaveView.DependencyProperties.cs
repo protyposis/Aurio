@@ -112,8 +112,12 @@ namespace AudioAlign.WaveControls
 
         private static void OnWaveformLineChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             WaveView waveView = (WaveView)d;
-            waveView.waveformBitmapRenderer.WaveformLine = e.NewValue as SolidColorBrush;
-            waveView.waveformGeometryRenderer.WaveformLine = e.NewValue as SolidColorBrush;
+            foreach(var renderer in waveView.waveformBitmapRenderers) {
+                renderer.WaveformLine = e.NewValue as SolidColorBrush;
+            }
+            foreach(var renderer in waveView.waveformGeometryRenderers) {
+                renderer.WaveformLine = e.NewValue as SolidColorBrush;
+            }
         }
 
         private static void OnTrackLengthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {

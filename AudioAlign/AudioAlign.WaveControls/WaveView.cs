@@ -19,8 +19,8 @@ using AudioAlign.Audio.Streams;
 namespace AudioAlign.WaveControls {
     public partial class WaveView : VirtualViewBase {
 
-        private WaveformBitmapRenderer waveformBitmapRenderer;
-        private WaveformGeometryRenderer waveformGeometryRenderer;
+        private WaveformBitmapRenderer[] waveformBitmapRenderers;
+        private WaveformGeometryRenderer[] waveformGeometryRenderers;
         private VisualizingStream audioStream;
 
         // variables used for mouse dragging
@@ -32,8 +32,15 @@ namespace AudioAlign.WaveControls {
             SizeChanged += WaveView_SizeChanged;
 
             // init renderers
-            waveformBitmapRenderer = new WaveformBitmapRenderer();
-            waveformGeometryRenderer = new WaveformGeometryRenderer();
+            // NOTE assume that 2 channels will be the maximum for now - increase if needed
+            waveformBitmapRenderers = new WaveformBitmapRenderer[2];
+            for (int i = 0; i < waveformBitmapRenderers.Length; i++) {
+                waveformBitmapRenderers[i] = new WaveformBitmapRenderer();
+            }
+            waveformGeometryRenderers = new WaveformGeometryRenderer[2];
+            for (int i = 0; i < waveformGeometryRenderers.Length; i++) {
+                waveformGeometryRenderers[i] = new WaveformGeometryRenderer();
+            }
         }
 
         public bool Antialiased {
@@ -138,19 +145,19 @@ namespace AudioAlign.WaveControls {
 
                 // draw waveforms
                 if (channelHeight >= 1) {
-                    IWaveformRenderer renderer = null;
+                    IWaveformRenderer[] renderers = null;
                     switch (RenderMode) {
                         case WaveViewRenderMode.None:
-                            renderer = null;
+                            renderers = null;
                             break;
                         case WaveViewRenderMode.Bitmap:
-                            renderer = waveformBitmapRenderer;
+                            renderers = waveformBitmapRenderers;
                             break;
                         case WaveViewRenderMode.Geometry:
-                            renderer = waveformGeometryRenderer;
+                            renderers = waveformGeometryRenderers;
                             break;
                     }
-                    if (renderer != null) {
+                    if (renderers != null) {
                         for (int channel = 0; channel < channels; channel++) {
                             // calculate the balance factor for the first two channels only (balance only applies to stereo)
                             // TODO extend for multichannel (needs implementation of a multichannel balance adjustment control)
@@ -161,7 +168,7 @@ namespace AudioAlign.WaveControls {
                                 balanceFactor = AudioTrack.Balance > 0 ? 1 : 1 + AudioTrack.Balance;
                             }
 
-                            Drawing waveform = renderer.Render(samples[channel], sampleCount, drawingWidthAligned, (int)channelHeight, AudioTrack.Volume * balanceFactor);
+                            Drawing waveform = renderers[channel].Render(samples[channel], sampleCount, drawingWidthAligned, (int)channelHeight, AudioTrack.Volume * balanceFactor);
                             DrawingGroup drawing = new DrawingGroup();
                             drawing.Children.Add(waveform);
                             drawing.Transform = new TranslateTransform((int)drawingOffsetAligned, (int)(channelHeight * channel));
