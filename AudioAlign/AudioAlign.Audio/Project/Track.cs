@@ -24,7 +24,7 @@ namespace AudioAlign.Audio.Project {
             this.Name = fileInfo.Name;
         }
 
-        public static MediaType MediaType { get; protected set; }
+        public abstract MediaType MediaType { get; }
 
         public TimeSpan Length {
             get { return length; }

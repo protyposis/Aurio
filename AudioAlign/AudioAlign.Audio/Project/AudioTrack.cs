@@ -10,10 +10,6 @@ namespace AudioAlign.Audio.Project {
 
         public const string PEAKFILE_EXTENSION = ".aapeaks";
 
-        static AudioTrack() {
-            MediaType = MediaType.Audio;
-        }
-
         public event EventHandler<ValueEventArgs<bool>> MuteChanged;
         public event EventHandler<ValueEventArgs<bool>> SoloChanged;
         public event EventHandler<ValueEventArgs<float>> VolumeChanged;
@@ -30,10 +26,21 @@ namespace AudioAlign.Audio.Project {
         private bool monoDownmix = false;
         private TimeWarpCollection timeWarps;
 
-        public AudioTrack(FileInfo fileInfo) : base(fileInfo) {
-            this.sourceProperties = AudioStreamFactory.FromFileInfo(FileInfo).Properties;
-            this.TimeWarps = new TimeWarpCollection();
-            InitializeLength();
+        public AudioTrack(FileInfo fileInfo, bool initialize)
+            : base(fileInfo) {
+                this.TimeWarps = new TimeWarpCollection();
+                if (initialize) {
+                    this.sourceProperties = AudioStreamFactory.FromFileInfo(FileInfo).Properties;
+                    InitializeLength();
+                }
+        }
+
+        public AudioTrack(FileInfo fileInfo)
+            : this(fileInfo, true) {
+        }
+
+        public override MediaType MediaType {
+            get { return MediaType.Audio; }
         }
 
         private void InitializeLength() {

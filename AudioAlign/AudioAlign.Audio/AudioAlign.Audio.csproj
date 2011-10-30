@@ -163,6 +163,7 @@
     <Compile Include="Matching\STFT.cs" />
     <Compile Include="Matching\StreamWindower.cs" />
     <Compile Include="MultitrackPlayer.cs" />
+    <Compile Include="Project\VideoTrack.cs" />
     <Compile Include="Streams\AbstractAudioStreamWrapper.cs" />
     <Compile Include="Streams\AudioFormat.cs" />
     <Compile Include="Streams\AudioProperties.cs" />

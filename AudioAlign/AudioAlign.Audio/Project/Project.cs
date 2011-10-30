@@ -7,6 +7,7 @@ using System.IO;
 using System.Xml.Serialization;
 using System.Xml;
 using AudioAlign.Audio.Streams;
+using System.Globalization;
 
 namespace AudioAlign.Audio.Project {
     public class Project {
@@ -267,6 +268,142 @@ namespace AudioAlign.Audio.Project {
             xml.Close();
             project.File = sourceFile;
             return project;
+        }
+
+        /// <summary>
+        /// Exports a project timeline to Sony Vegas' proprietary EDL text file format.
+        /// </summary>
+        public static void ExportEDL(TrackList<AudioTrack> tracks, FileInfo targetFile) {
+            string[] videoExtensions = { ".m2ts", ".mp4", ".mpg", ".avi" };
+
+            string[] edlFields = {
+                "ID", // 1, 2, 3, ...
+                "Track", // 0, 1, 2, ..
+                "StartTime", // #.#### (milliseconds floating point)
+                "Length", // #.####
+                "PlayRate", // 1.000000
+                "Locked", // FALSE
+                "Normalized", // FALSE
+                "StretchMethod", // 0
+                "Looped", // TRUE
+                "OnRuler", // FALSE
+                "MediaType", // AUDIO, VIDEO(?)
+                "FileName", // "C:\file.wav"
+                "Stream", // 0
+                "StreamStart", // 0.0000
+                "StreamLength", // #.####
+                "FadeTimeIn", // 0.0000
+                "FadeTimeOut", // 0.0000
+                "SustainGain", // 1.000000
+                "CurveIn", // 2
+                "GainIn", // 0.000000
+                "CurveOut", // -2
+                "GainOut", // 0.000000
+                "Layer", // 0
+                "Color", // -1
+                "CurveInR", // -2
+                "CurveOutR", // 2
+                "PlayPitch", // 0.000000
+                "LockPitch", // FALSE
+                "FirstChannel", // 0
+                "Channels" // 0
+            };
+
+            // preprocess tracks
+            // - skip unmatched/unaligned tracks
+            // - try to find a matching video file replacement for the audio file
+            Dictionary<Track, int> tracklist = new Dictionary<Track, int>();
+            int audioTrackNumber = 0;
+            int videoTrackNumber = 1;
+            foreach (AudioTrack track in tracks) {
+                if (track.Volume == 0.0f) {
+                    // skip tracks whose volume is muted (alignment sets track volumes to zero if a track has no matches)
+                    continue;
+                }
+
+                FileInfo videoFileInfo = null;
+                foreach (FileInfo fileInfo in track.FileInfo.Directory.EnumerateFiles(track.FileInfo.Name.Replace(".wav", ".*"))) {
+                    foreach (string videoExtension in videoExtensions) {
+                        if (fileInfo.Extension.Equals(videoExtension)) {
+                            videoFileInfo = new FileInfo(fileInfo.FullName.Replace(fileInfo.Extension, videoExtension));
+                            break;
+                        }
+                    }
+                    if (videoFileInfo != null) {
+                        break;
+                    }
+                }
+
+                if (videoFileInfo != null) {
+                    VideoTrack videoTrack = new VideoTrack(videoFileInfo) {
+                        Length = track.Length,
+                        Offset = track.Offset
+                    };
+                    AudioTrack audioTrack = new AudioTrack(videoFileInfo, false) {
+                        Length = track.Length,
+                        Offset = track.Offset
+                    };
+                    tracklist.Add(videoTrack, videoTrackNumber++);
+                    tracklist.Add(audioTrack, audioTrackNumber++);
+                }
+                else {
+                    tracklist.Add(track, audioTrackNumber++);
+                }
+            }
+
+            StringBuilder sb = new StringBuilder();
+            CultureInfo ci = new CultureInfo("en-US");
+            
+            // write headers
+            for (int i = 0; i < edlFields.Length; i++) {
+                sb.AppendFormat("\"{0}\"", edlFields[i]);
+                if (i < edlFields.Length - 1) {
+                    sb.Append(";");
+                }
+            }
+            sb.AppendLine();
+
+            // write tracks
+            int trackID = 1;
+            foreach(Track track in tracklist.Keys) {
+                sb.AppendFormat(ci, "{0}; ", trackID++);
+                sb.AppendFormat(ci, "{0}; ", tracklist[track]);
+                sb.AppendFormat(ci, "{0:0.0000}; ", track.Offset.TotalMilliseconds);
+                sb.AppendFormat(ci, "{0:0.0000}; ", track.Length.TotalMilliseconds);
+                sb.AppendFormat(ci, "{0:0.000000}; ", 1);
+                sb.Append("FALSE; ");
+                sb.Append("FALSE; ");
+                sb.AppendFormat(ci, "{0}; ", 0);
+                sb.Append("TRUE; ");
+                sb.Append("FALSE; ");
+                sb.AppendFormat("{0}; ", track.MediaType.ToString().ToUpperInvariant());
+                sb.AppendFormat(ci, "\"{0}\"; ", track.FileInfo.FullName);
+                sb.AppendFormat(ci, "{0}; ", 0);
+                sb.AppendFormat(ci, "{0:0.0000}; ", 0);
+                sb.AppendFormat(ci, "{0:0.0000}; ", track.Length.TotalMilliseconds);
+                sb.AppendFormat(ci, "{0:0.0000}; ", 0);
+                sb.AppendFormat(ci, "{0:0.0000}; ", 0);
+                sb.AppendFormat(ci, "{0:0.000000}; ", 1);
+                sb.AppendFormat(ci, "{0}; ", track.MediaType == MediaType.Video ? 4 : 2);
+                sb.AppendFormat(ci, "{0:0.000000}; ", 0);
+                sb.AppendFormat(ci, "{0}; ", track.MediaType == MediaType.Video ? 4 : -2);
+                sb.AppendFormat(ci, "{0:0.000000}; ", 0);
+                sb.AppendFormat(ci, "{0}; ", 0);
+                sb.AppendFormat(ci, "{0}; ", -1);
+                sb.AppendFormat(ci, "{0}; ", track.MediaType == MediaType.Video ? 4 : -2);
+                sb.AppendFormat(ci, "{0}; ", track.MediaType == MediaType.Video ? 4 : 2);
+                sb.AppendFormat(ci, "{0:0.000000}; ", 0);
+                sb.Append("FALSE; ");
+                sb.AppendFormat(ci, "{0}; ", 0);
+                sb.AppendFormat(ci, "{0}", 0);
+                sb.AppendLine();
+            }
+
+            // write to file
+            StreamWriter writer = new StreamWriter(targetFile.FullName, false, Encoding.Default);
+            writer.Write(sb.ToString());
+            writer.Flush();
+            writer.Close();
         }
     }
 }

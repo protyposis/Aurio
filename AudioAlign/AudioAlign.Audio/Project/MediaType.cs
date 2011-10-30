@@ -5,6 +5,7 @@ using System.Text;
 
 namespace AudioAlign.Audio.Project {
     public enum MediaType {
-        Audio
+        Audio,
+        Video
     }
 }
