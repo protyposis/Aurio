@@ -17,9 +17,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             Timestamp = timestamp;
         }
 
-        public AudioTrack AudioTrack { get; private set; }
-        public int Index { get; private set; }
-        public TimeSpan Timestamp { get; private set; }
+        // NOTE fields instead of properties to speed up fingerprint search (getters took ~20% cpu time)
+        public AudioTrack AudioTrack;
+        public int Index;
+        public TimeSpan Timestamp;
 
         public override string ToString() {
             return "SubFingerprintLookupEntry {" + AudioTrack.GetHashCode() + " / " + Index + " / " + Timestamp + "}";

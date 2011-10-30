@@ -115,9 +115,11 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                         }
 
                         // sum up the bit errors
+                        List<SubFingerprint> track1SubFingerprints = store[entry1.AudioTrack];
+                        List<SubFingerprint> track2SubFingerprints = store[entry2.AudioTrack];
                         int bitErrors = 0;
                         for (int s = 0; s < fingerprintSize; s++) {
-                            bitErrors += store[entry1.AudioTrack][entry1.Index + s].HammingDistance(store[entry2.AudioTrack][entry2.Index + s]);
+                            bitErrors += track1SubFingerprints[entry1.Index + s].HammingDistance(track2SubFingerprints[entry2.Index + s]);
                         }
 
                         float bitErrorRate = bitErrors / (float)(fingerprintSize * 32); // sub-fingerprints * 32 bits
