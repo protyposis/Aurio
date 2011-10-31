@@ -248,10 +248,12 @@
                                         <Style TargetType="ToggleButton">
                                             <Setter Property="FontSize" Value="9"/>
                                             <Setter Property="Padding" Value="5,2"/>
+                                            <Setter Property="Focusable" Value="False"/>
                                         </Style>
                                         <Style TargetType="Slider">
                                             <Setter Property="FontSize" Value="9"/>
                                             <Setter Property="Padding" Value="5,2"/>
+                                            <Setter Property="Focusable" Value="False"/>
                                         </Style>
                                     </DockPanel.Resources>
                                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">

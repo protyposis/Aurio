@@ -101,7 +101,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
             // compare each track with each other
             int cycle = 1;
-            for(int x = 0; x < entries.Count; x++) {
+            for (int x = 0; x < entries.Count; x++) {
                 SubFingerprintLookupEntry entry1 = entries[x];
                 for (int y = cycle; y < entries.Count; y++) {
                     SubFingerprintLookupEntry entry2 = entries[y];
@@ -109,9 +109,9 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                         //Debug.WriteLine("Comparing " + entry1.AudioTrack.Name + " with " + entry2.AudioTrack.Name + ":");
                         if (store[entry1.AudioTrack].Count - entry1.Index < fingerprintSize
                             || store[entry2.AudioTrack].Count - entry2.Index < fingerprintSize) {
-                                // the end of at least one track has been reached and there are not enough subfingerprints left
-                                // to do a fingerprint comparison
-                                continue;
+                            // the end of at least one track has been reached and there are not enough subfingerprints left
+                            // to do a fingerprint comparison
+                            continue;
                         }
 
                         // sum up the bit errors
@@ -119,18 +119,27 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                         List<SubFingerprint> track2SubFingerprints = store[entry2.AudioTrack];
                         int bitErrors = 0;
                         for (int s = 0; s < fingerprintSize; s++) {
-                            bitErrors += track1SubFingerprints[entry1.Index + s].HammingDistance(track2SubFingerprints[entry2.Index + s]);
+                            SubFingerprint track1SubFingerprint = track1SubFingerprints[entry1.Index + s];
+                            SubFingerprint track2SubFingerprint = track2SubFingerprints[entry2.Index + s];
+                            if (track1SubFingerprint.Value == 0 || track2SubFingerprint.Value == 0) {
+                                bitErrors = fingerprintSize * 32;
+                                break;
+                            }
+                            // skip fingerprints with subfingerprints that are zero, since it is probably from 
+                            // a track section with silence
+                            // by setting the bitErrors to the maximum, the match will not be added
+                            bitErrors += track1SubFingerprint.HammingDistance(track2SubFingerprint);
                         }
 
                         float bitErrorRate = bitErrors / (float)(fingerprintSize * 32); // sub-fingerprints * 32 bits
                         //Debug.WriteLine("BER: " + bitErrorRate + " <- " + (bitErrorRate < threshold ? "MATCH!!!" : "no match"));
                         if (bitErrorRate < threshold) {
-                            matches.Add(new Match { 
-                                Similarity = 1 - bitErrorRate, 
-                                Track1 = entry1.AudioTrack, 
-                                Track1Time = entry1.Timestamp, 
-                                Track2 = entry2.AudioTrack, 
-                                Track2Time = entry2.Timestamp 
+                            matches.Add(new Match {
+                                Similarity = 1 - bitErrorRate,
+                                Track1 = entry1.AudioTrack,
+                                Track1Time = entry1.Timestamp,
+                                Track2 = entry2.AudioTrack,
+                                Track2Time = entry2.Timestamp
                             });
                         }
                     }
@@ -170,7 +179,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         public List<Match> FindAllMatchingMatches() {
             List<Match> matches = new List<Match>();
             foreach (SubFingerprint subFingerprint in lookupTable.Keys) {
-                matches.AddRange(FindMatches(subFingerprint));
+                // skip all subfingerprints whose bits are all zero, since this is probably a position with silence
+                if (subFingerprint.Value != 0) {
+                    matches.AddRange(FindMatches(subFingerprint));
+                }
             }
             return matches;
         }
@@ -198,7 +210,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         public void PrintStats() {
             int totalSize = 0;
             Debug.WriteLine("calculating fingerprintstore stats:");
-            
+
             // calculate subfingerprint size for each track
             foreach (AudioTrack audioTrack in store.Keys) {
                 int subFingerprintCount = store[audioTrack].Count;
@@ -247,7 +259,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                                 float ber = -1;
                                 if (maxBER < 1) {
                                     ber = CalculateBER(
-                                        GetFingerprint(new SubFingerprintLookupEntry(audioTrack1, sfp1Index)), 
+                                        GetFingerprint(new SubFingerprintLookupEntry(audioTrack1, sfp1Index)),
                                         GetFingerprint(new SubFingerprintLookupEntry(audioTrack2, sfp2Index)));
                                 }
                                 if (ber != -1 && ber <= maxBER) {
