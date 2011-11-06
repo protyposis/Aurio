@@ -9,9 +9,15 @@ using System.Diagnostics;
 using AudioAlign.Audio.Project;
 using AudioAlign.Audio.TaskMonitor;
 using AudioAlign.Audio.Streams;
+using System.Collections.Concurrent;
 
 namespace AudioAlign.Audio {
     public static class AudioStreamFactory {
+
+        private const int SAMPLES_PER_PEAK = 256;
+
+        private static BlockingCollection<Action> peakStoreQueue = new BlockingCollection<Action>();
+        private static volatile int peakStoreQueueThreads = 0;
 
         private static WaveStream OpenFile(FileInfo fileInfo) {
             if (fileInfo.Extension.Equals(".wav")) {
@@ -58,13 +64,35 @@ namespace AudioAlign.Audio {
         }
 
         private static PeakStore CreatePeakStore(AudioTrack audioTrack, bool fileSupport) {
-            int SAMPLES_PER_PEAK = 256;
-
             IAudioStream audioInputStream = audioTrack.CreateAudioStream();
 
             PeakStore peakStore = new PeakStore(SAMPLES_PER_PEAK, audioInputStream.Properties.Channels,
                 (int)Math.Ceiling((float)audioInputStream.Length / audioInputStream.SampleBlockSize / SAMPLES_PER_PEAK));
 
+            Action peakStoreFillAction = delegate {
+                FillPeakStore(audioTrack, fileSupport, audioInputStream, peakStore);
+            };
+
+            // add task
+            peakStoreQueue.Add(peakStoreFillAction);
+
+            // create consumer/worker threads
+            for (; peakStoreQueueThreads < Environment.ProcessorCount; peakStoreQueueThreads++) {
+                Task.Factory.StartNew(() => {
+                    // process peakstore actions as long as the queue is not empty
+                    Debug.WriteLine("PeakStoreQueue thread started");
+                    while (peakStoreQueue.Count > 0) {
+                        peakStoreQueue.Take().Invoke();
+                    }
+                    peakStoreQueueThreads--;
+                    Debug.WriteLine("PeakStoreQueue thread stopped");
+                });
+            }
+
+            return peakStore;
+        }
+
+        private static void FillPeakStore(AudioTrack audioTrack, bool fileSupport, IAudioStream audioInputStream, PeakStore peakStore) {
             // search for existing peakfile
             if (audioTrack.HasPeakFile && fileSupport) {
                 // load peakfile from disk
@@ -79,82 +107,79 @@ namespace AudioAlign.Audio {
                 float[] max = new float[channels];
                 BinaryWriter[] peakWriters = peakStore.CreateMemoryStreams().WrapWithBinaryWriters();
 
-                Task.Factory.StartNew(() => {
-                    IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating peaks for " + audioTrack.FileInfo.Name, true);
-                    DateTime startTime = DateTime.Now;
-                    int sampleBlockCount = 0;
-                    int peakCount = 0;
-                    int bytesRead;
-                    long totalSampleBlocks = audioInputStream.Length / audioInputStream.SampleBlockSize;
-                    long totalSamplesRead = 0;
-                    int progress = 0;
+                IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating peaks for " + audioTrack.FileInfo.Name, true);
+                DateTime startTime = DateTime.Now;
+                int sampleBlockCount = 0;
+                int peakCount = 0;
+                int bytesRead;
+                long totalSampleBlocks = audioInputStream.Length / audioInputStream.SampleBlockSize;
+                long totalSamplesRead = 0;
+                int progress = 0;
 
-                    for (int i = 0; i < channels; i++) {
-                        min[i] = float.MaxValue;
-                        max[i] = float.MinValue;
-                    }
+                for (int i = 0; i < channels; i++) {
+                    min[i] = float.MaxValue;
+                    max[i] = float.MinValue;
+                }
 
-                    unsafe {
-                        fixed (byte* bufferB = &buffer[0]) {
-                            float* bufferF = (float*)bufferB;
-                            int samplesRead;
-                            int samplesProcessed;
+                unsafe {
+                    fixed (byte* bufferB = &buffer[0]) {
+                        float* bufferF = (float*)bufferB;
+                        int samplesRead;
+                        int samplesProcessed;
 
-                            while ((bytesRead = StreamUtil.ForceRead(audioInputStream, buffer, 0, buffer.Length)) > 0) {
-                                samplesRead = bytesRead / audioInputStream.Properties.SampleByteSize;
-                                samplesProcessed = 0;
+                        while ((bytesRead = StreamUtil.ForceRead(audioInputStream, buffer, 0, buffer.Length)) > 0) {
+                            samplesRead = bytesRead / audioInputStream.Properties.SampleByteSize;
+                            samplesProcessed = 0;
 
-                                do {
+                            do {
+                                for (int channel = 0; channel < channels; channel++) {
+                                    if (min[channel] > bufferF[samplesProcessed]) {
+                                        min[channel] = bufferF[samplesProcessed];
+                                    }
+                                    if (max[channel] < bufferF[samplesProcessed]) {
+                                        max[channel] = bufferF[samplesProcessed];
+                                    }
+                                    samplesProcessed++;
+                                    totalSamplesRead++;
+                                }
+
+                                if (++sampleBlockCount % SAMPLES_PER_PEAK == 0 || sampleBlockCount == totalSampleBlocks) {
+                                    // write peak
+                                    peakCount++;
                                     for (int channel = 0; channel < channels; channel++) {
-                                        if (min[channel] > bufferF[samplesProcessed]) {
-                                            min[channel] = bufferF[samplesProcessed];
-                                        }
-                                        if (max[channel] < bufferF[samplesProcessed]) {
-                                            max[channel] = bufferF[samplesProcessed];
-                                        }
-                                        samplesProcessed++;
-                                        totalSamplesRead++;
+                                        peakWriters[channel].Write(new Peak(min[channel], max[channel]));
+                                        // add last sample of previous peak as first sample of current peak to make consecutive peaks overlap
+                                        // this gives the impression of a continuous waveform
+                                        min[channel] = max[channel] = bufferF[samplesProcessed - channels];
                                     }
-
-                                    if (++sampleBlockCount % SAMPLES_PER_PEAK == 0 || sampleBlockCount == totalSampleBlocks) {
-                                        // write peak
-                                        peakCount++;
-                                        for (int channel = 0; channel < channels; channel++) {
-                                            peakWriters[channel].Write(new Peak(min[channel], max[channel]));
-                                            // add last sample of previous peak as first sample of current peak to make consecutive peaks overlap
-                                            // this gives the impression of a continuous waveform
-                                            min[channel] = max[channel] = bufferF[samplesProcessed - channels];
-                                        }
-                                        //sampleBlockCount = 0;
-                                    }
+                                    //sampleBlockCount = 0;
                                 }
-                                while (samplesProcessed < samplesRead);
+                            }
+                            while (samplesProcessed < samplesRead);
 
-                                progressReporter.ReportProgress(100.0f / audioInputStream.Length * audioInputStream.Position);
-                                if ((int)(100.0f / audioInputStream.Length * audioInputStream.Position) > progress) {
-                                    progress = (int)(100.0f / audioInputStream.Length * audioInputStream.Position);
-                                    peakStore.OnPeaksChanged();
-                                }
+                            progressReporter.ReportProgress(100.0f / audioInputStream.Length * audioInputStream.Position);
+                            if ((int)(100.0f / audioInputStream.Length * audioInputStream.Position) > progress) {
+                                progress = (int)(100.0f / audioInputStream.Length * audioInputStream.Position);
+                                peakStore.OnPeaksChanged();
                             }
                         }
                     }
+                }
 
-                    Debug.WriteLine("generating downscaled peaks...");
-                    peakStore.CalculateScaledData(8, 6);
+                Debug.WriteLine("generating downscaled peaks...");
+                peakStore.CalculateScaledData(8, 6);
 
-                    Debug.WriteLine("peak generation finished - " + (DateTime.Now - startTime) + ", " + (peakWriters[0].BaseStream.Length * channels) + " bytes");
-                    progressReporter.Finish();
+                Debug.WriteLine("peak generation finished - " + (DateTime.Now - startTime) + ", " + (peakWriters[0].BaseStream.Length * channels) + " bytes");
+                progressReporter.Finish();
 
-                    if (fileSupport) {
-                        // write peakfile to disk
-                        FileStream peakOutputFile = File.OpenWrite(audioTrack.PeakFile.FullName);
-                        peakStore.StoreTo(peakOutputFile);
-                        peakOutputFile.Close();
-                    }
-                });
+                if (fileSupport) {
+                    // write peakfile to disk
+                    FileStream peakOutputFile = File.OpenWrite(audioTrack.PeakFile.FullName);
+                    peakStore.StoreTo(peakOutputFile);
+                    peakOutputFile.Close();
+                }
             }
-
-            return peakStore;
+            peakStore.OnPeaksChanged();
         }
     }
 }
