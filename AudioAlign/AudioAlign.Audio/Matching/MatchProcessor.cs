@@ -354,5 +354,36 @@ namespace AudioAlign.Audio.Matching {
 
             return trackGroups;
         }
+
+        /// <summary>
+        /// Filters out matches that are coincident with another match. Two matches are coincident if they point
+        /// to the same time in the audio stream of one of the two involved tracks.
+        /// Coincident are a problem when a tracks gets adjusted/resampled to match another track. A section of one
+        /// track cannot be sesampled to an infinite small section of another track, so every match but the first at
+        /// one instance in time gets thrown away (filtered out).
+        /// </summary>
+        /// <remarks>
+        /// This is actually a workaround. The problem should be taken care of in the TimeWarpStream by just
+        /// skipping the section of a track that should be resampled to an infinitely small section according
+        /// to the coincident matches.
+        /// </remarks>
+        /// <param name="trackPairs"></param>
+        public static void FilterCoincidentMatches(List<MatchPair> trackPairs) {
+            foreach (MatchPair matchPair in trackPairs) {
+                List<Match> filteredMatches = new List<Match>();
+                Match previousMatch = null;
+                foreach (Match match in matchPair.Matches) {
+                    if (previousMatch != null &&
+                        (previousMatch.Track1Time == match.Track1Time || previousMatch.Track2Time == match.Track2Time)) {
+                        // skip this match
+                    }
+                    else {
+                        filteredMatches.Add(match);
+                        previousMatch = match;
+                    }
+                }
+                matchPair.Matches = filteredMatches;
+            }
+        }
     }
 }
