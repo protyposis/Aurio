@@ -102,7 +102,9 @@ namespace AudioAlign.Audio.Streams {
             //      dynamically - there might be source stream position issues (because of the SRC prereading,
             //      and there might be local buffering issues in terms of the buffer containing unfitting samples)
             if (properties.SampleRate == sourceStream.Properties.SampleRate) {
-                return sourceStream.Read(buffer, offset, count);
+                int bytesRead = sourceStream.Read(buffer, offset, count);
+                position += bytesRead;
+                return bytesRead;
             }
 
             // dynamically increase buffer size
