@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using AudioAlign.Audio.Project;
 using System.Diagnostics;
+using AudioAlign.Audio.Streams;
 
 namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
     public class FingerprintStore {
@@ -58,7 +59,17 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 if (!variation) {
                     // store the sub-fingerprint in the sequential list of the audio track
                     if (!store.ContainsKey(audioTrack)) {
-                        store.Add(audioTrack, new List<SubFingerprint>());
+                        /* calculate the number of sub-fingerprints that this audiotrack will be converted to and init the list with it
+                         * avoids fast filling and trashing of the memory, but doesn't have any impact on processing time */
+                        IAudioStream s = audioTrack.CreateAudioStream();
+                        long samples = s.Length / s.SampleBlockSize;
+                        samples = samples / s.Properties.SampleRate * profile.SampleRate; // convert from source to profile sample rate
+                        /* results in a slightly larger number of sub-fingerprints than actually will be calculated, 
+                         * because the last frame will not be stepped through as there are not enough samples left for 
+                         * further sub-fingerprints but that small overhead doesn't matter */
+                        int subFingerprints = (int)(samples / profile.FrameStep);
+
+                        store.Add(audioTrack, new List<SubFingerprint>(subFingerprints));
                     }
                     store[audioTrack].Add(subFingerprint);
                 }
