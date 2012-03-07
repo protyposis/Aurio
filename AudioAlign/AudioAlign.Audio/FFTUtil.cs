@@ -62,6 +62,15 @@ namespace AudioAlign.Audio {
             }
         }
 
+        public static void CalculateMagnitudes(float[] complexFFTOutput, float[] resultMagnitudes) {
+            int y = 0;
+            for (int x = 0; x < complexFFTOutput.Length; x += 2) {
+                // calculate magnitude of a FFT bin (L2 norm)
+                resultMagnitudes[y] = CalculateMagnitude(complexFFTOutput[x], complexFFTOutput[x + 1]);
+                y++;
+            }
+        }
+
         /// <summary>
         /// Transforms a complex FFT output to a logarithmic dB scale for better visualization, without 
         /// normalizing the peak to 0 dB.

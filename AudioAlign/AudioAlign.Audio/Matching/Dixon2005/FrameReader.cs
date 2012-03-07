@@ -11,19 +11,19 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         public const int WINDOW_SIZE = 2048; // 46ms @ 44.1kHz
         public const int WINDOW_HOP_SIZE = 882; // 20ms @ 44.1kHz
         public const WindowType WINDOW_TYPE = WindowType.Hamming;
-        public const int FRAME_SIZE = 42;
+        public const int FRAME_SIZE = 84;
 
         private double[] frequencyMidLogBands;
 
         public FrameReader(IAudioStream stream)
-            : base(stream, WINDOW_SIZE, WINDOW_HOP_SIZE, WINDOW_TYPE) {
+            : base(stream, WINDOW_SIZE, WINDOW_HOP_SIZE, WINDOW_TYPE, false) {
                 if (stream.Properties.SampleRate != SAMPLERATE) {
                     throw new ArgumentException("wrong sample rate");
                 }
                 if (stream.Properties.Channels != 1) {
                     throw new ArgumentException("only a mono stream is allowed");
                 }
-                this.frequencyMidLogBands = FFTUtil.CalculateFrequencyBoundariesLog(370, 12500, 24);
+                this.frequencyMidLogBands = FFTUtil.CalculateFrequencyBoundariesLog(370, 12500, 66);
         }
 
         private float[] fftFreqBins = new float[WINDOW_SIZE / 2];
@@ -57,17 +57,10 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
 
             // summation of bins above 12.5kHz
             for (int i = 580; i < fftFreqBins.Length; i++) {
-                currentFrame[41] = fftFreqBins[i];
+                currentFrame[83] = fftFreqBins[i];
             }
 
-            // reset negative infinities to zero to avoid side effects in further processing
-            for (int i = 0; i < currentFrame.Length; i++) {
-                if (float.IsNegativeInfinity(currentFrame[i])) {
-                    currentFrame[i] = 0;
-                }
-            }
-
-            // TODO calculate final frame representation
+            // calculate final frame representation
             // "half-wave rectified first order difference"
             // http://www.answers.com/topic/first-order-difference
             // http://www.ltcconline.net/greenl/courses/204/firstOrder/differenceEquations.htm

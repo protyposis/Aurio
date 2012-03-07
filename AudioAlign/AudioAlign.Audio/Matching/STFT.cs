@@ -13,6 +13,7 @@ namespace AudioAlign.Audio.Matching {
         private WindowFunction windowFunction;
         private float[] frameBuffer;
         private FFTW.FFTW fftw;
+        private bool normalizeTo_dB;
 
         // <summary>
         /// Initializes a new STFT for the specified stream with the specified window and hop size.
@@ -21,11 +22,18 @@ namespace AudioAlign.Audio.Matching {
         /// <param name="windowSize">the window size in the dimension of samples</param>
         /// <param name="hopSize">the hop size in the dimension of samples</param>
         /// <param name="windowType">the type of the window function to apply</param>
-        public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType)
+        /// <param name="normalizeTo_dB">true if the FFT result should be normalized to dB scale, false if raw FFT magnitudes are desired</param>
+        public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, bool normalizeTo_dB)
             : base(stream, windowSize, hopSize) {
                 windowFunction = WindowUtil.GetFunction(windowType, WindowSize);
                 frameBuffer = new float[WindowSize];
                 fftw = new FFTW.FFTW(WindowSize);
+                this.normalizeTo_dB = normalizeTo_dB;
+        }
+
+        public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType)
+            : this(stream, windowSize, hopSize, windowType, true) {
+
         }
 
         public override void ReadFrame(float[] fftResult) {
@@ -43,8 +51,13 @@ namespace AudioAlign.Audio.Matching {
             fftw.Execute(frameBuffer);
 
             // normalize fourier results
-            // TODO check if calculation corresponds to Haitsma & Kalker paper
-            FFTUtil.Results(frameBuffer, fftResult);
+            if (normalizeTo_dB) {
+                // TODO check if calculation corresponds to Haitsma & Kalker paper
+                FFTUtil.Results(frameBuffer, fftResult);
+            }
+            else {
+                FFTUtil.CalculateMagnitudes(frameBuffer, fftResult);
+            }
         }
     }
 }
