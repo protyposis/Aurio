@@ -191,64 +191,41 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         }
 
         private GetIncResult GetInc(int t, int j) {
+            // for the first c steps just proceed diagonally and build a square matrix
             if (t < c) {
                 return GetIncResult.Both;
             }
+
             if (runCount >= MAX_RUN_COUNT) { // ERROR in paper: ">" results in 4 similar runs in a row instead of 3
                 if (previous == GetIncResult.Row) {
                     return GetIncResult.Column;
                 }
-                else {
+                else if(previous == GetIncResult.Column) {
                     return GetIncResult.Row;
                 }
             }
 
             // x = argmin(pathCost(t,l|*))
             // y = argmin(pathCost(k|*,j))
-            int x = ArgminRow(t, j);
-            int y = ArgminCol(t, j);
+            double minValX, minValY;
+            int x = ArgminRow(t, j, out minValX);
+            int y = ArgminCol(t, j, out minValY);
 
             // NOTE the following block is taken from: Dixon / Live Tracking of Musical...
-            //      it doesn't work correctly (ERROR in paper?)
-            //if (x < t) {
-            //    return GetIncResult.Row;
-            //}
-            //else if (y < j) {
-            //    return GetIncResult.Column;
-            //}
-            //else {
-            //    return GetIncResult.Both;
-            //}
-
-            // NOTE the following block is taken from: Arzt / Score Following with Dynamic...
-            //      it's different to Dixon's code but works
-            //      (in the work it is said that it's derivated of Dixon's original MATCH source code)
-            if (x < y) {
+            //      and has been enhanced with the minVal* comparisons since since it would otherwise wrongly prefer columns
+            if (minValX < minValY && x < t) {
                 return GetIncResult.Column;
             }
-            else if (x == t) {
-                return GetIncResult.Both;
-            }
-            else {
+            else if (minValY < minValX && y < j) {
                 return GetIncResult.Row;
             }
-        }
-
-        private int ArgminRow(int row, int col) {
-            double minVal = double.MaxValue;
-            int minIndex = 0;
-            for (int i = Math.Max(col - c, 1); i <= col; i++) {
-                double val = matrix[row, i];
-                if (val < minVal) {
-                    minVal = val;
-                    minIndex = i;
-                }
+            else {
+                return GetIncResult.Both;
             }
-            return minIndex;
         }
 
-        private int ArgminCol(int row, int col) {
-            double minVal = double.MaxValue;
+        private int ArgminRow(int row, int col, out double minVal) {
+            minVal = double.MaxValue;
             int minIndex = 0;
             for (int i = Math.Max(row - c, 1); i <= row; i++) {
                 double val = matrix[i, col];
@@ -260,9 +237,22 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return minIndex;
         }
 
+        private int ArgminCol(int row, int col, out double minVal) {
+            minVal = double.MaxValue;
+            int minIndex = 0;
+            for (int i = Math.Max(col - c, 1); i <= col; i++) {
+                double val = matrix[row, i];
+                if (val < minVal) {
+                    minVal = val;
+                    minIndex = i;
+                }
+            }
+            return minIndex;
+        }
+
         private void DebugPrintMatrix(int size) {
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
+            for (int i = 0; i < Math.Min(size, matrix.LengthX); i++) {
+                for (int j = 0; j < Math.Min(size, matrix.LengthY); j++) {
                     Debug.Write(String.Format("{0:00000.00} ", matrix[i, j]));
                 }
                 Debug.WriteLine("");
