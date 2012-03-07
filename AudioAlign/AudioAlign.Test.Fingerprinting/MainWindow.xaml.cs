@@ -55,6 +55,7 @@ namespace AudioAlign.Test.Fingerprinting {
             if (dlg.ShowDialog() == true) {
                 profile = FingerprintGenerator.GetProfiles()[0];
                 store = new FingerprintStore(profile);
+                store.Threshold = 0.45f;
                 foreach (string file in dlg.FileNames) {
                     AudioTrack audioTrack = new AudioTrack(new FileInfo(file));
                     IAudioStream audioStream = audioTrack.CreateAudioStream();

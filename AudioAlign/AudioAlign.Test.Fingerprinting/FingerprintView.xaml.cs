@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AudioAlign.Audio.Matching.HaitsmaKalker2002;
+using System.IO;
 
 namespace AudioAlign.Test.Fingerprinting {
     /// <summary>
@@ -51,6 +52,20 @@ namespace AudioAlign.Test.Fingerprinting {
 
             fv.bitmap = BitmapSource.Create(width, height, dpi, dpi, PixelFormats.Gray8, null, pixelData, width);
             fv.bitmapDisplay.Source = fv.bitmap;
+        }
+
+        protected override void OnMouseDoubleClick(MouseButtonEventArgs e) {
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.DefaultExt = ".png";
+            dlg.Filter = "PNG files|*.png";
+            if (bitmap != null && dlg.ShowDialog() == true) {
+                PngBitmapEncoder encoder = new PngBitmapEncoder();
+                String photolocation = dlg.FileName;
+                encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                using (var filestream = new FileStream(photolocation, FileMode.Create)) {
+                    encoder.Save(filestream);
+                }
+            }
         }
     }
 }
