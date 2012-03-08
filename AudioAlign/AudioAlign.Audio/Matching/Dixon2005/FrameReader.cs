@@ -56,8 +56,9 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             }
 
             // summation of bins above 12.5kHz
+            currentFrame[83] = 0;
             for (int i = 580; i < fftFreqBins.Length; i++) {
-                currentFrame[83] = fftFreqBins[i];
+                currentFrame[83] += fftFreqBins[i];
             }
 
             // calculate final frame representation
@@ -66,20 +67,10 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             // http://www.ltcconline.net/greenl/courses/204/firstOrder/differenceEquations.htm
             // Dixon / Live Tracking of Musical Performances... / formula 5
             for (int i = 0; i < FRAME_SIZE; i++) {
-                frame[i] = Max(currentFrame[i] - previousFrame[i], 0);
+                frame[i] = Math.Max(currentFrame[i] - previousFrame[i], 0);
             }
 
             CommonUtil.Swap<float[]>(ref currentFrame, ref previousFrame);
-        }
-
-        private float Max(float val1, float val2) {
-            if (float.IsNaN(val1)) {
-                return val2;
-            }
-            if (float.IsNaN(val2)) {
-                return val1;
-            }
-            return Math.Max(val1, val2);
         }
     }
 }
