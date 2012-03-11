@@ -14,6 +14,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         public const int FRAME_SIZE = 84;
 
         private double[] frequencyMidLogBands;
+        private int[] freqMap = new int[9999];
 
         public FrameReader(IAudioStream stream)
             : base(stream, WINDOW_SIZE, WINDOW_HOP_SIZE, WINDOW_TYPE, false) {
@@ -24,6 +25,29 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                     throw new ArgumentException("only a mono stream is allowed");
                 }
                 this.frequencyMidLogBands = FFTUtil.CalculateFrequencyBoundariesLog(370, 12500, 66);
+                makeStandardFrequencyMap(WINDOW_SIZE, SAMPLERATE);
+        }
+
+        /// <summary>
+        /// taken from MATCH 0.9.2 at.ofai.music.match.PerformanceMatcher:518
+        /// </summary>
+        /// <param name="paramInt"></param>
+        /// <param name="paramFloat"></param>
+        protected void makeStandardFrequencyMap(int fftSize, float sampleRate) {
+            double binBandwidth = sampleRate / fftSize;
+            int i = (int)(2.0D / (Math.Pow(2.0D, 0.08333333333333333D) - 1.0D));
+            int j = (int)Math.Round(Math.Log(i * binBandwidth / 440.0D) / Math.Log(2.0D) * 12.0D + 69.0D);
+
+            int k = 0;
+            while (k <= i)
+                this.freqMap[k++] = k;
+            while (k <= fftSize / 2) {
+                double d2 = Math.Log(k * binBandwidth / 440.0D) / Math.Log(2.0D) * 12.0D + 69.0D;
+                if (d2 > 127.0D)
+                    d2 = 127.0D;
+                this.freqMap[k++] = (i + (int)Math.Round(d2) - j);
+            }
+            //this.freqMapSize = (this.freqMap[(k - 1)] + 1);
         }
 
         private float[] fftFreqBins = new float[WINDOW_SIZE / 2];

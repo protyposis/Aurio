@@ -7,12 +7,13 @@ using AudioAlign.Audio.TaskMonitor;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class DTW {
 
         [DebuggerDisplay("Pair {i1} <-> {i2}")]
-        protected struct Pair {
+        public struct Pair {
             public int i1, i2;
 
             public Pair(int i1, int i2) {
@@ -31,12 +32,19 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         float[][] rb2;
         private int rb2FrameCount;
 
+
+        public delegate void OltwInitDelegate(int windowSize, IMatrix cellCostMatrix, IMatrix totalCostMatrix);
+        public event OltwInitDelegate OltwInit;
+
+        public delegate void OltwProgressDelegate(int i, int j, int minI, int minJ, bool force);
+        public event OltwProgressDelegate OltwProgress;
+
         public DTW(TimeSpan searchWidth, ProgressMonitor progressMonitor) {
             this.searchWidth = searchWidth;
             this.progressMonitor = progressMonitor;
         }
 
-        public List<Tuple<TimeSpan, TimeSpan>> Execute(IAudioStream s1, IAudioStream s2) {
+        public virtual List<Tuple<TimeSpan, TimeSpan>> Execute(IAudioStream s1, IAudioStream s2) {
             s1 = PrepareStream(s1);
             s2 = PrepareStream(s2);
 
@@ -54,6 +62,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 while (stream1FrameReader.HasNext()) {
                     float[] frame = new float[FrameReader.FRAME_SIZE];
                     stream1FrameReader.ReadFrame(frame);
+                    //Thread.Sleep(20);
                     stream1FrameQueue.Add(frame);
                 }
                 stream1FrameQueue.CompleteAdding();
@@ -65,6 +74,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 while (stream2FrameReader.HasNext()) {
                     float[] frame = new float[FrameReader.FRAME_SIZE];
                     stream2FrameReader.ReadFrame(frame);
+                    //Thread.Sleep(20);
                     stream2FrameQueue.Add(frame);
                 }
                 stream2FrameQueue.CompleteAdding();
@@ -73,12 +83,14 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             IProgressReporter progressReporter = progressMonitor.BeginTask("DTW...", true);
             int n = stream1FrameReader.WindowCount;
             int m = stream2FrameReader.WindowCount;
-            PatchMatrix dtw = new PatchMatrix(double.PositiveInfinity);
+            IMatrix totalCostMatrix = new ArrayMatrix(double.PositiveInfinity, n + 1, m + 1);
+            IMatrix cellCostMatrix = new ArrayMatrix(double.PositiveInfinity, n + 1, m + 1);
 
             // init matrix
             // NOTE do not explicitely init the PatchMatrix, otherwise the sparse matrix characteristic would 
             //      be gone and the matrix would take up all the space like a standard matrix does
-            dtw[0, 0] = 0;
+            totalCostMatrix[0, 0] = 0;
+            cellCostMatrix[0, 0] = 0;
 
             double deltaN;
             double deltaM;
@@ -88,7 +100,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             }
             else if (m < n) {
                 deltaN = 1d;
-                deltaM = (double)(m - 1) / (n - 1);;
+                deltaM = (double)(m - 1) / (n - 1);
             }
             else {
                 deltaN = 1d;
@@ -98,6 +110,9 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             double progressM = 0;
             int i, x = 0;
             int j, y = 0;
+
+            FireOltwInit(diagonalWidth, cellCostMatrix, totalCostMatrix);
+
             while (x < n || y < m) {
                 x = (int)progressN + 1;
                 y = (int)progressM + 1;
@@ -106,25 +121,36 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 i = Math.Max(x - diagonalWidth, 1);
                 j = y;
                 for (; i <= x; i++) {
-                    dtw[i, j] = CalculateCost(rb1[(i - 1) % diagonalWidth], rb2[(j - 1) % diagonalWidth]) + 
-                        Min(dtw[i - 1, j], dtw[i, j - 1], dtw[i - 1, j - 1]);
+                    double cost = CalculateCost(rb1[(i - 1) % diagonalWidth], rb2[(j - 1) % diagonalWidth]);
+                    totalCostMatrix[i, j] = cost + Min(
+                        totalCostMatrix[i - 1, j], 
+                        totalCostMatrix[i, j - 1], 
+                        totalCostMatrix[i - 1, j - 1]);
+                    cellCostMatrix[i, j] = cost;
                 }
 
                 i = x;
                 j = Math.Max(y - diagonalWidth, 1);
                 for (; j <= y; j++) {
-                    dtw[i, j] = CalculateCost(rb1[(i - 1) % diagonalWidth], rb2[(j - 1) % diagonalWidth]) + 
-                        Min(dtw[i - 1, j], dtw[i, j - 1], dtw[i - 1, j - 1]);
+                    double cost = CalculateCost(rb1[(i - 1) % diagonalWidth], rb2[(j - 1) % diagonalWidth]);
+                    totalCostMatrix[i, j] = cost + Min(
+                        totalCostMatrix[i - 1, j], 
+                        totalCostMatrix[i, j - 1], 
+                        totalCostMatrix[i - 1, j - 1]);
+                    cellCostMatrix[i, j] = cost;
                 }
+
+                FireOltwProgress(x, y, x, y, false);
 
                 progressReporter.ReportProgress((double)x / n * 100);
 
                 progressN += deltaN;
                 progressM += deltaM;
             }
+            FireOltwProgress(x, y, x, y, true);
             progressReporter.Finish();
 
-            List<Pair> path = OptimalWarpingPath(dtw);
+            List<Pair> path = OptimalWarpingPath(totalCostMatrix);
 
             List<Tuple<TimeSpan, TimeSpan>> pathTimes = new List<Tuple<TimeSpan, TimeSpan>>();
             foreach (Pair pair in path) {
@@ -171,9 +197,10 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return stream;
         }
 
-        protected List<Pair> OptimalWarpingPath(PatchMatrix dtw, int i, int j) {
+        public static List<Pair> OptimalWarpingPath(IMatrix dtw, int i, int j) {
             List<Pair> path = new List<Pair>();
-            while (i > 1 && j > 1) {
+            path.Add(new Pair(i, j));
+            while (i > 1 || j > 1) {
                 if (i == 1) {
                     j--;
                 }
@@ -192,20 +219,21 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                         i--;
                         j--;
                     }
-                    path.Add(new Pair(i, j));
                 }
+                path.Add(new Pair(i, j));
             }
+            path.Add(new Pair(0, 0));
             path.Reverse();
             return path;
         }
 
-        protected List<Pair> OptimalWarpingPath(PatchMatrix dtw) {
+        public static List<Pair> OptimalWarpingPath(IMatrix dtw) {
             int i = dtw.LengthX - 1;
             int j = dtw.LengthY - 1;
             return OptimalWarpingPath(dtw, i, j);
         }
 
-        protected double Min(double val1, double val2, double val3) {
+        protected static double Min(double val1, double val2, double val3) {
             return Math.Min(val1, Math.Min(val2, val3));
         }
 
@@ -213,12 +241,12 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         /// Computes the distance between two audio frames.
         /// Dixon / Live Tracking of Musical Performances... / formula 4
         /// </summary>
-        protected double CalculateCost(float[] frame1, float[] frame2) {
+        protected static double CalculateCost(float[] frame1, float[] frame2) {
             double result = 0;
             for (int i = 0; i < frame1.Length; i++) {
-                result += Math.Pow(frame1[i] - frame2[i], 2);
+                result += Math.Abs(frame1[i] - frame2[i]);
             }
-            return Math.Sqrt(result);
+            return result;
         }
 
         public static TimeSpan PositionToTimeSpan(long position) {
@@ -227,6 +255,18 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
 
         public static TimeSpan IndexToTimeSpan(int index) {
             return PositionToTimeSpan(index * FrameReader.WINDOW_HOP_SIZE);
+        }
+
+        protected void FireOltwInit(int windowSize, IMatrix cellCostMatrix, IMatrix totalCostMatrix) {
+            if (OltwInit != null) {
+                OltwInit(windowSize, cellCostMatrix, totalCostMatrix);
+            }
+        }
+
+        protected void FireOltwProgress(int i, int j, int minI, int minJ, bool force) {
+            if (OltwProgress != null) {
+                OltwProgress(i, j, i, j, false);
+            }
         }
     }
 }

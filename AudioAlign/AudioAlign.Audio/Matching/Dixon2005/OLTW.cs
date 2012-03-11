@@ -7,6 +7,7 @@ using AudioAlign.Audio.TaskMonitor;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class OLTW : DTW {
@@ -23,7 +24,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         private BlockingCollection<float[]> stream1FrameQueue;
         private BlockingCollection<float[]> stream2FrameQueue;
 
-        private PatchMatrix matrix;
+        private IMatrix totalCostMatrix, cellCostMatrix;
         private RingBuffer<float[]> rb1;
         private int rb1FrameCount;
         private RingBuffer<float[]> rb2;
@@ -43,12 +44,13 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             // default contructor with default search width (500) like specified in the paper
         }
 
-        public new List<Tuple<TimeSpan, TimeSpan>> Execute(IAudioStream s1, IAudioStream s2) {
+        public override List<Tuple<TimeSpan, TimeSpan>> Execute(IAudioStream s1, IAudioStream s2) {
             s1 = PrepareStream(s1);
             s2 = PrepareStream(s2);
 
             int searchWidth = (int)(this.searchWidth.TotalSeconds * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE));
-            matrix = new PatchMatrix(double.PositiveInfinity);
+            totalCostMatrix = new PatchMatrix(double.PositiveInfinity);
+            cellCostMatrix = new PatchMatrix(double.PositiveInfinity);
             rb1 = new RingBuffer<float[]>(searchWidth);
             rb1FrameCount = 0;
             rb2 = new RingBuffer<float[]>(searchWidth);
@@ -60,6 +62,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 while (stream1FrameReader.HasNext()) {
                     float[] frame = new float[FrameReader.FRAME_SIZE];
                     stream1FrameReader.ReadFrame(frame);
+                    Thread.Sleep(20);
                     stream1FrameQueue.Add(frame);
                 }
                 stream1FrameQueue.CompleteAdding();
@@ -71,6 +74,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 while (stream2FrameReader.HasNext()) {
                     float[] frame = new float[FrameReader.FRAME_SIZE];
                     stream2FrameReader.ReadFrame(frame);
+                    Thread.Sleep(20);
                     stream2FrameQueue.Add(frame);
                 }
                 stream2FrameQueue.CompleteAdding();
@@ -79,7 +83,8 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             // init matrix
             // NOTE do not explicitely init the PatchMatrix, otherwise the sparse matrix characteristic would 
             //      be gone and the matrix would take up all the space like a standard matrix does
-            matrix[0, 0] = 0;
+            totalCostMatrix[0, 0] = 0;
+            cellCostMatrix[0, 0] = 0;
 
             IProgressReporter progressReporter = progressMonitor.BeginTask("OLTW", true);
             int totalFrames = stream1FrameReader.WindowCount + stream2FrameReader.WindowCount;
@@ -92,6 +97,9 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             runCount = 0;
             c = searchWidth;
             EvaluatePathCost(t, j);
+
+            FireOltwInit(c, cellCostMatrix, totalCostMatrix);
+
             while (rb1FrameCount + rb2FrameCount < totalFrames) {
                 GetIncResult getInc = GetInc(t, j);
                 if (t < stream1FrameReader.WindowCount && getInc != GetIncResult.Column) {
@@ -120,10 +128,14 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                     previous = getInc;
                 }
 
+                FireOltwProgress(t, j, t, j, false);
+
                 //Debug.WriteLine(t + " " + j + " " + getInc);
 
                 progressReporter.ReportProgress((rb1FrameCount + rb2FrameCount) / (double)totalFrames * 100);
             }
+
+            FireOltwProgress(t, j, t, j, true);
 
             Debug.WriteLine("OLTW finished @ t={0}/{1}, j={2}/{3}",
                 t, stream1FrameReader.WindowCount,
@@ -134,7 +146,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
 
             // --------- generate results -----------
 
-            List<Pair> path = OptimalWarpingPath(matrix);
+            List<Pair> path = OptimalWarpingPath(totalCostMatrix);
 
             List<Tuple<TimeSpan, TimeSpan>> pathTimes = new List<Tuple<TimeSpan, TimeSpan>>();
             foreach (Pair pair in path) {
@@ -183,10 +195,11 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             float[] frame2 = rb2[rb2.Count - (rb2FrameCount - t2) - 1];
             double cost = CalculateCost(frame1, frame2);
             //Debug.WriteLine("cost " + t1 + "/" + t2 + ": " + cost);
-            matrix[t1, t2] = Min(
-                matrix[t1, t2 - 1] + cost,
-                matrix[t1 - 1, t2] + cost,
-                matrix[t1 - 1, t2 - 1] + 2 * cost);
+            totalCostMatrix[t1, t2] = Min(
+                totalCostMatrix[t1, t2 - 1] + cost,
+                totalCostMatrix[t1 - 1, t2] + cost,
+                totalCostMatrix[t1 - 1, t2 - 1] + 2 * cost);
+            cellCostMatrix[t1, t2] = cost;
             //Debug.WriteLine("cost " + t1 + "/" + t2 + ": " + matrix[t1, t2]);
         }
 
@@ -228,7 +241,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             minVal = double.MaxValue;
             int minIndex = 0;
             for (int i = Math.Max(row - c, 1); i <= row; i++) {
-                double val = matrix[i, col];
+                double val = totalCostMatrix[i, col];
                 if (val < minVal) {
                     minVal = val;
                     minIndex = i;
@@ -241,7 +254,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             minVal = double.MaxValue;
             int minIndex = 0;
             for (int i = Math.Max(col - c, 1); i <= col; i++) {
-                double val = matrix[row, i];
+                double val = totalCostMatrix[row, i];
                 if (val < minVal) {
                     minVal = val;
                     minIndex = i;
@@ -251,9 +264,9 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         }
 
         private void DebugPrintMatrix(int size) {
-            for (int i = 0; i < Math.Min(size, matrix.LengthX); i++) {
-                for (int j = 0; j < Math.Min(size, matrix.LengthY); j++) {
-                    Debug.Write(String.Format("{0:00000.00} ", matrix[i, j]));
+            for (int i = 0; i < Math.Min(size, totalCostMatrix.LengthX); i++) {
+                for (int j = 0; j < Math.Min(size, totalCostMatrix.LengthY); j++) {
+                    Debug.Write(String.Format("{0:00000.00} ", totalCostMatrix[i, j]));
                 }
                 Debug.WriteLine("");
             }

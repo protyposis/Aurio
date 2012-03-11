@@ -56,7 +56,9 @@ namespace AudioAlign.Audio.Matching {
                 FFTUtil.Results(frameBuffer, fftResult);
             }
             else {
-                FFTUtil.CalculateMagnitudes(frameBuffer, fftResult);
+                //FFTUtil.CalculateMagnitudes(frameBuffer, fftResult);
+                // TEMP TEST FOR OLTW
+                FFTUtil.CalculateMagnitudesSquared(frameBuffer, fftResult);
             }
         }
     }

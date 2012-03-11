@@ -25,7 +25,16 @@ namespace AudioAlign.Audio {
         /// Calculates the magnitude of a complex FFT output bin.
         /// </summary>
         public static float CalculateMagnitude(float re, float im) {
+            // calculate magnitude of a FFT bin (L2 norm)
             return (float)Math.Sqrt(re * re + im * im);
+        }
+
+        public static void CalculateMagnitudes(float[] complexFFTOutput, float[] resultMagnitudes) {
+            int y = 0;
+            for (int x = 0; x < complexFFTOutput.Length; x += 2) {
+                resultMagnitudes[y] = CalculateMagnitude(complexFFTOutput[x], complexFFTOutput[x + 1]);
+                y++;
+            }
         }
 
         /// <summary>
@@ -34,6 +43,14 @@ namespace AudioAlign.Audio {
         /// </summary>
         public static float CalculateMagnitudeSquared(float re, float im) {
             return re * re + im * im;
+        }
+
+        public static void CalculateMagnitudesSquared(float[] complexFFTOutput, float[] resultMagnitudes) {
+            int y = 0;
+            for (int x = 0; x < complexFFTOutput.Length; x += 2) {
+                resultMagnitudes[y] = CalculateMagnitudeSquared(complexFFTOutput[x], complexFFTOutput[x + 1]);
+                y++;
+            }
         }
 
         /// <summary>
@@ -59,15 +76,6 @@ namespace AudioAlign.Audio {
             for (int x = 0; x < normalizedResult.Length; x++) {
                 // normalize by max value & calculate dB scale value
                 normalizedResult[x] = (float)VolumeUtil.LinearToDecibel(normalizedResult[x] / max);
-            }
-        }
-
-        public static void CalculateMagnitudes(float[] complexFFTOutput, float[] resultMagnitudes) {
-            int y = 0;
-            for (int x = 0; x < complexFFTOutput.Length; x += 2) {
-                // calculate magnitude of a FFT bin (L2 norm)
-                resultMagnitudes[y] = CalculateMagnitude(complexFFTOutput[x], complexFFTOutput[x + 1]);
-                y++;
             }
         }
 
