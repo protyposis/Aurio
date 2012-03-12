@@ -13,6 +13,8 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class OLTW2 : DTW {
 
         private const int MAX_RUN_COUNT = 3; // MaxRunCount
+        private const int DIAG_COST_FACTOR = 1;
+        private const int DIAG_LENGTH_FACTOR = 2;
 
         private enum GetIncResult {
             None = 0,
@@ -86,7 +88,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             // init square matrix
             for (int x = 0; x < c; x++) {
                 for (int y = 0; y < c; y++) {
-                    int cellCost = CalculateCost(s1Frames[x], s2Frames[y]);
+                    double cellCost = CalculateCost(s1Frames[x], s2Frames[y]);
                     if (x == 0 && y == 0) {
                         totalCostMatrix[x, y] = cellCost;
                     }
@@ -100,9 +102,9 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                         totalCostMatrix[x, y] = Min(
                                 totalCostMatrix[x, y - 1] + cellCost,
                                 totalCostMatrix[x - 1, y] + cellCost,
-                                totalCostMatrix[x - 1, y - 1] + 2 * cellCost);
+                                totalCostMatrix[x - 1, y - 1] + DIAG_COST_FACTOR * cellCost);
                     }
-                    cellCostMatrix[x, y] = (byte)cellCost;
+                    cellCostMatrix[x, y] = cellCost;
                 }
             }
 
@@ -118,10 +120,10 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
 
             // init path lengths
             for (int x = 0; x < c; x++) {
-                pathLengthRow[x] = OptimalWarpingPath(totalCostMatrix, x, j).Count;
+                pathLengthRow[x] = GetPathLength(x, j); //OptimalWarpingPath(totalCostMatrix, x, j).Count;
             }
             for (int y = 0; y < c; y++) {
-                pathLengthCol[y] = OptimalWarpingPath(totalCostMatrix, i, y).Count;
+                pathLengthCol[y] = GetPathLength(i, y); //OptimalWarpingPath(totalCostMatrix, i, y).Count;
             }
 
             IProgressReporter progressReporter = progressMonitor.BeginTask("OLTW", true);
@@ -205,7 +207,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                     j++;
                     int start = i - c + 1;
                     for (int x = start; x <= i; x++) {
-                        int cellCost = CalculateCost(s1Frames[x], s2Frames[j]);
+                        double cellCost = CalculateCost(s1Frames[x], s2Frames[j]);
                         if (x == 0) {
                             totalCostMatrix[x, j] = totalCostMatrix[x, j - 1] + cellCost;
                             pathLengthRow[x % pathLengthRow.Length] = pathLengthRowPrev[x % pathLengthRowPrev.Length] + 1;
@@ -220,7 +222,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                                     totalCostMatrix[x - 1, j],
                                     totalCostMatrix[x, j - 1],
                                     out direction);
-                            totalCostMatrix[x, j] += (direction == GetIncResult.Both) ? 1 * cellCost : cellCost;
+                            totalCostMatrix[x, j] += (direction == GetIncResult.Both) ? DIAG_COST_FACTOR * cellCost : cellCost;
                             if (direction == GetIncResult.Row) pathLengthRow[x % pathLengthRow.Length] = pathLengthRow[(x - 1) % pathLengthRow.Length] + 1;
                             else if (direction == GetIncResult.Column) pathLengthRow[x % pathLengthRow.Length] = pathLengthRowPrev[x % pathLengthRowPrev.Length] + 1;
                             else if (direction == GetIncResult.Both) pathLengthRow[x % pathLengthRow.Length] = pathLengthRowPrev[(x - 1) % pathLengthRowPrev.Length] + 2;
@@ -232,7 +234,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                             //    Debug.WriteLine("AAAH");
                             //}
                         }
-                        cellCostMatrix[x, j] = (byte)cellCost;
+                        cellCostMatrix[x, j] = cellCost;
                         //pathLengthRow[x % pathLengthRow.Length] = GetPathLength(x, j);
                     }
                     pathLengthCol[j % pathLengthCol.Length] = pathLengthRow[i % pathLengthRow.Length];
@@ -247,7 +249,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                     i++;
                     int start = j - c + 1;
                     for (int y = start; y <= j; y++) {
-                        int cellCost = CalculateCost(s1Frames[i], s2Frames[y]);
+                        double cellCost = CalculateCost(s1Frames[i], s2Frames[y]);
                         if (y == 0) {
                             totalCostMatrix[i, y] = totalCostMatrix[i - 1, y] + cellCost;
                             //pathLengthCol[y % pathLengthCol.Length] = pathLengthColPrev[y % pathLengthColPrev.Length] + 1;
@@ -259,12 +261,12 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                                     totalCostMatrix[i - 1, y],
                                     totalCostMatrix[i, y - 1],
                                     out direction);
-                            totalCostMatrix[i, y] += (direction == GetIncResult.Both) ? 1 * cellCost : cellCost;
+                            totalCostMatrix[i, y] += (direction == GetIncResult.Both) ? DIAG_COST_FACTOR * cellCost : cellCost;
                             if (direction == GetIncResult.Column) pathLengthCol[y % pathLengthCol.Length] = pathLengthCol[(y - 1) % pathLengthCol.Length] + 1;
                             else if (direction == GetIncResult.Row) pathLengthCol[y % pathLengthCol.Length] = pathLengthColPrev[y % pathLengthColPrev.Length] + 1;
                             else if (direction == GetIncResult.Both) pathLengthCol[y % pathLengthCol.Length] = pathLengthColPrev[(y - 1) % pathLengthColPrev.Length] + 2;
                         }
-                        cellCostMatrix[i, y] = (byte)cellCost;
+                        cellCostMatrix[i, y] = cellCost;
                         //pathLengthCol[y % pathLengthCol.Length] = GetPathLength(i, y);
                     }
                     pathLengthRow[i % pathLengthRow.Length] = pathLengthCol[j % pathLengthCol.Length];
@@ -317,7 +319,9 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             //return OptimalWarpingPath(matrix, t1, t2).Count;
 
             int length = 1;
+            bool diagonal;
             while (i > 0 || j > 0) {
+                diagonal = false;
                 if (i == 0) {
                     j--;
                 }
@@ -329,6 +333,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                     if (min == totalCostMatrix[i - 1, j - 1]) {
                         i--;
                         j--;
+                        diagonal = true;
                     }
                     else if (totalCostMatrix[i - 1, j] == min) {
                         i--;
@@ -337,7 +342,8 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                         j--;
                     }
                 }
-                length++;
+                if (diagonal) length += DIAG_LENGTH_FACTOR;
+                else length++;
             }
             return length;
         }
@@ -444,7 +450,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             }
         }
 
-        protected int CalculateCost(float[] frame1, float[] frame2) {
+        protected double CalculateCost(float[] frame1, float[] frame2) {
             // taken from MATCH 0.9.2 at.ofai.music.match.PerformanceMatcher:804
             // NOTE sum of ABS values is the same as the square root of the squared values, BUT FASTER
             double result = 0;
@@ -452,10 +458,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 result += Math.Abs(frame1[i] - frame2[i]);
             }
             result = result * 0.001d; // default scaling factor 90
-            if (result > 255) { // MATCH 0.9.2 at.ofai.music.match.PerformanceMatcher:721
-                result = 255;
-            }
-            return (int)result;
+            return result;
         }
 
         protected static double Min(double val1, double val2, double val3) {
