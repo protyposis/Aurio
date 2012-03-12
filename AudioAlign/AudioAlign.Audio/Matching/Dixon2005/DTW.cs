@@ -80,17 +80,9 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 stream2FrameQueue.CompleteAdding();
             });
 
-            IProgressReporter progressReporter = progressMonitor.BeginTask("DTW...", true);
+            IProgressReporter progressReporter = progressMonitor.BeginTask("DTW aligning...", true);
             int n = stream1FrameReader.WindowCount;
             int m = stream2FrameReader.WindowCount;
-            IMatrix totalCostMatrix = new ArrayMatrix(double.PositiveInfinity, n + 1, m + 1);
-            IMatrix cellCostMatrix = new ArrayMatrix(double.PositiveInfinity, n + 1, m + 1);
-
-            // init matrix
-            // NOTE do not explicitely init the PatchMatrix, otherwise the sparse matrix characteristic would 
-            //      be gone and the matrix would take up all the space like a standard matrix does
-            totalCostMatrix[0, 0] = 0;
-            cellCostMatrix[0, 0] = 0;
 
             double deltaN;
             double deltaM;
@@ -106,6 +98,16 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 deltaN = 1d;
                 deltaM = 1d;
             }
+
+            IMatrix totalCostMatrix = new PatchMatrix(double.PositiveInfinity);
+            IMatrix cellCostMatrix = new PatchMatrix(double.PositiveInfinity);
+
+            // init matrix
+            // NOTE do not explicitely init the PatchMatrix, otherwise the sparse matrix characteristic would 
+            //      be gone and the matrix would take up all the space like a standard matrix does
+            totalCostMatrix[0, 0] = 0;
+            cellCostMatrix[0, 0] = 0;
+
             double progressN = 0;
             double progressM = 0;
             int i, x = 0;
@@ -151,6 +153,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             progressReporter.Finish();
 
             List<Pair> path = OptimalWarpingPath(totalCostMatrix);
+            path.Reverse();
 
             List<Tuple<TimeSpan, TimeSpan>> pathTimes = new List<Tuple<TimeSpan, TimeSpan>>();
             foreach (Pair pair in path) {
@@ -197,40 +200,36 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return stream;
         }
 
-        public static List<Pair> OptimalWarpingPath(IMatrix dtw, int i, int j) {
+        public static List<Pair> OptimalWarpingPath(IMatrix totalCostMatrix, int i, int j) {
             List<Pair> path = new List<Pair>();
             path.Add(new Pair(i, j));
-            while (i > 1 || j > 1) {
-                if (i == 1) {
+            while (i > 0 || j > 0) {
+                if (i == 0) {
                     j--;
                 }
-                else if (j == 1) {
+                else if (j == 0) {
                     i--;
                 }
                 else {
-                    double min = Min(dtw[i - 1, j], dtw[i, j - 1], dtw[i - 1, j - 1]);
-                    if (dtw[i - 1, j] == min) {
+                    double min = Min(totalCostMatrix[i - 1, j], totalCostMatrix[i, j - 1], totalCostMatrix[i - 1, j - 1]);
+                    if (min == totalCostMatrix[i - 1, j - 1]) {
                         i--;
-                    }
-                    else if (dtw[i, j - 1] == min) {
                         j--;
                     }
-                    else {
+                    else if (totalCostMatrix[i - 1, j] == min) {
                         i--;
+                    }
+                    else {
                         j--;
                     }
                 }
                 path.Add(new Pair(i, j));
             }
-            path.Add(new Pair(0, 0));
-            path.Reverse();
             return path;
         }
 
-        public static List<Pair> OptimalWarpingPath(IMatrix dtw) {
-            int i = dtw.LengthX - 1;
-            int j = dtw.LengthY - 1;
-            return OptimalWarpingPath(dtw, i, j);
+        public static List<Pair> OptimalWarpingPath(IMatrix totalCostMatrix) {
+            return OptimalWarpingPath(totalCostMatrix, totalCostMatrix.LengthX - 1, totalCostMatrix.LengthY - 1);
         }
 
         protected static double Min(double val1, double val2, double val3) {
@@ -242,10 +241,13 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         /// Dixon / Live Tracking of Musical Performances... / formula 4
         /// </summary>
         protected static double CalculateCost(float[] frame1, float[] frame2) {
+            // taken from MATCH 0.9.2 at.ofai.music.match.PerformanceMatcher:804
+            // NOTE sum of ABS values is the same as the square root of the squared values, BUT FASTER
             double result = 0;
             for (int i = 0; i < frame1.Length; i++) {
                 result += Math.Abs(frame1[i] - frame2[i]);
             }
+            result = result * 0.001d; // default scaling factor 90
             return result;
         }
 

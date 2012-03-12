@@ -147,6 +147,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             // --------- generate results -----------
 
             List<Pair> path = OptimalWarpingPath(totalCostMatrix);
+            path.Reverse();
 
             List<Tuple<TimeSpan, TimeSpan>> pathTimes = new List<Tuple<TimeSpan, TimeSpan>>();
             foreach (Pair pair in path) {
