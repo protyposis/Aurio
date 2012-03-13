@@ -242,13 +242,24 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         /// </summary>
         protected static double CalculateCost(float[] frame1, float[] frame2) {
             // taken from MATCH 0.9.2 at.ofai.music.match.PerformanceMatcher:804
-            // NOTE sum of ABS values is the same as the square root of the squared values, BUT FASTER
-            double result = 0;
+            // and: https://code.soundsoftware.ac.uk/projects/match-vamp/repository/entry/Matcher.cpp
+            double d = 0;
+            double sum = 0;
             for (int i = 0; i < frame1.Length; i++) {
-                result += Math.Abs(frame1[i] - frame2[i]);
+                d += Math.Abs(frame1[i] - frame2[i]);
+                sum += frame1[i] + frame2[i];
             }
-            result = result * 90d; // default scaling factor 90
-            return result;
+            if (sum == 0)
+                return 0;
+
+            double weight = (8 + Math.Log(sum)) / 10.0;
+
+            if (weight < 0)
+                weight = 0;
+            else if (weight > 1)
+                weight = 1;
+
+            return (int)(90d * d / sum * weight); // default scale = 90
         }
 
         public static TimeSpan PositionToTimeSpan(long position) {
