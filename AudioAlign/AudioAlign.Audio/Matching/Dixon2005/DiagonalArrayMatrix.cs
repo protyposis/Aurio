@@ -69,10 +69,6 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                     columns.Add(col);
                     offsets.Add(y);
                     offset = y;
-
-                    if (maxY < y) {
-                        maxY = y;
-                    }
                 }
                 else if (x < columns.Count) {
                     col = columns[x];
@@ -83,6 +79,9 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 }
 
                 col[y - offset] = value;
+                if (maxY < y) {
+                    maxY = y;
+                }
             }
         }
 

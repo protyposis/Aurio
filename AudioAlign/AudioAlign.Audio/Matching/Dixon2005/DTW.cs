@@ -247,7 +247,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             for (int i = 0; i < frame1.Length; i++) {
                 result += Math.Abs(frame1[i] - frame2[i]);
             }
-            result = result * 0.001d; // default scaling factor 90
+            result = result * 90d; // default scaling factor 90
             return result;
         }
 
