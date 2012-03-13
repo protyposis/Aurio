@@ -89,6 +89,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             progressReporter.Finish();
 
             int c = (int)(this.searchWidth.TotalSeconds * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE));
+            c = Math.Min(c, Math.Min(s1FrameCount, s2FrameCount)); // reduce c to the shortest stream if necessary
 
             progressReporter = progressMonitor.BeginTask("OLTW initializing matrix...", false);
             //totalCostMatrix = new ArrayMatrix(double.PositiveInfinity, s1Frames.Count, s2Frames.Count);

@@ -71,24 +71,17 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             base.ReadFrame(frameBuffer);
 
 
-            float d = 0;
+            float sampleValue = 0;
             double frameRMS = 0;
-            for (int j = 0; j < frameBuffer.Length; j++) {
-                d = frameBuffer[j];
-                frameRMS += d * d;
+            for (int i = 0; i < frameBuffer.Length; i++) {
+                sampleValue = frameBuffer[i];
+                frameRMS += sampleValue * sampleValue;
             }
             frameRMS = Math.Sqrt(frameRMS / frameBuffer.Length);
 
-            // apply window function
             windowFunction.Apply(frameBuffer);
-
-            // do fourier transform
-            //FFTUtil.FFT(frameBuffer);
             fftw.Execute(frameBuffer);
-
-            for (int i = 0; i < WINDOW_SIZE; i+=2) {
-                fftFreqBins[i / 2] = frameBuffer[i] * frameBuffer[i] + frameBuffer[i+1] * frameBuffer[i+1];
-            }
+            FFTUtil.CalculateMagnitudesSquared(frameBuffer, fftFreqBins);
 
             // convert FFT result to compacted frame representation
             // linear mapping of first bins up to 370Hz
@@ -114,42 +107,27 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 currentFrame[83] += fftFreqBins[i];
             }
 
-            float d1 = 0.0f;
-            int k;
-            //if (this.useSpectralDifference) // default = true
-            for (k = 0; k < currentFrame.Length; k++) {
-                d1 += currentFrame[k];
-                if (currentFrame[k] > previousFrame[k]) {
-                    frame[k] = (currentFrame[k] - previousFrame[k]);
-                }
-                else
-                    frame[k] = 0.0f;
-            }
-            //else {
-            //    for (k = 0; k < this.freqMapSize; k++) {
-            //        this.frames[i][k] = this.newFrame[k];
-            //        d1 += this.frames[i][k];
-            //    }
-            //}
-            //this.frames[i][this.freqMapSize] = d1; // TODO CHECK IF USED - scheinbar nicht
-
-            if (frameRMS <= 0.0004D)
-                for (int m = 0; m < frame.Length; m++)
-                    frame[m] = 0.0f;
-            //else if (this.normalise1) // default = true
-            if (d1 > 0) {
-                for (int m = 0; m < frame.Length; m++)
-                    frame[m] /= d1;
-            }
-
-            // calculate final frame representation
+            // calculate final frame representation (spectral difference)
             // "half-wave rectified first order difference"
             // http://www.answers.com/topic/first-order-difference
             // http://www.ltcconline.net/greenl/courses/204/firstOrder/differenceEquations.htm
             // Dixon / Live Tracking of Musical Performances... / formula 5
-            //for (int i = 0; i < FRAME_SIZE; i++) {
-            //    frame[i] = Math.Max(currentFrame[i] - previousFrame[i], 0);
-            //}
+            float differenceSum = 0.0f;
+            for (int i = 0; i < currentFrame.Length; i++) {
+                differenceSum += currentFrame[i];
+                frame[i] = Math.Max(currentFrame[i] - previousFrame[i], 0);
+            }
+
+
+            if (frameRMS <= 0.0004D) {
+                Array.Clear(frame, 0, frame.Length);
+            }
+
+            if (differenceSum > 0) { // MATCH normalize1
+                for (int m = 0; m < frame.Length; m++) {
+                    frame[m] /= differenceSum;
+                }
+            }
 
             CommonUtil.Swap<float[]>(ref currentFrame, ref previousFrame);
         }
