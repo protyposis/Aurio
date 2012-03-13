@@ -6,6 +6,10 @@ using AudioAlign.Audio.Streams;
 using System.Diagnostics;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
+    /// <summary>
+    /// Audio frame reader for the OLTW algorithm.
+    /// Inspiration taken from reverse engineered MATCH - PerformanceMatcher GetFrame() / ProcessFrame()
+    /// </summary>
     class FrameReader : STFT {
 
         public const int SAMPLERATE = 44100;

@@ -21,6 +21,7 @@ namespace AudioAlign.WaveControls {
         public static readonly DependencyProperty PhysicalCaretOffsetProperty;
         public static readonly DependencyProperty VirtualCaretOffsetProperty;
         public static readonly DependencyProperty SuppressEventsProperty;
+        public static readonly DependencyProperty CaretVisibilityProperty;
   
         public class PositionEventArgs : RoutedEventArgs {
             public PositionEventArgs() : base() { }
@@ -63,6 +64,10 @@ namespace AudioAlign.WaveControls {
 
             SuppressEventsProperty = DependencyProperty.RegisterAttached("SuppressEvents", typeof(bool),
                   typeof(CaretOverlay), new FrameworkPropertyMetadata(false, OnSuppressEventsChanged));
+
+            CaretVisibilityProperty = DependencyProperty.Register(
+                "CaretVisibility", typeof(Visibility), typeof(CaretOverlay),
+                    new FrameworkPropertyMetadata { AffectsRender = true, DefaultValue = Visibility.Visible });
 
 
             PositionSelectedEvent = EventManager.RegisterRoutedEvent("PositionSelected", RoutingStrategy.Bubble,
@@ -138,6 +143,11 @@ namespace AudioAlign.WaveControls {
         public long VirtualCaretOffset {
             get { return (long)GetValue(VirtualCaretOffsetProperty); }
             private set { SetValue(VirtualCaretOffsetProperty, value); }
+        }
+
+        public Visibility CaretVisibility {
+            get { return (Visibility)GetValue(CaretVisibilityProperty); }
+            set { SetValue(CaretVisibilityProperty, value); }
         }
 
         public event PositionEventHandler PointSelected {

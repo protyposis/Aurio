@@ -11,6 +11,7 @@ namespace AudioAlign.WaveControls {
         
         public static readonly DependencyProperty VirtualViewportWidthProperty;
         public static readonly DependencyProperty TrackHeadersVisibilityProperty;
+        public static readonly DependencyProperty ControlsVisibilityProperty;
 
         static MultiTrackListBox() {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(MultiTrackListBox), new FrameworkPropertyMetadata(typeof(MultiTrackListBox)));
@@ -19,6 +20,10 @@ namespace AudioAlign.WaveControls {
             
             TrackHeadersVisibilityProperty = DependencyProperty.Register(
                 "TrackHeadersVisibility", typeof(Visibility), typeof(MultiTrackListBox),
+                    new FrameworkPropertyMetadata { AffectsRender = true, DefaultValue = Visibility.Visible });
+
+            ControlsVisibilityProperty = DependencyProperty.Register(
+                "ControlsVisibility", typeof(Visibility), typeof(MultiTrackListBox),
                     new FrameworkPropertyMetadata { AffectsRender = true, DefaultValue = Visibility.Visible });
         }
 
@@ -30,6 +35,11 @@ namespace AudioAlign.WaveControls {
         public Visibility TrackHeadersVisibility {
             get { return (Visibility)GetValue(TrackHeadersVisibilityProperty); }
             set { SetValue(TrackHeadersVisibilityProperty, value); }
+        }
+
+        public Visibility ControlsVisibility {
+            get { return (Visibility)GetValue(ControlsVisibilityProperty); }
+            set { SetValue(ControlsVisibilityProperty, value); }
         }
     }
 }

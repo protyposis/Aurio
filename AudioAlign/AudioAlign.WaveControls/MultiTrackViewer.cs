@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Input;
 using AudioAlign.Audio.Matching;
 using System.Collections.ObjectModel;
+using System.Windows.Media.Imaging;
 
 namespace AudioAlign.WaveControls {
     [TemplatePart(Name = "PART_TimeScale", Type = typeof(TimeScale))]
@@ -121,6 +122,22 @@ namespace AudioAlign.WaveControls {
                     resizeDecorator.Height = targetHeight;
                 }
             }
+        }
+
+        public void CopyToClipboard(bool fullHeight) {
+            ScrollViewer sv = UIUtil.FindVisualChild<ScrollViewer>(multiTrackListBox);
+            sv.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            multiTrackListBox.ControlsVisibility = Visibility.Hidden;
+
+            Size size = fullHeight ? new Size(multiTrackListBox.ActualWidth + sv.ScrollableWidth, multiTrackListBox.ActualHeight + sv.ScrollableHeight) : multiTrackListBox.RenderSize;
+            RenderTargetBitmap rtb = new RenderTargetBitmap((int)size.Width, (int)size.Height, 96, 96, PixelFormats.Pbgra32);
+            multiTrackListBox.Measure(size);
+            multiTrackListBox.Arrange(new Rect(size));
+            rtb.Render(multiTrackListBox);
+
+            Clipboard.SetImage(rtb);
+            sv.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
+            multiTrackListBox.ControlsVisibility = Visibility.Visible;
         }
 
         /// <summary>
