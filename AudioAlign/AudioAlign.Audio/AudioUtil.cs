@@ -103,5 +103,15 @@ namespace AudioAlign.Audio {
 
             return uninterleavedSamples;
         }
+
+        public static double CalculateRMS(float[] samples) {
+            float sampleValue = 0;
+            double frameRMS = 0;
+            for (int i = 0; i < samples.Length; i++) {
+                sampleValue = samples[i];
+                frameRMS += sampleValue * sampleValue;
+            }
+            return Math.Sqrt(frameRMS / samples.Length);
+        }
     }
 }

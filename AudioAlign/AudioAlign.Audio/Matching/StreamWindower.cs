@@ -166,6 +166,11 @@ namespace AudioAlign.Audio.Matching {
             // copy window to frame buffer
             Buffer.BlockCopy(streamBuffer, frameOffset, frame, 0, frameSize);
             frameOffset += hopSizeB;
+            OnFrameRead(frame);
+        }
+
+        protected virtual void OnFrameRead(float[] frame) {
+            // to be overridden
         }
     }
 }

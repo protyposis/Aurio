@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AudioAlign.Audio.Streams;
+using System.Diagnostics;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
-    class FrameReader : StreamWindower {
+    class FrameReader : STFT {
 
         public const int SAMPLERATE = 44100;
         public const int WINDOW_SIZE = 2048; // 46ms @ 44.1kHz
@@ -13,98 +14,70 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         public const WindowType WINDOW_TYPE = WindowType.Hamming;
         public const int FRAME_SIZE = 84;
 
-        private WindowFunction windowFunction;
-        private float[] frameBuffer;
-        private FFTW.FFTW fftw;
-
-        private double[] frequencyMidLogBands;
-        private int[] freqMap = new int[9999];
+        private int[] frequencyMap;
 
         public FrameReader(IAudioStream stream)
-            : base(stream, WINDOW_SIZE, WINDOW_HOP_SIZE) {
+            : base(stream, WINDOW_SIZE, WINDOW_HOP_SIZE, WINDOW_TYPE, false) {
                 if (stream.Properties.SampleRate != SAMPLERATE) {
                     throw new ArgumentException("wrong sample rate");
                 }
                 if (stream.Properties.Channels != 1) {
                     throw new ArgumentException("only a mono stream is allowed");
                 }
-                windowFunction = WindowUtil.GetFunction(WINDOW_TYPE, WindowSize);
-                frameBuffer = new float[WindowSize];
-                fftw = new FFTW.FFTW(WindowSize);
-                this.frequencyMidLogBands = FFTUtil.CalculateFrequencyBoundariesLog(370, 12500, 66);
-                makeStandardFrequencyMap(WINDOW_SIZE, SAMPLERATE);
+
+                frequencyMap = MakeFrequencyMap();
         }
 
-        /// <summary>
-        /// taken from MATCH 0.9.2 at.ofai.music.match.PerformanceMatcher:518
-        /// </summary>
-        /// <param name="paramInt"></param>
-        /// <param name="paramFloat"></param>
-        protected void makeStandardFrequencyMap(int fftSize, float sampleRate) {
-            double binBandwidth = sampleRate / fftSize;
-            int i = (int)(2.0D / (Math.Pow(2.0D, 0.08333333333333333D) - 1.0D));
-            int j = (int)Math.Round(Math.Log(i * binBandwidth / 440.0D) / Math.Log(2.0D) * 12.0D + 69.0D);
-
-            int k = 0;
-            while (k <= i)
-                this.freqMap[k++] = k;
-            while (k <= fftSize / 2) {
-                double d2 = Math.Log(k * binBandwidth / 440.0D) / Math.Log(2.0D) * 12.0D + 69.0D;
-                if (d2 > 127.0D)
-                    d2 = 127.0D;
-                this.freqMap[k++] = (i + (int)Math.Round(d2) - j);
-            }
-            //this.freqMapSize = (this.freqMap[(k - 1)] + 1);
-        }
-
-        private float[] fftFreqBins = new float[WINDOW_SIZE / 2];
-        private float[] previousFrame = new float[FRAME_SIZE];
-        private float[] currentFrame = new float[FRAME_SIZE];
-
-        public override void ReadFrame(float[] frame) {
-            if (frame.Length != FRAME_SIZE) {
-                throw new ArgumentException("wrong frame size");
-            }
-
-            //base.ReadFrame(fftFreqBins);
-
-            base.ReadFrame(frameBuffer);
-
-
-            float sampleValue = 0;
-            double frameRMS = 0;
-            for (int i = 0; i < frameBuffer.Length; i++) {
-                sampleValue = frameBuffer[i];
-                frameRMS += sampleValue * sampleValue;
-            }
-            frameRMS = Math.Sqrt(frameRMS / frameBuffer.Length);
-
-            windowFunction.Apply(frameBuffer);
-            fftw.Execute(frameBuffer);
-            FFTUtil.CalculateMagnitudesSquared(frameBuffer, fftFreqBins);
+        private int[] MakeFrequencyMap() {
+            int[] map = new int[WINDOW_SIZE / 2];
 
             // convert FFT result to compacted frame representation
             // linear mapping of first bins up to 370Hz
             for (int i = 0; i < 17; i++) {
-                currentFrame[i] = fftFreqBins[i];
+                map[i] = i;
             }
 
             // logarithmic mapping of 370Hz - 12.5kHz
             // NOTE same code pattern as in FingerprintGenerator
+            double[] frequencyMidLogBands = FFTUtil.CalculateFrequencyBoundariesLog(370, 12500, 66);
             double bandWidth = SAMPLERATE / 2d / fftFreqBins.Length;
             for (int x = 0; x < frequencyMidLogBands.Length - 1; x++) {
                 currentFrame[17 + x] = 0;
                 int lowerIndex = (int)(frequencyMidLogBands[x] / bandWidth);
                 int upperIndex = (int)(frequencyMidLogBands[x + 1] / bandWidth);
                 for (int y = lowerIndex; y < upperIndex; y++) {
-                    currentFrame[17 + x] += fftFreqBins[y];
+                    map[y] = 17 + x;
                 }
             }
 
             // summation of bins above 12.5kHz
             currentFrame[83] = 0;
             for (int i = 580; i < fftFreqBins.Length; i++) {
-                currentFrame[83] += fftFreqBins[i];
+                map[i] = 83;
+            }
+
+            return map;
+        }
+
+        private float[] fftFreqBins = new float[WINDOW_SIZE / 2];
+        private float[] previousFrame = new float[FRAME_SIZE];
+        private float[] currentFrame = new float[FRAME_SIZE];
+        private double currentFrameRMS;
+
+        protected override void OnFrameRead(float[] frame) {
+            currentFrameRMS = AudioUtil.CalculateRMS(frame);
+        }
+
+        public override void ReadFrame(float[] frame) {
+            if (frame.Length != FRAME_SIZE) {
+                throw new ArgumentException("wrong frame size");
+            }
+
+            base.ReadFrame(fftFreqBins);
+
+            Array.Clear(currentFrame, 0, currentFrame.Length);
+            for(int i = 0; i < fftFreqBins.Length; i++) {
+                currentFrame[frequencyMap[i]] += fftFreqBins[i];
             }
 
             // calculate final frame representation (spectral difference)
@@ -119,7 +92,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             }
 
 
-            if (frameRMS <= 0.0004D) {
+            if (currentFrameRMS <= 0.0004D) {
                 Array.Clear(frame, 0, frame.Length);
             }
 

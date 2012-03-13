@@ -60,6 +60,16 @@ namespace AudioAlign.Audio.Matching {
                 // TEMP TEST FOR OLTW
                 FFTUtil.CalculateMagnitudesSquared(frameBuffer, fftResult);
             }
+
+            OnFrameReadSTFT(fftResult);
+        }
+
+        //protected virtual void OnFrameSamplesRead(float[] frame) {
+        //    // to be overridden
+        //}
+
+        protected virtual void OnFrameReadSTFT(float[] frame) {
+            // to be overridden
         }
     }
 }
