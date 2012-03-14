@@ -174,9 +174,14 @@ namespace AudioAlign.Audio {
 
                 if (fileSupport) {
                     // write peakfile to disk
-                    FileStream peakOutputFile = File.OpenWrite(audioTrack.PeakFile.FullName);
-                    peakStore.StoreTo(peakOutputFile);
-                    peakOutputFile.Close();
+                    try {
+                        FileStream peakOutputFile = File.OpenWrite(audioTrack.PeakFile.FullName);
+                        peakStore.StoreTo(peakOutputFile);
+                        peakOutputFile.Close();
+                    }
+                    catch (UnauthorizedAccessException e) {
+                        Debug.WriteLine("peak file writing failed: " + e.Message);
+                    }
                 }
             }
             peakStore.OnPeaksChanged();

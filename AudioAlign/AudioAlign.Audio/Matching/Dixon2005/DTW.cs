@@ -225,6 +225,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 }
                 path.Add(new Pair(i, j));
             }
+
             return path;
         }
 
@@ -259,7 +260,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             else if (weight > 1)
                 weight = 1;
 
-            return (int)(90d * d / sum * weight); // default scale = 90
+            return (90d * d / sum * weight); // default scale = 90
         }
 
         public static TimeSpan PositionToTimeSpan(long position) {

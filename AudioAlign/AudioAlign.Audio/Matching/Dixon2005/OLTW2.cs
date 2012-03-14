@@ -12,9 +12,8 @@ using System.Threading;
 namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class OLTW2 : DTW {
 
-        private const int MAX_RUN_COUNT = 3; // MaxRunCount
+        private const int MAX_RUN_COUNT = 3;
         private const int DIAG_COST_FACTOR = 1;
-        private const int DIAG_LENGTH_FACTOR = 2;
 
         private enum Direction {
             None = 0,
@@ -23,24 +22,10 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             Both
         }
 
-        private BlockingCollection<float[]> stream1FrameQueue;
-        private BlockingCollection<float[]> stream2FrameQueue;
-
-        //private PatchMatrix matrix;
-        private RingBuffer<float[]> rb1;
-        private int rb1FrameCount;
-        private RingBuffer<float[]> rb2;
-        private int rb2FrameCount;
-        private int t; // pointer to the current position in series U
-        private int j; // pointer to the current position in series V
-        private Direction previous;
-        private int runCount;
-        private int c;
-
-        List<float[]> s1Frames, s2Frames;
-        IMatrix totalCostMatrix;
-        IMatrix cellCostMatrix;
-        int[] pathLengthRow, pathLengthCol;
+        private List<float[]> s1Frames, s2Frames;
+        private IMatrix totalCostMatrix;
+        private IMatrix cellCostMatrix;
+        private int[] pathLengthRow, pathLengthCol;
 
         public OLTW2(TimeSpan searchWidth, ProgressMonitor progressMonitor)
             : base(searchWidth, progressMonitor) {
@@ -54,13 +39,6 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         public override List<Tuple<TimeSpan, TimeSpan>> Execute(IAudioStream s1, IAudioStream s2) {
             s1 = PrepareStream(s1);
             s2 = PrepareStream(s2);
-
-            if (s1.Length > s2.Length) {
-                s1 = new VolumeControlStream(s1) { Volume = 2.7f };
-            }
-            else {
-                s2 = new VolumeControlStream(s2) { Volume = 2.7f };
-            }
 
             IProgressReporter progressReporter;
 
@@ -91,179 +69,129 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             int c = (int)(this.searchWidth.TotalSeconds * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE));
             c = Math.Min(c, Math.Min(s1FrameCount, s2FrameCount)); // reduce c to the shortest stream if necessary
 
-            progressReporter = progressMonitor.BeginTask("OLTW initializing matrix...", false);
-            //totalCostMatrix = new ArrayMatrix(double.PositiveInfinity, s1Frames.Count, s2Frames.Count);
-            //cellCostMatrix = new ArrayMatrix(double.PositiveInfinity, s1Frames.Count, s2Frames.Count);
-            //totalCostMatrix = new PatchMatrix(double.PositiveInfinity, 100);
-            //cellCostMatrix = new PatchMatrix(double.PositiveInfinity, 100);
-            totalCostMatrix = new DiagonalArrayMatrix(c + MAX_RUN_COUNT * c, double.PositiveInfinity);
-            cellCostMatrix = new DiagonalArrayMatrix(c + MAX_RUN_COUNT * c, double.PositiveInfinity);
+            totalCostMatrix = new PatchMatrix(double.PositiveInfinity, 100);
+            cellCostMatrix = new PatchMatrix(double.PositiveInfinity, 100);
 
-            totalCostMatrix[0, 0] = 0;
-            cellCostMatrix[0, 0] = 0;
-            // init square matrix
-            for (int x = 0; x < c; x++) {
-                for (int y = 0; y < c; y++) {
-                    double cellCost = CalculateCost(s1Frames[x], s2Frames[y]);
-                    if (x == 0 && y == 0) {
-                        totalCostMatrix[x, y] = cellCost;
-                    }
-                    else if (x == 0) {
-                        totalCostMatrix[x, y] = totalCostMatrix[x, y - 1] + cellCost;
-                    }
-                    else if (y == 0) {
-                        totalCostMatrix[x, y] = totalCostMatrix[x - 1, y] + cellCost;
-                    }
-                    else {
-                        totalCostMatrix[x, y] = Min(
-                                totalCostMatrix[x, y - 1] + cellCost,
-                                totalCostMatrix[x - 1, y] + cellCost,
-                                totalCostMatrix[x - 1, y - 1] + DIAG_COST_FACTOR * cellCost);
-                    }
-                    cellCostMatrix[x, y] = cellCost;
-                }
-            }
-
-            int i = c - 1;
-            int j = c - 1;
+            int i = 0, j = 0; // position of the "head" in each step
+            int minI, minJ; // position of the cell with the min path cost in each step
+            Direction r = Direction.None;
             Direction previous = Direction.None;
-            int maxRunCount = 0;
-
+            int runCount = 0;
             pathLengthRow = new int[c + MAX_RUN_COUNT];
             pathLengthCol = new int[c + MAX_RUN_COUNT];
             int[] pathLengthRowPrev = new int[c + MAX_RUN_COUNT];
             int[] pathLengthColPrev = new int[c + MAX_RUN_COUNT];
-
-            // init path lengths
-            for (int x = 0; x < c; x++) {
-                pathLengthRow[x] = GetPathLength(x, j);
-            }
-            for (int y = 0; y < c; y++) {
-                pathLengthCol[y] = GetPathLength(i, y);
-            }
-
-            progressReporter.Finish();
-            progressReporter = progressMonitor.BeginTask("OLTW aligning...", true);
             int totalFrames = s1Frames.Count + s2Frames.Count;
 
+            progressReporter = progressMonitor.BeginTask("OLTW aligning...", true);
+
+            // init
+            totalCostMatrix[0, 0] = cellCostMatrix[0, 0] = CalculateCost(s1Frames[0], s2Frames[0]);
             FireOltwInit(c, cellCostMatrix, totalCostMatrix);
 
-            int row = 0, col = 0, both = 0;
             while (i < s1Frames.Count - 1 || j < s2Frames.Count - 1) {
-                // calculate temp. min cost path
-                int xI = i;
-                double xV = double.PositiveInfinity;
-                for (int x = i - c + 1; x <= i; x++) {
-                    double pC = totalCostMatrix[x, j] / pathLengthRow[x % pathLengthRow.Length];
-                    if (pC <= xV) {
-                        xV = pC;
-                        xI = x;
-                    }
-                }
-
-                int yI = j;
-                double yV = double.PositiveInfinity;
-                for (int y = j - c + 1; y <= j; y++) {
-                    double pC = totalCostMatrix[i, y] / pathLengthCol[y % pathLengthRow.Length];
-                    if (pC <= yV) {
-                        yV = pC;
-                        yI = y;
-                    }
-                }
-
-                int minI, minJ;
-
-                Direction r = Direction.None;
-                if (xI == i && yI == j) {
-                    // min path is in the corner
+                if (i < c) { // build initial square matrix
                     r = Direction.Both;
                     minI = i;
                     minJ = j;
-                    both++;
                 }
-                else if (xV < yV) {
-                    // min path was found in a row
-                    r = Direction.Row;
-                    minI = xI;
-                    minJ = j;
-                    row++;
-                }
-                else {
-                    // min path is in the column
-                    r = Direction.Column;
-                    minI = i;
-                    minJ = yI;
-                    col++;
+                else { // calculate temp. min cost path
+                    int xI = i;
+                    double xV = double.PositiveInfinity;
+                    for (int x = i - c + 1; x <= i; x++) {
+                        double pC = totalCostMatrix[x, j] / pathLengthRow[x % pathLengthRow.Length];
+                        if (pC <= xV) {
+                            xV = pC;
+                            xI = x;
+                        }
+                    }
+
+                    int yI = j;
+                    double yV = double.PositiveInfinity;
+                    for (int y = j - c + 1; y <= j; y++) {
+                        double pC = totalCostMatrix[i, y] / pathLengthCol[y % pathLengthRow.Length];
+                        if (pC <= yV) {
+                            yV = pC;
+                            yI = y;
+                        }
+                    }
+
+                    if (xI == i && yI == j) {
+                        // min path is in the corner
+                        r = Direction.Both;
+                        minI = i;
+                        minJ = j;
+                    }
+                    else if (xV < yV) {
+                        // min path was found in a row
+                        r = Direction.Row;
+                        minI = xI;
+                        minJ = j;
+                    }
+                    else {
+                        // min path is in the column
+                        r = Direction.Column;
+                        minI = i;
+                        minJ = yI;
+                    }
                 }
 
                 FireOltwProgress(i, j, minI, minJ, false);
 
                 if (r == previous) {
-                    maxRunCount++;
+                    runCount++;
                 }
                 if (r == Direction.Both) {
-                    maxRunCount = 0;
+                    runCount = 0;
                 }
-                else if (maxRunCount >= MAX_RUN_COUNT) {
+                else if (runCount >= MAX_RUN_COUNT) {
                     if (r == Direction.Row) {
                         r = Direction.Column;
                     }
                     else if (r == Direction.Column) {
                         r = Direction.Row;
                     }
-                    maxRunCount = 0;
+                    runCount = 0;
                 }
 
                 // add row
                 if (j < s2Frames.Count - 1 && (r == Direction.Row || r == Direction.Both)) {
                     CommonUtil.Swap<int[]>(ref pathLengthRow, ref pathLengthRowPrev);
                     j++;
-                    int start = i - c + 1;
-                    for (int x = start; x <= i; x++) {
+                    for (int x = Math.Max(i - c + 1, 0); x <= i; x++) {
                         double cellCost = CalculateCost(s1Frames[x], s2Frames[j]);
                         if (x == 0) {
                             totalCostMatrix[x, j] = totalCostMatrix[x, j - 1] + cellCost;
-                            pathLengthRow[x % pathLengthRow.Length] = pathLengthRowPrev[x % pathLengthRowPrev.Length] + 1;
                         }
                         else {
-                            Direction direction;
                             totalCostMatrix[x, j] = Min(
-                                totalCostMatrix[x - 1, j - 1],
-                                    totalCostMatrix[x - 1, j],
-                                    totalCostMatrix[x, j - 1],
-                                    out direction);
-                            totalCostMatrix[x, j] += (direction == Direction.Both) ? DIAG_COST_FACTOR * cellCost : cellCost;
-                            if (direction == Direction.Row) pathLengthRow[x % pathLengthRow.Length] = pathLengthRow[(x - 1) % pathLengthRow.Length] + 1;
-                            else if (direction == Direction.Column) pathLengthRow[x % pathLengthRow.Length] = pathLengthRowPrev[x % pathLengthRowPrev.Length] + 1;
-                            else if (direction == Direction.Both) pathLengthRow[x % pathLengthRow.Length] = pathLengthRowPrev[(x - 1) % pathLengthRowPrev.Length] + DIAG_LENGTH_FACTOR;
+                                totalCostMatrix[x - 1, j - 1] + DIAG_COST_FACTOR * cellCost,
+                                totalCostMatrix[x - 1, j] + cellCost,
+                                totalCostMatrix[x, j - 1] + cellCost);
                         }
                         cellCostMatrix[x, j] = cellCost;
+                        pathLengthRow[x % pathLengthRow.Length] = GetPathLength(x, j);
                     }
                     pathLengthCol[j % pathLengthCol.Length] = pathLengthRow[i % pathLengthRow.Length];
                 }
+
                 // add column
                 if (i < s1Frames.Count - 1 && (r == Direction.Column || r == Direction.Both)) {
                     CommonUtil.Swap<int[]>(ref pathLengthCol, ref pathLengthColPrev);
                     i++;
-                    int start = j - c + 1;
-                    for (int y = start; y <= j; y++) {
+                    for (int y = Math.Max(j - c + 1, 0); y <= j; y++) {
                         double cellCost = CalculateCost(s1Frames[i], s2Frames[y]);
                         if (y == 0) {
                             totalCostMatrix[i, y] = totalCostMatrix[i - 1, y] + cellCost;
                         }
                         else {
-                            Direction direction;
                             totalCostMatrix[i, y] = Min(
-                                totalCostMatrix[i - 1, y - 1],
-                                    totalCostMatrix[i - 1, y],
-                                    totalCostMatrix[i, y - 1],
-                                    out direction);
-                            totalCostMatrix[i, y] += (direction == Direction.Both) ? DIAG_COST_FACTOR * cellCost : cellCost;
-                            if (direction == Direction.Column) pathLengthCol[y % pathLengthCol.Length] = pathLengthCol[(y - 1) % pathLengthCol.Length] + 1;
-                            else if (direction == Direction.Row) pathLengthCol[y % pathLengthCol.Length] = pathLengthColPrev[y % pathLengthColPrev.Length] + 1;
-                            else if (direction == Direction.Both) pathLengthCol[y % pathLengthCol.Length] = pathLengthColPrev[(y - 1) % pathLengthColPrev.Length] + DIAG_LENGTH_FACTOR;
+                                totalCostMatrix[i - 1, y - 1] + DIAG_COST_FACTOR * cellCost, 
+                                totalCostMatrix[i - 1, y] + cellCost,
+                                totalCostMatrix[i, y - 1] + cellCost);
                         }
                         cellCostMatrix[i, y] = cellCost;
+                        pathLengthCol[y % pathLengthCol.Length] = GetPathLength(i, y);
                     }
                     pathLengthRow[i % pathLengthRow.Length] = pathLengthCol[j % pathLengthCol.Length];
                 }
@@ -274,10 +202,42 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             }
             FireOltwProgress(i, j, i, j, true);
             progressReporter.Finish();
-            Debug.WriteLine("OLTW row {0} col {1} both {2}", row, col, both);
 
             List<Pair> path = OptimalWarpingPath(totalCostMatrix);
             path.Reverse();
+
+            // average multiple continuous mappings from one sequence to one time point of the other sequence
+            List<Pair> pairBuffer = new List<Pair>();
+            List<Pair> cleanedPath = new List<Pair>();
+            foreach (Pair p in path) {
+                if (pairBuffer.Count == 0) {
+                    pairBuffer.Add(p);
+                }
+                else {
+                    if (p.i1 == pairBuffer[pairBuffer.Count - 1].i1 && p.i2 == pairBuffer[pairBuffer.Count - 1].i2 + 1) { // pairs build a horizontal line
+                        pairBuffer.Add(p);
+                    }
+                    else if (p.i2 == pairBuffer[pairBuffer.Count - 1].i2 && p.i1 == pairBuffer[pairBuffer.Count - 1].i1 + 1) { // pairs build a vertical line
+                        pairBuffer.Add(p);
+                    }
+                    else { // direction change or vertical step
+                        if (pairBuffer.Count == 1) {
+                            cleanedPath.Add(pairBuffer[0]);
+                        }
+                        else if (pairBuffer.Count > 1) {
+                            // averate the line to a single mapping point
+                            cleanedPath.Add(new Pair((int)pairBuffer.Average(bp => bp.i1), (int)pairBuffer.Average(bp => bp.i2)));
+                        }
+                        pairBuffer.Clear();
+                        pairBuffer.Add(p);
+                    }
+                }
+            }
+            cleanedPath.AddRange(pairBuffer);
+            path = cleanedPath;
+
+            // replace adjacent horizontal/vertical path segments with diagonal segments
+            // HOW??
 
             List<Tuple<TimeSpan, TimeSpan>> pathTimes = new List<Tuple<TimeSpan, TimeSpan>>();
             foreach (Pair pair in path) {
@@ -293,34 +253,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         }
 
         private int GetPathLength(int i, int j) {
-            int length = 1;
-            bool diagonal;
-            while (i > 0 || j > 0) {
-                diagonal = false;
-                if (i == 0) {
-                    j--;
-                }
-                else if (j == 0) {
-                    i--;
-                }
-                else {
-                    double min = Min(totalCostMatrix[i - 1, j], totalCostMatrix[i, j - 1], totalCostMatrix[i - 1, j - 1]);
-                    if (min == totalCostMatrix[i - 1, j - 1]) {
-                        i--;
-                        j--;
-                        diagonal = true;
-                    }
-                    else if (totalCostMatrix[i - 1, j] == min) {
-                        i--;
-                    }
-                    else {
-                        j--;
-                    }
-                }
-                if (diagonal) length += DIAG_LENGTH_FACTOR;
-                else length++;
-            }
-            return length;
+            return 1 + i + j;
         }
 
         private void DebugPrintMatrix(IMatrix matrix, int size) {
