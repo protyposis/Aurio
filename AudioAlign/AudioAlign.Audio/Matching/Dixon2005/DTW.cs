@@ -155,17 +155,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             List<Pair> path = OptimalWarpingPath(totalCostMatrix);
             path.Reverse();
 
-            List<Tuple<TimeSpan, TimeSpan>> pathTimes = new List<Tuple<TimeSpan, TimeSpan>>();
-            foreach (Pair pair in path) {
-                Tuple<TimeSpan, TimeSpan> timePair = new Tuple<TimeSpan, TimeSpan>(
-                    PositionToTimeSpan(pair.i1 * FrameReader.WINDOW_HOP_SIZE),
-                    PositionToTimeSpan(pair.i2 * FrameReader.WINDOW_HOP_SIZE));
-                if (timePair.Item1 >= TimeSpan.Zero && timePair.Item2 >= TimeSpan.Zero) {
-                    pathTimes.Add(timePair);
-                }
-            }
-
-            return pathTimes;
+            return WarpingPathTimes(path, true);
         }
 
         private void ReadFrames(int x, int y) {
@@ -263,12 +253,64 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return (90d * d / sum * weight); // default scale = 90
         }
 
-        public static TimeSpan PositionToTimeSpan(long position) {
+        protected static TimeSpan PositionToTimeSpan(long position) {
             return new TimeSpan((long)Math.Round((double)position / FrameReader.SAMPLERATE * TimeUtil.SECS_TO_TICKS));
         }
 
-        public static TimeSpan IndexToTimeSpan(int index) {
+        protected static TimeSpan IndexToTimeSpan(int index) {
             return PositionToTimeSpan(index * FrameReader.WINDOW_HOP_SIZE);
+        }
+
+        protected static List<Tuple<TimeSpan, TimeSpan>> WarpingPathTimes(List<Pair> path, bool optimize) {
+            if (optimize) {
+                // average multiple continuous mappings from one sequence to one time point of the other sequence
+                List<Pair> pairBuffer = new List<Pair>();
+                List<Pair> cleanedPath = new List<Pair>();
+                foreach (Pair p in path) {
+                    if (pairBuffer.Count == 0) {
+                        pairBuffer.Add(p);
+                    }
+                    else {
+                        if (p.i1 == pairBuffer[pairBuffer.Count - 1].i1 && p.i2 == pairBuffer[pairBuffer.Count - 1].i2 + 1) {
+                            // pairs build a horizontal line
+                            pairBuffer.Add(p);
+                        }
+                        else if (p.i2 == pairBuffer[pairBuffer.Count - 1].i2 && p.i1 == pairBuffer[pairBuffer.Count - 1].i1 + 1) {
+                            // pairs build a vertical line
+                            pairBuffer.Add(p);
+                        }
+                        else {
+                            // direction change or vertical step
+                            if (pairBuffer.Count == 1) {
+                                cleanedPath.Add(pairBuffer[0]);
+                            }
+                            else if (pairBuffer.Count > 1) {
+                                // averate the line to a single mapping point
+                                cleanedPath.Add(new Pair((int)pairBuffer.Average(bp => bp.i1), (int)pairBuffer.Average(bp => bp.i2)));
+                            }
+                            pairBuffer.Clear();
+                            pairBuffer.Add(p);
+                        }
+                    }
+                }
+                cleanedPath.AddRange(pairBuffer);
+                path = cleanedPath;
+
+                // replace adjacent horizontal/vertical path segments with diagonal segments
+                // HOW??
+            }
+
+            List<Tuple<TimeSpan, TimeSpan>> pathTimes = new List<Tuple<TimeSpan, TimeSpan>>();
+            foreach (Pair pair in path) {
+                Tuple<TimeSpan, TimeSpan> timePair = new Tuple<TimeSpan, TimeSpan>(
+                    PositionToTimeSpan(pair.i1 * FrameReader.WINDOW_HOP_SIZE),
+                    PositionToTimeSpan(pair.i2 * FrameReader.WINDOW_HOP_SIZE));
+                if (timePair.Item1 >= TimeSpan.Zero && timePair.Item2 >= TimeSpan.Zero) {
+                    pathTimes.Add(timePair);
+                }
+            }
+
+            return pathTimes;
         }
 
         protected void FireOltwInit(int windowSize, IMatrix cellCostMatrix, IMatrix totalCostMatrix) {
