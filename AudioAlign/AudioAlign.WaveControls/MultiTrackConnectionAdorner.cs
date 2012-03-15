@@ -27,9 +27,11 @@ namespace AudioAlign.WaveControls {
                 matches.CollectionChanged += Matches_CollectionChanged;
 
                 ColorGradient gradient = new ColorGradient(0, 1);
-                gradient.AddStop(Colors.Red, 0);
-                gradient.AddStop(Colors.Yellow, 0.5f);
-                gradient.AddStop(Colors.Green, 1);
+                gradient.AddStop(Colors.DarkRed, 0);
+                gradient.AddStop(Colors.Red, 0.5f);
+                gradient.AddStop(Colors.Yellow, 0.65f);
+                gradient.AddStop(Colors.Green, 0.8f);
+                gradient.AddStop(Colors.DarkGreen, 1);
                 colors = gradient.GetGradient(1024).ToArray();
         }
 
@@ -70,7 +72,7 @@ namespace AudioAlign.WaveControls {
                 if (waveView1 != waveView2) {
                     Color c = colors[(int)(match.Similarity * (colors.Length - 1))];
                     drawingContext.DrawLine(new Pen(new SolidColorBrush(c), 3) {
-                        DashStyle = DashStyles.Dash,
+                        DashStyle = DashStyles.Solid,
                         EndLineCap = PenLineCap.Triangle,
                         StartLineCap = PenLineCap.Triangle
                     }, p1, p2);
