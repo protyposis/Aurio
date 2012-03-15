@@ -52,7 +52,7 @@ namespace AudioAlign.Audio.Project {
                 xml.WriteStartElement("track");
 
                 xml.WriteStartAttribute("file");
-                xml.WriteString(track.FileInfo.FullName);
+                xml.WriteString(GetFullOrRelativeFileName(targetFile, track.FileInfo));
                 xml.WriteEndAttribute();
 
                 xml.WriteStartAttribute("name");
@@ -171,7 +171,7 @@ namespace AudioAlign.Audio.Project {
                     while (xml.IsStartElement("track")) {
                         xml.MoveToAttribute("file");
                         string file = xml.Value;
-                        AudioTrack track = new AudioTrack(new FileInfo(file));
+                        AudioTrack track = new AudioTrack(GetFileInfo(sourceFile, file));
 
                         xml.MoveToAttribute("name");
                         track.Name = xml.Value;
@@ -377,7 +377,7 @@ namespace AudioAlign.Audio.Project {
                 sb.Append("TRUE; ");
                 sb.Append("FALSE; ");
                 sb.AppendFormat("{0}; ", track.MediaType.ToString().ToUpperInvariant());
-                sb.AppendFormat(ci, "\"{0}\"; ", track.FileInfo.FullName);
+                sb.AppendFormat(ci, "\"{0}\"; ", GetFullOrRelativeFileName(targetFile, track.FileInfo));
                 sb.AppendFormat(ci, "{0}; ", 0);
                 sb.AppendFormat(ci, "{0:0.0000}; ", 0);
                 sb.AppendFormat(ci, "{0:0.0000}; ", track.Length.TotalMilliseconds);
@@ -404,6 +404,22 @@ namespace AudioAlign.Audio.Project {
             writer.Write(sb.ToString());
             writer.Flush();
             writer.Close();
+        }
+
+        private static string GetFullOrRelativeFileName(FileInfo referenceFile, FileInfo targetFile) {
+            Uri uri1 = new Uri(targetFile.FullName);
+            Uri uri2 = new Uri(referenceFile.DirectoryName + Path.DirectorySeparatorChar);
+            return Uri.UnescapeDataString(uri2.MakeRelativeUri(uri1).ToString())
+                .Replace('/', Path.DirectorySeparatorChar);
+        }
+
+        private static FileInfo GetFileInfo(FileInfo referenceFile, string fullOrRelativeFileName) {
+            try {
+                // try it as relative file
+                return new FileInfo(referenceFile.DirectoryName + Path.DirectorySeparatorChar + fullOrRelativeFileName);
+            } catch (FileNotFoundException) {}
+            // if the relative try fails, try as absolute path - if it still fails, the file doesn't exist
+            return new FileInfo(fullOrRelativeFileName);
         }
     }
 }
