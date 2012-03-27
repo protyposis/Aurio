@@ -417,7 +417,7 @@ namespace AudioAlign.Audio.Project {
             try {
                 // try it as relative file
                 return new FileInfo(referenceFile.DirectoryName + Path.DirectorySeparatorChar + fullOrRelativeFileName);
-            } catch (FileNotFoundException) {}
+            } catch (Exception) {}
             // if the relative try fails, try as absolute path - if it still fails, the file doesn't exist
             return new FileInfo(fullOrRelativeFileName);
         }
