@@ -113,7 +113,7 @@ namespace AudioAlign.Audio.Matching {
             return Calculate(x, y, length, null, out maxVal);
         }
 
-        public static TimeSpan Calculate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor) {
+        public static TimeSpan Calculate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor, out double maxVal) {
             if (i1.Length != i2.Length) {
                 throw new ArgumentException("interval lengths do not match");
             }
@@ -141,7 +141,6 @@ namespace AudioAlign.Audio.Matching {
             StreamUtil.ForceReadIntervalSamples(s1, i1, x);
             StreamUtil.ForceReadIntervalSamples(s2, i2, y);
 
-            double maxVal;
             int indexOffset = Calculate(x, y, progress, out maxVal);
 
             TimeSpan offset = new TimeSpan((long)(indexOffset / (float)sampleRate * TimeUtil.SECS_TO_TICKS));
@@ -152,7 +151,8 @@ namespace AudioAlign.Audio.Matching {
 
         public static void CalculateAsync(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor) {
             Task.Factory.StartNew(() => {
-                Calculate(s1, i1, s2, i2, progressMonitor);
+                double maxValTemp;
+                Calculate(s1, i1, s2, i2, progressMonitor, out maxValTemp);
             });
         }
 
@@ -177,10 +177,11 @@ namespace AudioAlign.Audio.Matching {
                 iT1 += adjust;
                 iT2 += adjust;
 
+                double maxValTemp;
                 TimeSpan offset = Calculate(
                     match.Track1.CreateAudioStream(), iT1,
                     match.Track2.CreateAudioStream(), iT2,
-                    progressMonitor);
+                    progressMonitor, out maxValTemp);
                 Debug.WriteLine("CC: " + match + ": " + offset + " (" + sw.Elapsed + ")");
                 match.Track2Time += offset;
             }
