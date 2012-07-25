@@ -77,7 +77,7 @@ namespace AudioAlign.Audio {
             peakStoreQueue.Add(peakStoreFillAction);
 
             // create consumer/worker threads
-            for (; peakStoreQueueThreads < Environment.ProcessorCount; peakStoreQueueThreads++) {
+            for (; peakStoreQueueThreads < Math.Min(2, Environment.ProcessorCount); peakStoreQueueThreads++) {
                 Task.Factory.StartNew(() => {
                     // process peakstore actions as long as the queue is not empty
                     Debug.WriteLine("PeakStoreQueue thread started");

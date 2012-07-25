@@ -14,6 +14,8 @@ using System.Windows.Input;
 using AudioAlign.Audio.Matching;
 using System.Collections.ObjectModel;
 using System.Windows.Media.Imaging;
+using System.Collections;
+using System.Windows.Threading;
 
 namespace AudioAlign.WaveControls {
     [TemplatePart(Name = "PART_TimeScale", Type = typeof(TimeScale))]
@@ -32,10 +34,12 @@ namespace AudioAlign.WaveControls {
                 });
         }
 
+        private ObservableCollection<AudioTrack> tracks;
         private MultiTrackListBox multiTrackListBox;
         MultiTrackConnectionAdorner multiTrackConnectionAdorner;
 
         public MultiTrackViewer() {
+            tracks = new ObservableCollection<AudioTrack>();
             this.Loaded += new RoutedEventHandler(MultiTrackViewer_Loaded);
         }
 
@@ -44,6 +48,7 @@ namespace AudioAlign.WaveControls {
             AddHandler(CaretOverlay.IntervalSelectedEvent, new CaretOverlay.IntervalEventHandler(MultiTrackViewer_CaretIntervalSelected));
             AddHandler(WaveView.TrackOffsetChangedEvent, new RoutedEventHandler(MultiTrackViewer_WaveViewTrackOffsetChanged));
             multiTrackListBox = (MultiTrackListBox)GetTemplateChild("PART_TrackListBox");
+            multiTrackListBox.ItemsSource = tracks;
 
             StackPanel itemContainer = UIUtil.FindVisualChild<StackPanel>(multiTrackListBox);
             multiTrackConnectionAdorner = new MultiTrackConnectionAdorner(itemContainer, multiTrackListBox);
@@ -71,8 +76,8 @@ namespace AudioAlign.WaveControls {
             set { SetValue(VirtualCaretOffsetProperty, value); }
         }
 
-        public ItemCollection Items {
-            get { return multiTrackListBox.Items; }
+        public ObservableCollection<AudioTrack> ItemsSource {
+            get { return tracks; }
         }
 
         public object SelectedItem {
@@ -100,7 +105,10 @@ namespace AudioAlign.WaveControls {
 
         public void RefreshAdornerLayer() {
             if (multiTrackConnectionAdorner != null) {
-                multiTrackConnectionAdorner.InvalidateVisual();
+                // HACK DispatcherPriority is a workaround - without the Dispatcher it sometimes wouldn't refresh
+                Dispatcher.BeginInvoke((Action)delegate {
+                    multiTrackConnectionAdorner.InvalidateVisual();
+                }, DispatcherPriority.Render);
             }
         }
 
@@ -127,7 +135,7 @@ namespace AudioAlign.WaveControls {
 
         public void CopyToClipboard(bool fullHeight) {
             ScrollViewer sv = UIUtil.FindVisualChild<ScrollViewer>(multiTrackListBox);
-            sv.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+            //sv.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
             multiTrackListBox.ControlsVisibility = Visibility.Hidden;
 
             Size size = fullHeight ? new Size(multiTrackListBox.ActualWidth + sv.ScrollableWidth, multiTrackListBox.ActualHeight + sv.ScrollableHeight) : multiTrackListBox.RenderSize;

@@ -45,7 +45,8 @@ namespace AudioAlign.Audio.Matching.Graph {
         /// <summary>
         /// Returns true if there's a path between the given vertices, else false.
         /// </summary>
-        public bool IsConnected(TVertex v1, TVertex v2) {
+        /// <remarks>This function VERY SLOW, try to avoid using it</remarks>
+        public bool IsConnectedBetween(TVertex v1, TVertex v2) {
             if (!vertices.Contains(v1) || !vertices.Contains(v2)) {
                 throw new Exception("the given vertices aren't part of the graph");
             }
@@ -78,17 +79,25 @@ namespace AudioAlign.Audio.Matching.Graph {
         /// <summary>
         /// Return true if the graph consists of disconnected components, else false.
         /// </summary>
+        /// <remarks>This call is VERY SLOW, use !IsConnected instead</remarks>
         public bool IsDisconnected {
             get {
                 for (int i = 0; i < vertices.Count; i++) {
                     for (int j = i + 1; j < vertices.Count; j++) {
-                        if (!IsConnected(vertices[i], vertices[j])) {
+                        if (!IsConnectedBetween(vertices[i], vertices[j])) {
                             return true;
                         }
                     }
                 }
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Returns true if the graph is connected (if there's a connection between all vertex pairs), else false.
+        /// </summary>
+        public bool isConnected {
+            get { return GetConnectedComponents().Count == 1; }
         }
 
         /// <summary>
@@ -141,7 +150,7 @@ namespace AudioAlign.Audio.Matching.Graph {
         }
 
         public UndirectedGraph<TVertex, TWeight> GetMinimalSpanningTree() {
-            if (IsDisconnected) {
+            if (!isConnected) {
                 throw new Exception("cannot determine the MST in a graph that isn't fully connected");
             }
 

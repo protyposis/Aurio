@@ -328,15 +328,17 @@ namespace AudioAlign.Audio.Matching {
             }
 
             List<UndirectedGraph<AudioTrack, double>> trackGraphComponents = trackGraph.GetConnectedComponents();
-            Debug.WriteLine("{0} disconnected components", trackGraphComponents.Count);
+            Debug.WriteLine("{0} connected components", trackGraphComponents.Count);
 
             List<MatchGroup> trackGroups = new List<MatchGroup>();
             foreach (UndirectedGraph<AudioTrack, double> component in trackGraphComponents) {
                 List<MatchPair> connectedTrackPairs = new List<MatchPair>();
 
+                Debug.WriteLine("determining connected track pairs...");
                 foreach (Edge<AudioTrack, double> edge in component.GetMinimalSpanningTree().Edges) {
                     connectedTrackPairs.Add((MatchPair)edge.Tag);
                 }
+                Debug.WriteLine("finished - {0} pairs", connectedTrackPairs.Count);
 
                 foreach (MatchPair filteredTrackPair in connectedTrackPairs) {
                     Debug.WriteLine("TrackPair {0} <-> {1}: {2} matches, similarity = {3}",

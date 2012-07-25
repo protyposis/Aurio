@@ -12,6 +12,12 @@ namespace AudioAlign.Audio.Matching {
         public TimeSpan Track2Time { get; set; }
         public float Similarity { get; set; }
 
+        public TimeSpan Offset {
+            get {
+                return Track1Time - Track2Time;
+            }
+        }
+
         public override string ToString() {
             return "Match {" + Track1.Name + "@" + Track1Time + "<->" + Track2.Name + "@" + Track2Time + ":" + Similarity + "}";
         }

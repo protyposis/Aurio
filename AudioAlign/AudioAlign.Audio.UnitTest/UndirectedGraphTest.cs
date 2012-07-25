@@ -105,9 +105,9 @@ namespace AudioAlign.Audio.UnitTest
             g.Add(new Edge<object, int>(o1, o2, 0));
             g.Add(new Edge<object, int>(o3, o2, 0));
 
-            Assert.IsTrue(g.IsConnected(o1, o2));
-            Assert.IsTrue(g.IsConnected(o1, o3));
-            Assert.IsTrue(g.IsConnected(o2, o3));
+            Assert.IsTrue(g.IsConnectedBetween(o1, o2));
+            Assert.IsTrue(g.IsConnectedBetween(o1, o3));
+            Assert.IsTrue(g.IsConnectedBetween(o2, o3));
             Assert.IsFalse(g.IsDisconnected);
         }
 
@@ -130,7 +130,7 @@ namespace AudioAlign.Audio.UnitTest
             g.Add(new Edge<object, int>(c2o3, c2o2, 0));
 
             Assert.IsTrue(g.IsDisconnected);
-            Assert.IsFalse(g.IsConnected(c1o1, c2o1));
+            Assert.IsFalse(g.IsConnectedBetween(c1o1, c2o1));
         }
 
         [TestMethod()]

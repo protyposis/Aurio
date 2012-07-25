@@ -94,6 +94,17 @@ namespace AudioAlign.Audio.Project {
             }
         }
 
+        public void Sort(IComparer<T> comparer) {
+            list.Sort(comparer);
+        }
+
+        public void Move(int oldIndex, int newIndex) {
+            var item = list[oldIndex];
+            list.RemoveAt(oldIndex);
+            if (newIndex > oldIndex) newIndex--;
+            list.Insert(newIndex, item);
+        }
+
         /// <summary>
         /// Gets the time at which the earliest track in the tracklist starts.
         /// </summary>

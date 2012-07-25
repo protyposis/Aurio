@@ -51,9 +51,13 @@ namespace AudioAlign.WaveControls {
         }
 
         protected override void OnRender(DrawingContext drawingContext) {
+            if (multiTrackListBox.ItemsSource == null || !multiTrackListBox.ItemsSource.GetEnumerator().MoveNext()) {
+                return;
+            }
+
             // NOTE the dictionary needs to be built every time because the ListBox.items.CollectionChanged event is inaccessible (protected)
             Dictionary<AudioTrack, WaveView> waveViewMappings = new Dictionary<AudioTrack, WaveView>();
-            foreach (AudioTrack audioTrack in multiTrackListBox.Items) {
+            foreach (AudioTrack audioTrack in multiTrackListBox.ItemsSource) {
                 ListBoxItem item = (ListBoxItem)multiTrackListBox.ItemContainerGenerator.ContainerFromItem(audioTrack);
                 ContentPresenter itemContentPresenter = UIUtil.FindVisualChild<ContentPresenter>(item);
                 DataTemplate itemDataTemplate = itemContentPresenter.ContentTemplate;
