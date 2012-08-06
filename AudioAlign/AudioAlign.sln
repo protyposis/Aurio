@@ -44,6 +44,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaveCutter", "WaveCutter\Wa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.FFTW", "AudioAlign.FFTW\AudioAlign.FFTW.csproj", "{880F644B-5370-47D6-A4B6-F98338073631}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicDetector", "MusicDetector\MusicDetector.csproj", "{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -191,6 +193,15 @@ Global
 		{880F644B-5370-47D6-A4B6-F98338073631}.Release|Any CPU.Build.0 = Release|Any CPU
 		{880F644B-5370-47D6-A4B6-F98338073631}.Release|x64.ActiveCfg = Release|Any CPU
 		{880F644B-5370-47D6-A4B6-F98338073631}.Release|x86.ActiveCfg = Release|Any CPU
+		{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}.Debug|x64.ActiveCfg = Debug|x64
+		{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}.Debug|x64.Build.0 = Debug|x64
+		{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}.Debug|x86.ActiveCfg = Debug|x86
+		{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}.Debug|x86.Build.0 = Debug|x86
+		{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}.Release|Any CPU.ActiveCfg = Release|x86
+		{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}.Release|x64.ActiveCfg = Release|x86
+		{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}.Release|x86.ActiveCfg = Release|x86
+		{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -10,7 +10,7 @@ namespace AudioAlign.Audio.Matching {
     /// <summary>
     /// Reads consecutive windows from a stream, specified by the window size and hop size.
     /// </summary>
-    class StreamWindower {
+    public class StreamWindower {
 
         private readonly IAudioStream stream;
         private readonly int windowSize;
@@ -85,7 +85,7 @@ namespace AudioAlign.Audio.Matching {
         /// <summary>
         /// Gets the total number of windows/frames that can be read.
         /// </summary>
-        public int WindowCount {
+        public virtual int WindowCount {
             get { return (int)(((stream.Length / stream.Properties.SampleBlockByteSize) - WindowSize) / HopSize) + 1; }
         }
 

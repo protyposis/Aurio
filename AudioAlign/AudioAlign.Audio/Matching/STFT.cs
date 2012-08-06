@@ -8,7 +8,7 @@ namespace AudioAlign.Audio.Matching {
     /// <summary>
     /// Short-Time Fourier Tranformation
     /// </summary>
-    class STFT: StreamWindower {
+    public class STFT: StreamWindower {
 
         private WindowFunction windowFunction;
         private float[] frameBuffer;
