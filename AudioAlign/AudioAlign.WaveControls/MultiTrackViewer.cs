@@ -16,6 +16,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Media.Imaging;
 using System.Collections;
 using System.Windows.Threading;
+using System.Windows.Controls.Primitives;
 
 namespace AudioAlign.WaveControls {
     [TemplatePart(Name = "PART_TimeScale", Type = typeof(TimeScale))]
@@ -49,6 +50,11 @@ namespace AudioAlign.WaveControls {
             AddHandler(WaveView.TrackOffsetChangedEvent, new RoutedEventHandler(MultiTrackViewer_WaveViewTrackOffsetChanged));
             multiTrackListBox = (MultiTrackListBox)GetTemplateChild("PART_TrackListBox");
             multiTrackListBox.ItemsSource = tracks;
+
+            // HACK refresh adorner layer after every scroll event to prevent mispositioned match indicators (actually it would suffice at a "ScrollFinished" event, but that doesn't exist)
+            UIUtil.FindVisualChild<ScrollBar>(multiTrackListBox).Scroll += delegate(object sender2, System.Windows.Controls.Primitives.ScrollEventArgs e2) {
+                RefreshAdornerLayer();
+            };
 
             StackPanel itemContainer = UIUtil.FindVisualChild<StackPanel>(multiTrackListBox);
             multiTrackConnectionAdorner = new MultiTrackConnectionAdorner(itemContainer, multiTrackListBox);

@@ -5,8 +5,10 @@ using System.Text;
 using System.Windows.Controls;
 using System.Windows;
 using System.Diagnostics;
+using System.Windows.Controls.Primitives;
 
 namespace AudioAlign.WaveControls {
+    [TemplatePart(Name = "PART_VerticalScrollBar", Type = typeof(ScrollBar))]
     class MultiTrackListBox : ListBox {
         
         public static readonly DependencyProperty VirtualViewportWidthProperty;
