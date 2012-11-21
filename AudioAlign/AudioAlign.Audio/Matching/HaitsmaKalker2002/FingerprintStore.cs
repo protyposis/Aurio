@@ -54,7 +54,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             get { return store; }
         }
 
-        public void Add(AudioTrack audioTrack, SubFingerprint subFingerprint, TimeSpan timestamp, bool variation) {
+        public void Add(AudioTrack audioTrack, SubFingerprint subFingerprint, int index, bool variation) {
             lock (this) {
                 if (!variation) {
                     // store the sub-fingerprint in the sequential list of the audio track
@@ -78,7 +78,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 if (!lookupTable.ContainsKey(subFingerprint)) {
                     lookupTable.Add(subFingerprint, new List<SubFingerprintLookupEntry>());
                 }
-                lookupTable[subFingerprint].Add(new SubFingerprintLookupEntry(audioTrack, store[audioTrack].Count, timestamp));
+                lookupTable[subFingerprint].Add(new SubFingerprintLookupEntry(audioTrack, index));
             }
         }
 
@@ -148,9 +148,9 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                             matches.Add(new Match {
                                 Similarity = 1 - bitErrorRate,
                                 Track1 = entry1.AudioTrack,
-                                Track1Time = entry1.Timestamp,
+                                Track1Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, entry1.Index),
                                 Track2 = entry2.AudioTrack,
-                                Track2Time = entry2.Timestamp
+                                Track2Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, entry2.Index)
                             });
                         }
                     }
