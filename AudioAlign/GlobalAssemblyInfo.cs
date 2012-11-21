@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyProduct("AudioAlign")]
 [assembly: AssemblyCompany("Mario Guggenberger")]
-[assembly: AssemblyCopyright("Copyright © 2011 Mario Guggenberger")]
+[assembly: AssemblyCopyright("Copyright © 2011-2012 Mario Guggenberger")]
 //[assembly: AssemblyTrademark("")]
 
 #if DEBUG

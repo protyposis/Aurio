@@ -5,6 +5,7 @@ using System.Text;
 using AudioAlign.Audio.Project;
 using AudioAlign.Audio.Streams;
 using AudioAlign.Audio;
+using System.IO;
 
 namespace MusicDetector.ContinuousFrequencyActivation {
     /// <summary>
@@ -26,15 +27,17 @@ namespace MusicDetector.ContinuousFrequencyActivation {
         private AudioTrack audioTrack;
         private readonly float threshold;
         private readonly bool smoothing;
+        private readonly bool writeLog;
 
-        public CFA(AudioTrack audioTrack, float threshold, bool smoothing) {
+        public CFA(AudioTrack audioTrack, float threshold, bool smoothing, bool writeLog) {
             this.audioTrack = audioTrack;
             this.threshold = threshold;
             this.smoothing = smoothing;
+            this.writeLog = writeLog;
         }
 
         public CFA(AudioTrack audioTrack)
-            : this(audioTrack, DEFAULT_THRESHOLD, true) {
+            : this(audioTrack, DEFAULT_THRESHOLD, true, false) {
             // nothing to do here
         }
 
@@ -96,11 +99,29 @@ namespace MusicDetector.ContinuousFrequencyActivation {
                 }
             }
 
-            Console.WriteLine("'" + audioTrack.FileInfo.FullName + "' contains " + ((int)(Math.Round((float)musicCount / count * 100))) + "% music");
+            float musicRatio = (float)musicCount / count;
+            float musicRatioSmoothed = -1f;
+            Console.WriteLine("'" + audioTrack.FileInfo.FullName + "' contains " + ((int)(Math.Round(musicRatio * 100))) + "% music");
 
             if (smoothing) {
                 musicCount = cfaLabels.Count<Label>(l => l == Label.MUSIC);
-                Console.WriteLine("smoothed: " + ((int)(Math.Round((float)musicCount / count * 100))) + "% music");
+                musicRatioSmoothed = (float)musicCount / count;
+                Console.WriteLine("smoothed: " + ((int)(Math.Round(musicRatioSmoothed * 100))) + "% music");
+            }
+
+            if (writeLog) {
+                FileInfo logFile = new FileInfo(audioTrack.FileInfo.FullName + ".music");
+                StreamWriter writer = logFile.CreateText();
+
+                writer.WriteLine(musicRatio + "; " + musicRatioSmoothed);
+                writer.WriteLine(threshold);
+
+                for (int i = 0; i < cfaValues.Length; i++) {
+                    writer.WriteLine("{0:0.00000}; {1}; \t{2}", cfaValues[i], cfaValues[i] > threshold ? Label.MUSIC : Label.NO_MUSIC, cfaLabels[i]);
+                }
+
+                writer.Flush();
+                writer.Close();
             }
 
             return 0;

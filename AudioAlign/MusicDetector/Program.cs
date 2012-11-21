@@ -30,14 +30,33 @@ namespace MusicDetector {
                 }
             }
 
+            FileInfo errorLogFileInfo = new FileInfo("error.log");
+            StreamWriter errorLogWriter = errorLogFileInfo.AppendText();
+
             foreach (var fi in scanQueue) {
-                if (fi.Exists) {
-                    new CFA(new AudioTrack(fi), 1.0f, true).Run();
+                try {
+                    if (fi.Exists && fi.Length > 0) {
+                        new CFA(new AudioTrack(fi), CFA.DEFAULT_THRESHOLD, true, true).Run();
+                    }
+                    else {
+                        throw new FileNotFoundException(String.Format("file '{0}' not existing or empty, skipping", fi.FullName));
+                    }
                 }
-                else {
-                    Console.WriteLine("file '{0}' does not exist, skip", fi.FullName);
+                catch (FileNotFoundException e) {
+                    Console.WriteLine(DateTime.Now + " " + e.Message);
+                    errorLogWriter.WriteLine(DateTime.Now + " " + e.Message);
+                }
+                catch (Exception e) {
+                    Console.WriteLine(DateTime.Now + " " + e.ToString());
+                    Console.WriteLine();
+
+                    errorLogWriter.WriteLine(DateTime.Now + " " + fi.FullName);
+                    errorLogWriter.WriteLine(e.ToString());
                 }
             }
+
+            errorLogWriter.Flush();
+            errorLogWriter.Close();
 
         }
     }
