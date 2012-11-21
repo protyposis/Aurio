@@ -17,20 +17,18 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         private IProfile profile;
 
         private int flipWeakestBits;
-        private bool generateAllBitCombinations;
 
         public event EventHandler<SubFingerprintEventArgs> SubFingerprintCalculated;
         public event EventHandler Completed;
 
         public FingerprintGenerator(IProfile profile, AudioTrack track)
-            : this(profile, track, 0, false) {
+            : this(profile, track, 0) {
         }
 
-        public FingerprintGenerator(IProfile profile, AudioTrack track, int flipWeakestBits, bool generateAllBitCombinations) {
+        public FingerprintGenerator(IProfile profile, AudioTrack track, int flipWeakestBits) {
             this.inputTrack = track;
             this.profile = profile;
             this.flipWeakestBits = flipWeakestBits;
-            this.generateAllBitCombinations = generateAllBitCombinations;
         }
 
         private int index;
@@ -91,29 +89,17 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             if (flipWeakestBits > 0) {
                 // calculate probable subfingerprints by flipping the most unreliable bits (the bits with the least energy differences)
                 List<int> weakestBits = new List<int>(bitReliability.Keys.OrderBy(key => bitReliability[key]));
-                if (!generateAllBitCombinations) {
-                    // generate fingerprints with one bit flipped
-                    for (int i = 0; i < flipWeakestBits; i++) {
-                        SubFingerprint flippedSubFingerprint = new SubFingerprint(subFingerprint.Value);
-                        flippedSubFingerprint[weakestBits[i]] = !flippedSubFingerprint[weakestBits[i]];
-                        if (SubFingerprintCalculated != null) {
-                            SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, flippedSubFingerprint, index, indices, true));
+                // generate fingerprints with all possible bit combinations flipped
+                int variations = 1 << flipWeakestBits;
+                for (int i = 1; i < variations; i++) { // start at 1 since i0 equals to the original subfingerprint
+                    SubFingerprint flippedSubFingerprint = new SubFingerprint(subFingerprint.Value);
+                    for (int j = 0; j < flipWeakestBits; j++) {
+                        if (((i >> j) & 1) == 1) {
+                            flippedSubFingerprint[weakestBits[j]] = !flippedSubFingerprint[weakestBits[j]];
                         }
                     }
-                }
-                else {
-                    // generate fingerprints with all possible bit combinations flipped
-                    int variations = 1 << flipWeakestBits;
-                    for (int i = 1; i < variations; i++) { // start at 1 since i0 equals to the original subfingerprint
-                        SubFingerprint flippedSubFingerprint = new SubFingerprint(subFingerprint.Value);
-                        for (int j = 0; j < flipWeakestBits; j++) {
-                            if (((i >> j) & 1) == 1) {
-                                flippedSubFingerprint[weakestBits[j]] = !flippedSubFingerprint[weakestBits[j]];
-                            }
-                        }
-                        if (SubFingerprintCalculated != null) {
-                            SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, flippedSubFingerprint, index, indices, true));
-                        }
+                    if (SubFingerprintCalculated != null) {
+                        SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, flippedSubFingerprint, index, indices, true));
                     }
                 }
             }
