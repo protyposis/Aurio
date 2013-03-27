@@ -5,6 +5,13 @@ using System.Text;
 using AudioAlign.Audio.Project;
 
 namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
+
+    /// <summary>
+    /// Struct consumes a little bit less memory than object (~5%) and results in a faster fingerprint
+    /// generation time (~9%).
+    /// 
+    /// 
+    /// </summary>
     public struct SubFingerprintLookupEntry {
 
         public SubFingerprintLookupEntry(AudioTrack audioTrack, int index) {
