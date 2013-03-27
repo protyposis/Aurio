@@ -148,6 +148,9 @@
     <Compile Include="Matching\Graph\UndirectedGraph.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\BugProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\BassProfile.cs" />
+    <Compile Include="Matching\HaitsmaKalker2002\DictionaryCollisionMap.cs" />
+    <Compile Include="Matching\HaitsmaKalker2002\ICollisionMap.cs" />
+    <Compile Include="Matching\HaitsmaKalker2002\SQLiteCollisionMap.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\HumanProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\DefaultProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\Fingerprint.cs" />
@@ -219,6 +222,10 @@
     <ProjectReference Include="..\..\ExocortexDSP\Exocortex.DSP.csproj">
       <Project>{1904A41B-D1B8-40E5-ADBB-728DDCF7C816}</Project>
       <Name>Exocortex.DSP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SQLite-Net\SQLite-Net.csproj">
+      <Project>{C5D1B35F-272E-4509-9C4E-2D3DD2928809}</Project>
+      <Name>SQLite-Net</Name>
     </ProjectReference>
     <ProjectReference Include="..\AudioAlign.FFTW\AudioAlign.FFTW.csproj">
       <Project>{880F644B-5370-47D6-A4B6-F98338073631}</Project>

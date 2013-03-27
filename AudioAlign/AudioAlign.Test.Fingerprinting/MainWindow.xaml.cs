@@ -141,17 +141,17 @@ namespace AudioAlign.Test.Fingerprinting {
         }
 
         private void btnStats_Click(object sender, RoutedEventArgs e) {
-            store.PrintStats();
+            //store.PrintStats();
         }
 
         private void btnFindAllMatches_Click(object sender, RoutedEventArgs e) {
-            List<Match> matches = store.FindAllMatches();
-            PrintMatchResult(matches);
-            matchGrid.ItemsSource = matches;
+            //List<Match> matches = store.FindAllMatches();
+            //PrintMatchResult(matches);
+            //matchGrid.ItemsSource = matches;
         }
 
         private void btnFindAllMatchingMatches_Click(object sender, RoutedEventArgs e) {
-            List<Match> matches = store.FindAllMatchingMatches();
+            List<Match> matches = store.FindAllMatches();
             PrintMatchResult(matches);
             matchGrid.ItemsSource = matches;
         }

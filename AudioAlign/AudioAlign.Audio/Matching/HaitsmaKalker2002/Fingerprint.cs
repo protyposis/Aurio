@@ -50,5 +50,20 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
             return GetEnumerator();
         }
+
+        public static float CalculateBER(Fingerprint fp1, Fingerprint fp2) {
+            if (fp1.Length != fp2.Length) {
+                throw new ArgumentException("cannot compare fingerprints of different lengths");
+            }
+
+            int bitErrors = 0;
+
+            // sum up the bit errors
+            for (int s = 0; s < fp1.Length; s++) {
+                bitErrors += fp1[s].HammingDistance(fp2[s]);
+            }
+
+            return bitErrors / (float)(fp1.Length * 32); // sub-fingerprints * 32 bits
+        }
     }
 }

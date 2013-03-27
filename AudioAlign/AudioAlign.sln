@@ -46,6 +46,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.FFTW", "AudioAli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicDetector", "MusicDetector\MusicDetector.csproj", "{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLite-Net", "..\SQLite-Net\SQLite-Net.csproj", "{C5D1B35F-272E-4509-9C4E-2D3DD2928809}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -274,6 +276,18 @@ Global
 		{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}.Release|x64.Build.0 = Release|x64
 		{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}.Release|x86.ActiveCfg = Release|x86
 		{ECC7AB0C-7DB9-439F-95E1-95C206759DFE}.Release|x86.Build.0 = Release|x86
+		{C5D1B35F-272E-4509-9C4E-2D3DD2928809}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5D1B35F-272E-4509-9C4E-2D3DD2928809}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5D1B35F-272E-4509-9C4E-2D3DD2928809}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C5D1B35F-272E-4509-9C4E-2D3DD2928809}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C5D1B35F-272E-4509-9C4E-2D3DD2928809}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C5D1B35F-272E-4509-9C4E-2D3DD2928809}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C5D1B35F-272E-4509-9C4E-2D3DD2928809}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5D1B35F-272E-4509-9C4E-2D3DD2928809}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5D1B35F-272E-4509-9C4E-2D3DD2928809}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C5D1B35F-272E-4509-9C4E-2D3DD2928809}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C5D1B35F-272E-4509-9C4E-2D3DD2928809}.Release|x64.ActiveCfg = Release|Any CPU
+		{C5D1B35F-272E-4509-9C4E-2D3DD2928809}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

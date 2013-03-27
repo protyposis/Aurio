@@ -15,15 +15,15 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         private int fingerprintSize;
         private float threshold;
         private IProfile profile;
-        private Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>> lookupTable;
         private Dictionary<AudioTrack, List<SubFingerprint>> store;
+        private IFingerprintCollisionMap collisionMap;
 
         public FingerprintStore(IProfile profile) {
             FingerprintSize = DEFAULT_FINGERPRINT_SIZE;
             Threshold = DEFAULT_THRESHOLD;
             this.profile = profile;
-            lookupTable = new Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>>();
             store = new Dictionary<AudioTrack, List<SubFingerprint>>();
+            collisionMap = new DictionaryCollisionMap(); // new SQLiteCollisionMap();
         }
 
         public int FingerprintSize {
@@ -47,7 +47,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         }
 
         public Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>> LookupTable {
-            get { return lookupTable; }
+            get { throw new NotImplementedException("refactor to hand CollisionMap back???"); }
         }
 
         public Dictionary<AudioTrack, List<SubFingerprint>> AudioTracks {
@@ -75,38 +75,13 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 }
 
                 // insert a track/index lookup entry for the sub-fingerprint
-                if (!lookupTable.ContainsKey(subFingerprint)) {
-                    lookupTable.Add(subFingerprint, new List<SubFingerprintLookupEntry>());
-                }
-                lookupTable[subFingerprint].Add(new SubFingerprintLookupEntry(audioTrack, index));
+                collisionMap.Add(subFingerprint, new SubFingerprintLookupEntry(audioTrack, index));
             }
-        }
-
-        public void Clear() {
-            lookupTable.Clear();
-            store.Clear();
-        }
-
-        public void Analyze() {
-            Debug.WriteLine("analyzing fingerprint store...");
-            foreach (SubFingerprint sfp in lookupTable.Keys) {
-                if (lookupTable[sfp].Count > 1) {
-                    Debug.WriteLine(sfp + " has " + lookupTable[sfp].Count + " matches:");
-                    foreach (SubFingerprintLookupEntry le in lookupTable[sfp]) {
-                        Debug.WriteLine(le.AudioTrack + ": " + le.Index);
-                    }
-                }
-            }
-            Debug.WriteLine("analysis finished");
         }
 
         public List<Match> FindMatches(SubFingerprint subFingerprint) {
             List<Match> matches = new List<Match>();
-
-            if (!lookupTable.ContainsKey(subFingerprint)) {
-                return matches;
-            }
-            List<SubFingerprintLookupEntry> entries = lookupTable[subFingerprint];
+            List<SubFingerprintLookupEntry> entries = collisionMap.GetValues(subFingerprint);
 
             //Debug.WriteLine("Finding matches...");
 
@@ -162,51 +137,16 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             return matches;
         }
 
-        public List<Match> FindSoftMatches(SubFingerprint subFingerprint) {
+        public List<Match> FindAllMatches() {
             List<Match> matches = new List<Match>();
-            matches.AddRange(FindMatches(subFingerprint));
-            if (matches.Count == 0) {
-                // no match found, generate 32 subfingerprints of distance 1
-                for (int x = 0; x < 32; x++) {
-                    SubFingerprint temp = new SubFingerprint(subFingerprint.Value);
-                    temp[x] = !temp[x];
-                    matches.AddRange(FindMatches(temp));
-                }
-                //if (matches.Count == 0) {
-                //    // again no match found, generate 32*32 subfingerprints of distance 2
-                //    for (int i = 0; i < 32; i++) {
-                //        for (int j = i + 1; j < 32; j++) {
-                //            SubFingerprint temp = new SubFingerprint(subFingerprint.Value);
-                //            temp[i] = !temp[i];
-                //            temp[j] = !temp[j];
-                //            matches.AddRange(FindMatches(temp));
-                //        }
-                //    }
-                //}
-            }
-            return matches;
-        }
-
-        public List<Match> FindAllMatchingMatches() {
-            List<Match> matches = new List<Match>();
-            foreach (SubFingerprint subFingerprint in lookupTable.Keys) {
+            //collisionMap.CreateLookupIndex(); // TODO evaluate if this call speeds the process up
+            //collisionMap.Cleanup();
+            foreach (SubFingerprint subFingerprint in collisionMap.GetCollidingKeys()) {
                 // skip all subfingerprints whose bits are all zero, since this is probably a position with silence
                 if (subFingerprint.Value != 0) {
                     matches.AddRange(FindMatches(subFingerprint));
                 }
             }
-            return matches;
-        }
-
-        public List<Match> FindAllMatches() {
-            DateTime startTime = DateTime.Now;
-            List<Match> matches = new List<Match>();
-            foreach (AudioTrack audioTrack in store.Keys) {
-                foreach (SubFingerprint subFingerprint in store[audioTrack]) {
-                    matches.AddRange(FindSoftMatches(subFingerprint));
-                }
-            }
-            Debug.WriteLine("duration: " + (DateTime.Now - startTime));
             return matches;
         }
 
@@ -216,80 +156,6 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 indexOffset = Math.Min(indexOffset, -fingerprintSize + store[entry.AudioTrack].Count - entry.Index);
             }
             return new Fingerprint(store[entry.AudioTrack], entry.Index + indexOffset, fingerprintSize);
-        }
-
-        public void PrintStats() {
-            int totalSize = 0;
-            Debug.WriteLine("calculating fingerprintstore stats:");
-
-            // calculate subfingerprint size for each track
-            foreach (AudioTrack audioTrack in store.Keys) {
-                int subFingerprintCount = store[audioTrack].Count;
-                Debug.WriteLine(audioTrack + ": " + (subFingerprintCount * sizeof(UInt32)) + " bytes");
-                totalSize += subFingerprintCount * sizeof(UInt32);
-            }
-
-            // calculate lookuptable size
-            int lookupCount = 0;
-            foreach (SubFingerprint subFingerpint in lookupTable.Keys) {
-                lookupCount += lookupTable[subFingerpint].Count;
-            }
-            Debug.WriteLine("lookup table size: " + (lookupCount * (sizeof(int) + sizeof(int))) + " bytes");
-            totalSize += lookupCount * (sizeof(int) + sizeof(int));
-
-            Debug.WriteLine("total size: " + totalSize + " bytes = " + (totalSize / 1024) + " kb = " + (totalSize / 1024 / 1024) + " mb");
-        }
-
-        public float CalculateBER(Fingerprint fp1, Fingerprint fp2) {
-            if (fp1.Length != fp2.Length) {
-                throw new ArgumentException("cannot compare fingerprints of different lengths");
-            }
-
-            int bitErrors = 0;
-
-            // sum up the bit errors
-            for (int s = 0; s < fp1.Length; s++) {
-                bitErrors += fp1[s].HammingDistance(fp2[s]);
-            }
-
-            return bitErrors / (float)(fingerprintSize * 32); // sub-fingerprints * 32 bits
-        }
-
-        public void FindAllMatches(int maxSubFingerprintDistance, float maxBER) {
-            List<AudioTrack> audioTracks = new List<AudioTrack>(store.Keys.OrderByDescending(at => at.Length.Ticks));
-            for (int i = 0; i < audioTracks.Count; i++) {
-                AudioTrack audioTrack1 = audioTracks[i];
-                for (int j = i + 1; j < audioTracks.Count; j++) {
-                    AudioTrack audioTrack2 = audioTracks[j];
-                    int sfp1Index = 0;
-                    foreach (SubFingerprint subFingerprint1 in store[audioTrack1]) {
-                        int sfp2Index = 0;
-                        foreach (SubFingerprint subFingerprint2 in store[audioTrack2]) {
-                            int sfpDistance = subFingerprint1.HammingDistance(subFingerprint2);
-                            if (sfpDistance <= maxSubFingerprintDistance) {
-                                float ber = -1;
-                                if (maxBER < 1) {
-                                    ber = CalculateBER(
-                                        GetFingerprint(new SubFingerprintLookupEntry(audioTrack1, sfp1Index)),
-                                        GetFingerprint(new SubFingerprintLookupEntry(audioTrack2, sfp2Index)));
-                                }
-                                if (ber != -1 && ber <= maxBER) {
-                                    Match match = new Match {
-                                        Similarity = 1 - ber,
-                                        Track1 = audioTrack1,
-                                        Track1Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, sfp1Index),
-                                        Track2 = audioTrack2,
-                                        Track2Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, sfp2Index)
-                                    };
-                                    Debug.WriteLine(match + " [SFP distance: " + sfpDistance + "]");
-                                }
-                            }
-                            sfp2Index++;
-                        }
-                        sfp1Index++;
-                    }
-                }
-            }
         }
 
         /// <summary>
