@@ -274,7 +274,7 @@ namespace AudioAlign.Audio.Project {
         /// Exports a project timeline to Sony Vegas' proprietary EDL text file format.
         /// </summary>
         public static void ExportEDL(TrackList<AudioTrack> tracks, FileInfo targetFile) {
-            string[] videoExtensions = { ".m2ts", ".mp4", ".mpg", ".avi" };
+            string[] videoExtensions = { ".m2ts", ".mp4", ".mpg", ".avi", ".webm" };
 
             string[] edlFields = {
                 "ID", // 1, 2, 3, ...
