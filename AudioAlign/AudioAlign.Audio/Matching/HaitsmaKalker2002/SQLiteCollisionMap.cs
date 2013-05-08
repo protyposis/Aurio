@@ -18,7 +18,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         private SQLiteConnection db;
         private Dictionary<AudioTrack, int> trackToNumber;
         private Dictionary<int, AudioTrack> numberToTrack;
-        private List<DTO> temp;
+        private List<DTO> insertBuffer;
 
         public SQLiteCollisionMap() {
             db = new SQLiteConnection(":memory:");
@@ -26,7 +26,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
             trackToNumber = new Dictionary<AudioTrack, int>();
             numberToTrack = new Dictionary<int, AudioTrack>();
-            temp = new List<DTO>(1000);
+            insertBuffer = new List<DTO>(1000);
         }
 
         public void Add(SubFingerprint subFingerprint, SubFingerprintLookupEntry lookupEntry) {
@@ -48,23 +48,30 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 TrackPositionIndex = lookupEntry.Index
             };
 
-            temp.Add(dto);
+            insertBuffer.Add(dto);
 
-            if (temp.Count == 1000) {
-                db.InsertAll(temp);
-                temp.Clear();
+            if (insertBuffer.Count == 1000) {
+                InsertBuffered();
             }
 
             //db.Insert();
         }
 
+        private void InsertBuffered() {
+            db.InsertAll(insertBuffer);
+            insertBuffer.Clear();
+        }
+
         public void CreateLookupIndex() {
+            InsertBuffered();
             var start = DateTime.Now;
             db.Execute("create index if not exists DTO_SubFingerprint on DTO(SubFingerprint)");
             Debug.WriteLine("CreateLookupIndex duration: " + (DateTime.Now - start));
         }
 
         public void Cleanup() {
+            InsertBuffered();
+
             int count = db.ExecuteScalar<int>("select count(*) from DTO");
             Debug.WriteLine("Cleanup count before: " + count);
 
@@ -75,6 +82,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         }
 
         public List<SubFingerprint> GetCollidingKeys() {
+            InsertBuffered();
             CreateLookupIndex();
 
             var start = DateTime.Now;
@@ -88,6 +96,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         }
 
         public List<SubFingerprintLookupEntry> GetValues(SubFingerprint subFingerprint) {
+            if (insertBuffer.Count > 0) {
+                InsertBuffered();
+            }
+
             //var start = DateTime.Now;
             IEnumerable<DTO> result = db.Query<DTO>("select * from DTO where SubFingerprint = ?", subFingerprint.Value);
             List<SubFingerprintLookupEntry> lookupEntries = new List<SubFingerprintLookupEntry>();
