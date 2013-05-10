@@ -69,7 +69,7 @@ namespace AudioAlign.Audio.TaskMonitor {
 
                 if (prevProgress != (int)progress) {
                     prevProgress = (int)progress;
-                    Debug.WriteLine(Name + ": " + prevProgress + "%");
+                    //Debug.WriteLine("ProgressReporter::" + Name + ": " + prevProgress + "%"); // this immensely slows down debugging performance
                 }
             }
 
@@ -77,7 +77,7 @@ namespace AudioAlign.Audio.TaskMonitor {
                 monitor.EndTask(this);
                 monitor = null;
                 isFinished = true;
-                Debug.WriteLine(name + " duration: " + (DateTime.Now - startTime));
+                Debug.WriteLine("ProgressReporter::" + name + " duration: " + (DateTime.Now - startTime));
             }
 
             public bool IsFinished {
@@ -98,6 +98,7 @@ namespace AudioAlign.Audio.TaskMonitor {
         private List<ProgressReporter> reporters;
 
         private Timer timer;
+        private string statusMessage;
 
         public event EventHandler ProcessingStarted;
         public event EventHandler<ValueEventArgs<float>> ProcessingProgressChanged;
@@ -142,49 +143,68 @@ namespace AudioAlign.Audio.TaskMonitor {
         }
 
         private ProgressReporter BeginTask(ProgressReporter reporter) {
+            bool started = false;
+
             lock (lockObject) {
                 if (reporters.Count == 0) {
-                    OnProcessingStarted();
+                    started = true;
                 }
                 reporters.Add(reporter);
-                OnTaskBegun(reporter);
             }
+
+            if(started) {
+                OnProcessingStarted();
+            }
+
+            OnTaskBegun(reporter);
+
             return reporter;
         }
 
         private void EndTask(ProgressReporter reporter) {
+            bool finished = false;
+
+            OnTaskEnded(reporter);
+
             lock (lockObject) {
-                OnTaskEnded(reporter);
                 reporters.Remove(reporter);
                 if (reporters.Count == 0) {
-                    OnProcessingFinished();
+                    finished = true;
                 }
+            }
+
+            if (finished) {
+                OnProcessingFinished();
             }
         }
 
         public string StatusMessage {
-            get {
-                string message = "";
-                lock (lockObject) {
-                    if (reporters.Count == 1) {
-                        message += reporters[0].Name;
-                    }
-                    else if (reporters.Count > 1) {
-                        message += "(" + reporters.Count + " tasks) ";
-                        for (int x = 0; x < reporters.Count; x++) {
-                            message += reporters[x].Name;
-                            if (x + 1 != reporters.Count) {
-                                message += "; ";
-                            }
-                        }
-                    }
-                }
-                return message;
-            }
+            get { return statusMessage; }
         }
 
         public bool Active {
             get { return reporters.Count > 0; }
+        }
+
+        private void UpdateStatusMessage() {
+            string message = "";
+
+            lock (lockObject) {
+                if (reporters.Count == 1) {
+                    message += reporters[0].Name;
+                }
+                else if (reporters.Count > 1) {
+                    message += "(" + reporters.Count + " tasks) ";
+                    for (int x = 0; x < reporters.Count; x++) {
+                        message += reporters[x].Name;
+                        if (x + 1 != reporters.Count) {
+                            message += "; ";
+                        }
+                    }
+                }
+            }
+
+            statusMessage = message;
         }
 
         private void OnProcessingStarted() {
@@ -260,12 +280,14 @@ namespace AudioAlign.Audio.TaskMonitor {
         }
 
         private void OnTaskBegun(ProgressReporter reporter) {
+            UpdateStatusMessage();
             if (TaskBegun != null) {
                 TaskBegun(this, new ValueEventArgs<ProgressReporter>(reporter));
             }
         }
 
         private void OnTaskEnded(ProgressReporter reporter) {
+            UpdateStatusMessage();
             if (TaskEnded != null) {
                 TaskEnded(this, new ValueEventArgs<ProgressReporter>(reporter));
             }
