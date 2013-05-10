@@ -197,16 +197,21 @@ namespace AudioAlign.Audio.TaskMonitor {
         }
 
         private void OnProcessingProgressChanged() {
+            float progress = 0;
+
             lock (lockObject) {
-                if (ProcessingProgressChanged != null && reporters.Count > 0) {
-                    float progress = 0;
+                if (reporters.Count > 0) {
                     foreach (ProgressReporter reporter in reporters) {
                         progress += (float)reporter.Progress;
                     }
                     progress /= reporters.Count;
-                    ProcessingProgressChanged(this, new ValueEventArgs<float>(progress));
                 }
             }
+
+            if (ProcessingProgressChanged != null) {
+                ProcessingProgressChanged(this, new ValueEventArgs<float>(progress));
+            }
+
             if (childMonitors.Count > 0) {
                 foreach (ProgressMonitor childMonitor in childMonitors) {
                     if (childMonitor.Active) {
