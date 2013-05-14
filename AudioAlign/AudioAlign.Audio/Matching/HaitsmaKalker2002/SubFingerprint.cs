@@ -62,15 +62,12 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         /// </summary>
         /// <param name="sfp"></param>
         /// <returns></returns>
-        public int HammingDistance(SubFingerprint sfp) {
-            int dist = 0;
-            UInt32 val = this.value ^ sfp.value;
-            // Count the number of set bits (Knuth's algorithm)
-            while (val > 0) {
-                ++dist;
-                val &= val - 1;
-            }
-            return dist;
+        public uint HammingDistance(SubFingerprint sfp) {
+            uint i = this.value ^ sfp.value;
+            // Count the number of set bits: http://stackoverflow.com/a/109025
+            i = i - ((i >> 1) & 0x55555555);
+            i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+            return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
         }
 
         public static bool operator !=(SubFingerprint a, SubFingerprint b) {

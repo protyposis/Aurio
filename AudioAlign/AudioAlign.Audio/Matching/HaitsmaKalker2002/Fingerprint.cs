@@ -56,7 +56,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 throw new ArgumentException("cannot compare fingerprints of different lengths");
             }
 
-            int bitErrors = 0;
+            uint bitErrors = 0;
 
             // sum up the bit errors
             for (int s = 0; s < fp1.Length; s++) {

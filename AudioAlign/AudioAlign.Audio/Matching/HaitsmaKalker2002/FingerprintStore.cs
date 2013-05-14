@@ -103,12 +103,12 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                         // sum up the bit errors
                         List<SubFingerprint> track1SubFingerprints = store[entry1.AudioTrack];
                         List<SubFingerprint> track2SubFingerprints = store[entry2.AudioTrack];
-                        int bitErrors = 0;
+                        uint bitErrors = 0;
                         for (int s = 0; s < fingerprintSize; s++) {
                             SubFingerprint track1SubFingerprint = track1SubFingerprints[entry1.Index + s];
                             SubFingerprint track2SubFingerprint = track2SubFingerprints[entry2.Index + s];
                             if (track1SubFingerprint.Value == 0 || track2SubFingerprint.Value == 0) {
-                                bitErrors = fingerprintSize * 32;
+                                bitErrors = (uint)fingerprintSize * 32;
                                 break;
                             }
                             // skip fingerprints with subfingerprints that are zero, since it is probably from 
