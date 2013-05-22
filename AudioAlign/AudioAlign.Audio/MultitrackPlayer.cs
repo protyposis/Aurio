@@ -7,6 +7,7 @@ using NAudio.Wave;
 using System.Timers;
 using System.Diagnostics;
 using AudioAlign.Audio.Streams;
+using NAudio.CoreAudioApi;
 
 namespace AudioAlign.Audio {
     public class MultitrackPlayer : IDisposable {
@@ -96,7 +97,19 @@ namespace AudioAlign.Audio {
         }
 
         private void SetupAudioChain() {
-            audioMixer = new MixerStream(2, 44100);
+            /* Obtain output device to read the rendering samplerate and initialize the mixer stream
+             * with the target samplerate to avoid NAudio's internal ResamplerDmoStream for the target
+             * samplerate conversion. ResamplerDmoStream works strangely and often requests zero bytes
+             * from the audio pipeline which makes the playback stop and screws up the whole playback
+             * in AudioAlign. */
+            MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+            MMDevice mmdevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
+
+            Console.WriteLine("audio playback endpoint: " + mmdevice.FriendlyName);
+            Console.WriteLine("format: " + mmdevice.AudioClient.MixFormat);
+
+            // init mixer stream with device playback samplerate
+            audioMixer = new MixerStream(2, mmdevice.AudioClient.MixFormat.SampleRate);
 
             audioVolumeControlStream = new VolumeControlStream(audioMixer);
             audioVolumeMeteringStream = new VolumeMeteringStream(audioVolumeControlStream);
@@ -118,7 +131,9 @@ namespace AudioAlign.Audio {
 
         private void AddTrack(AudioTrack audioTrack) {
             IAudioStream input = AudioStreamFactory.FromFileInfo(audioTrack.FileInfo);
-            IAudioStream baseStream = new IeeeStream(new TolerantStream(new BufferedStream(input, 1024 * 1024, true)));
+            IAudioStream baseStream = new ResamplingStream( // adjust sample rate to mixer output rate
+                new IeeeStream(new TolerantStream(new BufferedStream(input, 1024 * 1024, true))), 
+                ResamplingQuality.SincFastest, audioMixer.Properties.SampleRate);
             TimeWarpStream timeWarpStream = new TimeWarpStream(baseStream, ResamplingQuality.SincFastest) {
                 Mappings = audioTrack.TimeWarps
             };
