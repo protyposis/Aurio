@@ -57,8 +57,6 @@ namespace AudioAlign.WaveControls {
             base.OnRender(drawingContext);
             bool debug = DebugOutput;
 
-            Console.WriteLine("RENDER!!!!!!");
-
             // draw background
             drawingContext.DrawRectangle(Background, null, new Rect(0, 0, ActualWidth, ActualHeight));
 
