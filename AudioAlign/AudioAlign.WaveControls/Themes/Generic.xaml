@@ -335,7 +335,7 @@
                         <ScrollViewer.Template>
                             <ControlTemplate TargetType="{x:Type ScrollViewer}">
                                 <!-- HACK: background needed for screenshot functionality -->
-                                <Grid Background="{StaticResource NormalBrush}">
+                                <Grid Background="{Binding Background, RelativeSource={RelativeSource AncestorType=local:MultiTrackListBox}}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition/>
                                         <ColumnDefinition Width="Auto"/>

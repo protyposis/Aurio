@@ -9,7 +9,7 @@ using System.Windows.Controls.Primitives;
 
 namespace AudioAlign.WaveControls {
     [TemplatePart(Name = "PART_VerticalScrollBar", Type = typeof(ScrollBar))]
-    class MultiTrackListBox : ListBox {
+    public class MultiTrackListBox : ListBox {
         
         public static readonly DependencyProperty VirtualViewportWidthProperty;
         public static readonly DependencyProperty TrackHeadersVisibilityProperty;
