@@ -15,6 +15,8 @@ using System.Globalization;
 using System.Diagnostics;
 using AudioAlign.Audio;
 using AudioAlign.Audio.Streams;
+using System.Windows.Controls.Primitives;
+using System.ComponentModel;
 
 namespace AudioAlign.WaveControls {
     public partial class WaveView : VirtualViewBase {
@@ -41,6 +43,9 @@ namespace AudioAlign.WaveControls {
             for (int i = 0; i < waveformGeometryRenderers.Length; i++) {
                 waveformGeometryRenderers[i] = new WaveformGeometryRenderer();
             }
+
+            DependencyPropertyDescriptor.FromProperty(Selector.IsSelectedProperty, typeof(WaveView))
+                .AddValueChanged(this, new EventHandler(OnSelectionChanged));
         }
 
         public bool Antialiased {
@@ -51,6 +56,8 @@ namespace AudioAlign.WaveControls {
         protected override void OnRender(DrawingContext drawingContext) {
             base.OnRender(drawingContext);
             bool debug = DebugOutput;
+
+            Console.WriteLine("RENDER!!!!!!");
 
             // draw background
             drawingContext.DrawRectangle(Background, null, new Rect(0, 0, ActualWidth, ActualHeight));
@@ -252,6 +259,13 @@ namespace AudioAlign.WaveControls {
             //Debug.WriteLine("WaveView OnMouseUp @ " + mouseUpPosition);
             dragging = false;
             e.Handled = true;
+        }
+
+        protected void OnSelectionChanged(object sender, EventArgs e) {
+            // exchange colors to emphasize selected track
+            Brush temp = WaveformLine;
+            WaveformLine = WaveformBackground;
+            WaveformBackground = temp;
         }
     }
 }

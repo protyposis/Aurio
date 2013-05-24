@@ -59,6 +59,12 @@ namespace AudioAlign.Audio.Project {
                 xml.WriteString(track.Name);
                 xml.WriteEndAttribute();
 
+                if (track.Color != Track.DEFAULT_COLOR) {
+                    xml.WriteStartAttribute("color");
+                    xml.WriteString(track.Color);
+                    xml.WriteEndAttribute();
+                }
+
                 xml.WriteStartAttribute("length");
                 xml.WriteString(track.Length.ToString());
                 xml.WriteEndAttribute();
@@ -175,6 +181,11 @@ namespace AudioAlign.Audio.Project {
 
                         xml.MoveToAttribute("name");
                         track.Name = xml.Value;
+
+                        string color = xml.GetAttribute("color");
+                        if (color != null) {
+                            track.Color = color;
+                        }
 
                         xml.MoveToAttribute("length");
                         track.Length = TimeSpan.Parse(xml.Value);

@@ -8,13 +8,17 @@ using System.ComponentModel;
 namespace AudioAlign.Audio.Project {
     public abstract class Track : INotifyPropertyChanged {
 
+        public static readonly string DEFAULT_COLOR = "#FF6495ED";
+
         public event EventHandler<ValueEventArgs<TimeSpan>> LengthChanged;
         public event EventHandler<ValueEventArgs<TimeSpan>> OffsetChanged;
         public event EventHandler<ValueEventArgs<string>> NameChanged;
+        public event EventHandler<ValueEventArgs<string>> ColorChanged;
 
         private TimeSpan length = TimeSpan.Zero;
         private TimeSpan offset = TimeSpan.Zero;
         private string name;
+        private string color = DEFAULT_COLOR;
 
         public Track(FileInfo fileInfo) {
             if (!fileInfo.Exists) {
@@ -41,6 +45,11 @@ namespace AudioAlign.Audio.Project {
         public string Name {
             get { return name; }
             set { name = value; OnNameChanged(); }
+        }
+
+        public string Color {
+            get { return color; }
+            set { color = value; OnColorChanged(); }
         }
 
         #region INotifyPropertyChanged Members
@@ -74,6 +83,13 @@ namespace AudioAlign.Audio.Project {
                 NameChanged(this, new ValueEventArgs<string>(name));
             }
             OnPropertyChanged("Name");
+        }
+
+        private void OnColorChanged() {
+            if (ColorChanged != null) {
+                ColorChanged(this, new ValueEventArgs<string>(color));
+            }
+            OnPropertyChanged("Color");
         }
 
         public override string ToString() {

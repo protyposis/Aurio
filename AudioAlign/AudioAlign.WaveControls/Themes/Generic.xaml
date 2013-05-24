@@ -14,22 +14,6 @@
 
     <Style BasedOn="{StaticResource {x:Type Slider}}" TargetType="{x:Type local:LogSlider}"/>
 
-    <Style TargetType="{x:Type local:WaveView}">
-        <Style.Resources>
-            <SolidColorBrush x:Key="WaveformLineBrush" Color="CornflowerBlue"/>
-            <SolidColorBrush x:Key="WaveformBackgroundBrush" Color="White"/>
-        </Style.Resources>
-        <Setter Property="Background" Value="Purple"/>
-        <Setter Property="WaveformLine" Value="{DynamicResource ResourceKey=WaveformLineBrush}"/>
-        <Setter Property="WaveformBackground" Value="{DynamicResource ResourceKey=WaveformBackgroundBrush}"/>
-        <Style.Triggers>
-            <Trigger Property="Selector.IsSelected" Value="True">
-                <Setter Property="WaveformLine" Value="{DynamicResource ResourceKey=WaveformBackgroundBrush}"/>
-                <Setter Property="WaveformBackground" Value="{DynamicResource ResourceKey=WaveformLineBrush}"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
     <Style TargetType="{x:Type local:CaretOverlay}">
         <Setter Property="ClipToBounds" Value="True"/>
         <Setter Property="Focusable" Value="True"/>
@@ -316,7 +300,8 @@
                                             Selector.IsSelected="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}, Path=IsSelected}"
                                             VirtualViewportWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=VirtualViewportWidth}"
                                             TrackLength="{Binding Path=Length, Converter={StaticResource TimeSpanTicksConverter}}"
-                                            TrackOffset="{Binding Path=Offset, Mode=TwoWay, Converter={StaticResource TimeSpanTicksConverter}}"/>
+                                            TrackOffset="{Binding Path=Offset, Mode=TwoWay, Converter={StaticResource TimeSpanTicksConverter}}"
+                                            WaveformLine="{Binding Path=Color, Mode=TwoWay}"/>
                             <Border Grid.Row="1" Background="Black" Opacity="0.5" Name="muteIndicator" Visibility="Hidden"/>
                         </Grid>
                     </local:ResizeDecorator>
