@@ -11,6 +11,7 @@
     <local:ChannelsToTextConverter x:Key="ChannelsToTextConverter"/>
     <local:TimeSpanTicksConverter x:Key="TimeSpanTicksConverter"/>
     <local:LinearDecibelConverter x:Key="LinearDecibelConverter"/>
+    <local:ListBoxItemIndexConverter x:Key="ListBoxItemIndexConverter"/>
 
     <Style BasedOn="{StaticResource {x:Type Slider}}" TargetType="{x:Type local:LogSlider}"/>
 
@@ -241,6 +242,9 @@
                                         </Style>
                                     </DockPanel.Resources>
                                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                                        <Label Content="{Binding RelativeSource={RelativeSource FindAncestor, 
+                                            AncestorType={x:Type ListBoxItem}}, 
+                                            Converter={StaticResource ListBoxItemIndexConverter}}" ToolTip="track no"/>
                                         <Label FontWeight="Bold" ToolTip="{Binding Path=Name}">
                                             <Label.Content>
                                                 <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" Width="200" />

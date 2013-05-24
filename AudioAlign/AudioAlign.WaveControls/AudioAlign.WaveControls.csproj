@@ -129,6 +129,7 @@
     </Compile>
     <Compile Include="GraphMode.cs" />
     <Compile Include="LinearDecibelConverter.cs" />
+    <Compile Include="ListBoxItemIndexConverter.cs" />
     <Compile Include="LogSlider.cs" />
     <Compile Include="MultiTrackConnectionAdorner.cs" />
     <Compile Include="MultiTrackListBox.cs" />
