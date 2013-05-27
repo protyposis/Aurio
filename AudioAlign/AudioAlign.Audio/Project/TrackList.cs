@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
+using System.ComponentModel;
 
 namespace AudioAlign.Audio.Project {
-    public class TrackList<T> : IEnumerable<T> where T : Track {
+    public class TrackList<T> : IEnumerable<T>, INotifyPropertyChanged where T : Track {
         private readonly List<T> list;
 
         public class TrackListEventArgs : EventArgs {
@@ -35,12 +36,14 @@ namespace AudioAlign.Audio.Project {
             if (TrackAdded != null) {
                 TrackAdded(this, e);
             }
+            OnTrackListChanged();
         }
 
         private void OnTrackRemoved(TrackListEventArgs e) {
             if (TrackRemoved != null) {
                 TrackRemoved(this, e);
             }
+            OnTrackListChanged();
         }
 
         public void Add(T track) {
@@ -141,6 +144,19 @@ namespace AudioAlign.Audio.Project {
             }
         }
 
+        /// <summary>
+        /// Gets the total length of all tracks added together.
+        /// </summary>
+        public TimeSpan TotalLength {
+            get {
+                TimeSpan total = new TimeSpan();
+                foreach (T track in this) {
+                    total += track.Length;
+                }
+                return total;
+            }
+        }
+
         #region IEnumerable<T> Members
 
         IEnumerator IEnumerable.GetEnumerator() {
@@ -159,6 +175,25 @@ namespace AudioAlign.Audio.Project {
                     yield return track;
                 }
             }
+        }
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string name) {
+            if (PropertyChanged != null) {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
+        #endregion
+
+        protected void OnTrackListChanged() {
+            OnPropertyChanged("TotalLength");
+            OnPropertyChanged("Start");
+            OnPropertyChanged("End");
+            OnPropertyChanged("Count");
         }
     }
 }
