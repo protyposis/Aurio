@@ -125,6 +125,12 @@ namespace AudioAlign.WaveControls {
             }
         }
 
+        public void Display(Match m) {
+            int i1 = multiTrackListBox.Items.IndexOf(m.Track1);
+            int i2 = multiTrackListBox.Items.IndexOf(m.Track2);
+            multiTrackListBox.ScrollIntoView(i1 < i2 ? m.Track1 : m.Track2);
+        }
+
         public void FitTracksVertically(double minHeight) {
             double targetHeight = 
                 (multiTrackListBox.ActualHeight - UIUtil.FindVisualChild<TimeScale>(multiTrackListBox).ActualHeight) / 
