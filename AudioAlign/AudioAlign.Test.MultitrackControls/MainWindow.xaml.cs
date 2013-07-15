@@ -42,7 +42,7 @@ namespace AudioAlign.Test.MultitrackControls {
                 // Open document
                 AudioTrack audioTrack = new AudioTrack(new FileInfo(dlg.FileName));
                 //audioTrack.Offset = new TimeSpan(new Random().Next((int)new TimeSpan(0, 10, 0).Ticks));
-                multiTrackViewer1.Items.Add(audioTrack);
+                multiTrackViewer1.ItemsSource.Add(audioTrack);
             }
         }
     }
