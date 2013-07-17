@@ -156,7 +156,7 @@ namespace AudioAlign.Audio.Matching {
             });
         }
 
-        public static void Adjust(Match match, ProgressMonitor progressMonitor) {
+        public static Match Adjust(Match match, ProgressMonitor progressMonitor) {
             try {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
@@ -183,11 +183,18 @@ namespace AudioAlign.Audio.Matching {
                     match.Track2.CreateAudioStream(), iT2,
                     progressMonitor, out maxValTemp);
                 Debug.WriteLine("CC: " + match + ": " + offset + " (" + sw.Elapsed + ")");
-                match.Track2Time += offset;
+
+                return new Match(match) {
+                    Track2Time = match.Track2Time + offset,
+                    Similarity = (float)maxValTemp,
+                    Source = "CC"
+                };
             }
             catch (Exception e) {
                 Debug.WriteLine("CC adjust failed: " + e.Message);
             }
+
+            return null;
         }
 
         public static unsafe double Correlate(float* x, float* y, int length) {

@@ -125,7 +125,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                                 Track1 = entry1.AudioTrack,
                                 Track1Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, entry1.Index),
                                 Track2 = entry2.AudioTrack,
-                                Track2Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, entry2.Index)
+                                Track2Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, entry2.Index),
+                                Source = "FP"
                             });
                         }
                     }

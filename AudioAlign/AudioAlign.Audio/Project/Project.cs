@@ -138,6 +138,10 @@ namespace AudioAlign.Audio.Project {
                 xml.WriteValue(match.Similarity);
                 xml.WriteEndAttribute();
 
+                xml.WriteStartAttribute("source");
+                xml.WriteValue(match.Source);
+                xml.WriteEndAttribute();
+
                 xml.WriteEndElement();
             }
             xml.WriteEndElement();
@@ -261,6 +265,10 @@ namespace AudioAlign.Audio.Project {
 
                         xml.MoveToAttribute("similarity");
                         match.Similarity = xml.ReadContentAsFloat();
+
+                        if (xml.MoveToAttribute("source")) {
+                            match.Source = xml.ReadContentAsString();
+                        }
 
                         project.Matches.Add(match);
                         xml.ReadStartElement("match");
