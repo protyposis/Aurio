@@ -35,21 +35,23 @@ namespace AudioAlign.WaveControls {
                 });
         }
 
-        private ObservableCollection<AudioTrack> tracks;
         private MultiTrackListBox multiTrackListBox;
-        MultiTrackConnectionAdorner multiTrackConnectionAdorner;
+        private MultiTrackConnectionAdorner multiTrackConnectionAdorner;
 
         public MultiTrackViewer() {
-            tracks = new ObservableCollection<AudioTrack>();
             this.Loaded += new RoutedEventHandler(MultiTrackViewer_Loaded);
+        }
+
+        public override void OnApplyTemplate() {
+            base.OnApplyTemplate();
+            multiTrackListBox = (MultiTrackListBox)GetTemplateChild("PART_TrackListBox");
+            multiTrackListBox.ItemsSource = new TrackList<AudioTrack>();
         }
 
         private void MultiTrackViewer_Loaded(object sender, RoutedEventArgs e) {
             AddHandler(CaretOverlay.PositionSelectedEvent, new CaretOverlay.PositionEventHandler(MultiTrackViewer_CaretPositionSelected));
             AddHandler(CaretOverlay.IntervalSelectedEvent, new CaretOverlay.IntervalEventHandler(MultiTrackViewer_CaretIntervalSelected));
             AddHandler(WaveView.TrackOffsetChangedEvent, new RoutedEventHandler(MultiTrackViewer_WaveViewTrackOffsetChanged));
-            multiTrackListBox = (MultiTrackListBox)GetTemplateChild("PART_TrackListBox");
-            multiTrackListBox.ItemsSource = tracks;
 
             // HACK refresh adorner layer after every scroll event to prevent mispositioned match indicators (actually it would suffice at a "ScrollFinished" event, but that doesn't exist)
             UIUtil.FindVisualChild<ScrollBar>(multiTrackListBox).Scroll += delegate(object sender2, System.Windows.Controls.Primitives.ScrollEventArgs e2) {
@@ -82,8 +84,9 @@ namespace AudioAlign.WaveControls {
             set { SetValue(VirtualCaretOffsetProperty, value); }
         }
 
-        public ObservableCollection<AudioTrack> ItemsSource {
-            get { return tracks; }
+        public TrackList<AudioTrack> ItemsSource {
+            get { return (TrackList<AudioTrack>)multiTrackListBox.ItemsSource; }
+            set { multiTrackListBox.ItemsSource = value; }
         }
 
         public object SelectedItem {

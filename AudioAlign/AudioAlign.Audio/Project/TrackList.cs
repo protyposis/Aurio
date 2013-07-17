@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 using System.ComponentModel;
+using System.Collections.Specialized;
 
 namespace AudioAlign.Audio.Project {
-    public class TrackList<T> : IEnumerable<T>, INotifyPropertyChanged where T : Track {
+    public class TrackList<T> : IEnumerable<T>, INotifyPropertyChanged, INotifyCollectionChanged where T : Track {
         private readonly List<T> list;
 
         public class TrackListEventArgs : EventArgs {
@@ -49,6 +50,7 @@ namespace AudioAlign.Audio.Project {
         public void Add(T track) {
             list.Add(track);
             OnTrackAdded(new TrackListEventArgs(track, list.IndexOf(track)));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, track));
         }
 
         public void Add(IEnumerable<T> tracks) {
@@ -56,6 +58,7 @@ namespace AudioAlign.Audio.Project {
                 list.Add(track);
                 OnTrackAdded(new TrackListEventArgs(track, list.IndexOf(track)));
             }
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, tracks));
         }
 
         public bool Contains(T item) {
@@ -71,6 +74,7 @@ namespace AudioAlign.Audio.Project {
                 int index = list.IndexOf(track);
                 if (list.Remove(track)) {
                     OnTrackRemoved(new TrackListEventArgs(track, index));
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, track));
                     return true;
                 }
             }
@@ -95,10 +99,12 @@ namespace AudioAlign.Audio.Project {
             foreach (T track in copy) {
                 Remove(track);
             }
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         public void Sort(IComparer<T> comparer) {
             list.Sort(comparer);
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         public void Move(int oldIndex, int newIndex) {
@@ -106,6 +112,8 @@ namespace AudioAlign.Audio.Project {
             list.RemoveAt(oldIndex);
             if (newIndex > oldIndex) newIndex--;
             list.Insert(newIndex, item);
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(
+                NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
         }
 
         /// <summary>
@@ -195,5 +203,17 @@ namespace AudioAlign.Audio.Project {
             OnPropertyChanged("End");
             OnPropertyChanged("Count");
         }
+
+        #region INotifyCollectionChanged Members
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+        protected void OnCollectionChanged(NotifyCollectionChangedEventArgs args) {
+            if (CollectionChanged != null) {
+                CollectionChanged(this, args);
+            }
+        }
+
+        #endregion
     }
 }
