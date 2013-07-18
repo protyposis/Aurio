@@ -19,6 +19,14 @@ namespace AudioAlign.Audio.Matching {
             public float MaxValue {
                 get { return Correlations[MaxIndex]; }
             }
+
+            public Result AbsoluteResult() {
+                var absCorr = Correlations.Select(Math.Abs).ToList();
+                return new Result() {
+                                        Correlations = absCorr.ToArray(),
+                                        MaxIndex = absCorr.IndexOf(absCorr.Max())
+                                    };
+            }
         }
 
         private static unsafe int Calculate(float* x, float* y, int length, IProgressReporter reporter, out Result result) {
