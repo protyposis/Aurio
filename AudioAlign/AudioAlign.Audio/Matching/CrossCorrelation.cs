@@ -11,7 +11,17 @@ using AudioAlign.Audio.Streams;
 namespace AudioAlign.Audio.Matching {
     public class CrossCorrelation {
 
-        private static unsafe int Calculate(float* x, float* y, int length, IProgressReporter reporter, out double maxVal) {
+        public class Result {
+
+            public float[] Correlations { get; set; }
+            public int MaxIndex { get; set; }
+
+            public float MaxValue {
+                get { return Correlations[MaxIndex]; }
+            }
+        }
+
+        private static unsafe int Calculate(float* x, float* y, int length, IProgressReporter reporter, out Result result) {
             int n = length;
             int maxdelay = length / 2;
             if (maxdelay * 2 > n) {
@@ -78,17 +88,21 @@ namespace AudioAlign.Audio.Matching {
                 }
             }
 
+            result = new Result() {
+                Correlations = r,
+                MaxIndex = maxindex
+            };
+
             Debug.WriteLine("max val: {0} index: {1} adjusted index: {2}", maxval, maxindex, maxindex - maxdelay);
-            maxVal = maxval;
             return maxindex - maxdelay;
         }
 
-        private static unsafe int Calculate(float[] x, float[] y, IProgressReporter reporter, out double maxVal) {
+        private static unsafe int Calculate(float[] x, float[] y, IProgressReporter reporter, out Result result) {
             if (x.Length != y.Length) {
                 throw new ArgumentException("interval lengths do not match");
             }
             fixed (float* xF = &x[0], yF = &y[0]) {
-                return Calculate(xF, yF, x.Length, reporter, out maxVal);
+                return Calculate(xF, yF, x.Length, reporter, out result);
             }
         }
 
@@ -98,8 +112,8 @@ namespace AudioAlign.Audio.Matching {
         /// <param name="x">the first input series</param>
         /// <param name="y">the second input series</param>
         /// <returns>the adjustment offset as the number of samples that the second series if off from the first series</returns>
-        public static int Calculate(float[] x, float[] y, out double maxVal) {
-            return Calculate(x, y, null, out maxVal);
+        public static int Calculate(float[] x, float[] y, out Result result) {
+            return Calculate(x, y, null, out result);
         }
 
         /// <summary>
@@ -109,11 +123,11 @@ namespace AudioAlign.Audio.Matching {
         /// <param name="y">the second input series</param>
         /// <param name="length">the length of each input series</param>
         /// <returns>the adjustment offset as the number of samples that the second series if off from the first series</returns>
-        public static unsafe int Calculate(float* x, float* y, int length, out double maxVal) {
-            return Calculate(x, y, length, null, out maxVal);
+        public static unsafe int Calculate(float* x, float* y, int length, out Result result) {
+            return Calculate(x, y, length, null, out result);
         }
 
-        public static TimeSpan Calculate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor, out double maxVal) {
+        public static TimeSpan Calculate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor, out Result result) {
             if (i1.Length != i2.Length) {
                 throw new ArgumentException("interval lengths do not match");
             }
@@ -141,7 +155,7 @@ namespace AudioAlign.Audio.Matching {
             StreamUtil.ForceReadIntervalSamples(s1, i1, x);
             StreamUtil.ForceReadIntervalSamples(s2, i2, y);
 
-            int indexOffset = Calculate(x, y, progress, out maxVal);
+            int indexOffset = Calculate(x, y, progress, out result);
 
             TimeSpan offset = new TimeSpan((long)(indexOffset / (float)sampleRate * TimeUtil.SECS_TO_TICKS));
             Debug.WriteLine("peak offset @ " + offset);
@@ -151,12 +165,12 @@ namespace AudioAlign.Audio.Matching {
 
         public static void CalculateAsync(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor) {
             Task.Factory.StartNew(() => {
-                double maxValTemp;
-                Calculate(s1, i1, s2, i2, progressMonitor, out maxValTemp);
+                Result result;
+                Calculate(s1, i1, s2, i2, progressMonitor, out result);
             });
         }
 
-        public static Match Adjust(Match match, ProgressMonitor progressMonitor) {
+        public static Match Adjust(Match match, ProgressMonitor progressMonitor, out Result result) {
             try {
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
@@ -177,16 +191,15 @@ namespace AudioAlign.Audio.Matching {
                 iT1 += adjust;
                 iT2 += adjust;
 
-                double maxValTemp;
                 TimeSpan offset = Calculate(
                     match.Track1.CreateAudioStream(), iT1,
                     match.Track2.CreateAudioStream(), iT2,
-                    progressMonitor, out maxValTemp);
+                    progressMonitor, out result);
                 Debug.WriteLine("CC: " + match + ": " + offset + " (" + sw.Elapsed + ")");
 
                 return new Match(match) {
                     Track2Time = match.Track2Time + offset,
-                    Similarity = (float)maxValTemp,
+                    Similarity = result.MaxValue,
                     Source = "CC"
                 };
             }
@@ -194,7 +207,14 @@ namespace AudioAlign.Audio.Matching {
                 Debug.WriteLine("CC adjust failed: " + e.Message);
             }
 
+            result = null;
             return null;
+        }
+
+        public static Match Adjust(Match match, ProgressMonitor progressMonitor) {
+            // throw away the result
+            Result result;
+            return Adjust(match, progressMonitor, out result);
         }
 
         public static unsafe double Correlate(float* x, float* y, int length) {
