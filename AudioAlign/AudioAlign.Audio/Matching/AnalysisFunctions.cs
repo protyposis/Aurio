@@ -18,7 +18,7 @@ namespace AudioAlign.Audio.Matching {
                 float* yF = (float*)yB;
                 int n = x.Length / sizeof(float);
                 CrossCorrelation.Result ccr;
-                return (1 - Math.Abs(CrossCorrelation.Calculate(xF, yF, n, out ccr)) / (n / 2d)) * ccr.MaxValue;
+                return (1 - Math.Abs(CrossCorrelation.Calculate(xF, yF, n, out ccr)) / (n / 2d)) * ccr.AbsoluteMaxValue;
             }
         }
 

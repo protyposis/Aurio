@@ -20,6 +20,10 @@ namespace AudioAlign.Audio.Matching {
                 get { return Correlations[MaxIndex]; }
             }
 
+            public float AbsoluteMaxValue {
+                get { return Math.Abs(MaxValue); }
+            }
+
             public Result AbsoluteResult() {
                 var absCorr = Correlations.Select(Math.Abs).ToList();
                 return new Result() {
@@ -90,8 +94,9 @@ namespace AudioAlign.Audio.Matching {
             float maxval = float.MinValue;
             int maxindex = 0;
             for (int i = 0; i < r.Length; i++) {
-                if (r[i] > maxval) {
-                    maxval = r[i];
+                float val = Math.Abs(r[i]);
+                if (val > maxval) {
+                    maxval = val;
                     maxindex = i;
                 }
             }
@@ -207,7 +212,7 @@ namespace AudioAlign.Audio.Matching {
 
                 return new Match(match) {
                     Track2Time = match.Track2Time + offset,
-                    Similarity = result.MaxValue,
+                    Similarity = result.AbsoluteMaxValue,
                     Source = "CC"
                 };
             }
