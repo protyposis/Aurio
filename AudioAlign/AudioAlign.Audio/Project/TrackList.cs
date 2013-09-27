@@ -74,7 +74,7 @@ namespace AudioAlign.Audio.Project {
                 int index = list.IndexOf(track);
                 if (list.Remove(track)) {
                     OnTrackRemoved(new TrackListEventArgs(track, index));
-                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, track));
+                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, track, index));
                     return true;
                 }
             }
