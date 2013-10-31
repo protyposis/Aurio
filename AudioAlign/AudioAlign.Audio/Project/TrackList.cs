@@ -110,7 +110,6 @@ namespace AudioAlign.Audio.Project {
         public void Move(int oldIndex, int newIndex) {
             var item = list[oldIndex];
             list.RemoveAt(oldIndex);
-            if (newIndex > oldIndex) newIndex--;
             list.Insert(newIndex, item);
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(
                 NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
