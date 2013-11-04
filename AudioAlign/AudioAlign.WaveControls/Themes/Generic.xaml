@@ -294,6 +294,9 @@
                                         <ToggleButton IsChecked="{Binding Path=MonoDownmix, Mode=TwoWay}" Margin="1" Padding="0" Height="15" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
                                             <Image Source="{StaticResource IconSpeakers}" Width="12" Height="12" />
                                         </ToggleButton>
+                                        <ToggleButton IsChecked="{Binding Path=Locked, Mode=TwoWay}" Margin="1" Padding="0" Height="15" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
+                                            <Image Source="{StaticResource IconLock}" Width="12" Height="12" />
+                                        </ToggleButton>
                                     </StackPanel>
                                 </DockPanel>
                             </Border>
@@ -307,11 +310,15 @@
                                             TrackOffset="{Binding Path=Offset, Mode=TwoWay, Converter={StaticResource TimeSpanTicksConverter}}"
                                             WaveformLine="{Binding Path=Color, Mode=TwoWay}"/>
                             <Border Grid.Row="1" Background="Black" Opacity="0.5" Name="muteIndicator" Visibility="Hidden"/>
+                            <Border Grid.Row="1" Background="Red" Opacity="0.1" Name="lockIndicator" Visibility="Hidden"/>
                         </Grid>
                     </local:ResizeDecorator>
                     <DataTemplate.Triggers>
                         <DataTrigger Binding="{Binding Path=Mute}" Value="True">
                             <Setter TargetName="muteIndicator" Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=Locked}" Value="True">
+                            <Setter TargetName="lockIndicator" Property="Visibility" Value="Visible"/>
                         </DataTrigger>
                     </DataTemplate.Triggers>
                 </DataTemplate>

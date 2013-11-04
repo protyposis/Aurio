@@ -14,11 +14,13 @@ namespace AudioAlign.Audio.Project {
         public event EventHandler<ValueEventArgs<TimeSpan>> OffsetChanged;
         public event EventHandler<ValueEventArgs<string>> NameChanged;
         public event EventHandler<ValueEventArgs<string>> ColorChanged;
+        public event EventHandler<ValueEventArgs<bool>> LockedChanged;
 
         private TimeSpan length = TimeSpan.Zero;
         private TimeSpan offset = TimeSpan.Zero;
         private string name;
         private string color = DEFAULT_COLOR;
+        private bool locked = false;
 
         public Track(FileInfo fileInfo) {
             if (!fileInfo.Exists) {
@@ -50,6 +52,14 @@ namespace AudioAlign.Audio.Project {
         public string Color {
             get { return color; }
             set { color = value; OnColorChanged(); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value telling if this track is locked, which means it cannot be manipulated in the timeline (position change, etc...).
+        /// </summary>
+        public bool Locked {
+            get { return locked; } 
+            set { locked = value; OnLockedChanged(); }
         }
 
         #region INotifyPropertyChanged Members
@@ -90,6 +100,13 @@ namespace AudioAlign.Audio.Project {
                 ColorChanged(this, new ValueEventArgs<string>(color));
             }
             OnPropertyChanged("Color");
+        }
+
+        private void OnLockedChanged() {
+            if (LockedChanged != null) {
+                LockedChanged(this, new ValueEventArgs<bool>(locked));
+            }
+            OnPropertyChanged("Locked");
         }
 
         public override string ToString() {

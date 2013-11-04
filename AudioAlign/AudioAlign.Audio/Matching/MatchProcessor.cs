@@ -170,6 +170,10 @@ namespace AudioAlign.Audio.Matching {
         }
 
         public static void Align(Match match, AudioTrack trackToAdjust) {
+            if(trackToAdjust.Locked) {
+                return; // don't move locked track!!
+            }
+
             if (match.Track1 == trackToAdjust) {
                 match.Track1.Offset = match.Track2.Offset + match.Track2Time - match.Track1Time;
             }
@@ -181,16 +185,14 @@ namespace AudioAlign.Audio.Matching {
             }
         }
 
-        public static AudioTrack Align(Match match) {
-            if (match.Track1.Offset + match.Track1Time < match.Track2.Offset + match.Track2Time) {
+        public static void Align(Match match) {
+            if (!match.Track1.Locked && match.Track1.Offset + match.Track1Time < match.Track2.Offset + match.Track2Time) {
                 // move track 1
                 Align(match, match.Track1);
-                return match.Track1;
             }
-            else {
+            else if (!match.Track2.Locked) {
                 // move track 2
                 Align(match, match.Track2);
-                return match.Track2;
             }
         }
 
@@ -259,13 +261,13 @@ namespace AudioAlign.Audio.Matching {
                     List<Match> adjustedMatches = new List<Match>();
                     foreach (Match match in allMatches) {
                         if (!trackPair.Matches.Contains(match)) {
-                            if (match.Track1 == trackToAlign) {
+                            if (match.Track1 == trackToAlign && !match.Track1.Locked) {
                                 match.Track1Time = TimeUtil.BytesToTimeSpan(
                                     trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(
                                     TimeUtil.TimeSpanToBytes(match.Track1Time, properties)), properties);
                                 adjustedMatches.Add(match);
                             }
-                            else if (match.Track2 == trackToAlign) {
+                            else if (match.Track2 == trackToAlign && !match.Track2.Locked) {
                                 match.Track2Time = TimeUtil.BytesToTimeSpan(
                                     trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(
                                     TimeUtil.TimeSpanToBytes(match.Track2Time, properties)), properties);
@@ -284,7 +286,8 @@ namespace AudioAlign.Audio.Matching {
             TimeSpan start = trackList.Start;
             TimeSpan delta = startTime - start;
             foreach (AudioTrack audioTrack in trackList) {
-                audioTrack.Offset += delta;
+                if(!audioTrack.Locked)
+                    audioTrack.Offset += delta;
             }
         }
 

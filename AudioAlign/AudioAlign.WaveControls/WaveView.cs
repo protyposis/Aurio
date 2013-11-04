@@ -225,6 +225,9 @@ namespace AudioAlign.WaveControls {
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e) {
             base.OnMouseDown(e);
+
+            if (AudioTrack.Locked) return; // block any action if track is locked
+
             Point mouseDownPosition = Mouse.GetPosition(this);
             //Debug.WriteLine("WaveView OnMouseDown @ " + mouseDownPosition);
 

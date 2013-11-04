@@ -93,6 +93,10 @@ namespace AudioAlign.Audio.Project {
                 xml.WriteValue(track.InvertedPhase);
                 xml.WriteEndAttribute();
 
+                xml.WriteStartAttribute("locked");
+                xml.WriteValue(track.Locked);
+                xml.WriteEndAttribute();
+
                 xml.WriteStartElement("timewarps");
                 foreach (TimeWarp warp in track.TimeWarps) {
                     xml.WriteStartElement("timewarp");
@@ -211,6 +215,10 @@ namespace AudioAlign.Audio.Project {
 
                         xml.MoveToAttribute("invertedphase");
                         track.InvertedPhase = xml.ReadContentAsBoolean();
+
+                        if (xml.MoveToAttribute("locked")) {
+                            track.Locked = xml.ReadContentAsBoolean();
+                        }
 
                         xml.ReadStartElement("track");
                         if (xml.IsStartElement("timewarps")) {
