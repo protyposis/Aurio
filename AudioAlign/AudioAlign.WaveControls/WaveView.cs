@@ -21,6 +21,8 @@ using System.ComponentModel;
 namespace AudioAlign.WaveControls {
     public partial class WaveView : VirtualViewBase {
 
+        private SolidColorBrush _lineBrush;
+        private SolidColorBrush _backgroundBrush;
         private WaveformBitmapRenderer[] waveformBitmapRenderers;
         private WaveformGeometryRenderer[] waveformGeometryRenderers;
         private VisualizingStream audioStream;
@@ -46,6 +48,9 @@ namespace AudioAlign.WaveControls {
 
             DependencyPropertyDescriptor.FromProperty(Selector.IsSelectedProperty, typeof(WaveView))
                 .AddValueChanged(this, new EventHandler(OnSelectionChanged));
+
+            _lineBrush = WaveformLine;
+            _backgroundBrush = WaveformBackground;
         }
 
         public bool Antialiased {
@@ -121,7 +126,7 @@ namespace AudioAlign.WaveControls {
                 DateTime beforeDrawing = DateTime.Now;
 
                 // draw background
-                drawingContext.DrawRectangle(WaveformBackground, null, new Rect(drawingOffsetAligned, 0, drawingWidthAligned, ActualHeight));
+                drawingContext.DrawRectangle(_backgroundBrush, null, new Rect(drawingOffsetAligned, 0, drawingWidthAligned, ActualHeight));
                 if (debug) {
                     drawingContext.DrawRectangle(null, new Pen(Brushes.Brown, 4), new Rect(drawingOffsetAligned, 0, drawingWidthAligned, ActualHeight));
                 }
@@ -260,10 +265,25 @@ namespace AudioAlign.WaveControls {
         }
 
         protected void OnSelectionChanged(object sender, EventArgs e) {
-            // exchange colors to emphasize selected track
-            Brush temp = WaveformLine;
-            WaveformLine = WaveformBackground;
-            WaveformBackground = temp;
+            if((bool)GetValue(Selector.IsSelectedProperty)) {
+                // exchange colors to emphasize selected track
+                _lineBrush = WaveformBackground;
+                _backgroundBrush = WaveformLine;
+            } else {
+                _lineBrush = WaveformLine;
+                _backgroundBrush = WaveformBackground;
+            }
+            ApplyLineBrushToRenderers(); // apply line brush to renderers
+            InvalidateVisual();
+        }
+
+        private void ApplyLineBrushToRenderers() {
+            foreach (var renderer in waveformBitmapRenderers) {
+                renderer.WaveformLine = _lineBrush;
+            }
+            foreach (var renderer in waveformGeometryRenderers) {
+                renderer.WaveformLine = _lineBrush;
+            }
         }
     }
 }

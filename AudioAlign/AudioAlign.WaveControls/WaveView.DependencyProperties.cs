@@ -45,17 +45,18 @@ namespace AudioAlign.WaveControls
             DrawTrackNameProperty = DependencyProperty.Register("DrawTrackName", typeof(bool), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = false, AffectsRender = true });
 
-            WaveformBackgroundProperty = DependencyProperty.Register("WaveformBackground", typeof(Brush), typeof(WaveView), 
-                new FrameworkPropertyMetadata { DefaultValue = Brushes.White, AffectsRender = true });
+            WaveformBackgroundProperty = DependencyProperty.Register("WaveformBackground", typeof(SolidColorBrush), typeof(WaveView), 
+                new FrameworkPropertyMetadata { DefaultValue = Brushes.White, AffectsRender = true,
+                PropertyChangedCallback = OnWaveformBackgroundChanged });
 
-            WaveformLineProperty = DependencyProperty.Register("WaveformLine", typeof(Brush), typeof(WaveView),
+            WaveformLineProperty = DependencyProperty.Register("WaveformLine", typeof(SolidColorBrush), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = Brushes.CornflowerBlue, AffectsRender = true, 
                     PropertyChangedCallback = OnWaveformLineChanged });
 
-            WaveformFillProperty = DependencyProperty.Register("WaveformFill", typeof(Brush), typeof(WaveView),
+            WaveformFillProperty = DependencyProperty.Register("WaveformFill", typeof(SolidColorBrush), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = Brushes.LightBlue, AffectsRender = true });
 
-            WaveformSamplePointProperty = DependencyProperty.Register("WaveformSamplePoint", typeof(Brush), typeof(WaveView),
+            WaveformSamplePointProperty = DependencyProperty.Register("WaveformSamplePoint", typeof(SolidColorBrush), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = Brushes.RoyalBlue, AffectsRender = true });
 
             TrackLengthProperty = DependencyProperty.Register("TrackLength", typeof(long), typeof(WaveView),
@@ -112,12 +113,13 @@ namespace AudioAlign.WaveControls
 
         private static void OnWaveformLineChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             WaveView waveView = (WaveView)d;
-            foreach(var renderer in waveView.waveformBitmapRenderers) {
-                renderer.WaveformLine = e.NewValue as SolidColorBrush;
-            }
-            foreach(var renderer in waveView.waveformGeometryRenderers) {
-                renderer.WaveformLine = e.NewValue as SolidColorBrush;
-            }
+            waveView._lineBrush = e.NewValue as SolidColorBrush;
+            waveView.ApplyLineBrushToRenderers();
+        }
+
+        private static void OnWaveformBackgroundChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+            WaveView waveView = (WaveView)d;
+            waveView._backgroundBrush = e.NewValue as SolidColorBrush;
         }
 
         private static void OnTrackLengthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
@@ -163,26 +165,26 @@ namespace AudioAlign.WaveControls
         }
 
         [Bindable(true), Category("Brushes")]
-        public Brush WaveformBackground {
-            get { return (Brush)GetValue(WaveformBackgroundProperty); }
+        public SolidColorBrush WaveformBackground {
+            get { return (SolidColorBrush)GetValue(WaveformBackgroundProperty); }
             set { SetValue(WaveformBackgroundProperty, value); }
         }
 
         [Bindable(true), Category("Brushes")]
-        public Brush WaveformLine {
-            get { return (Brush)GetValue(WaveformLineProperty); }
+        public SolidColorBrush WaveformLine {
+            get { return (SolidColorBrush)GetValue(WaveformLineProperty); }
             set { SetValue(WaveformLineProperty, value); }
         }
 
         [Bindable(true), Category("Brushes")]
-        public Brush WaveformFill {
-            get { return (Brush)GetValue(WaveformFillProperty); }
+        public SolidColorBrush WaveformFill {
+            get { return (SolidColorBrush)GetValue(WaveformFillProperty); }
             set { SetValue(WaveformFillProperty, value); }
         }
 
         [Bindable(true), Category("Brushes")]
-        public Brush WaveformSamplePoint {
-            get { return (Brush)GetValue(WaveformSamplePointProperty); }
+        public SolidColorBrush WaveformSamplePoint {
+            get { return (SolidColorBrush)GetValue(WaveformSamplePointProperty); }
             set { SetValue(WaveformSamplePointProperty, value); }
         }
 
