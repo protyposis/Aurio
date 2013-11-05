@@ -11,8 +11,10 @@ namespace AudioAlign.WaveControls {
     public class TimeSpanConverter : IValueConverter {
         #region IValueConverter Members
 
+        public static readonly string DEFAULT_FORMAT = "d\\.hh\\:mm\\:ss\\.fffffff";
+
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-            string format = parameter as string;
+            string format = parameter as string ?? DEFAULT_FORMAT;
             TimeSpan timeSpan = new TimeSpan();
 
             if ((value as TimeSpan?) != null) {
@@ -28,7 +30,7 @@ namespace AudioAlign.WaveControls {
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
             string input = (string)value;
-            string format = parameter as string;
+            string format = parameter as string ?? DEFAULT_FORMAT;
 
             if (targetType == typeof(long)) {
                 return TimeSpan.ParseExact(input, format, null).Ticks;
