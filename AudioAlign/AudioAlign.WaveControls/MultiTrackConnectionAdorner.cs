@@ -17,7 +17,7 @@ namespace AudioAlign.WaveControls {
 
         private MultiTrackListBox multiTrackListBox;
         private ObservableCollection<Match> matches;
-        private Match selectedMatch;
+        private ObservableCollection<Match> selectedMatches;
         private Color[] colors;
 
         public MultiTrackConnectionAdorner(UIElement adornedElement, MultiTrackListBox multiTrackListBox)
@@ -25,6 +25,8 @@ namespace AudioAlign.WaveControls {
                 this.multiTrackListBox = multiTrackListBox;
                 matches = new ObservableCollection<Match>();
                 matches.CollectionChanged += Matches_CollectionChanged;
+                selectedMatches = new ObservableCollection<Match>();
+            selectedMatches.CollectionChanged += Matches_CollectionChanged;
 
                 ColorGradient gradient = new ColorGradient(0, 1);
                 gradient.AddStop(Colors.DarkRed, 0);
@@ -35,20 +37,29 @@ namespace AudioAlign.WaveControls {
                 colors = gradient.GetGradient(1024).ToArray();
         }
 
-        public ObservableCollection<Match> Matches {
+        public Collection<Match> Matches {
             get { return matches; }
         }
 
         public Match SelectedMatch {
-            get { return selectedMatch; }
+            get {
+                if(selectedMatches.Count > 0) {
+                    return selectedMatches[0];
+                }
+                return null;
+            }
             set {
                 if (value != null && !matches.Contains(value)) {
                     throw new Exception("match to be selected isn't part of the match collection");
                 }
-                selectedMatch = value;
-                InvalidateVisual();
+                selectedMatches.Clear();
+                selectedMatches.Add(value);
             }
         }
+
+        public Collection<Match> SelectedMatches {
+            get { return selectedMatches; }
+        } 
 
         protected override void OnRender(DrawingContext drawingContext) {
             if (multiTrackListBox.ItemsSource == null || !multiTrackListBox.ItemsSource.GetEnumerator().MoveNext()) {
@@ -81,11 +92,9 @@ namespace AudioAlign.WaveControls {
                         StartLineCap = PenLineCap.Triangle
                     }, p1, p2);
                 }
-            }
 
-            // draw selected match
-            if (selectedMatch != null) {
-                if (CalculatePoints(selectedMatch, waveViewMappings, out p1, out p2)) {
+                // draw selected match
+                if(selectedMatches.Contains(match)) {
                     DrawTriangle(drawingContext, Brushes.Red, p1, p1.Y > p2.Y ? 6 : -6); // top triangle
                     DrawTriangle(drawingContext, Brushes.Red, p2, p1.Y > p2.Y ? -6 : 6); // bottom triangle
                 }
