@@ -177,10 +177,18 @@ namespace AudioAlign.WaveControls {
             base.OnPreviewMouseWheel(e);
 
             // if the ctrl-key is held, we scroll the viewport
-            if (Keyboard.Modifiers == ModifierKeys.Control) {
-                double scrollPercentage = 0.01d;
-                double scrollOffset = ActualWidth * scrollPercentage * (e.Delta / Mouse.MouseWheelDeltaForOneLine);
-                VirtualViewportOffset += PhysicalToVirtualOffset(scrollOffset);
+            if ((Keyboard.Modifiers & ModifierKeys.Control) > 0) {
+                long offset = 0;
+                if ((Keyboard.Modifiers & ModifierKeys.Shift) > 0) {
+                    offset = (long) (VirtualViewportWidth*0.9);
+                    if (e.Delta < 0) offset *= -1;
+                }
+                else {
+                    double scrollPercentage = 0.01d;
+                    double scrollOffset = ActualWidth*scrollPercentage*(e.Delta/Mouse.MouseWheelDeltaForOneLine);
+                    offset = PhysicalToVirtualOffset(scrollOffset);
+                }
+                VirtualViewportOffset += offset;
                 e.Handled = true;
                 return;
             }
