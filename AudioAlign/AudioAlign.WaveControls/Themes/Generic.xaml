@@ -310,7 +310,7 @@
                                             TrackLength="{Binding Path=Length, Converter={StaticResource TimeSpanTicksConverter}}"
                                             TrackOffset="{Binding Path=Offset, Mode=TwoWay, Converter={StaticResource TimeSpanTicksConverter}}"
                                             WaveformLine="{Binding Path=Color, Mode=TwoWay}"/>
-                            <Border Grid.Row="1" Background="Black" Opacity="0.5" Name="muteIndicator" Visibility="Hidden"/>
+                            <Border Grid.Row="1" Background="Black" Opacity="0.5" Name="muteIndicator" Visibility="Hidden" IsHitTestVisible="False"/>
                             <Border Grid.Row="1" Background="Red" Opacity="0.1" Name="lockIndicator" Visibility="Hidden"/>
                         </Grid>
                     </local:ResizeDecorator>
