@@ -51,6 +51,8 @@ namespace AudioAlign.Audio.Project {
             list.Add(track);
             OnTrackAdded(new TrackListEventArgs(track, list.IndexOf(track)));
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, track));
+            track.LengthChanged += Track_LengthOrOffsetChanged;
+            track.OffsetChanged += Track_LengthOrOffsetChanged;
         }
 
         public void Add(IEnumerable<T> tracks) {
@@ -73,6 +75,8 @@ namespace AudioAlign.Audio.Project {
             if (list.Contains(track)) {
                 int index = list.IndexOf(track);
                 if (list.Remove(track)) {
+                    track.LengthChanged -= Track_LengthOrOffsetChanged;
+                    track.OffsetChanged -= Track_LengthOrOffsetChanged;
                     OnTrackRemoved(new TrackListEventArgs(track, index));
                     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, track, index));
                     return true;
@@ -162,6 +166,12 @@ namespace AudioAlign.Audio.Project {
                 }
                 return total;
             }
+        }
+
+        private void Track_LengthOrOffsetChanged(object sender, ValueEventArgs<TimeSpan> e) {
+            // if a track length or offset changes, it might affect the whole tracklist
+            // TODO check if tracklist properties are affected and only fire event in these cases
+            OnTrackListChanged();
         }
 
         #region IEnumerable<T> Members

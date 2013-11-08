@@ -85,8 +85,7 @@ namespace AudioAlign.WaveControls {
                 return lowerBound;
             }
 
-            // TODO create dependency property Virtual(Content)ViewBase.VirtualWidth with default long.MaxValue and replace all occurences of 100000000000 with the property
-            long upperBound = 100000000000L;
+            long upperBound = ((VirtualView)d).VirtualViewportMaxWidth;
             if (newValue > upperBound) {
                 return upperBound;
             }

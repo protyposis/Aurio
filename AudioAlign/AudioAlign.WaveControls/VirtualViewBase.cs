@@ -8,7 +8,7 @@ using AudioAlign.Audio;
 using System.Diagnostics;
 
 namespace AudioAlign.WaveControls {
-    public class VirtualViewBase: Control {
+    public class VirtualViewBase: Control, VirtualView {
 
         public static readonly DependencyProperty VirtualViewportOffsetProperty = DependencyProperty.Register(
             "VirtualViewportOffset", typeof(long), typeof(VirtualViewBase),
@@ -32,6 +32,15 @@ namespace AudioAlign.WaveControls {
                     Inherits = true, AffectsRender = true,
                     CoerceValueCallback = CoerceVirtualViewportMinWidth,
                     PropertyChangedCallback = OnViewportMinWidthChanged, DefaultValue = 1L
+                });
+
+        public static readonly DependencyProperty VirtualViewportMaxWidthProperty = DependencyProperty.Register(
+            "VirtualViewportMaxWidth", typeof(long), typeof(VirtualViewBase),
+                new FrameworkPropertyMetadata {
+                    Inherits = true, AffectsRender = true,
+                    CoerceValueCallback = CoerceVirtualViewportMaxWidth,
+                    PropertyChangedCallback = OnViewportMaxWidthChanged,
+                    DefaultValue = 100000000000L
                 });
 
         public static readonly DependencyProperty DebugOutputProperty = DependencyProperty.Register(
@@ -70,6 +79,15 @@ namespace AudioAlign.WaveControls {
             return newValue;
         }
 
+        private static object CoerceVirtualViewportMaxWidth(DependencyObject d, object value) {
+            //Debug.WriteLine("CoerceVirtualViewportMaxWidth @ " + ((FrameworkElement)d).Name + " -> " + value);
+            long newValue = (long)value;
+            if (newValue < 1) {
+                return 1L;
+            }
+            return newValue;
+        }
+
         private static void OnViewportOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             VirtualViewBase ctrl = (VirtualViewBase)d;
             ctrl.OnViewportOffsetChanged((long)e.OldValue, (long)e.NewValue);
@@ -81,6 +99,9 @@ namespace AudioAlign.WaveControls {
         }
 
         private static void OnViewportMinWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        }
+
+        private static void OnViewportMaxWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
         }
 
         public long VirtualViewportOffset {
@@ -96,6 +117,11 @@ namespace AudioAlign.WaveControls {
         public long VirtualViewportMinWidth {
             get { return (long)GetValue(VirtualViewportMinWidthProperty); }
             set { SetValue(VirtualViewportMinWidthProperty, value); }
+        }
+
+        public long VirtualViewportMaxWidth {
+            get { return (long)GetValue(VirtualViewportMaxWidthProperty); }
+            set { SetValue(VirtualViewportMaxWidthProperty, value); }
         }
 
         public bool DebugOutput {

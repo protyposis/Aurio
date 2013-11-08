@@ -412,7 +412,7 @@
                                        Grid.Column="0"
                                        Value="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=VirtualViewportOffset}"
                                        Minimum="0"
-                                       Maximum="100000000000"
+                                       Maximum="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=VirtualViewportMaxWidth}"
                                        SmallChange="{Binding RelativeSource={RelativeSource Mode=Self}, Path=ViewportSize, Converter={StaticResource MultiplicationConverter}, ConverterParameter='0.2'}"
                                        LargeChange="{Binding RelativeSource={RelativeSource Mode=Self}, Path=ViewportSize}"
                                        ViewportSize="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=VirtualViewportWidth}"/>

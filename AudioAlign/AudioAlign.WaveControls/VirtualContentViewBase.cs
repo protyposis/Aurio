@@ -7,7 +7,7 @@ using System.Windows;
 using AudioAlign.Audio;
 
 namespace AudioAlign.WaveControls {
-    public class VirtualContentViewBase : ContentControl {
+    public class VirtualContentViewBase : ContentControl, VirtualView {
 
         public static readonly DependencyProperty VirtualViewportOffsetProperty =
             VirtualViewBase.VirtualViewportOffsetProperty.AddOwner(typeof(VirtualContentViewBase),
@@ -20,6 +20,10 @@ namespace AudioAlign.WaveControls {
         public static readonly DependencyProperty VirtualViewportMinWidthProperty =
             VirtualViewBase.VirtualViewportMinWidthProperty.AddOwner(typeof(VirtualContentViewBase),
             new FrameworkPropertyMetadata() { Inherits = true, PropertyChangedCallback = OnViewportMinWidthChanged });
+
+        public static readonly DependencyProperty VirtualViewportMaxWidthProperty =
+            VirtualViewBase.VirtualViewportMaxWidthProperty.AddOwner(typeof(VirtualContentViewBase),
+            new FrameworkPropertyMetadata() { Inherits = true, PropertyChangedCallback = OnViewportMaxWidthChanged });
 
         public static readonly DependencyProperty DebugOutputProperty =
             VirtualViewBase.DebugOutputProperty.AddOwner(typeof(VirtualContentViewBase),
@@ -38,6 +42,9 @@ namespace AudioAlign.WaveControls {
         private static void OnViewportMinWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
         }
 
+        private static void OnViewportMaxWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        }
+
         public long VirtualViewportOffset {
             get { return (long)GetValue(VirtualViewportOffsetProperty); }
             set { SetValue(VirtualViewportOffsetProperty, value); }
@@ -51,6 +58,11 @@ namespace AudioAlign.WaveControls {
         public long VirtualViewportMinWidth {
             get { return (long)GetValue(VirtualViewportMinWidthProperty); }
             set { SetValue(VirtualViewportMinWidthProperty, value); }
+        }
+
+        public long VirtualViewportMaxWidth {
+            get { return (long)GetValue(VirtualViewportMaxWidthProperty); }
+            set { SetValue(VirtualViewportMaxWidthProperty, value); }
         }
 
         public bool DebugOutput {
