@@ -32,7 +32,8 @@
                                            Width="1" 
                                            Fill="Black" 
                                            Height="{Binding ElementName=CaretContainer, Path=ActualHeight}" 
-                                           Canvas.Left="{TemplateBinding PhysicalCaretOffset}"/>
+                                           Canvas.Left="{TemplateBinding PhysicalCaretOffset}"
+                                           IsHitTestVisible="False"/>
                             </Canvas>
                         </Border>
                     </Grid>
