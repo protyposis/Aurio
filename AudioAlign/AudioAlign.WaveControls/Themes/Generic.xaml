@@ -217,12 +217,12 @@
             <Setter.Value>
                 <DataTemplate>
                     <local:ResizeDecorator Height="100">
-                        <Grid>
+                        <Grid Name="trackGrid">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
-                            <Border Grid.Row="0" BorderThickness="0,1" BorderBrush="Black" Background="DimGray" 
+                            <Border Name="titleBar" Grid.Row="0" BorderThickness="0,1" BorderBrush="Black" Background="DimGray" 
                                     local:CaretOverlay.SuppressEvents="True" 
                                     Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MultiTrackListBox}}, Path=TrackHeadersVisibility}">
                                 <DockPanel LastChildFill="False">
@@ -320,6 +320,10 @@
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Path=Locked}" Value="True">
                             <Setter TargetName="lockIndicator" Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
+                            <Setter TargetName="titleBar" Property="Background" Value="{Binding Path=Color}"/>
+                            <Setter TargetName="trackGrid" Property="Background" Value="{Binding Path=Color}"/>
                         </DataTrigger>
                     </DataTemplate.Triggers>
                 </DataTemplate>

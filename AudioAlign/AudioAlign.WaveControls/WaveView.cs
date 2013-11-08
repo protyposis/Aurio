@@ -268,16 +268,7 @@ namespace AudioAlign.WaveControls {
         }
 
         protected void OnSelectionChanged(object sender, EventArgs e) {
-            if((bool)GetValue(Selector.IsSelectedProperty)) {
-                // exchange colors to emphasize selected track
-                _lineBrush = WaveformBackground;
-                _backgroundBrush = WaveformLine;
-            } else {
-                _lineBrush = WaveformLine;
-                _backgroundBrush = WaveformBackground;
-            }
-            ApplyLineBrushToRenderers(); // apply line brush to renderers
-            InvalidateVisual();
+            // nothing to do now
         }
 
         private void ApplyLineBrushToRenderers() {
