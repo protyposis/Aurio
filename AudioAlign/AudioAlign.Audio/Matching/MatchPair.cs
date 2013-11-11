@@ -22,5 +22,11 @@ namespace AudioAlign.Audio.Matching {
             }
             return similarity /= Matches.Count;
         }
+
+        public void SwapTracks() {
+            AudioTrack temp = Track1;
+            Track1 = Track2;
+            Track2 = temp;
+        }
     }
 }

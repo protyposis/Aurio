@@ -246,6 +246,27 @@ namespace AudioAlign.Audio.Matching {
                 trackPair.Track2.TimeWarps.Clear();
             }
 
+            // reorder list and put first locked track to top to start alignment at this track
+            List<AudioTrack> allTracks = new List<AudioTrack>();
+            foreach (MatchPair pair in trackPairs) {
+                if (pair.Track2.Locked)
+                    pair.SwapTracks();
+
+                if (pair.Track1.Locked) {
+                    int pairIndex = trackPairs.IndexOf(pair);
+                    /* If the locked track is somewhere in the middle of the alignment sequence, the order of the preceding
+                     * pairs needs to be reversed for the alignment sequence to be correct. What happens is, that a path of
+                     * alignment pairs gets split into 2 subpaths, forming a tree with two branches. */
+                    if (pairIndex > 0) {
+                        trackPairs.Reverse(0, pairIndex);
+                    }
+                    trackPairs.Remove(pair);
+                    trackPairs.Insert(0, pair);
+                    alignedTracks.Add(pair.Track1);
+                    break;
+                }
+            }
+
             foreach (MatchPair trackPair in trackPairs) {
                 AudioTrack trackToAlign = alignedTracks.Contains(trackPair.Track2) ?
                     trackPair.Track1 : trackPair.Track2;
