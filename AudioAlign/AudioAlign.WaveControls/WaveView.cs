@@ -94,8 +94,9 @@ namespace AudioAlign.WaveControls {
                     return;
                 }
 
-                if (drawingWidthAligned < 1) {
-                    // the visible width of the track is too narrow to be drawn/visible
+                if (drawingWidthAligned <= 1) {
+                    // the visible width of the track is too narrow to be drawn/visible, so draw a line to visually indicate the presence of a waveform
+                    drawingContext.DrawRectangle(_lineBrush, null, new Rect(drawingOffsetAligned, 0, 1, ActualHeight));
                     return;
                 }
 
