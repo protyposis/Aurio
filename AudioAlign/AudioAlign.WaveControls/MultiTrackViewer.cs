@@ -241,6 +241,35 @@ namespace AudioAlign.WaveControls {
             e.Handled = true;
         }
 
+        protected override void OnPreviewKeyDown(KeyEventArgs e) {
+            base.OnKeyUp(e);
+            if (SelectedItem != null && Keyboard.Modifiers == ModifierKeys.Shift) {
+                TrackList<AudioTrack> itemsSource = (TrackList<AudioTrack>)ItemsSource;
+
+                int oldIndex = itemsSource.IndexOf((AudioTrack)SelectedItem);
+                int newIndex = oldIndex;
+
+                if (e.Key == Key.Up) {
+                    newIndex = Math.Max(0, newIndex - 1);
+                }
+                else if (e.Key == Key.Down) {
+                    newIndex = Math.Min(itemsSource.Count - 1, oldIndex + 1);
+                }
+
+                if (newIndex != oldIndex) {
+                    itemsSource.Move(oldIndex, newIndex);
+                    multiTrackListBox.SelectedIndex = newIndex;
+
+                    // http://stackoverflow.com/a/10463162
+                    ListBoxItem listBoxItem = (ListBoxItem)multiTrackListBox.ItemContainerGenerator.ContainerFromItem(multiTrackListBox.SelectedItem);
+                    listBoxItem.Focus();
+                    RefreshAdornerLayer();
+                }
+
+                e.Handled = true;
+            }
+        }
+
         protected override void OnViewportOffsetChanged(long oldValue, long newValue) {
             base.OnViewportOffsetChanged(oldValue, newValue);
             RefreshAdornerLayer();
