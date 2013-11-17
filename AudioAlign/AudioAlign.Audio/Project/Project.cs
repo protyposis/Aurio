@@ -433,6 +433,78 @@ namespace AudioAlign.Audio.Project {
             writer.Close();
         }
 
+        public static void ExportSyncXML(Project project, FileInfo targetFile) {
+            Stream stream = targetFile.Create();
+
+            string timeFormat = "G";
+            IFormatProvider numberFormat = new CultureInfo("en-US");
+
+            XmlTextWriter xml = new XmlTextWriter(stream, null);
+            xml.Formatting = Formatting.Indented;
+            xml.WriteStartElement("sync");
+
+
+            // audio tracks
+            xml.WriteStartElement("recordings");
+            foreach (AudioTrack track in project.AudioTracks) {
+                if (track.Volume == 0.0f) {
+                    // skip tracks whose volume is muted
+                    continue;
+                }
+
+                xml.WriteStartElement("recording");
+
+                xml.WriteStartAttribute("name");
+                xml.WriteString(Path.GetFileNameWithoutExtension(track.FileInfo.Name));
+                xml.WriteEndAttribute();
+
+                xml.WriteStartAttribute("offset");
+                xml.WriteString(track.Offset.ToString(timeFormat, numberFormat));
+                xml.WriteEndAttribute();
+
+                xml.WriteEndElement();
+            }
+            xml.WriteEndElement();
+
+            // matches
+            xml.WriteStartElement("syncpoints");
+            foreach (Match match in project.Matches) {
+                xml.WriteStartElement("syncpoint");
+
+                xml.WriteStartElement("recording1");
+
+                xml.WriteStartAttribute("name");
+                xml.WriteValue(Path.GetFileNameWithoutExtension(match.Track1.FileInfo.Name));
+                xml.WriteEndAttribute();
+
+                xml.WriteStartAttribute("time");
+                xml.WriteString(match.Track1Time.ToString(timeFormat, numberFormat));
+                xml.WriteEndAttribute();
+
+                xml.WriteEndElement();
+
+                xml.WriteStartElement("recording2");
+
+                xml.WriteStartAttribute("name");
+                xml.WriteValue(Path.GetFileNameWithoutExtension(match.Track2.FileInfo.Name));
+                xml.WriteEndAttribute();
+
+                xml.WriteStartAttribute("time");
+                xml.WriteString(match.Track2Time.ToString(timeFormat, numberFormat));
+                xml.WriteEndAttribute();
+
+                xml.WriteEndElement();
+
+                xml.WriteEndElement();
+            }
+            xml.WriteEndElement();
+
+            xml.WriteEndElement();
+
+            xml.Flush();
+            xml.Close();
+        }
+
         private static string GetFullOrRelativeFileName(FileInfo referenceFile, FileInfo targetFile) {
             Uri uri1 = new Uri(targetFile.FullName);
             Uri uri2 = new Uri(referenceFile.DirectoryName + Path.DirectorySeparatorChar);
