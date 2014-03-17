@@ -9,17 +9,24 @@ namespace AudioAlign.Audio.Streams {
 
         private AudioProperties properties;
         private byte[] sourceBuffer;
+        private bool passthrough;
 
         public IeeeStream(IAudioStream sourceStream)
             : base(sourceStream) {
-            if (!(sourceStream.Properties.Format == AudioFormat.LPCM && sourceStream.Properties.BitDepth == 16)) {
-                throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
+            if (sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32) {
+                passthrough = true;
+                properties = sourceStream.Properties;
             }
+            else {
+                if (!(sourceStream.Properties.Format == AudioFormat.LPCM && sourceStream.Properties.BitDepth == 16)) {
+                    throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
+                }
 
-            properties = new AudioProperties(sourceStream.Properties.Channels, sourceStream.Properties.SampleRate,
-                32, AudioFormat.IEEE);
+                properties = new AudioProperties(sourceStream.Properties.Channels, sourceStream.Properties.SampleRate,
+                    32, AudioFormat.IEEE);
 
-            sourceBuffer = new byte[0];
+                sourceBuffer = new byte[0];
+            }
         }
 
         public override AudioProperties Properties {
@@ -40,6 +47,10 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public override int Read(byte[] buffer, int offset, int count) {
+            if (passthrough) {
+                return sourceStream.Read(buffer, offset, count);
+            }
+
             // dynamically increase buffer size
             if (sourceBuffer.Length < count) {
                 int oldSize = sourceBuffer.Length;
