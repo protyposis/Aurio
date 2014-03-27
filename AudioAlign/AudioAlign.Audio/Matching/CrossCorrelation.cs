@@ -209,6 +209,7 @@ namespace AudioAlign.Audio.Matching {
                     match.Track2.CreateAudioStream(), iT2,
                     progressMonitor, out result);
                 Debug.WriteLine("CC: " + match + ": " + offset + " (" + sw.Elapsed + ")");
+                Debug.WriteLine("CCEV;" + match + ";" + offset.TotalMilliseconds + ";" + result.MaxValue + ";" + result.AbsoluteMaxValue + ";" + result.Correlations.Average() + ";" + result.Correlations.Average(f => Math.Abs(f)));
 
                 return new Match(match) {
                     Track2Time = match.Track2Time + offset,
