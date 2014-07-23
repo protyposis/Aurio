@@ -26,10 +26,10 @@ namespace BatchResampler
 
             Dictionary<FileInfo, double> fileMapping = new Dictionary<FileInfo, double>();
 
-            foreach (string regex in mapping.Keys)
+            foreach (string fileNamePattern in mapping.Keys)
             {
-                double factor = mapping[regex];
-                foreach (FileInfo fileInfo in indir.EnumerateFiles(regex))
+                double factor = mapping[fileNamePattern];
+                foreach (FileInfo fileInfo in indir.EnumerateFiles(fileNamePattern))
                 {
                     fileMapping.Add(fileInfo, factor);
                 }
