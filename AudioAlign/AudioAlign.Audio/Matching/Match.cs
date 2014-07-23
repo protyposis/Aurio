@@ -26,7 +26,7 @@ namespace AudioAlign.Audio.Matching {
 
         public TimeSpan Offset {
             get {
-                return Track1Time - Track2Time;
+                return (Track1.Offset + Track1Time) - (Track2.Offset + Track2Time);
             }
         }
 
