@@ -8,6 +8,7 @@ using System.Xml.Serialization;
 using System.Xml;
 using AudioAlign.Audio.Streams;
 using System.Globalization;
+using System.Collections.ObjectModel;
 
 namespace AudioAlign.Audio.Project {
     public class Project {
@@ -503,6 +504,29 @@ namespace AudioAlign.Audio.Project {
 
             xml.Flush();
             xml.Close();
+        }
+
+        public static void ExportMatchesCSV(Collection<Match> matches, FileInfo targetFile) {
+            Stream stream = targetFile.Create();
+
+            string timeFormat = "G";
+            IFormatProvider numberFormat = new CultureInfo("en-US");
+
+            StreamWriter text = new StreamWriter(stream, Encoding.UTF8);
+
+            // write title header
+            text.WriteLine("Track A;Track B;Track A Position;Track B Position;Similarity;Offset;Source;Track A Position (ms);Track B Position (ms);Offset (ms)");
+
+            // write matches
+            foreach (Match m in matches) {
+                text.WriteLine(String.Format("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9}", m.Track1.Name, m.Track2.Name, 
+                    m.Track1Time.ToString(timeFormat, numberFormat), m.Track2Time.ToString(timeFormat, numberFormat), 
+                    m.Similarity, m.Offset.ToString(timeFormat, numberFormat), m.Source,
+                    (long)m.Track1Time.TotalMilliseconds, (long)m.Track2Time.TotalMilliseconds, (long)m.Offset.TotalMilliseconds));
+            }
+
+            text.Flush();
+            text.Close();
         }
 
         private static string GetFullOrRelativeFileName(FileInfo referenceFile, FileInfo targetFile) {
