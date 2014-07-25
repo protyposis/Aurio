@@ -46,14 +46,21 @@ namespace BatchResampler
                 }
 
                 Console.WriteLine(fileInfo.Name);
-                IAudioStream inputStream = AudioStreamFactory.FromFileInfoIeee32(fileInfo);
-                IAudioStream resamplingStream = new ResamplingStream(inputStream, ResamplingQuality.SincBest, factor);
-                MixerStream sampleRateResetStream = new MixerStream(resamplingStream.Properties.Channels, inputStream.Properties.SampleRate);
-                sampleRateResetStream.Add(resamplingStream);
+                try
+                {
+                    IAudioStream inputStream = AudioStreamFactory.FromFileInfoIeee32(fileInfo);
+                    IAudioStream resamplingStream = new ResamplingStream(inputStream, ResamplingQuality.SincBest, factor);
+                    MixerStream sampleRateResetStream = new MixerStream(resamplingStream.Properties.Channels, inputStream.Properties.SampleRate);
+                    sampleRateResetStream.Add(resamplingStream);
 
-                IAudioStream outputStream = sampleRateResetStream;
+                    IAudioStream outputStream = sampleRateResetStream;
 
-                AudioStreamFactory.WriteToFile(outputStream, outputFileInfo.FullName);
+                    AudioStreamFactory.WriteToFile(outputStream, outputFileInfo.FullName);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("Error processing " + fileInfo.Name + ": " + e.Message);
+                }
             });
         }
 
