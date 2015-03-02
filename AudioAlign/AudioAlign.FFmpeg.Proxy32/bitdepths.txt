@@ -1,0 +1,30 @@
+This document is about determining the audio bitdepth of an encoded audio stream.
+
+Audio bitdepths in FFmpeg are rather obscure, and there is no field telling the "nominal" bitrate. 
+This is partly because lossy compressed formats do not have a fixed bitdepth.
+
+Tests with different formats:
+
+flac24		sampleformat: s32,		planar: 0,	channels: 2,		raw bitdepth: 24,	bitdepth: 32
+pcm_s24le	sampleformat: s32,		planar: 0,	channels: 2,		raw bitdepth: 24,	bitdepth: 32
+aac			sampleformat: fltp,		planar: 1,	channels: 2,		raw bitdepth: 0,	bitdepth: 32
+mp3			sampleformat: s16p,		planar: 1,	channels: 2,		raw bitdepth: 0,	bitdepth: 16
+pcm_s16le	sampleformat: s16,		planar: 0,	channels: 2,		raw bitdepth: 0,	bitdepth: 16
+mp3			sampleformat: s16p,		planar: 1,	channels: 2,		raw bitdepth: 0,	bitdepth: 16
+flac16		sampleformat: s16,		planar: 0,	channels: 2,		raw bitdepth: 16,	bitdepth: 16
+shorten		sampleformat: s16p,		planar: 1,	channels: 2,		raw bitdepth: 0,	bitdepth: 16
+pcm_f32le	sampleformat: flt,		planar: 0,	channels: 2,		raw bitdepth: 0,	bitdepth: 32
+
+raw bitdepth: codec_ctx->bits_per_raw_sample
+bitdepth: av_get_bytes_per_sample(codec_ctx->sample_fmt) * 8
+
+Conclusion:
+
+If the raw bitdepth is set, this is the original encoded bitdepth. If not set, the processing bitdepth 
+equals the source bitdepth if this is a supported concept by the audio format (e.g. pcm, shorten); if 
+it is an unsupported concept (usually in lossy conpressed format, eg.g mp3, aac), we cannot know the 
+source bitdepth (the processing bitdepth will be at least as high as the input was, to represent the full 
+depth information).
+
+Sources:
+http://comments.gmane.org/gmane.comp.video.ffmpeg.devel/182531

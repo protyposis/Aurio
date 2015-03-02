@@ -90,6 +90,9 @@ copy $(SolutionDir)\..\libs\ffmpeg\win32\bin\swresample-1.dll $(OutDir)</Command
   <ItemGroup>
     <ClCompile Include="proxy.c" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="bitdepths.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

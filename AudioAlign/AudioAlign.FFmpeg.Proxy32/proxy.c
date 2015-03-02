@@ -32,18 +32,22 @@
 #include <stdio.h>
 
 // FFmpeg includes
-#include <libavformat\avformat.h>
-#include <libavutil\timestamp.h>
+#include "libavformat\avformat.h"
+#include "libavutil\timestamp.h"
+#include "libswresample\swresample.h"
+#include "libavutil\opt.h"
 
 // FFmpeg libs
 #pragma comment(lib, "avformat.lib")
 #pragma comment(lib, "avcodec.lib")
 #pragma comment(lib, "avutil.lib")
+#pragma comment(lib, "swresample.lib")
 
 // function definitions
 static void info(AVFormatContext *fmt_ctx);
 static int open_codec_context(AVFormatContext *fmt_ctx, enum AVMediaType type);
 static int decode_audio_packet(int audio_stream_idx, AVPacket pkt, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *got_frame, int cached);
+static int convert_samples(SwrContext *swr, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *output_buffer_size, uint8_t **output_buffer);
 
 int main(int argc, char *argv[])
 {
@@ -56,6 +60,7 @@ int main(int argc, char *argv[])
 	AVFrame *frame = NULL;
 	int ret;
 	int got_frame;
+	SwrContext *swr = NULL;
 
 	if (argc < 2) {
 		fprintf(stderr, "No source file specified\n");
@@ -90,6 +95,20 @@ int main(int argc, char *argv[])
 	audio_stream = fmt_ctx->streams[audio_stream_idx];
 	audio_codec_ctx = audio_stream->codec;
 
+	/* initialize sample format converter */
+	// http://stackoverflow.com/a/15372417
+	swr = swr_alloc();
+	av_opt_set_int(swr, "in_channel_layout", audio_codec_ctx->channel_layout, 0);
+	av_opt_set_int(swr, "out_channel_layout", audio_codec_ctx->channel_layout, 0);
+	av_opt_set_int(swr, "in_sample_rate", audio_codec_ctx->sample_rate, 0);
+	av_opt_set_int(swr, "out_sample_rate", audio_codec_ctx->sample_rate, 0);
+	av_opt_set_sample_fmt(swr, "in_sample_fmt", audio_codec_ctx->sample_fmt, 0);
+	av_opt_set_sample_fmt(swr, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
+	swr_init(swr);
+
+	int output_buffer_size = 0;
+	uint8_t *output_buffer = NULL;
+
 	/* initialize packet, set data to NULL, let the demuxer fill it */
 	av_init_packet(&pkt);
 	pkt.data = NULL;
@@ -109,6 +128,8 @@ int main(int argc, char *argv[])
 				break;
 			pkt.data += ret;
 			pkt.size -= ret;
+
+			convert_samples(swr, audio_codec_ctx, frame, &output_buffer_size, &output_buffer);
 		} while (pkt.size > 0);
 		av_free_packet(&orig_pkt);
 	}
@@ -118,12 +139,15 @@ int main(int argc, char *argv[])
 	pkt.size = 0;
 	do {
 		decode_audio_packet(audio_stream_idx, pkt, audio_codec_ctx, frame, &got_frame, 1);
+		convert_samples(swr, audio_codec_ctx, frame, &output_buffer_size, &output_buffer);
 	} while (got_frame);
 
 
 	/* close open FFmpeg stuff */
 	av_free_packet(&pkt);
 	av_frame_free(&frame);
+	free(output_buffer);
+	swr_free(&swr);
 	avcodec_close(audio_codec_ctx);
 	avformat_close_input(&fmt_ctx);
 
@@ -153,6 +177,7 @@ static void info(AVFormatContext *fmt_ctx)
 		printf("  duration: ............ %lld\n", stream->duration);
 		printf("  number of frames: .... %lld\n", stream->nb_frames);
 		printf("  sample aspect ratio: . %d:%d\n", stream->sample_aspect_ratio.num, stream->sample_aspect_ratio.den);
+		printf("  calculated length: ... %s\n", av_ts2timestr(stream->duration, &stream->time_base));
 
 		// print codec context info
 		// http://ffmpeg.org/doxygen/trunk/structAVCodecContext.html
@@ -224,6 +249,13 @@ static int open_codec_context(AVFormatContext *fmt_ctx, enum AVMediaType type)
 			fprintf(stderr, "Failed to open codec\n");
 			return -3;
 		}
+
+		printf("sampleformat: %s, planar: %d, channels: %d, raw bitdepth: %d, bitdepth: %d\n", 
+			av_get_sample_fmt_name(codec_ctx->sample_fmt), 
+			av_sample_fmt_is_planar(codec_ctx->sample_fmt), 
+			codec_ctx->channels,
+			codec_ctx->bits_per_raw_sample,
+			av_get_bytes_per_sample(codec_ctx->sample_fmt) * 8);
 	}
 
 	return stream_idx;
@@ -256,9 +288,32 @@ static int decode_audio_packet(int audio_stream_idx, AVPacket pkt, AVCodecContex
 				cached ? "(cached)" : "",
 				audio_frame_count++, frame->nb_samples,
 				av_ts2timestr(frame->pts, &audio_codec_ctx->time_base));
-
 		}
 	}
 
 	return decoded;
+}
+
+static int convert_samples(SwrContext *swr, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *output_buffer_size, uint8_t **output_buffer) {
+	/* prepare/update sample format conversion buffer */
+	int output_buffer_size_needed = frame->nb_samples * frame->channels * av_get_bytes_per_sample(audio_codec_ctx->sample_fmt);
+	if (*output_buffer_size < output_buffer_size_needed) {
+		printf("init swr output buffer size %d\n", output_buffer_size_needed);
+		if (*output_buffer != NULL) {
+			free(*output_buffer);
+		}
+		*output_buffer = malloc(output_buffer_size_needed);
+		*output_buffer_size = output_buffer_size_needed;
+	}
+
+	/* convert samples to target format */
+	int ret = swr_convert(swr, output_buffer, frame->nb_samples, frame->extended_data, frame->nb_samples);
+	if (ret < 0) {
+		fprintf(stderr, "Could not convert input samples\n");
+	}
+	else if (ret != frame->nb_samples) {
+		fprintf(stderr, "Output sample count != input sample count (%d != %d)\n", ret, frame->nb_samples);
+	}
+
+	return ret; // if >= 0, the number of samples converted
 }
