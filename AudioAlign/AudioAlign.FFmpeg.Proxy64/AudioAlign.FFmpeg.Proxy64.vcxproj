@@ -62,6 +62,12 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\avformat-56.dll $(OutDir)
+copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\avcodec-56.dll $(OutDir)
+copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\avutil-54.dll $(OutDir)
+copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\swresample-1.dll $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
