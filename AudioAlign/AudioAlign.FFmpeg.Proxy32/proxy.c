@@ -46,14 +46,13 @@
 // function definitions
 static void info(AVFormatContext *fmt_ctx);
 static int open_codec_context(AVFormatContext *fmt_ctx, enum AVMediaType type);
-static int decode_audio_packet(int audio_stream_idx, AVPacket pkt, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *got_frame, int cached);
+static int decode_audio_packet(AVStream *audio_stream, AVPacket pkt, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *got_frame, int cached);
 static int convert_samples(SwrContext *swr, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *output_buffer_size, uint8_t **output_buffer);
 
 int main(int argc, char *argv[])
 {
 	char *src_filename;
 	AVFormatContext *fmt_ctx = NULL;
-	int audio_stream_idx;
 	AVStream *audio_stream = NULL;
 	AVCodecContext *audio_codec_ctx = NULL;
 	AVPacket pkt;
@@ -87,12 +86,12 @@ int main(int argc, char *argv[])
 	//info(fmt_ctx);
 
 	// open audio stream
-	if ((audio_stream_idx = open_codec_context(fmt_ctx, AVMEDIA_TYPE_AUDIO)) < 0) {
+	if ((ret = open_codec_context(fmt_ctx, AVMEDIA_TYPE_AUDIO)) < 0) {
 		fprintf(stderr, "Cannot find audio stream\n");
 		exit(1);
 	}
 
-	audio_stream = fmt_ctx->streams[audio_stream_idx];
+	audio_stream = fmt_ctx->streams[ret];
 	audio_codec_ctx = audio_stream->codec;
 
 	/* initialize sample format converter */
@@ -123,7 +122,7 @@ int main(int argc, char *argv[])
 	while (av_read_frame(fmt_ctx, &pkt) >= 0) {
 		AVPacket orig_pkt = pkt;
 		do {
-			ret = decode_audio_packet(audio_stream_idx, pkt, audio_codec_ctx, frame, &got_frame, 0);
+			ret = decode_audio_packet(audio_stream, pkt, audio_codec_ctx, frame, &got_frame, 0);
 			if (ret < 0)
 				break;
 			pkt.data += ret;
@@ -138,7 +137,7 @@ int main(int argc, char *argv[])
 	pkt.data = NULL;
 	pkt.size = 0;
 	do {
-		decode_audio_packet(audio_stream_idx, pkt, audio_codec_ctx, frame, &got_frame, 1);
+		decode_audio_packet(audio_stream, pkt, audio_codec_ctx, frame, &got_frame, 1);
 		convert_samples(swr, audio_codec_ctx, frame, &output_buffer_size, &output_buffer);
 	} while (got_frame);
 
@@ -262,14 +261,14 @@ static int open_codec_context(AVFormatContext *fmt_ctx, enum AVMediaType type)
 }
 
 static int audio_frame_count = 0;
-static int decode_audio_packet(int audio_stream_idx, AVPacket pkt, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *got_frame, int cached)
+static int decode_audio_packet(AVStream *audio_stream, AVPacket pkt, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *got_frame, int cached)
 {
 	int ret = 0;
 	int decoded = pkt.size; // to skip non-target stream packets, return the full packet size
 
 	*got_frame = 0;
 
-	if (pkt.stream_index == audio_stream_idx) {
+	if (pkt.stream_index == audio_stream->id) {
 		/* decode audio frame */
 		ret = avcodec_decode_audio4(audio_codec_ctx, frame, got_frame, &pkt);
 		if (ret < 0) {
