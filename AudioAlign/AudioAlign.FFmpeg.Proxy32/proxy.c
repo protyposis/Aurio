@@ -64,9 +64,9 @@ typedef struct ProxyInstance {
 static void pi_init(ProxyInstance **pi);
 static void pi_free(ProxyInstance **pi);
 static void info(AVFormatContext *fmt_ctx);
-static int open_codec_context(AVFormatContext *fmt_ctx, enum AVMediaType type);
-static int decode_audio_packet(AVStream *audio_stream, AVPacket pkt, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *got_frame, int cached);
-static int convert_samples(SwrContext *swr, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *output_buffer_size, uint8_t **output_buffer);
+static int open_audio_codec_context(AVFormatContext *fmt_ctx);
+static int decode_audio_packet(ProxyInstance *pi, int *got_frame, int cached);
+static int convert_samples(ProxyInstance *pi);
 
 int main(int argc, char *argv[])
 {
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 	//info(fmt_ctx);
 
 	// open audio stream
-	if ((ret = open_codec_context(pi->fmt_ctx, AVMEDIA_TYPE_AUDIO)) < 0) {
+	if ((ret = open_audio_codec_context(pi->fmt_ctx)) < 0) {
 		fprintf(stderr, "Cannot find audio stream\n");
 		exit(1);
 	}
@@ -137,13 +137,13 @@ int main(int argc, char *argv[])
 	while (av_read_frame(pi->fmt_ctx, &pi->pkt) >= 0) {
 		AVPacket orig_pkt = pi->pkt;
 		do {
-			ret = decode_audio_packet(pi->audio_stream, pi->pkt, pi->audio_codec_ctx, pi->frame, &got_frame, 0);
+			ret = decode_audio_packet(pi, &got_frame, 0);
 			if (ret < 0)
 				break;
 			pi->pkt.data += ret;
 			pi->pkt.size -= ret;
 
-			convert_samples(pi->swr, pi->audio_codec_ctx, pi->frame, &pi->output_buffer_size, &pi->output_buffer);
+			convert_samples(pi);
 		} while (pi->pkt.size > 0);
 		av_free_packet(&orig_pkt);
 	}
@@ -152,8 +152,8 @@ int main(int argc, char *argv[])
 	pi->pkt.data = NULL;
 	pi->pkt.size = 0;
 	do {
-		decode_audio_packet(pi->audio_stream, pi->pkt, pi->audio_codec_ctx, pi->frame, &got_frame, 1);
-		convert_samples(pi->swr, pi->audio_codec_ctx, pi->frame, &pi->output_buffer_size, &pi->output_buffer);
+		decode_audio_packet(pi, &got_frame, 1);
+		convert_samples(pi);
 	} while (got_frame);
 
 
@@ -260,7 +260,7 @@ static void info(AVFormatContext *fmt_ctx)
 	}
 }
 
-static int open_codec_context(AVFormatContext *fmt_ctx, enum AVMediaType type)
+static int open_audio_codec_context(AVFormatContext *fmt_ctx)
 {
 	int stream_idx;
 	AVStream *stream = NULL;
@@ -272,7 +272,7 @@ static int open_codec_context(AVFormatContext *fmt_ctx, enum AVMediaType type)
 	stream_idx = av_find_best_stream(fmt_ctx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
 
 	if (stream_idx < 0) {
-		fprintf(stderr, "Could not find stream\n", av_get_media_type_string(type));
+		fprintf(stderr, "Could not find stream\n");
 		return -1;
 	}
 	else {
@@ -304,16 +304,16 @@ static int open_codec_context(AVFormatContext *fmt_ctx, enum AVMediaType type)
 }
 
 static int audio_frame_count = 0;
-static int decode_audio_packet(AVStream *audio_stream, AVPacket pkt, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *got_frame, int cached)
+static int decode_audio_packet(ProxyInstance *pi, int *got_frame, int cached)
 {
 	int ret = 0;
-	int decoded = pkt.size; // to skip non-target stream packets, return the full packet size
+	int decoded = pi->pkt.size; // to skip non-target stream packets, return the full packet size
 
 	*got_frame = 0;
 
-	if (pkt.stream_index == audio_stream->id) {
+	if (pi->pkt.stream_index == pi->audio_stream->id) {
 		/* decode audio frame */
-		ret = avcodec_decode_audio4(audio_codec_ctx, frame, got_frame, &pkt);
+		ret = avcodec_decode_audio4(pi->audio_codec_ctx, pi->frame, got_frame, &pi->pkt);
 		if (ret < 0) {
 			fprintf(stderr, "Error decoding audio frame (%s)\n", av_err2str(ret));
 			return ret;
@@ -322,39 +322,38 @@ static int decode_audio_packet(AVStream *audio_stream, AVPacket pkt, AVCodecCont
 		* called again with the remainder of the packet data.
 		* Sample: fate-suite/lossless-audio/luckynight-partial.shn
 		* Also, some decoders might over-read the packet. */
-		decoded = FFMIN(ret, pkt.size);
+		decoded = FFMIN(ret, pi->pkt.size);
 
 		if (*got_frame) {
-			size_t unpadded_linesize = frame->nb_samples * av_get_bytes_per_sample(frame->format);
 			printf("audio_frame%s n:%d nb_samples:%d pts:%s\n",
 				cached ? "(cached)" : "",
-				audio_frame_count++, frame->nb_samples,
-				av_ts2timestr(frame->pts, &audio_codec_ctx->time_base));
+				audio_frame_count++, pi->frame->nb_samples,
+				av_ts2timestr(pi->frame->pts, &pi->audio_codec_ctx->time_base));
 		}
 	}
 
 	return decoded;
 }
 
-static int convert_samples(SwrContext *swr, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *output_buffer_size, uint8_t **output_buffer) {
+static int convert_samples(ProxyInstance *pi) {
 	/* prepare/update sample format conversion buffer */
-	int output_buffer_size_needed = frame->nb_samples * frame->channels * av_get_bytes_per_sample(audio_codec_ctx->sample_fmt);
-	if (*output_buffer_size < output_buffer_size_needed) {
+	int output_buffer_size_needed = pi->frame->nb_samples * pi->frame->channels * av_get_bytes_per_sample(pi->audio_codec_ctx->sample_fmt);
+	if (pi->output_buffer_size < output_buffer_size_needed) {
 		printf("init swr output buffer size %d\n", output_buffer_size_needed);
-		if (*output_buffer != NULL) {
-			free(*output_buffer);
+		if (pi->output_buffer != NULL) {
+			free(pi->output_buffer);
 		}
-		*output_buffer = malloc(output_buffer_size_needed);
-		*output_buffer_size = output_buffer_size_needed;
+		pi->output_buffer = malloc(output_buffer_size_needed);
+		pi->output_buffer_size = output_buffer_size_needed;
 	}
 
 	/* convert samples to target format */
-	int ret = swr_convert(swr, output_buffer, frame->nb_samples, frame->extended_data, frame->nb_samples);
+	int ret = swr_convert(pi->swr, &pi->output_buffer, pi->frame->nb_samples, pi->frame->extended_data, pi->frame->nb_samples);
 	if (ret < 0) {
 		fprintf(stderr, "Could not convert input samples\n");
 	}
-	else if (ret != frame->nb_samples) {
-		fprintf(stderr, "Output sample count != input sample count (%d != %d)\n", ret, frame->nb_samples);
+	else if (ret != pi->frame->nb_samples) {
+		fprintf(stderr, "Output sample count != input sample count (%d != %d)\n", ret, pi->frame->nb_samples);
 	}
 
 	return ret; // if >= 0, the number of samples converted
