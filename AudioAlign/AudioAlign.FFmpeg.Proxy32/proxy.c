@@ -43,7 +43,26 @@
 #pragma comment(lib, "avutil.lib")
 #pragma comment(lib, "swresample.lib")
 
+
+// structs
+/* 
+ * This struct holds all data necessary to manage an "instance" of a decoder,
+ * and most importantly to run several decoders in parallel.
+ */
+typedef struct ProxyInstance {
+	AVFormatContext		*fmt_ctx;
+	AVStream			*audio_stream;
+	AVCodecContext		*audio_codec_ctx;
+	AVPacket			pkt;
+	AVFrame				*frame;
+	SwrContext			*swr;
+	int					output_buffer_size;
+	uint8_t				*output_buffer;
+} ProxyInstance;
+
 // function definitions
+static void pi_init(ProxyInstance **pi);
+static void pi_free(ProxyInstance **pi);
 static void info(AVFormatContext *fmt_ctx);
 static int open_codec_context(AVFormatContext *fmt_ctx, enum AVMediaType type);
 static int decode_audio_packet(AVStream *audio_stream, AVPacket pkt, AVCodecContext *audio_codec_ctx, AVFrame *frame, int *got_frame, int cached);
@@ -51,15 +70,10 @@ static int convert_samples(SwrContext *swr, AVCodecContext *audio_codec_ctx, AVF
 
 int main(int argc, char *argv[])
 {
+	ProxyInstance *pi;
 	char *src_filename;
-	AVFormatContext *fmt_ctx = NULL;
-	AVStream *audio_stream = NULL;
-	AVCodecContext *audio_codec_ctx = NULL;
-	AVPacket pkt;
-	AVFrame *frame = NULL;
 	int ret;
 	int got_frame;
-	SwrContext *swr = NULL;
 
 	if (argc < 2) {
 		fprintf(stderr, "No source file specified\n");
@@ -69,14 +83,16 @@ int main(int argc, char *argv[])
 		src_filename = argv[1];
 	}
 
+	pi_init(&pi);
+
 	av_register_all();
 	
-	if (avformat_open_input(&fmt_ctx, src_filename, NULL, NULL) < 0) {
+	if (avformat_open_input(&pi->fmt_ctx, src_filename, NULL, NULL) < 0) {
 		fprintf(stderr, "Could not open source file %s\n", src_filename);
 		exit(1);
 	}
 
-	if (avformat_find_stream_info(fmt_ctx, NULL) < 0) {
+	if (avformat_find_stream_info(pi->fmt_ctx, NULL) < 0) {
 		fprintf(stderr, "Could not find stream information\n");
 		exit(1);
 	}
@@ -86,71 +102,98 @@ int main(int argc, char *argv[])
 	//info(fmt_ctx);
 
 	// open audio stream
-	if ((ret = open_codec_context(fmt_ctx, AVMEDIA_TYPE_AUDIO)) < 0) {
+	if ((ret = open_codec_context(pi->fmt_ctx, AVMEDIA_TYPE_AUDIO)) < 0) {
 		fprintf(stderr, "Cannot find audio stream\n");
 		exit(1);
 	}
 
-	audio_stream = fmt_ctx->streams[ret];
-	audio_codec_ctx = audio_stream->codec;
+	pi->audio_stream = pi->fmt_ctx->streams[ret];
+	pi->audio_codec_ctx = pi->audio_stream->codec;
 
 	/* initialize sample format converter */
 	// http://stackoverflow.com/a/15372417
-	swr = swr_alloc();
-	av_opt_set_int(swr, "in_channel_layout", audio_codec_ctx->channel_layout, 0);
-	av_opt_set_int(swr, "out_channel_layout", audio_codec_ctx->channel_layout, 0);
-	av_opt_set_int(swr, "in_sample_rate", audio_codec_ctx->sample_rate, 0);
-	av_opt_set_int(swr, "out_sample_rate", audio_codec_ctx->sample_rate, 0);
-	av_opt_set_sample_fmt(swr, "in_sample_fmt", audio_codec_ctx->sample_fmt, 0);
-	av_opt_set_sample_fmt(swr, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
-	swr_init(swr);
+	pi->swr = swr_alloc();
+	av_opt_set_int(pi->swr, "in_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
+	av_opt_set_int(pi->swr, "out_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
+	av_opt_set_int(pi->swr, "in_sample_rate", pi->audio_codec_ctx->sample_rate, 0);
+	av_opt_set_int(pi->swr, "out_sample_rate", pi->audio_codec_ctx->sample_rate, 0);
+	av_opt_set_sample_fmt(pi->swr, "in_sample_fmt", pi->audio_codec_ctx->sample_fmt, 0);
+	av_opt_set_sample_fmt(pi->swr, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
+	swr_init(pi->swr);
 
-	int output_buffer_size = 0;
-	uint8_t *output_buffer = NULL;
+	
 
 	/* initialize packet, set data to NULL, let the demuxer fill it */
-	av_init_packet(&pkt);
-	pkt.data = NULL;
-	pkt.size = 0;
+	av_init_packet(&pi->pkt);
+	pi->pkt.data = NULL;
+	pi->pkt.size = 0;
 
-	frame = av_frame_alloc();
+	pi->frame = av_frame_alloc();
 
 
 	/* read frames from the file */
 	/* You should use libswresample or libavfilter to convert the frame
 	 * to packed data. */
-	while (av_read_frame(fmt_ctx, &pkt) >= 0) {
-		AVPacket orig_pkt = pkt;
+	while (av_read_frame(pi->fmt_ctx, &pi->pkt) >= 0) {
+		AVPacket orig_pkt = pi->pkt;
 		do {
-			ret = decode_audio_packet(audio_stream, pkt, audio_codec_ctx, frame, &got_frame, 0);
+			ret = decode_audio_packet(pi->audio_stream, pi->pkt, pi->audio_codec_ctx, pi->frame, &got_frame, 0);
 			if (ret < 0)
 				break;
-			pkt.data += ret;
-			pkt.size -= ret;
+			pi->pkt.data += ret;
+			pi->pkt.size -= ret;
 
-			convert_samples(swr, audio_codec_ctx, frame, &output_buffer_size, &output_buffer);
-		} while (pkt.size > 0);
+			convert_samples(pi->swr, pi->audio_codec_ctx, pi->frame, &pi->output_buffer_size, &pi->output_buffer);
+		} while (pi->pkt.size > 0);
 		av_free_packet(&orig_pkt);
 	}
 
 	/* flush cached frames (e.g. in SHN) */
-	pkt.data = NULL;
-	pkt.size = 0;
+	pi->pkt.data = NULL;
+	pi->pkt.size = 0;
 	do {
-		decode_audio_packet(audio_stream, pkt, audio_codec_ctx, frame, &got_frame, 1);
-		convert_samples(swr, audio_codec_ctx, frame, &output_buffer_size, &output_buffer);
+		decode_audio_packet(pi->audio_stream, pi->pkt, pi->audio_codec_ctx, pi->frame, &got_frame, 1);
+		convert_samples(pi->swr, pi->audio_codec_ctx, pi->frame, &pi->output_buffer_size, &pi->output_buffer);
 	} while (got_frame);
 
 
-	/* close open FFmpeg stuff */
-	av_free_packet(&pkt);
-	av_frame_free(&frame);
-	free(output_buffer);
-	swr_free(&swr);
-	avcodec_close(audio_codec_ctx);
-	avformat_close_input(&fmt_ctx);
+	pi_free(&pi);
 
 	return 0;
+}
+
+/*
+* Initialize an instance data object to manage the decoding of audio.
+*/
+static void pi_init(ProxyInstance **pi) {
+	ProxyInstance *_pi;
+	*pi = _pi = malloc(sizeof(ProxyInstance));
+
+	_pi->fmt_ctx = NULL;
+	_pi->audio_stream = NULL;
+	_pi->audio_codec_ctx = NULL;
+	_pi->frame = NULL;
+	_pi->swr = NULL;
+	_pi->output_buffer_size = 0;
+	_pi->output_buffer = NULL;
+}
+
+/*
+* Destroy an instance data object.
+*/
+static void pi_free(ProxyInstance **pi) {
+	ProxyInstance *_pi = *pi;
+
+	/* close & free FFmpeg stuff */
+	av_free_packet(&_pi->pkt);
+	av_frame_free(&_pi->frame);
+	free(_pi->output_buffer);
+	swr_free(&_pi->swr);
+	avcodec_close(_pi->audio_codec_ctx);
+	avformat_close_input(&_pi->fmt_ctx);
+
+	/* free instance data */
+	free(_pi);
 }
 
 static void info(AVFormatContext *fmt_ctx)
