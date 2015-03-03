@@ -408,7 +408,7 @@ static int decode_audio_packet(ProxyInstance *pi, int *got_frame, int cached)
 
 	*got_frame = 0;
 
-	if (pi->pkt.stream_index == pi->audio_stream->id) {
+	if (pi->pkt.stream_index == pi->audio_stream->index) {
 		/* decode audio frame */
 		ret = avcodec_decode_audio4(pi->audio_codec_ctx, pi->frame, got_frame, &pi->pkt);
 		if (ret < 0) {
