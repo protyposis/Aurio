@@ -67,6 +67,7 @@ static void info(AVFormatContext *fmt_ctx);
 static int open_audio_codec_context(AVFormatContext *fmt_ctx);
 static int decode_audio_packet(ProxyInstance *pi, int *got_frame, int cached);
 static int convert_samples(ProxyInstance *pi);
+static int determine_target_format(AVCodecContext *audio_codec_ctx);
 
 int main(int argc, char *argv[])
 {
@@ -123,7 +124,7 @@ int main(int argc, char *argv[])
 	av_opt_set_int(pi->swr, "in_sample_rate", pi->audio_codec_ctx->sample_rate, 0);
 	av_opt_set_int(pi->swr, "out_sample_rate", pi->audio_codec_ctx->sample_rate, 0);
 	av_opt_set_sample_fmt(pi->swr, "in_sample_fmt", pi->audio_codec_ctx->sample_fmt, 0);
-	av_opt_set_sample_fmt(pi->swr, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
+	av_opt_set_sample_fmt(pi->swr, "out_sample_fmt", determine_target_format(pi->audio_codec_ctx), 0);
 	swr_init(pi->swr);
 
 	
@@ -365,4 +366,34 @@ static int convert_samples(ProxyInstance *pi) {
 	}
 
 	return ret; // if >= 0, the number of samples converted
+}
+
+/* 
+ * Determines the always interleaved sample format to be output from this decoding layer.
+ */
+static int determine_target_format(AVCodecContext *audio_codec_ctx)
+{
+	int raw_bitdepth = audio_codec_ctx->bits_per_raw_sample;
+	int bitdepth = av_get_bytes_per_sample(audio_codec_ctx->sample_fmt) * 8;
+
+	if (raw_bitdepth == 16) {
+		return AV_SAMPLE_FMT_S16;
+	}
+	else if (raw_bitdepth > 16) {
+		return AV_SAMPLE_FMT_FLT;
+	}
+	else if (bitdepth == 16) {
+		return AV_SAMPLE_FMT_S16;
+	}
+	else if (bitdepth > 16) {
+		return AV_SAMPLE_FMT_FLT;
+	}
+	else {
+		fprintf(stderr, "unsupported sample format %d/%d/%s, fallback to default\n", 
+			raw_bitdepth, bitdepth, 
+			av_get_sample_fmt_name(audio_codec_ctx->sample_fmt));
+	}
+
+	// default format
+	return AV_SAMPLE_FMT_FLT;
 }
