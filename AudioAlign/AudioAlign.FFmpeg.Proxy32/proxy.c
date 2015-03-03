@@ -44,6 +44,7 @@
 #pragma comment(lib, "swresample.lib")
 
 #define EXPORT __declspec(dllexport)
+#define DEBUG 0
 
 
 
@@ -147,7 +148,6 @@ ProxyInstance *stream_open(char *filename)
 		// when no channel layout is set, set default layout
 		pi->audio_codec_ctx->channel_layout = av_get_default_channel_layout(pi->audio_codec_ctx->channels);
 	}
-	printf("ch layout %d\n", pi->audio_codec_ctx->channel_layout);
 	av_opt_set_int(pi->swr, "in_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
 	av_opt_set_int(pi->swr, "out_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
 	av_opt_set_int(pi->swr, "in_sample_rate", pi->audio_codec_ctx->sample_rate, 0);
@@ -171,10 +171,12 @@ ProxyInstance *stream_open(char *filename)
 	pi->output.format.sample_size = av_get_bytes_per_sample(determine_target_format(pi->audio_codec_ctx));
 	pi->output.format.channels = pi->audio_codec_ctx->channels;
 
-	printf("output.format: %d sample_rate, %d sample_size, %d channels\n",
-		pi->output.format.sample_rate,
-		pi->output.format.sample_size,
-		pi->output.format.channels);
+	if (DEBUG) {
+		printf("output.format: %d sample_rate, %d sample_size, %d channels\n",
+			pi->output.format.sample_rate,
+			pi->output.format.sample_size,
+			pi->output.format.channels);
+	}
 
 	/*
 	 * TODO To get the frame size, read the first frame, take the size, and seek back to the start.
@@ -193,7 +195,9 @@ ProxyInstance *stream_open(char *filename)
 		pi->audio_stream->duration * pi->output.format.sample_rate);
 	pi->output.frame_size = pi->output.format.sample_rate; // 1 sec default frame size
 
-	printf("output: %lld length, %d frame_size\n", pi->output.length, pi->output.frame_size);
+	if (DEBUG) {
+		printf("output: %lld length, %d frame_size\n", pi->output.length, pi->output.frame_size);
+	}
 
 	return pi;
 }
@@ -388,12 +392,14 @@ static int open_audio_codec_context(AVFormatContext *fmt_ctx)
 			return -3;
 		}
 
-		printf("sampleformat: %s, planar: %d, channels: %d, raw bitdepth: %d, bitdepth: %d\n", 
-			av_get_sample_fmt_name(codec_ctx->sample_fmt), 
-			av_sample_fmt_is_planar(codec_ctx->sample_fmt), 
-			codec_ctx->channels,
-			codec_ctx->bits_per_raw_sample,
-			av_get_bytes_per_sample(codec_ctx->sample_fmt) * 8);
+		if (DEBUG) {
+			printf("sampleformat: %s, planar: %d, channels: %d, raw bitdepth: %d, bitdepth: %d\n",
+				av_get_sample_fmt_name(codec_ctx->sample_fmt),
+				av_sample_fmt_is_planar(codec_ctx->sample_fmt),
+				codec_ctx->channels,
+				codec_ctx->bits_per_raw_sample,
+				av_get_bytes_per_sample(codec_ctx->sample_fmt) * 8);
+		}
 	}
 
 	return stream_idx;
@@ -424,7 +430,7 @@ static int decode_audio_packet(ProxyInstance *pi, int *got_frame, int cached)
 		* Also, some decoders might over-read the packet. */
 		decoded = FFMIN(ret, pi->pkt.size);
 
-		if (*got_frame) {
+		if (*got_frame && DEBUG) {
 			printf("packet dts:%s pts:%s duration:%s\n",
 				av_ts2timestr(pi->pkt.dts, &pi->audio_stream->time_base),
 				av_ts2timestr(pi->pkt.pts, &pi->audio_stream->time_base),
@@ -444,7 +450,7 @@ static int convert_samples(ProxyInstance *pi) {
 	/* prepare/update sample format conversion buffer */
 	int output_buffer_size_needed = pi->frame->nb_samples * pi->frame->channels * av_get_bytes_per_sample(pi->audio_codec_ctx->sample_fmt);
 	if (pi->output_buffer_size < output_buffer_size_needed) {
-		printf("init swr output buffer size %d\n", output_buffer_size_needed);
+		if(DEBUG) printf("init swr output buffer size %d\n", output_buffer_size_needed);
 		if (pi->output_buffer != NULL) {
 			free(pi->output_buffer);
 		}

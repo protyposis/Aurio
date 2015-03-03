@@ -17,6 +17,13 @@ namespace AudioAlign.FFmpeg.Test {
             // TODO read audio from FFmpeg
             FFmpegReader reader = new FFmpegReader(args[0]);
 
+            Console.WriteLine("length {0}, frame_size {1}, sample_rate {2}, sample_size {3}, channels {4}", 
+                reader.OutputConfig.length,
+                reader.OutputConfig.frame_size,
+                reader.OutputConfig.format.sample_rate,
+                reader.OutputConfig.format.sample_size,
+                reader.OutputConfig.format.channels);
+
             int samplesRead;
             while ((samplesRead = reader.ReadFrame()) > 0) {
                 Console.WriteLine("read " + samplesRead);

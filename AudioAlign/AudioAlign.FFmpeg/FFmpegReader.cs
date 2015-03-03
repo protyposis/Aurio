@@ -28,8 +28,10 @@ namespace AudioAlign.FFmpeg {
             
             IntPtr ocp = interop.stream_get_output_config(instance);
             outputConfig = (OutputConfig)Marshal.PtrToStructure(ocp, typeof(OutputConfig));
-            
-            Console.WriteLine(outputConfig.ToString());
+        }
+
+        public OutputConfig OutputConfig {
+            get { return outputConfig; }
         }
 
         public int ReadFrame() {
