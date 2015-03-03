@@ -11,7 +11,6 @@ namespace AudioAlign.FFmpeg {
         private static IInteropWrapper interop;
 
         static FFmpegReader() {
-            Console.WriteLine("STATIC");
             if (IntPtr.Size == 8) {
                 interop = new Interop64Wrapper();
             }
