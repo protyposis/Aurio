@@ -61,8 +61,13 @@ typedef struct ProxyInstance {
 } ProxyInstance;
 
 // function definitions
+ProxyInstance *stream_open(char *filename);
+int stream_read_frame(ProxyInstance *pi);
+void stream_close(ProxyInstance *pi);
+
 static void pi_init(ProxyInstance **pi);
 static void pi_free(ProxyInstance **pi);
+
 static void info(AVFormatContext *fmt_ctx);
 static int open_audio_codec_context(AVFormatContext *fmt_ctx);
 static int decode_audio_packet(ProxyInstance *pi, int *got_frame, int cached);
@@ -72,24 +77,34 @@ static int determine_target_format(AVCodecContext *audio_codec_ctx);
 int main(int argc, char *argv[])
 {
 	ProxyInstance *pi;
-	char *src_filename;
-	int ret;
-	int got_frame;
 
 	if (argc < 2) {
 		fprintf(stderr, "No source file specified\n");
 		exit(1);
 	}
-	else {
-		src_filename = argv[1];
+
+	pi = stream_open(argv[1]);
+
+	while (stream_read_frame(pi) >= 0) {
+		// frame decoded
 	}
+
+	stream_close(pi);
+
+	return 0;
+}
+
+ProxyInstance *stream_open(char *filename)
+{
+	ProxyInstance *pi;
+	int ret;
 
 	pi_init(&pi);
 
 	av_register_all();
-	
-	if (avformat_open_input(&pi->fmt_ctx, src_filename, NULL, NULL) < 0) {
-		fprintf(stderr, "Could not open source file %s\n", src_filename);
+
+	if (avformat_open_input(&pi->fmt_ctx, filename, NULL, NULL) < 0) {
+		fprintf(stderr, "Could not open source file %s\n", filename);
 		exit(1);
 	}
 
@@ -127,7 +142,7 @@ int main(int argc, char *argv[])
 	av_opt_set_sample_fmt(pi->swr, "out_sample_fmt", determine_target_format(pi->audio_codec_ctx), 0);
 	swr_init(pi->swr);
 
-	
+
 
 	/* initialize packet, set data to NULL, let the demuxer fill it */
 	av_init_packet(&pi->pkt);
@@ -136,34 +151,62 @@ int main(int argc, char *argv[])
 
 	pi->frame = av_frame_alloc();
 
+	return pi;
+}
 
-	/* read frames from the file */
-	while (av_read_frame(pi->fmt_ctx, &pi->pkt) >= 0) {
-		AVPacket orig_pkt = pi->pkt;
-		do {
-			ret = decode_audio_packet(pi, &got_frame, 0);
-			if (ret < 0)
-				break;
-			pi->pkt.data += ret;
-			pi->pkt.size -= ret;
+int stream_read_frame(ProxyInstance *pi)
+{
+	int ret;
+	int got_frame;
+	int cached = 0;
 
-			convert_samples(pi);
-		} while (pi->pkt.size > 0);
-		av_free_packet(&orig_pkt);
+	/* 
+	 * TODO to avoid possible memory leaks, open packets might have to be freed
+	 * before EOF is returned.
+	 */
+
+	// if packet is emtpy, read new packet from stream
+	if (pi->pkt.size == 0) {
+		if ((ret = av_read_frame(pi->fmt_ctx, &pi->pkt)) < 0) {
+			// probably EOF, check for cached frames (e.g. SHN)
+			pi->pkt.data = NULL;
+			pi->pkt.size = 0;
+			cached = 1;
+		}
 	}
 
-	/* flush cached frames (e.g. in SHN) */
-	pi->pkt.data = NULL;
-	pi->pkt.size = 0;
-	do {
-		decode_audio_packet(pi, &got_frame, 1);
-		convert_samples(pi);
-	} while (got_frame);
+	ret = decode_audio_packet(pi, &got_frame, cached);
+	
+	if (ret < 0) {
+		return -1; // decoding failed, signal EOF
+	}
+	else if (cached && !got_frame) {
+		return -1; // signal the caller EOF
+	}
 
+	pi->pkt.data += ret;
+	pi->pkt.size -= ret;
 
+	if (convert_samples(pi) < 0) {
+		return -1; // conversion failed, signal EOF
+	}
+
+	// free packet if all content has been read
+	if (pi->pkt.size == 0) {
+		av_free_packet(&pi->pkt);
+	}
+
+	return ret; // return the number of bytes read
+}
+
+void stream_seek(ProxyInstance *pi, int target)
+{
+	// TODO implement
+}
+
+void stream_close(ProxyInstance *pi)
+{
 	pi_free(&pi);
-
-	return 0;
 }
 
 /*
@@ -308,6 +351,10 @@ static int open_audio_codec_context(AVFormatContext *fmt_ctx)
 }
 
 static int audio_frame_count = 0;
+/*
+ * Decodes an audio frame and returns the number of bytes consumed from the input packet,
+ * or a negative error code (it is basically the result of avcodec_decode_audio4).
+ */
 static int decode_audio_packet(ProxyInstance *pi, int *got_frame, int cached)
 {
 	int ret = 0;
