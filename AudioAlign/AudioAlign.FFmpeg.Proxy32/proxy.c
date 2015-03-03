@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 
 	//av_dump_format(fmt_ctx, 0, src_filename, 0);
 
-	//info(fmt_ctx);
+	//info(pi->fmt_ctx);
 
 	// open audio stream
 	if ((ret = open_audio_codec_context(pi->fmt_ctx)) < 0) {
@@ -325,10 +325,15 @@ static int decode_audio_packet(ProxyInstance *pi, int *got_frame, int cached)
 		decoded = FFMIN(ret, pi->pkt.size);
 
 		if (*got_frame) {
+			printf("packet dts:%s pts:%s duration:%s\n",
+				av_ts2timestr(pi->pkt.dts, &pi->audio_stream->time_base),
+				av_ts2timestr(pi->pkt.pts, &pi->audio_stream->time_base),
+				av_ts2timestr(pi->pkt.duration, &pi->audio_stream->time_base));
+
 			printf("audio_frame%s n:%d nb_samples:%d pts:%s\n",
 				cached ? "(cached)" : "",
 				audio_frame_count++, pi->frame->nb_samples,
-				av_ts2timestr(pi->frame->pts, &pi->audio_codec_ctx->time_base));
+				av_ts2timestr(pi->frame->pts, &pi->audio_stream->time_base));
 		}
 	}
 
