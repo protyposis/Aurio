@@ -137,8 +137,6 @@ int main(int argc, char *argv[])
 
 
 	/* read frames from the file */
-	/* You should use libswresample or libavfilter to convert the frame
-	 * to packed data. */
 	while (av_read_frame(pi->fmt_ctx, &pi->pkt) >= 0) {
 		AVPacket orig_pkt = pi->pkt;
 		do {
