@@ -44,7 +44,7 @@
 #pragma comment(lib, "swresample.lib")
 
 #define EXPORT __declspec(dllexport)
-#define DEBUG 0
+#define DEBUG 1
 
 
 
@@ -249,7 +249,11 @@ int stream_read_frame(ProxyInstance *pi)
 		av_free_packet(&pi->pkt);
 	}
 
-	return ret; // return the number of bytes read
+	/* 
+	 * Return the number of samples per channel read, to keep API consistent.
+	 * All "sizes" in the API are in samples, none in bytes.
+	 */
+	return ret / pi->output.format.channels / pi->output.format.sample_size; 
 }
 
 void stream_seek(ProxyInstance *pi, int target)
