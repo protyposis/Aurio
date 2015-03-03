@@ -43,6 +43,9 @@
 #pragma comment(lib, "avutil.lib")
 #pragma comment(lib, "swresample.lib")
 
+#define EXPORT __declspec(dllexport)
+
+
 
 // structs
 /* 
@@ -71,10 +74,10 @@ typedef struct ProxyInstance {
 } ProxyInstance;
 
 // function definitions
-ProxyInstance *stream_open(char *filename);
-void *stream_get_output_config(ProxyInstance *pi);
-int stream_read_frame(ProxyInstance *pi);
-void stream_close(ProxyInstance *pi);
+EXPORT ProxyInstance *stream_open(char *filename);
+EXPORT void *stream_get_output_config(ProxyInstance *pi);
+EXPORT int stream_read_frame(ProxyInstance *pi);
+EXPORT void stream_close(ProxyInstance *pi);
 
 static void pi_init(ProxyInstance **pi);
 static void pi_free(ProxyInstance **pi);
