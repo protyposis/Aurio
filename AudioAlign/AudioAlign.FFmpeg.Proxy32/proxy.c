@@ -113,6 +113,11 @@ int main(int argc, char *argv[])
 	/* initialize sample format converter */
 	// http://stackoverflow.com/a/15372417
 	pi->swr = swr_alloc();
+	if (!pi->audio_codec_ctx->channel_layout) {
+		// when no channel layout is set, set default layout
+		pi->audio_codec_ctx->channel_layout = av_get_default_channel_layout(pi->audio_codec_ctx->channels);
+	}
+	printf("ch layout %d\n", pi->audio_codec_ctx->channel_layout);
 	av_opt_set_int(pi->swr, "in_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
 	av_opt_set_int(pi->swr, "out_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
 	av_opt_set_int(pi->swr, "in_sample_rate", pi->audio_codec_ctx->sample_rate, 0);
