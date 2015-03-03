@@ -58,10 +58,21 @@ typedef struct ProxyInstance {
 	SwrContext			*swr;
 	int					output_buffer_size;
 	uint8_t				*output_buffer;
+
+	struct {
+		struct {
+			int					sample_rate;
+			int					sample_size; // bytes per sample (2 bytes for 16 bit int, 4 bytes for 32 bit float)
+			int					channels;
+		}					format;
+		int64_t				length;
+		int					frame_size;
+	}					output;
 } ProxyInstance;
 
 // function definitions
 ProxyInstance *stream_open(char *filename);
+void *stream_get_output_config(ProxyInstance *pi);
 int stream_read_frame(ProxyInstance *pi);
 void stream_close(ProxyInstance *pi);
 
@@ -113,7 +124,7 @@ ProxyInstance *stream_open(char *filename)
 		exit(1);
 	}
 
-	//av_dump_format(fmt_ctx, 0, src_filename, 0);
+	//av_dump_format(pi->fmt_ctx, 0, filename, 0);
 
 	//info(pi->fmt_ctx);
 
@@ -151,7 +162,42 @@ ProxyInstance *stream_open(char *filename)
 
 	pi->frame = av_frame_alloc();
 
+	/* set output properties */
+
+	pi->output.format.sample_rate = pi->audio_codec_ctx->sample_rate;
+	pi->output.format.sample_size = av_get_bytes_per_sample(determine_target_format(pi->audio_codec_ctx));
+	pi->output.format.channels = pi->audio_codec_ctx->channels;
+
+	printf("output.format: %d sample_rate, %d sample_size, %d channels\n",
+		pi->output.format.sample_rate,
+		pi->output.format.sample_size,
+		pi->output.format.channels);
+
+	/*
+	 * TODO To get the frame size, read the first frame, take the size, and seek back to the start.
+	 * This only works under the assumption that 
+	 *  1. the frame size stays constant over time (are there codecs with variable sized frames?)
+	 *  2. the first frame is always of "full" size
+	 *  3. only the last frame can be smaller
+	 * Alternatively, the frame size could be announced through a callback after reading the first
+	 * frame, but this still requires an intermediate buffer. The best case would be to let the
+	 * program that calls this library manage the buffer.
+	 * 
+	 * For now, a frame size of 1 second should be big enough to fit all occurring frame sizes (frame
+	 * sizes were always smaller during tests).
+	 */
+	pi->output.length = (long)(av_q2d(pi->audio_stream->time_base) * 
+		pi->audio_stream->duration * pi->output.format.sample_rate);
+	pi->output.frame_size = pi->output.format.sample_rate; // 1 sec default frame size
+
+	printf("output: %lld length, %d frame_size\n", pi->output.length, pi->output.frame_size);
+
 	return pi;
+}
+
+void *stream_get_output_config(ProxyInstance *pi)
+{
+	return &pi->output;
 }
 
 int stream_read_frame(ProxyInstance *pi)
