@@ -79,7 +79,7 @@ typedef struct ProxyInstance {
 EXPORT ProxyInstance *stream_open(char *filename);
 EXPORT void *stream_get_output_config(ProxyInstance *pi);
 EXPORT int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame);
-EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp);
+EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t **output_buffer);
 EXPORT void stream_seek(ProxyInstance *pi, int64_t timestamp);
 EXPORT void stream_close(ProxyInstance *pi);
 
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 	pi = stream_open(argv[1]);
 
 	// read full stream
-	while ((ret = stream_read_frame(pi, &timestamp)) >= 0) {
+	while ((ret = stream_read_frame(pi, &timestamp, NULL)) >= 0) {
 		printf("read %d @ %lld\n", ret, timestamp);
 	}
 
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 	stream_seek(pi, 0);
 
 	// read again (output should be the same as above)
-	while ((ret = stream_read_frame(pi, &timestamp)) >= 0) {
+	while ((ret = stream_read_frame(pi, &timestamp, NULL)) >= 0) {
 		printf("read %d @ %lld\n", ret, timestamp);
 	}
 
@@ -280,7 +280,7 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 /*
  * Read the next audio frame, skipping other frame types in between.
  */
-int stream_read_frame(ProxyInstance *pi, int64_t *timestamp)
+int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t **output_buffer)
 {
 	int ret;
 	int got_audio_frame;
@@ -291,6 +291,7 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp)
 		ret = stream_read_frame_any(pi, &got_audio_frame);
 		if (ret < 0 || got_audio_frame) {
 			*timestamp = pts_to_samples(pi, pi->audio_stream->time_base, pi->pkt.pts);
+			*output_buffer = pi->output_buffer;
 			return ret;
 		}
 	}

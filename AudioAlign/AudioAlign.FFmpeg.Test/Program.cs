@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace AudioAlign.FFmpeg.Test {
@@ -24,28 +25,77 @@ namespace AudioAlign.FFmpeg.Test {
                 reader.OutputConfig.format.sample_size,
                 reader.OutputConfig.format.channels);
 
+            int sampleBlockSize = reader.OutputConfig.format.channels * reader.OutputConfig.format.sample_size;
+
             int samplesRead;
             long timestamp;
+            IntPtr data;
+            MemoryStream ms = new MemoryStream();
 
             // read full stream
-            while ((samplesRead = reader.ReadFrame(out timestamp)) > 0) {
+            while ((samplesRead = reader.ReadFrame(out timestamp, out data)) > 0) {
                 Console.WriteLine("read " + samplesRead + " @ " + timestamp);
+
+                // read samples into memory
+                int bytesRead = samplesRead * sampleBlockSize;
+                var bytes = new byte[bytesRead];
+                Marshal.Copy(data, bytes, 0, bytesRead);
+                ms.Write(bytes, 0, bytesRead);
             }
 
             // seek back to start
             reader.Seek(0);
 
             // read again (output should be the same as above)
-            while ((samplesRead = reader.ReadFrame(out timestamp)) > 0) {
+            while ((samplesRead = reader.ReadFrame(out timestamp, out data)) > 0) {
                 Console.WriteLine("read " + samplesRead + " @ " + timestamp);
             }
 
             reader.Dispose();
 
-            //IeeeStream ieee = new IeeeStream(nAudioSource);
-            //NAudioSinkStream nAudioSink = new NAudioSinkStream(ieee);
-            //WaveFileWriter.CreateWaveFile(dlg.FileName + ".processed.wav", nAudioSink);
+            // write memory to wav file
+            ms.Position = 0;
+            MemorySourceStream mss = new MemorySourceStream(ms, new AudioProperties(
+                reader.OutputConfig.format.channels, 
+                reader.OutputConfig.format.sample_rate, 
+                reader.OutputConfig.format.sample_size * 8, 
+                reader.OutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM));
+            IeeeStream ieee = new IeeeStream(mss);
+            NAudioSinkStream nAudioSink = new NAudioSinkStream(ieee);
+            WaveFileWriter.CreateWaveFile(args[0] + ".ffmpeg.wav", nAudioSink);
 
+        }
+    }
+
+    class MemorySourceStream : IAudioStream {
+
+        private MemoryStream source;
+        private AudioProperties properties;
+
+        public MemorySourceStream(MemoryStream source, AudioProperties properties) {
+            this.source = source;
+            this.properties = properties;
+        }
+
+        public AudioProperties Properties {
+            get { return properties; }
+        }
+
+        public long Length {
+            get { return source.Length; }
+        }
+
+        public long Position {
+            get { return source.Position; }
+            set { source.Position = value; }
+        }
+
+        public int SampleBlockSize {
+            get { return properties.SampleBlockByteSize; }
+        }
+
+        public int Read(byte[] buffer, int offset, int count) {
+            return source.Read(buffer, offset, count);
         }
     }
 }
