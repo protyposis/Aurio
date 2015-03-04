@@ -259,7 +259,7 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 	 * Return the number of samples per channel read, to keep API consistent.
 	 * All "sizes" in the API are in samples, none in bytes.
 	 */
-	return ret / pi->output.format.channels / pi->output.format.sample_size; 
+	return pi->frame->nb_samples; 
 }
 
 /*
