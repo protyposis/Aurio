@@ -8,17 +8,18 @@ namespace AudioAlign.FFmpeg {
     internal class Interop64 {
 
         private const string FFMPEGPROXYLIB = "win64\\AudioAlign.FFmpeg.Proxy64.dll";
+        private const CallingConvention CC = CallingConvention.Cdecl;
 
-        [DllImport(FFMPEGPROXYLIB)]
+        [DllImport(FFMPEGPROXYLIB, CallingConvention = CC)]
         public static extern IntPtr stream_open(string filename);
 
-        [DllImport(FFMPEGPROXYLIB)]
+        [DllImport(FFMPEGPROXYLIB, CallingConvention = CC)]
         public static extern IntPtr stream_get_output_config(IntPtr instance);
 
-        [DllImport(FFMPEGPROXYLIB)]
-        public static extern int stream_read_frame(IntPtr instance);
+        [DllImport(FFMPEGPROXYLIB, CallingConvention = CC)]
+        public static extern int stream_read_frame(IntPtr instance, out long timestamp);
 
-        [DllImport(FFMPEGPROXYLIB)]
+        [DllImport(FFMPEGPROXYLIB, CallingConvention = CC)]
         public static extern void stream_close(IntPtr instance);
     }
 }

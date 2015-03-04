@@ -34,8 +34,8 @@ namespace AudioAlign.FFmpeg {
             get { return outputConfig; }
         }
 
-        public int ReadFrame() {
-            return interop.stream_read_frame(instance);
+        public int ReadFrame(out long timestamp) {
+            return interop.stream_read_frame(instance, out timestamp);
         }
 
         #region IDisposable & destructor

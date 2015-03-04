@@ -78,7 +78,7 @@ typedef struct ProxyInstance {
 EXPORT ProxyInstance *stream_open(char *filename);
 EXPORT void *stream_get_output_config(ProxyInstance *pi);
 EXPORT int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame);
-EXPORT int stream_read_frame(ProxyInstance *pi);
+EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp);
 EXPORT void stream_close(ProxyInstance *pi);
 
 static void pi_init(ProxyInstance **pi);
@@ -89,10 +89,12 @@ static int open_audio_codec_context(AVFormatContext *fmt_ctx);
 static int decode_audio_packet(ProxyInstance *pi, int *got_audio_frame, int cached);
 static int convert_samples(ProxyInstance *pi);
 static int determine_target_format(AVCodecContext *audio_codec_ctx);
+static inline int64_t pts_to_samples(ProxyInstance *pi, AVRational time_base, int64_t time);
 
 int main(int argc, char *argv[])
 {
 	ProxyInstance *pi;
+	int64_t timestamp;
 
 	if (argc < 2) {
 		fprintf(stderr, "No source file specified\n");
@@ -101,8 +103,9 @@ int main(int argc, char *argv[])
 
 	pi = stream_open(argv[1]);
 
-	while (stream_read_frame(pi) >= 0) {
+	while (stream_read_frame(pi, &timestamp) >= 0) {
 		// frame decoded
+		printf("frame @ %lld\n", timestamp);
 	}
 
 	stream_close(pi);
@@ -179,6 +182,7 @@ ProxyInstance *stream_open(char *filename)
 			pi->output.format.channels);
 	}
 
+	pi->output.length = pts_to_samples(pi, pi->audio_stream->time_base, pi->audio_stream->duration);
 	/*
 	 * TODO To get the frame size, read the first frame, take the size, and seek back to the start.
 	 * This only works under the assumption that 
@@ -192,8 +196,6 @@ ProxyInstance *stream_open(char *filename)
 	 * For now, a frame size of 1 second should be big enough to fit all occurring frame sizes (frame
 	 * sizes were always smaller during tests).
 	 */
-	pi->output.length = (long)(av_q2d(pi->audio_stream->time_base) * 
-		pi->audio_stream->duration * pi->output.format.sample_rate);
 	pi->output.frame_size = pi->output.format.sample_rate; // 1 sec default frame size
 
 	if (DEBUG) {
@@ -262,13 +264,17 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 /*
  * Read the next audio frame, skipping other frame types in between.
  */
-int stream_read_frame(ProxyInstance *pi) {
+int stream_read_frame(ProxyInstance *pi, int64_t *timestamp)
+{
 	int ret;
 	int got_audio_frame;
+
+	*timestamp = -1;
 	
 	while (1) {
 		ret = stream_read_frame_any(pi, &got_audio_frame);
 		if (ret < 0 || got_audio_frame) {
+			*timestamp = pts_to_samples(pi, pi->audio_stream->time_base, pi->pkt.pts);
 			return ret;
 		}
 	}
@@ -520,4 +526,9 @@ static int determine_target_format(AVCodecContext *audio_codec_ctx)
 
 	// default format
 	return AV_SAMPLE_FMT_FLT;
+}
+
+static inline int64_t pts_to_samples(ProxyInstance *pi, AVRational time_base, int64_t time)
+{
+	return (int64_t)(av_q2d(time_base) * time * pi->output.format.sample_rate);
 }

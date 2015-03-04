@@ -25,8 +25,9 @@ namespace AudioAlign.FFmpeg.Test {
                 reader.OutputConfig.format.channels);
 
             int samplesRead;
-            while ((samplesRead = reader.ReadFrame()) > 0) {
-                Console.WriteLine("read " + samplesRead);
+            long timestamp;
+            while ((samplesRead = reader.ReadFrame(out timestamp)) > 0) {
+                Console.WriteLine("read " + samplesRead + " @ " + timestamp);
             }
 
             reader.Dispose();
