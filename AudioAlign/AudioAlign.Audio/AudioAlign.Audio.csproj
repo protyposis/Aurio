@@ -179,6 +179,7 @@
     <Compile Include="Streams\DataMonitorStream.cs" />
     <Compile Include="Streams\DebugStream.cs" />
     <Compile Include="Streams\DebugStreamController.cs" />
+    <Compile Include="Streams\MemorySourceStream.cs" />
     <Compile Include="Streams\SineGeneratorStream.cs" />
     <Compile Include="Streams\StreamExtensions.cs" />
     <Compile Include="Streams\TimeWarp.cs" />
