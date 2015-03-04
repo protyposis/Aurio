@@ -79,6 +79,7 @@ EXPORT ProxyInstance *stream_open(char *filename);
 EXPORT void *stream_get_output_config(ProxyInstance *pi);
 EXPORT int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame);
 EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp);
+EXPORT void stream_seek(ProxyInstance *pi, int64_t timestamp);
 EXPORT void stream_close(ProxyInstance *pi);
 
 static void pi_init(ProxyInstance **pi);
@@ -90,6 +91,7 @@ static int decode_audio_packet(ProxyInstance *pi, int *got_audio_frame, int cach
 static int convert_samples(ProxyInstance *pi);
 static int determine_target_format(AVCodecContext *audio_codec_ctx);
 static inline int64_t pts_to_samples(ProxyInstance *pi, AVRational time_base, int64_t time);
+static inline int64_t samples_to_pts(ProxyInstance *pi, AVRational time_base, int64_t time);
 
 int main(int argc, char *argv[])
 {
@@ -104,8 +106,16 @@ int main(int argc, char *argv[])
 
 	pi = stream_open(argv[1]);
 
+	// read full stream
 	while ((ret = stream_read_frame(pi, &timestamp)) >= 0) {
-		// frame decoded
+		printf("read %d @ %lld\n", ret, timestamp);
+	}
+
+	// seek back to start
+	stream_seek(pi, 0);
+
+	// read again (output should be the same as above)
+	while ((ret = stream_read_frame(pi, &timestamp)) >= 0) {
 		printf("read %d @ %lld\n", ret, timestamp);
 	}
 
@@ -281,9 +291,20 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp)
 	}
 }
 
-void stream_seek(ProxyInstance *pi, int target)
+void stream_seek(ProxyInstance *pi, int64_t timestamp)
 {
-	// TODO implement
+	// convert sample time to time_base time
+	timestamp = samples_to_pts(pi, pi->audio_stream->time_base, timestamp);
+
+	// do seek
+	av_seek_frame(pi->fmt_ctx, pi->audio_stream->index, timestamp, AVSEEK_FLAG_ANY);
+	
+	// flush codec
+	avcodec_flush_buffers(pi->audio_codec_ctx);
+
+	// avcodec_flush_buffers invalidates the packet reference
+	pi->pkt.data = NULL;
+	pi->pkt.size = 0;
 }
 
 void stream_close(ProxyInstance *pi)
@@ -532,4 +553,9 @@ static int determine_target_format(AVCodecContext *audio_codec_ctx)
 static inline int64_t pts_to_samples(ProxyInstance *pi, AVRational time_base, int64_t time)
 {
 	return (int64_t)(av_q2d(time_base) * time * pi->output.format.sample_rate);
+}
+
+static inline int64_t samples_to_pts(ProxyInstance *pi, AVRational time_base, int64_t time)
+{
+	return (int64_t)(time / av_q2d(time_base) / pi->output.format.sample_rate);
 }
