@@ -77,6 +77,7 @@ typedef struct ProxyInstance {
 // function definitions
 EXPORT ProxyInstance *stream_open(char *filename);
 EXPORT void *stream_get_output_config(ProxyInstance *pi);
+EXPORT int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame);
 EXPORT int stream_read_frame(ProxyInstance *pi);
 EXPORT void stream_close(ProxyInstance *pi);
 
@@ -85,7 +86,7 @@ static void pi_free(ProxyInstance **pi);
 
 static void info(AVFormatContext *fmt_ctx);
 static int open_audio_codec_context(AVFormatContext *fmt_ctx);
-static int decode_audio_packet(ProxyInstance *pi, int *got_frame, int cached);
+static int decode_audio_packet(ProxyInstance *pi, int *got_audio_frame, int cached);
 static int convert_samples(ProxyInstance *pi);
 static int determine_target_format(AVCodecContext *audio_codec_ctx);
 
@@ -207,10 +208,12 @@ void *stream_get_output_config(ProxyInstance *pi)
 	return &pi->output;
 }
 
-int stream_read_frame(ProxyInstance *pi)
+/*
+ * Reads the next frame in the stream.
+ */
+int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 {
 	int ret;
-	int got_frame;
 	int cached = 0;
 
 	/* 
@@ -228,12 +231,12 @@ int stream_read_frame(ProxyInstance *pi)
 		}
 	}
 
-	ret = decode_audio_packet(pi, &got_frame, cached);
+	ret = decode_audio_packet(pi, got_audio_frame, cached);
 	
 	if (ret < 0) {
 		return -1; // decoding failed, signal EOF
 	}
-	else if (cached && !got_frame) {
+	else if (cached && !*got_audio_frame) {
 		return -1; // signal the caller EOF
 	}
 
@@ -254,6 +257,21 @@ int stream_read_frame(ProxyInstance *pi)
 	 * All "sizes" in the API are in samples, none in bytes.
 	 */
 	return ret / pi->output.format.channels / pi->output.format.sample_size; 
+}
+
+/*
+ * Read the next audio frame, skipping other frame types in between.
+ */
+int stream_read_frame(ProxyInstance *pi) {
+	int ret;
+	int got_audio_frame;
+	
+	while (1) {
+		ret = stream_read_frame_any(pi, &got_audio_frame);
+		if (ret < 0 || got_audio_frame) {
+			return ret;
+		}
+	}
 }
 
 void stream_seek(ProxyInstance *pi, int target)
@@ -414,16 +432,16 @@ static int audio_frame_count = 0;
  * Decodes an audio frame and returns the number of bytes consumed from the input packet,
  * or a negative error code (it is basically the result of avcodec_decode_audio4).
  */
-static int decode_audio_packet(ProxyInstance *pi, int *got_frame, int cached)
+static int decode_audio_packet(ProxyInstance *pi, int *got_audio_frame, int cached)
 {
 	int ret = 0;
 	int decoded = pi->pkt.size; // to skip non-target stream packets, return the full packet size
 
-	*got_frame = 0;
+	*got_audio_frame = 0;
 
 	if (pi->pkt.stream_index == pi->audio_stream->index) {
 		/* decode audio frame */
-		ret = avcodec_decode_audio4(pi->audio_codec_ctx, pi->frame, got_frame, &pi->pkt);
+		ret = avcodec_decode_audio4(pi->audio_codec_ctx, pi->frame, got_audio_frame, &pi->pkt);
 		if (ret < 0) {
 			fprintf(stderr, "Error decoding audio frame (%s)\n", av_err2str(ret));
 			return ret;
@@ -434,7 +452,7 @@ static int decode_audio_packet(ProxyInstance *pi, int *got_frame, int cached)
 		* Also, some decoders might over-read the packet. */
 		decoded = FFMIN(ret, pi->pkt.size);
 
-		if (*got_frame && DEBUG) {
+		if (*got_audio_frame && DEBUG) {
 			printf("packet dts:%s pts:%s duration:%s\n",
 				av_ts2timestr(pi->pkt.dts, &pi->audio_stream->time_base),
 				av_ts2timestr(pi->pkt.pts, &pi->audio_stream->time_base),
