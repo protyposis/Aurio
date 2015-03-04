@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
 {
 	ProxyInstance *pi;
 	int64_t timestamp;
+	int ret;
 
 	if (argc < 2) {
 		fprintf(stderr, "No source file specified\n");
@@ -103,9 +104,9 @@ int main(int argc, char *argv[])
 
 	pi = stream_open(argv[1]);
 
-	while (stream_read_frame(pi, &timestamp) >= 0) {
+	while ((ret = stream_read_frame(pi, &timestamp)) >= 0) {
 		// frame decoded
-		printf("frame @ %lld\n", timestamp);
+		printf("read %d @ %lld\n", ret, timestamp);
 	}
 
 	stream_close(pi);
