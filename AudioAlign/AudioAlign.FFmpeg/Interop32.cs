@@ -20,6 +20,9 @@ namespace AudioAlign.FFmpeg {
         public static extern int stream_read_frame(IntPtr instance, out long timestamp);
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = CC)]
+        public static extern void stream_seek(IntPtr instance, long timestamp);
+
+        [DllImport(FFMPEGPROXYLIB, CallingConvention = CC)]
         public static extern void stream_close(IntPtr instance);
     }
 }

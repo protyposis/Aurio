@@ -26,6 +26,16 @@ namespace AudioAlign.FFmpeg.Test {
 
             int samplesRead;
             long timestamp;
+
+            // read full stream
+            while ((samplesRead = reader.ReadFrame(out timestamp)) > 0) {
+                Console.WriteLine("read " + samplesRead + " @ " + timestamp);
+            }
+
+            // seek back to start
+            reader.Seek(0);
+
+            // read again (output should be the same as above)
             while ((samplesRead = reader.ReadFrame(out timestamp)) > 0) {
                 Console.WriteLine("read " + samplesRead + " @ " + timestamp);
             }

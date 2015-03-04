@@ -17,6 +17,10 @@ namespace AudioAlign.FFmpeg {
             return Interop64.stream_read_frame(instance, out timestamp);
         }
 
+        public void stream_seek(IntPtr instance, long timestamp) {
+            Interop64.stream_seek(instance, timestamp);
+        }
+
         public void stream_close(IntPtr instance) {
             Interop64.stream_close(instance);
         }

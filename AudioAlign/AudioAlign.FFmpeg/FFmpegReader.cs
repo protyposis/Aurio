@@ -38,6 +38,10 @@ namespace AudioAlign.FFmpeg {
             return interop.stream_read_frame(instance, out timestamp);
         }
 
+        public void Seek(long timestamp) {
+            interop.stream_seek(instance, timestamp);
+        }
+
         #region IDisposable & destructor
 
         public void Dispose() {
