@@ -99,6 +99,7 @@ int main(int argc, char *argv[])
 	ProxyInstance *pi;
 	int64_t timestamp;
 	int ret;
+	uint8_t *output_data;
 
 	if (argc < 2) {
 		fprintf(stderr, "No source file specified\n");
@@ -108,7 +109,7 @@ int main(int argc, char *argv[])
 	pi = stream_open(argv[1]);
 
 	// read full stream
-	while ((ret = stream_read_frame(pi, &timestamp, NULL)) >= 0) {
+	while ((ret = stream_read_frame(pi, &timestamp, &output_data)) >= 0) {
 		printf("read %d @ %lld\n", ret, timestamp);
 	}
 
@@ -116,7 +117,7 @@ int main(int argc, char *argv[])
 	stream_seek(pi, 0);
 
 	// read again (output should be the same as above)
-	while ((ret = stream_read_frame(pi, &timestamp, NULL)) >= 0) {
+	while ((ret = stream_read_frame(pi, &timestamp, &output_data)) >= 0) {
 		printf("read %d @ %lld\n", ret, timestamp);
 	}
 
