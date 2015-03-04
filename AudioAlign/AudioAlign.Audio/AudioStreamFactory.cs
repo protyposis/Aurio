@@ -29,12 +29,28 @@ namespace AudioAlign.Audio {
             return null;
         }
 
+        private static IAudioStream TryOpenSourceStream(FileInfo fileInfo) {
+            WaveStream waveStream;
+            if ((waveStream = OpenFile(fileInfo)) != null) {
+                return new NAudioSourceStream(waveStream);
+            }
+            else {
+                try {
+                    return new FFmpegSourceStream(fileInfo);
+                }
+                catch {
+                    // file probably unsupported
+                }
+            }
+            return null;
+        }
+
         public static IAudioStream FromFileInfo(FileInfo fileInfo) {
-            return new NAudioSourceStream(OpenFile(fileInfo));
+            return TryOpenSourceStream(fileInfo);
         }
 
         public static IAudioStream FromFileInfoIeee32(FileInfo fileInfo) {
-            return new IeeeStream(new NAudioSourceStream(OpenFile(fileInfo)));
+            return new IeeeStream(TryOpenSourceStream(fileInfo));
         }
 
         public static VisualizingStream FromAudioTrackForGUI(AudioTrack audioTrack) {
@@ -56,7 +72,7 @@ namespace AudioAlign.Audio {
         /// <param name="fileName">the filename to check</param>
         /// <returns>true if the file is supported, else false</returns>
         public static bool IsSupportedFile(string fileName) {
-            return fileName.EndsWith(".wav") || fileName.EndsWith(".mp3");
+            return TryOpenSourceStream(new FileInfo(fileName)) != null;
         }
 
         public static void WriteToFile(IAudioStream stream, string targetFileName) {
