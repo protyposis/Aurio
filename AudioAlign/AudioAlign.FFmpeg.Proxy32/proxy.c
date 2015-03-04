@@ -44,7 +44,7 @@
 #pragma comment(lib, "swresample.lib")
 
 #define EXPORT __declspec(dllexport)
-#define DEBUG 1
+#define DEBUG 0
 
 
 
@@ -311,23 +311,22 @@ void stream_seek(ProxyInstance *pi, int64_t timestamp)
 	timestamp = samples_to_pts(pi, pi->audio_stream->time_base, timestamp);
 
 	/*
-	 * When seeking backward to a timestamp which is not exactly a frame PTS
-	 * but between two frame PTS' a and b, 
+	 * When seeking to a timestamp which is not exactly a frame PTS but 
+	 * between two frame PTS' a and b, 
 	 * thus PTS(a) < seek_timestamp < PTS(b), e.g.:
 	 *
 	 *   ...........|....................................|................
 	 *              ^ PTS(a)     ^ seek_timestamp        ^ PTS(b)
 	 * 
 	 * then the position after the seek will be PTS(b). By specifying the
-	 * flag AVSEEK_FLAG_BACKWARD, it will send up at PTS(a).
+	 * flag AVSEEK_FLAG_BACKWARD, it will end up at PTS(a).
 	 *
-	 * By tracking the current frame PTS, the seek function can decide 
-	 * whether the seek_timestamp lies in the back and set the flag accordingly.
+	 * This applies to both seek directions, backward and forward from the
+	 * current position in the stream.
 	 */
 
 	// do seek
-	av_seek_frame(pi->fmt_ctx, pi->audio_stream->index, timestamp, 
-		timestamp < pi->frame_pts ? AVSEEK_FLAG_BACKWARD : 0);
+	av_seek_frame(pi->fmt_ctx, pi->audio_stream->index, timestamp, AVSEEK_FLAG_BACKWARD);
 	
 	// flush codec
 	avcodec_flush_buffers(pi->audio_codec_ctx);
