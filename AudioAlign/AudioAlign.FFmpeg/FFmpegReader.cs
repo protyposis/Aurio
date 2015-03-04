@@ -57,8 +57,10 @@ namespace AudioAlign.FFmpeg {
 
                 // There are no unmanaged resources to release, but
                 // if we add them, they need to be released here.
-                interop.stream_close(instance);
-                instance = IntPtr.Zero;
+                if (instance != IntPtr.Zero) {
+                    interop.stream_close(instance);
+                    instance = IntPtr.Zero;
+                }
             }
             disposed = true;
 
