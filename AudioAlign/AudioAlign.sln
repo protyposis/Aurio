@@ -59,6 +59,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioAlign.FFmpeg.Proxy64", "AudioAlign.FFmpeg.Proxy64\AudioAlign.FFmpeg.Proxy64.vcxproj", "{11C4D931-21A8-44DD-8093-E98CACD13468}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.FFmpeg", "AudioAlign.FFmpeg\AudioAlign.FFmpeg.csproj", "{8A1A603C-7005-4CC0-9AB7-E6FD3F58F621}"
+	ProjectSection(ProjectDependencies) = postProject
+		{11C4D931-21A8-44DD-8093-E98CACD13468} = {11C4D931-21A8-44DD-8093-E98CACD13468}
+		{950C1FC8-EC9F-457D-854C-5361FA61B267} = {950C1FC8-EC9F-457D-854C-5361FA61B267}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.FFmpeg.Test", "AudioAlign.FFmpeg.Test\AudioAlign.FFmpeg.Test.csproj", "{616330A6-6386-40F1-907D-CD46884FA86F}"
 EndProject
