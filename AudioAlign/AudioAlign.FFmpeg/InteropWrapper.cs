@@ -11,7 +11,7 @@ namespace AudioAlign.FFmpeg {
 
         public delegate IntPtr d_stream_open(string filename);
         public delegate IntPtr d_stream_get_output_config(IntPtr instance);
-        public delegate int d_stream_read_frame(IntPtr instance, out long timestamp, out IntPtr data);
+        public delegate int d_stream_read_frame(IntPtr instance, out long timestamp, byte[] output_buffer, int output_buffer_size);
         public delegate void d_stream_seek(IntPtr instance, long timestamp);
         public delegate void d_stream_close(IntPtr instance);
 

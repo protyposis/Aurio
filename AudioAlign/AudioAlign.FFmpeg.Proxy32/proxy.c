@@ -79,7 +79,7 @@ typedef struct ProxyInstance {
 EXPORT ProxyInstance *stream_open(char *filename);
 EXPORT void *stream_get_output_config(ProxyInstance *pi);
 EXPORT int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame);
-EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t **output_buffer);
+EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size);
 EXPORT void stream_seek(ProxyInstance *pi, int64_t timestamp);
 EXPORT void stream_close(ProxyInstance *pi);
 
@@ -99,7 +99,8 @@ int main(int argc, char *argv[])
 	ProxyInstance *pi;
 	int64_t timestamp;
 	int ret;
-	uint8_t *output_data;
+	uint8_t *output_buffer;
+	int output_buffer_size;
 
 	if (argc < 2) {
 		fprintf(stderr, "No source file specified\n");
@@ -108,8 +109,11 @@ int main(int argc, char *argv[])
 
 	pi = stream_open(argv[1]);
 
+	output_buffer_size = pi->output.frame_size * pi->output.format.channels * pi->output.format.sample_size;
+	output_buffer = malloc(output_buffer_size);
+
 	// read full stream
-	while ((ret = stream_read_frame(pi, &timestamp, &output_data)) >= 0) {
+	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size)) >= 0) {
 		printf("read %d @ %lld\n", ret, timestamp);
 	}
 
@@ -117,9 +121,11 @@ int main(int argc, char *argv[])
 	stream_seek(pi, 0);
 
 	// read again (output should be the same as above)
-	while ((ret = stream_read_frame(pi, &timestamp, &output_data)) >= 0) {
+	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size)) >= 0) {
 		printf("read %d @ %lld\n", ret, timestamp);
 	}
+
+	free(output_buffer);
 
 	stream_close(pi);
 
@@ -281,7 +287,7 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 /*
  * Read the next audio frame, skipping other frame types in between.
  */
-int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t **output_buffer)
+int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size)
 {
 	int ret;
 	int got_audio_frame;
@@ -289,10 +295,11 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t **output_bu
 	*timestamp = -1;
 	
 	while (1) {
+		pi->output_buffer = output_buffer;
+		pi->output_buffer_size = output_buffer_size;
 		ret = stream_read_frame_any(pi, &got_audio_frame);
 		if (ret < 0 || got_audio_frame) {
 			*timestamp = pts_to_samples(pi, pi->audio_stream->time_base, pi->pkt.pts);
-			*output_buffer = pi->output_buffer;
 			return ret;
 		}
 	}
@@ -360,7 +367,6 @@ static void pi_free(ProxyInstance **pi) {
 	/* close & free FFmpeg stuff */
 	av_free_packet(&_pi->pkt);
 	av_frame_free(&_pi->frame);
-	free(_pi->output_buffer);
 	swr_free(&_pi->swr);
 	avcodec_close(_pi->audio_codec_ctx);
 	avformat_close_input(&_pi->fmt_ctx);
@@ -523,12 +529,7 @@ static int convert_samples(ProxyInstance *pi) {
 	/* prepare/update sample format conversion buffer */
 	int output_buffer_size_needed = pi->frame->nb_samples * pi->frame->channels * av_get_bytes_per_sample(pi->audio_codec_ctx->sample_fmt);
 	if (pi->output_buffer_size < output_buffer_size_needed) {
-		if(DEBUG) printf("init swr output buffer size %d\n", output_buffer_size_needed);
-		if (pi->output_buffer != NULL) {
-			free(pi->output_buffer);
-		}
-		pi->output_buffer = malloc(output_buffer_size_needed);
-		pi->output_buffer_size = output_buffer_size_needed;
+		fprintf(stderr, "output buffer too small (%d < %d)\n", pi->output_buffer_size, output_buffer_size_needed);
 	}
 
 	/* convert samples to target format */

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace AudioAlign.FFmpeg.Test {
@@ -27,27 +26,28 @@ namespace AudioAlign.FFmpeg.Test {
 
             int sampleBlockSize = reader.OutputConfig.format.channels * reader.OutputConfig.format.sample_size;
 
+            int output_buffer_size = reader.OutputConfig.frame_size * 
+                reader.OutputConfig.format.channels * reader.OutputConfig.format.sample_size;
+            byte[] output_buffer = new byte[output_buffer_size];
+
             int samplesRead;
             long timestamp;
-            IntPtr data;
             MemoryStream ms = new MemoryStream();
 
             // read full stream
-            while ((samplesRead = reader.ReadFrame(out timestamp, out data)) > 0) {
+            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size)) > 0) {
                 Console.WriteLine("read " + samplesRead + " @ " + timestamp);
 
                 // read samples into memory
                 int bytesRead = samplesRead * sampleBlockSize;
-                var bytes = new byte[bytesRead];
-                Marshal.Copy(data, bytes, 0, bytesRead);
-                ms.Write(bytes, 0, bytesRead);
+                ms.Write(output_buffer, 0, bytesRead);
             }
 
             // seek back to start
             reader.Seek(0);
 
             // read again (output should be the same as above)
-            while ((samplesRead = reader.ReadFrame(out timestamp, out data)) > 0) {
+            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size)) > 0) {
                 Console.WriteLine("read " + samplesRead + " @ " + timestamp);
             }
 

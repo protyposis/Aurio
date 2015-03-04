@@ -31,8 +31,8 @@ namespace AudioAlign.FFmpeg {
             get { return outputConfig; }
         }
 
-        public int ReadFrame(out long timestamp, out IntPtr data) {
-            return interop.stream_read_frame(instance, out timestamp, out data);
+        public int ReadFrame(out long timestamp, byte[] output_buffer, int output_buffer_size) {
+            return interop.stream_read_frame(instance, out timestamp, output_buffer, output_buffer_size);
         }
 
         public void Seek(long timestamp) {
