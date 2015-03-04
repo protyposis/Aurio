@@ -58,11 +58,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FFmpegReader.cs" />
-    <Compile Include="IInteropWrapper.cs" />
     <Compile Include="Interop32.cs" />
-    <Compile Include="Interop32Wrapper.cs" />
+    <Compile Include="InteropWrapper.cs" />
     <Compile Include="Interop64.cs" />
-    <Compile Include="Interop64Wrapper.cs" />
     <Compile Include="OutputConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

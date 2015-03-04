@@ -8,15 +8,10 @@ using System.Text;
 namespace AudioAlign.FFmpeg {
     public class FFmpegReader : IDisposable {
 
-        private static IInteropWrapper interop;
+        private static InteropWrapper interop;
 
         static FFmpegReader() {
-            if (IntPtr.Size == 8) {
-                interop = new Interop64Wrapper();
-            }
-            else {
-                interop = new Interop32Wrapper();
-            }
+            interop = new InteropWrapper();
         }
 
         private bool disposed = false;
