@@ -25,6 +25,8 @@ namespace AudioAlign.FFmpeg {
             outputConfig = (OutputConfig)Marshal.PtrToStructure(ocp, typeof(OutputConfig));
         }
 
+        public FFmpegReader(FileInfo fileInfo) : this(fileInfo.FullName) { }
+
         public OutputConfig OutputConfig {
             get { return outputConfig; }
         }
