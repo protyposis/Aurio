@@ -62,6 +62,7 @@ typedef struct ProxyInstance {
 	SwrContext			*swr;
 	int					output_buffer_size;
 	uint8_t				*output_buffer;
+	int64_t				frame_pts;
 
 	struct {
 		struct {
@@ -265,6 +266,10 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 		av_free_packet(&pi->pkt);
 	}
 
+	if (got_audio_frame) {
+		pi->frame_pts = pi->pkt.pts;
+	}
+
 	/* 
 	 * Return the number of samples per channel read, to keep API consistent.
 	 * All "sizes" in the API are in samples, none in bytes.
@@ -296,8 +301,24 @@ void stream_seek(ProxyInstance *pi, int64_t timestamp)
 	// convert sample time to time_base time
 	timestamp = samples_to_pts(pi, pi->audio_stream->time_base, timestamp);
 
+	/*
+	 * When seeking backward to a timestamp which is not exactly a frame PTS
+	 * but between two frame PTS' a and b, 
+	 * thus PTS(a) < seek_timestamp < PTS(b), e.g.:
+	 *
+	 *   ...........|....................................|................
+	 *              ^ PTS(a)     ^ seek_timestamp        ^ PTS(b)
+	 * 
+	 * then the position after the seek will be PTS(b). By specifying the
+	 * flag AVSEEK_FLAG_BACKWARD, it will send up at PTS(a).
+	 *
+	 * By tracking the current frame PTS, the seek function can decide 
+	 * whether the seek_timestamp lies in the back and set the flag accordingly.
+	 */
+
 	// do seek
-	av_seek_frame(pi->fmt_ctx, pi->audio_stream->index, timestamp, AVSEEK_FLAG_ANY);
+	av_seek_frame(pi->fmt_ctx, pi->audio_stream->index, timestamp, 
+		timestamp < pi->frame_pts ? AVSEEK_FLAG_BACKWARD : 0);
 	
 	// flush codec
 	avcodec_flush_buffers(pi->audio_codec_ctx);
