@@ -201,7 +201,8 @@ ProxyInstance *stream_open(char *filename)
 			pi->output.format.channels);
 	}
 
-	pi->output.length = pts_to_samples(pi, pi->audio_stream->time_base, pi->audio_stream->duration);
+	pi->output.length = pi->audio_stream->duration != AV_NOPTS_VALUE ? 
+		pts_to_samples(pi, pi->audio_stream->time_base, pi->audio_stream->duration) : AV_NOPTS_VALUE;
 	/*
 	 * TODO To get the frame size, read the first frame, take the size, and seek back to the start.
 	 * This only works under the assumption that 
@@ -299,7 +300,8 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buf
 		pi->output_buffer_size = output_buffer_size;
 		ret = stream_read_frame_any(pi, &got_audio_frame);
 		if (ret < 0 || got_audio_frame) {
-			*timestamp = pts_to_samples(pi, pi->audio_stream->time_base, pi->pkt.pts);
+			*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ? 
+				pts_to_samples(pi, pi->audio_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
 			return ret;
 		}
 	}

@@ -1,4 +1,5 @@
 ﻿using AudioAlign.FFmpeg;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,6 +21,22 @@ namespace AudioAlign.Audio.Streams {
 
         public FFmpegSourceStream(FileInfo fileInfo) {
             reader = new FFmpegReader(fileInfo);
+
+            if (reader.OutputConfig.length == long.MinValue) {
+                /* 
+                 * length == FFmpeg AV_NOPTS_VALUE
+                 * 
+                 * This means that for the opened file/format, there is no length/PTS data 
+                 * available, which also makes seeking more or less impossible.
+                 * 
+                 * As a workaround, an index could be created to map the frames to the file
+                 * position, and then seek by file position. The index could be created by 
+                 * linearly reading through the file (decoding not necessary), and creating
+                 * a mapping of AVPacket.pos to the frame time.
+                 */
+                throw new FileNotSeekableException();
+            }
+
             properties = new AudioProperties(
                 reader.OutputConfig.format.channels,
                 reader.OutputConfig.format.sample_rate,
@@ -114,6 +131,51 @@ namespace AudioAlign.Audio.Streams {
             }
 
             return bytesToCopy;
+        }
+
+        public static FileInfo CreateWaveProxy(FileInfo fileInfo) {
+            var outputFileInfo = new FileInfo(fileInfo.FullName + ".ffproxy.wav");
+
+            if (outputFileInfo.Exists) {
+                Console.WriteLine("Proxy already existing, using " + outputFileInfo.Name);
+                return outputFileInfo;
+            }
+
+            var reader = new FFmpegReader(fileInfo);
+
+            // workaround to get NAudio WaveFormat (instead of creating it manually here)
+            var mss = new MemorySourceStream(null, new AudioProperties(
+                reader.OutputConfig.format.channels, 
+                reader.OutputConfig.format.sample_rate, 
+                reader.OutputConfig.format.sample_size * 8, 
+                reader.OutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM));
+            var nass = new NAudioSinkStream(mss);
+            var waveFormat = nass.WaveFormat;
+
+            var writer = new WaveFileWriter(outputFileInfo.FullName, waveFormat);
+
+            int output_buffer_size = reader.OutputConfig.frame_size * mss.SampleBlockSize;
+            byte[] output_buffer = new byte[output_buffer_size];
+
+            int samplesRead;
+            long timestamp;
+
+            // sequentially read samples from decoder and write it to wav file
+            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size)) > 0) {
+                int bytesRead = samplesRead * mss.SampleBlockSize;
+                writer.Write(output_buffer, 0, bytesRead);
+            }
+
+            reader.Dispose();
+            writer.Close();
+
+            return outputFileInfo;
+        }
+
+        public class FileNotSeekableException : Exception {
+            public FileNotSeekableException() : base() { }
+            public FileNotSeekableException(string message) : base(message) { }
+            public FileNotSeekableException(string message, Exception innerException) : base(message, innerException) { }
         }
     }
 }

@@ -38,6 +38,19 @@ namespace AudioAlign.Audio {
                 try {
                     return new FFmpegSourceStream(fileInfo);
                 }
+                catch (FFmpegSourceStream.FileNotSeekableException) {
+                    /* 
+                     * This exception gets thrown is a file is not seekable and therefore cannot
+                     * provide all the functionality that is needed for an IAudioStream, although
+                     * the problem could be solved by creating a seek index. See FFmpegSourceStream
+                     * for further information.
+                     * 
+                     * For now, we create a WAV proxy file, because it is easier (consumes 
+                     * additional space though).
+                     */
+                    Console.WriteLine("File not seekable, creating proxy file...");
+                    return TryOpenSourceStream(FFmpegSourceStream.CreateWaveProxy(fileInfo));
+                }
                 catch {
                     // file probably unsupported
                 }
