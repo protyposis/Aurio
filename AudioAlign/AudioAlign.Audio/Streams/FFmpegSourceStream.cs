@@ -11,6 +11,7 @@ namespace AudioAlign.Audio.Streams {
         private FFmpegReader reader;
         private AudioProperties properties;
         private long readerPosition; // samples
+        private long readerFirstPTS; // samples
 
         private byte[] sourceBuffer;
         private int sourceBufferLength; // samples
@@ -31,6 +32,16 @@ namespace AudioAlign.Audio.Streams {
                 reader.OutputConfig.format.sample_size];
             sourceBufferPosition = 0;
             sourceBufferLength = -1; // -1 means buffer empty, >= 0 means valid buffer data
+
+            // determine first PTS to handle cases where it is > 0
+            try {
+                Position = 0;
+            }
+            catch(InvalidOperationException) {
+                readerFirstPTS = readerPosition;
+                readerPosition = 0;
+                Console.WriteLine("first PTS = " + readerFirstPTS);
+            }
         }
 
         public AudioProperties Properties {
@@ -50,7 +61,7 @@ namespace AudioAlign.Audio.Streams {
                 return SamplePosition * SampleBlockSize;
             }
             set {
-                long seekTarget = value / SampleBlockSize;
+                long seekTarget = (value / SampleBlockSize) + readerFirstPTS;
 
                 // seek to target position
                 reader.Seek(seekTarget);
@@ -68,7 +79,7 @@ namespace AudioAlign.Audio.Streams {
                     sourceBufferPosition = (int)(seekTarget - readerPosition);
                 }
                 else if (seekTarget < readerPosition) {
-                    Console.WriteLine("should not happen!!!");
+                    throw new InvalidOperationException("illegal state");
                 }
 
                 // seek back to seek point for successive reads to return expected data (not one frame in advance) PROBABLY NOT NEEDED
@@ -95,7 +106,7 @@ namespace AudioAlign.Audio.Streams {
             Array.Copy(sourceBuffer, sourceBufferPosition * SampleBlockSize, buffer, offset, bytesToCopy);
             sourceBufferPosition += (bytesToCopy / SampleBlockSize);
             if (sourceBufferPosition > sourceBufferLength) {
-                throw new Exception("overflow");
+                throw new InvalidOperationException("overflow");
             }
             else if (sourceBufferPosition == sourceBufferLength) {
                 // buffer read completely, need to read next frame
