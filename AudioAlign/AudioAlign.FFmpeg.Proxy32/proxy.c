@@ -243,11 +243,6 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 	int ret;
 	int cached = 0;
 
-	/* 
-	 * TODO to avoid possible memory leaks, open packets might have to be freed
-	 * before EOF is returned.
-	 */
-
 	// if packet is emtpy, read new packet from stream
 	if (pi->pkt.size == 0) {
 		if ((ret = av_read_frame(pi->fmt_ctx, &pi->pkt)) < 0) {
@@ -261,9 +256,11 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 	ret = decode_audio_packet(pi, got_audio_frame, cached);
 	
 	if (ret < 0) {
+		av_free_packet(&pi->pkt);
 		return -1; // decoding failed, signal EOF
 	}
 	else if (cached && !*got_audio_frame) {
+		av_free_packet(&pi->pkt);
 		return -1; // signal the caller EOF
 	}
 
@@ -271,6 +268,7 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 	pi->pkt.size -= ret;
 
 	if (convert_samples(pi) < 0) {
+		av_free_packet(&pi->pkt);
 		return -1; // conversion failed, signal EOF
 	}
 
