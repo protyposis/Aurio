@@ -222,6 +222,11 @@ ProxyInstance *stream_open(char *filename)
 		printf("output: %lld length, %d frame_size\n", pi->output.length, pi->output.frame_size);
 	}
 
+	if (pi->audio_codec_ctx->codec->capabilities & CODEC_CAP_DELAY) {
+		// When CODEC_CAP_DELAY is set, there is a delay between input and output of the decoder
+		printf("warning: cap delay!\n");
+	}
+
 	return pi;
 }
 
