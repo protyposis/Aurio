@@ -111,12 +111,15 @@ namespace AudioAlign.Audio.Streams {
 
         public int Read(byte[] buffer, int offset, int count) {
             if (sourceBufferLength == -1) {
-                sourceBufferLength = reader.ReadFrame(out readerPosition, sourceBuffer, sourceBuffer.Length);
-                sourceBufferPosition = 0;
+                long newPosition;
+                sourceBufferLength = reader.ReadFrame(out newPosition, sourceBuffer, sourceBuffer.Length);
 
-                if (sourceBufferLength == -1) {
+                if (newPosition == -1 || sourceBufferLength == -1) {
                     return 0; // end of stream
                 }
+
+                readerPosition = newPosition;
+                sourceBufferPosition = 0;
             }
 
             int bytesToCopy = Math.Min(count, (sourceBufferLength - sourceBufferPosition) * SampleBlockSize);
