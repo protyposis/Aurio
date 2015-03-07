@@ -14,11 +14,13 @@ namespace AudioAlign.FFmpeg {
             interop = new InteropWrapper();
         }
 
+        private string filename; // store source filename for debugging
         private bool disposed = false;
         private IntPtr instance = IntPtr.Zero;
         private OutputConfig outputConfig;
 
         public FFmpegReader(string filename) {
+            this.filename = filename;
             instance = interop.stream_open(filename);
             
             IntPtr ocp = interop.stream_get_output_config(instance);
