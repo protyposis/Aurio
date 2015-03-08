@@ -1,0 +1,7 @@
+1. Go to http://ffmpeg.zeranoe.com/
+
+2. Download 32 and 64 bit shared and dev packages
+
+3. Place contents of shared and dev archives (without root folder) in win32 or win64 subfolder
+
+currently used: FFmpeg 2.5.2 from http://ffmpeg.zeranoe.com/blog/?p=394
