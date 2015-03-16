@@ -23,7 +23,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -48,6 +48,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(ProjectDir)\bin\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)\obj\$(Configuration)\</IntDir>
+    <IncludePath>..\..\libs\ffmpeg\win64\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\libs\ffmpeg\win64\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -86,6 +90,12 @@ copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\swresample-1.dll $(OutDir)</Command
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\avformat-56.dll $(OutDir)
+copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\avcodec-56.dll $(OutDir)
+copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\avutil-54.dll $(OutDir)
+copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\swresample-1.dll $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\AudioAlign.FFmpeg.Proxy32\proxy.c" />
