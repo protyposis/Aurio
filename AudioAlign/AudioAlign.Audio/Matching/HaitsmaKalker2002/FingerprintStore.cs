@@ -23,7 +23,16 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             Threshold = DEFAULT_THRESHOLD;
             this.profile = profile;
             store = new Dictionary<AudioTrack, List<SubFingerprint>>();
+
+            // Dictionary is faster, SQLite needs less memory
             collisionMap = new DictionaryCollisionMap(); // new SQLiteCollisionMap();
+
+            /*
+             * TODO to support processing of huge datasets (or machines with low memory),
+             * the store could also be moved from Dictionary/Lists to SQLite, the database
+             * written to disk (instead of in-memory like now) and the user given the 
+             * choice between them (or automatically chosen depending on the amount of data).
+             */
         }
 
         public int FingerprintSize {
