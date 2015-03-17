@@ -10,7 +10,7 @@ namespace AudioAlign.FFTW {
         private static IInteropWrapper interop;
 
         static FFTW() {
-            if (IntPtr.Size == 8) {
+            if (Environment.Is64BitProcess) {
                 interop = new Interop64Wrapper();
             }
             else {

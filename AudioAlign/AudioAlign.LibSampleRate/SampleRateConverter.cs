@@ -9,7 +9,7 @@ namespace AudioAlign.LibSampleRate {
         private static IInteropWrapper interop;
 
         static SampleRateConverter() {
-            if (IntPtr.Size == 8) {
+            if (Environment.Is64BitProcess) {
                 interop = new Interop64Wrapper();
             }
             else {

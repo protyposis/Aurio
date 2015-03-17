@@ -22,7 +22,7 @@ namespace AudioAlign.FFmpeg {
         public d_stream_close stream_close;
 
         public InteropWrapper() {
-            if (IntPtr.Size == 8) {
+            if (Environment.Is64BitProcess) {
                 stream_open = Interop64.stream_open;
                 stream_get_output_config = Interop64.stream_get_output_config;
                 stream_read_frame = Interop64.stream_read_frame;
