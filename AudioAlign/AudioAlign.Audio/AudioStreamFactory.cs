@@ -51,8 +51,12 @@ namespace AudioAlign.Audio {
                     Console.WriteLine("File not seekable, creating proxy file...");
                     return TryOpenSourceStream(FFmpegSourceStream.CreateWaveProxy(fileInfo));
                 }
+                catch (DllNotFoundException) {
+                    Console.WriteLine("Cannot open file through FFmpeg: DLL missing");
+                }
                 catch {
                     // file probably unsupported
+                    Console.WriteLine("unsupported file format");
                 }
             }
             return null;
