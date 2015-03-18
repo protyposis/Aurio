@@ -8,12 +8,6 @@ using System.Text;
 namespace AudioAlign.FFmpeg {
     public class FFmpegReader : IDisposable {
 
-        private static InteropWrapper interop;
-
-        static FFmpegReader() {
-            interop = new InteropWrapper();
-        }
-
         private string filename; // store source filename for debugging
         private bool disposed = false;
         private IntPtr instance = IntPtr.Zero;
@@ -21,9 +15,9 @@ namespace AudioAlign.FFmpeg {
 
         public FFmpegReader(string filename) {
             this.filename = filename;
-            instance = interop.stream_open(filename);
-            
-            IntPtr ocp = interop.stream_get_output_config(instance);
+            instance = InteropWrapper.stream_open(filename);
+
+            IntPtr ocp = InteropWrapper.stream_get_output_config(instance);
             outputConfig = (OutputConfig)Marshal.PtrToStructure(ocp, typeof(OutputConfig));
         }
 
@@ -34,11 +28,11 @@ namespace AudioAlign.FFmpeg {
         }
 
         public int ReadFrame(out long timestamp, byte[] output_buffer, int output_buffer_size) {
-            return interop.stream_read_frame(instance, out timestamp, output_buffer, output_buffer_size);
+            return InteropWrapper.stream_read_frame(instance, out timestamp, output_buffer, output_buffer_size);
         }
 
         public void Seek(long timestamp) {
-            interop.stream_seek(instance, timestamp);
+            InteropWrapper.stream_seek(instance, timestamp);
         }
 
         #region IDisposable & destructor
@@ -60,7 +54,7 @@ namespace AudioAlign.FFmpeg {
                 // There are no unmanaged resources to release, but
                 // if we add them, they need to be released here.
                 if (instance != IntPtr.Zero) {
-                    interop.stream_close(instance);
+                    InteropWrapper.stream_close(instance);
                     instance = IntPtr.Zero;
                 }
             }
