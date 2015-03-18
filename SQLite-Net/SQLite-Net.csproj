@@ -77,17 +77,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SQLiteWin64.cs" />
+    <Compile Include="SQLiteWin32.cs" />
+    <Compile Include="ISQLitePlatform.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQLite.cs" />
     <Compile Include="SQLiteAsync.cs" />
+    <Compile Include="SQLiteWinInterop.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\libs\sqlite3_x86.dll">
-      <Link>sqlite3_x86.dll</Link>
+    <Content Include="..\libs\sqlite3.x64.dll">
+      <Link>sqlite3.x64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\libs\sqlite3_x64.dll">
-      <Link>sqlite3_x64.dll</Link>
+    <Content Include="..\libs\sqlite3.x86.dll">
+      <Link>sqlite3.x86.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
