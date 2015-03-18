@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign", "AudioAlign\AudioAlign.csproj", "{7742E5AD-81A6-4CE7-915D-EAA9C30AB6B1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8A1A603C-7005-4CC0-9AB7-E6FD3F58F621} = {8A1A603C-7005-4CC0-9AB7-E6FD3F58F621}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.WaveControls", "AudioAlign.WaveControls\AudioAlign.WaveControls.csproj", "{FD0C6CC5-B509-4441-9AA2-E8B34BAD9F95}"
 EndProject

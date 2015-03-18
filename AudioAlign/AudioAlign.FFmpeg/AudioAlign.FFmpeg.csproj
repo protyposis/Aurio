@@ -83,6 +83,48 @@
     <Compile Include="OutputConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\AudioAlign.FFmpeg.Proxy32\bin\Debug\AudioAlign.FFmpeg.Proxy32.dll">
+      <Link>ffmpeg32\AudioAlign.FFmpeg.Proxy32.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\AudioAlign.FFmpeg.Proxy32\bin\Debug\avcodec-56.dll">
+      <Link>ffmpeg32\avcodec-56.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\AudioAlign.FFmpeg.Proxy32\bin\Debug\avformat-56.dll">
+      <Link>ffmpeg32\avformat-56.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\AudioAlign.FFmpeg.Proxy32\bin\Debug\avutil-54.dll">
+      <Link>ffmpeg32\avutil-54.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\AudioAlign.FFmpeg.Proxy32\bin\Debug\swresample-1.dll">
+      <Link>ffmpeg32\swresample-1.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\AudioAlign.FFmpeg.Proxy64\bin\Debug\AudioAlign.FFmpeg.Proxy64.dll">
+      <Link>ffmpeg64\AudioAlign.FFmpeg.Proxy64.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\AudioAlign.FFmpeg.Proxy64\bin\Debug\avcodec-56.dll">
+      <Link>ffmpeg64\avcodec-56.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\AudioAlign.FFmpeg.Proxy64\bin\Debug\avformat-56.dll">
+      <Link>ffmpeg64\avformat-56.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\AudioAlign.FFmpeg.Proxy64\bin\Debug\avutil-54.dll">
+      <Link>ffmpeg64\avutil-54.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\AudioAlign.FFmpeg.Proxy64\bin\Debug\swresample-1.dll">
+      <Link>ffmpeg64\swresample-1.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

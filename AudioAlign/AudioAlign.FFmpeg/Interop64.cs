@@ -7,7 +7,7 @@ using System.Text;
 namespace AudioAlign.FFmpeg {
     internal class Interop64 {
 
-        private const string FFMPEGPROXYLIB = "win64\\AudioAlign.FFmpeg.Proxy64.dll";
+        private const string FFMPEGPROXYLIB = "ffmpeg64\\AudioAlign.FFmpeg.Proxy64.dll";
         private const CallingConvention CC = CallingConvention.Cdecl;
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = CC)]
