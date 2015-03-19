@@ -3,3 +3,6 @@ obj/
 *.suo
 *.sdf
 *.opensdf
+
+# NuGet
+**/packages/*

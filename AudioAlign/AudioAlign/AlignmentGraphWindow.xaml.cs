@@ -11,10 +11,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using AudioAlign.Audio.Matching;
-using Microsoft.Research.DynamicDataDisplay.DataSources;
-using Microsoft.Research.DynamicDataDisplay.Charts;
-using Microsoft.Research.DynamicDataDisplay.PointMarkers;
-using Microsoft.Research.DynamicDataDisplay;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+using OxyPlot;
+using System.IO;
 
 namespace AudioAlign {
     /// <summary>
@@ -22,15 +22,7 @@ namespace AudioAlign {
     /// </summary>
     public partial class AlignmentGraphWindow : Window {
 
-        private static Brush[] COLORS = { Brushes.Red, Brushes.Blue, Brushes.Green, 
-                                            Brushes.Magenta, Brushes.DarkViolet, Brushes.CornflowerBlue, 
-                                            Brushes.Orange, Brushes.YellowGreen, Brushes.Cyan };
-
         private List<MatchPair> matchPairs;
-
-        private HorizontalTimeSpanAxis horizontalAxis;
-        private VerticalTimeSpanAxis verticalAxis;
-        private int colorIndex = 0;
 
         public AlignmentGraphWindow(List<MatchPair> matchPairs) {
             InitializeComponent();
@@ -38,28 +30,71 @@ namespace AudioAlign {
             this.matchPairs = matchPairs;
         }
 
-        private void FillGraph() {
+        private void FillGraph(OxyPlot.PlotModel plotModel) {
             foreach (MatchPair matchPair in matchPairs) {
-                AddGraphLine(matchPair);
+                AddGraphLine(plotModel, matchPair);
             }
         }
 
-        private void AddGraphLine(MatchPair matchPair) {
-            // matches must be sequentially ordered on the X-axis for the graph line to be drawn correctly
-            EnumerableDataSource<Match> dataSource = new EnumerableDataSource<Match>(matchPair.Matches.OrderBy(match => match.Track1Time));
-            dataSource.SetXMapping(match => horizontalAxis.ConvertToDouble(match.Track1.Offset + match.Track1Time));
-            dataSource.SetYMapping(match => verticalAxis.ConvertToDouble((match.Track1.Offset + match.Track1Time) - (match.Track2.Offset + match.Track2Time)));
-            plotter.AddLineGraph(dataSource, new Pen(COLORS[colorIndex % COLORS.Length], 1d), 
-                new CirclePointMarker() { Size = 3d, Fill = COLORS[colorIndex % COLORS.Length] }, null);
-            plotter.LegendVisible = false;
-            colorIndex++;
+        private void AddGraphLine(OxyPlot.PlotModel plotModel, MatchPair matchPair) {
+            var lineSeries = new LineSeries();
+            lineSeries.Title = matchPair.Track1.Name + " <-> " + matchPair.Track2.Name;
+            lineSeries.TrackerFormatString = "{0}\n{1}: {2}\n{3}: {4}"; // bugfix https://github.com/oxyplot/oxyplot/issues/265
+            matchPair.Matches.OrderBy(match => match.Track1Time).ToList()
+                .ForEach(match => lineSeries.Points.Add(new DataPoint(
+                    DateTimeAxis.ToDouble(match.Track1.Offset + match.Track1Time), 
+                    DateTimeAxis.ToDouble((match.Track1.Offset + match.Track1Time) - (match.Track2.Offset + match.Track2Time)))));
+            plotModel.Series.Add(lineSeries);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            plotter.HorizontalAxis = horizontalAxis = new HorizontalTimeSpanAxis();
-            plotter.VerticalAxis = verticalAxis = new VerticalTimeSpanAxis();
+            var plotModel = new OxyPlot.PlotModel();
+            var timeSpanAxis1 = new TimeSpanAxis();
+            timeSpanAxis1.Title = "Time";
+            timeSpanAxis1.Position = AxisPosition.Bottom;
+            plotModel.Axes.Add(timeSpanAxis1);
+            var timeSpanAxis2 = new MsecTimeSpanAxis();
+            timeSpanAxis2.Title = "Offset";
+            timeSpanAxis2.StringFormat = "m:ss:msec";
+            timeSpanAxis2.MajorGridlineStyle = LineStyle.Automatic;
+            timeSpanAxis2.MinorGridlineStyle = LineStyle.Automatic;
+            plotModel.Axes.Add(timeSpanAxis2);
+            FillGraph(plotModel);
+            plotModel.IsLegendVisible = false;
+            plotter.Model = plotModel;
+        }
 
-            FillGraph();
+        private void MenuItemCopyToClipboard_Click(object sender, RoutedEventArgs e) {
+            Clipboard.SetImage(OxyPlot.Wpf.PngExporter.ExportToBitmap(plotter.Model, (int)plotter.ActualWidth, (int)plotter.ActualHeight, OxyColors.White));
+        }
+
+        /// <summary>
+        /// Modifies OxyPlot's TimeSpanAxis calculation to display labels for smaller intervals. This
+        /// is helpful on the Y-axis offset plotting to visualize offsets with higher precision. A min
+        /// interval of the default 1 second is to coarse to inspect offsets on the millisecond level.
+        /// https://github.com/oxyplot/oxyplot/blob/v2014.1.546/Source/OxyPlot/Axes/TimeSpanAxis.cs
+        /// </summary>
+        class MsecTimeSpanAxis : TimeSpanAxis {
+            protected override double CalculateActualInterval(double availableSize, double maxIntervalSize) {
+                double range = Math.Abs(this.ActualMinimum - this.ActualMaximum);
+                double interval = 0.001;
+                var goodIntervals = new[] { 0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 5, 10, 30, 60, 120, 300, 600, 900, 1200, 1800, 3600 };
+
+                int maxNumberOfIntervals = Math.Max((int)(availableSize / maxIntervalSize), 2);
+
+                while (true) {
+                    if (range / interval < maxNumberOfIntervals) {
+                        return interval;
+                    }
+
+                    double nextInterval = goodIntervals.FirstOrDefault(i => i > interval);
+                    if (Math.Abs(nextInterval) < double.Epsilon) {
+                        nextInterval = interval * 2;
+                    }
+
+                    interval = nextInterval;
+                }
+            }
         }
     }
 }
