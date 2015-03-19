@@ -1,0 +1,17 @@
+1. Download and extract source from http://www.mega-nerd.com/SRC/download.html
+
+2. Replace Makefile.msvc in Win32 directory with libsamplerate-Makefile.msvc (rename to Makefile.msvc!)
+   - This makefile is updated to work with VS2013 whereas the provided makefile was written for the very old Visual Studio .NET and can only compile an x86 version
+   - Test programs are not included in this makefile as they do not compile with MSVC (if you need to validate the DLL, compile with gcc instead)
+
+3. Edit the makefile and set MSVCDir to the correct directory
+
+4a. Compile x86 dll in Visual Studio "x86 Native Tools Command Prompt":
+    cd to libsamplerate source root folder
+    make clean & make
+
+4b. Compile x64 dll in Visual Studio "x64 Native Tools Command Prompt" (or "x64 Cross Tools Command Prompt" on 32 bit Windows):
+    cd to libsamplerate source root folder
+    make clean & make
+
+Current version used: 0.1.8 / libsamplerate-0.1.8.tar.gz
