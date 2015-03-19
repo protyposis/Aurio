@@ -1,0 +1,5 @@
+1. Download precompiled Windows DLLs (32-bit and 64-bit versions) from http://www.fftw.org/install/windows.html
+
+2. Extract the floating point DLLs ("f" postfix)
+
+Current version used: 3.3 / fftw-3.3-dll32.zip & fftw-3.3-dll64.zip
