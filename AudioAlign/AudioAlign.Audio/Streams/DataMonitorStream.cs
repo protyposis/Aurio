@@ -15,7 +15,16 @@ namespace AudioAlign.Audio.Streams {
             }
         }
 
+        public bool Disabled {
+            get;
+            set;
+        }
+
         public override int Read(byte[] buffer, int offset, int count) {
+            if (Disabled) {
+                return sourceStream.Read(buffer, offset, count);
+            }
+
             int bytesRead = sourceStream.Read(buffer, offset, count);
             if (DataRead != null && bytesRead > 0) {
                 DataRead(this, new StreamDataMonitorEventArgs(Properties, buffer, offset, bytesRead));

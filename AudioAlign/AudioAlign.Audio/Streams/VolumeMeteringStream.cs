@@ -32,7 +32,16 @@ namespace AudioAlign.Audio.Streams {
             this.SamplesPerNotification = samplesPerNotification;
         }
 
+        public bool Disabled {
+            get;
+            set;
+        }
+
         public override int Read(byte[] buffer, int offset, int count) {
+            if (Disabled) {
+                return sourceStream.Read(buffer, offset, count);
+            }
+
             int bytesRead = sourceStream.Read(buffer, offset, count);
 
             if (bytesRead > 0) {

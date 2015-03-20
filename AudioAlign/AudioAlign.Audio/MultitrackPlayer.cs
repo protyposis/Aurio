@@ -8,6 +8,7 @@ using System.Timers;
 using System.Diagnostics;
 using AudioAlign.Audio.Streams;
 using NAudio.CoreAudioApi;
+using AudioAlign.Audio.TaskMonitor;
 
 namespace AudioAlign.Audio {
     public class MultitrackPlayer : IDisposable {
@@ -27,6 +28,7 @@ namespace AudioAlign.Audio {
         private MixerStream audioMixer;
         private VolumeControlStream audioVolumeControlStream;
         private VolumeMeteringStream audioVolumeMeteringStream;
+        private DataMonitorStream dataMonitorStream;
         private IAudioStream audioOutputStream;
         private IWavePlayer audioOutput;
 
@@ -96,6 +98,51 @@ namespace AudioAlign.Audio {
             return true;
         }
 
+        public void SaveToFile(System.IO.FileInfo outputFile, IProgressReporter progressReporter) {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            // save current position for later
+            var currentTime = CurrentTime;
+            // disable reporting to consumers (e.g. GUI)
+            audioVolumeMeteringStream.Disabled = dataMonitorStream.Disabled = true;
+
+            // set to start for all audio to be saved
+            audioOutputStream.Position = 0;
+
+            NAudioSinkStream nAudioSink = new NAudioSinkStream(audioOutputStream);
+            long total = nAudioSink.Length;
+            long progress = 0;
+            using (WaveFileWriter writer = new WaveFileWriter(outputFile.FullName, nAudioSink.WaveFormat)) {
+                byte[] buffer = new byte[nAudioSink.WaveFormat.AverageBytesPerSecond * 5];
+                while (true) {
+                    int bytesRead = nAudioSink.Read(buffer, 0, buffer.Length);
+                    progress += bytesRead;
+                    if (bytesRead == 0) {
+                        // end of stream reached
+                        break;
+                    }
+                    writer.Write(buffer, 0, bytesRead);
+
+                    if (progressReporter != null) {
+                        progressReporter.ReportProgress((double)progress / total * 100);
+                    }
+                }
+            }
+
+            // reenable reporting to consumers
+            audioVolumeMeteringStream.Disabled = dataMonitorStream.Disabled = false;
+            // reset initial position
+            CurrentTime = currentTime;
+
+            sw.Stop();
+            Console.WriteLine("Export time: " + sw.Elapsed);
+        }
+
+        public void SaveToFile(System.IO.FileInfo outputFile) {
+            SaveToFile(outputFile, null);
+        }
+
         private void SetupAudioChain() {
             /* Obtain output device to read the rendering samplerate and initialize the mixer stream
              * with the target samplerate to avoid NAudio's internal ResamplerDmoStream for the target
@@ -113,7 +160,7 @@ namespace AudioAlign.Audio {
 
             audioVolumeControlStream = new VolumeControlStream(audioMixer);
             audioVolumeMeteringStream = new VolumeMeteringStream(audioVolumeControlStream);
-            DataMonitorStream dataMonitorStream = new DataMonitorStream(audioVolumeMeteringStream);
+            dataMonitorStream = new DataMonitorStream(audioVolumeMeteringStream);
             dataMonitorStream.DataRead += new EventHandler<StreamDataMonitorEventArgs>(dataMonitorStream_DataRead);
             VolumeClipStream volumeClipStream = new VolumeClipStream(dataMonitorStream);
 
