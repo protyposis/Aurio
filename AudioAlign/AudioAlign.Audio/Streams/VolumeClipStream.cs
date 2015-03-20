@@ -28,11 +28,11 @@ namespace AudioAlign.Audio.Streams {
                     fixed (byte* sampleBuffer = &buffer[offset]) {
                         float* samples = (float*)sampleBuffer;
                         for (int x = 0; x < bytesRead / 4; x++) {
-                            if (samples[x] > 0) {
-                                samples[x] = samples[x] > 1 ? 1.0f : samples[x];
+                            if (samples[x] > 1.0f) {
+                                samples[x] = 1.0f;
                             }
-                            else {
-                                samples[x] = samples[x] < -1 ? -1.0f : samples[x];
+                            else if(samples[x] < -1.0f) {
+                                samples[x] = -1.0f;
                             }
                         }
                     }
