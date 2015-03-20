@@ -7,14 +7,17 @@ using NAudio.Wave;
 namespace AudioAlign.Audio.Streams {
     public class VolumeControlStream : AbstractAudioStreamWrapper {
 
+        public const float DefaultVolume = 1.0f;
+        public const float DefaultBalance = 0.0f;
+
         public VolumeControlStream(IAudioStream sourceStream)
             : base(sourceStream) {
             if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32)) {
                 throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
             }
 
-            Volume = 1.0f;
-            Balance = 0.0f;
+            Volume = DefaultVolume;
+            Balance = DefaultBalance;
             Mute = false;
         }
 
@@ -37,36 +40,35 @@ namespace AudioAlign.Audio.Streams {
             int bytesRead = sourceStream.Read(buffer, offset, count);
 
             if (bytesRead > 0) {
-                unsafe {
-                    bool mute = Mute;
-                    float balance = Balance;
-                    float volume = Volume;
-                    fixed (byte* sampleBuffer = &buffer[offset]) {
-                        float* samples = (float*)sampleBuffer;
-                        for (int x = 0; x < bytesRead / 4; x++) {
-                            if (mute) {
-                                // in mute mode, just set the samples to zero (-inf dB).
-                                samples[x] = 0.0f;
-                            }
-                            else {
+                bool mute = Mute;
+                float balance = Balance;
+                float volume = Volume;
+
+                if (mute) {
+                    // in mute mode, just set the samples to zero (-inf dB).
+                    Array.Clear(buffer, offset, bytesRead);
+                }
+                else if (volume != DefaultVolume || balance != DefaultBalance) {
+                    unsafe {
+                        fixed (byte* sampleBuffer = &buffer[offset]) {
+                            float* samples = (float*)sampleBuffer;
+
+                            for (int x = 0; x < bytesRead / 4; x += 2) {
                                 // adjust balance
                                 if (balance != 0) {
-                                    if (x % 2 == 0) {
-                                        // left channel
-                                        if (balance > 0) {
-                                            samples[x] *= 1 - balance;
-                                        }
+                                    // left channel
+                                    if (balance > 0) {
+                                        samples[x] *= 1 - balance;
                                     }
+                                    // right channel
                                     else {
-                                        // right channel
-                                        if (balance < 0) {
-                                            samples[x] *= 1 + balance;
-                                        }
+                                        samples[x + 1] *= 1 + balance;
                                     }
                                 }
 
                                 // adjust volume
                                 samples[x] *= volume;
+                                samples[x + 1] *= volume;
                             }
                         }
                     }
