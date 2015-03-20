@@ -38,32 +38,35 @@ namespace AudioAlign.Audio.Streams {
 
             if (bytesRead > 0) {
                 unsafe {
+                    bool mute = Mute;
+                    float balance = Balance;
+                    float volume = Volume;
                     fixed (byte* sampleBuffer = &buffer[offset]) {
                         float* samples = (float*)sampleBuffer;
                         for (int x = 0; x < bytesRead / 4; x++) {
-                            if (Mute) {
+                            if (mute) {
                                 // in mute mode, just set the samples to zero (-inf dB).
                                 samples[x] = 0.0f;
                             }
                             else {
                                 // adjust balance
-                                if (Balance != 0) {
+                                if (balance != 0) {
                                     if (x % 2 == 0) {
                                         // left channel
-                                        if (Balance > 0) {
-                                            samples[x] *= 1 - Balance;
+                                        if (balance > 0) {
+                                            samples[x] *= 1 - balance;
                                         }
                                     }
                                     else {
                                         // right channel
-                                        if (Balance < 0) {
-                                            samples[x] *= 1 + Balance;
+                                        if (balance < 0) {
+                                            samples[x] *= 1 + balance;
                                         }
                                     }
                                 }
 
                                 // adjust volume
-                                samples[x] *= Volume;
+                                samples[x] *= volume;
                             }
                         }
                     }
