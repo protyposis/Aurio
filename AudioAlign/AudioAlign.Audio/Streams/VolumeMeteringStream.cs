@@ -45,6 +45,10 @@ namespace AudioAlign.Audio.Streams {
             int bytesRead = sourceStream.Read(buffer, offset, count);
 
             if (bytesRead > 0) {
+                // local value copies for speed optimization
+                int sourceStreamChannels = sourceStream.Properties.Channels;
+                int samplesPerNotification = SamplesPerNotification;
+
                 unsafe {
                     fixed (byte* sampleBuffer = &buffer[offset]) {
                         float* samples = (float*)sampleBuffer;
@@ -58,10 +62,10 @@ namespace AudioAlign.Audio.Streams {
                                 maxSamples[channel] = sampleValue;
                             }
 
-                            channel = ++channel % sourceStream.Properties.Channels;
+                            channel = ++channel % sourceStreamChannels;
                             sampleCount++;
 
-                            if (SamplesPerNotification > 0 && sampleCount >= SamplesPerNotification) {
+                            if (samplesPerNotification > 0 && sampleCount >= samplesPerNotification) {
                                 RaiseStreamVolumeNotification();
                                 sampleCount = 0;
                             }
