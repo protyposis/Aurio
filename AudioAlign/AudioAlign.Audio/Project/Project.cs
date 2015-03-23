@@ -13,6 +13,8 @@ using System.Collections.ObjectModel;
 namespace AudioAlign.Audio.Project {
     public class Project {
 
+        public const int FormatVersion = 1;
+
         private readonly TrackList<AudioTrack> audioTrackList;
         private readonly List<Match> matches;
 
@@ -44,7 +46,7 @@ namespace AudioAlign.Audio.Project {
             
             // project format version
             xml.WriteStartElement("format");
-            xml.WriteValue(1);
+            xml.WriteValue(FormatVersion);
             xml.WriteEndElement();
 
             // audio tracks
@@ -173,7 +175,7 @@ namespace AudioAlign.Audio.Project {
             // project format version
             xml.ReadStartElement("format");
             int formatVersion = xml.ReadContentAsInt();
-            if (formatVersion != 1) {
+            if (formatVersion != FormatVersion) {
                 throw new Exception("invalid project file format");
             }
             xml.ReadEndElement();
