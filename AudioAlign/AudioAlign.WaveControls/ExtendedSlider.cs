@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.Windows.Controls.Primitives;
 
 namespace AudioAlign.WaveControls {
-    public class ExtendedSlider : Slider {
+    public class ExtendedSlider : FormattedAutoTooltipSlider {
 
         private static readonly DependencyProperty DefaultValueProperty = DependencyProperty.Register(
             "DefaultValue", typeof(double), typeof(ExtendedSlider), 
@@ -38,7 +38,8 @@ namespace AudioAlign.WaveControls {
             return value;
         }
 
-        public ExtendedSlider() {
+        public ExtendedSlider()
+            : base() {
             this.Loaded += new RoutedEventHandler(ExtendedSlider_Loaded);
         }
 

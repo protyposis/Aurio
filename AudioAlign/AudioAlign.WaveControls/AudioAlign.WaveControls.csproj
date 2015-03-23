@@ -124,6 +124,7 @@
     <Compile Include="ExtendedTickBar.cs" />
     <Compile Include="DragDropDecorator.cs" />
     <Compile Include="ExtendedSlider.cs" />
+    <Compile Include="FormattedAutoTooltipSlider.cs" />
     <Compile Include="Graph.xaml.cs">
       <DependentUpon>Graph.xaml</DependentUpon>
     </Compile>
