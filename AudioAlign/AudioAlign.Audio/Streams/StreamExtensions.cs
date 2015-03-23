@@ -28,5 +28,34 @@ namespace AudioAlign.Audio.Streams {
                 }
             }
         }
+
+        /// <summary>
+        /// Returns the direct source of a stream.
+        /// </summary>
+        /// <param name="stream">the stream of which the source is asked for</param>
+        /// <returns>the source stream of the stream if existing, else null</returns>
+        public static IAudioStream GetSourceStream(this IAudioStream stream) {
+            if (!(stream is AbstractAudioStreamWrapper)) {
+                return null;
+            }
+
+            FieldInfo fieldInfo = typeof(AbstractAudioStreamWrapper)
+                .GetField("sourceStream", BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+            return (IAudioStream)fieldInfo.GetValue(stream);
+        }
+
+        /// <summary>
+        /// Goes through a hierarchy of nested streams and prints their type and properties to the console. 
+        /// Useful for debugging.
+        /// </summary>
+        /// <param name="stream">the stream whose hierarchy should be printed</param>
+        public static void PrintStreamHierarchy(this IAudioStream stream) {
+            Console.WriteLine(stream.GetType().Name + " " + stream.Properties + " " + stream.Length + "@" + stream.Position);
+            var source = GetSourceStream(stream);
+            if (source != null) {
+                PrintStreamHierarchy(source);
+            }
+        }
     }
 }
