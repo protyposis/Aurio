@@ -14,7 +14,7 @@ namespace AudioAlign.Audio.Streams {
         /// <returns>the stream of the given type if found, else null</returns>
         public static T FindStream<T>(this IAudioStream stream) {
             FieldInfo fieldInfo = typeof(AbstractAudioStreamWrapper)
-                .GetField("sourceStream", BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                .GetField("sourceStream", BindingFlags.Instance | BindingFlags.NonPublic);
 
             while (true) {
                 if (stream is T) {
