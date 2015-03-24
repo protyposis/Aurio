@@ -13,7 +13,7 @@ using System.Collections.ObjectModel;
 namespace AudioAlign.Audio.Project {
     public class Project {
 
-        public const int FormatVersion = 1;
+        public const int FormatVersion = 2;
 
         private readonly TrackList<AudioTrack> audioTrackList;
         private readonly List<Match> matches;
@@ -105,11 +105,11 @@ namespace AudioAlign.Audio.Project {
                     xml.WriteStartElement("timewarp");
 
                     xml.WriteStartAttribute("from");
-                    xml.WriteValue(warp.From);
+                    xml.WriteValue(warp.From.Ticks);
                     xml.WriteEndAttribute();
 
                     xml.WriteStartAttribute("to");
-                    xml.WriteValue(warp.To);
+                    xml.WriteValue(warp.To.Ticks);
                     xml.WriteEndAttribute();
 
                     xml.WriteEndElement();
@@ -176,7 +176,7 @@ namespace AudioAlign.Audio.Project {
             xml.ReadStartElement("format");
             int formatVersion = xml.ReadContentAsInt();
             if (formatVersion != FormatVersion) {
-                throw new Exception("invalid project file format");
+                throw new Exception(String.Format("invalid project file format (format {0}, expected {1})", formatVersion, FormatVersion));
             }
             xml.ReadEndElement();
 
@@ -232,10 +232,10 @@ namespace AudioAlign.Audio.Project {
                                     TimeWarp warp = new TimeWarp();
 
                                     xml.MoveToAttribute("from");
-                                    warp.From = xml.ReadContentAsLong();
+                                    warp.From = new TimeSpan(xml.ReadContentAsLong());
 
                                     xml.MoveToAttribute("to");
-                                    warp.To = xml.ReadContentAsLong();
+                                    warp.To = new TimeSpan(xml.ReadContentAsLong());
 
                                     xml.ReadStartElement();
                                     //xml.ReadEndElement(); // not necessary since timewarp is an empty element

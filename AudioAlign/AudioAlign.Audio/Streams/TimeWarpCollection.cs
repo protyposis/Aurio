@@ -77,7 +77,7 @@ namespace AudioAlign.Audio.Streams {
             }
         }
 
-        public void GetBoundingMappingsForSourcePosition(long sourcePosition,
+        public void GetBoundingMappingsForSourcePosition(TimeSpan sourcePosition,
                 out TimeWarp lowerMapping, out TimeWarp upperMapping) {
             lowerMapping = null;
             upperMapping = null;
@@ -100,7 +100,7 @@ namespace AudioAlign.Audio.Streams {
             }
         }
 
-        public void GetBoundingMappingsForWarpedPosition(long warpedPosition,
+        public void GetBoundingMappingsForWarpedPosition(TimeSpan warpedPosition,
                 out TimeWarp lowerMapping, out TimeWarp upperMapping) {
             lowerMapping = null;
             upperMapping = null;
@@ -123,7 +123,7 @@ namespace AudioAlign.Audio.Streams {
             }
         }
 
-        public long TranslateSourceToWarpedPosition(long sourcePosition) {
+        public TimeSpan TranslateSourceToWarpedPosition(TimeSpan sourcePosition) {
             TimeWarp lowerMapping;
             TimeWarp upperMapping;
             GetBoundingMappingsForSourcePosition(sourcePosition, out lowerMapping, out upperMapping);
@@ -138,8 +138,8 @@ namespace AudioAlign.Audio.Streams {
             }
             else {
                 return lowerMapping.To +
-                    (long)((sourcePosition - lowerMapping.From) *
-                    TimeWarp.CalculateSampleRateRatio(lowerMapping, upperMapping));
+                    new TimeSpan((long)((sourcePosition - lowerMapping.From).Ticks *
+                    TimeWarp.CalculateSampleRateRatio(lowerMapping, upperMapping)));
             }
         }
     }

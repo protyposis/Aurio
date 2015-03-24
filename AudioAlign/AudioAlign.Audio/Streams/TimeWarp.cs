@@ -8,22 +8,22 @@ namespace AudioAlign.Audio.Streams {
         /// <summary>
         /// The byte position in the unwarped source stream.
         /// </summary>
-        public long From { get; set; }
+        public TimeSpan From { get; set; }
 
         /// <summary>
         /// The warped byte position in the target stream.
         /// </summary>
-        public long To { get; set; }
+        public TimeSpan To { get; set; }
 
         /// <summary>
         /// The position difference between the source and target stream.
         /// </summary>
-        public long Offset {
+        public TimeSpan Offset {
             get { return To - From; }
         }
 
         public static double CalculateSampleRateRatio(TimeWarp mL, TimeWarp mH) {
-            return (mH.To - mL.To) / (double)(mH.From - mL.From);
+            return (mH.To.Ticks - mL.To.Ticks) / (double)(mH.From.Ticks - mL.From.Ticks);
         }
 
         public override string ToString() {

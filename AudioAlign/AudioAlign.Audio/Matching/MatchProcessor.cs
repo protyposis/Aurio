@@ -205,7 +205,6 @@ namespace AudioAlign.Audio.Matching {
             }
 
             AudioTrack track = trackToWarp;
-            AudioProperties trackProperties = track.CreateAudioStream().Properties;
             List<TimeWarp> timeWarps = new List<TimeWarp>();
 
             if (track == matches[0].Track1) {
@@ -223,8 +222,8 @@ namespace AudioAlign.Audio.Matching {
                 m2 = matches[i];
                 TimeSpan targetTime = m1.Track2Time + (m2.Track1Time - m1.Track1Time);
                 timeWarps.Add(new TimeWarp() {
-                    From = TimeUtil.TimeSpanToBytes(m2.Track2Time, trackProperties),
-                    To = TimeUtil.TimeSpanToBytes(targetTime, trackProperties)
+                    From = m2.Track2Time,
+                    To = targetTime
                 });
                 m2.Track2Time = targetTime;
                 // TODO alle anderen Matches die Track 2 betreffen anpassen
@@ -283,15 +282,11 @@ namespace AudioAlign.Audio.Matching {
                     foreach (Match match in allMatches) {
                         if (!trackPair.Matches.Contains(match)) {
                             if (match.Track1 == trackToAlign && !match.Track1.Locked) {
-                                match.Track1Time = TimeUtil.BytesToTimeSpan(
-                                    trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(
-                                    TimeUtil.TimeSpanToBytes(match.Track1Time, properties)), properties);
+                                match.Track1Time = trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(match.Track1Time);
                                 adjustedMatches.Add(match);
                             }
                             else if (match.Track2 == trackToAlign && !match.Track2.Locked) {
-                                match.Track2Time = TimeUtil.BytesToTimeSpan(
-                                    trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(
-                                    TimeUtil.TimeSpanToBytes(match.Track2Time, properties)), properties);
+                                match.Track2Time = trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(match.Track2Time);
                                 adjustedMatches.Add(match);
                             }
                         }
