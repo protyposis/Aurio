@@ -13,7 +13,8 @@ using System.Collections.ObjectModel;
 namespace AudioAlign.Audio.Project {
     public class Project {
 
-        public const int FormatVersion = 1;
+        public const int FormatVersion = 2;
+        private delegate Project UpgradeDelegate(Project project);
 
         private readonly TrackList<AudioTrack> audioTrackList;
         private readonly List<Match> matches;
@@ -105,11 +106,11 @@ namespace AudioAlign.Audio.Project {
                     xml.WriteStartElement("timewarp");
 
                     xml.WriteStartAttribute("from");
-                    xml.WriteValue(warp.From);
+                    xml.WriteValue(warp.From.Ticks);
                     xml.WriteEndAttribute();
 
                     xml.WriteStartAttribute("to");
-                    xml.WriteValue(warp.To);
+                    xml.WriteValue(warp.To.Ticks);
                     xml.WriteEndAttribute();
 
                     xml.WriteEndElement();
@@ -165,6 +166,27 @@ namespace AudioAlign.Audio.Project {
             project.File = targetFile;
         }
 
+        private static System.Func<Project, Project> ProjectFormatUpgrade(int format) {
+            if (FormatVersion == 2 && format == 1) {
+                // Version 2 changed the time warp representation from byte positions (long) to time positions (TimeSpan, internally a long)
+                // -> Conversion possible
+                return project => {
+                    foreach (AudioTrack track in project.AudioTracks) {
+                        foreach (TimeWarp tw in track.TimeWarps) {
+                            // The byte positions are stored in the Ticks property and we convert them to real ticks as time units
+                            tw.From = TimeUtil.BytesToTimeSpan(tw.From.Ticks, track.SourceProperties);
+                            tw.To = TimeUtil.BytesToTimeSpan(tw.To.Ticks, track.SourceProperties);
+                        }
+                    }
+
+                    return project;
+                };
+            }
+
+            // Every other conversion is unsupported
+            return null;
+        }
+
         public static Project Load(FileInfo sourceFile) {
             Project project = new Project();
             Stream stream = sourceFile.OpenRead();
@@ -175,10 +197,17 @@ namespace AudioAlign.Audio.Project {
             // project format version
             xml.ReadStartElement("format");
             int formatVersion = xml.ReadContentAsInt();
-            if (formatVersion != FormatVersion) {
-                throw new Exception("invalid project file format");
-            }
             xml.ReadEndElement();
+
+            // check project format and upgrade support
+            var projectUpgradeFunction = ProjectFormatUpgrade(formatVersion);
+            if(projectUpgradeFunction == null) {
+                throw new Exception(String.Format("invalid project file format (found {0}, expected {1}, upgrade unsupported)", formatVersion, FormatVersion));
+            }
+            else {
+                Console.WriteLine("old format detected, upgrade supported ({0} -> {1})", formatVersion, FormatVersion);
+            }
+            
 
             // audio tracks
             if (xml.IsStartElement("audiotracks")) {
@@ -232,10 +261,10 @@ namespace AudioAlign.Audio.Project {
                                     TimeWarp warp = new TimeWarp();
 
                                     xml.MoveToAttribute("from");
-                                    warp.From = xml.ReadContentAsLong();
+                                    warp.From = new TimeSpan(xml.ReadContentAsLong());
 
                                     xml.MoveToAttribute("to");
-                                    warp.To = xml.ReadContentAsLong();
+                                    warp.To = new TimeSpan(xml.ReadContentAsLong());
 
                                     xml.ReadStartElement();
                                     //xml.ReadEndElement(); // not necessary since timewarp is an empty element
@@ -297,6 +326,13 @@ namespace AudioAlign.Audio.Project {
 
             xml.Close();
             project.File = sourceFile;
+
+            // project format upgrade execution
+            if (projectUpgradeFunction != null) {
+                // there's an upgrade function we need to call
+                project = projectUpgradeFunction(project);
+            }
+
             return project;
         }
 
