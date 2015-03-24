@@ -203,6 +203,10 @@ namespace AudioAlign.Audio.Matching {
             if (GetTracks(matches).Count != 2) {
                 throw new ArgumentException("matches must contain a single pair of affected tracks");
             }
+            if (matches.Count < 2) {
+                // warping needs at least 2 matches that form a warped interval; nothing to do here
+                return trackToWarp;
+            }
 
             AudioTrack track = trackToWarp;
             List<TimeWarp> timeWarps = new List<TimeWarp>();
@@ -218,6 +222,10 @@ namespace AudioAlign.Audio.Matching {
             // calculate time warps from track's matches
             Match m1 = matches[0];
             Match m2 = null;
+            timeWarps.Add(new TimeWarp() { // the start of the warping section
+                From = m1.Track2Time,
+                To = m1.Track2Time
+            });
             for (int i = 1; i < matches.Count; i++) {
                 m2 = matches[i];
                 TimeSpan targetTime = m1.Track2Time + (m2.Track1Time - m1.Track1Time);
