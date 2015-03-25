@@ -580,10 +580,10 @@ static int determine_target_format(AVCodecContext *audio_codec_ctx)
 
 static inline int64_t pts_to_samples(ProxyInstance *pi, AVRational time_base, int64_t time)
 {
-	return (int64_t)(av_q2d(time_base) * time * pi->output.format.sample_rate);
+	return (int64_t)round((av_q2d(time_base) * time) * pi->output.format.sample_rate);
 }
 
 static inline int64_t samples_to_pts(ProxyInstance *pi, AVRational time_base, int64_t time)
 {
-	return (int64_t)(time / av_q2d(time_base) / pi->output.format.sample_rate);
+	return (int64_t)round(time / av_q2d(time_base) / pi->output.format.sample_rate);
 }
