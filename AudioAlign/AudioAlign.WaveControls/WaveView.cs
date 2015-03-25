@@ -167,6 +167,17 @@ namespace AudioAlign.WaveControls {
                         case WaveViewRenderMode.Geometry:
                             renderers = waveformGeometryRenderers;
                             break;
+                        case WaveViewRenderMode.Auto:
+                            // Automatically select the waveform renderer:
+                            //  - when zoom to sample level, draw a nice geometry
+                            //  - when zoomed out and single samples are not visible, draw bitmap because geometry is too slow
+                            if (sampleCount >= drawingWidthAligned) {
+                                renderers = waveformBitmapRenderers;
+                            }
+                            else {
+                                renderers = waveformGeometryRenderers;
+                            }
+                            break;
                     }
                     if (renderers != null) {
                         for (int channel = 0; channel < channels; channel++) {
