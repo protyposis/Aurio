@@ -166,7 +166,7 @@ namespace AudioAlign.Audio.Project {
             project.File = targetFile;
         }
 
-        private static System.Func<Project, Project> ProjectFormatUpgrade(int format) {
+        private static UpgradeDelegate ProjectFormatUpgrade(int format) {
             if (FormatVersion == 2 && format == 1) {
                 // Version 2 changed the time warp representation from byte positions (long) to time positions (TimeSpan, internally a long)
                 // -> Conversion possible
@@ -200,12 +200,15 @@ namespace AudioAlign.Audio.Project {
             xml.ReadEndElement();
 
             // check project format and upgrade support
-            var projectUpgradeFunction = ProjectFormatUpgrade(formatVersion);
-            if(projectUpgradeFunction == null) {
-                throw new Exception(String.Format("invalid project file format (found {0}, expected {1}, upgrade unsupported)", formatVersion, FormatVersion));
-            }
-            else {
-                Console.WriteLine("old format detected, upgrade supported ({0} -> {1})", formatVersion, FormatVersion);
+            UpgradeDelegate projectUpgradeFunction = null;
+            if (formatVersion != FormatVersion) {
+                projectUpgradeFunction = ProjectFormatUpgrade(formatVersion);
+                if (projectUpgradeFunction == null) {
+                    throw new Exception(String.Format("invalid project file format (found {0}, expected {1}, upgrade unsupported)", formatVersion, FormatVersion));
+                }
+                else {
+                    Console.WriteLine("old format detected, upgrade supported ({0} -> {1})", formatVersion, FormatVersion);
+                }
             }
             
 
