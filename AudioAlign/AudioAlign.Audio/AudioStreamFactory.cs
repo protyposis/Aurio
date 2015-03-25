@@ -187,6 +187,13 @@ namespace AudioAlign.Audio {
                                     }
                                     //sampleBlockCount = 0;
                                 }
+
+                                if (sampleBlockCount == totalSampleBlocks && samplesProcessed < samplesRead) {
+                                    // There's no more space for more peaks
+                                    // TODO how to handle this case? why is there still audio data left?
+                                    Console.WriteLine("peakstore full, but there are samples left ({0} < {1})", samplesProcessed, samplesRead);
+                                    break;
+                                }
                             }
                             while (samplesProcessed < samplesRead);
 
