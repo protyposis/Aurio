@@ -84,6 +84,7 @@ namespace AudioAlign.Audio.Streams {
                 pos -= pos % sourceStream.SampleBlockSize;
                 sourceStream.Position = pos;
                 src.Reset(); // clear buffered data in the SRC
+                sourceBufferFillLevel = 0; // clear locally buffered data
             }
         }
 
