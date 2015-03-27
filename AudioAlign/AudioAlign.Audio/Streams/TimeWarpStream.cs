@@ -81,7 +81,7 @@ namespace AudioAlign.Audio.Streams {
             upperMapping = upperMapping ?? mappingOmega;
         }
 
-        private void ResetStream() {
+        private void ResetStream(bool hardReset) {
             if (position > mappingOmega.To) {
                 throw new Exception("position beyond length");
             }
@@ -91,12 +91,37 @@ namespace AudioAlign.Audio.Streams {
             ByteTimeWarp mL, mH;
             GetBoundingMappingsForWarpedPosition(position, out mL, out mH);
 
+            
             if (cropStream == null || cropStream.Begin != mL.From || cropStream.End != mH.From || resamplingStream.Length != mappingOmega.To) {
                 // mapping has changed, stream subsection must be renewed
-                cropStream = new CropStream(sourceStream, mL.From, mH.From);
-                resamplingStream = new ResamplingStream(cropStream, resamplingQuality, ByteTimeWarp.CalculateSampleRateRatio(mL, mH));
-                resamplingStream.Position = position - mL.To;
+                if (hardReset) {
+                    cropStream = new CropStream(sourceStream, mL.From, mH.From);
+                    resamplingStream = new ResamplingStream(cropStream, resamplingQuality, ByteTimeWarp.CalculateSampleRateRatio(mL, mH));
+                    resamplingStream.Position = position - mL.To;
+                }
+                else {
+                    // Reset the streams to the new conditions without creating new instances as the hard reset does
+                    // NOTE always hard resetting works too, but this mode has been added to keep the sample resampler throughout playback
+
+                    // Reset crop stream to source bounds, else the successive setting of begin and end can fail if 
+                    // the new begin position is after the old end position and the validation in the crop stream fails
+                    cropStream.Begin = 0;
+                    cropStream.End = sourceStream.Length;
+
+                    // Reset the crop stream to the new bounds
+                    cropStream.Begin = mL.From;
+                    cropStream.End = mH.From;
+                    cropStream.Position = 0;
+
+                    // Reset the resampling stream
+                    resamplingStream.SampleRateRatio = ByteTimeWarp.CalculateSampleRateRatio(mL, mH);
+                    resamplingStream.Position = position - mL.To;
+                }
             }
+            
+        }
+        private void ResetStream() {
+            ResetStream(true);
         }
 
         public override long Length {
@@ -115,12 +140,13 @@ namespace AudioAlign.Audio.Streams {
 
                 if (position < mL.To || position >= mH.To) {
                     // new stream subsection required
-                    cropStream = new CropStream(sourceStream, mL.From, mH.From);
-                    resamplingStream = new ResamplingStream(cropStream, resamplingQuality, ByteTimeWarp.CalculateSampleRateRatio(mL, mH));
+                    position = value;
+                    ResetStream(false);
                 }
-
-                resamplingStream.Position = value - mL.To;
-                position = value;
+                else {
+                    position = value;
+                    resamplingStream.Position = position - mL.To;
+                }
             }
         }
 
@@ -129,7 +155,7 @@ namespace AudioAlign.Audio.Streams {
 
             if (bytesRead == 0 && cropStream.End != sourceStream.Length) {
                 //PrintDebugStatus();
-                ResetStream(); // switch to next subsection
+                ResetStream(false); // switch to next subsection
                 return this.Read(buffer, offset, count);
             }
 
