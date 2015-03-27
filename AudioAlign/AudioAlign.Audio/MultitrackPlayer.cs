@@ -99,6 +99,8 @@ namespace AudioAlign.Audio {
         }
 
         public void SaveToFile(System.IO.FileInfo outputFile, IProgressReporter progressReporter) {
+            Pause(); // playback and saving cannot happen in parallel
+
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
