@@ -107,19 +107,20 @@ namespace AudioAlign.Audio.Streams {
                 return bytesRead;
             }
 
-            // dynamically increase buffer size
-            if (sourceBuffer.Length < count) {
-                int oldSize = sourceBuffer.Length;
-                sourceBuffer = new byte[count];
-                Debug.WriteLine("ResamplingStream: buffer size increased: " + oldSize + " -> " + count);
-            }
-
             int inputLengthUsed, outputLengthGenerated;
             bool endOfStream = false;
 
             // loop while the sample rate converter consumes samples until it produces an output
             do {
                 if (sourceBufferFillLevel == 0 || sourceBufferPosition == sourceBufferFillLevel) {
+                    // dynamically increase buffer size
+                    // Here's a good place to resize the buffer because it is guaranteed to be empty / fully consumed
+                    if (sourceBuffer.Length < count) {
+                        int oldSize = sourceBuffer.Length;
+                        sourceBuffer = new byte[count];
+                        Debug.WriteLine("ResamplingStream: buffer size increased: " + oldSize + " -> " + count);
+                    }
+
                     // buffer is empty or all data has already been read -> refill
                     sourceBufferPosition = 0;
                     sourceBufferFillLevel = sourceStream.Read(sourceBuffer, 0, count);
