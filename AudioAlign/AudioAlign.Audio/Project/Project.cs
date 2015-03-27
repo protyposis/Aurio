@@ -573,14 +573,23 @@ namespace AudioAlign.Audio.Project {
         private static string GetFullOrRelativeFileName(FileInfo referenceFile, FileInfo targetFile) {
             Uri uri1 = new Uri(targetFile.FullName);
             Uri uri2 = new Uri(referenceFile.DirectoryName + Path.DirectorySeparatorChar);
-            return Uri.UnescapeDataString(uri2.MakeRelativeUri(uri1).ToString())
-                .Replace('/', Path.DirectorySeparatorChar);
+            try {
+                return uri2.MakeRelativeUri(uri1).LocalPath;
+            }
+            catch {
+                return Uri.UnescapeDataString(uri2.MakeRelativeUri(uri1).ToString())
+                    .Replace('/', Path.DirectorySeparatorChar);
+
+            }
         }
 
         private static FileInfo GetFileInfo(FileInfo referenceFile, string fullOrRelativeFileName) {
             try {
                 // try it as relative file
-                return new FileInfo(referenceFile.DirectoryName + Path.DirectorySeparatorChar + fullOrRelativeFileName);
+                var fi = new FileInfo(referenceFile.DirectoryName + Path.DirectorySeparatorChar + fullOrRelativeFileName);
+                if (fi.Exists) {
+                    return fi;
+                }
             } catch (Exception) {}
             // if the relative try fails, try as absolute path - if it still fails, the file doesn't exist
             return new FileInfo(fullOrRelativeFileName);
