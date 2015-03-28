@@ -34,6 +34,8 @@ namespace AudioAlign.Audio {
 
         private Timer timer;
 
+        private const int DefaultSampleRate = 44100;
+
         public MultitrackPlayer(TrackList<AudioTrack> trackList) {
             this.trackList = trackList;
             trackListStreams = new Dictionary<AudioTrack, IAudioStream>();
@@ -158,7 +160,7 @@ namespace AudioAlign.Audio {
             Console.WriteLine("format: " + mmdevice.AudioClient.MixFormat);
 
             // init mixer stream with device playback samplerate
-            audioMixer = new MixerStream(2, mmdevice.AudioClient.MixFormat.SampleRate);
+            audioMixer = new MixerStream(2, DefaultSampleRate);
 
             audioVolumeControlStream = new VolumeControlStream(audioMixer);
             audioVolumeMeteringStream = new VolumeMeteringStream(audioVolumeControlStream);
@@ -166,7 +168,9 @@ namespace AudioAlign.Audio {
             dataMonitorStream.DataRead += new EventHandler<StreamDataMonitorEventArgs>(dataMonitorStream_DataRead);
             VolumeClipStream volumeClipStream = new VolumeClipStream(dataMonitorStream);
 
-            audioOutputStream = volumeClipStream;
+            // resample to playback output samplerate
+            audioOutputStream = new ResamplingStream(volumeClipStream, ResamplingQuality.SincFastest, 
+                mmdevice.AudioClient.MixFormat.SampleRate);
 
             audioOutput = new WasapiOut(global::NAudio.CoreAudioApi.AudioClientShareMode.Shared, true, 200);
             audioOutput.PlaybackStopped += new EventHandler<StoppedEventArgs>(
@@ -178,11 +182,30 @@ namespace AudioAlign.Audio {
             audioOutput.Init(new NAudioSinkStream(audioOutputStream));
         }
 
+        private void ChangeMixingSampleRate(int newSampleRate) {
+            int oldSampleRate = audioMixer.SampleRate;
+
+            // Set new mixer samplerate
+            audioMixer.SampleRate = newSampleRate;
+            // Adjust other streams' samplerates
+            trackListStreams.Values.ToList().ForEach(s =>
+                s.FindStream<ResamplingStream>().TargetSampleRate = newSampleRate);
+            // Adjust playback output resampler rate
+            var outputResamplingStream = audioOutputStream.FindStream<ResamplingStream>();
+            outputResamplingStream.TargetSampleRate = outputResamplingStream.TargetSampleRate;
+
+            Console.WriteLine("mixer rate changed from {0} to {1}", oldSampleRate, newSampleRate);
+        }
+
         private void AddTrack(AudioTrack audioTrack) {
+            if (audioTrack.SourceProperties.SampleRate > audioMixer.SampleRate) {
+                // The newly added track has a higher samplerate than the current tracks, so we adjust 
+                // the processing samplerate to the highest rate
+                ChangeMixingSampleRate(audioTrack.SourceProperties.SampleRate);
+            }
+
             IAudioStream input = AudioStreamFactory.FromFileInfo(audioTrack.FileInfo);
-            IAudioStream baseStream = new ResamplingStream( // adjust sample rate to mixer output rate
-                new IeeeStream(new TolerantStream(new BufferedStream(input, 1024 * 1024, true))), 
-                ResamplingQuality.SincFastest, audioMixer.Properties.SampleRate);
+            IAudioStream baseStream = new IeeeStream(new TolerantStream(new BufferedStream(input, 1024 * 1024, true)));
             TimeWarpStream timeWarpStream = new TimeWarpStream(baseStream, ResamplingQuality.SincFastest) {
                 Mappings = audioTrack.TimeWarps
             };
@@ -271,7 +294,11 @@ namespace AudioAlign.Audio {
                     monoStream.Downmix = ve.Value;
                 });
 
-            IAudioStream trackStream = volumeControl;
+            // adjust sample rate to mixer output rate
+            ResamplingStream resamplingStream = new ResamplingStream(volumeControl, 
+                ResamplingQuality.SincFastest, audioMixer.Properties.SampleRate);
+
+            IAudioStream trackStream = resamplingStream;
 
             if (trackStream.Properties.Channels == 1 && audioMixer.Properties.Channels > 1) {
                 trackStream = new MonoStream(trackStream, audioMixer.Properties.Channels);
@@ -284,6 +311,22 @@ namespace AudioAlign.Audio {
         private void RemoveTrack(AudioTrack audioTrack) {
             audioMixer.Remove(trackListStreams[audioTrack]);
             trackListStreams.Remove(audioTrack);
+
+            if (trackListStreams.Count == 0) {
+                // Last track has been removed and timeline is empty, set mixer to default sample rate
+                audioMixer.SampleRate = DefaultSampleRate;
+            }
+            else {
+                // Determine the maximum sample rate of the remaining tracks
+                int remainingTracksMaxSampleRate = trackListStreams.Values.Select(s =>
+                    s.FindStream<ResamplingStream>().GetSourceStream().Properties.SampleRate).Max();
+
+                // Check if the new maximum is lower than the current processing rate
+                if (remainingTracksMaxSampleRate < audioMixer.SampleRate) {
+                    // Decrease the processing sample rate to the new lower maximum which is the highest rate required
+                    ChangeMixingSampleRate(remainingTracksMaxSampleRate);
+                }
+            }
         }
 
         private void trackList_TrackAdded(object sender, TrackList<AudioTrack>.TrackListEventArgs e) {

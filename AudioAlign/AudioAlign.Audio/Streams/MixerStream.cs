@@ -69,6 +69,11 @@ namespace AudioAlign.Audio.Streams {
             get { return properties.SampleByteSize * properties.Channels; }
         }
 
+        public int SampleRate {
+            get { return properties.SampleRate; }
+            set { properties.SampleRate = value; }
+        }
+
         public int Read(byte[] buffer, int offset, int count) {
             lock (this) {
                 // check for end of stream
