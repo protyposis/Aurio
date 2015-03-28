@@ -145,7 +145,9 @@ namespace AudioAlign.Audio.Streams {
             // NOTE max observed overflow: 8 bytes (1 2ch 32bit sample)
             if (position > Length) {
                 int overflow = (int)(position - Length);
-                Debug.WriteLine("ResamplingStream OVERFLOW WARNING: {0} bytes cut off", overflow);
+                // The resampler is expected to return a few samples too much, and they can just be thrown away
+                // http://comments.gmane.org/gmane.comp.audio.src.general/168
+                Debug.WriteLine("ResamplingStream overflow: {0} bytes cut off", overflow);
                 position -= overflow;
                 return outputLengthGenerated - overflow;
             }
