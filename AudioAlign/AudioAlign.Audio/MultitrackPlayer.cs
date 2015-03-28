@@ -114,7 +114,13 @@ namespace AudioAlign.Audio {
             // set to start for all audio to be saved
             audioOutputStream.Position = 0;
 
-            NAudioSinkStream nAudioSink = new NAudioSinkStream(audioOutputStream);
+            // Get the source of the resampling stream, because this final resampler adjusts 
+            // the rate to the speaker playback rate, which we do not need and also not want
+            // when writing to a file. Instead, we write the file at the mixer sample rate,
+            // which is ideally the source sample rate if all tracks have the same sample rate.
+            var fileOutputStream = audioOutputStream.GetSourceStream();
+
+            NAudioSinkStream nAudioSink = new NAudioSinkStream(fileOutputStream);
             long total = nAudioSink.Length;
             long progress = 0;
             using (WaveFileWriter writer = new WaveFileWriter(outputFile.FullName, nAudioSink.WaveFormat)) {
