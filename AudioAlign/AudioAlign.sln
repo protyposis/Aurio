@@ -73,6 +73,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{02507825
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{C10A7AB5-A4DB-414C-859F-B642CCBC48FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Soxr", "AudioAlign.Soxr\AudioAlign.Soxr.csproj", "{24228071-5E72-4BA8-90E3-89DE331A718C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -277,6 +279,18 @@ Global
 		{616330A6-6386-40F1-907D-CD46884FA86F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{616330A6-6386-40F1-907D-CD46884FA86F}.Release|x64.ActiveCfg = Release|x64
 		{616330A6-6386-40F1-907D-CD46884FA86F}.Release|x86.ActiveCfg = Release|x86
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Debug|x64.ActiveCfg = Debug|x64
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Debug|x64.Build.0 = Debug|x64
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Debug|x86.ActiveCfg = Debug|x86
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Debug|x86.Build.0 = Debug|x86
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Release|x64.ActiveCfg = Release|x64
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Release|x64.Build.0 = Release|x64
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Release|x86.ActiveCfg = Release|x86
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
