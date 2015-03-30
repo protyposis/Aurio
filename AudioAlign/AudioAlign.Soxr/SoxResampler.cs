@@ -26,6 +26,9 @@ namespace AudioAlign.Soxr {
             }
         }
 
+        /// <summary>
+        /// Returns the libsoxr version.
+        /// </summary>
         public string Version {
             get { 
                 StringPtr ptr = InteropWrapper.soxr_version();
@@ -33,6 +36,9 @@ namespace AudioAlign.Soxr {
             }
         }
 
+        /// <summary>
+        /// Returns the name of the active resampling engine.
+        /// </summary>
         public string Engine {
             get {
                 StringPtr ptr = InteropWrapper.soxr_engine(soxr);
@@ -40,6 +46,11 @@ namespace AudioAlign.Soxr {
             }
         }
 
+        /// <summary>
+        /// Converts an error pointer to an error message.
+        /// </summary>
+        /// <param name="error">the error pointer to convert to the error message</param>
+        /// <returns>An error message, or null if no error reported</returns>
         private string GetError(SoxrError error) {
             if (error == SoxrError.Zero) {
                 return null;
@@ -49,9 +60,28 @@ namespace AudioAlign.Soxr {
             }
         }
 
+        /// <summary>
+        /// Returns the most recent error message.
+        /// </summary>
         public string GetError() {
             SoxrError ptr = InteropWrapper.soxr_error(soxr);
             return GetError(ptr);
+        }
+
+        /// <summary>
+        /// Clear internal state (e.g. buffered data) for a fresh resampling session, 
+        /// but keeping the same configuration.
+        /// </summary>
+        public void Clear() {
+            SoxrError error = InteropWrapper.soxr_clear(soxr);
+
+            if (error != SoxrError.Zero) {
+                throw new SoxrException("Cannot clear state: " + GetError(error));
+            }
+        }
+
+        ~SoxResampler() {
+            InteropWrapper.soxr_delete(soxr);
         }
     }
 }

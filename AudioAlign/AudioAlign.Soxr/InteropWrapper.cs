@@ -21,8 +21,8 @@ namespace AudioAlign.Soxr {
         public delegate SoxrError d_soxr_error(SoxrInstance resampler);
         //public delegate double d_soxr_delay(SoxrInstance resampler);
         public delegate StringPtr d_soxr_engine(SoxrInstance resampler);
-        //public delegate SoxrError d_soxr_clear(SoxrInstance resampler);
-        //public delegate void d_soxr_delete(SoxrInstance resampler);
+        public delegate SoxrError d_soxr_clear(SoxrInstance resampler);
+        public delegate void d_soxr_delete(SoxrInstance resampler);
         //public delegate SoxrError d_soxr_set_io_ratio(SoxrInstance resampler, double io_ratio, uint slew_len);
         //public delegate SoxrQualitySpec d_soxr_quality_spec(QualityRecipe recipe, QualityFlags flags);
         //public delegate SoxrRuntimeSpec d_soxr_runtime_spec(uint num_threads);
@@ -34,8 +34,8 @@ namespace AudioAlign.Soxr {
         public static d_soxr_error soxr_error;
         //public static d_soxr_delay soxr_delay;
         public static d_soxr_engine soxr_engine;
-        //public static d_soxr_clear soxr_clear;
-        //public static d_soxr_delete soxr_delete;
+        public static d_soxr_clear soxr_clear;
+        public static d_soxr_delete soxr_delete;
         //public static d_soxr_set_io_ratio soxr_set_io_ratio;
         //public static d_soxr_quality_spec soxr_quality_spec;
         //public static d_soxr_runtime_spec soxr_runtime_spec;
@@ -49,8 +49,8 @@ namespace AudioAlign.Soxr {
                 soxr_error = Interop64.soxr_error;
                 //soxr_delay = Interop64.soxr_delay;
                 soxr_engine = Interop64.soxr_engine;
-                //soxr_clear = Interop64.soxr_clear;
-                //soxr_delete = Interop64.soxr_delete;
+                soxr_clear = Interop64.soxr_clear;
+                soxr_delete = Interop64.soxr_delete;
                 //soxr_set_io_ratio = Interop64.soxr_set_io_ratio;
                 //soxr_quality_spec = Interop64.soxr_quality_spec;
                 //soxr_runtime_spec = Interop64.soxr_runtime_spec;
@@ -63,8 +63,8 @@ namespace AudioAlign.Soxr {
                 soxr_error = Interop32.soxr_error;
                 //soxr_delay = Interop32.soxr_delay;
                 soxr_engine = Interop32.soxr_engine;
-                //soxr_clear = Interop32.soxr_clear;
-                //soxr_delete = Interop32.soxr_delete;
+                soxr_clear = Interop32.soxr_clear;
+                soxr_delete = Interop32.soxr_delete;
                 //soxr_set_io_ratio = Interop32.soxr_set_io_ratio;
                 //soxr_quality_spec = Interop32.soxr_quality_spec;
                 //soxr_runtime_spec = Interop32.soxr_runtime_spec;

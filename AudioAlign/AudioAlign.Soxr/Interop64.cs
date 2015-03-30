@@ -39,11 +39,11 @@ namespace AudioAlign.Soxr {
         [DllImport(SOXRLIB, CallingConvention = CC)]
         public static extern StringPtr soxr_engine(SoxrInstance resampler);
 
-        //[DllImport(SOXRLIB, CallingConvention = CC)]
-        //public static extern SoxrError soxr_clear(SoxrInstance resampler);
+        [DllImport(SOXRLIB, CallingConvention = CC)]
+        public static extern SoxrError soxr_clear(SoxrInstance resampler);
 
-        //[DllImport(SOXRLIB, CallingConvention = CC)]
-        //public static extern void soxr_delete(SoxrInstance resampler);
+        [DllImport(SOXRLIB, CallingConvention = CC)]
+        public static extern void soxr_delete(SoxrInstance resampler);
 
         //[DllImport(SOXRLIB, CallingConvention = CC)]
         //public static extern SoxrError soxr_set_io_ratio(SoxrInstance resampler, double io_ratio, uint slew_len);
