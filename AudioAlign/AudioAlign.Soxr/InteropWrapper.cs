@@ -19,7 +19,7 @@ namespace AudioAlign.Soxr {
         //    byte* input, uint ilen, out uint idone,
         //    byte* output, uint olen, out uint odone);
         public delegate SoxrError d_soxr_error(SoxrInstance resampler);
-        //public delegate double d_soxr_delay(SoxrInstance resampler);
+        public delegate double d_soxr_delay(SoxrInstance resampler);
         public delegate StringPtr d_soxr_engine(SoxrInstance resampler);
         public delegate SoxrError d_soxr_clear(SoxrInstance resampler);
         public delegate void d_soxr_delete(SoxrInstance resampler);
@@ -32,7 +32,7 @@ namespace AudioAlign.Soxr {
         public static d_soxr_create soxr_create;
         //public static d_soxr_process soxr_process;
         public static d_soxr_error soxr_error;
-        //public static d_soxr_delay soxr_delay;
+        public static d_soxr_delay soxr_delay;
         public static d_soxr_engine soxr_engine;
         public static d_soxr_clear soxr_clear;
         public static d_soxr_delete soxr_delete;
@@ -47,7 +47,7 @@ namespace AudioAlign.Soxr {
                 soxr_create = Interop64.soxr_create;
                 //soxr_process = Interop64.soxr_process;
                 soxr_error = Interop64.soxr_error;
-                //soxr_delay = Interop64.soxr_delay;
+                soxr_delay = Interop64.soxr_delay;
                 soxr_engine = Interop64.soxr_engine;
                 soxr_clear = Interop64.soxr_clear;
                 soxr_delete = Interop64.soxr_delete;
@@ -61,7 +61,7 @@ namespace AudioAlign.Soxr {
                 soxr_create = Interop32.soxr_create;
                 //soxr_process = Interop32.soxr_process;
                 soxr_error = Interop32.soxr_error;
-                //soxr_delay = Interop32.soxr_delay;
+                soxr_delay = Interop32.soxr_delay;
                 soxr_engine = Interop32.soxr_engine;
                 soxr_clear = Interop32.soxr_clear;
                 soxr_delete = Interop32.soxr_delete;

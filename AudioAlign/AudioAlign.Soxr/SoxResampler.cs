@@ -46,6 +46,10 @@ namespace AudioAlign.Soxr {
             }
         }
 
+        public double GetOutputDelay() {
+            return InteropWrapper.soxr_delay(soxr);
+        }
+
         /// <summary>
         /// Converts an error pointer to an error message.
         /// </summary>

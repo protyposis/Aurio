@@ -33,8 +33,8 @@ namespace AudioAlign.Soxr {
         [DllImport(SOXRLIB, CallingConvention = CC)]
         public static extern SoxrError soxr_error(SoxrInstance resampler);
 
-        //[DllImport(SOXRLIB, CallingConvention = CC)]
-        //public static extern double soxr_delay(SoxrInstance resampler);
+        [DllImport(SOXRLIB, CallingConvention = CC)]
+        public static extern double soxr_delay(SoxrInstance resampler);
 
         [DllImport(SOXRLIB, CallingConvention = CC)]
         public static extern StringPtr soxr_engine(SoxrInstance resampler);
