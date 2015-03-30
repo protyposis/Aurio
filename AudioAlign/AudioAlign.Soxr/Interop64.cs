@@ -25,10 +25,10 @@ namespace AudioAlign.Soxr {
         public static extern SoxrInstance soxr_create(double input_rate, double output_rate, uint num_channels,
             out SoxrError error, SoxrIoSpec io_spec, SoxrQualitySpec quality_spec, SoxrRuntimeSpec runtime_spec);
 
-        //[DllImport(SOXRLIB, CallingConvention = CC)]
-        //public static extern SoxrError soxr_process(SoxrInstance resampler,
-        //    byte* input, uint ilen, out uint idone,
-        //    byte* output, uint olen, out uint odone);
+        [DllImport(SOXRLIB, CallingConvention = CC)]
+        public static extern SoxrError soxr_process(SoxrInstance resampler,
+            byte* input, uint ilen, out uint idone,
+            byte* output, uint olen, out uint odone);
 
         [DllImport(SOXRLIB, CallingConvention = CC)]
         public static extern SoxrError soxr_error(SoxrInstance resampler);

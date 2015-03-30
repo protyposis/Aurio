@@ -14,6 +14,7 @@ namespace AudioAlign.Soxr {
     public class SoxResampler : IDisposable {
 
         private SoxrInstance soxr;
+        private int channels;
 
         public SoxResampler(double inputRate, double outputRate, int channels) {
             SoxrError error = SoxrError.Zero;
@@ -24,6 +25,8 @@ namespace AudioAlign.Soxr {
             if (error != SoxrError.Zero) {
                 throw new SoxrException(GetError(error));
             }
+
+            this.channels = channels;
         }
 
         /// <summary>
@@ -48,6 +51,53 @@ namespace AudioAlign.Soxr {
 
         public double GetOutputDelay() {
             return InteropWrapper.soxr_delay(soxr);
+        }
+
+        /// <summary>
+        /// Resamples input data to output data according to the configuration of the resampler.
+        /// 
+        /// The input and output data is expected to be interleaved with the number of channels
+        /// supplied in the constructor.
+        /// 
+        /// All data sizes are byte sizes. E.g. to get the number of output samples, divide the
+        /// output length by 4 (to get the number of float samples) and then by the number of 
+        /// channels to get the number of samples for a single channel.
+        /// </summary>
+        /// <param name="input">a byte array of interleaved float samples</param>
+        /// <param name="inputOffset">the byte offset in the input array</param>
+        /// <param name="inputLength">the byte length available in the input array</param>
+        /// <param name="output">a byte array of interleaved float samples</param>
+        /// <param name="outputOffset">the byte offset in the output array</param>
+        /// <param name="outputLength">the byte length available in the output array</param>
+        /// <param name="endOfInput">set to true if there is no more input data</param>
+        /// <param name="inputLengthUsed">the number of bytes read</param>
+        /// <param name="outputLengthGenerated">the number of bytes output</param>
+        public void Process(byte[] input, int inputOffset, int inputLength,
+            byte[] output, int outputOffset, int outputLength,
+            bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated) {
+
+            // Only 32-bit float samples are supported
+            int sampleBlockByteSize = 4 * channels;
+
+            uint ilen = (uint)(inputLength / sampleBlockByteSize);
+            uint olen = (uint)(outputLength / sampleBlockByteSize);
+            uint idone = 0;
+            uint odone = 0;
+
+            unsafe {
+                fixed (byte* inputBytes = &input[inputOffset], outputBytes = &output[outputOffset]) {
+                    SoxrError error = InteropWrapper.soxr_process(soxr, 
+                        endOfInput ? null : inputBytes, ilen, out idone, 
+                        outputBytes, olen, out odone);
+
+                    if (error != SoxrError.Zero) {
+                        throw new SoxrException("Processing failed: " + GetError(error));
+                    }
+                }
+            }
+
+            inputLengthUsed = (int)(idone * sampleBlockByteSize);
+            outputLengthGenerated = (int)(odone * sampleBlockByteSize);
         }
 
         /// <summary>
