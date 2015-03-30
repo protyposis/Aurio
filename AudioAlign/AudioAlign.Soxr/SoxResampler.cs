@@ -11,7 +11,7 @@ using SoxrRuntimeSpec = System.IntPtr;
 using System.Runtime.InteropServices;
 
 namespace AudioAlign.Soxr {
-    public class SoxResampler {
+    public class SoxResampler : IDisposable {
 
         private SoxrInstance soxr;
 
@@ -80,8 +80,25 @@ namespace AudioAlign.Soxr {
             }
         }
 
+        /// <summary>
+        /// Deletes the current resampler instance and frees its memory. 
+        /// To be called on destruction.
+        /// </summary>
+        private void Delete() {
+            // Check if an instance is existing and only delete it if this is the case, avoiding
+            // an exception if called multiple times (i.e. by Dispose and the destructor).
+            if (soxr != SoxrInstance.Zero) {
+                InteropWrapper.soxr_delete(soxr);
+                soxr = SoxrInstance.Zero;
+            }
+        }
+
         ~SoxResampler() {
-            InteropWrapper.soxr_delete(soxr);
+            Delete();
+        }
+
+        public void Dispose() {
+            Delete();
         }
     }
 }
