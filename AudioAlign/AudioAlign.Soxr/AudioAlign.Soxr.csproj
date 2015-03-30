@@ -85,6 +85,7 @@
     <Compile Include="QualityFlags.cs" />
     <Compile Include="QualityRecipe.cs" />
     <Compile Include="SoxResampler.cs" />
+    <Compile Include="SoxrException.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\libs\soxr.x64.dll">
