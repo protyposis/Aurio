@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Soxr {
-    [Flags]
-    enum QualityRecipe : ulong {
+    public enum QualityRecipe : uint {
         /// <summary>
         /// 'Quick' cubic interpolation
         /// </summary>

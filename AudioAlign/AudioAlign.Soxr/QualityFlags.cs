@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Soxr {
-    enum QualityFlags : ulong {
+    [Flags]
+    public enum QualityFlags : uint {
         /// <summary>
         /// <= 0.01 dB
         /// </summary>
