@@ -12,6 +12,7 @@ namespace AudioAlign.Soxr {
 
         private SoxrInstance soxr;
         private bool variableRate;
+        private double maxRatio;
         private int channels;
 
         /// <summary>
@@ -31,6 +32,10 @@ namespace AudioAlign.Soxr {
         public SoxResampler(double inputRate, double outputRate, int channels, 
             QualityRecipe qualityRecipe, QualityFlags qualityFlags) {
 
+            if (inputRate <= 0 || outputRate <= 0 || channels <= 0) {
+                throw new SoxrException("one or more parameters are invalid (zero or negative)");
+            }
+
             SoxrError error = SoxrError.Zero;
 
             // Apply the default configuration as per soxr.c
@@ -43,6 +48,7 @@ namespace AudioAlign.Soxr {
                     throw new SoxrException("Invalid parameters: variable rate resampling only works with the HQ recipe");
                 }
                 variableRate = true;
+                maxRatio = inputRate / outputRate;
             }
             
             soxr = InteropWrapper.soxr_create(inputRate, outputRate, (uint)channels,
@@ -159,6 +165,9 @@ namespace AudioAlign.Soxr {
         public void SetIoRatio(double ratio, int transitionLength) {
             if (!variableRate) {
                 throw new SoxrException("Illegal call: set_io_ratio only works in variable-rate resampling mode");
+            }
+            else if (ratio > maxRatio) {
+                throw new SoxrException("Ratio exceeds max bound specified in constructor");
             }
 
             SoxrError error = InteropWrapper.soxr_set_io_ratio(soxr, ratio, (uint)transitionLength);
