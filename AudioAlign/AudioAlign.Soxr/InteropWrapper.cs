@@ -26,7 +26,7 @@ namespace AudioAlign.Soxr {
             public Datatype otype;
             public double scale;
             public void* e;
-            public uint flags;
+            public IoFlags flags;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -36,7 +36,7 @@ namespace AudioAlign.Soxr {
             public double passband_end;
             public double stopband_begin;
             public void* e;
-            public uint flags;
+            public QualityFlags flags;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -46,7 +46,7 @@ namespace AudioAlign.Soxr {
             public uint coef_size_kbytes;
             public uint num_threads;
             public void* e;
-            public uint flags;
+            public RuntimeFlags flags;
         }
 
         public delegate StringPtr d_soxr_version();

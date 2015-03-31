@@ -84,6 +84,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QualityFlags.cs" />
     <Compile Include="QualityRecipe.cs" />
+    <Compile Include="IoFlags.cs" />
+    <Compile Include="RuntimeFlags.cs" />
     <Compile Include="SoxResampler.cs" />
     <Compile Include="SoxrException.cs" />
   </ItemGroup>
