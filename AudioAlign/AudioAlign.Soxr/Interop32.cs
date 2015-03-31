@@ -7,9 +7,6 @@ using System.Text;
 using StringPtr = System.IntPtr;
 using SoxrInstance = System.IntPtr;
 using SoxrError = System.IntPtr;
-using SoxrIoSpec = System.IntPtr;
-using SoxrQualitySpec = System.IntPtr;
-using SoxrRuntimeSpec = System.IntPtr;
 
 namespace AudioAlign.Soxr {
     //[SuppressUnmanagedCodeSecurity]
@@ -23,7 +20,7 @@ namespace AudioAlign.Soxr {
 
         [DllImport(SOXRLIB, CallingConvention = CC)]
         public static extern SoxrInstance soxr_create(double input_rate, double output_rate, uint num_channels,
-            out SoxrError error, SoxrIoSpec io_spec, SoxrQualitySpec quality_spec, SoxrRuntimeSpec runtime_spec);
+            out SoxrError error, ref InteropWrapper.SoxrIoSpec io_spec, ref InteropWrapper.SoxrQualitySpec quality_spec, ref InteropWrapper.SoxrRuntimeSpec runtime_spec);
 
         [DllImport(SOXRLIB, CallingConvention = CC)]
         public static extern SoxrError soxr_process(SoxrInstance resampler,
@@ -45,16 +42,16 @@ namespace AudioAlign.Soxr {
         [DllImport(SOXRLIB, CallingConvention = CC)]
         public static extern void soxr_delete(SoxrInstance resampler);
 
-        //[DllImport(SOXRLIB, CallingConvention = CC)]
-        //public static extern SoxrError soxr_set_io_ratio(SoxrInstance resampler, double io_ratio, uint slew_len);
+        [DllImport(SOXRLIB, CallingConvention = CC)]
+        public static extern SoxrError soxr_set_io_ratio(SoxrInstance resampler, double io_ratio, uint slew_len);
 
-        //[DllImport(SOXRLIB, CallingConvention = CC)]
-        //public static extern SoxrQualitySpec soxr_quality_spec(QualityRecipe recipe, QualityFlags flags);
+        [DllImport(SOXRLIB, CallingConvention = CC)]
+        public static extern InteropWrapper.SoxrQualitySpec soxr_quality_spec(QualityRecipe recipe, QualityFlags flags);
 
-        //[DllImport(SOXRLIB, CallingConvention = CC)]
-        //public static extern SoxrRuntimeSpec soxr_runtime_spec(uint num_threads);
+        [DllImport(SOXRLIB, CallingConvention = CC)]
+        public static extern InteropWrapper.SoxrRuntimeSpec soxr_runtime_spec(uint num_threads);
 
-        //[DllImport(SOXRLIB, CallingConvention = CC)]
-        //public static extern SoxrIoSpec soxr_io_spec(Datatype itype, Datatype otype);
+        [DllImport(SOXRLIB, CallingConvention = CC)]
+        public static extern InteropWrapper.SoxrIoSpec soxr_io_spec(Datatype itype, Datatype otype);
     }
 }

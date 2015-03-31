@@ -5,9 +5,6 @@ using System.Text;
 using StringPtr = System.IntPtr;
 using SoxrInstance = System.IntPtr;
 using SoxrError = System.IntPtr;
-using SoxrIoSpec = System.IntPtr;
-using SoxrQualitySpec = System.IntPtr;
-using SoxrRuntimeSpec = System.IntPtr;
 using System.Runtime.InteropServices;
 
 namespace AudioAlign.Soxr {
@@ -18,9 +15,16 @@ namespace AudioAlign.Soxr {
 
         public SoxResampler(double inputRate, double outputRate, int channels) {
             SoxrError error = SoxrError.Zero;
+
+            // Apply the default configuration as per soxr.c
+            InteropWrapper.SoxrIoSpec ioSpec = InteropWrapper.soxr_io_spec(Datatype.SOXR_FLOAT32_I, Datatype.SOXR_FLOAT32_I);
+            InteropWrapper.SoxrQualitySpec qSpec = InteropWrapper.soxr_quality_spec(QualityRecipe.SOXR_HQ, QualityFlags.SOXR_ROLLOFF_SMALL);
+            InteropWrapper.SoxrRuntimeSpec rtSpec = InteropWrapper.soxr_runtime_spec(1);
+
+            // TODO check if SOXR_VR is configured with SOXR_HQ (the only valid combination)
             
-            soxr = InteropWrapper.soxr_create(inputRate, outputRate, (uint)channels, 
-                out error, SoxrIoSpec.Zero, SoxrQualitySpec.Zero, SoxrRuntimeSpec.Zero);
+            soxr = InteropWrapper.soxr_create(inputRate, outputRate, (uint)channels,
+                out error, ref ioSpec, ref qSpec, ref rtSpec);
             
             if (error != SoxrError.Zero) {
                 throw new SoxrException(GetError(error));
@@ -98,6 +102,23 @@ namespace AudioAlign.Soxr {
 
             inputLengthUsed = (int)(idone * sampleBlockByteSize);
             outputLengthGenerated = (int)(odone * sampleBlockByteSize);
+        }
+
+        /// <summary>
+        /// Transitions to a new resampling ratio for variable-rate resampling over the given length.
+        /// Set the length to 0 for an instant change.
+        /// </summary>
+        /// <param name="ratio">the new resampling ratio</param>
+        /// <param name="transitionLength">the length over which to linearly transition to the new ratio</param>
+        /// <exception cref="SoxrException">when the resampler is not configured for variable-rate resampling</exception>
+        public void SetIoRatio(double ratio, int transitionLength) {
+            // TODO throw exception if not in variable-rate mode
+
+            SoxrError error = InteropWrapper.soxr_set_io_ratio(soxr, ratio, (uint)transitionLength);
+
+            if (error != SoxrError.Zero) {
+                throw new SoxrException("Error changing IO ratio: " + GetError(error));
+            }
         }
 
         /// <summary>
