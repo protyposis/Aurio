@@ -11,17 +11,39 @@ namespace AudioAlign.Soxr {
     public class SoxResampler : IDisposable {
 
         private SoxrInstance soxr;
+        private bool variableRate;
         private int channels;
 
-        public SoxResampler(double inputRate, double outputRate, int channels) {
+        /// <summary>
+        /// Creates a new resampler with the supplied quality parameters. 
+        /// 
+        /// Can be used to create a variable-rate resampler by supplying SOXR_HQ as recipe 
+        /// and SOXR_VR as flag. For a variable resampler, inputRate/outputRate must equate
+        /// to the maximum IO ratio that will be set by calling SetIoRatio. To set the initial
+        /// ratio, call SetIoRatio with a transitionLength of 0 on the created instance.
+        /// </summary>
+        /// <param name="inputRate"></param>
+        /// <param name="outputRate"></param>
+        /// <param name="channels"></param>
+        /// <param name="qualityRecipe"></param>
+        /// <param name="qualityFlags"></param>
+        /// <exception cref="SoxrException">when parameters are incorrect; see error message for details</exception>
+        public SoxResampler(double inputRate, double outputRate, int channels, 
+            QualityRecipe qualityRecipe, QualityFlags qualityFlags) {
+
             SoxrError error = SoxrError.Zero;
 
             // Apply the default configuration as per soxr.c
             InteropWrapper.SoxrIoSpec ioSpec = InteropWrapper.soxr_io_spec(Datatype.SOXR_FLOAT32_I, Datatype.SOXR_FLOAT32_I);
-            InteropWrapper.SoxrQualitySpec qSpec = InteropWrapper.soxr_quality_spec(QualityRecipe.SOXR_HQ, QualityFlags.SOXR_ROLLOFF_SMALL);
+            InteropWrapper.SoxrQualitySpec qSpec = InteropWrapper.soxr_quality_spec(qualityRecipe, qualityFlags);
             InteropWrapper.SoxrRuntimeSpec rtSpec = InteropWrapper.soxr_runtime_spec(1);
 
-            // TODO check if SOXR_VR is configured with SOXR_HQ (the only valid combination)
+            if (qualityFlags == QualityFlags.SOXR_VR) {
+                if (qualityRecipe != QualityRecipe.SOXR_HQ) {
+                    throw new SoxrException("Invalid parameters: variable rate resampling only works with the HQ recipe");
+                }
+                variableRate = true;
+            }
             
             soxr = InteropWrapper.soxr_create(inputRate, outputRate, (uint)channels,
                 out error, ref ioSpec, ref qSpec, ref rtSpec);
@@ -32,6 +54,28 @@ namespace AudioAlign.Soxr {
 
             this.channels = channels;
         }
+
+        /// <summary>
+        /// Creates a new resampler instance with the supplied quality.
+        /// </summary>
+        /// <param name="inputRate"></param>
+        /// <param name="outputRate"></param>
+        /// <param name="channels"></param>
+        /// <exception cref="SoxrException">when parameters are incorrect; see error message for details</exception>
+        public SoxResampler(double inputRate, double outputRate, int channels, QualityRecipe qualityRecipe) :
+            this(inputRate, outputRate, channels,
+            qualityRecipe, QualityFlags.SOXR_ROLLOFF_SMALL) { }
+
+        /// <summary>
+        /// Creates a new resampler instance with the default configuration.
+        /// </summary>
+        /// <param name="inputRate"></param>
+        /// <param name="outputRate"></param>
+        /// <param name="channels"></param>
+        /// <exception cref="SoxrException">when parameters are incorrect; see error message for details</exception>
+        public SoxResampler(double inputRate, double outputRate, int channels) :
+            this(inputRate, outputRate, channels,
+            QualityRecipe.SOXR_HQ, QualityFlags.SOXR_ROLLOFF_SMALL) { }
 
         /// <summary>
         /// Returns the libsoxr version.
@@ -76,6 +120,7 @@ namespace AudioAlign.Soxr {
         /// <param name="endOfInput">set to true if there is no more input data</param>
         /// <param name="inputLengthUsed">the number of bytes read</param>
         /// <param name="outputLengthGenerated">the number of bytes output</param>
+        /// <exception cref="SoxrException">if an error happens during processing, see error message for details</exception>
         public void Process(byte[] input, int inputOffset, int inputLength,
             byte[] output, int outputOffset, int outputLength,
             bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated) {
@@ -112,7 +157,9 @@ namespace AudioAlign.Soxr {
         /// <param name="transitionLength">the length over which to linearly transition to the new ratio</param>
         /// <exception cref="SoxrException">when the resampler is not configured for variable-rate resampling</exception>
         public void SetIoRatio(double ratio, int transitionLength) {
-            // TODO throw exception if not in variable-rate mode
+            if (!variableRate) {
+                throw new SoxrException("Illegal call: set_io_ratio only works in variable-rate resampling mode");
+            }
 
             SoxrError error = InteropWrapper.soxr_set_io_ratio(soxr, ratio, (uint)transitionLength);
 
@@ -147,6 +194,7 @@ namespace AudioAlign.Soxr {
         /// Clear internal state (e.g. buffered data) for a fresh resampling session, 
         /// but keeping the same configuration.
         /// </summary>
+        /// <exception cref="SoxrException">when clearing fails, see error message for details</exception>
         public void Clear() {
             SoxrError error = InteropWrapper.soxr_clear(soxr);
 
