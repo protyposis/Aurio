@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AudioAlign.Soxr.UnitTest {
     [TestClass]
-    public class ResamplerTest {
+    public class SoxResamplerTest {
 
         [TestMethod]
         public void CreateInstance() {

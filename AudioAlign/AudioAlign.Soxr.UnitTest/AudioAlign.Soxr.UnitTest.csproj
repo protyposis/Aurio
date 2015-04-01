@@ -89,7 +89,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ResamplerTest.cs" />
+    <Compile Include="SoxResamplerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
