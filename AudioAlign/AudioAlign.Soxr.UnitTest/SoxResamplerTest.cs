@@ -203,7 +203,7 @@ namespace AudioAlign.Soxr.UnitTest {
             var r = new SoxResampler(1.0, 1.0, 1);
 
             // This call is illegal because a fixed-rate resampler was instantiated
-            r.SetIoRatio(2.0, 0);
+            r.SetRatio(2.0, 0);
         }
 
         [TestMethod]
@@ -212,7 +212,7 @@ namespace AudioAlign.Soxr.UnitTest {
             var r = new SoxResampler(2.0, 1.0, 1, QualityRecipe.SOXR_HQ, QualityFlags.SOXR_VR);
 
             // This ratio is invalid because it is higher than the max ratio specified in the constructor
-            r.SetIoRatio(3.0, 0);
+            r.SetRatio(3.0, 0);
         }
 
         [TestMethod]
@@ -221,14 +221,14 @@ namespace AudioAlign.Soxr.UnitTest {
             var r = new SoxResampler(2.0, 1.0, 1, QualityRecipe.SOXR_HQ, QualityFlags.SOXR_VR);
 
             // A negative ratio is impossible
-            r.SetIoRatio(-1.0, 0);
+            r.SetRatio(-1.0, 0);
         }
 
         [TestMethod]
         public void RateChange() {
             var r = new SoxResampler(2.0, 1.0, 1, QualityRecipe.SOXR_HQ, QualityFlags.SOXR_VR);
 
-            r.SetIoRatio(1.5, 0);
+            r.SetRatio(1.5, 0);
         }
 
         [TestMethod]

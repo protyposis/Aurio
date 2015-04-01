@@ -162,11 +162,12 @@ namespace AudioAlign.Soxr {
         /// <summary>
         /// Transitions to a new resampling ratio for variable-rate resampling over the given length.
         /// Set the length to 0 for an instant change.
+        /// The ratio is the factor that the input rate must be multiplied with to get the output rate.
         /// </summary>
         /// <param name="ratio">the new resampling ratio</param>
         /// <param name="transitionLength">the length over which to linearly transition to the new ratio</param>
         /// <exception cref="SoxrException">when the resampler is not configured for variable-rate resampling</exception>
-        public void SetIoRatio(double ratio, int transitionLength) {
+        public void SetRatio(double ratio, int transitionLength) {
             if (!variableRate) {
                 throw new SoxrException("Illegal call: set_io_ratio only works in variable-rate resampling mode");
             }
@@ -174,7 +175,7 @@ namespace AudioAlign.Soxr {
                 throw new SoxrException("Ratio exceeds max bound specified in constructor");
             }
 
-            SoxrError error = InteropWrapper.soxr_set_io_ratio(soxr, ratio, new UIntPtr((uint)transitionLength));
+            SoxrError error = InteropWrapper.soxr_set_io_ratio(soxr, 1.0 / ratio, new UIntPtr((uint)transitionLength));
 
             if (error != SoxrError.Zero) {
                 throw new SoxrException("Error changing IO ratio: " + GetError(error));
