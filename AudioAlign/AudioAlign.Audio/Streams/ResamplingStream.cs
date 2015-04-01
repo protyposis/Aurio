@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.LibSampleRate;
 using System.Diagnostics;
 using AudioAlign.Soxr;
 
@@ -171,8 +170,8 @@ namespace AudioAlign.Audio.Streams {
             return CheckSampleRateRatio(sampleRate / sourceStream.Properties.SampleRate);
         }
 
-        public bool CheckSampleRateRatio(double ratio) {
-            return SampleRateConverter.CheckRatio(ratio);
+        public static bool CheckSampleRateRatio(double ratio) {
+            return SoxResampler.CheckRatio(ratio);
         }
     }
 }
