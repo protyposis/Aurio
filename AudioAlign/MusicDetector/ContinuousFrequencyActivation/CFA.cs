@@ -44,7 +44,7 @@ namespace MusicDetector.ContinuousFrequencyActivation {
         public float Run() {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(audioTrack.FileInfo)),
-                ResamplingQuality.SincFastest, 11000);
+                ResamplingQuality.Medium, 11000);
 
             ContinuousFrequencyActivationQuantifier cfaq = new ContinuousFrequencyActivationQuantifier(audioStream);
             float[] cfaValue = new float[1];

@@ -127,8 +127,7 @@ namespace AudioAlign.Audio.UnitTest {
         public void SetPosition01() {
             var audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             TimeWarpStream s = new TimeWarpStream(
-                new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)),
-                ResamplingQuality.SincBest);
+                new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)));
             TimeSpan length = TimeUtil.BytesToTimeSpan(s.Length, s.Properties);
             s.Mappings.Add(new TimeWarp {
                 From = new TimeSpan(length.Ticks / 2),
@@ -156,8 +155,7 @@ namespace AudioAlign.Audio.UnitTest {
         public void SetPosition02() {
             var audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             TimeWarpStream s = new TimeWarpStream(
-                new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)),
-                ResamplingQuality.SincBest);
+                new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)));
             TimeSpan length = TimeUtil.BytesToTimeSpan(s.Length, s.Properties);
             //s.Mappings.Add(new TimeWarp {
             //    From = StreamUtil.AlignToBlockSize(length / 2, s.SampleBlockSize),
@@ -188,8 +186,7 @@ namespace AudioAlign.Audio.UnitTest {
         public void SetPosition03() {
             var audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             TimeWarpStream s = new TimeWarpStream(
-                new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)),
-                ResamplingQuality.SincBest);
+                new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)));
             TimeSpan length = TimeUtil.BytesToTimeSpan(s.Length, s.Properties);
             s.Mappings.Add(new TimeWarp {
                 From = new TimeSpan(length.Ticks / 2),
@@ -213,8 +210,7 @@ namespace AudioAlign.Audio.UnitTest {
         public void SetPosition04() {
             var audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             TimeWarpStream s = new TimeWarpStream(
-                new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)),
-                ResamplingQuality.SincBest);
+                new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)));
             TimeSpan length = TimeUtil.BytesToTimeSpan(s.Length, s.Properties);
             s.Mappings.Add(new TimeWarp {
                 From = new TimeSpan(length.Ticks / 2),

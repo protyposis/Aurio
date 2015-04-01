@@ -8,6 +8,7 @@ using AudioAlign.Soxr;
 namespace AudioAlign.Audio.Streams {
     public class ResamplingStream : AbstractAudioStreamWrapper {
 
+        private ResamplingQuality quality;
         private SoxResampler soxr;
         private AudioProperties properties;
         private byte[] sourceBuffer;
@@ -26,7 +27,9 @@ namespace AudioAlign.Audio.Streams {
             properties = new AudioProperties(sourceStream.Properties.Channels, sourceStream.Properties.SampleRate, 
                 sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
 
-            soxr = new SoxResampler(10.0, 1.0, properties.Channels, QualityRecipe.SOXR_HQ, QualityFlags.SOXR_VR);
+            this.quality = quality;
+            SetupResampler();
+            
             sourceBuffer = new byte[0];
             sourceBufferFillLevel = 0;
             sourceBufferPosition = 0;
@@ -46,12 +49,52 @@ namespace AudioAlign.Audio.Streams {
                 SampleRateRatio = sampleRateRatio;
         }
 
+        private void SetupResampler() {
+            if (soxr != null) {
+                soxr.Dispose(); // delete previous resampler instance
+            }
+
+            Soxr.QualityRecipe qr = QualityRecipe.SOXR_HQ;
+            Soxr.QualityFlags qf = QualityFlags.SOXR_ROLLOFF_SMALL;
+
+            switch (quality) {
+                case ResamplingQuality.VeryLow:
+                    qr = QualityRecipe.SOXR_QQ; break;
+                case ResamplingQuality.Low:
+                    qr = QualityRecipe.SOXR_LQ; break;
+                case ResamplingQuality.Medium:
+                    qr = QualityRecipe.SOXR_MQ; break;
+                case ResamplingQuality.High:
+                    qr = QualityRecipe.SOXR_HQ; break;
+                case ResamplingQuality.VeryHigh:
+                    qr = QualityRecipe.SOXR_VHQ; break;
+                case ResamplingQuality.VariableRate:
+                    qr = QualityRecipe.SOXR_HQ; qf = QualityFlags.SOXR_VR; break;
+            }
+
+            double inputRate = sourceStream.Properties.SampleRate;
+            double outputRate = properties.SampleRate;
+
+            if (qf == QualityFlags.SOXR_VR) {
+                // set max variable rate
+                inputRate = 10.0;
+                outputRate = 1.0;
+            }
+
+            soxr = new SoxResampler(inputRate, outputRate, properties.Channels, qr, qf);
+        }
+
         public double TargetSampleRate {
             get { return targetSampleRate; }
             set {
                 targetSampleRate = value;
                 sampleRateRatio = value / sourceStream.Properties.SampleRate;
-                soxr.SetRatio(sampleRateRatio, 0);
+                if (soxr.VariableRate) {
+                    soxr.SetRatio(sampleRateRatio, 0);
+                }
+                else {
+                    SetupResampler();
+                }
                 properties.SampleRate = (int)targetSampleRate;
             }
         }
@@ -83,8 +126,13 @@ namespace AudioAlign.Audio.Streams {
                 long pos = (long)Math.Ceiling(value / sampleRateRatio);
                 pos -= pos % sourceStream.SampleBlockSize;
                 sourceStream.Position = pos;
-                soxr.Clear(); // clear buffered data in soxr
-                soxr.SetRatio(sampleRateRatio, 0); // re-init soxr instance
+                if (soxr.VariableRate) {
+                    soxr.Clear(); // clear buffered data in soxr
+                    soxr.SetRatio(sampleRateRatio, 0); // re-init soxr instance
+                }
+                else {
+                    SetupResampler();
+                }
                 sourceBufferFillLevel = 0; // clear locally buffered data
             }
         }
