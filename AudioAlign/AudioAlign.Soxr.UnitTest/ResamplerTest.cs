@@ -12,6 +12,26 @@ namespace AudioAlign.Soxr.UnitTest {
         }
 
         [TestMethod]
+        public void CreateAndDestroyLotsOfInstancesAndProcess() {
+            var r = new SoxResampler(44100, 96000, 2);
+            int count = 1000;
+            var instances = new SoxResampler[count];
+
+            var dataIn = new byte[80000];
+            var dataOut = new byte[80000];
+            int readIn = 0, readOut = 0;
+
+            for (int i = 0; i < count; i++) {
+                instances[i] = new SoxResampler(5.0, 1.0, 2, QualityRecipe.SOXR_HQ, QualityFlags.SOXR_VR);
+                instances[i].Process(dataIn, 0, dataIn.Length, dataOut, 0, dataOut.Length, false, out readIn, out readOut);
+            }
+
+            for (int i = 0; i < count; i++) {
+                instances[i].Dispose();
+            }
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(SoxrException), "Invalid instantiation parameter didn't raise exception")]
         public void CreateInvalidInstance() {
             /* A negative input rate is invalid and should return in an error that triggers an exception.
@@ -91,6 +111,90 @@ namespace AudioAlign.Soxr.UnitTest {
 
             Assert.AreEqual(inSize, totalIn, "not all data has been read");
             Assert.AreEqual(outSize, totalOut, "not all data has been put out");
+        }
+
+        [TestMethod]
+        public void ProcessHugeBlock() {
+            var r = new SoxResampler(1.0d, 1.0d, 1);
+
+            int inSize = 15360;
+            int outSize = 15360;
+
+            var sampleDataIn = new byte[inSize];
+            var sampleDataOut = new byte[outSize];
+            int inputLengthUsed = 0;
+            int outputLengthGenerated = 0;
+
+            int remainingIn = inSize;
+            int totalIn = 0, totalOut = 0;
+
+            do {
+                r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize,
+                    remainingIn == 0, out inputLengthUsed, out outputLengthGenerated);
+                totalIn += inputLengthUsed;
+                totalOut += outputLengthGenerated;
+                remainingIn -= inputLengthUsed;
+            }
+            while (inputLengthUsed > 0 || outputLengthGenerated > 0);
+
+            Assert.AreEqual(inSize, totalIn, "not all data has been read");
+            Assert.AreEqual(outSize, totalOut, "not all data has been put out");
+        }
+
+        [TestMethod]
+        public void ProcessRateDouble() {
+            var r = new SoxResampler(48000, 96000, 1);
+
+            int inSize = 12;
+            int outSize = 12;
+
+            var sampleDataIn = new byte[inSize];
+            var sampleDataOut = new byte[outSize];
+            int inputLengthUsed = 0;
+            int outputLengthGenerated = 0;
+
+            int remainingIn = inSize;
+            int totalIn = 0, totalOut = 0;
+
+            do {
+                r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize,
+                    remainingIn == 0, out inputLengthUsed, out outputLengthGenerated);
+                totalIn += inputLengthUsed;
+                totalOut += outputLengthGenerated;
+                remainingIn -= inputLengthUsed;
+            }
+            while (inputLengthUsed > 0 || outputLengthGenerated > 0);
+
+            Assert.AreEqual(inSize, totalIn, "not all data has been read");
+            Assert.AreEqual(inSize * 2, totalOut, "not all data has been put out");
+        }
+
+        [TestMethod]
+        public void ProcessRateHalf() {
+            var r = new SoxResampler(1.0d, 0.5d, 1);
+
+            int inSize = 4 * 10;
+            int outSize = 12;
+
+            var sampleDataIn = new byte[inSize];
+            var sampleDataOut = new byte[outSize];
+            int inputLengthUsed = 0;
+            int outputLengthGenerated = 0;
+
+            int remainingIn = inSize;
+            int totalIn = 0, totalOut = 0;
+
+            do {
+                r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize,
+                    remainingIn == 0, out inputLengthUsed, out outputLengthGenerated);
+                totalIn += inputLengthUsed;
+                totalOut += outputLengthGenerated;
+                remainingIn -= inputLengthUsed;
+            }
+            while (inputLengthUsed > 0 || outputLengthGenerated > 0);
+
+            Assert.AreEqual(inSize, totalIn, "not all data has been read");
+            Assert.AreEqual(inSize / 2, totalOut, "not all data has been put out");
         }
 
         [TestMethod]
