@@ -178,9 +178,9 @@
       <Project>{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}</Project>
       <Name>AudioAlign.Audio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AudioAlign.LibSampleRate\AudioAlign.LibSampleRate.csproj">
-      <Project>{CC813B15-06BB-4334-96C6-DD252BE37D1B}</Project>
-      <Name>AudioAlign.LibSampleRate</Name>
+    <ProjectReference Include="..\AudioAlign.Soxr\AudioAlign.Soxr.csproj">
+      <Project>{24228071-5e72-4ba8-90e3-89de331a718c}</Project>
+      <Name>AudioAlign.Soxr</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
