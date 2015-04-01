@@ -98,6 +98,10 @@
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NAudio, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\libs\NAudio.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -158,6 +162,10 @@
     <ProjectReference Include="..\AudioAlign.Audio\AudioAlign.Audio.csproj">
       <Project>{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}</Project>
       <Name>AudioAlign.Audio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioAlign.LibSampleRate\AudioAlign.LibSampleRate.csproj">
+      <Project>{cc813b15-06bb-4334-96c6-dd252be37d1b}</Project>
+      <Name>AudioAlign.LibSampleRate</Name>
     </ProjectReference>
     <ProjectReference Include="..\AudioAlign.WaveControls\AudioAlign.WaveControls.csproj">
       <Project>{FD0C6CC5-B509-4441-9AA2-E8B34BAD9F95}</Project>
