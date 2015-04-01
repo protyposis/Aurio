@@ -20,8 +20,8 @@ namespace AudioAlign.Soxr {
         /// 
         /// Can be used to create a variable-rate resampler by supplying SOXR_HQ as recipe 
         /// and SOXR_VR as flag. For a variable resampler, inputRate/outputRate must equate
-        /// to the maximum IO ratio that will be set by calling SetIoRatio. To set the initial
-        /// ratio, call SetIoRatio with a transitionLength of 0 on the created instance.
+        /// to the maximum IO ratio that will be set by calling SetRatio. To set the initial
+        /// ratio, call SetRatio with a transitionLength of 0 on the created instance.
         /// </summary>
         /// <param name="inputRate"></param>
         /// <param name="outputRate"></param>
@@ -105,6 +105,10 @@ namespace AudioAlign.Soxr {
 
         public double GetOutputDelay() {
             return InteropWrapper.soxr_delay(soxr);
+        }
+
+        public bool VariableRate {
+            get { return variableRate; }
         }
 
         /// <summary>
@@ -215,6 +219,10 @@ namespace AudioAlign.Soxr {
             if (error != SoxrError.Zero) {
                 throw new SoxrException("Cannot clear state: " + GetError(error));
             }
+        }
+
+        public static bool CheckRatio(double ratio) {
+            return ratio > 0.0;
         }
 
         /// <summary>
