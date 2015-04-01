@@ -63,26 +63,26 @@ namespace AudioAlign.Audio.UnitTest
         [TestMethod()]
         public void TWC1() {
             TimeWarpCollection collection = new TimeWarpCollection();
-            collection.Add(new TimeWarp() { From = 5, To = 0 });
-            collection.Add(new TimeWarp() { From = 15, To = 15 });
+            collection.Add(new TimeWarp() { From = new TimeSpan(0, 0, 5), To = new TimeSpan(0, 0, 0) });
+            collection.Add(new TimeWarp() { From = new TimeSpan(0, 0, 15), To = new TimeSpan(0, 0, 15) });
 
-            Assert.AreEqual(-5, collection.TranslateSourceToWarpedPosition(0));
-            Assert.AreEqual(0, collection.TranslateSourceToWarpedPosition(5));
-            Assert.AreEqual(7, collection.TranslateSourceToWarpedPosition(10));
-            Assert.AreEqual(15, collection.TranslateSourceToWarpedPosition(15));
-            Assert.AreEqual(20, collection.TranslateSourceToWarpedPosition(20));
+            Assert.AreEqual(new TimeSpan(0, 0, -5), collection.TranslateSourceToWarpedPosition(new TimeSpan(0, 0, 0)));
+            Assert.AreEqual(new TimeSpan(0, 0, 0), collection.TranslateSourceToWarpedPosition(new TimeSpan(0, 0, 5)));
+            Assert.AreEqual(new TimeSpan(0, 0, 0, 7, 500), collection.TranslateSourceToWarpedPosition(new TimeSpan(0, 0, 10)));
+            Assert.AreEqual(new TimeSpan(0, 0, 15), collection.TranslateSourceToWarpedPosition(new TimeSpan(0, 0, 15)));
+            Assert.AreEqual(new TimeSpan(0, 0, 20), collection.TranslateSourceToWarpedPosition(new TimeSpan(0, 0, 20)));
         }
 
         [TestMethod()]
         public void TranslationRangeTest() {
             TimeWarpCollection collection = new TimeWarpCollection();
-            collection.Add(new TimeWarp() { From = -5, To = -5 });
-            collection.Add(new TimeWarp() { From = 10, To = 10 });
-            collection.Add(new TimeWarp() { From = 20, To = 20 });
-            collection.Add(new TimeWarp() { From = 40, To = 40 });
+            collection.Add(new TimeWarp() { From = new TimeSpan(0, 0, -5), To = new TimeSpan(0, 0, -5) });
+            collection.Add(new TimeWarp() { From = new TimeSpan(0, 0, 10), To = new TimeSpan(0, 0, 10) });
+            collection.Add(new TimeWarp() { From = new TimeSpan(0, 0, 20), To = new TimeSpan(0, 0, 20) });
+            collection.Add(new TimeWarp() { From = new TimeSpan(0, 0, 40), To = new TimeSpan(0, 0, 40) });
 
-            for (long x = -10; x <= 50; x++) {
-                Assert.AreEqual(x, collection.TranslateSourceToWarpedPosition(x));
+            for (int x = -10; x <= 50; x++) {
+                Assert.AreEqual(new TimeSpan(0, 0, x), collection.TranslateSourceToWarpedPosition(new TimeSpan(0, 0, x)));
             }
         }
     }
