@@ -20,7 +20,6 @@ namespace AudioAlign.LibSampleRate.Test {
     /// </summary>
     public partial class MainWindow : Window {
 
-        //private SampleRateConverter src;
         private MixerStream mixer;
         WasapiOut audioOutput;
 
@@ -29,14 +28,11 @@ namespace AudioAlign.LibSampleRate.Test {
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            //src = new SampleRateConverter(ConverterType.SRC_SINC_FASTEST, 1);
-
             audioOutput = new WasapiOut(global::NAudio.CoreAudioApi.AudioClientShareMode.Shared, true, 10);
             mixer = new MixerStream(2, 44100);
             MonoStream mono = new MonoStream(mixer);
-            ResamplingStream resampler = new ResamplingStream(mono, ResamplingQuality.SincFastest, 5512);
-            ResamplingStream resampler2 = new ResamplingStream(resampler, ResamplingQuality.SincFastest, 44100);
-            NAudioSinkStream naudioSink = new NAudioSinkStream(resampler2);
+            ResamplingStream resampler = new ResamplingStream(mono, ResamplingQuality.SincMedium, 44100);
+            NAudioSinkStream naudioSink = new NAudioSinkStream(resampler);
             audioOutput.Init(naudioSink);
 
             sliderSampleRate.ValueChanged += new RoutedPropertyChangedEventHandler<double>(delegate(object s2, RoutedPropertyChangedEventArgs<double> e2) {
@@ -54,7 +50,6 @@ namespace AudioAlign.LibSampleRate.Test {
             if (dlg.ShowDialog() == true) {
                 mixer.Clear();
                 mixer.Add(new IeeeStream(new NAudioSourceStream(new WaveFileReader(dlg.FileName))));
-                //mixer.Add(new NAudioSourceStream(new WaveChannel32(new WaveFileReader(dlg.FileName))));
                 lblFile.Content = dlg.FileName;
             }
         }
