@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using AudioAlign.LibSampleRate;
 using System.Diagnostics;
+using AudioAlign.Soxr;
 
 namespace AudioAlign.Audio.Streams {
     public class ResamplingStream : AbstractAudioStreamWrapper {
 
-        private SampleRateConverter src;
+        private SoxResampler soxr;
         private AudioProperties properties;
         private byte[] sourceBuffer;
         private int sourceBufferPosition;
@@ -26,7 +27,7 @@ namespace AudioAlign.Audio.Streams {
             properties = new AudioProperties(sourceStream.Properties.Channels, sourceStream.Properties.SampleRate, 
                 sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
 
-            src = new SampleRateConverter((ConverterType)quality, properties.Channels);
+            soxr = new SoxResampler(10.0, 1.0, properties.Channels, QualityRecipe.SOXR_HQ, QualityFlags.SOXR_VR);
             sourceBuffer = new byte[0];
             sourceBufferFillLevel = 0;
             sourceBufferPosition = 0;
@@ -51,7 +52,7 @@ namespace AudioAlign.Audio.Streams {
             set {
                 targetSampleRate = value;
                 sampleRateRatio = value / sourceStream.Properties.SampleRate;
-                src.SetRatio(sampleRateRatio);
+                soxr.SetRatio(sampleRateRatio, 0);
                 properties.SampleRate = (int)targetSampleRate;
             }
         }
@@ -62,7 +63,7 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public int BufferedBytes {
-            get { return src.BufferedBytes; }
+            get { return (int)soxr.GetOutputDelay(); }
         }
 
         public override AudioProperties Properties {
@@ -83,7 +84,8 @@ namespace AudioAlign.Audio.Streams {
                 long pos = (long)Math.Ceiling(value / sampleRateRatio);
                 pos -= pos % sourceStream.SampleBlockSize;
                 sourceStream.Position = pos;
-                src.Reset(); // clear buffered data in the SRC
+                soxr.Clear(); // clear buffered data in soxr
+                soxr.SetRatio(sampleRateRatio, 0); // re-init soxr instance
                 sourceBufferFillLevel = 0; // clear locally buffered data
             }
         }
@@ -132,7 +134,7 @@ namespace AudioAlign.Audio.Streams {
                 // this is also the reason why the source stream's Read() method may be called multiple times although
                 // it already signalled that it has reached the end of the stream
                 endOfStream = sourceStream.Position >= sourceStream.Length && sourceBufferFillLevel == 0;
-                src.Process(sourceBuffer, sourceBufferPosition, sourceBufferFillLevel - sourceBufferPosition,
+                soxr.Process(sourceBuffer, sourceBufferPosition, sourceBufferFillLevel - sourceBufferPosition,
                     buffer, offset, count, endOfStream, out inputLengthUsed, out outputLengthGenerated);
                 sourceBufferPosition += inputLengthUsed;
             } 
