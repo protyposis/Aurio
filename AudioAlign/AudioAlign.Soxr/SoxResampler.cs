@@ -134,15 +134,19 @@ namespace AudioAlign.Soxr {
             // Only 32-bit float samples are supported
             int sampleBlockByteSize = 4 * channels;
 
-            uint ilen = (uint)(inputLength / sampleBlockByteSize);
-            uint olen = (uint)(outputLength / sampleBlockByteSize);
-            uint idone = 0;
-            uint odone = 0;
+            UIntPtr ilen = new UIntPtr((uint)(inputLength / sampleBlockByteSize));
+            UIntPtr olen = new UIntPtr((uint)(outputLength / sampleBlockByteSize));
+            UIntPtr idone = UIntPtr.Zero;
+            UIntPtr odone = UIntPtr.Zero;
 
+            if (outputLength == 0 && output.Length == 0) {
+                output = new byte[1];
+            }
+            
             unsafe {
                 fixed (byte* inputBytes = &input[inputOffset], outputBytes = &output[outputOffset]) {
-                    SoxrError error = InteropWrapper.soxr_process(soxr, 
-                        endOfInput ? null : inputBytes, ilen, out idone, 
+                    SoxrError error = InteropWrapper.soxr_process(soxr,
+                        endOfInput ? null : inputBytes, ilen, out idone,
                         outputBytes, olen, out odone);
 
                     if (error != SoxrError.Zero) {
@@ -151,8 +155,8 @@ namespace AudioAlign.Soxr {
                 }
             }
 
-            inputLengthUsed = (int)(idone * sampleBlockByteSize);
-            outputLengthGenerated = (int)(odone * sampleBlockByteSize);
+            inputLengthUsed = (int)(idone.ToUInt32() * sampleBlockByteSize);
+            outputLengthGenerated = (int)(odone.ToUInt32() * sampleBlockByteSize);
         }
 
         /// <summary>
@@ -170,7 +174,7 @@ namespace AudioAlign.Soxr {
                 throw new SoxrException("Ratio exceeds max bound specified in constructor");
             }
 
-            SoxrError error = InteropWrapper.soxr_set_io_ratio(soxr, ratio, (uint)transitionLength);
+            SoxrError error = InteropWrapper.soxr_set_io_ratio(soxr, ratio, new UIntPtr((uint)transitionLength));
 
             if (error != SoxrError.Zero) {
                 throw new SoxrException("Error changing IO ratio: " + GetError(error));

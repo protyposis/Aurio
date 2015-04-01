@@ -49,18 +49,24 @@ namespace AudioAlign.Soxr {
             public RuntimeFlags flags;
         }
 
+        /*
+         * The length of the unsigned integer size_t is platform dependent (32/64 bit). As C# data types
+         * uint and ulong are fixed length, UIntPtrs must be used for marshalling size_t because they are
+         * also platform dependent.
+         */
+
         public delegate StringPtr d_soxr_version();
         public delegate SoxrInstance d_soxr_create(double input_rate, double output_rate, uint num_channels,
             out SoxrError error, ref SoxrIoSpec io_spec, ref SoxrQualitySpec quality_spec, ref SoxrRuntimeSpec runtime_spec);
         public delegate SoxrError d_soxr_process(SoxrInstance resampler,
-            byte* input, uint ilen, out uint idone,
-            byte* output, uint olen, out uint odone);
+            byte* input, UIntPtr ilen, out UIntPtr idone,
+            byte* output, UIntPtr olen, out UIntPtr odone);
         public delegate SoxrError d_soxr_error(SoxrInstance resampler);
         public delegate double d_soxr_delay(SoxrInstance resampler);
         public delegate StringPtr d_soxr_engine(SoxrInstance resampler);
         public delegate SoxrError d_soxr_clear(SoxrInstance resampler);
         public delegate void d_soxr_delete(SoxrInstance resampler);
-        public delegate SoxrError d_soxr_set_io_ratio(SoxrInstance resampler, double io_ratio, uint slew_len);
+        public delegate SoxrError d_soxr_set_io_ratio(SoxrInstance resampler, double io_ratio, UIntPtr slew_len);
         public delegate SoxrQualitySpec d_soxr_quality_spec(QualityRecipe recipe, QualityFlags flags);
         public delegate SoxrRuntimeSpec d_soxr_runtime_spec(uint num_threads);
         public delegate SoxrIoSpec d_soxr_io_spec(Datatype itype, Datatype otype);

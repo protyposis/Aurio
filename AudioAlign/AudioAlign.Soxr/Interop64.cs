@@ -24,8 +24,8 @@ namespace AudioAlign.Soxr {
 
         [DllImport(SOXRLIB, CallingConvention = CC)]
         public static extern SoxrError soxr_process(SoxrInstance resampler,
-            byte* input, uint ilen, out uint idone,
-            byte* output, uint olen, out uint odone);
+            byte* input, UIntPtr ilen, out UIntPtr idone,
+            byte* output, UIntPtr olen, out UIntPtr odone);
 
         [DllImport(SOXRLIB, CallingConvention = CC)]
         public static extern SoxrError soxr_error(SoxrInstance resampler);
@@ -43,7 +43,7 @@ namespace AudioAlign.Soxr {
         public static extern void soxr_delete(SoxrInstance resampler);
 
         [DllImport(SOXRLIB, CallingConvention = CC)]
-        public static extern SoxrError soxr_set_io_ratio(SoxrInstance resampler, double io_ratio, uint slew_len);
+        public static extern SoxrError soxr_set_io_ratio(SoxrInstance resampler, double io_ratio, UIntPtr slew_len);
 
         [DllImport(SOXRLIB, CallingConvention = CC)]
         public static extern InteropWrapper.SoxrQualitySpec soxr_quality_spec(QualityRecipe recipe, QualityFlags flags);
