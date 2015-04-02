@@ -211,6 +211,13 @@ namespace AudioAlign.Soxr {
         /// <summary>
         /// Clear internal state (e.g. buffered data) for a fresh resampling session, 
         /// but keeping the same configuration.
+        /// 
+        /// Warning: Clearing clears too much of the internal state, which seems to be
+        /// a bug: http://sourceforge.net/p/soxr/discussion/general/thread/15725968/
+        /// In variable rate mode, clearing works if the ratio is set afterwards. Without
+        /// setting the rate it is zero, leading to an exception at the next Process call.
+        /// In fixed rate mode, a new resampler should be instantiated instead of clearing,
+        /// because this class does not permit setting the ratio in fixed mode.
         /// </summary>
         /// <exception cref="SoxrException">when clearing fails, see error message for details</exception>
         public void Clear() {
