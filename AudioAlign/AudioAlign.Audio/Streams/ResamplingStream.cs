@@ -89,13 +89,14 @@ namespace AudioAlign.Audio.Streams {
             set {
                 targetSampleRate = value;
                 sampleRateRatio = value / sourceStream.Properties.SampleRate;
+                properties.SampleRate = (int)targetSampleRate;
+
                 if (soxr.VariableRate) {
                     soxr.SetRatio(sampleRateRatio, 0);
                 }
                 else {
                     SetupResampler();
                 }
-                properties.SampleRate = (int)targetSampleRate;
             }
         }
 
