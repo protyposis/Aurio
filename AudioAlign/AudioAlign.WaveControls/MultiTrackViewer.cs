@@ -62,6 +62,7 @@ namespace AudioAlign.WaveControls {
             multiTrackConnectionAdorner = new MultiTrackConnectionAdorner(itemContainer, multiTrackListBox);
             AdornerLayer.GetAdornerLayer(itemContainer).Add(multiTrackConnectionAdorner);
             multiTrackConnectionAdorner.Opacity = 0.8d;
+            multiTrackConnectionAdorner.IsHitTestVisible = false;
         }
 
         private void MultiTrackViewer_CaretPositionSelected(object sender, CaretOverlay.PositionEventArgs e) {
