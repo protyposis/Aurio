@@ -55,8 +55,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
         }
 
-        public Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>> LookupTable {
-            get { throw new NotImplementedException("refactor to hand CollisionMap back???"); }
+        public IFingerprintCollisionMap CollisionMap {
+            get { return collisionMap; }
         }
 
         public Dictionary<AudioTrack, List<SubFingerprint>> AudioTracks {
