@@ -100,7 +100,7 @@ namespace AudioAlign.Audio {
             return true;
         }
 
-        public void SaveToFile(System.IO.FileInfo outputFile, IProgressReporter progressReporter) {
+        private void SaveToFile(IAudioStream fileOutputStream, System.IO.FileInfo outputFile, IProgressReporter progressReporter) {
             Pause(); // playback and saving cannot happen in parallel
 
             Stopwatch sw = new Stopwatch();
@@ -112,13 +112,7 @@ namespace AudioAlign.Audio {
             audioVolumeMeteringStream.Disabled = dataMonitorStream.Disabled = true;
 
             // set to start for all audio to be saved
-            audioOutputStream.Position = 0;
-
-            // Get the source of the resampling stream, because this final resampler adjusts 
-            // the rate to the speaker playback rate, which we do not need and also not want
-            // when writing to a file. Instead, we write the file at the mixer sample rate,
-            // which is ideally the source sample rate if all tracks have the same sample rate.
-            var fileOutputStream = audioOutputStream.GetSourceStream();
+            fileOutputStream.Position = 0;
 
             NAudioSinkStream nAudioSink = new NAudioSinkStream(fileOutputStream);
             long total = nAudioSink.Length;
@@ -149,8 +143,32 @@ namespace AudioAlign.Audio {
             Console.WriteLine("Export time: " + sw.Elapsed);
         }
 
+        public void SaveToFile(System.IO.FileInfo outputFile, IProgressReporter progressReporter) {
+            // Get the source of the resampling stream, because this final resampler adjusts 
+            // the rate to the speaker playback rate, which we do not need and also not want
+            // when writing to a file. Instead, we write the file at the mixer sample rate,
+            // which is ideally the source sample rate if all tracks have the same sample rate.
+            var fileOutputStream = audioOutputStream.GetSourceStream();
+
+            // Save the mix to the file
+            SaveToFile(fileOutputStream, outputFile, progressReporter);
+        }
+
         public void SaveToFile(System.IO.FileInfo outputFile) {
             SaveToFile(outputFile, null);
+        }
+
+        public void SaveToFile(AudioTrack track, System.IO.FileInfo outputFile, IProgressReporter progressReporter) {
+            // Get the stream before the resampling stream that prepares the stream for the mixer.
+            // When rendering a single stream, we do not want any unnecessary resampling.
+            var fileOutputStream = trackListStreams[track].FindStream<ResamplingStream>().GetSourceStream();
+
+            // Save the single track to the file
+            SaveToFile(fileOutputStream, outputFile, progressReporter);
+        }
+
+        public void SaveToFile(AudioTrack track, System.IO.FileInfo outputFile) {
+            SaveToFile(track, outputFile, null);
         }
 
         private void SetupAudioChain() {
