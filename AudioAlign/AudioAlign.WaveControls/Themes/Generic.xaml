@@ -199,6 +199,7 @@
     <Style TargetType="{x:Type local:MultiTrackListBox}">
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="ScrollViewer.CanContentScroll" Value="False"/> <!-- if set to True, smooth scrolling is disabled -->
+        <Setter Property="SelectionMode" Value="Extended"/>
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="ListBoxItem">

@@ -93,6 +93,10 @@ namespace AudioAlign.WaveControls {
             get { return multiTrackListBox.SelectedItem; }
         }
 
+        public IList SelectedItems {
+            get { return multiTrackListBox.SelectedItems; }
+        }
+
         public Collection<Match> Matches {
             get { return multiTrackConnectionAdorner.Matches; }
         }
@@ -243,26 +247,46 @@ namespace AudioAlign.WaveControls {
 
         protected override void OnPreviewKeyDown(KeyEventArgs e) {
             base.OnKeyUp(e);
-            if (SelectedItem != null && Keyboard.Modifiers == ModifierKeys.Shift) {
+
+            // Only if at least one item is selected, shift is held, and up or down is pressed, we want to execute a move
+            if (SelectedItem != null && Keyboard.Modifiers == ModifierKeys.Shift && (e.Key == Key.Up || e.Key == Key.Down)) {
                 TrackList<AudioTrack> itemsSource = (TrackList<AudioTrack>)ItemsSource;
 
-                int oldIndex = itemsSource.IndexOf((AudioTrack)SelectedItem);
-                int newIndex = oldIndex;
+                // Get the selected tracks ordered by their position
+                var selectedTracks = new List<AudioTrack>(SelectedItems.Cast<AudioTrack>().OrderBy(t => itemsSource.IndexOf(t)));
+                
+                int delta = 0; // The delta to the new index after moving (no moving if zero)
 
                 if (e.Key == Key.Up) {
-                    newIndex = Math.Max(0, newIndex - 1);
+                    // Check the index of the first key and see if it can be moved upwards
+                    int oldIndex = itemsSource.IndexOf(selectedTracks.First());
+                    delta = Math.Max(0, oldIndex - 1) - oldIndex;
                 }
                 else if (e.Key == Key.Down) {
-                    newIndex = Math.Min(itemsSource.Count - 1, oldIndex + 1);
+                    // Check the index of the last key and see if it can be moved downwards
+                    int oldIndex = itemsSource.IndexOf(selectedTracks.Last());
+                    delta = Math.Min(itemsSource.Count - 1, oldIndex + 1) - oldIndex;
                 }
 
-                if (newIndex != oldIndex) {
-                    itemsSource.Move(oldIndex, newIndex);
-                    multiTrackListBox.SelectedIndex = newIndex;
+                if (delta != 0) {
+                    if (delta > 0) {
+                        // When moving down, the sequence of the moves must be in the opposite direction
+                        // beginning with the last one, else it somehow locks up and movement does not work.
+                        selectedTracks.Reverse();
+                    }
 
+                    // Move items
+                    selectedTracks.ForEach(t => {
+                        int oldIndex = itemsSource.IndexOf(t);
+                        itemsSource.Move(oldIndex, oldIndex + delta);
+                    });
+
+                    // Refocus on the moved selected item because it loses focus during the move
                     // http://stackoverflow.com/a/10463162
-                    ListBoxItem listBoxItem = (ListBoxItem)multiTrackListBox.ItemContainerGenerator.ContainerFromItem(multiTrackListBox.SelectedItem);
+                    ListBoxItem listBoxItem = (ListBoxItem)multiTrackListBox.ItemContainerGenerator
+                        .ContainerFromItem(multiTrackListBox.SelectedItem);
                     listBoxItem.Focus();
+
                     RefreshAdornerLayer();
                 }
 
