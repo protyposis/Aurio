@@ -73,6 +73,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{02507825
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{C10A7AB5-A4DB-414C-859F-B642CCBC48FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Soxr", "AudioAlign.Soxr\AudioAlign.Soxr.csproj", "{24228071-5E72-4BA8-90E3-89DE331A718C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Soxr.UnitTest", "AudioAlign.Soxr.UnitTest\AudioAlign.Soxr.UnitTest.csproj", "{22B3D2D1-D139-4AC6-B72A-1A96F1CCBBBE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -277,6 +281,24 @@ Global
 		{616330A6-6386-40F1-907D-CD46884FA86F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{616330A6-6386-40F1-907D-CD46884FA86F}.Release|x64.ActiveCfg = Release|x64
 		{616330A6-6386-40F1-907D-CD46884FA86F}.Release|x86.ActiveCfg = Release|x86
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Debug|x64.ActiveCfg = Debug|x64
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Debug|x64.Build.0 = Debug|x64
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Debug|x86.ActiveCfg = Debug|x86
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Debug|x86.Build.0 = Debug|x86
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Release|x64.ActiveCfg = Release|x64
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Release|x64.Build.0 = Release|x64
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Release|x86.ActiveCfg = Release|x86
+		{24228071-5E72-4BA8-90E3-89DE331A718C}.Release|x86.Build.0 = Release|x86
+		{22B3D2D1-D139-4AC6-B72A-1A96F1CCBBBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22B3D2D1-D139-4AC6-B72A-1A96F1CCBBBE}.Debug|x64.ActiveCfg = Debug|x64
+		{22B3D2D1-D139-4AC6-B72A-1A96F1CCBBBE}.Debug|x86.ActiveCfg = Debug|x86
+		{22B3D2D1-D139-4AC6-B72A-1A96F1CCBBBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22B3D2D1-D139-4AC6-B72A-1A96F1CCBBBE}.Release|x64.ActiveCfg = Release|x64
+		{22B3D2D1-D139-4AC6-B72A-1A96F1CCBBBE}.Release|x86.ActiveCfg = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -297,6 +319,7 @@ Global
 		{C5D1B35F-272E-4509-9C4E-2D3DD2928809} = {C10A7AB5-A4DB-414C-859F-B642CCBC48FF}
 		{937AA772-00F3-45B8-A9FE-8504F3D12909} = {02507825-08DE-4A31-B1C8-531BB8DA6BAC}
 		{616330A6-6386-40F1-907D-CD46884FA86F} = {33AD9CF5-1CD7-4393-A5A8-42A64760C229}
+		{22B3D2D1-D139-4AC6-B72A-1A96F1CCBBBE} = {33AD9CF5-1CD7-4393-A5A8-42A64760C229}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = AudioAlign.vsmdi
