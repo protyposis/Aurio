@@ -31,7 +31,7 @@ namespace AudioAlign.LibSampleRate.Test {
             audioOutput = new WasapiOut(global::NAudio.CoreAudioApi.AudioClientShareMode.Shared, true, 10);
             mixer = new MixerStream(2, 44100);
             MonoStream mono = new MonoStream(mixer);
-            ResamplingStream resampler = new ResamplingStream(mono, ResamplingQuality.SincMedium, 44100);
+            ResamplingStream resampler = new ResamplingStream(mono, ResamplingQuality.VariableRate, 44100);
             NAudioSinkStream naudioSink = new NAudioSinkStream(resampler);
             audioOutput.Init(naudioSink);
 

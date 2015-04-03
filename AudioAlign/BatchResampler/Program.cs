@@ -49,7 +49,7 @@ namespace BatchResampler
                 try
                 {
                     IAudioStream inputStream = AudioStreamFactory.FromFileInfoIeee32(fileInfo);
-                    IAudioStream resamplingStream = new ResamplingStream(inputStream, ResamplingQuality.SincBest, factor);
+                    IAudioStream resamplingStream = new ResamplingStream(inputStream, ResamplingQuality.VeryHigh, factor);
                     MixerStream sampleRateResetStream = new MixerStream(resamplingStream.Properties.Channels, inputStream.Properties.SampleRate);
                     sampleRateResetStream.Add(resamplingStream);
 

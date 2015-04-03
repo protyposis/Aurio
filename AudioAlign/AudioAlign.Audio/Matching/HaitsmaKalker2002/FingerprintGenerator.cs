@@ -38,7 +38,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         public void Generate() {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(inputTrack.FileInfo)),
-                ResamplingQuality.SincFastest, profile.SampleRate);
+                ResamplingQuality.Medium, profile.SampleRate);
 
             STFT stft = new STFT(audioStream, profile.FrameSize, profile.FrameStep, WindowType.Hann);
             index = 0;

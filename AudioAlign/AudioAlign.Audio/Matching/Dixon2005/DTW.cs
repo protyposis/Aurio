@@ -185,7 +185,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 stream = new MonoStream(stream);
             }
             if (stream.Properties.SampleRate != FrameReader.SAMPLERATE) {
-                stream = new ResamplingStream(stream, ResamplingQuality.SincFastest, FrameReader.SAMPLERATE);
+                stream = new ResamplingStream(stream, ResamplingQuality.Medium, FrameReader.SAMPLERATE);
             }
             return stream;
         }

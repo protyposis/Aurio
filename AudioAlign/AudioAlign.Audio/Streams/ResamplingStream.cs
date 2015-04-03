@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.LibSampleRate;
 using System.Diagnostics;
+using AudioAlign.Soxr;
 
 namespace AudioAlign.Audio.Streams {
     public class ResamplingStream : AbstractAudioStreamWrapper {
 
-        private SampleRateConverter src;
+        private ResamplingQuality quality;
+        private SoxResampler soxr;
         private AudioProperties properties;
         private byte[] sourceBuffer;
         private int sourceBufferPosition;
@@ -26,7 +27,9 @@ namespace AudioAlign.Audio.Streams {
             properties = new AudioProperties(sourceStream.Properties.Channels, sourceStream.Properties.SampleRate, 
                 sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
 
-            src = new SampleRateConverter((ConverterType)quality, properties.Channels);
+            this.quality = quality;
+            SetupResampler();
+            
             sourceBuffer = new byte[0];
             sourceBufferFillLevel = 0;
             sourceBufferPosition = 0;
@@ -46,13 +49,54 @@ namespace AudioAlign.Audio.Streams {
                 SampleRateRatio = sampleRateRatio;
         }
 
+        private void SetupResampler() {
+            if (soxr != null) {
+                soxr.Dispose(); // delete previous resampler instance
+            }
+
+            Soxr.QualityRecipe qr = QualityRecipe.SOXR_HQ;
+            Soxr.QualityFlags qf = QualityFlags.SOXR_ROLLOFF_SMALL;
+
+            switch (quality) {
+                case ResamplingQuality.VeryLow:
+                    qr = QualityRecipe.SOXR_QQ; break;
+                case ResamplingQuality.Low:
+                    qr = QualityRecipe.SOXR_LQ; break;
+                case ResamplingQuality.Medium:
+                    qr = QualityRecipe.SOXR_MQ; break;
+                case ResamplingQuality.High:
+                    qr = QualityRecipe.SOXR_HQ; break;
+                case ResamplingQuality.VeryHigh:
+                    qr = QualityRecipe.SOXR_VHQ; break;
+                case ResamplingQuality.VariableRate:
+                    qr = QualityRecipe.SOXR_HQ; qf = QualityFlags.SOXR_VR; break;
+            }
+
+            double inputRate = sourceStream.Properties.SampleRate;
+            double outputRate = properties.SampleRate;
+
+            if (qf == QualityFlags.SOXR_VR) {
+                // set max variable rate
+                inputRate = 10.0;
+                outputRate = 1.0;
+            }
+
+            soxr = new SoxResampler(inputRate, outputRate, properties.Channels, qr, qf);
+        }
+
         public double TargetSampleRate {
             get { return targetSampleRate; }
             set {
                 targetSampleRate = value;
                 sampleRateRatio = value / sourceStream.Properties.SampleRate;
-                src.SetRatio(sampleRateRatio);
                 properties.SampleRate = (int)targetSampleRate;
+
+                if (soxr.VariableRate) {
+                    soxr.SetRatio(sampleRateRatio, 0);
+                }
+                else {
+                    SetupResampler();
+                }
             }
         }
 
@@ -62,7 +106,7 @@ namespace AudioAlign.Audio.Streams {
         }
 
         public int BufferedBytes {
-            get { return src.BufferedBytes; }
+            get { return (int)soxr.GetOutputDelay(); }
         }
 
         public override AudioProperties Properties {
@@ -83,7 +127,13 @@ namespace AudioAlign.Audio.Streams {
                 long pos = (long)Math.Ceiling(value / sampleRateRatio);
                 pos -= pos % sourceStream.SampleBlockSize;
                 sourceStream.Position = pos;
-                src.Reset(); // clear buffered data in the SRC
+                if (soxr.VariableRate) {
+                    soxr.Clear(); // clear buffered data in soxr
+                    soxr.SetRatio(sampleRateRatio, 0); // re-init soxr instance
+                }
+                else {
+                    SetupResampler();
+                }
                 sourceBufferFillLevel = 0; // clear locally buffered data
             }
         }
@@ -132,7 +182,7 @@ namespace AudioAlign.Audio.Streams {
                 // this is also the reason why the source stream's Read() method may be called multiple times although
                 // it already signalled that it has reached the end of the stream
                 endOfStream = sourceStream.Position >= sourceStream.Length && sourceBufferFillLevel == 0;
-                src.Process(sourceBuffer, sourceBufferPosition, sourceBufferFillLevel - sourceBufferPosition,
+                soxr.Process(sourceBuffer, sourceBufferPosition, sourceBufferFillLevel - sourceBufferPosition,
                     buffer, offset, count, endOfStream, out inputLengthUsed, out outputLengthGenerated);
                 sourceBufferPosition += inputLengthUsed;
             } 
@@ -169,8 +219,8 @@ namespace AudioAlign.Audio.Streams {
             return CheckSampleRateRatio(sampleRate / sourceStream.Properties.SampleRate);
         }
 
-        public bool CheckSampleRateRatio(double ratio) {
-            return SampleRateConverter.CheckRatio(ratio);
+        public static bool CheckSampleRateRatio(double ratio) {
+            return SoxResampler.CheckRatio(ratio);
         }
     }
 }

@@ -36,7 +36,7 @@ namespace AudioAlign.Test.Streams {
                 IeeeStream ieee = new IeeeStream(nAudioSource);
 
                 MonoStream mono = new MonoStream(ieee);
-                ResamplingStream res = new ResamplingStream(mono, ResamplingQuality.SincFastest, 22050);
+                ResamplingStream res = new ResamplingStream(mono, ResamplingQuality.Medium, 22050);
 
                 NAudioSinkStream nAudioSink = new NAudioSinkStream(res);
 

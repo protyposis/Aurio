@@ -320,7 +320,7 @@ namespace AudioAlign.Audio.Matching {
                 stream = new MonoStream(stream);
             }
             if (stream.Properties.SampleRate != 11050) {
-                stream = new ResamplingStream(stream, ResamplingQuality.SincFastest, sampleRate);
+                stream = new ResamplingStream(stream, ResamplingQuality.Medium, sampleRate);
             }
             return stream;
         }

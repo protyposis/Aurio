@@ -49,7 +49,7 @@ namespace AudioAlign.Audio.UnitTest
         public void MyTestInitialize() {
             stream = new ResamplingStream(
                 new NullStream(new AudioProperties(1, 44100, 32, AudioFormat.IEEE), 1000),
-                ResamplingQuality.SincBest);
+                ResamplingQuality.VeryHigh);
         }
         
         //Use TestCleanup to run code after each test has run

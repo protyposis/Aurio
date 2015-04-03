@@ -16,9 +16,8 @@ namespace AudioAlign.Audio.Streams {
         private long position;
         private CropStream cropStream;
         private ResamplingStream resamplingStream;
-        private ResamplingQuality resamplingQuality;
 
-        public TimeWarpStream(IAudioStream sourceStream, ResamplingQuality quality)
+        public TimeWarpStream(IAudioStream sourceStream)
             : base(sourceStream) {
                 mappingAlpha = new ByteTimeWarp { From = 0, To = 0 };
                 mappingOmega = new ByteTimeWarp { From = sourceStream.Length, To = sourceStream.Length };
@@ -26,13 +25,12 @@ namespace AudioAlign.Audio.Streams {
                 Mappings = new TimeWarpCollection();
                 length = sourceStream.Length;
                 position = sourceStream.Position;
-                resamplingQuality = quality;
 
                 ResetStream();
         }
 
-        public TimeWarpStream(IAudioStream sourceStream, ResamplingQuality quality, TimeWarpCollection mappings)
-            : this(sourceStream, quality) {
+        public TimeWarpStream(IAudioStream sourceStream, TimeWarpCollection mappings)
+            : this(sourceStream) {
                 Mappings = mappings;
         }
 
@@ -96,7 +94,7 @@ namespace AudioAlign.Audio.Streams {
                 // mapping has changed, stream subsection must be renewed
                 if (hardReset) {
                     cropStream = new CropStream(sourceStream, mL.From, mH.From);
-                    resamplingStream = new ResamplingStream(cropStream, resamplingQuality, ByteTimeWarp.CalculateSampleRateRatio(mL, mH));
+                    resamplingStream = new ResamplingStream(cropStream, ResamplingQuality.VariableRate, ByteTimeWarp.CalculateSampleRateRatio(mL, mH));
                     resamplingStream.Position = position - mL.To;
                 }
                 else {

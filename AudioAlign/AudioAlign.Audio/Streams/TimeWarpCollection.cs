@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
-using AudioAlign.LibSampleRate;
 using System.Collections.Specialized;
 
 namespace AudioAlign.Audio.Streams {
@@ -70,7 +69,7 @@ namespace AudioAlign.Audio.Streams {
                     if (this[x].To > this[y].To) {
                         throw new Exception(this[x] + " is overlapping " + this[y]);
                     }
-                    else if (!SampleRateConverter.CheckRatio(TimeWarp.CalculateSampleRateRatio(this[x], this[y]))) {
+                    else if (!ResamplingStream.CheckSampleRateRatio(TimeWarp.CalculateSampleRateRatio(this[x], this[y]))) {
                         throw new Exception("invalid sample ratio: " + TimeWarp.CalculateSampleRateRatio(this[x], this[y]));
                     }
                 }

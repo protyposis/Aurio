@@ -175,7 +175,7 @@ namespace AudioAlign.Audio {
             VolumeClipStream volumeClipStream = new VolumeClipStream(dataMonitorStream);
 
             // resample to playback output samplerate
-            audioOutputStream = new ResamplingStream(volumeClipStream, ResamplingQuality.SincFastest, 
+            audioOutputStream = new ResamplingStream(volumeClipStream, ResamplingQuality.Medium, 
                 mmdevice.AudioClient.MixFormat.SampleRate);
 
             audioOutput = new WasapiOut(global::NAudio.CoreAudioApi.AudioClientShareMode.Shared, true, 200);
@@ -212,7 +212,7 @@ namespace AudioAlign.Audio {
 
             IAudioStream input = AudioStreamFactory.FromFileInfo(audioTrack.FileInfo);
             IAudioStream baseStream = new IeeeStream(new TolerantStream(new BufferedStream(input, 1024 * 1024, true)));
-            TimeWarpStream timeWarpStream = new TimeWarpStream(baseStream, ResamplingQuality.SincFastest) {
+            TimeWarpStream timeWarpStream = new TimeWarpStream(baseStream) {
                 Mappings = audioTrack.TimeWarps
             };
             OffsetStream offsetStream = new OffsetStream(timeWarpStream) {
@@ -302,7 +302,7 @@ namespace AudioAlign.Audio {
 
             // adjust sample rate to mixer output rate
             ResamplingStream resamplingStream = new ResamplingStream(volumeControl, 
-                ResamplingQuality.SincFastest, audioMixer.Properties.SampleRate);
+                ResamplingQuality.Medium, audioMixer.Properties.SampleRate);
 
             IAudioStream trackStream = resamplingStream;
 
