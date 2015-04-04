@@ -5,6 +5,13 @@ namespace AudioAlign.PFFFT.UnitTest {
     [TestClass]
     public class PffftTest {
 
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext testContext) {
+            // Init the class before the tests run, so DLLs get loaded and test runtimes 
+            // of the first test are not wrong due to initialization
+            new PFFFT(64, Transform.Real);
+        }
+
         [TestMethod]
         public void TestSimdSize() {
             int size = PFFFT.SimdSize;
