@@ -6,6 +6,7 @@ using System.Text;
 namespace AudioAlign.Test.FFT {
     enum FFTLibrary {
         ExocortexDSP,
-        FFTW
+        FFTW,
+        PFFFT
     }
 }
