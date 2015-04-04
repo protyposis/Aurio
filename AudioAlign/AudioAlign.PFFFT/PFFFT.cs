@@ -32,7 +32,9 @@ namespace AudioAlign.PFFFT {
         }
 
         private void Transform(float* input, float* output, Direction direction) {
-            InteropWrapper.pffft_transform(setup, input, output, null, direction);
+            // The non-ordered transform pffft_transform may be faster, 
+            // but all AudioAlign algorithms expect the canonical ordered form
+            InteropWrapper.pffft_transform_ordered(setup, input, output, null, direction);
         }
 
         private void CheckSize(float[] array) {
