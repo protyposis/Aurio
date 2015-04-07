@@ -229,7 +229,7 @@ namespace AudioAlign.Audio {
             }
 
             IAudioStream input = AudioStreamFactory.FromFileInfo(audioTrack.FileInfo);
-            IAudioStream baseStream = new IeeeStream(new TolerantStream(new BufferedStream(input, 1024 * 1024, true)));
+            IAudioStream baseStream = new IeeeStream(new TolerantStream(new BufferedStream(input, 1024 * 256 * input.SampleBlockSize, true)));
             TimeWarpStream timeWarpStream = new TimeWarpStream(baseStream) {
                 Mappings = audioTrack.TimeWarps
             };

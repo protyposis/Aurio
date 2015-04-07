@@ -17,6 +17,9 @@ namespace AudioAlign.Audio.Streams {
             if(sourceFormat.Encoding == WaveFormatEncoding.Pcm && sourceFormat.BitsPerSample == 16) {
                 format = AudioFormat.LPCM;
             }
+            else if (sourceFormat.Encoding == WaveFormatEncoding.Pcm && sourceFormat.BitsPerSample == 24) {
+                format = AudioFormat.LPCM;
+            }
             else if(sourceFormat.Encoding == WaveFormatEncoding.IeeeFloat && sourceFormat.BitsPerSample == 32) {
                 format = AudioFormat.IEEE;
             }
