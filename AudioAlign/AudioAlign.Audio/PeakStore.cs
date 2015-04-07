@@ -9,6 +9,20 @@ namespace AudioAlign.Audio {
     public class PeakStore {
 
         private static readonly int PEAK_BYTE_SIZE;
+        private static readonly char[] MAGICNUMBER = { 'A', 'A', 'P', 'K' }; // AudioAlignPeaKfile
+
+        /// <summary>
+        /// The first file format didn't have a header and just contained the raw peaks.
+        /// 
+        /// Format 2 adds a header with:
+        /// - magic number
+        /// - version number (int32)
+        /// - audio file last modified date
+        /// The LMD serves to check if a peak file is still valid for an audio file; if the audio file 
+        /// has changed, the peakfile is invalid (and a new one gets generated).
+        /// </summary>
+        private const int FILEFORMAT = 2;
+        private const int HEADERSIZE = 4 /* magic number */ + sizeof(int) + sizeof(long);
 
         static PeakStore() {
             unsafe { PEAK_BYTE_SIZE = sizeof(Peak); }
@@ -78,12 +92,26 @@ namespace AudioAlign.Audio {
         /// Reads serialized peaks from a data stream into the store.
         /// </summary>
         /// <param name="inputStream">the stream containing the serialized peaks</param>
-        public void ReadFrom(Stream inputStream) {
-            long inputPeakCount = inputStream.Length / PEAK_BYTE_SIZE / Channels;
+        public void ReadFrom(Stream inputStream, DateTime modifiedDate) {
+            long inputPeakCount = (inputStream.Length - HEADERSIZE) / PEAK_BYTE_SIZE / Channels;
             BinaryReader br = new BinaryReader(inputStream);
             BinaryWriter[] peakWriters = CreateMemoryStreams().WrapWithBinaryWriters();
 
             inputStream.Position = 0;
+
+            // read header
+            var magicNumber = br.ReadChars(4);
+            var fileFormat = br.ReadInt32();
+            var date = br.ReadInt64();
+
+            if (!magicNumber.SequenceEqual(MAGICNUMBER) || fileFormat != FILEFORMAT) {
+                throw new FileFormatException("invalid peak file");
+            }
+            if (date != modifiedDate.Ticks) {
+                throw new Exception("peakfile date does not match audio file modification date");
+            }
+
+            // read payload
             for (long x = 0; x < inputPeakCount; x++) {
                 for (int channel = 0; channel < Channels; channel++) {
                     peakWriters[channel].Write(br.ReadPeak());
@@ -95,10 +123,16 @@ namespace AudioAlign.Audio {
         /// Writes the peaks in this store for all channels to a stream in a serialized form.
         /// </summary>
         /// <param name="outputStream">the stream where the peaks will be written to</param>
-        public void StoreTo(Stream outputStream) {
+        public void StoreTo(Stream outputStream, DateTime modifiedDate) {
             BinaryWriter bw = new BinaryWriter(outputStream);
             BinaryReader[] peakReaders = CreateMemoryStreams().WrapWithBinaryReaders();
 
+            // write header
+            bw.Write(MAGICNUMBER);
+            bw.Write(FILEFORMAT);
+            bw.Write(modifiedDate.Ticks);
+
+            // write payload
             for (int x = 0; x < Length; x++) {
                 for (int channel = 0; channel < Channels; channel++) {
                     bw.Write(peakReaders[channel].ReadPeak());

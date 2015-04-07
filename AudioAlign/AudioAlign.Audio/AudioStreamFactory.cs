@@ -126,14 +126,23 @@ namespace AudioAlign.Audio {
         }
 
         private static void FillPeakStore(AudioTrack audioTrack, bool fileSupport, IAudioStream audioInputStream, PeakStore peakStore) {
+            bool peakFileLoaded = false;
+
             // search for existing peakfile
             if (audioTrack.HasPeakFile && fileSupport) {
                 // load peakfile from disk
-                peakStore.ReadFrom(File.OpenRead(audioTrack.PeakFile.FullName));
-                peakStore.CalculateScaledData(8, 6);
+                try {
+                    peakStore.ReadFrom(File.OpenRead(audioTrack.PeakFile.FullName), audioTrack.FileInfo.LastWriteTimeUtc);
+                    peakStore.CalculateScaledData(8, 6);
+                    peakFileLoaded = true;
+                }
+                catch (Exception e) {
+                    Console.WriteLine("peakfile read failed: " + e.Message);
+                }
             }
+
             // generate peakfile
-            else {
+            if(!peakFileLoaded) {
                 int channels = peakStore.Channels;
                 byte[] buffer = new byte[65536 * audioInputStream.SampleBlockSize];
                 float[] min = new float[channels];
@@ -216,7 +225,7 @@ namespace AudioAlign.Audio {
                     // write peakfile to disk
                     try {
                         FileStream peakOutputFile = File.OpenWrite(audioTrack.PeakFile.FullName);
-                        peakStore.StoreTo(peakOutputFile);
+                        peakStore.StoreTo(peakOutputFile, audioTrack.FileInfo.LastWriteTimeUtc);
                         peakOutputFile.Close();
                     }
                     catch (UnauthorizedAccessException e) {
