@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Exocortex.DSP;
 
 namespace AudioAlign.Audio {
     public static class FFTUtil {
@@ -112,10 +111,6 @@ namespace AudioAlign.Audio {
                 y++;
             }
             return peak;
-        }
-
-        public static void FFT(float[] values) {
-            Fourier.RFFT(values, FourierDirection.Forward);
         }
 
         /// <summary>

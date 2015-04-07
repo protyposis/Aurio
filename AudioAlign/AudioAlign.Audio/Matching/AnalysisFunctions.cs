@@ -92,14 +92,18 @@ namespace AudioAlign.Audio.Matching {
                 windowFunction = WindowUtil.GetFunction(WindowType.Hann, fftSize);
             }
 
+            var fft = new PFFFT.PFFFT(fftSize, PFFFT.Transform.Real);
+
             int blocks = (samples - fftSize) / hopSize;
             for (int block = 0; block < blocks; block++) {
                 Array.Copy(xF, block * hopSize, buffer, 0, buffer.Length);
-                FrequencyDistributionBlockProcess(buffer, xSum);
+                FrequencyDistributionBlockProcess(buffer, xSum, fft);
 
                 Array.Copy(yF, block * hopSize, buffer, 0, buffer.Length);
-                FrequencyDistributionBlockProcess(buffer, ySum);
+                FrequencyDistributionBlockProcess(buffer, ySum, fft);
             }
+
+            fft.Dispose();
 
             // remove DC offset
             xSum[0] = 0;
@@ -116,9 +120,9 @@ namespace AudioAlign.Audio.Matching {
             return 1 - result;
         }
 
-        private static void FrequencyDistributionBlockProcess(float[] buffer, double[] target) {
+        private static void FrequencyDistributionBlockProcess(float[] buffer, double[] target, PFFFT.PFFFT fft) {
             windowFunction.Apply(buffer);
-            FFTUtil.FFT(buffer);
+            fft.Forward(buffer);
             for (int i = 0; i < buffer.Length; i += 2) {
                 buffer[i / 2] = FFTUtil.CalculateMagnitude(buffer[i], buffer[i + 1]) / buffer.Length * 2;
             }
