@@ -85,7 +85,7 @@ namespace AudioAlign.Test.FFT {
 
             FFTLibrary fftLib = (FFTLibrary)fftLibComboBox.SelectedValue;
             if (fftLib == FFTLibrary.ExocortexDSP) {
-                FFTUtil.FFT(fftIO);
+                Fourier.RFFT(fftIO, FourierDirection.Forward);
             }
             else if (fftLib == FFTLibrary.FFTW) {
                 FFTW.FFTW fftw = new FFTW.FFTW(fftIO.Length);
