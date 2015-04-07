@@ -16,12 +16,12 @@ namespace AudioAlign.Audio {
         private int inputBufferFillLevel;
         private float[] outputBuffer;
         private WindowFunction windowFunction;
-        private FFTW.FFTW fftw;
+        private PFFFT.PFFFT fft;
         private float windowFunctionNormalizationDecibelOffset;
 
         public FFTAnalyzer(int windowSize) {
             WindowSize = windowSize;
-            fftw = new FFTW.FFTW(windowSize);
+            fft = new PFFFT.PFFFT(windowSize, PFFFT.Transform.Real);
             windowFunctionNormalizationDecibelOffset = 0;
         }
 
@@ -61,13 +61,13 @@ namespace AudioAlign.Audio {
             }
             else {
                 SineGeneratorStream sine = new SineGeneratorStream(1024, 16, new TimeSpan(0, 0, 1));
-                float[] input = new float[512];
+                float[] input = new float[WindowSize];
                 float[] output = new float[input.Length / 2];
                 WindowFunction wf = WindowUtil.GetFunction(windowFunction.Type, input.Length);
                 
                 sine.Read(input, 0, input.Length);
                 wf.Apply(input);
-                fftw.Execute(input);
+                fft.Forward(input);
                 int maxIndex = FFTUtil.Results(input, output);
                 float maxValue = output[maxIndex];
                 windowFunctionNormalizationDecibelOffset = 1f - maxValue;
@@ -108,7 +108,7 @@ namespace AudioAlign.Audio {
             if (WindowFunction != null) {
                 WindowFunction.Apply(inputBuffer);
             }
-            fftw.Execute(inputBuffer);
+            fft.Forward(inputBuffer);
             FFTUtil.Results(inputBuffer, outputBuffer, windowFunctionNormalizationDecibelOffset);
             OnWindowAnalyzed();
         }

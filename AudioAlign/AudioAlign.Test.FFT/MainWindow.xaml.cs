@@ -85,11 +85,15 @@ namespace AudioAlign.Test.FFT {
 
             FFTLibrary fftLib = (FFTLibrary)fftLibComboBox.SelectedValue;
             if (fftLib == FFTLibrary.ExocortexDSP) {
-                FFTUtil.FFT(fftIO);
+                Fourier.RFFT(fftIO, FourierDirection.Forward);
             }
             else if (fftLib == FFTLibrary.FFTW) {
                 FFTW.FFTW fftw = new FFTW.FFTW(fftIO.Length);
                 fftw.Execute(fftIO);
+            }
+            else if (fftLib == FFTLibrary.PFFFT) {
+                PFFFT.PFFFT pffft = new PFFFT.PFFFT(fftIO.Length, PFFFT.Transform.Real);
+                pffft.Forward(fftIO, fftIO);
             }
 
             //// convert real input to complex input with im part set to zero

@@ -175,6 +175,10 @@
       <Project>{880F644B-5370-47D6-A4B6-F98338073631}</Project>
       <Name>AudioAlign.FFTW</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AudioAlign.PFFFT\AudioAlign.PFFFT.csproj">
+      <Project>{3960f81d-5aea-4f36-a26c-f295dff3fcb6}</Project>
+      <Name>AudioAlign.PFFFT</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AudioAlign.WaveControls\AudioAlign.WaveControls.csproj">
       <Project>{FD0C6CC5-B509-4441-9AA2-E8B34BAD9F95}</Project>
       <Name>AudioAlign.WaveControls</Name>

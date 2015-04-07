@@ -12,7 +12,7 @@ namespace AudioAlign.Audio.Matching {
 
         private WindowFunction windowFunction;
         private float[] frameBuffer;
-        private FFTW.FFTW fftw;
+        private PFFFT.PFFFT fft;
         private bool normalizeTo_dB;
 
         // <summary>
@@ -27,7 +27,7 @@ namespace AudioAlign.Audio.Matching {
             : base(stream, windowSize, hopSize) {
                 windowFunction = WindowUtil.GetFunction(windowType, WindowSize);
                 frameBuffer = new float[WindowSize];
-                fftw = new FFTW.FFTW(WindowSize);
+                fft = new PFFFT.PFFFT(WindowSize, PFFFT.Transform.Real);
                 this.normalizeTo_dB = normalizeTo_dB;
         }
 
@@ -47,8 +47,7 @@ namespace AudioAlign.Audio.Matching {
             windowFunction.Apply(frameBuffer);
 
             // do fourier transform
-            //FFTUtil.FFT(frameBuffer);
-            fftw.Execute(frameBuffer);
+            fft.Forward(frameBuffer);
 
             // normalize fourier results
             if (normalizeTo_dB) {
