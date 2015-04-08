@@ -193,16 +193,23 @@ namespace AudioAlign.Audio.Streams {
             // in some cases it can happen that the SRC returns more data than the stream length suggests,
             // this data is cut off here to avoid a stream position that is greater than the stream's length.
             // NOTE max observed overflow: 8 bytes (1 2ch 32bit sample)
-            if (position > Length) {
-                int overflow = (int)(position - Length);
+            long length = Length;
+            if (length == 0) {
+                // This is a special case in which the length suddenly drops to zero, which can happen when reading
+                // from a dynamic source (e.g. a mixer). In this case no valid overflow can be calculated, so just
+                // return the read bytes.
+                return outputLengthGenerated;
+            }
+            else if (position > length) {
+                int overflow = (int)(position - length);
                 // The resampler is expected to return a few samples too much, and they can just be thrown away
                 // http://comments.gmane.org/gmane.comp.audio.src.general/168
                 Debug.WriteLine("ResamplingStream overflow: {0} bytes cut off", overflow);
                 position -= overflow;
                 return outputLengthGenerated - overflow;
             }
-            else if (position < Length && inputLengthUsed == 0 && outputLengthGenerated == 0 && endOfStream) {
-                int underflow = (int)(Length - position);
+            else if (position < length && inputLengthUsed == 0 && outputLengthGenerated == 0 && endOfStream) {
+                int underflow = (int)(length - position);
                 if (count < underflow) {
                     underflow = count;
                 }
