@@ -243,8 +243,14 @@ namespace AudioAlign.Audio {
                     audioMixer.UpdateLength();
                 });
 
+            // Upmix mono inputs to dual channel stereo to allow channel balancing
+            MonoStream stereoStream = new MonoStream(offsetStream, 2);
+            if (offsetStream.Properties.Channels > 1) {
+                stereoStream.Downmix = false;
+            }
+
             // control the track phase
-            PhaseInversionStream phaseInversion = new PhaseInversionStream(offsetStream) {
+            PhaseInversionStream phaseInversion = new PhaseInversionStream(stereoStream) {
                 Invert = audioTrack.InvertedPhase
             };
 
