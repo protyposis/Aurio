@@ -9,8 +9,6 @@ namespace AudioAlign.Audio.Streams {
     public class TimeWarpStream : AbstractAudioStreamWrapper {
 
         private TimeWarpCollection mappings;
-        private ByteTimeWarp mappingAlpha;
-        private ByteTimeWarp mappingOmega;
         private ByteTimeWarpCollection byteMappings;
         private long length;
         private long position;
@@ -19,8 +17,6 @@ namespace AudioAlign.Audio.Streams {
 
         public TimeWarpStream(IAudioStream sourceStream)
             : base(sourceStream) {
-                mappingAlpha = new ByteTimeWarp { From = 0, To = 0 };
-                mappingOmega = new ByteTimeWarp { From = sourceStream.Length, To = sourceStream.Length };
                 byteMappings = new ByteTimeWarpCollection(0);
                 Mappings = new TimeWarpCollection();
                 length = sourceStream.Length;
@@ -47,6 +43,9 @@ namespace AudioAlign.Audio.Streams {
         }
 
         private void mappings_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+            var alpha = new ByteTimeWarp { From = 0, To = 0 };
+            var omega = new ByteTimeWarp { From = sourceStream.Length, To = sourceStream.Length };
+
             if (mappings.Count > 0) {
                 // Convert time mappings to byte mappings
                 // This is the place where the TimeWarps and ByteTimeWarps are kept in sync!!
@@ -55,42 +54,44 @@ namespace AudioAlign.Audio.Streams {
                     byteMappings.Add(ByteTimeWarp.Convert(mapping, Properties));
                 }
 
-                ByteTimeWarp last = byteMappings.Last();
-                if (last.From < length) {
-                    mappingOmega = new ByteTimeWarp { From = length, To = byteMappings.TranslateSourceToWarpedPosition(length) };
+                var first = byteMappings.Alpha;
+                if (first.From > alpha.From) {
+                    // The first mapping is not at the start of the stream, insert start of stream alpha
+                    byteMappings.Insert(0, alpha);
                 }
-                else {
-                    mappingOmega = byteMappings.Last();
+
+                var last = byteMappings.Omega;
+                if (last.From < omega.From) {
+                    // The last mapping is not at the end of the stream, insert EOS omega
+                    omega.To += last.Offset;
+                    byteMappings.Insert(byteMappings.Count, omega);
                 }
             }
-            else if (e != null && e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset) {
-                mappingOmega = new ByteTimeWarp { From = sourceStream.Length, To = sourceStream.Length };
+            else {
+                byteMappings.Add(alpha);
+                byteMappings.Add(omega);
             }
-            if (position > mappingOmega.To) {
-                Position = mappingOmega.To;
+
+            if (position > byteMappings.Omega.To) {
+                Position = byteMappings.Omega.To;
             }
+
             ResetStream();
         }
 
-        private void GetBoundingMappingsForWarpedPosition(long warpedPosition,
-                out ByteTimeWarp lowerMapping, out ByteTimeWarp upperMapping) {
-            byteMappings.GetBoundingMappingsForWarpedPosition(warpedPosition, out lowerMapping, out upperMapping);
-            lowerMapping = lowerMapping ?? mappingAlpha;
-            upperMapping = upperMapping ?? mappingOmega;
-        }
-
         private void ResetStream(bool hardReset) {
-            if (position > mappingOmega.To) {
+            if (position > byteMappings.Omega.To) {
                 throw new Exception("position beyond length");
             }
 
-            length = mappingOmega.To;
+            length = byteMappings.Omega.To;
 
-            ByteTimeWarp mL, mH;
-            GetBoundingMappingsForWarpedPosition(position, out mL, out mH);
+            byteMappings.SetWarpedPosition(position);
+            ByteTimeWarp mL = byteMappings.Lower;
+            ByteTimeWarp mH = byteMappings.Upper;
 
-            
-            if (cropStream == null || cropStream.Begin != mL.From || cropStream.End != mH.From || resamplingStream.Length != mappingOmega.To) {
+
+            if (cropStream == null || cropStream.Begin != mL.From || cropStream.End != mH.From || resamplingStream.Length != byteMappings.Omega.To) {
                 // mapping has changed, stream subsection must be renewed
                 if (hardReset) {
                     cropStream = new CropStream(sourceStream, mL.From, mH.From);
@@ -133,17 +134,16 @@ namespace AudioAlign.Audio.Streams {
                     throw new ArgumentException("invalid position");
                 }
 
-                ByteTimeWarp mL, mH;
-                GetBoundingMappingsForWarpedPosition(value, out mL, out mH);
+                byteMappings.SetWarpedPosition(value);
 
-                if (position < mL.To || position >= mH.To) {
+                if (position < byteMappings.Lower.To || position >= byteMappings.Upper.To) {
                     // new stream subsection required
                     position = value;
                     ResetStream(false);
                 }
                 else {
                     position = value;
-                    resamplingStream.Position = position - mL.To;
+                    resamplingStream.Position = position - byteMappings.Lower.To;
                 }
             }
         }
@@ -209,72 +209,55 @@ namespace AudioAlign.Audio.Streams {
         /// </summary>
         private class ByteTimeWarpCollection : List<ByteTimeWarp> {
 
+            private int currentIndex = 0;
+
             public ByteTimeWarpCollection(int size) : base(size) { }
 
-            public void GetBoundingMappingsForSourcePosition(long sourcePosition,
-                out ByteTimeWarp lowerMapping, out ByteTimeWarp upperMapping) {
-                lowerMapping = null;
-                upperMapping = null;
-                for (int x = 0; x < Count; x++) {
-                    if (sourcePosition < this[x].From) {
-                        if (x == 0) {
-                            upperMapping = this[x];
-                            break;
-                        }
-                        else {
-                            lowerMapping = this[x - 1];
-                            upperMapping = this[x];
-                            break;
-                        }
-                    }
-                    else if (x == Count - 1) {
-                        lowerMapping = this[x];
-                        break;
-                    }
-                }
+            public ByteTimeWarp Alpha {
+                get { return this.First(); }
             }
 
-            public void GetBoundingMappingsForWarpedPosition(long warpedPosition,
-                    out ByteTimeWarp lowerMapping, out ByteTimeWarp upperMapping) {
-                lowerMapping = null;
-                upperMapping = null;
-                for (int x = 0; x < Count; x++) {
-                    if (warpedPosition < this[x].To) {
-                        if (x == 0) {
-                            upperMapping = this[x];
-                            break;
-                        }
-                        else {
-                            lowerMapping = this[x - 1];
-                            upperMapping = this[x];
-                            break;
-                        }
-                    }
-                    else if (x == Count - 1) {
-                        lowerMapping = this[x];
-                        break;
-                    }
-                }
+            public ByteTimeWarp Omega {
+                get { return this.Last(); }
             }
 
-            public long TranslateSourceToWarpedPosition(long sourcePosition) {
-                ByteTimeWarp lowerMapping;
-                ByteTimeWarp upperMapping;
-                GetBoundingMappingsForSourcePosition(sourcePosition, out lowerMapping, out upperMapping);
+            public int CurrentIndex {
+                get { return currentIndex; }
+                set { currentIndex = value; }
+            }
 
-                if (lowerMapping == null) {
-                    // position is before the first mapping -> linear adjust
-                    return sourcePosition + upperMapping.Offset;
+            public ByteTimeWarp Lower {
+                get { return this[currentIndex]; }
+            }
+
+            public ByteTimeWarp Upper {
+                get { return this[currentIndex + 1]; }
+            }
+
+            public bool Next() {
+                if (currentIndex < Count - 2) {
+                    currentIndex++;
+                    return true;
                 }
-                else if (upperMapping == null) {
-                    // position is after the last mapping -> linear adjust
-                    return sourcePosition + lowerMapping.Offset;
+
+                return false;
+            }
+
+            public void SetWarpedPosition(long warpedPosition) {
+                if (warpedPosition < Alpha.To || warpedPosition > Omega.To) {
+                    throw new ArgumentOutOfRangeException("invalid warped position " + warpedPosition);
                 }
-                else {
-                    return lowerMapping.To +
-                        (long)((sourcePosition - lowerMapping.From) *
-                        ByteTimeWarp.CalculateSampleRateRatio(lowerMapping, upperMapping));
+
+                // Either the warpedPosition falls into an interval
+                for (currentIndex = 0; currentIndex < Count - 1; currentIndex++) {
+                    if (warpedPosition >= Lower.To && warpedPosition < Upper.To) {
+                        return;
+                    }
                 }
+
+                // Or it is the EOS position so it isn't caught by the loop above
+                // but it is still considered part of the last interval that the loop
+                // stopped at.
             }
         }
     }
