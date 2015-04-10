@@ -32,6 +32,10 @@ namespace AudioAlign.Audio.Streams {
                 Add(timeWarp);
             }
             rangeAdding = false;
+
+            Sort();
+            ValidateMappings();
+
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(
                 NotifyCollectionChangedAction.Add, new List<TimeWarp>(range)));
         }

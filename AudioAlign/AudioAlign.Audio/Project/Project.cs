@@ -260,6 +260,7 @@ namespace AudioAlign.Audio.Project {
                             empty = xml.IsEmptyElement;
                             xml.ReadStartElement("timewarps");
                             if (!empty) {
+                                var timeWarps = new List<TimeWarp>();
                                 while (xml.IsStartElement("timewarp")) {
                                     TimeWarp warp = new TimeWarp();
 
@@ -272,8 +273,9 @@ namespace AudioAlign.Audio.Project {
                                     xml.ReadStartElement();
                                     //xml.ReadEndElement(); // not necessary since timewarp is an empty element
 
-                                    track.TimeWarps.Add(warp);
+                                    timeWarps.Add(warp);
                                 }
+                                track.TimeWarps.AddRange(timeWarps);
                                 xml.ReadEndElement(); // timewarps
                             }
                         }
