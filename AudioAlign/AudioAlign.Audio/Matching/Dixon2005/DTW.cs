@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
+using AudioAlign.Audio.DataStructures;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class DTW {
@@ -33,7 +34,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         private int rb2FrameCount;
 
 
-        public delegate void OltwInitDelegate(int windowSize, IMatrix cellCostMatrix, IMatrix totalCostMatrix);
+        public delegate void OltwInitDelegate(int windowSize, IMatrix<double> cellCostMatrix, IMatrix<double> totalCostMatrix);
         public event OltwInitDelegate OltwInit;
 
         public delegate void OltwProgressDelegate(int i, int j, int minI, int minJ, bool force);
@@ -99,8 +100,9 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
                 deltaM = 1d;
             }
 
-            IMatrix totalCostMatrix = new PatchMatrix(double.PositiveInfinity);
-            IMatrix cellCostMatrix = new PatchMatrix(double.PositiveInfinity);
+            // NOTE the SparseMatrix is NOT USABLE for DTW -> OutOfMemoryException (1.3GB RAM) at a densely filled matrix of ~4000x3000
+            IMatrix<double> totalCostMatrix = new PatchMatrix<double>(double.PositiveInfinity);
+            IMatrix<double> cellCostMatrix = new PatchMatrix<double>(double.PositiveInfinity);
 
             // init matrix
             // NOTE do not explicitely init the PatchMatrix, otherwise the sparse matrix characteristic would 
@@ -190,7 +192,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return stream;
         }
 
-        public static List<Pair> OptimalWarpingPath(IMatrix totalCostMatrix, int i, int j) {
+        public static List<Pair> OptimalWarpingPath(IMatrix<double> totalCostMatrix, int i, int j) {
             List<Pair> path = new List<Pair>();
             path.Add(new Pair(i, j));
             while (i > 0 || j > 0) {
@@ -219,7 +221,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return path;
         }
 
-        public static List<Pair> OptimalWarpingPath(IMatrix totalCostMatrix) {
+        public static List<Pair> OptimalWarpingPath(IMatrix<double> totalCostMatrix) {
             return OptimalWarpingPath(totalCostMatrix, totalCostMatrix.LengthX - 1, totalCostMatrix.LengthY - 1);
         }
 
@@ -313,7 +315,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return pathTimes;
         }
 
-        protected void FireOltwInit(int windowSize, IMatrix cellCostMatrix, IMatrix totalCostMatrix) {
+        protected void FireOltwInit(int windowSize, IMatrix<double> cellCostMatrix, IMatrix<double> totalCostMatrix) {
             if (OltwInit != null) {
                 OltwInit(windowSize, cellCostMatrix, totalCostMatrix);
             }
