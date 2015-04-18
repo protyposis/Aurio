@@ -140,7 +140,7 @@
     <Compile Include="Matching\Dixon2005\DTW.cs" />
     <Compile Include="Matching\Dixon2005\FrameReader.cs" />
     <Compile Include="Matching\Dixon2005\OLTW.cs" />
-    <Compile Include="Matching\Dixon2005\RingBuffer.cs" />
+    <Compile Include="DataStructures\RingBuffer.cs" />
     <Compile Include="Matching\Dixon2005\SparseMatrix.cs" />
     <Compile Include="Matching\Dixon2005\PatchMatrix.cs" />
     <Compile Include="Matching\Dixon2005\TimeWarpMode.cs" />
