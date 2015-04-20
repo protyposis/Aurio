@@ -1,4 +1,4 @@
-﻿using AudioAlign.Audio.Matching.Graph;
+﻿using AudioAlign.Audio.DataStructures.Graph;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
