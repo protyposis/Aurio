@@ -96,7 +96,7 @@ namespace AudioAlign.Audio.DataStructures.Graph {
         /// <summary>
         /// Returns true if the graph is connected (if there's a connection between all vertex pairs), else false.
         /// </summary>
-        public bool isConnected {
+        public bool IsConnected {
             get { return GetConnectedComponents().Count == 1; }
         }
 
@@ -150,7 +150,7 @@ namespace AudioAlign.Audio.DataStructures.Graph {
         }
 
         public UndirectedGraph<TVertex, TWeight> GetMinimalSpanningTree() {
-            if (!isConnected) {
+            if (!IsConnected) {
                 throw new Exception("cannot determine the MST in a graph that isn't fully connected");
             }
 
