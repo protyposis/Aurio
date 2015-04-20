@@ -20,8 +20,7 @@ namespace AudioAlign.Audio.DataStructures {
         public RingBuffer(int size) {
             this.buffer = new T[size];
             this.bufferSize = size;
-            this.bufferStart = 0;
-            this.bufferFillLevel = 0;
+            Clear();
         }
 
         /// <summary>
@@ -63,6 +62,14 @@ namespace AudioAlign.Audio.DataStructures {
                 int realIndex = (index + bufferStart + (bufferSize - bufferFillLevel)) % bufferSize;
                 return buffer[realIndex];
             }
+        }
+
+        /// <summary>
+        /// Clears the contents of the ring buffer.
+        /// </summary>
+        public void Clear() {
+            bufferStart = 0;
+            bufferFillLevel = 0;
         }
     }
 }
