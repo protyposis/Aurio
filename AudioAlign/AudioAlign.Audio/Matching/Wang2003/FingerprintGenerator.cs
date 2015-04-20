@@ -115,6 +115,20 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             }
         }
 
+        /// <summary>
+        /// Local peak picking works as follows: 
+        /// A local peak is always a highest value surrounded by lower values. 
+        /// In case of a plateu, the index if the first plateu value marks the peak.
+        /// 
+        ///      |      |    |
+        ///      |      |    |
+        ///      v      |    |
+        ///      ___    |    |
+        ///     /   \   v    v
+        ///   _/     \       /\_
+        ///  /        \_/\  /   \
+        /// /             \/     \
+        /// </summary>
         private void FindLocalMaxima(float[] data, List<Peak> peakList) {
             float val;
             float lastVal = float.MinValue;
