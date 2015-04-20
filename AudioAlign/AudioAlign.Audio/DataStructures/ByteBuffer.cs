@@ -59,10 +59,17 @@ namespace AudioAlign.Audio.DataStructures {
         }
 
         /// <summary>
-        /// Gets the numvber of bytes left in the buffer to be read.
+        /// Gets the number of bytes left in the buffer to be read.
         /// </summary>
         public int Count {
             get { return count; }
+        }
+
+        /// <summary>
+        /// Gets the total length of data in the buffer, indenpendent of the read offset.
+        /// </summary>
+        public int Length {
+            get { return offset + count; }
         }
 
         /// <summary>
