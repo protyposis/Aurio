@@ -99,6 +99,10 @@ namespace AudioAlign.WaveControls {
             }
         }
 
+        public int[] GetGradientArgbArray(int steps) {
+            return GetGradient(steps).Select(c => ColorGradient.ColorToArgb(c)).ToArray();
+        }
+
         /// <summary>
         /// Returns a linearly interpolated color between the two given colors. The ratio can be between 0 
         /// and 1 and specifies how much of each color will be taken into the new color. A ratio of 0 means
@@ -120,6 +124,10 @@ namespace AudioAlign.WaveControls {
                 (byte)Math.Round(c1.R * r1 + c2.R * r2),
                 (byte)Math.Round(c1.G * r1 + c2.G * r2),
                 (byte)Math.Round(c1.B * r1 + c2.B * r2));
+        }
+
+        public static int ColorToArgb(Color c) {
+            return c.A << 24 | c.R << 16 | c.G << 8 | c.B;
         }
     }
 }

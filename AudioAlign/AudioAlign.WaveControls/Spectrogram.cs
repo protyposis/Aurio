@@ -85,10 +85,15 @@ namespace AudioAlign.WaveControls {
             gradient.AddStop(Colors.DarkOrange, 0.7f);
             gradient.AddStop(Colors.Yellow, 0.9f);
             gradient.AddStop(Colors.White, 1);
-            colorPalette = gradient.GetGradient(1024).Select(c => GetColorValue(c)).ToArray();
+            colorPalette = gradient.GetGradientArgbArray(1024);
 
             ClipToBounds = true;
             mode = Mode;
+        }
+
+        public int[] ColorPalette {
+            get { return colorPalette; }
+            set { colorPalette = value; }
         }
 
         protected override void OnRender(System.Windows.Media.DrawingContext drawingContext) {
@@ -193,10 +198,6 @@ namespace AudioAlign.WaveControls {
                 }
             }
             InvalidateVisual();
-        }
-
-        private static int GetColorValue(Color c) {
-            return c.A << 24 | c.R << 16 | c.G << 8 | c.B;
         }
 
         private static void CopyPixels(WriteableBitmap src, WriteableBitmap dest) {
