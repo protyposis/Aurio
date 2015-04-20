@@ -14,7 +14,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         private int windowSize = 512;
         private int hopSize = 256;
 
-        private int frameSmoothingLength = 3; // the width in samples of the FFT spectrum to average over
+        private int spectrumSmoothingLength = 3; // the width in samples of the FFT spectrum to average over
         private int peaksPerFrame = 3;
         private int peakFanout = 5;
 
@@ -53,8 +53,8 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 //spectrumSmoother.Clear();
                 //for (int i = 0; i < frameBuffer.Length; i++) {
                 //    var avg = spectrumSmoother.Add(frameBuffer[i]);
-                //    if (i >= frameSmoothingLength) {
-                //        smoothedSpectrum[i - frameSmoothingLength] = avg;
+                //    if (i >= spectrumSmoothingLength) {
+                //        smoothedSpectrum[i - spectrumSmoothingLength] = avg;
                 //    }
                 //}
 
