@@ -138,7 +138,7 @@ namespace AudioAlign.WaveControls {
                         color = colorPalette[0];
                     }
                     else {
-                        color = colorPalette[colorPalette.Length - 1 + (int)(factor * values[x])];
+                        color = colorPalette[colorPalette.Length - 1 + (int)(factor * value)];
                     }
                     pixelColumn[pixelColumn.Length - 1 - x] = color;
                 }
