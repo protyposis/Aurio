@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using AudioAlign.Audio.DataStructures;
 
 namespace AudioAlign.Audio.Streams {
     public class MonoStream : AbstractAudioStreamWrapper {
 
         private AudioProperties properties;
-        private byte[] sourceBuffer;
+        private ByteBuffer sourceBuffer;
         private bool downmix;
 
         /// <summary>
@@ -32,7 +33,7 @@ namespace AudioAlign.Audio.Streams {
 
             properties = new AudioProperties(outputChannels, sourceStream.Properties.SampleRate, 
                 sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
-            sourceBuffer = new byte[0];
+            sourceBuffer = new ByteBuffer();
             downmix = true;
         }
 
@@ -71,7 +72,6 @@ namespace AudioAlign.Audio.Streams {
             int sourceChannels = sourceStream.Properties.Channels;
             int targetChannels = Properties.Channels;
 
-            // dynamically increase buffer size
             /* NOTE: The buffer size must be at least of a size that can hold as much data as is required
              *       to generate the number of requested bytes. For a stereo to mono conversion, twice the
              *       amount of bytes needs to be read in order to generate the requested number of bytes.
@@ -80,14 +80,8 @@ namespace AudioAlign.Audio.Streams {
              *       a 32bit stereo stream will result in zero bytes returned and it also could not be converted
              *       from stereo to mono (since 1 single sample isn't "stereo"). */
             int bufferSize = count * sourceChannels / targetChannels;
-            if (sourceBuffer.Length < bufferSize) {
-                int oldSize = sourceBuffer.Length;
-                sourceBuffer = new byte[bufferSize];
-                Debug.WriteLine("MonoStream: buffer size increased: " + oldSize + " -> " + bufferSize);
-            }
-
             int sourceBytesToRead = bufferSize - bufferSize % sourceStream.SampleBlockSize;
-            int sourceBytesRead = sourceStream.Read(sourceBuffer, 0, sourceBytesToRead);
+            int sourceBytesRead = sourceBuffer.FillIfEmpty(sourceStream, sourceBytesToRead);
 
             int sourceFloats = sourceBytesRead / 4;
             int sourceIndex = 0;
@@ -95,7 +89,7 @@ namespace AudioAlign.Audio.Streams {
             float targetSample;
 
             unsafe {
-                fixed (byte* sourceByteBuffer = &sourceBuffer[0], targetByteBuffer = &buffer[offset]) {
+                fixed (byte* sourceByteBuffer = &sourceBuffer.Data[0], targetByteBuffer = &buffer[offset]) {
                     float* sourceFloatBuffer = (float*)sourceByteBuffer;
                     float* targetFloatBuffer = (float*)targetByteBuffer;
 
@@ -113,6 +107,8 @@ namespace AudioAlign.Audio.Streams {
                     }
                 }
             }
+
+            sourceBuffer.Clear();
 
             return sourceBytesRead / sourceChannels * targetChannels;
         }

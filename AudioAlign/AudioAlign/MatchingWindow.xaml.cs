@@ -20,11 +20,12 @@ using AudioAlign.Audio.Matching;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Interop;
-using AudioAlign.Audio.Matching.Graph;
+using AudioAlign.Audio.DataStructures.Graph;
 using AudioAlign.Audio.Matching.Dixon2005;
 using AudioAlign.Audio.Streams;
 using Match = AudioAlign.Audio.Matching.Match;
 using System.IO;
+using AudioAlign.Audio.DataStructures.Matrix;
 
 namespace AudioAlign {
     /// <summary>
@@ -465,7 +466,7 @@ namespace AudioAlign {
                     dtwPathViewer.Show();
                 });
 
-                dtw.OltwInit += new DTW.OltwInitDelegate(delegate(int windowSize, IMatrix cellCostMatrix, IMatrix totalCostMatrix) {
+                dtw.OltwInit += new DTW.OltwInitDelegate(delegate(int windowSize, IMatrix<double> cellCostMatrix, IMatrix<double> totalCostMatrix) {
                     dtwPathViewer.Dispatcher.BeginInvoke((Action)delegate {
                         dtwPathViewer.DtwPath.Init(windowSize, cellCostMatrix, totalCostMatrix);
                     });

@@ -5,7 +5,7 @@ using System.Text;
 using AudioAlign.Audio.Project;
 using System.Diagnostics;
 using AudioAlign.Audio.Streams;
-using AudioAlign.Audio.Matching.Graph;
+using AudioAlign.Audio.DataStructures.Graph;
 
 namespace AudioAlign.Audio.Matching {
     public class MatchProcessor {

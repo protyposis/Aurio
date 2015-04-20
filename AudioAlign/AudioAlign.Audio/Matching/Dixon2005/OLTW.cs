@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
+using AudioAlign.Audio.DataStructures;
+using AudioAlign.Audio.DataStructures.Matrix;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class OLTW : DTW {
@@ -24,7 +26,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         private BlockingCollection<float[]> stream1FrameQueue;
         private BlockingCollection<float[]> stream2FrameQueue;
 
-        private IMatrix totalCostMatrix, cellCostMatrix;
+        private IMatrix<double> totalCostMatrix, cellCostMatrix;
         private RingBuffer<float[]> rb1;
         private int rb1FrameCount;
         private RingBuffer<float[]> rb2;
@@ -49,8 +51,8 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             s2 = PrepareStream(s2);
 
             int searchWidth = (int)(this.searchWidth.TotalSeconds * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE));
-            totalCostMatrix = new PatchMatrix(double.PositiveInfinity);
-            cellCostMatrix = new PatchMatrix(double.PositiveInfinity);
+            totalCostMatrix = new PatchMatrix<double>(double.PositiveInfinity);
+            cellCostMatrix = new PatchMatrix<double>(double.PositiveInfinity);
             rb1 = new RingBuffer<float[]>(searchWidth);
             rb1FrameCount = 0;
             rb2 = new RingBuffer<float[]>(searchWidth);

@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
+using AudioAlign.Audio.DataStructures.Matrix;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class OLTW2 : DTW {
@@ -23,8 +24,8 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
         }
 
         private List<float[]> s1Frames, s2Frames;
-        private IMatrix totalCostMatrix;
-        private IMatrix cellCostMatrix;
+        private IMatrix<double> totalCostMatrix;
+        private IMatrix<double> cellCostMatrix;
         private int[] pathLengthRow, pathLengthCol;
 
         public OLTW2(TimeSpan searchWidth, ProgressMonitor progressMonitor)
@@ -69,8 +70,8 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             int c = (int)(this.searchWidth.TotalSeconds * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE));
             c = Math.Min(c, Math.Min(s1FrameCount, s2FrameCount)); // reduce c to the shortest stream if necessary
 
-            totalCostMatrix = new PatchMatrix(double.PositiveInfinity, 100);
-            cellCostMatrix = new PatchMatrix(double.PositiveInfinity, 100);
+            totalCostMatrix = new PatchMatrix<double>(double.PositiveInfinity, 100);
+            cellCostMatrix = new PatchMatrix<double>(double.PositiveInfinity, 100);
 
             int i = 0, j = 0; // position of the "head" in each step
             int minI, minJ; // position of the cell with the min path cost in each step
@@ -213,7 +214,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return 1 + i + j;
         }
 
-        private void DebugPrintMatrix(IMatrix matrix, int size) {
+        private void DebugPrintMatrix(IMatrix<double> matrix, int size) {
             for (int i = 0; i < Math.Min(size, matrix.LengthX); i++) {
                 for (int j = 0; j < Math.Min(size, matrix.LengthY); j++) {
                     Debug.Write(String.Format("{0:000000.00} ", matrix[i, j]));
@@ -230,7 +231,7 @@ namespace AudioAlign.Audio.Matching.Dixon2005 {
             return min;
         }
 
-        protected void DebugPrintMatrixHeadInfo(IMatrix matrix, int i, int j, int c) {
+        protected void DebugPrintMatrixHeadInfo(IMatrix<double> matrix, int i, int j, int c) {
             
             int xI = -1;
             double xV = double.PositiveInfinity;

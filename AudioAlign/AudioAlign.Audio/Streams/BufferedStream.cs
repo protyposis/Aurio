@@ -5,15 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using AudioAlign.Audio.DataStructures;
 
 namespace AudioAlign.Audio.Streams {
     public class BufferedStream : AbstractAudioStreamWrapper {
 
-        private class Buffer {
-            /// <summary>
-            /// The data storage that the buffer can use.
-            /// </summary>
-            public byte[] data;
+        private class Buffer : ByteBuffer {
 
             /// <summary>
             /// The position in the source stream where the buffered data starts.
@@ -21,29 +18,22 @@ namespace AudioAlign.Audio.Streams {
             public long streamPosition = 0;
 
             /// <summary>
-            /// The length of the valid data that has been buffered.
-            /// </summary>
-            public long validDataLength = 0;
-
-            /// <summary>
             /// Tells if the buffer is being filled. If it is locked, data is being written to the buffer
             /// and no data should be read.
             /// </summary>
             public bool locked = false;
 
-            /// <summary>
-            /// Returs true if the buffer contains valid data.
-            /// </summary>
-            public bool IsFilled {
-                get { return validDataLength > 0; }
+            public Buffer(int size)
+                : base(size) {
+                //
             }
 
             /// <summary>
             /// Clears the buffer and makes it empty.
             /// </summary>
-            public void Clear() {
+            public new void Clear() {
+                base.Clear();
                 streamPosition = 0;
-                validDataLength = 0;
             }
 
             /// <summary>
@@ -52,7 +42,7 @@ namespace AudioAlign.Audio.Streams {
             /// <param name="position">the position in the source stream that should be checked for being buffered</param>
             /// <returns>true if the position is contained in the buffer, else false</returns>
             public bool Contains(long position) {
-                return position >= streamPosition && position < streamPosition + validDataLength;
+                return position >= streamPosition && position < streamPosition + Offset + Count;
             }
 
             /// <summary>
@@ -62,7 +52,7 @@ namespace AudioAlign.Audio.Streams {
             /// <param name="count">the length of the interval in the source stream that should be checked for being buffered</param>
             /// <returns>true if the interval is contained in the buffer, else false</returns>
             public bool Contains(long position, int count) {
-                return position >= streamPosition && position + count <= streamPosition + validDataLength;
+                return position >= streamPosition && position + count <= streamPosition + Offset + Count;
             }
         }
 
@@ -81,10 +71,10 @@ namespace AudioAlign.Audio.Streams {
         /// (note: required memory will be bufferSize * 2)</param>
         public BufferedStream(IAudioStream sourceStream, int bufferSize, bool doubleBuffered)
             : base(sourceStream) {
-            frontBuffer = new Buffer() { data = new byte[bufferSize] };
+            frontBuffer = new Buffer(bufferSize);
             
             if (doubleBuffered) {
-                backBuffer = new Buffer() { data = new byte[bufferSize] };
+                backBuffer = new Buffer(bufferSize);
             }
 
             position = sourceStream.Position;
@@ -104,23 +94,22 @@ namespace AudioAlign.Audio.Streams {
             if (frontBuffer.Contains(position)) {
                 // read data from buffer
                 long bufferPosition = position - frontBuffer.streamPosition;
-                long bufferCount = count;
-                if (frontBuffer.validDataLength - bufferPosition < count) {
-                    bufferCount = frontBuffer.validDataLength - bufferPosition;
+                if (frontBuffer.Length - bufferPosition < count) {
+                    count = (int)(frontBuffer.Length - bufferPosition);
                 }
-                Array.Copy(frontBuffer.data, bufferPosition, buffer, offset, bufferCount);
-                position += bufferCount;
-                return (int)bufferCount;
+                Array.Copy(frontBuffer.Data, bufferPosition, buffer, offset, count);
+                position += count;
+                return (int)count;
             }
-            else if (doubleBuffered && !backBuffer.locked && backBuffer.IsFilled && backBuffer.Contains(position)) {
+            else if (doubleBuffered && !backBuffer.locked && !backBuffer.Empty && backBuffer.Contains(position)) {
                 // swap buffers (requested data is contained in the back buffer so turn it to the front buffer)
                 CommonUtil.Swap<Buffer>(ref frontBuffer, ref backBuffer);
-                FillBufferAsync(backBuffer, frontBuffer.streamPosition + frontBuffer.validDataLength);
+                FillBufferAsync(backBuffer, frontBuffer.streamPosition + frontBuffer.Length);
             } else {
                 // both buffers empty (happens at start or a position change beyond the buffered area)
                 FillBufferSync(frontBuffer, position);
                 if (doubleBuffered && !backBuffer.locked) {
-                    FillBufferAsync(backBuffer, frontBuffer.streamPosition + frontBuffer.validDataLength);
+                    FillBufferAsync(backBuffer, frontBuffer.streamPosition + frontBuffer.Length);
                 }
             }
 
@@ -130,9 +119,10 @@ namespace AudioAlign.Audio.Streams {
 
         [MethodImpl(MethodImplOptions.Synchronized)] // synchronized because we can only read once at a time from the same source stream
         private void FillBufferSync(Buffer buffer, long position) {
+            buffer.Clear();
             buffer.streamPosition = position;
             sourceStream.Position = position;
-            buffer.validDataLength = StreamUtil.ForceRead(sourceStream, buffer.data, 0, buffer.data.Length);
+            buffer.ForceFill(sourceStream, buffer.Capacity);
         }
 
         private void FillBufferAsync(Buffer buffer, long position) {

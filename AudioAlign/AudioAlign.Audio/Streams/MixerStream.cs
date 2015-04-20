@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using AudioAlign.Audio.DataStructures;
 
 namespace AudioAlign.Audio.Streams {
     public class MixerStream : IAudioStream {
@@ -11,14 +12,14 @@ namespace AudioAlign.Audio.Streams {
         private List<IAudioStream> sourceStreams;
         private long length;
         private long position;
-        private byte[] sourceBuffer;
+        private ByteBuffer sourceBuffer;
 
         public MixerStream(int channels, int sampleRate) {
             properties = new AudioProperties(channels, sampleRate, 32, AudioFormat.IEEE);
             sourceStreams = new List<IAudioStream>();
             length = 0;
             position = 0;
-            sourceBuffer = new byte[0];
+            sourceBuffer = new ByteBuffer();
         }
 
         public void Add(IAudioStream sourceStream) {
@@ -82,17 +83,13 @@ namespace AudioAlign.Audio.Streams {
                 }
 
                 // dynamically increase buffer size
-                if (sourceBuffer.Length < count) {
-                    int oldSize = sourceBuffer.Length;
-                    sourceBuffer = new byte[count];
-                    Debug.WriteLine("MixerStream: buffer size increased: " + oldSize + " -> " + count);
-                }
+                sourceBuffer.ResizeIfTooSmall(count);
 
                 // clear output buffer (because data won't be overwritten, but summed up)
                 Array.Clear(buffer, offset, count);
-                int maxTotalBytesRead = 0;
+                int maxBytesRead = 0;
                 unsafe {
-                    fixed (byte* outputByteBuffer = &buffer[offset], inputByteBuffer = &sourceBuffer[0]) {
+                    fixed (byte* outputByteBuffer = &buffer[offset], inputByteBuffer = &sourceBuffer.Data[0]) {
                         float* outputFloatBuffer = (float*)outputByteBuffer;
                         float* inputFloatBuffer = (float*)inputByteBuffer;
                         foreach (IAudioStream sourceStream in sourceStreams) {
@@ -100,27 +97,23 @@ namespace AudioAlign.Audio.Streams {
                                 continue;
                             }
 
-                            int bytesRead = 0;
-                            int totalBytesRead = 0;
-
                             // try to read requested amount of bytes
-                            while (count - totalBytesRead > 0 && (bytesRead = sourceStream.Read(sourceBuffer, totalBytesRead, count - totalBytesRead)) > 0) {
-                                totalBytesRead += bytesRead;
-                            }
+                            sourceBuffer.Clear();
+                            int bytesRead = sourceBuffer.ForceFill(sourceStream, count);
 
                             // add stream data to output buffer
-                            for (int x = 0; x < totalBytesRead / sizeof(float); x++) {
+                            for (int x = 0; x < bytesRead / sizeof(float); x++) {
                                 outputFloatBuffer[x] += inputFloatBuffer[x];
                             }
 
-                            if (totalBytesRead > maxTotalBytesRead) {
-                                maxTotalBytesRead = totalBytesRead;
+                            if (bytesRead > maxBytesRead) {
+                                maxBytesRead = bytesRead;
                             }
                         }
                     }
                 }
-                position += maxTotalBytesRead;
-                return maxTotalBytesRead;
+                position += maxBytesRead;
+                return maxBytesRead;
             }
         }
 
