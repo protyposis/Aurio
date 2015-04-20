@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using AudioAlign.Audio.DataStructures;
 
 namespace AudioAlign.Audio.Streams {
     public class IeeeStream : AbstractAudioStreamWrapper {
@@ -12,7 +13,7 @@ namespace AudioAlign.Audio.Streams {
 
         private delegate int DReadAndConvert(byte[] buffer, int offset, int count);
         private DReadAndConvert ReadAndConvert;
-        private byte[] sourceBuffer;
+        private ByteBuffer sourceBuffer;
 
 
         public IeeeStream(IAudioStream sourceStream)
@@ -35,7 +36,7 @@ namespace AudioAlign.Audio.Streams {
                 throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
             }
 
-            sourceBuffer = new byte[0];
+            sourceBuffer = new ByteBuffer();
         }
 
         public override AudioProperties Properties {
@@ -60,23 +61,16 @@ namespace AudioAlign.Audio.Streams {
                 return sourceStream.Read(buffer, offset, count);
             }
 
-            // dynamically increase buffer size
-            if (sourceBuffer.Length < count) {
-                int oldSize = sourceBuffer.Length;
-                sourceBuffer = new byte[count];
-                Debug.WriteLine("IeeeStream: buffer size increased: " + oldSize + " -> " + count);
-            }
-
             return ReadAndConvert(buffer, offset, count);
         }
 
         private int ReadPCM16(byte[] buffer, int offset, int count) {
             int sourceBytesToRead = count / SampleBlockSize * sourceStream.SampleBlockSize;
-            int sourceBytesRead = sourceStream.Read(sourceBuffer, 0, sourceBytesToRead);
-            int samples = sourceBytesRead / 2; // #bytes / 2 = #shorts
+            sourceBuffer.FillIfEmpty(sourceStream, sourceBytesToRead);
+            int samples = sourceBuffer.Count / 2; // #bytes / 2 = #shorts
 
             unsafe {
-                fixed (byte* sourceByteBuffer = &sourceBuffer[0], targetByteBuffer = &buffer[offset]) {
+                fixed (byte* sourceByteBuffer = &sourceBuffer.Data[0], targetByteBuffer = &buffer[offset]) {
                     short* sourceShortBuffer = (short*)sourceByteBuffer;
                     float* targetFloatBuffer = (float*)targetByteBuffer;
 
@@ -86,22 +80,26 @@ namespace AudioAlign.Audio.Streams {
                 }
             }
 
+            sourceBuffer.Clear();
+
             return samples * 4;
         }
 
         private int ReadPCM24(byte[] buffer, int offset, int count) {
             int sourceBytesToRead = count / SampleBlockSize * sourceStream.SampleBlockSize;
-            int sourceBytesRead = sourceStream.Read(sourceBuffer, 0, sourceBytesToRead);
-            int samples = sourceBytesRead / 3; // #bytes / 3 = #24bitsamples
+            sourceBuffer.FillIfEmpty(sourceStream, sourceBytesToRead);
+            int samples = sourceBuffer.Count / 3; // #bytes / 3 = #24bitsamples
 
             unsafe {
                 fixed (byte* targetByteBuffer = &buffer[offset]) {
                     float* targetFloatBuffer = (float*)targetByteBuffer;
-                    for (int x = 0; x < sourceBytesRead; x += 3) {
-                        targetFloatBuffer[x / 3] = (sourceBuffer[x] << 8 | sourceBuffer[x + 1] << 16 | sourceBuffer[x + 2] << 24) / 2147483648f;
+                    for (int x = 0; x < sourceBuffer.Count; x += 3) {
+                        targetFloatBuffer[x / 3] = (sourceBuffer.Data[x] << 8 | sourceBuffer.Data[x + 1] << 16 | sourceBuffer.Data[x + 2] << 24) / 2147483648f;
                     }
                 }
             }
+
+            sourceBuffer.Clear();
 
             return samples * 4;
         }

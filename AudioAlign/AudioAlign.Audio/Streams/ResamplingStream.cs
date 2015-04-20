@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using AudioAlign.Soxr;
+using AudioAlign.Audio.DataStructures;
 
 namespace AudioAlign.Audio.Streams {
     public class ResamplingStream : AbstractAudioStreamWrapper {
@@ -11,9 +12,7 @@ namespace AudioAlign.Audio.Streams {
         private ResamplingQuality quality;
         private SoxResampler soxr;
         private AudioProperties properties;
-        private byte[] sourceBuffer;
-        private int sourceBufferPosition;
-        private int sourceBufferFillLevel;
+        private ByteBuffer sourceBuffer;
         private double targetSampleRate;
         private double sampleRateRatio;
         private long position;
@@ -29,10 +28,8 @@ namespace AudioAlign.Audio.Streams {
 
             this.quality = quality;
             SetupResampler();
-            
-            sourceBuffer = new byte[0];
-            sourceBufferFillLevel = 0;
-            sourceBufferPosition = 0;
+
+            sourceBuffer = new ByteBuffer();
 
             TargetSampleRate = properties.SampleRate;
 
@@ -134,7 +131,7 @@ namespace AudioAlign.Audio.Streams {
                 else {
                     SetupResampler();
                 }
-                sourceBufferFillLevel = 0; // clear locally buffered data
+                sourceBuffer.Clear(); // clear locally buffered data
             }
         }
 
@@ -163,28 +160,16 @@ namespace AudioAlign.Audio.Streams {
 
             // loop while the sample rate converter consumes samples until it produces an output
             do {
-                if (sourceBufferFillLevel == 0 || sourceBufferPosition == sourceBufferFillLevel) {
-                    // dynamically increase buffer size
-                    // Here's a good place to resize the buffer because it is guaranteed to be empty / fully consumed
-                    if (sourceBuffer.Length < count) {
-                        int oldSize = sourceBuffer.Length;
-                        sourceBuffer = new byte[count];
-                        Debug.WriteLine("ResamplingStream: buffer size increased: " + oldSize + " -> " + count);
-                    }
-
-                    // buffer is empty or all data has already been read -> refill
-                    sourceBufferPosition = 0;
-                    sourceBufferFillLevel = sourceStream.Read(sourceBuffer, 0, count);
-                }
+                sourceBuffer.FillIfEmpty(sourceStream, count);
                 // if the sourceBufferFillLevel is 0 at this position, the end of the source stream has been reached,
                 // and endOfInput needs to be set to true in order to retrieve eventually buffered samples from
                 // the sample rate converter
                 // this is also the reason why the source stream's Read() method may be called multiple times although
                 // it already signalled that it has reached the end of the stream
-                endOfStream = sourceStream.Position >= sourceStream.Length && sourceBufferFillLevel == 0;
-                soxr.Process(sourceBuffer, sourceBufferPosition, sourceBufferFillLevel - sourceBufferPosition,
+                endOfStream = sourceStream.Position >= sourceStream.Length && sourceBuffer.Empty;
+                soxr.Process(sourceBuffer.Data, sourceBuffer.Offset, sourceBuffer.Count,
                     buffer, offset, count, endOfStream, out inputLengthUsed, out outputLengthGenerated);
-                sourceBufferPosition += inputLengthUsed;
+                sourceBuffer.Read(inputLengthUsed);
             } 
             while (inputLengthUsed > 0 && outputLengthGenerated == 0);
 

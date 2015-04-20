@@ -128,6 +128,8 @@
     <Compile Include="BinaryIOExtensions.cs" />
     <Compile Include="AudioBuffer.cs" />
     <Compile Include="CommonUtil.cs" />
+    <Compile Include="DataStructures\ByteBuffer.cs" />
+    <Compile Include="DataStructures\ByteBufferExtensions.cs" />
     <Compile Include="FFTAnalyzer.cs" />
     <Compile Include="FFTUtil.cs" />
     <Compile Include="Matching\Analysis.cs" />
