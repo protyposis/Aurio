@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
 using AudioAlign.Audio.DataStructures;
+using AudioAlign.Audio.DataStructures.Matrix;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
     public class OLTW : DTW {

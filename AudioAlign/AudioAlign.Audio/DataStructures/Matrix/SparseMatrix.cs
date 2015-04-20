@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.DataStructures {
+namespace AudioAlign.Audio.DataStructures.Matrix {
     /// <summary>
     /// Implementation of a sparse matrix by using dictionaries.
     /// taken from: http://www.blackbeltcoder.com/Articles/algorithms/creating-a-sparse-matrix-in-net

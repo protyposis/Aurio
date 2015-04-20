@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.DataStructures {
+namespace AudioAlign.Audio.DataStructures.Matrix {
     /// <summary>
     /// Implementation of a dense matrix through a rectangular matrix array.
     /// This needs a lot of memory for large matrices; consider using a sparse
