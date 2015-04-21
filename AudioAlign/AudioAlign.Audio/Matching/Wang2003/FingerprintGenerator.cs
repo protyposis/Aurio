@@ -46,7 +46,12 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             float[] spectrumTemporalAverage = new float[spectrum.Length]; // a running average of each spectrum bin over time
             float[] spectrumResidual = new float[spectrum.Length]; // the difference between the current spectrum and the moving average spectrum
 
-            var peaks = new List<Peak>(spectrum.Length / 2); // keep a single instance of the list to avoid instantiation overhead
+            //var peaks = new List<Peak>(spectrum.Length / 2); // keep a single instance of the list to avoid instantiation overhead
+            var peakHistory = new RingBuffer<List<Peak>>(1 + targetZoneDistance + targetZoneLength); // a FIFO list of peak lists
+            for (int i = 0; i < peakHistory.Length; i++) {
+                peakHistory.Add(new List<Peak>(spectrum.Length / 2)); // instantiate peak lists for later reuse
+            }
+            var peakPairs = new List<PeakPair>(peaksPerFrame * peakFanout); // keep a single instance of the list to avoid instantiation overhead
 
             while (stft.HasNext()) {
                 // Get the FFT spectrum
@@ -94,8 +99,9 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 // The advantage of finding peaks in the residual instead of the spectrum is that spectrum energy is usually
                 // concentrated in the low frequencies, resulting in a clustering if the highest peaks in the lows. Getting
                 // peaks from the residual distributes the peaks more evenly across the spectrum.
-                peaks.Clear();
-                FindLocalMaxima(spectrumResidual, peaks);
+                var peaks = peakHistory[0]; // take oldest list,
+                peaks.Clear(); // clear it, and
+                FindLocalMaxima(spectrumResidual, peaks); // refill with new peaks
 
                 // Pick the largest n peaks
                 int numMaxima = Math.Min(peaks.Count, peaksPerFrame);
@@ -107,12 +113,12 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                     peaks.Sort((p1, p2) => p1.Index == p2.Index ? 0 : p1.Index < p2.Index ? -1 : 1); // sort peaks by index (not really necessary)
                 }
 
-                if (peaks != null) {
-                    // Mark peaks as 0dB for spectrogram display purposes
-                    foreach (var peak in peaks) {
-                        spectrum[peak.Index] = 0;
-                        spectrumResidual[peak.Index] = 0;
-                    }
+                peakHistory.Add(peaks);
+
+                // Mark peaks as 0dB for spectrogram display purposes
+                foreach (var peak in peaks) {
+                    spectrum[peak.Index] = 0;
+                    spectrumResidual[peak.Index] = 0;
                 }
                 
                 if (FrameProcessed != null) {
@@ -122,7 +128,19 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                     });
                 }
 
+                peakPairs.Clear();
+                FindPairs(peakHistory, peakPairs);
+
                 index++;
+            }
+
+            // Flush the remaining peaks of the last frames from the history to get all remaining pairs
+            for (int i = 0; i < targetZoneLength; i++) {
+                var peaks = peakHistory[0];
+                peaks.Clear();
+                peakHistory.Add(peaks);
+                peakPairs.Clear();
+                FindPairs(peakHistory, peakPairs);
             }
         }
 
@@ -172,6 +190,35 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             //Debug.WriteLine("{0} local maxima found", maxima.Count);
         }
 
+        private List<PeakPair> FindPairs(RingBuffer<List<Peak>> peakHistory, List<PeakPair> peakPairs) {
+            var halfWidth = targetZoneWidth / 2;
+
+            // Get pairs from peaks
+            // This is a very naive approach that can be improved, e.g. by taking the average peak value into account,
+            // which would result in a list of the most prominent peak pairs.
+            // For now, this just iterates linearly through frames and their peaks and generates a pair if the
+            // constraints of the target area permit, until the max number of pairs has been generated.
+            foreach (var peak in peakHistory[0]) {
+                int count = 0;
+                for (int distance = targetZoneDistance; distance < peakHistory.Length; distance++) {
+                    foreach (var targetPeak in peakHistory[distance]) {
+                        if (peak.Index >= targetPeak.Index - halfWidth && peak.Index <= targetPeak.Index + halfWidth) {
+                            peakPairs.Add(new PeakPair { Peak1 = peak, Peak2 = targetPeak, Distance = distance });
+                            if (++count >= peakFanout) {
+                                break;
+                            }
+                        }
+                    }
+                    if (count >= peakFanout) {
+                        break;
+                    }
+                }
+            }
+
+            return peakPairs;
+        }
+
+        [DebuggerDisplay("{index}/{value}")]
         private struct Peak {
 
             private int index;
@@ -183,6 +230,13 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             }
             public int Index { get { return index; } }
             public float Value { get { return value; } }
+        }
+
+        [DebuggerDisplay("{Peak1.Index} --({Distance})--> {Peak2.Index}")]
+        private struct PeakPair {
+            public Peak Peak1 { get; set; }
+            public Peak Peak2 { get; set; }
+            public int Distance { get; set; }
         }
     }
 }
