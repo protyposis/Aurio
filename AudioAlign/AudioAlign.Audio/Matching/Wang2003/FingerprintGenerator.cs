@@ -47,7 +47,6 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             float[] spectrumTemporalAverage = new float[spectrum.Length]; // a running average of each spectrum bin over time
             float[] spectrumResidual = new float[spectrum.Length]; // the difference between the current spectrum and the moving average spectrum
 
-            //var peaks = new List<Peak>(spectrum.Length / 2); // keep a single instance of the list to avoid instantiation overhead
             var peakHistory = new PeakHistory(1 + targetZoneDistance + targetZoneLength, spectrum.Length / 2);
             var peakPairs = new List<PeakPair>(peaksPerFrame * peakFanout); // keep a single instance of the list to avoid instantiation overhead
 
