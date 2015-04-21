@@ -44,6 +44,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         public List<Match> FindMatches(FingerprintHash hash) {
             List<Match> matches = new List<Match>();
             List<FingerprintHashLookupEntry> entries = collisionMap.GetValues(hash);
+            Dictionary<FingerprintHash, int> localCollisionMap = new Dictionary<FingerprintHash, int>();
 
             for (int x = 0; x < entries.Count; x++) {
                 FingerprintHashLookupEntry entry1 = entries[x];
@@ -65,25 +66,36 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             indexEntry1 = store1.index[index1];
                             indexEntry2 = store2.index[index2];
 
-                            int ii = 0;
+                            // The union of the two ranges is the total number of distinct hashes
+                            // The intersection of the two ranges is the total number of similar hashes
+                            // NOTE: the following code block is veeery slow, see below for a faster version
+                            //var r1 = hashes1.GetRange(indexEntry1.index, indexEntry1.length);
+                            //var r2 = hashes2.GetRange(indexEntry2.index, indexEntry2.length);
+                            //numTried += r1.Union(r2).Count();
+                            //numMatched += r1.Intersect(r2).Count();
+
+                            // Determine union and intersection (this block is much faster than the one above)
+                            localCollisionMap.Clear();
                             for (int i = indexEntry1.index; i < indexEntry1.EndIndex; i++) {
-                                for (int j = indexEntry2.index + ii; j < indexEntry2.EndIndex; j++) {
-                                    if (hashes1[i] == hashes2[j]) {
-                                        numMatched++;
-                                    }
-                                    else {
-                                        numTried++;
-                                    }
-                                }
-                                ii++;
+                                localCollisionMap.Add(hashes1[i], 0);
+                                numTried++;
                             }
+                            for (int j = indexEntry2.index; j < indexEntry2.EndIndex; j++) {
+                                if (localCollisionMap.ContainsKey(hashes2[j])) {
+                                    numMatched++; // if it's already contained in the map, it's a matching hash
+                                }
+                                else {
+                                    numTried++; // if it's not contained, it's another distinct hash
+                                }
+                            }
+
                             index1++;
                             index2++;
                         }
 
-                        if (numMatched > 50 && numTried > 100) {
+                        if (numMatched > 40 && numTried > 100) {
                             matches.Add(new Match {
-                                Similarity = 1 / numTried * numMatched,
+                                Similarity = 1f / numTried * numMatched,
                                 Track1 = entry1.AudioTrack,
                                 Track1Time = FingerprintGenerator.FingerprintHashIndexToTimeSpan(entry1.Index),
                                 Track2 = entry2.AudioTrack,
@@ -102,7 +114,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             List<Match> matches = new List<Match>();
 
             var collidingKeys = collisionMap.GetCollidingKeys();
-            Debug.WriteLine("{0} colliding keys", collidingKeys.Count);
+            Debug.WriteLine("{0} colliding keys, {1} lookup entries", collidingKeys.Count, collidingKeys.Sum(h => collisionMap.GetValues(h).Count));
 
             foreach (FingerprintHash hash in collidingKeys) {
                 matches.AddRange(FindMatches(hash));
