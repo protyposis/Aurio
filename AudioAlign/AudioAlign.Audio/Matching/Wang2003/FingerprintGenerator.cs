@@ -132,7 +132,6 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 if (processedFrames >= peakHistory.Length) {
                     peakPairs.Clear();
                     FindPairs(peakHistory, peakPairs);
-                    var peakPairsIndex = peakHistory.Index;
                 }
             }
 
@@ -143,7 +142,6 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 peakHistory.Add(-1, peaks);
                 peakPairs.Clear();
                 FindPairs(peakHistory, peakPairs);
-                var peakPairsIndex = peakHistory.Index;
             }
         }
 
@@ -201,12 +199,13 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             // which would result in a list of the most prominent peak pairs.
             // For now, this just iterates linearly through frames and their peaks and generates a pair if the
             // constraints of the target area permit, until the max number of pairs has been generated.
+            var index = peakHistory.Index;
             foreach (var peak in peakHistory.Lists[0]) {
                 int count = 0;
                 for (int distance = targetZoneDistance; distance < peakHistory.Length; distance++) {
                     foreach (var targetPeak in peakHistory.Lists[distance]) {
                         if (peak.Index >= targetPeak.Index - halfWidth && peak.Index <= targetPeak.Index + halfWidth) {
-                            peakPairs.Add(new PeakPair { Peak1 = peak, Peak2 = targetPeak, Distance = distance });
+                            peakPairs.Add(new PeakPair { Index = index, Peak1 = peak, Peak2 = targetPeak, Distance = distance });
                             if (++count >= peakFanout) {
                                 break;
                             }
@@ -235,8 +234,9 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             public float Value { get { return value; } }
         }
 
-        [DebuggerDisplay("{Peak1.Index} --({Distance})--> {Peak2.Index}")]
+        [DebuggerDisplay("{Index}:{Peak1.Index} --({Distance})--> {Peak2.Index}")]
         private struct PeakPair {
+            public int Index { get; set; }
             public Peak Peak1 { get; set; }
             public Peak Peak2 { get; set; }
             public int Distance { get; set; }
