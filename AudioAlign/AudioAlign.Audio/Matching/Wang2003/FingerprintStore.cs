@@ -66,15 +66,9 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             indexEntry1 = store1.index[index1];
                             indexEntry2 = store2.index[index2];
 
+                            // Determine union and intersection (this block is much faster than using LINQ)
                             // The union of the two ranges is the total number of distinct hashes
                             // The intersection of the two ranges is the total number of similar hashes
-                            // NOTE: the following code block is veeery slow, see below for a faster version
-                            //var r1 = hashes1.GetRange(indexEntry1.index, indexEntry1.length);
-                            //var r2 = hashes2.GetRange(indexEntry2.index, indexEntry2.length);
-                            //numTried += r1.Union(r2).Count();
-                            //numMatched += r1.Intersect(r2).Count();
-
-                            // Determine union and intersection (this block is much faster than the one above)
                             localCollisionMap.Clear();
                             for (int i = indexEntry1.index; i < indexEntry1.EndIndex; i++) {
                                 localCollisionMap.Add(hashes1[i], 0);
