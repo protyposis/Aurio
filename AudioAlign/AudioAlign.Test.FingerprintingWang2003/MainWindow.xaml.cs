@@ -5,8 +5,10 @@ using AudioAlign.Audio.TaskMonitor;
 using AudioAlign.WaveControls;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -71,6 +73,8 @@ namespace AudioAlign.Test.FingerprintingWang2003 {
                     spectrogram1.ColorPalette = palette;
                     spectrogram2.ColorPalette = palette;
 
+                    var hashCollection = new List<FingerprintHash>();
+
                     Task.Factory.StartNew(() => {
                         IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating fingerprints for " + audioTrack.FileInfo.Name, true);
 
@@ -84,8 +88,12 @@ namespace AudioAlign.Test.FingerprintingWang2003 {
                                 progressReporter.ReportProgress((double)e2.Index / e2.Indices * 100);
                             });
                         };
+                        fpg.FingerprintHashesGenerated += delegate(object sender2, FingerprintHashEventArgs e2) {
+                            hashCollection.AddRange(e2.Hashes);
+                        };
 
                         fpg.Generate(audioTrack);
+                        Debug.WriteLine("{0} hashes (mem {1:0.00} mb)", hashCollection.Count, (hashCollection.Count * Marshal.SizeOf(typeof(FingerprintHash))) / 1024f / 1024f);
 
                         progressReporter.Finish();
                     });

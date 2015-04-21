@@ -33,6 +33,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         private int targetZoneWidth = 63; // frequency width in FFT bins
 
         public event EventHandler<FrameProcessedEventArgs> FrameProcessed;
+        public event EventHandler<FingerprintHashEventArgs> FingerprintHashesGenerated;
 
         public FingerprintGenerator() {
             //
@@ -139,6 +140,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 if (processedFrames >= peakHistory.Length) {
                     peakPairs.Clear();
                     FindPairs(peakHistory, peakPairs);
+                    FireFingerprintHashesGenerated(track, indices, peakPairs);
                 }
             }
 
@@ -149,6 +151,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 peakHistory.Add(-1, peaks);
                 peakPairs.Clear();
                 FindPairs(peakHistory, peakPairs);
+                FireFingerprintHashesGenerated(track, indices, peakPairs);
             }
         }
 
@@ -225,6 +228,17 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             }
 
             return peakPairs;
+        }
+
+        private void FireFingerprintHashesGenerated(AudioTrack track, int indices, List<PeakPair> peakPairs) {
+            if (FingerprintHashesGenerated != null && peakPairs.Count > 0) {
+                FingerprintHashesGenerated(this, new FingerprintHashEventArgs {
+                    AudioTrack = track,
+                    Index = peakPairs[0].Index,
+                    Indices = indices,
+                    Hashes = peakPairs.ConvertAll(pp => PeakPair.PeakPairToHash(pp))
+                });
+            }
         }
 
         [DebuggerDisplay("{index}/{value}")]
