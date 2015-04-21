@@ -240,6 +240,25 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             public Peak Peak1 { get; set; }
             public Peak Peak2 { get; set; }
             public int Distance { get; set; }
+
+            public static FingerprintHash PeakPairToHash(PeakPair pp) {
+                // Put frequency bins and the distance each in one byte. The actual quantization
+                // is configured through the parameters, e.g. the FFT window size determines the
+                // number of frequency bins, and the size of the target zone determines the max
+                // distance. Their max size can be anywhere in the range of a byte. if it should be 
+                // higher, a quantization step must be introduced (which will basically be a division).
+                return new FingerprintHash((uint)((byte)pp.Peak1.Index << 16 | (byte)pp.Peak2.Index << 8 | (byte)pp.Distance));
+            }
+
+            public static PeakPair HashToPeakPair(FingerprintHash hash, int index) {
+                // The inverse operation of the function above.
+                return new PeakPair {
+                    Index = index,
+                    Peak1 = new Peak((int)(hash.Value >> 16 & 0xFF), 0),
+                    Peak2 = new Peak((int)(hash.Value >> 8 & 0xFF), 0),
+                    Distance = (int)(hash.Value & 0xFF)
+                };
+            }
         }
 
         /// <summary>
