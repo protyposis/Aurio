@@ -112,14 +112,14 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 }
 
                 peakHistory.Add(index, peaks);
-
-                // Mark peaks as 0dB for spectrogram display purposes
-                foreach (var peak in peaks) {
-                    spectrum[peak.Index] = 0;
-                    spectrumResidual[peak.Index] = 0;
-                }
                 
                 if (FrameProcessed != null) {
+                    // Mark peaks as 0dB for spectrogram display purposes
+                    foreach (var peak in peaks) {
+                        spectrum[peak.Index] = 0;
+                        spectrumResidual[peak.Index] = 0;
+                    }
+
                     FrameProcessed(this, new FrameProcessedEventArgs { 
                         AudioTrack = track, Index = index, Indices = indices,
                         Spectrum = spectrum, SpectrumResidual = spectrumResidual
