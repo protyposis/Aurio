@@ -8,6 +8,13 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Audio.Matching.Wang2003 {
+    /// <summary>
+    /// Generates fingerprints according to what is described in:
+    /// - Wang, Avery. "An Industrial Strength Audio Search Algorithm." ISMIR. 2003.
+    /// - Kennedy, Lyndon, and Mor Naaman. "Less talk, more rock: automated organization 
+    ///   of community-contributed collections of concert videos." Proceedings of the 
+    ///   18th international conference on World wide web. ACM, 2009.
+    /// </summary>
     public class FingerprintGenerator {
 
         private int samplingRate = 11025;
