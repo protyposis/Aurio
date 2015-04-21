@@ -54,6 +54,14 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 // Get the FFT spectrum
                 stft.ReadFrame(spectrum);
 
+                // Skip frames whose average spectrum volume is below the threshold
+                // This skips silent frames (zero samples) that only contain very low noise from the FFT 
+                // and that would screw up the temporal spectrum average below for the following frames.
+                if (spectrum.Average() < spectrumMinThreshold) {
+                    index++;
+                    continue;
+                }
+
                 // Smooth the frequency spectrum to remove small peaks
                 //spectrumSmoother.Clear();
                 //for (int i = 0; i < frameBuffer.Length; i++) {
@@ -62,14 +70,6 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 //        smoothedSpectrum[i - spectrumSmoothingLength] = avg;
                 //    }
                 //}
-
-                // Skip frames whose average spectrum volume is below the threshold
-                // This skips silent frames (zero samples) that only contain very low noise from the FFT 
-                // and that would screw up the temporal spectrum average below for the following frames.
-                if (spectrum.Average() < spectrumMinThreshold) {
-                    index++;
-                    continue;
-                }
 
                 // Update the temporal moving bin average
                 if (processedFrames == 0) {
