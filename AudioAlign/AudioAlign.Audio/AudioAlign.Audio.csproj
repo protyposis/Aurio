@@ -175,10 +175,14 @@
     <Compile Include="Matching\MatchProcessor.cs" />
     <Compile Include="Matching\STFT.cs" />
     <Compile Include="Matching\StreamWindower.cs" />
+    <Compile Include="Matching\Wang2003\DictionaryCollisionMap.cs" />
     <Compile Include="Matching\Wang2003\FingerprintGenerator.cs" />
     <Compile Include="Matching\Wang2003\FingerprintHash.cs" />
     <Compile Include="Matching\Wang2003\FingerprintHashEventArgs.cs" />
+    <Compile Include="Matching\Wang2003\FingerprintStore.cs" />
     <Compile Include="Matching\Wang2003\FrameProcessedEventArgs.cs" />
+    <Compile Include="Matching\Wang2003\ICollisionMap.cs" />
+    <Compile Include="Matching\Wang2003\FingerprintHashLookupEntry.cs" />
     <Compile Include="MultitrackPlayer.cs" />
     <Compile Include="Project\VideoTrack.cs" />
     <Compile Include="Streams\AbstractAudioStreamWrapper.cs" />
