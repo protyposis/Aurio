@@ -56,27 +56,27 @@ namespace AudioAlign.Test.FingerprintingWang2003 {
             dlg.Filter = "Wave files|*.wav";
 
             if (dlg.ShowDialog() == true) {
-                foreach (string file in dlg.FileNames) {
-                    AudioTrack audioTrack = new AudioTrack(new FileInfo(file));
-                    IAudioStream audioStream = audioTrack.CreateAudioStream();
+                spectrogram1.SpectrogramSize = 256;
+                spectrogram2.SpectrogramSize = 256;
 
-                    spectrogram1.SpectrogramSize = 256;
-                    spectrogram2.SpectrogramSize = 256;
+                ColorGradient gradient = new ColorGradient(0, 1);
+                gradient.AddStop(Colors.Black, 0);
+                gradient.AddStop(Colors.White, 1);
+                var palette = gradient.GetGradientArgbArray(1024);
+                // Set zero dB to red, and then set all found peaks to zero dB to make them visible in the spectrogram
+                palette[palette.Length - 1] = ColorGradient.ColorToArgb(Colors.Red);
 
-                    ColorGradient gradient = new ColorGradient(0, 1);
-                    gradient.AddStop(Colors.Black, 0);
-                    gradient.AddStop(Colors.White, 1);
-                    var palette = gradient.GetGradientArgbArray(1024);
-                    // Set zero dB to red, and then set all found peaks to zero dB to make them visible in the spectrogram
-                    palette[palette.Length - 1] = ColorGradient.ColorToArgb(Colors.Red);
-                    
-                    spectrogram1.ColorPalette = palette;
-                    spectrogram2.ColorPalette = palette;
+                spectrogram1.ColorPalette = palette;
+                spectrogram2.ColorPalette = palette;
 
-                    var hashCollection = new List<FingerprintHash>();
+                var store = new FingerprintStore();
 
-                    Task.Factory.StartNew(() => {
+                Task.Factory.StartNew(() => {
+                    foreach (string file in dlg.FileNames) {
+                        AudioTrack audioTrack = new AudioTrack(new FileInfo(file));
+                        IAudioStream audioStream = audioTrack.CreateAudioStream();
                         IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating fingerprints for " + audioTrack.FileInfo.Name, true);
+                        var hashCollection = new List<FingerprintHash>();
 
                         FingerprintGenerator fpg = new FingerprintGenerator();
                         fpg.FrameProcessed += delegate(object sender2, FrameProcessedEventArgs e2) {
@@ -90,14 +90,17 @@ namespace AudioAlign.Test.FingerprintingWang2003 {
                         };
                         fpg.FingerprintHashesGenerated += delegate(object sender2, FingerprintHashEventArgs e2) {
                             hashCollection.AddRange(e2.Hashes);
+                            store.Add(e2);
                         };
 
                         fpg.Generate(audioTrack);
                         Debug.WriteLine("{0} hashes (mem {1:0.00} mb)", hashCollection.Count, (hashCollection.Count * Marshal.SizeOf(typeof(FingerprintHash))) / 1024f / 1024f);
 
                         progressReporter.Finish();
-                    });
-                }
+                    }
+                    store.FindAllMatches();
+                });
+
             }
         }
     }
