@@ -46,6 +46,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         public List<Match> FindMatches(uint hash) {
             List<Match> matches = new List<Match>();
             List<FingerprintHashLookupEntry> entries = collisionMap.GetValues(hash);
+            double sec = (double)profile.SamplingRate / profile.HopSize; // the length of a second in units of frames
 
             for (int x = 0; x < entries.Count; x++) {
                 FingerprintHashLookupEntry entry1 = entries[x];
@@ -65,6 +66,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                         int numIndices = 0; // count over how many actual frames hashes were matched (an index in the store is the equivalent of a frame in the generator)
                         bool matchFound = false;
 
+                        // Iterate through sequential frames
                         while(store1.index.ContainsKey(index1) && store2.index.ContainsKey(index2)) {
                             indexEntry1 = store1.index[index1];
                             indexEntry2 = store2.index[index2];
@@ -86,7 +88,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             int j_e = indexEntry2.index + indexEntry2.length;
                             int intersectionCount = 0;
 
-                            // Count intersecting hashes with Zipper algorithm
+                            // Count intersecting hashes of a frame with the Zipper algorithm
                             while (i < i_e && j < j_e) {
                                 if (hashes1[i] < hashes2[j]) {
                                     i++;
@@ -114,7 +116,6 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             // to parameterize it in such a way, that a match is detected as fast as possible,
                             // while detecting a no-match isn't delayed too far as it takes a lot of processing time.
                             // NOTE The current parameters are just eyeballed, there's a lot of influence on processing speed here
-                            double sec = (double)profile.SamplingRate / profile.HopSize;
                             double threshold = Math.Pow(0.5, numIndices / (sec * 2)) * 0.3;
                             double thresholdLow = threshold / 6;
                             double rate = 1d / numTried * numMatched;
