@@ -56,8 +56,10 @@ namespace AudioAlign.Test.FingerprintingWang2003 {
             dlg.Filter = "Wave files|*.wav";
 
             if (dlg.ShowDialog() == true) {
-                spectrogram1.SpectrogramSize = 256;
-                spectrogram2.SpectrogramSize = 256;
+                var profile = new Profile();
+
+                spectrogram1.SpectrogramSize = profile.WindowSize / 2;
+                spectrogram2.SpectrogramSize = profile.WindowSize / 2;
 
                 ColorGradient gradient = new ColorGradient(0, 1);
                 gradient.AddStop(Colors.Black, 0);
@@ -69,16 +71,16 @@ namespace AudioAlign.Test.FingerprintingWang2003 {
                 spectrogram1.ColorPalette = palette;
                 spectrogram2.ColorPalette = palette;
 
-                var store = new FingerprintStore();
+                var store = new FingerprintStore(profile);
 
                 Task.Factory.StartNew(() => {
                     foreach (string file in dlg.FileNames) {
                         AudioTrack audioTrack = new AudioTrack(new FileInfo(file));
                         IAudioStream audioStream = audioTrack.CreateAudioStream();
                         IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating fingerprints for " + audioTrack.FileInfo.Name, true);
-                        var hashCollection = new List<FingerprintHash>();
+                        var hashCollection = new List<uint>();
 
-                        FingerprintGenerator fpg = new FingerprintGenerator();
+                        FingerprintGenerator fpg = new FingerprintGenerator(profile);
                         fpg.FrameProcessed += delegate(object sender2, FrameProcessedEventArgs e2) {
                             var spectrum = (float[])e2.Spectrum.Clone();
                             var spectrumResidual = (float[])e2.SpectrumResidual.Clone();
@@ -94,7 +96,7 @@ namespace AudioAlign.Test.FingerprintingWang2003 {
                         };
 
                         fpg.Generate(audioTrack);
-                        Debug.WriteLine("{0} hashes (mem {1:0.00} mb)", hashCollection.Count, (hashCollection.Count * Marshal.SizeOf(typeof(FingerprintHash))) / 1024f / 1024f);
+                        Debug.WriteLine("{0} hashes (mem {1:0.00} mb)", hashCollection.Count, (hashCollection.Count * Marshal.SizeOf(typeof(uint))) / 1024f / 1024f);
 
                         progressReporter.Finish();
                     }
