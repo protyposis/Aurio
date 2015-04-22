@@ -139,7 +139,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
 
                 if (processedFrames >= peakHistory.Length) {
                     peakPairs.Clear();
-                    FindPairs(peakHistory, peakPairs);
+                    FindPairsWithMaxEnergy(peakHistory, peakPairs);
                     FireFingerprintHashesGenerated(track, indices, peakPairs);
                 }
             }
@@ -150,7 +150,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 peaks.Clear();
                 peakHistory.Add(-1, peaks);
                 peakPairs.Clear();
-                FindPairs(peakHistory, peakPairs);
+                FindPairsWithMaxEnergy(peakHistory, peakPairs);
                 FireFingerprintHashesGenerated(track, indices, peakPairs);
             }
         }
@@ -201,14 +201,18 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             //Debug.WriteLine("{0} local maxima found", maxima.Count);
         }
 
-        private List<PeakPair> FindPairs(PeakHistory peakHistory, List<PeakPair> peakPairs) {
+        /// <summary>
+        /// Builds pairs of peaks from the current frame and its target area.
+        /// 
+        /// This is a very naive approach that just iterates linearly through frames and their peaks 
+        /// and generates a pair if the constraints of the target area permit, until the max number
+        /// of pairs has been generated.
+        /// </summary>
+        /// <param name="peakHistory">the history structure to read the peaks from</param>
+        /// <param name="peakPairs">the list to store the pairs in</param>
+        private void FindPairsNaive(PeakHistory peakHistory, List<PeakPair> peakPairs) {
             var halfWidth = targetZoneWidth / 2;
 
-            // Get pairs from peaks
-            // This is a very naive approach that can be improved, e.g. by taking the average peak value into account,
-            // which would result in a list of the most prominent peak pairs.
-            // For now, this just iterates linearly through frames and their peaks and generates a pair if the
-            // constraints of the target area permit, until the max number of pairs has been generated.
             var index = peakHistory.Index;
             foreach (var peak in peakHistory.Lists[0]) {
                 int count = 0;
@@ -226,8 +230,58 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                     }
                 }
             }
+        }
 
-            return peakPairs;
+        /// <summary>
+        /// Builds pairs of peaks from the current frame and its target area.
+        /// 
+        /// This approach generates all possible pairs and then picks the most distinct ones
+        /// according to their average peak energy. The idea is that these peaks are the ones
+        /// that most probably survive in high noise environments.
+        /// This approach takes a bit longer to compute compared to the naive approach, but
+        /// generates much more diverse peaks, spread more evenly across the hash space (this is 
+        /// just a speculation; not validated). Compared to the naive approach, this results 
+        /// in much faster hash matching and also a lot more matches.
+        /// </summary>
+        /// <param name="peakHistory">the history structure to read the peaks from</param>
+        /// <param name="peakPairs">the list to store the pairs in</param>
+        private void FindPairsWithMaxEnergy(PeakHistory peakHistory, List<PeakPair> peakPairs) {
+            var halfWidth = targetZoneWidth / 2;
+
+            // Get pairs from peaks
+            // This is a very naive approach that can be improved, e.g. by taking the average peak value into account,
+            // which would result in a list of the most prominent peak pairs.
+            // For now, this just iterates linearly through frames and their peaks and generates a pair if the
+            // constraints of the target area permit, until the max number of pairs has been generated.
+            var index = peakHistory.Index;
+            foreach (var peak in peakHistory.Lists[0]) {
+                for (int distance = targetZoneDistance; distance < peakHistory.Length; distance++) {
+                    foreach (var targetPeak in peakHistory.Lists[distance]) {
+                        if (peak.Index >= targetPeak.Index - halfWidth && peak.Index <= targetPeak.Index + halfWidth) {
+                            peakPairs.Add(new PeakPair { Index = index, Peak1 = peak, Peak2 = targetPeak, Distance = distance });
+                        }
+                    }
+                }
+            }
+
+            peakPairs.Sort((pp1, pp2) => {
+                var avg1 = pp1.AverageEnergy;
+                var avg2 = pp2.AverageEnergy;
+
+                if (avg1 < avg2) {
+                    return 1;
+                }
+                else if (avg1 > avg2) {
+                    return -1;
+                }
+
+                return 0;
+            });
+
+            int maxPeaks = Math.Min(peakFanout, peakPairs.Count);
+            if (peakPairs.Count > maxPeaks) {
+                peakPairs.RemoveRange(maxPeaks, peakPairs.Count - maxPeaks); // select the n most prominent peak pairs
+            }
         }
 
         private void FireFingerprintHashesGenerated(AudioTrack track, int indices, List<PeakPair> peakPairs) {
@@ -270,10 +324,16 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
 
         [DebuggerDisplay("{Index}:{Peak1.Index} --({Distance})--> {Peak2.Index}")]
         private struct PeakPair {
+
+            private Peak peak1;
+            private Peak peak2;
+            private float averageEnergy;
+
             public int Index { get; set; }
             public Peak Peak1 { get; set; }
             public Peak Peak2 { get; set; }
             public int Distance { get; set; }
+            public float AverageEnergy { get { return (Peak1.Value + Peak2.Value) / 2; } }
 
             public static uint PeakPairToHash(PeakPair pp) {
                 // Put frequency bins and the distance each in one byte. The actual quantization
