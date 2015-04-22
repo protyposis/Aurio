@@ -9,22 +9,22 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
     /// </summary>
     class DictionaryCollisionMap : IFingerprintCollisionMap {
 
-        private Dictionary<FingerprintHash, List<FingerprintHashLookupEntry>> lookupTable;
+        private Dictionary<uint, List<FingerprintHashLookupEntry>> lookupTable;
 
         public DictionaryCollisionMap() {
-            lookupTable = new Dictionary<FingerprintHash, List<FingerprintHashLookupEntry>>();
+            lookupTable = new Dictionary<uint, List<FingerprintHashLookupEntry>>();
         }
 
-        public void Add(FingerprintHash hash, FingerprintHashLookupEntry lookupEntry) {
+        public void Add(uint hash, FingerprintHashLookupEntry lookupEntry) {
             if (!lookupTable.ContainsKey(hash)) {
                 lookupTable.Add(hash, new List<FingerprintHashLookupEntry>());
             }
             lookupTable[hash].Add(lookupEntry);
         }
 
-        public List<FingerprintHash> GetCollidingKeys() {
-            List<FingerprintHash> hashes = new List<FingerprintHash>();
-            foreach (FingerprintHash hash in lookupTable.Keys) {
+        public List<uint> GetCollidingKeys() {
+            List<uint> hashes = new List<uint>();
+            foreach (uint hash in lookupTable.Keys) {
                 if (lookupTable[hash].Count > 1) {
                     hashes.Add(hash);
                 }
@@ -32,7 +32,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             return hashes;
         }
 
-        public List<FingerprintHashLookupEntry> GetValues(FingerprintHash subFingerprint) {
+        public List<FingerprintHashLookupEntry> GetValues(uint subFingerprint) {
             return lookupTable[subFingerprint];
         }
     }

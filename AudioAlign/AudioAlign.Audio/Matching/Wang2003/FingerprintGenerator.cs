@@ -232,11 +232,16 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
 
         private void FireFingerprintHashesGenerated(AudioTrack track, int indices, List<PeakPair> peakPairs) {
             if (FingerprintHashesGenerated != null && peakPairs.Count > 0) {
+                // This sorting step is neede for the Zipper intersection algorithm 
+                // in the fingerprint store to find matching hashes.
+                var hashes = peakPairs.ConvertAll(pp => PeakPair.PeakPairToHash(pp));
+                hashes.Sort();
+
                 FingerprintHashesGenerated(this, new FingerprintHashEventArgs {
                     AudioTrack = track,
                     Index = peakPairs[0].Index,
                     Indices = indices,
-                    Hashes = peakPairs.ConvertAll(pp => PeakPair.PeakPairToHash(pp))
+                    Hashes = hashes
                 });
             }
         }
@@ -270,22 +275,22 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             public Peak Peak2 { get; set; }
             public int Distance { get; set; }
 
-            public static FingerprintHash PeakPairToHash(PeakPair pp) {
+            public static uint PeakPairToHash(PeakPair pp) {
                 // Put frequency bins and the distance each in one byte. The actual quantization
                 // is configured through the parameters, e.g. the FFT window size determines the
                 // number of frequency bins, and the size of the target zone determines the max
                 // distance. Their max size can be anywhere in the range of a byte. if it should be 
                 // higher, a quantization step must be introduced (which will basically be a division).
-                return new FingerprintHash((uint)((byte)pp.Peak1.Index << 16 | (byte)pp.Peak2.Index << 8 | (byte)pp.Distance));
+                return (uint)((byte)pp.Peak1.Index << 16 | (byte)pp.Peak2.Index << 8 | (byte)pp.Distance);
             }
 
-            public static PeakPair HashToPeakPair(FingerprintHash hash, int index) {
+            public static PeakPair HashToPeakPair(uint hash, int index) {
                 // The inverse operation of the function above.
                 return new PeakPair {
                     Index = index,
-                    Peak1 = new Peak((int)(hash.Value >> 16 & 0xFF), 0),
-                    Peak2 = new Peak((int)(hash.Value >> 8 & 0xFF), 0),
-                    Distance = (int)(hash.Value & 0xFF)
+                    Peak1 = new Peak((int)(hash >> 16 & 0xFF), 0),
+                    Peak2 = new Peak((int)(hash >> 8 & 0xFF), 0),
+                    Distance = (int)(hash & 0xFF)
                 };
             }
         }

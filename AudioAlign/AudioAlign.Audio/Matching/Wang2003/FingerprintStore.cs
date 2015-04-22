@@ -41,10 +41,9 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             }
         }
 
-        public List<Match> FindMatches(FingerprintHash hash) {
+        public List<Match> FindMatches(uint hash) {
             List<Match> matches = new List<Match>();
             List<FingerprintHashLookupEntry> entries = collisionMap.GetValues(hash);
-            HashSet<FingerprintHash> localCollisionMap = new HashSet<FingerprintHash>();
 
             for (int x = 0; x < entries.Count; x++) {
                 FingerprintHashLookupEntry entry1 = entries[x];
@@ -54,8 +53,8 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
 
                         var store1 = store[entry1.AudioTrack];
                         var store2 = store[entry2.AudioTrack];
-                        List<FingerprintHash> hashes1 = store1.hashes;
-                        List<FingerprintHash> hashes2 = store2.hashes;
+                        List<uint> hashes1 = store1.hashes;
+                        List<uint> hashes2 = store2.hashes;
                         int index1 = entry1.Index;
                         int index2 = entry2.Index;
                         TrackStore.IndexEntry indexEntry1, indexEntry2;
@@ -68,27 +67,39 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             indexEntry1 = store1.index[index1];
                             indexEntry2 = store2.index[index2];
 
-                            // Determine union and intersection (this block is much faster than using LINQ)
+                            // Hash collision
                             // The union of the two ranges is the total number of distinct hashes
                             // The intersection of the two ranges is the total number of similar hashes
-                            // NOTE The collision map here is the bottleneck of this method and takes the major
-                            //      processing time. Other approaches tried without any speedup:
-                            //      - n*m element by element comparison (since the amount of elements is reasonably small)
-                            //      - concatenating the two ranges, sorting them, and linearly iterating over, counting the duplicates (sort is slow)
-                            //      - presorting at hashes generation time, then applying zipper intersection algorithm (hash comparisons are slow)
-                            localCollisionMap.Clear();
-                            for (int i = indexEntry1.index; i < indexEntry1.index + indexEntry1.length; i++) {
-                                localCollisionMap.Add(hashes1[i]);
-                                numTried++;
-                            }
-                            for (int j = indexEntry2.index; j < indexEntry2.index + indexEntry2.length; j++) {
-                                if (localCollisionMap.Contains(hashes2[j])) {
-                                    numMatched++; // if it's already contained in the map, it's a matching hash
+                            // NOTE The following block calculates the number of matches (the intersection)
+                            //      of the two hash lists with the Zipper intersection algorithm and relies
+                            //      on the hash list sorting in the fingerprint generator.
+                            //      Other approaches tried which are slower:
+                            //      - n*m element by element comparison (seven though the amount of elements is reasonably small)
+                            //      - concatenating the two ranges (LINQ), sorting them, and linearly iterating over, counting the duplicates (sort is slow)
+                            //      - using a hash set for collision detection (hash set insertion and lookup are costly)
+
+                            int i = indexEntry1.index;
+                            int i_e = indexEntry1.index + indexEntry1.length;
+                            int j = indexEntry2.index;
+                            int j_e = indexEntry2.index + indexEntry2.length;
+                            int intersectionCount = 0;
+
+                            // Count intersecting hashes with Zipper algorithm
+                            while (i < i_e && j < j_e) {
+                                if (hashes1[i] < hashes2[j]) {
+                                    i++;
+                                }
+                                else if (hashes2[j] < hashes1[i]) {
+                                    j++;
                                 }
                                 else {
-                                    numTried++; // if it's not contained, it's another distinct hash
+                                    intersectionCount++;
+                                    i++; j++;
                                 }
                             }
+
+                            numMatched += intersectionCount;
+                            numTried += indexEntry1.length + indexEntry2.length - intersectionCount;
 
                             index1++;
                             index2++;
@@ -138,7 +149,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             var collidingKeys = collisionMap.GetCollidingKeys();
             Debug.WriteLine("{0} colliding keys, {1} lookup entries", collidingKeys.Count, collidingKeys.Sum(h => collisionMap.GetValues(h).Count));
 
-            foreach (FingerprintHash hash in collidingKeys) {
+            foreach (uint hash in collidingKeys) {
                 matches.AddRange(FindMatches(hash));
             }
             Debug.WriteLine("{0} matches", matches.Count);
@@ -160,11 +171,11 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 }
             }
 
-            public List<FingerprintHash> hashes;
+            public List<uint> hashes;
             public Dictionary<int, IndexEntry> index;
 
             public TrackStore() {
-                hashes = new List<FingerprintHash>();
+                hashes = new List<uint>();
                 index = new Dictionary<int, IndexEntry>();
             }
         }

@@ -9,6 +9,6 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         public AudioTrack AudioTrack { get; set; }
         public int Index { get; set; }
         public int Indices { get; set; }
-        public List<FingerprintHash> Hashes { get; set; }
+        public List<uint> Hashes { get; set; }
     }
 }
