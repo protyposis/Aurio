@@ -315,11 +315,6 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
 
         [DebuggerDisplay("{Index}:{Peak1.Index} --({Distance})--> {Peak2.Index}")]
         private struct PeakPair {
-
-            private Peak peak1;
-            private Peak peak2;
-            private float averageEnergy;
-
             public int Index { get; set; }
             public Peak Peak1 { get; set; }
             public Peak Peak2 { get; set; }
