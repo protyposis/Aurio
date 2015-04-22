@@ -72,11 +72,11 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             // The union of the two ranges is the total number of distinct hashes
                             // The intersection of the two ranges is the total number of similar hashes
                             localCollisionMap.Clear();
-                            for (int i = indexEntry1.index; i < indexEntry1.EndIndex; i++) {
+                            for (int i = indexEntry1.index; i < indexEntry1.index + indexEntry1.length; i++) {
                                 localCollisionMap.Add(hashes1[i], 0);
                                 numTried++;
                             }
-                            for (int j = indexEntry2.index; j < indexEntry2.EndIndex; j++) {
+                            for (int j = indexEntry2.index; j < indexEntry2.index + indexEntry2.length; j++) {
                                 if (localCollisionMap.ContainsKey(hashes2[j])) {
                                     numMatched++; // if it's already contained in the map, it's a matching hash
                                 }
@@ -152,10 +152,6 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 public IndexEntry(int index, int length) {
                     this.index = index;
                     this.length = length;
-                }
-
-                public int EndIndex {
-                    get { return index + length; }
                 }
             }
 

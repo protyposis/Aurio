@@ -21,7 +21,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         }
 
         public override int GetHashCode() {
-            return this.value.GetHashCode();
+            return (int)this.value;
         }
 
         public override string ToString() {
