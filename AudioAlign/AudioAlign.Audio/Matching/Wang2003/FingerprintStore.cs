@@ -59,10 +59,12 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                         int index1 = entry1.Index;
                         int index2 = entry2.Index;
                         TrackStore.IndexEntry indexEntry1, indexEntry2;
-                        int numTried = 0;
-                        int numMatched = 0;
+                        int numTried = 0; // count of hashes tried to match
+                        int numMatched = 0; // count of hashes matched
+                        int numIndices = 0; // count over how many actual frames hashes were matched (an index in the store is the equivalent of a frame in the generator)
+                        bool matchFound = false;
 
-                        while(store1.index.ContainsKey(index1) && store2.index.ContainsKey(index2) && numTried < 200) {
+                        while(store1.index.ContainsKey(index1) && store2.index.ContainsKey(index2)) {
                             indexEntry1 = store1.index[index1];
                             indexEntry2 = store2.index[index2];
 
@@ -85,9 +87,30 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
 
                             index1++;
                             index2++;
+                            numIndices++;
+
+                            // Match detection
+                            // This approach trades the hash matching rate with time, i.e. the rate required
+                            // for a match drops with time. The idea is that a high matching rate after a short
+                            // time is equivalent to a low matching rate after a long time. The difficulty is to 
+                            // to parameterize it in such a way, that a match is detected as fast as possible,
+                            // while detecting a no-match isn't delayed too far as it takes a lot of processing time.
+                            // NOTE The current parameters are just eyeballed, there's a lot of influence on processing speed here
+                            double sec = 11025d / 256;
+                            double threshold = Math.Pow(0.5, numIndices / (sec * 2)) * 0.3;
+                            double thresholdLow = threshold / 6;
+                            double rate = 1d / numTried * numMatched;
+
+                            if (numIndices > 10 && rate > threshold) {
+                                matchFound = true;
+                                break;
+                            }
+                            else if (rate < thresholdLow || numIndices > 30 * sec) {
+                                break; // exit condition
+                            }
                         }
 
-                        if (numMatched > 40 && numTried > 100) {
+                        if (matchFound) {
                             matches.Add(new Match {
                                 Similarity = 1f / numTried * numMatched,
                                 Track1 = entry1.AudioTrack,
