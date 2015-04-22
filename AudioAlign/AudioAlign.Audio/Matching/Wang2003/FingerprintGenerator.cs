@@ -17,46 +17,35 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
     /// </summary>
     public class FingerprintGenerator {
 
-        private int samplingRate = 11025;
-        private int windowSize = 512;
-        private int hopSize = 256;
+        private const float spectrumMinThreshold = -200; // dB volume
 
-        private float spectrumMinThreshold = -200; // dB volume
-        private float spectrumTemporalSmoothingCoefficient = 0.05f;
-
-        private int spectrumSmoothingLength = 3; // the width in samples of the FFT spectrum to average over
-        private int peaksPerFrame = 3;
-        private int peakFanout = 5;
-
-        private int targetZoneDistance = 2; // time distance in frames
-        private int targetZoneLength = 30; // time length in frames
-        private int targetZoneWidth = 63; // frequency width in FFT bins
+        private Profile profile;
 
         public event EventHandler<FrameProcessedEventArgs> FrameProcessed;
         public event EventHandler<FingerprintHashEventArgs> FingerprintHashesGenerated;
 
-        public FingerprintGenerator() {
-            //
+        public FingerprintGenerator(Profile profile) {
+            this.profile = profile;
         }
 
         public void Generate(AudioTrack track) {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(track.FileInfo)),
-                ResamplingQuality.Medium, samplingRate);
+                ResamplingQuality.Medium, profile.SamplingRate);
 
-            STFT stft = new STFT(audioStream, windowSize, hopSize, WindowType.Hann);
+            STFT stft = new STFT(audioStream, profile.WindowSize, profile.HopSize, WindowType.Hann);
             int index = 0;
             int indices = stft.WindowCount;
             int processedFrames = 0;
 
-            float[] spectrum = new float[windowSize / 2];
-            //float[] smoothedSpectrum = new float[frameBuffer.Length - frameSmoothingLength + 1]; // the smooved frequency spectrum of the current frame
-            //var spectrumSmoother = new SimpleMovingAverage(frameSmoothingLength);
+            float[] spectrum = new float[profile.WindowSize / 2];
+            float[] smoothedSpectrum = new float[spectrum.Length - profile.SpectrumSmoothingLength + 1]; // the smooved frequency spectrum of the current frame
+            var spectrumSmoother = new SimpleMovingAverage(profile.SpectrumSmoothingLength);
             float[] spectrumTemporalAverage = new float[spectrum.Length]; // a running average of each spectrum bin over time
             float[] spectrumResidual = new float[spectrum.Length]; // the difference between the current spectrum and the moving average spectrum
 
-            var peakHistory = new PeakHistory(1 + targetZoneDistance + targetZoneLength, spectrum.Length / 2);
-            var peakPairs = new List<PeakPair>(peaksPerFrame * peakFanout); // keep a single instance of the list to avoid instantiation overhead
+            var peakHistory = new PeakHistory(1 + profile.TargetZoneDistance + profile.TargetZoneLength, spectrum.Length / 2);
+            var peakPairs = new List<PeakPair>(profile.PeaksPerFrame * profile.PeakFanout); // keep a single instance of the list to avoid instantiation overhead
 
             while (stft.HasNext()) {
                 // Get the FFT spectrum
@@ -71,13 +60,15 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 }
 
                 // Smooth the frequency spectrum to remove small peaks
-                //spectrumSmoother.Clear();
-                //for (int i = 0; i < frameBuffer.Length; i++) {
-                //    var avg = spectrumSmoother.Add(frameBuffer[i]);
-                //    if (i >= spectrumSmoothingLength) {
-                //        smoothedSpectrum[i - spectrumSmoothingLength] = avg;
-                //    }
-                //}
+                if (profile.SpectrumSmoothingLength > 0) {
+                    spectrumSmoother.Clear();
+                    for (int i = 0; i < spectrum.Length; i++) {
+                        var avg = spectrumSmoother.Add(spectrum[i]);
+                        if (i >= profile.SpectrumSmoothingLength) {
+                            smoothedSpectrum[i - profile.SpectrumSmoothingLength] = avg;
+                        }
+                    }
+                }
 
                 // Update the temporal moving bin average
                 if (processedFrames == 0) {
@@ -90,7 +81,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                     // Update averages on all subsequent frames
                     for (int i = 0; i < spectrum.Length; i++) {
                         spectrumTemporalAverage[i] = ExponentialMovingAverage.UpdateMovingAverage(
-                            spectrumTemporalAverage[i], spectrumTemporalSmoothingCoefficient, spectrum[i]);
+                            spectrumTemporalAverage[i], profile.SpectrumTemporalSmoothingCoefficient, spectrum[i]);
                     }
                 }
 
@@ -110,7 +101,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 FindLocalMaxima(spectrumResidual, peaks); // refill with new peaks
 
                 // Pick the largest n peaks
-                int numMaxima = Math.Min(peaks.Count, peaksPerFrame);
+                int numMaxima = Math.Min(peaks.Count, profile.PeaksPerFrame);
                 if (numMaxima > 0) {
                     peaks.Sort((p1, p2) => p1.Value == p2.Value ? 0 : p1.Value < p2.Value ? 1 : -1); // order peaks by height
                     if (peaks.Count > numMaxima) {
@@ -145,7 +136,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             }
 
             // Flush the remaining peaks of the last frames from the history to get all remaining pairs
-            for (int i = 0; i < targetZoneLength; i++) {
+            for (int i = 0; i < profile.TargetZoneLength; i++) {
                 var peaks = peakHistory.List;
                 peaks.Clear();
                 peakHistory.Add(-1, peaks);
@@ -211,21 +202,21 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         /// <param name="peakHistory">the history structure to read the peaks from</param>
         /// <param name="peakPairs">the list to store the pairs in</param>
         private void FindPairsNaive(PeakHistory peakHistory, List<PeakPair> peakPairs) {
-            var halfWidth = targetZoneWidth / 2;
+            var halfWidth = profile.TargetZoneWidth / 2;
 
             var index = peakHistory.Index;
             foreach (var peak in peakHistory.Lists[0]) {
                 int count = 0;
-                for (int distance = targetZoneDistance; distance < peakHistory.Length; distance++) {
+                for (int distance = profile.TargetZoneDistance; distance < peakHistory.Length; distance++) {
                     foreach (var targetPeak in peakHistory.Lists[distance]) {
                         if (peak.Index >= targetPeak.Index - halfWidth && peak.Index <= targetPeak.Index + halfWidth) {
                             peakPairs.Add(new PeakPair { Index = index, Peak1 = peak, Peak2 = targetPeak, Distance = distance });
-                            if (++count >= peakFanout) {
+                            if (++count >= profile.PeakFanout) {
                                 break;
                             }
                         }
                     }
-                    if (count >= peakFanout) {
+                    if (count >= profile.PeakFanout) {
                         break;
                     }
                 }
@@ -246,7 +237,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         /// <param name="peakHistory">the history structure to read the peaks from</param>
         /// <param name="peakPairs">the list to store the pairs in</param>
         private void FindPairsWithMaxEnergy(PeakHistory peakHistory, List<PeakPair> peakPairs) {
-            var halfWidth = targetZoneWidth / 2;
+            var halfWidth = profile.TargetZoneWidth / 2;
 
             // Get pairs from peaks
             // This is a very naive approach that can be improved, e.g. by taking the average peak value into account,
@@ -255,7 +246,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             // constraints of the target area permit, until the max number of pairs has been generated.
             var index = peakHistory.Index;
             foreach (var peak in peakHistory.Lists[0]) {
-                for (int distance = targetZoneDistance; distance < peakHistory.Length; distance++) {
+                for (int distance = profile.TargetZoneDistance; distance < peakHistory.Length; distance++) {
                     foreach (var targetPeak in peakHistory.Lists[distance]) {
                         if (peak.Index >= targetPeak.Index - halfWidth && peak.Index <= targetPeak.Index + halfWidth) {
                             peakPairs.Add(new PeakPair { Index = index, Peak1 = peak, Peak2 = targetPeak, Distance = distance });
@@ -278,7 +269,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 return 0;
             });
 
-            int maxPeaks = Math.Min(peakFanout, peakPairs.Count);
+            int maxPeaks = Math.Min(profile.PeakFanout, peakPairs.Count);
             if (peakPairs.Count > maxPeaks) {
                 peakPairs.RemoveRange(maxPeaks, peakPairs.Count - maxPeaks); // select the n most prominent peak pairs
             }

@@ -182,6 +182,7 @@
     <Compile Include="Matching\Wang2003\FrameProcessedEventArgs.cs" />
     <Compile Include="Matching\Wang2003\ICollisionMap.cs" />
     <Compile Include="Matching\Wang2003\FingerprintHashLookupEntry.cs" />
+    <Compile Include="Matching\Wang2003\Profile.cs" />
     <Compile Include="MultitrackPlayer.cs" />
     <Compile Include="Project\VideoTrack.cs" />
     <Compile Include="Streams\AbstractAudioStreamWrapper.cs" />

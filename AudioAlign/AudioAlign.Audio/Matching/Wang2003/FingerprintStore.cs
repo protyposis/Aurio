@@ -8,10 +8,12 @@ using System.Text;
 namespace AudioAlign.Audio.Matching.Wang2003 {
     public class FingerprintStore {
 
+        private Profile profile;
         private Dictionary<AudioTrack, TrackStore> store;
         private IFingerprintCollisionMap collisionMap;
 
-        public FingerprintStore() {
+        public FingerprintStore(Profile profile) {
+            this.profile = profile;
             store = new Dictionary<AudioTrack, TrackStore>();
             collisionMap = new DictionaryCollisionMap();
         }
@@ -112,7 +114,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             // to parameterize it in such a way, that a match is detected as fast as possible,
                             // while detecting a no-match isn't delayed too far as it takes a lot of processing time.
                             // NOTE The current parameters are just eyeballed, there's a lot of influence on processing speed here
-                            double sec = 11025d / 256;
+                            double sec = (double)profile.SamplingRate / profile.HopSize;
                             double threshold = Math.Pow(0.5, numIndices / (sec * 2)) * 0.3;
                             double thresholdLow = threshold / 6;
                             double rate = 1d / numTried * numMatched;
