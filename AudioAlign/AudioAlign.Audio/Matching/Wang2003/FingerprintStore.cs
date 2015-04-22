@@ -44,7 +44,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         public List<Match> FindMatches(FingerprintHash hash) {
             List<Match> matches = new List<Match>();
             List<FingerprintHashLookupEntry> entries = collisionMap.GetValues(hash);
-            Dictionary<FingerprintHash, int> localCollisionMap = new Dictionary<FingerprintHash, int>();
+            HashSet<FingerprintHash> localCollisionMap = new HashSet<FingerprintHash>();
 
             for (int x = 0; x < entries.Count; x++) {
                 FingerprintHashLookupEntry entry1 = entries[x];
@@ -71,13 +71,18 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             // Determine union and intersection (this block is much faster than using LINQ)
                             // The union of the two ranges is the total number of distinct hashes
                             // The intersection of the two ranges is the total number of similar hashes
+                            // NOTE The collision map here is the bottleneck of this method and takes the major
+                            //      processing time. Other approaches tried without any speedup:
+                            //      - n*m element by element comparison (since the amount of elements is reasonably small)
+                            //      - concatenating the two ranges, sorting them, and linearly iterating over, counting the duplicates (sort is slow)
+                            //      - presorting at hashes generation time, then applying zipper intersection algorithm (hash comparisons are slow)
                             localCollisionMap.Clear();
                             for (int i = indexEntry1.index; i < indexEntry1.index + indexEntry1.length; i++) {
-                                localCollisionMap.Add(hashes1[i], 0);
+                                localCollisionMap.Add(hashes1[i]);
                                 numTried++;
                             }
                             for (int j = indexEntry2.index; j < indexEntry2.index + indexEntry2.length; j++) {
-                                if (localCollisionMap.ContainsKey(hashes2[j])) {
+                                if (localCollisionMap.Contains(hashes2[j])) {
                                     numMatched++; // if it's already contained in the map, it's a matching hash
                                 }
                                 else {
