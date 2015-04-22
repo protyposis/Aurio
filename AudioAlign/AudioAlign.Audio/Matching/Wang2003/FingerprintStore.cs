@@ -111,13 +111,14 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
 
                             // Match detection
                             // This approach trades the hash matching rate with time, i.e. the rate required
-                            // for a match drops with time. The idea is that a high matching rate after a short
-                            // time is equivalent to a low matching rate after a long time. The difficulty is to 
-                            // to parameterize it in such a way, that a match is detected as fast as possible,
-                            // while detecting a no-match isn't delayed too far as it takes a lot of processing time.
+                            // for a match drops with time, by using an exponentially with time decaying threshold. 
+                            // The idea is that a high matching rate after a short time is equivalent to a low matching 
+                            // rate after a long time. The difficulty is to to parameterize it in such a way, that a 
+                            // match is detected as fast as possible, while detecting a no-match isn't delayed too far 
+                            // as it takes a lot of processing time.
                             // NOTE The current parameters are just eyeballed, there's a lot of influence on processing speed here
-                            double threshold = Math.Pow(0.5, numIndices / (sec * 2)) * 0.3;
-                            double thresholdLow = threshold / 6;
+                            double threshold = Math.Pow(0.5, numIndices / (sec * 2)) * 0.3; // match successful threshold
+                            double thresholdLow = threshold / 6; // match abort threshold
                             double rate = 1d / numTried * numMatched;
 
                             if (numIndices > 10 && rate > threshold) {
