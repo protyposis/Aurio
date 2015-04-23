@@ -133,6 +133,13 @@
     <Compile Include="DataStructures\ExponentialMovingAverage.cs" />
     <Compile Include="DataStructures\IAverage.cs" />
     <Compile Include="DataStructures\SimpleMovingAverage.cs" />
+    <Compile Include="Features\ContinuousFrequencyActivation\Binarizer.cs" />
+    <Compile Include="Features\ContinuousFrequencyActivation\CFA.cs" />
+    <Compile Include="Features\ContinuousFrequencyActivation\ContinuousFrequencyActivationQuantifier.cs" />
+    <Compile Include="Features\ContinuousFrequencyActivation\FrequencyActivationCalculator.cs" />
+    <Compile Include="Features\ContinuousFrequencyActivation\LocalPeakEmphasizer.cs" />
+    <Compile Include="Features\ContinuousFrequencyActivation\PowerSpectrumCalculator.cs" />
+    <Compile Include="Features\ContinuousFrequencyActivation\StrongPeakDetector.cs" />
     <Compile Include="FFTAnalyzer.cs" />
     <Compile Include="FFTUtil.cs" />
     <Compile Include="Matching\Analysis.cs" />

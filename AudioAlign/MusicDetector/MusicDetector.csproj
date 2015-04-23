@@ -81,13 +81,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ContinuousFrequencyActivation\Binarizer.cs" />
-    <Compile Include="ContinuousFrequencyActivation\CFA.cs" />
-    <Compile Include="ContinuousFrequencyActivation\ContinuousFrequencyActivationQuantifier.cs" />
-    <Compile Include="ContinuousFrequencyActivation\FrequencyActivationCalculator.cs" />
-    <Compile Include="ContinuousFrequencyActivation\LocalPeakEmphasizer.cs" />
-    <Compile Include="ContinuousFrequencyActivation\PowerSpectrumCalculator.cs" />
-    <Compile Include="ContinuousFrequencyActivation\StrongPeakDetector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
