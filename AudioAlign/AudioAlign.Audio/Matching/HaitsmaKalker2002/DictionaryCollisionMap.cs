@@ -16,7 +16,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             if (!lookupTable.ContainsKey(subFingerprint)) {
                 lookupTable.Add(subFingerprint, new List<SubFingerprintLookupEntry>());
             }
-            lookupTable[subFingerprint].Add(new SubFingerprintLookupEntry(lookupEntry.AudioTrack, lookupEntry.Index));
+            lookupTable[subFingerprint].Add(lookupEntry);
         }
 
         public List<SubFingerprint> GetCollidingKeys() {
