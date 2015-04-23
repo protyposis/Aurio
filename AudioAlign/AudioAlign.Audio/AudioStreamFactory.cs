@@ -168,6 +168,7 @@ namespace AudioAlign.Audio {
                         float* bufferF = (float*)bufferB;
                         int samplesRead;
                         int samplesProcessed;
+                        bool peakStoreFull = false;
 
                         while ((bytesRead = StreamUtil.ForceRead(audioInputStream, buffer, 0, buffer.Length)) > 0) {
                             samplesRead = bytesRead / audioInputStream.Properties.SampleByteSize;
@@ -201,6 +202,7 @@ namespace AudioAlign.Audio {
                                     // There's no more space for more peaks
                                     // TODO how to handle this case? why is there still audio data left?
                                     Console.WriteLine("peakstore full, but there are samples left ({0} < {1})", samplesProcessed, samplesRead);
+                                    peakStoreFull = true;
                                     break;
                                 }
                             }
@@ -210,6 +212,10 @@ namespace AudioAlign.Audio {
                             if ((int)(100.0f / audioInputStream.Length * audioInputStream.Position) > progress) {
                                 progress = (int)(100.0f / audioInputStream.Length * audioInputStream.Position);
                                 peakStore.OnPeaksChanged();
+                            }
+
+                            if (peakStoreFull) {
+                                break;
                             }
                         }
                     }
