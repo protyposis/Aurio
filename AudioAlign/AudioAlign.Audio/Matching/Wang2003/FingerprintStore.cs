@@ -12,10 +12,22 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         private Dictionary<AudioTrack, TrackStore> store;
         private IFingerprintCollisionMap collisionMap;
 
+        private double[] thresholdAccept;
+        private double[] thresholdReject;
+
         public FingerprintStore(Profile profile) {
             this.profile = profile;
             store = new Dictionary<AudioTrack, TrackStore>();
             collisionMap = new DictionaryCollisionMap();
+
+            // Precompute the threshold function
+            thresholdAccept = new double[profile.MatchingMaxFrames];
+            thresholdReject = new double[profile.MatchingMaxFrames];
+            double framesPerSec = (double)profile.SamplingRate / profile.HopSize;
+            for (int i = 0; i < thresholdAccept.Length; i++) {
+                thresholdAccept[i] = profile.ThresholdAccept.Calculate(i / framesPerSec);
+                thresholdReject[i] = profile.ThresholdReject.Calculate(i / framesPerSec);
+            }
         }
 
         public IFingerprintCollisionMap CollisionMap {
@@ -46,7 +58,6 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         public List<Match> FindMatches(uint hash) {
             List<Match> matches = new List<Match>();
             List<FingerprintHashLookupEntry> entries = collisionMap.GetValues(hash);
-            double sec = (double)profile.SamplingRate / profile.HopSize; // the length of a second in units of frames
 
             for (int x = 0; x < entries.Count; x++) {
                 FingerprintHashLookupEntry entry1 = entries[x];
@@ -63,7 +74,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                         TrackStore.IndexEntry indexEntry1, indexEntry2;
                         int numTried = 0; // count of hashes tried to match
                         int numMatched = 0; // count of hashes matched
-                        int numIndices = 0; // count over how many actual frames hashes were matched (an index in the store is the equivalent of a frame in the generator)
+                        int frameCount = 0; // count over how many actual frames hashes were matched (an index in the store is the equivalent of a frame in the generator)
                         bool matchFound = false;
 
                         // Iterate through sequential frames
@@ -107,7 +118,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
 
                             index1++;
                             index2++;
-                            numIndices++;
+                            frameCount++;
 
                             // Match detection
                             // This approach trades the hash matching rate with time, i.e. the rate required
@@ -117,15 +128,15 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             // match is detected as fast as possible, while detecting a no-match isn't delayed too far 
                             // as it takes a lot of processing time.
                             // NOTE The current parameters are just eyeballed, there's a lot of influence on processing speed here
-                            double threshold = Math.Pow(0.5, numIndices / (sec * 2)) * 0.3; // match successful threshold
-                            double thresholdLow = threshold / 6; // match abort threshold
+                            //double threshold = Math.Pow(profile.MatchingThresholdExponentialDecayBase, numIndices / sec / profile.MatchingThresholdExponentialWidthScale) * profile.MatchingThresholdExponentialHeight; // match successful threshold
+                            //double thresholdLow = threshold / profile.MatchingThresholdRejectionFraction; // match abort threshold
                             double rate = 1d / numTried * numMatched;
 
-                            if (numIndices > 10 && rate > threshold) {
+                            if (frameCount > profile.MatchingMinFrames && rate > thresholdAccept[frameCount]) {
                                 matchFound = true;
                                 break;
                             }
-                            else if (rate < thresholdLow || numIndices > 30 * sec) {
+                            else if (rate < thresholdReject[frameCount] || frameCount > profile.MatchingMaxFrames) {
                                 break; // exit condition
                             }
                         }
