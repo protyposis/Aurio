@@ -15,6 +15,9 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         private double[] thresholdAccept;
         private double[] thresholdReject;
 
+        public event EventHandler<ValueEventArgs<double>> MatchingProgress;
+        public event EventHandler<ValueEventArgs<List<Match>>> MatchingFinished;
+
         public FingerprintStore(Profile profile) {
             this.profile = profile;
             store = new Dictionary<AudioTrack, TrackStore>();
@@ -163,12 +166,22 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
 
             var collidingKeys = collisionMap.GetCollidingKeys();
             Debug.WriteLine("{0} colliding keys, {1} lookup entries", collidingKeys.Count, collidingKeys.Sum(h => collisionMap.GetValues(h).Count));
-
+            
+            int collisions = collidingKeys.Count;
+            int count = 0;
             foreach (uint hash in collidingKeys) {
                 matches.AddRange(FindMatches(hash));
+
+                if (count++ % 4096 == 0 && MatchingProgress != null) {
+                    MatchingProgress(this, new ValueEventArgs<double>((double)count / collisions * 100));
+                }
             }
             Debug.WriteLine("{0} matches", matches.Count);
 
+            if (MatchingFinished != null) {
+                MatchingFinished(this, new ValueEventArgs<List<Match>>(matches));
+            }
+            
             return matches;
         }
 
