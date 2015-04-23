@@ -26,6 +26,7 @@ using AudioAlign.Audio.Streams;
 using Match = AudioAlign.Audio.Matching.Match;
 using System.IO;
 using AudioAlign.Audio.DataStructures.Matrix;
+using AudioAlign.ViewModels;
 
 namespace AudioAlign {
     /// <summary>
@@ -53,6 +54,8 @@ namespace AudioAlign {
         public TimeSpan CorrelationWindowSize { get; set; }
         public TimeSpan CorrelationIntervalSize { get; set; }
 
+        public WangFingerprintingViewModel WangFingerprinting { get; set; }
+
         public MatchingWindow(TrackList<AudioTrack> trackList, MultiTrackViewer multiTrackViewer) {
             // init non-dependency-property variables before InitializeComponent() is called
             FingerprintSize = FingerprintStore.DEFAULT_FINGERPRINT_SIZE;
@@ -66,11 +69,13 @@ namespace AudioAlign {
             CorrelationWindowSize = new TimeSpan(0, 0, 5);
             CorrelationIntervalSize = new TimeSpan(0, 5, 0);
 
-            InitializeComponent();
-
             progressMonitor = new ProgressMonitor();
             this.trackList = trackList;
             this.multiTrackViewer = multiTrackViewer;
+
+            WangFingerprinting = new WangFingerprintingViewModel(progressMonitor, trackList, multiTrackViewer.Matches);
+
+            InitializeComponent();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -326,7 +331,7 @@ namespace AudioAlign {
             List<Match> matches = fingerprintStore.FindAllMatches();
             sw.Stop();
             Debug.WriteLine(matches.Count + " matches found in {0}", sw.Elapsed);
-            matches = FingerprintStore.FilterDuplicateMatches(matches);
+            matches = MatchProcessor.FilterDuplicateMatches(matches);
             Debug.WriteLine(matches.Count + " matches found (filtered)");
             foreach (Match match in matches) {
                 multiTrackViewer.Matches.Add(match);

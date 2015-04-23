@@ -81,6 +81,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.PFFFT", "AudioAl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.PFFFT.UnitTest", "AudioAlign.PFFFT.UnitTest\AudioAlign.PFFFT.UnitTest.csproj", "{726D85B6-A389-417B-A85B-4ACACDEE4640}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Test.FingerprintingWang2003", "AudioAlign.Test.FingerprintingWang2003\AudioAlign.Test.FingerprintingWang2003.csproj", "{FF2B695C-7567-4DDD-A8F4-E16BE2E49A65}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -321,6 +323,12 @@ Global
 		{726D85B6-A389-417B-A85B-4ACACDEE4640}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{726D85B6-A389-417B-A85B-4ACACDEE4640}.Release|x64.ActiveCfg = Release|x64
 		{726D85B6-A389-417B-A85B-4ACACDEE4640}.Release|x86.ActiveCfg = Release|x86
+		{FF2B695C-7567-4DDD-A8F4-E16BE2E49A65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF2B695C-7567-4DDD-A8F4-E16BE2E49A65}.Debug|x64.ActiveCfg = Debug|x64
+		{FF2B695C-7567-4DDD-A8F4-E16BE2E49A65}.Debug|x86.ActiveCfg = Debug|x86
+		{FF2B695C-7567-4DDD-A8F4-E16BE2E49A65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF2B695C-7567-4DDD-A8F4-E16BE2E49A65}.Release|x64.ActiveCfg = Release|x64
+		{FF2B695C-7567-4DDD-A8F4-E16BE2E49A65}.Release|x86.ActiveCfg = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -343,6 +351,7 @@ Global
 		{616330A6-6386-40F1-907D-CD46884FA86F} = {33AD9CF5-1CD7-4393-A5A8-42A64760C229}
 		{22B3D2D1-D139-4AC6-B72A-1A96F1CCBBBE} = {33AD9CF5-1CD7-4393-A5A8-42A64760C229}
 		{726D85B6-A389-417B-A85B-4ACACDEE4640} = {33AD9CF5-1CD7-4393-A5A8-42A64760C229}
+		{FF2B695C-7567-4DDD-A8F4-E16BE2E49A65} = {33AD9CF5-1CD7-4393-A5A8-42A64760C229}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = AudioAlign.vsmdi
