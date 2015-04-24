@@ -26,7 +26,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
 
         }
 
-        private class SubbandAnalysis {
+        private class SubbandAnalyzer : StreamWindower {
 
             /// <summary>
             /// The 128 point subband filter bank coefficients for the decomposition into 8 frequency bands.
@@ -40,7 +40,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             /// A filter bank facilitates non-uniform frequency resolution and specification of filters separately
             /// for each bank, whereas transforms (e.g. FFT) are uniform. Transforms are faster with lots of subbands.
             /// </summary>
-            private const float[] C = {
+            private static readonly float[] C = {
                      0.000000477f,  0.000000954f,  0.000001431f,  0.000002384f,  0.000003815f,  0.000006199f,  0.000009060f,  0.000013828f,
                      0.000019550f,  0.000027657f,  0.000037670f,  0.000049591f,  0.000062943f,  0.000076771f,  0.000090599f,  0.000101566f,
                     -0.000108242f, -0.000106812f, -0.000095367f, -0.000069618f, -0.000027180f,  0.000034332f,  0.000116348f,  0.000218868f,
@@ -58,70 +58,69 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                     -0.000090599f, -0.000076771f, -0.000062943f, -0.000049591f, -0.000037670f, -0.000027657f, -0.000019550f, -0.000013828f,
                     -0.000009060f, -0.000006199f, -0.000003815f, -0.000002384f, -0.000001431f, -0.000000954f, -0.000000477f, 0 };
 
-            private const int SubBands = 8;
-            private const int MatrixRows = 8;
-            private const int MatrixCols = 16;
+            public const int SubBands = 8;
+
+            private float[] frameBuffer;
+            private float[] subbandBuffer;
+            private int subbandFrameSize;
 
             private float[,] mRe;
             private float[,] mIm;
 
-            public SubbandAnalysis() {
-                // Precalculate the analysis filter bank coefficients
-                mRe = new float[MatrixRows, MatrixCols];
-                mIm = new float[MatrixRows, MatrixCols];
+            public SubbandAnalyzer(IAudioStream stream) : base(stream, C.Length, SubBands) {
+                frameBuffer = new float[WindowSize];
+                subbandBuffer = new float[SubBands];
+                subbandFrameSize = WindowSize / SubBands;
 
-                for (int i = 0; i < MatrixRows; i++) {
-                    for (int j = 0; j < MatrixCols; j++) {
+                // Precalculate the analysis filter bank DFT coefficients
+                mRe = new float[SubBands, subbandFrameSize];
+                mIm = new float[SubBands, subbandFrameSize];
+
+                for (int i = 0; i < SubBands; i++) {
+                    for (int j = 0; j < subbandFrameSize; j++) {
                         mRe[i, j] = (float)Math.Cos((2 * i + 1) * (j - 4) * (Math.PI / 16.0));
                         mIm[i, j] = (float)Math.Sin((2 * i + 1) * (j - 4) * (Math.PI / 16.0));
                     }
                 }
             }
 
-            public float[,] Analyze(float[] samples) {
-
-                float[] Z = new float[C.Length];
-                float[] Y = new float[MatrixCols];
-
-                int numFrames = (samples.Length - C.Length + 1) / SubBands;
-                Debug.Assert(numFrames > 0);
-
-                float[,] data = new float[numFrames, SubBands]; // storage for decomposed bands
-
-                // For each frame, ...
-                for (int t = 0; t < numFrames; t++) {
-                    // ...multiply frame with filter bank coefficients, ...
-                    for (int i = 0; i < C.Length; i++) {
-                        Z[i] = samples[t * SubBands + i] * C[i];
-                    }
-                    // (the subbands are now interleaved in Z)
-
-                    // ...take the first subsection of Z, which contains the first sample of each subband spectrum(?), ...
-                    for (int i = 0; i < MatrixCols; i++) {
-                        Y[i] = Z[i];
-                    }
-                    // (Y now contains, for each subband, the first sample)
-
-                    // ...add up all remaining interleaved samples to their subband, ...
-                    for (int i = 0; i < MatrixCols; i++) {
-                        for (int j = 1; j < MatrixRows; j++) {
-                            Y[i] += Z[i + MatrixCols * j];
-                        }
-                    }
-                    // (Y now contains, for each subband, its sum of samples)
-
-                    // ...and finally compute the frequency energy of each subband by applying the DFT and calculating the squared magnitude
-                    for (int i = 0; i < MatrixRows; i++) {
-                        float Dr = 0, Di = 0;
-                        for (int j = 0; j < MatrixCols; j++) {
-                            Dr += mRe[i, j] * Y[j];
-                            Di -= mIm[i, j] * Y[j];
-                        }
-                        data[t, i] = Dr * Dr + Di * Di;
-                    }
+            public override void ReadFrame(float[] subbandEnergies) {
+                if (subbandEnergies.Length != SubBands) {
+                    throw new ArgumentOutOfRangeException("wrong subband array size");
                 }
 
-                return data;
+                base.ReadFrame(frameBuffer);
+
+                // Multiply frame with filter bank coefficients, ...
+                for (int i = 0; i < C.Length; i++) {
+                    frameBuffer[i] = frameBuffer[i] * C[i];
+                }
+                // (the subbands are now interleaved in the frame buffer)
+
+                // ...take the first subsection of fB, which contains the first sample of each subband spectrum(?), ...
+                for (int i = 0; i < subbandFrameSize; i++) {
+                    subbandBuffer[i] = frameBuffer[i];
+                }
+                // (subbandBuffer now contains, for each subband, the first sample)
+
+                // ...add up all remaining interleaved samples to their subband, ...
+                for (int i = 0; i < subbandFrameSize; i++) {
+                    for (int j = 1; j < SubBands; j++) {
+                        subbandBuffer[i] += frameBuffer[i + subbandFrameSize * j];
+                    }
+                }
+                // (Y now contains, for each subband, its sum of samples)
+
+                // ...and finally compute the frequency energy of each subband by applying the DFT and calculating the squared magnitude
+                for (int i = 0; i < SubBands; i++) {
+                    float Dr = 0, Di = 0;
+                    for (int j = 0; j < subbandFrameSize; j++) {
+                        Dr += mRe[i, j] * subbandBuffer[j];
+                        Di -= mIm[i, j] * subbandBuffer[j];
+                    }
+                    subbandEnergies[i] = Dr * Dr + Di * Di;
+                }
+                // (subbandEnergies not contains the result as the total energy of each subband)
             }
         }
     }
