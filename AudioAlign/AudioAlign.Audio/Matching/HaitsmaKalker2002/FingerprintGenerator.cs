@@ -9,6 +9,10 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
+    /// <summary>
+    /// Generates fingerprints according to what is described in:
+    /// - Haitsma, Jaap, and Ton Kalker. "A highly robust audio fingerprinting system." ISMIR. 2002.
+    /// </summary>
     public class FingerprintGenerator {
 
         private const int STREAM_INPUT_BUFFER_SIZE = 32768;

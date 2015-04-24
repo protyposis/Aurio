@@ -12,6 +12,11 @@ using AudioAlign.Audio.DataStructures;
 using AudioAlign.Audio.DataStructures.Matrix;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
+    /// <summary>
+    /// On-line Time Warping
+    /// - Dixon, Simon. "An On-Line Time Warping Algorithm for Tracking Musical Performances." IJCAI. 2005.
+    /// - Dixon, Simon, and Gerhard Widmer. "MATCH: A Music Alignment Tool Chest." ISMIR. 2005.
+    /// </summary>
     public class OLTW : DTW {
 
         private const int MAX_RUN_COUNT = 3; // MaxRunCount
