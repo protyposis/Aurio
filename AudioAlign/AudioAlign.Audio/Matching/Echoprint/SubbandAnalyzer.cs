@@ -5,6 +5,10 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Audio.Matching.Echoprint {
+    /// <summary>
+    /// Divides a source signal into 8 bands by converting every 8 samples of a source signal into a vector 
+    /// of 8 values containing the total energy of each band.
+    /// </summary>
     class SubbandAnalyzer : StreamWindower {
 
         /// <summary>
@@ -48,6 +52,11 @@ namespace AudioAlign.Audio.Matching.Echoprint {
 
         public SubbandAnalyzer(IAudioStream stream)
             : base(stream, C.Length, SubBands) {
+
+            if (stream.Properties.SampleRate != 11025) {
+                throw new ArgumentException("stream sample rate must be 11025");
+            }
+
             frameBuffer = new float[WindowSize];
             subbandBuffer = new float[SubBands];
             subbandFrameSize = WindowSize / SubBands;
