@@ -50,6 +50,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
 
             float[,] outm;
             uint[] onset_counter_for_band;
+            // 345 ~= 1 sec (11025 / 8 [subband downsampling factor in SubbandAnalyzer] / 4 [RMS downsampling in adaptiveOnsets()] ~= 345 frames per second)
             uint res = adaptiveOnsets(E, 345, out outm, out onset_counter_for_band);
         }
 
@@ -59,7 +60,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             int bands, frames, i, j, k;
             int deadtime = 128;
             double[] H = new double[SubBands], taus = new double[SubBands], N = new double[SubBands];
-            int[] contact = new int[SubBands], lcontact = new int[SubBands], tsince = new int[SubBands];
+            bool[] contact = new bool[SubBands], lcontact = new bool[SubBands];
+            int[] tsince = new int[SubBands];
             double overfact = 1.1;  /* threshold rel. to actual peak */
             uint onset_counter = 0;
 
@@ -97,8 +99,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 N[j] = 0.0;
                 taus[j] = 1.0;
                 H[j] = E[0, j];
-                contact[j] = 0;
-                lcontact[j] = 0;
+                contact[j] = false;
+                lcontact[j] = false;
                 tsince[j] = 0;
                 Y0[j] = 0;
             }
@@ -119,15 +121,15 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                     /* remember the last filtered level */
                     Y0[j] = xn;
 
-                    contact[j] = (xn > H[j]) ? 1 : 0;
+                    contact[j] = (xn > H[j]);
 
-                    if (contact[j] == 1 && lcontact[j] == 0) {
+                    if (contact[j] && !lcontact[j]) {
                         /* attach - record the threshold level unless we have one */
                         if (N[j] == 0) {
                             N[j] = H[j];
                         }
                     }
-                    if (contact[j] == 1) {
+                    if (contact[j]) {
                         /* update with new threshold */
                         H[j] = xn * overfact;
                     }
@@ -136,7 +138,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                         H[j] = H[j] * Math.Exp(-1.0 / (double)taus[j]);
                     }
 
-                    if (contact[j] == 0 && lcontact[j] == 1) {
+                    if (!contact[j] && lcontact[j]) {
                         /* detach */
                         if (onset_counter_for_band[j] > 0 && (int)outm[j, onset_counter_for_band[j] - 1] > i - deadtime) {
                             // overwrite last-written time
@@ -156,7 +158,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                         taus[j] = taus[j] + 1;
                     }
 
-                    if ((contact[j] == 0) && (tsince[j] > deadtime)) {
+                    if (!contact[j] && (tsince[j] > deadtime)) {
                         /* forget the threshold where we recently hit */
                         N[j] = 0;
                     }
