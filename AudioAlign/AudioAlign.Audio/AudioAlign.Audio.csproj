@@ -161,6 +161,7 @@
     <Compile Include="DataStructures\Graph\UndirectedGraph.cs" />
     <Compile Include="Matching\Echoprint\FingerprintGenerator.cs" />
     <Compile Include="Matching\Echoprint\SubbandAnalyzer.cs" />
+    <Compile Include="Matching\Echoprint\WhiteningStream.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\BugProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\BassProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\DictionaryCollisionMap.cs" />
