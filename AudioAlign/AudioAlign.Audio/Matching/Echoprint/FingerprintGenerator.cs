@@ -19,12 +19,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
     public class FingerprintGenerator {
 
         private const uint HashSeed = 0x9ea5fa36;
-        private const float Quantize_DT_S = 256f / 11025f;
-        private const float Quantize_A_S = 256f / 11025f;
         private const uint HashBitmask = 0x000fffff;
         private const int SubBands = 8;
-
-        private const int _Offset = 0;
 
         public void Generate(AudioTrack track) {
             IAudioStream audioStream = new ResamplingStream(
@@ -170,14 +166,13 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             return onset_counter;
         }
 
-        private uint CalculateQuantizedTimeForFrameDelta(uint frameDelta) {
-            double frameDeltaTime = (double)frameDelta / ((double)11025 / 32.0);
-            return (uint)(((int)Math.Floor((frameDeltaTime * 1000.0) / (float)Quantize_DT_S) * Quantize_DT_S) / Math.Floor(Quantize_DT_S * 1000.0));
-        }
-
-        private uint CalculateQuantizedTimeForFrameAbsolute(uint frame) {
-            double frameTime = _Offset + (double)frame / ((double)11025 / 32.0);
-            return (uint)(((int)Math.Round((frameTime * 1000.0) / (float)Quantize_A_S) * Quantize_A_S) / Math.Floor(Quantize_A_S * 1000.0));
+        /// <summary>
+        /// The quantized_time_for_frame_delta and quantized_time_for_frame_absolute functions in the original
+        /// Echoprint source are way too complicated and can be simplified to this function. The offset is omitted
+        /// here as it is not needed.
+        /// </summary>
+        private uint QuantizeFrameTime(uint frame) {
+            return (uint)Math.Round(frame / 8d);
         }
 
         private List<FPCode> GetCodes(float[,] E) {
@@ -191,7 +186,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 if (bandOnsetCount[band] > 2) {
                     for (uint onset = 0; onset < bandOnsetCount[band] - 2; onset++) {
                         // What time was this onset at?
-                        uint quantizedOnsetTime = CalculateQuantizedTimeForFrameAbsolute(bandOnsets[band, onset]);
+                        uint quantizedOnsetTime = QuantizeFrameTime(bandOnsets[band, onset]);
 
                         uint[,] p = new uint[2, 6];
                         for (int i = 0; i < 6; i++) {
@@ -222,8 +217,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                         // For each pair emit a code
                         for (uint k = 0; k < 6; k++) {
                             // Quantize the time deltas to 23ms
-                            short deltaTime0 = (short)CalculateQuantizedTimeForFrameDelta(p[0, k]);
-                            short deltaTime1 = (short)CalculateQuantizedTimeForFrameDelta(p[1, k]);
+                            short deltaTime0 = (short)QuantizeFrameTime(p[0, k]);
+                            short deltaTime1 = (short)QuantizeFrameTime(p[1, k]);
                             // Create a key from the time deltas and the band index
                             hashMaterial[0] = (byte)((deltaTime0 >> 8) & 0xFF);
                             hashMaterial[1] = (byte)((deltaTime0) & 0xFF);
