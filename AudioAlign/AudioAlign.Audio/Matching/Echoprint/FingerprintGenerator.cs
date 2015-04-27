@@ -48,14 +48,14 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 count++;
             }
 
-            uint[,] outm;
-            uint[] onset_counter_for_band;
+            uint[,] bandOnsets;
+            uint[] bandOnsetCount;
             // 345 ~= 1 sec (11025 / 8 [subband downsampling factor in SubbandAnalyzer] / 4 [RMS downsampling in adaptiveOnsets()] ~= 345 frames per second)
-            uint res = adaptiveOnsets(E, 345, out outm, out onset_counter_for_band);
-            var codes = Compute(E);
+            uint res = GetAdaptiveOnsets(E, 345, out bandOnsets, out bandOnsetCount);
+            var codes = GetCodes(E);
         }
 
-        private uint adaptiveOnsets(float[,] E, int ttarg, out uint[,] outm, out uint[] onset_counter_for_band) {
+        private uint GetAdaptiveOnsets(float[,] E, int ttarg, out uint[,] bandOnsets, out uint[] bandOnsetCount) {
             //  E is a sgram-like matrix of energies.
             //const float *pE;
             int bands, frames, i, j, k;
@@ -87,8 +87,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             frames = Eb.GetLength(0);
             bands = Eb.GetLength(1);
 
-            outm = new uint[SubBands, frames];
-            onset_counter_for_band = new uint[SubBands];
+            bandOnsets = new uint[SubBands, frames];
+            bandOnsetCount = new uint[SubBands];
 
             double[] bn = { 0.1883, 0.4230, 0.3392 }; /* preemph filter */   // new
             int nbn = 3;
@@ -96,7 +96,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             double[] Y0 = new double[SubBands];
 
             for (j = 0; j < bands; ++j) {
-                onset_counter_for_band[j] = 0;
+                bandOnsetCount[j] = 0;
                 N[j] = 0.0;
                 taus[j] = 1.0;
                 H[j] = E[0, j];
@@ -141,12 +141,12 @@ namespace AudioAlign.Audio.Matching.Echoprint {
 
                     if (!contact[j] && lcontact[j]) {
                         /* detach */
-                        if (onset_counter_for_band[j] > 0 && (int)outm[j, onset_counter_for_band[j] - 1] > i - deadtime) {
+                        if (bandOnsetCount[j] > 0 && (int)bandOnsets[j, bandOnsetCount[j] - 1] > i - deadtime) {
                             // overwrite last-written time
-                            --onset_counter_for_band[j];
+                            --bandOnsetCount[j];
                             --onset_counter;
                         }
-                        outm[j, onset_counter_for_band[j]++] = (uint)i;
+                        bandOnsets[j, bandOnsetCount[j]++] = (uint)i;
                         ++onset_counter;
                         tsince[j] = 0;
                     }
@@ -170,84 +170,76 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             return onset_counter;
         }
 
-        private uint quantized_time_for_frame_delta(uint frame_delta) {
-            double time_for_frame_delta = (double)frame_delta / ((double)11025 / 32.0);
-            return (uint)(((int)Math.Floor((time_for_frame_delta * 1000.0) / (float)Quantize_DT_S) * Quantize_DT_S) / Math.Floor(Quantize_DT_S * 1000.0));
+        private uint CalculateQuantizedTimeForFrameDelta(uint frameDelta) {
+            double frameDeltaTime = (double)frameDelta / ((double)11025 / 32.0);
+            return (uint)(((int)Math.Floor((frameDeltaTime * 1000.0) / (float)Quantize_DT_S) * Quantize_DT_S) / Math.Floor(Quantize_DT_S * 1000.0));
         }
 
-        private uint quantized_time_for_frame_absolute(uint frame) {
-            double time_for_frame = _Offset + (double)frame / ((double)11025 / 32.0);
-            return (uint)(((int)Math.Round((time_for_frame * 1000.0) / (float)Quantize_A_S) * Quantize_A_S) / Math.Floor(Quantize_A_S * 1000.0));
+        private uint CalculateQuantizedTimeForFrameAbsolute(uint frame) {
+            double frameTime = _Offset + (double)frame / ((double)11025 / 32.0);
+            return (uint)(((int)Math.Round((frameTime * 1000.0) / (float)Quantize_A_S) * Quantize_A_S) / Math.Floor(Quantize_A_S * 1000.0));
         }
 
-        private List<FPCode> Compute(float[,] E) {
-            uint actual_codes = 0;
-            byte[] hash_material = new byte[5];
-            for (uint i = 0; i < 5; i++) hash_material[i] = 0;
-            uint[] onset_counter_for_band;
-            uint[,] outm;
-            uint onset_count = adaptiveOnsets(E, 345, out outm, out onset_counter_for_band);
-            List<FPCode> codes = new List<FPCode>((int)onset_count * 6);
+        private List<FPCode> GetCodes(float[,] E) {
+            byte[] hashMaterial = new byte[5];
+            uint[] bandOnsetCount;
+            uint[,] bandOnsets;
+            uint onsetCount = GetAdaptiveOnsets(E, 345, out bandOnsets, out bandOnsetCount);
+            List<FPCode> codes = new List<FPCode>((int)onsetCount * 6);
 
             for (byte band = 0; band < SubBands; band++) {
-                if (onset_counter_for_band[band] > 2) {
-                    for (uint onset = 0; onset < onset_counter_for_band[band] - 2; onset++) {
+                if (bandOnsetCount[band] > 2) {
+                    for (uint onset = 0; onset < bandOnsetCount[band] - 2; onset++) {
                         // What time was this onset at?
-                        uint time_for_onset_ms_quantized = quantized_time_for_frame_absolute(outm[band, onset]);
+                        uint quantizedOnsetTime = CalculateQuantizedTimeForFrameAbsolute(bandOnsets[band, onset]);
 
                         uint[,] p = new uint[2, 6];
                         for (int i = 0; i < 6; i++) {
                             p[0, i] = 0;
                             p[1, i] = 0;
                         }
-                        int nhashes = 6;
+                        int hashCount = 6;
 
-                        if ((int)onset == (int)onset_counter_for_band[band] - 4) { nhashes = 3; }
-                        if ((int)onset == (int)onset_counter_for_band[band] - 3) { nhashes = 1; }
-                        p[0, 0] = (outm[band, onset + 1] - outm[band, onset]);
-                        p[1, 0] = (outm[band, onset + 2] - outm[band, onset + 1]);
-                        if (nhashes > 1) {
-                            p[0, 1] = (outm[band, onset + 1] - outm[band, onset]);
-                            p[1, 1] = (outm[band, onset + 3] - outm[band, onset + 1]);
-                            p[0, 2] = (outm[band, onset + 2] - outm[band, onset]);
-                            p[1, 2] = (outm[band, onset + 3] - outm[band, onset + 2]);
-                            if (nhashes > 3) {
-                                p[0, 3] = (outm[band, onset + 1] - outm[band, onset]);
-                                p[1, 3] = (outm[band, onset + 4] - outm[band, onset + 1]);
-                                p[0, 4] = (outm[band, onset + 2] - outm[band, onset]);
-                                p[1, 4] = (outm[band, onset + 4] - outm[band, onset + 2]);
-                                p[0, 5] = (outm[band, onset + 3] - outm[band, onset]);
-                                p[1, 5] = (outm[band, onset + 4] - outm[band, onset + 3]);
+                        if ((int)onset == (int)bandOnsetCount[band] - 4) { hashCount = 3; }
+                        if ((int)onset == (int)bandOnsetCount[band] - 3) { hashCount = 1; }
+                        p[0, 0] = (bandOnsets[band, onset + 1] - bandOnsets[band, onset]);
+                        p[1, 0] = (bandOnsets[band, onset + 2] - bandOnsets[band, onset + 1]);
+                        if (hashCount > 1) {
+                            p[0, 1] = (bandOnsets[band, onset + 1] - bandOnsets[band, onset]);
+                            p[1, 1] = (bandOnsets[band, onset + 3] - bandOnsets[band, onset + 1]);
+                            p[0, 2] = (bandOnsets[band, onset + 2] - bandOnsets[band, onset]);
+                            p[1, 2] = (bandOnsets[band, onset + 3] - bandOnsets[band, onset + 2]);
+                            if (hashCount > 3) {
+                                p[0, 3] = (bandOnsets[band, onset + 1] - bandOnsets[band, onset]);
+                                p[1, 3] = (bandOnsets[band, onset + 4] - bandOnsets[band, onset + 1]);
+                                p[0, 4] = (bandOnsets[band, onset + 2] - bandOnsets[band, onset]);
+                                p[1, 4] = (bandOnsets[band, onset + 4] - bandOnsets[band, onset + 2]);
+                                p[0, 5] = (bandOnsets[band, onset + 3] - bandOnsets[band, onset]);
+                                p[1, 5] = (bandOnsets[band, onset + 4] - bandOnsets[band, onset + 3]);
                             }
                         }
 
                         // For each pair emit a code
                         for (uint k = 0; k < 6; k++) {
                             // Quantize the time deltas to 23ms
-                            short time_delta0 = (short)quantized_time_for_frame_delta(p[0, k]);
-                            short time_delta1 = (short)quantized_time_for_frame_delta(p[1, k]);
+                            short deltaTime0 = (short)CalculateQuantizedTimeForFrameDelta(p[0, k]);
+                            short deltaTime1 = (short)CalculateQuantizedTimeForFrameDelta(p[1, k]);
                             // Create a key from the time deltas and the band index
-                            //memcpy(hash_material+0, (const void*)&time_delta0, 2);
-                            hash_material[0] = (byte)((time_delta0 >> 8) & 0xFF);
-                            hash_material[1] = (byte)((time_delta0) & 0xFF);
-                            //memcpy(hash_material+2, (const void*)&time_delta1, 2);
-                            hash_material[2] = (byte)((time_delta1 >> 8) & 0xFF);
-                            hash_material[3] = (byte)((time_delta1) & 0xFF);
-                            //memcpy(hash_material+4, (const void*)&band, 1);
-                            hash_material[4] = band;
-                            uint hashed_code = MurmurHash2.Hash(hash_material, HashSeed) & HashBitmask;
+                            hashMaterial[0] = (byte)((deltaTime0 >> 8) & 0xFF);
+                            hashMaterial[1] = (byte)((deltaTime0) & 0xFF);
+                            hashMaterial[2] = (byte)((deltaTime1 >> 8) & 0xFF);
+                            hashMaterial[3] = (byte)((deltaTime1) & 0xFF);
+                            hashMaterial[4] = band;
+                            uint hashCode = MurmurHash2.Hash(hashMaterial, HashSeed) & HashBitmask;
 
                             // Set the code alongside the time of onset
-                            codes.Add(new FPCode(time_for_onset_ms_quantized, hashed_code));
-                            actual_codes++;
-                            //fprintf(stderr, "whee %d,%d: [%d, %d] (%d, %d), %d = %u at %d\n", actual_codes, k, time_delta0, time_delta1, p[0][k], p[1][k], band, hashed_code, time_for_onset_ms_quantized);
+                            codes.Add(new FPCode(quantizedOnsetTime, hashCode));
                         }
                     }
                 }
             }
 
             codes.TrimExcess();
-            //delete [] onset_counter_for_band;
 
             return codes;
         }
