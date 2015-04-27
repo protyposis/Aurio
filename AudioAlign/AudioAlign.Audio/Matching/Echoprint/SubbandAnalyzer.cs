@@ -12,16 +12,13 @@ namespace AudioAlign.Audio.Matching.Echoprint {
     class SubbandAnalyzer : StreamWindower {
 
         /// <summary>
-        /// The 128 point subband filter bank coefficients for the decomposition into 8 frequency bands.
+        /// The 128 point subband filter analysis window coefficients for the decomposition into 8 frequency bands.
         /// 
         /// They are downsampled from the 512 subband filter bank coefficients from the MPEG-1 audio standard 
-        /// (ISO/IEC 11172-3:1993), which is a 32-band filter bank for 44.1 kHz audio. We only deal with 11kHz 
-        /// audio and only need the lowest 8 bands (44/11 == 32/8 == 512/128).
+        /// (ISO/IEC 11172-3:1993 pp. 68--69), which is a window for a 32-band filter bank for 44.1 kHz audio. 
+        /// We only deal with 11kHz audio and only need the lowest 8 bands (44/11 == 32/8 == 512/128).
         /// 
-        /// Source: http://heim.ifi.uio.no/~inf3440/MP1/Table_analysis_window.m
-        /// 
-        /// A filter bank facilitates non-uniform frequency resolution and specification of filters separately
-        /// for each bank, whereas transforms (e.g. FFT) are uniform. Transforms are faster with lots of subbands.
+        /// Window source: http://heim.ifi.uio.no/~inf3440/MP1/Table_analysis_window.m
         /// </summary>
         private static readonly float[] C = {
                      0.000000477f,  0.000000954f,  0.000001431f,  0.000002384f,  0.000003815f,  0.000006199f,  0.000009060f,  0.000013828f,
@@ -58,21 +55,31 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             }
 
             frameBuffer = new float[WindowSize];
-            subbandBuffer = new float[SubBands];
             subbandFrameSize = WindowSize / SubBands;
+            subbandBuffer = new float[subbandFrameSize];
 
-            // Precalculate the analysis filter bank DFT coefficients
             mRe = new float[SubBands, subbandFrameSize];
             mIm = new float[SubBands, subbandFrameSize];
 
+            // Precalculate the analysis filter bank coefficients
             for (int i = 0; i < SubBands; i++) {
                 for (int j = 0; j < subbandFrameSize; j++) {
-                    mRe[i, j] = (float)Math.Cos((2 * i + 1) * (j - 4) * (Math.PI / 16.0));
-                    mIm[i, j] = (float)Math.Sin((2 * i + 1) * (j - 4) * (Math.PI / 16.0));
+                    mRe[i, j] = (float)Math.Cos((2 * i + 1) * (j - 4) * (Math.PI / 16.0)); // from the ISO standard
+                    mIm[i, j] = (float)Math.Sin((2 * i + 1) * (j - 4) * (Math.PI / 16.0)); // added for DFT
                 }
             }
         }
 
+        /// <summary>
+        /// Every frame is basically its previous frame with 8 new samples added to the end and
+        /// the oldest 8 samples removed from the beginning. For every 8 new samples, the data 
+        /// is divided into 8 bands, one sample each.
+        /// 
+        /// This process is described in 
+        ///  - ISO/IEC 11172-3:1993 p. 67 (text) and p. 78 (flowchart)
+        ///  - Pan Davis, A Tutorial on MPEG/Audio Compression
+        /// </summary>
+        /// <param name="subbandEnergies">the output</param>
         public override void ReadFrame(float[] subbandEnergies) {
             if (subbandEnergies.Length != SubBands) {
                 throw new ArgumentOutOfRangeException("wrong subband array size");
@@ -80,36 +87,38 @@ namespace AudioAlign.Audio.Matching.Echoprint {
 
             base.ReadFrame(frameBuffer);
 
-            // Multiply frame with filter bank coefficients, ...
+            // The following resembles the flow chart from figure C.4 of ISO/IEC 11172-3:1993 p. 78
+            // NOTE in the standard, the most recent sample is at index 0, while here it is at length-1
+
+            // Multiply frame X with the analysis window coefficients C to get Z, ...
             for (int i = 0; i < C.Length; i++) {
                 frameBuffer[i] = frameBuffer[i] * C[i];
             }
-            // (the subbands are now interleaved in the frame buffer)
 
-            // ...take the first subsection of fB, which contains the first sample of each subband spectrum(?), ...
+            // ...do the partial calculation to get Yi, ...
             for (int i = 0; i < subbandFrameSize; i++) {
                 subbandBuffer[i] = frameBuffer[i];
             }
-            // (subbandBuffer now contains, for each subband, the first sample)
-
-            // ...add up all remaining interleaved samples to their subband, ...
             for (int i = 0; i < subbandFrameSize; i++) {
                 for (int j = 1; j < SubBands; j++) {
                     subbandBuffer[i] += frameBuffer[i + subbandFrameSize * j];
                 }
             }
-            // (Y now contains, for each subband, its sum of samples)
 
-            // ...and finally compute the frequency energy of each subband by applying the DFT and calculating the squared magnitude
+            // ...and finally compute the output by matrixing
             for (int i = 0; i < SubBands; i++) {
                 float Dr = 0, Di = 0;
                 for (int j = 0; j < subbandFrameSize; j++) {
-                    Dr += mRe[i, j] * subbandBuffer[j];
+                    Dr += mRe[i, j] * subbandBuffer[j]; // calculate output sample of subband i
                     Di -= mIm[i, j] * subbandBuffer[j];
                 }
+                // calculate the frequency energy of subband i by applying the DFT and calculating the squared magnitude (???)
+                // TODO find out whats really happening here... is the enhancement to the ISO standard here really 
+                //      to get the energy magnitude instead of the sample value?
                 subbandEnergies[i] = Dr * Dr + Di * Di;
             }
-            // (subbandEnergies not contains the result as the total energy of each subband)
+
+            // subbandEnergies now contains the result as the total energy of each subband
         }
     }
 }
