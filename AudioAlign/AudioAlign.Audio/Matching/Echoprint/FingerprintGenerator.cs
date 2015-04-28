@@ -93,7 +93,6 @@ namespace AudioAlign.Audio.Matching.Echoprint {
 
             for (j = 0; j < bands; ++j) {
                 bandOnsetCount[j] = 0;
-                N[j] = 0.0;
                 taus[j] = 1.0;
                 H[j] = E[0, j];
                 contact[j] = false;
@@ -120,12 +119,6 @@ namespace AudioAlign.Audio.Matching.Echoprint {
 
                     contact[j] = (xn > H[j]);
 
-                    if (contact[j] && !lcontact[j]) {
-                        /* attach - record the threshold level unless we have one */
-                        if (N[j] == 0) {
-                            N[j] = H[j];
-                        }
-                    }
                     if (contact[j]) {
                         /* update with new threshold */
                         H[j] = xn * overfact;
@@ -155,10 +148,6 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                         taus[j] = taus[j] + 1;
                     }
 
-                    if (!contact[j] && (tsince[j] > deadtime)) {
-                        /* forget the threshold where we recently hit */
-                        N[j] = 0;
-                    }
                     lcontact[j] = contact[j];
                 }
             }
