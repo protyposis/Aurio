@@ -51,108 +51,112 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             var codes = GetCodes(E);
         }
 
-        private uint GetAdaptiveOnsets(float[,] E, int ttarg, out uint[,] bandOnsets, out uint[] bandOnsetCount) {
-            //  E is a sgram-like matrix of energies.
-            //const float *pE;
-            int bands, frames, i, j, k;
-            int deadtime = 128;
-            double[] H = new double[SubBands], taus = new double[SubBands], N = new double[SubBands];
-            bool[] contact = new bool[SubBands], lcontact = new bool[SubBands];
-            int[] tsince = new int[SubBands];
+        private uint GetAdaptiveOnsets(float[,] E, int targetOnsetDistance, out uint[,] bandOnsets, out uint[] bandOnsetCount) {
+            int minOnsetDistance = 128;
+            double[] H = new double[SubBands]; // threshold
+            int[] taus = new int[SubBands]; // decay rate adjustment factor
+            bool[] contact = new bool[SubBands], lastContact = new bool[SubBands]; // signal-exceeds-threshold marker
+            int[] timeSinceLastOnset = new int[SubBands];
             double overfact = 1.1;  /* threshold rel. to actual peak */
-            uint onset_counter = 0;
+            uint onsetCount = 0;
 
             // Take successive stretches of 8 subband samples and sum their energy under a hann window, then hop by 4 samples (50% window overlap).
-            int hop = 4;
-            int nsm = 8;
-            float[] ham = new float[nsm];
-            WindowUtil.Hann(ham, 0, nsm);
+            int hopSize = 4;
+            int windowSize = 8;
+            float[] window = WindowUtil.GetArray(WindowType.Hann, windowSize);
 
-
-            int nc = (int)(Math.Floor((float)E.GetLength(1) / (float)hop) - (Math.Floor((float)nsm / (float)hop) - 1));
+            int nc = (int)(Math.Floor((float)E.GetLength(1) / (float)hopSize) - (Math.Floor((float)windowSize / (float)hopSize) - 1));
             float[,] Eb = new float[nc, 8];
 
-            for (i = 0; i < nc; i++) {
-                for (j = 0; j < SubBands; j++) {
+            for (int i = 0; i < nc; i++) {
+                for (int band = 0; band < SubBands; band++) {
                     // Compute RMS of each block
-                    for (k = 0; k < nsm; k++) Eb[i, j] = Eb[i, j] + (E[j, (i * hop) + k] * ham[k]);
-                    Eb[i, j] = (float)Math.Sqrt(Eb[i, j]);
+                    for (int k = 0; k < windowSize; k++) {
+                        Eb[i, band] = Eb[i, band] + (E[band, (i * hopSize) + k] * window[k]);
+                    }
+                    Eb[i, band] = (float)Math.Sqrt(Eb[i, band]);
                 }
             }
 
-            frames = Eb.GetLength(0);
-            bands = Eb.GetLength(1);
+            int frames = Eb.GetLength(0);
+            int bands = Eb.GetLength(1);
 
             bandOnsets = new uint[SubBands, frames];
             bandOnsetCount = new uint[SubBands];
 
-            double[] bn = { 0.1883, 0.4230, 0.3392 }; /* preemph filter */   // new
-            int nbn = 3;
+            double[] bn = { 0.1883, 0.4230, 0.3392 }; /* preemph filter */
             double a1 = 0.98;
             double[] Y0 = new double[SubBands];
 
-            for (j = 0; j < bands; ++j) {
-                bandOnsetCount[j] = 0;
-                taus[j] = 1.0;
-                H[j] = E[0, j];
-                contact[j] = false;
-                lcontact[j] = false;
-                tsince[j] = 0;
-                Y0[j] = 0;
+            for (int band = 0; band < bands; ++band) {
+                bandOnsetCount[band] = 0;
+                taus[band] = 1;
+                H[band] = E[0, band];
+                contact[band] = false;
+                lastContact[band] = false;
+                timeSinceLastOnset[band] = 0;
+                Y0[band] = 0;
             }
 
-            for (i = 0; i < frames; ++i) {
-                for (j = 0; j < SubBands; ++j) {
-
-                    double xn = 0;
+            for (int frame = 0; frame < frames; ++frame) {
+                for (int band = 0; band < SubBands; ++band) {
+                    double xn = 0; // signal level of current frame
                     /* calculate the filter -  FIR part */
-                    if (i >= 2 * nbn) {
-                        for (k = 0; k < nbn; ++k) {
-                            //xn += bn[k]*(pE[j-SubBands*k] - pE[j-SubBands*(2*nbn-k)]);
-                            xn += bn[k] * (E[j, i - k] - E[j, i - (2 * nbn - k)]);
+                    if (frame >= 2 * bn.Length) {
+                        for (int k = 0; k < bn.Length; ++k) {
+                            xn += bn[k] * (E[band, frame - k] - E[band, frame - (2 * bn.Length - k)]);
                         }
                     }
                     /* IIR part */
-                    xn = xn + a1 * Y0[j];
+                    xn = xn + a1 * Y0[band];
+
                     /* remember the last filtered level */
-                    Y0[j] = xn;
+                    Y0[band] = xn;
 
-                    contact[j] = (xn > H[j]);
+                    // Check if the signal exceeds the threshold
+                    contact[band] = (xn > H[band]);
 
-                    if (contact[j]) {
+                    if (contact[band]) {
                         /* update with new threshold */
-                        H[j] = xn * overfact;
+                        H[band] = xn * overfact;
                     }
                     else {
                         /* apply decays */
-                        H[j] = H[j] * Math.Exp(-1.0 / (double)taus[j]);
+                        H[band] = H[band] * Math.Exp(-1.0 / (double)taus[band]);
                     }
 
-                    if (!contact[j] && lcontact[j]) {
-                        /* detach */
-                        if (bandOnsetCount[j] > 0 && (int)bandOnsets[j, bandOnsetCount[j] - 1] > i - deadtime) {
-                            // overwrite last-written time
-                            --bandOnsetCount[j];
-                            --onset_counter;
+                    // When the signal does not exceed the threshold anymore, but did in the last frame, we have an onset detected
+                    if (!contact[band] && lastContact[band]) {
+                        // If the distance between the previous and current onset is too short, we replace the previous onset
+                        if (bandOnsetCount[band] > 0 && frame - (int)bandOnsets[band, bandOnsetCount[band] - 1] < minOnsetDistance) {
+                            --bandOnsetCount[band];
+                            --onsetCount;
                         }
-                        bandOnsets[j, bandOnsetCount[j]++] = (uint)i;
-                        ++onset_counter;
-                        tsince[j] = 0;
+
+                        // Store the onset
+                        bandOnsets[band, bandOnsetCount[band]++] = (uint)frame;
+                        ++onsetCount;
+                        timeSinceLastOnset[band] = 0;
                     }
-                    ++tsince[j];
-                    if (tsince[j] > ttarg) {
-                        taus[j] = taus[j] - 1;
-                        if (taus[j] < 1) taus[j] = 1;
+                    ++timeSinceLastOnset[band];
+
+                    // Adjust the decay rate
+                    if (timeSinceLastOnset[band] > targetOnsetDistance) {
+                        // Increase decay above the target onset distance (makes it easier to detect an onset)
+                        if (taus[band] > 1) {
+                            taus[band]--;
+                        }
                     }
                     else {
-                        taus[j] = taus[j] + 1;
+                        // Decrease decay rate below target onset distance
+                        taus[band]++;
                     }
 
-                    lcontact[j] = contact[j];
+                    lastContact[band] = contact[band];
                 }
             }
 
-            return onset_counter;
+            return onsetCount;
         }
 
         /// <summary>
