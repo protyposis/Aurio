@@ -91,7 +91,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             for (int band = 0; band < bands; ++band) {
                 bandOnsetCount[band] = 0;
                 taus[band] = 1;
-                H[band] = E[0, band];
+                H[band] = Eb[0, band];
                 contact[band] = false;
                 lastContact[band] = false;
                 timeSinceLastOnset[band] = 0;
@@ -104,7 +104,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                     /* calculate the filter -  FIR part */
                     if (frame >= 2 * bn.Length) {
                         for (int k = 0; k < bn.Length; ++k) {
-                            xn += bn[k] * (E[band, frame - k] - E[band, frame - (2 * bn.Length - k)]);
+                            xn += bn[k] * (Eb[frame - k, band] - Eb[frame - (2 * bn.Length - k), band]);
                         }
                     }
                     /* IIR part */
