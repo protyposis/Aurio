@@ -33,6 +33,9 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             float[,] E = new float[SubBands, subbandAnalyzer.WindowCount];
             float[] analyzedFrame = new float[SubBands];
 
+            var sw = new Stopwatch();
+            sw.Start();
+
             int count = 0;
             while (subbandAnalyzer.HasNext()) {
                 subbandAnalyzer.ReadFrame(analyzedFrame);
@@ -44,11 +47,12 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 count++;
             }
 
-            uint[,] bandOnsets;
-            uint[] bandOnsetCount;
-            // 345 ~= 1 sec (11025 / 8 [subband downsampling factor in SubbandAnalyzer] / 4 [RMS downsampling in adaptiveOnsets()] ~= 345 frames per second)
-            uint res = GetAdaptiveOnsets(E, 345, out bandOnsets, out bandOnsetCount);
+            Console.WriteLine("analysis time: " + sw.Elapsed);
+
+            sw.Restart();
             var codes = GetCodes(E);
+            sw.Stop();
+            Console.WriteLine("codegen time: " + sw.Elapsed);
         }
 
         private uint GetAdaptiveOnsets(float[,] E, int targetOnsetDistance, out uint[,] bandOnsets, out uint[] bandOnsetCount) {
@@ -172,6 +176,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             byte[] hashMaterial = new byte[5];
             uint[] bandOnsetCount;
             uint[,] bandOnsets;
+
+            // 345 ~= 1 sec (11025 / 8 [subband downsampling factor in SubbandAnalyzer] / 4 [RMS downsampling in adaptiveOnsets()] ~= 345 frames per second)
             uint onsetCount = GetAdaptiveOnsets(E, 345, out bandOnsets, out bandOnsetCount);
             List<FPCode> codes = new List<FPCode>((int)onsetCount * 6);
 
