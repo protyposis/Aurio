@@ -188,37 +188,34 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                         // What time was this onset at?
                         uint quantizedOnsetTime = QuantizeFrameTime(bandOnsets[band, onset]);
 
-                        uint[,] p = new uint[2, 6];
-                        for (int i = 0; i < 6; i++) {
-                            p[0, i] = 0;
-                            p[1, i] = 0;
-                        }
-                        int hashCount = 6;
+                        uint[,] deltaPairs = new uint[2, 6];
 
-                        if ((int)onset == (int)bandOnsetCount[band] - 4) { hashCount = 3; }
-                        if ((int)onset == (int)bandOnsetCount[band] - 3) { hashCount = 1; }
-                        p[0, 0] = (bandOnsets[band, onset + 1] - bandOnsets[band, onset]);
-                        p[1, 0] = (bandOnsets[band, onset + 2] - bandOnsets[band, onset + 1]);
-                        if (hashCount > 1) {
-                            p[0, 1] = (bandOnsets[band, onset + 1] - bandOnsets[band, onset]);
-                            p[1, 1] = (bandOnsets[band, onset + 3] - bandOnsets[band, onset + 1]);
-                            p[0, 2] = (bandOnsets[band, onset + 2] - bandOnsets[band, onset]);
-                            p[1, 2] = (bandOnsets[band, onset + 3] - bandOnsets[band, onset + 2]);
-                            if (hashCount > 3) {
-                                p[0, 3] = (bandOnsets[band, onset + 1] - bandOnsets[band, onset]);
-                                p[1, 3] = (bandOnsets[band, onset + 4] - bandOnsets[band, onset + 1]);
-                                p[0, 4] = (bandOnsets[band, onset + 2] - bandOnsets[band, onset]);
-                                p[1, 4] = (bandOnsets[band, onset + 4] - bandOnsets[band, onset + 2]);
-                                p[0, 5] = (bandOnsets[band, onset + 3] - bandOnsets[band, onset]);
-                                p[1, 5] = (bandOnsets[band, onset + 4] - bandOnsets[band, onset + 3]);
+                        deltaPairs[0, 0] = (bandOnsets[band, onset + 1] - bandOnsets[band, onset]);
+                        deltaPairs[1, 0] = (bandOnsets[band, onset + 2] - bandOnsets[band, onset + 1]);
+                        if (onset < bandOnsetCount[band] - 3) {
+                            deltaPairs[0, 1] = (bandOnsets[band, onset + 1] - bandOnsets[band, onset]);
+                            deltaPairs[1, 1] = (bandOnsets[band, onset + 3] - bandOnsets[band, onset + 1]);
+                            deltaPairs[0, 2] = (bandOnsets[band, onset + 2] - bandOnsets[band, onset]);
+                            deltaPairs[1, 2] = (bandOnsets[band, onset + 3] - bandOnsets[band, onset + 2]);
+                            if (onset < bandOnsetCount[band] - 4) {
+                                deltaPairs[0, 3] = (bandOnsets[band, onset + 1] - bandOnsets[band, onset]);
+                                deltaPairs[1, 3] = (bandOnsets[band, onset + 4] - bandOnsets[band, onset + 1]);
+                                deltaPairs[0, 4] = (bandOnsets[band, onset + 2] - bandOnsets[band, onset]);
+                                deltaPairs[1, 4] = (bandOnsets[band, onset + 4] - bandOnsets[band, onset + 2]);
+                                deltaPairs[0, 5] = (bandOnsets[band, onset + 3] - bandOnsets[band, onset]);
+                                deltaPairs[1, 5] = (bandOnsets[band, onset + 4] - bandOnsets[band, onset + 3]);
                             }
                         }
 
                         // For each pair emit a code
+                        // NOTE This always generates 6 codes, even at the end of a band where < 6 pairs
+                        //      are formed. Thats not really a problem though as their delta times will
+                        //      always be zero, whereas valid pairs have delta times above zero; therefore
+                        //      the chance is very low to get spurious collisions.
                         for (uint k = 0; k < 6; k++) {
                             // Quantize the time deltas to 23ms
-                            short deltaTime0 = (short)QuantizeFrameTime(p[0, k]);
-                            short deltaTime1 = (short)QuantizeFrameTime(p[1, k]);
+                            short deltaTime0 = (short)QuantizeFrameTime(deltaPairs[0, k]);
+                            short deltaTime1 = (short)QuantizeFrameTime(deltaPairs[1, k]);
                             // Create a key from the time deltas and the band index
                             hashMaterial[0] = (byte)((deltaTime0 >> 8) & 0xFF);
                             hashMaterial[1] = (byte)((deltaTime0) & 0xFF);
