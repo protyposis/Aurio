@@ -7,7 +7,8 @@ using System.Text;
 namespace AudioAlign.Audio.Matching.Echoprint {
     /// <summary>
     /// Divides a source signal into 8 bands by converting every 8 samples of a source signal into a vector 
-    /// of 8 values containing the total energy of each band.
+    /// of 8 values containing the total energy of each band. The series of result vectors form a spectrogram-like
+    /// matrix of subband energies.
     /// </summary>
     class SubbandAnalyzer : StreamWindower {
 
