@@ -160,6 +160,7 @@
     <Compile Include="DataStructures\Graph\Edge.cs" />
     <Compile Include="DataStructures\Graph\UndirectedGraph.cs" />
     <Compile Include="Matching\Echoprint\FingerprintGenerator.cs" />
+    <Compile Include="Matching\Echoprint\FingerprintCodeEventArgs.cs" />
     <Compile Include="Matching\Echoprint\FPCode.cs" />
     <Compile Include="Matching\Echoprint\MurmurHash2.cs" />
     <Compile Include="Matching\Echoprint\SubbandAnalyzer.cs" />

@@ -23,6 +23,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
         private const uint HashBitmask = 0x000fffff;
         private const int SubBands = 8;
 
+        public event EventHandler<FingerprintCodeEventArgs> FingerprintHashesGenerated;
+
         /// <summary>
         /// This method generates hash codes from an audio stream in a streaming fashion,
         /// which means that it only maintains a small consntat-size state and can process
@@ -87,6 +89,16 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 
                 if (currentFrame % 4096 == 0) {
                     codeSorter.Fill(codes, false);
+
+                    if (FingerprintHashesGenerated != null) {
+                        FingerprintHashesGenerated(this, new FingerprintCodeEventArgs {
+                            AudioTrack = track,
+                            Index = currentFrame,
+                            Indices = totalFrames,
+                            Codes = codes
+                        });
+                        codes.Clear();
+                    }
                 }
 
                 currentFrame++;
@@ -96,6 +108,16 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 bandAnalyzers[i].Flush(codeSorter.Queues[i]);
             }
             codeSorter.Fill(codes, true);
+
+            if (FingerprintHashesGenerated != null) {
+                FingerprintHashesGenerated(this, new FingerprintCodeEventArgs {
+                    AudioTrack = track,
+                    Index = currentFrame,
+                    Indices = totalFrames,
+                    Codes = codes
+                });
+                codes.Clear();
+            }
 
             sw.Stop();
             Console.WriteLine("time: " + sw.Elapsed);
