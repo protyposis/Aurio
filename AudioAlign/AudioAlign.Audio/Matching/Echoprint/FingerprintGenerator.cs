@@ -1,4 +1,5 @@
-﻿using AudioAlign.Audio.Project;
+﻿using AudioAlign.Audio.DataStructures;
+using AudioAlign.Audio.Project;
 using AudioAlign.Audio.Streams;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,35 @@ namespace AudioAlign.Audio.Matching.Echoprint {
         private const uint HashBitmask = 0x000fffff;
         private const int SubBands = 8;
 
+        /// <summary>
+        /// This method generates hash codes from an audio stream in a streaming fashion,
+        /// which means that it only maintains a small consntat-size state and can process
+        /// streams of arbitrary length.
+        /// 
+        /// Here is a scheme of the data processing flow. After the subband splitting
+        /// stage, every subband is processed independently.
+        /// 
+        ///                    +-----------------+   +--------------+   +-----------+
+        ///   audio stream +---> mono conversion +---> downsampling +---> whitening |
+        ///                    +-----------------+   +--------------+   +---------+-+
+        ///                                                                       |  
+        ///                        +-------------------+   +------------------+   |  
+        ///                        | subband splitting <---+ subband analysis <---+  
+        ///                        +--+---+---+---+----+   +------------------+      
+        ///                           |   |   |   |                                  
+        ///                           |   v   v   v                                  
+        ///                           |  ... ... ...                                 
+        ///                           |                                              
+        ///                           |   +------------------+   +-----------------+ 
+        ///                           +---> RMS downsampling +---> onset detection | 
+        ///                               +------------------+   +----------+------+ 
+        ///                                                                 |        
+        ///                                    +-----------------+          |        
+        ///   hash codes   <-------------------+ code generation <----------+        
+        ///                                    +-----------------+                   
+        ///
+        /// </summary>
+        /// <param name="track"></param>
         public void Generate(AudioTrack track) {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(track.FileInfo)),
@@ -30,209 +60,244 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             var whiteningStream = new WhiteningStream(audioStream, 40, 8, 10000);
             var subbandAnalyzer = new SubbandAnalyzer(whiteningStream);
 
-            float[,] E = new float[SubBands, subbandAnalyzer.WindowCount];
             float[] analyzedFrame = new float[SubBands];
+
+            var bandAnalyzers = new BandAnalyzer[SubBands];
+            for (int i = 0; i < SubBands; i++) {
+                bandAnalyzers[i] = new BandAnalyzer(i);
+            }
+
+            List<FPCode> codes = new List<FPCode>();
 
             var sw = new Stopwatch();
             sw.Start();
 
-            int count = 0;
             while (subbandAnalyzer.HasNext()) {
                 subbandAnalyzer.ReadFrame(analyzedFrame);
 
                 for (int i = 0; i < SubBands; i++) {
-                    E[i, count] = analyzedFrame[i];
+                    bandAnalyzers[i].ProcessSample(analyzedFrame[i], codes);
                 }
-
-                count++;
             }
 
-            Console.WriteLine("analysis time: " + sw.Elapsed);
-
-            sw.Restart();
-            var codes = GetCodes(E);
             sw.Stop();
-            Console.WriteLine("codegen time: " + sw.Elapsed);
-        }
+            Console.WriteLine("time: " + sw.Elapsed);
 
-        private uint GetAdaptiveOnsets(float[,] E, int targetOnsetDistance, out uint[,] bandOnsets, out uint[] bandOnsetCount) {
-            int minOnsetDistance = 128;
-            double[] H = new double[SubBands]; // threshold
-            int[] taus = new int[SubBands]; // decay rate adjustment factor
-            bool[] contact = new bool[SubBands], lastContact = new bool[SubBands]; // signal-exceeds-threshold marker
-            int[] timeSinceLastOnset = new int[SubBands];
-            double overfact = 1.1;  /* threshold rel. to actual peak */
-            uint onsetCount = 0;
-
-            // Take successive stretches of 8 subband samples and sum their energy under a hann window, then hop by 4 samples (50% window overlap).
-            int hopSize = 4;
-            int windowSize = 8;
-            float[] window = WindowUtil.GetArray(WindowType.Hann, windowSize);
-
-            int nc = (int)(Math.Floor((float)E.GetLength(1) / (float)hopSize) - (Math.Floor((float)windowSize / (float)hopSize) - 1));
-            float[,] Eb = new float[nc, 8];
-
-            for (int i = 0; i < nc; i++) {
-                for (int band = 0; band < SubBands; band++) {
-                    // Compute RMS of each block
-                    for (int k = 0; k < windowSize; k++) {
-                        Eb[i, band] = Eb[i, band] + (E[band, (i * hopSize) + k] * window[k]);
-                    }
-                    Eb[i, band] = (float)Math.Sqrt(Eb[i, band]);
-                }
+            for (int i = 0; i < bandAnalyzers.Length; i++) {
+                bandAnalyzers[i].Flush(codes);
             }
 
-            int frames = Eb.GetLength(0);
-            int bands = Eb.GetLength(1);
-
-            bandOnsets = new uint[SubBands, frames];
-            bandOnsetCount = new uint[SubBands];
-
-            double[] bn = { 0.1883, 0.4230, 0.3392 }; /* preemph filter */
-            double a1 = 0.98;
-            double[] Y0 = new double[SubBands];
-
-            for (int band = 0; band < bands; ++band) {
-                bandOnsetCount[band] = 0;
-                taus[band] = 1;
-                H[band] = Eb[0, band];
-                contact[band] = false;
-                lastContact[band] = false;
-                timeSinceLastOnset[band] = 0;
-                Y0[band] = 0;
-            }
-
-            for (int frame = 0; frame < frames; ++frame) {
-                for (int band = 0; band < SubBands; ++band) {
-                    double xn = 0; // signal level of current frame
-                    /* calculate the filter -  FIR part */
-                    if (frame >= 2 * bn.Length) {
-                        for (int k = 0; k < bn.Length; ++k) {
-                            xn += bn[k] * (Eb[frame - k, band] - Eb[frame - (2 * bn.Length - k), band]);
-                        }
-                    }
-                    /* IIR part */
-                    xn = xn + a1 * Y0[band];
-
-                    /* remember the last filtered level */
-                    Y0[band] = xn;
-
-                    // Check if the signal exceeds the threshold
-                    contact[band] = (xn > H[band]);
-
-                    if (contact[band]) {
-                        /* update with new threshold */
-                        H[band] = xn * overfact;
-                    }
-                    else {
-                        /* apply decays */
-                        H[band] = H[band] * Math.Exp(-1.0 / (double)taus[band]);
-                    }
-
-                    // When the signal does not exceed the threshold anymore, but did in the last frame, we have an onset detected
-                    if (!contact[band] && lastContact[band]) {
-                        // If the distance between the previous and current onset is too short, we replace the previous onset
-                        if (bandOnsetCount[band] > 0 && frame - (int)bandOnsets[band, bandOnsetCount[band] - 1] < minOnsetDistance) {
-                            --bandOnsetCount[band];
-                            --onsetCount;
-                        }
-
-                        // Store the onset
-                        bandOnsets[band, bandOnsetCount[band]++] = (uint)frame;
-                        ++onsetCount;
-                        timeSinceLastOnset[band] = 0;
-                    }
-                    ++timeSinceLastOnset[band];
-
-                    // Adjust the decay rate
-                    if (timeSinceLastOnset[band] > targetOnsetDistance) {
-                        // Increase decay above the target onset distance (makes it easier to detect an onset)
-                        if (taus[band] > 1) {
-                            taus[band]--;
-                        }
-                    }
-                    else {
-                        // Decrease decay rate below target onset distance
-                        taus[band]++;
-                    }
-
-                    lastContact[band] = contact[band];
-                }
-            }
-
-            return onsetCount;
+            Debug.WriteLine("done");
         }
 
         /// <summary>
-        /// The quantized_time_for_frame_delta and quantized_time_for_frame_absolute functions in the original
-        /// Echoprint source are way too complicated and can be simplified to this function. The offset is omitted
-        /// here as it is not needed.
+        /// Analyzes a subband for onsets and generates hash codes.
         /// </summary>
-        private uint QuantizeFrameTime(uint frame) {
-            return (uint)Math.Round(frame / 8d);
-        }
+        private class BandAnalyzer {
 
-        private List<FPCode> GetCodes(float[,] E) {
-            byte[] hashMaterial = new byte[5];
-            uint[] bandOnsetCount;
-            uint[,] bandOnsets;
+            private const int MinOnsetDistance = 128;
+            private const double Overfact = 1.1;  /* threshold rel. to actual peak */ // paper says 1.05
+            private const int TargetOnsetDistance = 345; // 345 ~= 1 sec (11025 / 8 [subband downsampling factor in SubbandAnalyzer] / 4 [RMS downsampling in adaptiveOnsets()] ~= 345 frames per second)
+            private const int RmsWindowSize = 8;
+            private const int RmsHopSize = 4;
 
-            // 345 ~= 1 sec (11025 / 8 [subband downsampling factor in SubbandAnalyzer] / 4 [RMS downsampling in adaptiveOnsets()] ~= 345 frames per second)
-            uint onsetCount = GetAdaptiveOnsets(E, 345, out bandOnsets, out bandOnsetCount);
-            List<FPCode> codes = new List<FPCode>((int)onsetCount * 6);
+            private static readonly double[] FilterCoefficientsBn = { 0.1883, 0.4230, 0.3392 }; /* preemph filter */
+            private const double FilterCoefficientA1 = 0.98; // feedback filter coefficient
 
-            for (byte band = 0; band < SubBands; band++) {
-                if (bandOnsetCount[band] > 2) {
-                    for (uint onset = 0; onset < bandOnsetCount[band] - 2; onset++) {
-                        // What time was this onset at?
-                        uint quantizedOnsetTime = QuantizeFrameTime(bandOnsets[band, onset]);
+            private int band;
+            
+            private double H; // threshold
+            private int taus; // decay rate adjustment factor
+            private bool contact; // signal-exceeds-threshold marker
+            private bool lastContact;
+            private int timeSinceLastOnset;
+            private double Y0; // last filter level (for feedback)
+            private uint onsetCount = 0;
+            
+            private RingBuffer<float> rmsBlock = new RingBuffer<float>(RmsWindowSize);
+            private float[] rmsWindow = WindowUtil.GetArray(WindowType.Hann, RmsWindowSize);
+            private int sampleCount = 0;
+            private int rmsSampleCount = 0;
+            private RingBuffer<float> rmsSampleBuffer = new RingBuffer<float>(FilterCoefficientsBn.Length * 2 + 1); // needed for filtering
 
-                        uint[,] deltaPairs = new uint[2, 6];
+            private RingBuffer<int> onsetBuffer = new RingBuffer<int>(6);
 
-                        deltaPairs[0, 0] = (bandOnsets[band, onset + 1] - bandOnsets[band, onset]);
-                        deltaPairs[1, 0] = (bandOnsets[band, onset + 2] - bandOnsets[band, onset + 1]);
-                        if (onset < bandOnsetCount[band] - 3) {
-                            deltaPairs[0, 1] = (bandOnsets[band, onset + 1] - bandOnsets[band, onset]);
-                            deltaPairs[1, 1] = (bandOnsets[band, onset + 3] - bandOnsets[band, onset + 1]);
-                            deltaPairs[0, 2] = (bandOnsets[band, onset + 2] - bandOnsets[band, onset]);
-                            deltaPairs[1, 2] = (bandOnsets[band, onset + 3] - bandOnsets[band, onset + 2]);
-                            if (onset < bandOnsetCount[band] - 4) {
-                                deltaPairs[0, 3] = (bandOnsets[band, onset + 1] - bandOnsets[band, onset]);
-                                deltaPairs[1, 3] = (bandOnsets[band, onset + 4] - bandOnsets[band, onset + 1]);
-                                deltaPairs[0, 4] = (bandOnsets[band, onset + 2] - bandOnsets[band, onset]);
-                                deltaPairs[1, 4] = (bandOnsets[band, onset + 4] - bandOnsets[band, onset + 2]);
-                                deltaPairs[0, 5] = (bandOnsets[band, onset + 3] - bandOnsets[band, onset]);
-                                deltaPairs[1, 5] = (bandOnsets[band, onset + 4] - bandOnsets[band, onset + 3]);
-                            }
-                        }
+            public BandAnalyzer(int band) {
+                this.band = band;
+            }
 
-                        // For each pair emit a code
-                        // NOTE This always generates 6 codes, even at the end of a band where < 6 pairs
-                        //      are formed. Thats not really a problem though as their delta times will
-                        //      always be zero, whereas valid pairs have delta times above zero; therefore
-                        //      the chance is very low to get spurious collisions.
-                        for (uint k = 0; k < 6; k++) {
-                            // Quantize the time deltas to 23ms
-                            short deltaTime0 = (short)QuantizeFrameTime(deltaPairs[0, k]);
-                            short deltaTime1 = (short)QuantizeFrameTime(deltaPairs[1, k]);
-                            // Create a key from the time deltas and the band index
-                            hashMaterial[0] = (byte)((deltaTime0 >> 8) & 0xFF);
-                            hashMaterial[1] = (byte)((deltaTime0) & 0xFF);
-                            hashMaterial[2] = (byte)((deltaTime1 >> 8) & 0xFF);
-                            hashMaterial[3] = (byte)((deltaTime1) & 0xFF);
-                            hashMaterial[4] = band;
-                            uint hashCode = MurmurHash2.Hash(hashMaterial, HashSeed) & HashBitmask;
+            public void ProcessSample(float energySample, List<FPCode> codes) {
+                rmsBlock.Add(energySample);
+                sampleCount++;
 
-                            // Set the code alongside the time of onset
-                            codes.Add(new FPCode(quantizedOnsetTime, hashCode));
-                        }
+                // The incoming samples are windowed and aggregated to RMS values, making the RMS sample sequence
+                // hop-size times shorter than the incoming sample sequence. Onsets will be detected from the
+                // aggregated RMS sample sequence.
+
+                if (sampleCount >= 8 && sampleCount % RmsHopSize == 0) {
+                    float rmsSample = 0;
+
+                    // Compute RMS of a block
+                    for (int k = 0; k < RmsWindowSize; k++) {
+                        rmsSample += rmsBlock[k] * rmsWindow[k];
                     }
+                    rmsSample = (float)Math.Sqrt(rmsSample);
+
+                    // Initialize onset detector variables once the first rms sample is known
+                    if (rmsSampleCount == 0) {
+                        H = rmsSample;
+                        taus = 1;
+                        contact = false;
+                        lastContact = false;
+                        timeSinceLastOnset = 0;
+                        Y0 = 0;
+                        onsetCount = 0;
+                    }
+
+                    rmsSampleBuffer.Add(rmsSample);
+                    int onset = DetectOnset();
+                    if (onset != -1 && onsetBuffer.Count == onsetBuffer.Length) {
+                        GenerateCodes(band, codes);
+                    }
+
+                    rmsSampleCount++;
                 }
             }
 
-            codes.TrimExcess();
+            public void Flush(List<FPCode> codes) {
+                // Generate codes for last few onsets
+                for (int i = 0; i < onsetBuffer.Count; i++) {
+                    onsetBuffer.RemoveTail();
+                    GenerateCodes(band, codes);
+                }
+            }
 
-            return codes;
+            private int DetectOnset() {
+                int onsetCountDelta = 0;
+
+                double xn = 0; // signal level of current frame
+                /* calculate the filter -  FIR part */
+                if (rmsSampleCount >= 2 * FilterCoefficientsBn.Length) {
+                    for (int k = 0; k < FilterCoefficientsBn.Length; ++k) {
+                        xn += FilterCoefficientsBn[k] * (rmsSampleBuffer[rmsSampleBuffer.Length - 1 - k] - rmsSampleBuffer[rmsSampleBuffer.Length - 1 - (2 * FilterCoefficientsBn.Length - k)]);
+                    }
+                }
+                /* IIR part */
+                xn = xn + FilterCoefficientA1 * Y0;
+
+                /* remember the last filtered level */
+                Y0 = xn;
+
+                // Check if the signal exceeds the threshold
+                contact = (xn > H);
+
+                if (contact) {
+                    /* update with new threshold */
+                    H = xn * Overfact;
+                }
+                else {
+                    /* apply decays */
+                    H = H * Math.Exp(-1.0 / (double)taus);
+                }
+
+                // When the signal does not exceed the threshold anymore, but did in the last frame, we have an onset detected
+                if (!contact && lastContact) {
+                    // If the distance between the previous and current onset is too short, we replace the previous onset
+                    if (onsetCount > 0 && rmsSampleCount - onsetBuffer[onsetBuffer.Count - 1] < MinOnsetDistance) {
+                        onsetBuffer.RemoveHead(); // TODO check if working correctly
+                        --onsetCount;
+                        onsetCountDelta--;
+                    }
+
+                    // Store the onset
+                    onsetBuffer.Add(rmsSampleCount);
+                    ++onsetCount;
+                    timeSinceLastOnset = 0;
+                    onsetCountDelta++;
+                }
+                ++timeSinceLastOnset;
+
+                // Adjust the decay rate
+                if (timeSinceLastOnset > TargetOnsetDistance) {
+                    // Increase decay above the target onset distance (makes it easier to detect an onset)
+                    if (taus > 1) {
+                        taus--;
+                    }
+                }
+                else {
+                    // Decrease decay rate below target onset distance
+                    taus++;
+                }
+
+                lastContact = contact;
+
+                if (onsetCountDelta > 0 && onsetCount > 1) {
+                    // Return the second most recent onset
+                    // The current detected onset could still change, but detecting an onset means
+                    // means that the previously detected onset is now fixed.
+                    return onsetBuffer[onsetBuffer.Count - 2];
+                }
+                else {
+                    return -1;
+                }
+            }
+
+            /// <summary>
+            /// The quantized_time_for_frame_delta and quantized_time_for_frame_absolute functions in the original
+            /// Echoprint source are way too complicated and can be simplified to this function. The offset is omitted
+            /// here as it is not needed.
+            /// </summary>
+            private static int QuantizeFrameTime(int frame) {
+                return (int)Math.Round(frame / 8d);
+            }
+
+            private void GenerateCodes(int band, List<FPCode> codes) {
+                if (onsetBuffer.Count > 2) {
+                    byte[] hashMaterial = new byte[5];
+                    // What time was this onset at?
+                    int quantizedOnsetTime = QuantizeFrameTime(onsetBuffer[0]);
+
+                    int[,] deltaPairs = new int[2, 6];
+
+                    deltaPairs[0, 0] = (onsetBuffer[1] - onsetBuffer[0]);
+                    deltaPairs[1, 0] = (onsetBuffer[2] - onsetBuffer[1]);
+                    if (onsetBuffer.Count > 3) {
+                        deltaPairs[0, 1] = (onsetBuffer[1] - onsetBuffer[0]);
+                        deltaPairs[1, 1] = (onsetBuffer[3] - onsetBuffer[1]);
+                        deltaPairs[0, 2] = (onsetBuffer[2] - onsetBuffer[0]);
+                        deltaPairs[1, 2] = (onsetBuffer[3] - onsetBuffer[2]);
+                        if (onsetBuffer.Count > 4) {
+                            deltaPairs[0, 3] = (onsetBuffer[1] - onsetBuffer[0]);
+                            deltaPairs[1, 3] = (onsetBuffer[4] - onsetBuffer[1]);
+                            deltaPairs[0, 4] = (onsetBuffer[2] - onsetBuffer[0]);
+                            deltaPairs[1, 4] = (onsetBuffer[4] - onsetBuffer[2]);
+                            deltaPairs[0, 5] = (onsetBuffer[3] - onsetBuffer[0]);
+                            deltaPairs[1, 5] = (onsetBuffer[4] - onsetBuffer[3]);
+                        }
+                    }
+
+                    // For each pair emit a code
+                    // NOTE This always generates 6 codes, even at the end of a band where < 6 pairs
+                    //      are formed. Thats not really a problem though as their delta times will
+                    //      always be zero, whereas valid pairs have delta times above zero; therefore
+                    //      the chance is very low to get spurious collisions.
+                    for (uint k = 0; k < 6; k++) {
+                        // Quantize the time deltas to 23ms
+                        short deltaTime0 = (short)QuantizeFrameTime(deltaPairs[0, k]);
+                        short deltaTime1 = (short)QuantizeFrameTime(deltaPairs[1, k]);
+                        // Create a key from the time deltas and the band index
+                        hashMaterial[0] = (byte)((deltaTime0 >> 8) & 0xFF);
+                        hashMaterial[1] = (byte)((deltaTime0) & 0xFF);
+                        hashMaterial[2] = (byte)((deltaTime1 >> 8) & 0xFF);
+                        hashMaterial[3] = (byte)((deltaTime1) & 0xFF);
+                        hashMaterial[4] = (byte)band;
+                        uint hashCode = MurmurHash2.Hash(hashMaterial, HashSeed) & HashBitmask;
+
+                        // Set the code alongside the time of onset
+                        codes.Add(new FPCode((uint)quantizedOnsetTime, hashCode));
+                    }
+                }
+            }
         }
     }
 }

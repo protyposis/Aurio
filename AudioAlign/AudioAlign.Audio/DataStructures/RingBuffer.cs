@@ -50,6 +50,26 @@ namespace AudioAlign.Audio.DataStructures {
         }
 
         /// <summary>
+        /// Removes the most recent addition from the ring buffer.
+        /// </summary>
+        public void RemoveHead() {
+            bufferStart = Mod(bufferStart - 1, bufferSize);
+            buffer[bufferStart] = default(T);
+            if (bufferFillLevel > 0) {
+                bufferFillLevel--;
+            }
+        }
+
+        /// <summary>
+        /// Removes the oldest addition from the ring buffer.
+        /// </summary>
+        public void RemoveTail() {
+            if (bufferFillLevel > 0) {
+                bufferFillLevel--;
+            }
+        }
+
+        /// <summary>
         /// Gets an element from the ring buffer at the given index. The oldest element 
         /// is always at index 0, the newest at Count-1.
         /// </summary>
@@ -70,6 +90,10 @@ namespace AudioAlign.Audio.DataStructures {
         public void Clear() {
             bufferStart = 0;
             bufferFillLevel = 0;
+        }
+
+        private static int Mod(int i, int n) {
+            return ((i %= n) < 0) ? i + n : i;
         }
     }
 }
