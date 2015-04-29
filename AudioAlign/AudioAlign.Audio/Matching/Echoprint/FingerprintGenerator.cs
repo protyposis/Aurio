@@ -49,7 +49,10 @@ namespace AudioAlign.Audio.Matching.Echoprint {
         ///                                    +-----------------+          |        
         ///   hash codes   <-------------------+ code generation <----------+        
         ///                                    +-----------------+                   
-        ///
+        /// 
+        /// The hash codes from the code generators of each band are then sent though a code
+        /// sorter which brings them into sequential temporal order before they are stored
+        /// in the final list.
         /// </summary>
         /// <param name="track"></param>
         public void Generate(AudioTrack track) {
@@ -68,26 +71,34 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             }
 
             List<FPCode> codes = new List<FPCode>();
+            CodeSorter codeSorter = new CodeSorter(SubBands);
 
             var sw = new Stopwatch();
             sw.Start();
 
+            int totalFrames = subbandAnalyzer.WindowCount;
+            int currentFrame = 0;
             while (subbandAnalyzer.HasNext()) {
                 subbandAnalyzer.ReadFrame(analyzedFrame);
 
                 for (int i = 0; i < SubBands; i++) {
-                    bandAnalyzers[i].ProcessSample(analyzedFrame[i], codes);
+                    bandAnalyzers[i].ProcessSample(analyzedFrame[i], codeSorter.Queues[i]);
                 }
+                
+                if (currentFrame % 4096 == 0) {
+                    codeSorter.Fill(codes, false);
+                }
+
+                currentFrame++;
             }
+
+            for (int i = 0; i < bandAnalyzers.Length; i++) {
+                bandAnalyzers[i].Flush(codeSorter.Queues[i]);
+            }
+            codeSorter.Fill(codes, true);
 
             sw.Stop();
             Console.WriteLine("time: " + sw.Elapsed);
-
-            for (int i = 0; i < bandAnalyzers.Length; i++) {
-                bandAnalyzers[i].Flush(codes);
-            }
-
-            Debug.WriteLine("done");
         }
 
         /// <summary>
@@ -126,7 +137,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 this.band = band;
             }
 
-            public void ProcessSample(float energySample, List<FPCode> codes) {
+            public void ProcessSample(float energySample, Queue<FPCode> codes) {
                 rmsBlock.Add(energySample);
                 sampleCount++;
 
@@ -164,7 +175,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 }
             }
 
-            public void Flush(List<FPCode> codes) {
+            public void Flush(Queue<FPCode> codes) {
                 // Generate codes for last few onsets
                 for (int i = 0; i < onsetBuffer.Count; i++) {
                     onsetBuffer.RemoveTail();
@@ -251,7 +262,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 return (int)Math.Round(frame / 8d);
             }
 
-            private void GenerateCodes(int band, List<FPCode> codes) {
+            private void GenerateCodes(int band, Queue<FPCode> codes) {
                 if (onsetBuffer.Count > 2) {
                     byte[] hashMaterial = new byte[5];
                     // What time was this onset at?
@@ -294,7 +305,83 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                         uint hashCode = MurmurHash2.Hash(hashMaterial, HashSeed) & HashBitmask;
 
                         // Set the code alongside the time of onset
-                        codes.Add(new FPCode((uint)quantizedOnsetTime, hashCode));
+                        codes.Enqueue(new FPCode((uint)quantizedOnsetTime, hashCode));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// This class collects codes from different bands, sorts them internally,
+        /// and fills a list with the sorted codes.
+        /// 
+        /// Fresh codes should be written to the queue of the source band (Queues[i]), 
+        /// and sorted codes should be fetched through the Fill method. When no more
+        /// codes are going to be written, the remaining ones can be fetched by flushing
+        /// through the Fill method.
+        /// </summary>
+        private class CodeSorter {
+
+            private Queue<FPCode>[] queues;
+            private int frame;
+
+            public CodeSorter(int bands) {
+                queues = new Queue<FPCode>[bands];
+                for(int i = 0; i < bands; i++) {
+                    queues[i] = new Queue<FPCode>();
+                }
+            }
+
+            /// <summary>
+            /// Gets the array of queues to collect the codes of the separate bands.
+            /// </summary>
+            public Queue<FPCode>[] Queues {
+                get { return queues; }
+            }
+
+            /// <summary>
+            /// Fills a list with sorted codes.
+            /// </summary>
+            /// <param name="list">the list to add the sorted codes to</param>
+            /// <param name="flush">If true, all buffered codes will be added to the list</param>
+            /// <returns></returns>
+            public int Fill(List<FPCode> list, bool flush) {
+                int codesTransferred = 0;
+
+                // This block loops until a queue is empty (default mode) or all queues
+                // are empty (flush mode). In default mode, looping stops when a queue is
+                // empty because the minimal frame index of the remaining filled queues
+                // could still be higher than the frame index thats going to be filled next 
+                // into the empty queue.
+                while (true) {
+                    uint minFrame = int.MaxValue;
+                    int minFrameBand = -1;
+
+                    for (int i = 0; i < queues.Length; i++) {
+                        // Find the lowest frame index
+                        if (queues[i].Count == 0) {
+                            if (flush) {
+                                // When flushing, just skip the empty queues
+                                continue;
+                            }
+                            minFrameBand = -1;
+                            break;
+                        }
+                        else if (queues[i].Peek().Frame < minFrame) {
+                            minFrame = queues[i].Peek().Frame;
+                            minFrameBand = i;
+                        }
+                    }
+
+                    // Check loop break condition (one or all queues empty, depending on mode)
+                    if (minFrameBand == -1) {
+                        return codesTransferred;
+                    }
+
+                    // Transfer all codes from the current minimal frame index to the output list
+                    while (queues[minFrameBand].Count > 0 && queues[minFrameBand].Peek().Frame == minFrame) {
+                        list.Add(queues[minFrameBand].Dequeue());
+                        codesTransferred++;
                     }
                 }
             }

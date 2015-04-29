@@ -6,10 +6,10 @@ using System.Text;
 
 namespace AudioAlign.Audio.Matching.Echoprint {
     [DebuggerDisplay("{Frame}/{Code}")]
-    struct FPCode {
+    public struct FPCode {
 
-        private uint Frame;
-        private uint Code;
+        public uint Frame;
+        public uint Code;
 
         public FPCode(uint frame, uint code) {
             Frame = frame;
