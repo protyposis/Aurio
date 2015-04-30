@@ -28,6 +28,10 @@ namespace AudioAlign.Audio.DataStructures {
             return bytesRead;
         }
 
+        public static int ForceFill(this ByteBuffer buffer, IAudioStream sourceStream) {
+            return ForceFill(buffer, sourceStream, buffer.Capacity);
+        }
+
         public static int FillIfEmpty(this ByteBuffer buffer, IAudioStream sourceStream, int count) {
             if (buffer.Empty) {
                 // dynamically increase buffer size
@@ -40,7 +44,5 @@ namespace AudioAlign.Audio.DataStructures {
 
             return 0;
         }
-
-
     }
 }

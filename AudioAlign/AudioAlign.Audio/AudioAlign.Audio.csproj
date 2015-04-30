@@ -159,6 +159,17 @@
     <Compile Include="Matching\Dixon2005\TimeWarpType.cs" />
     <Compile Include="DataStructures\Graph\Edge.cs" />
     <Compile Include="DataStructures\Graph\UndirectedGraph.cs" />
+    <Compile Include="Matching\Echoprint\DictionaryCollisionMap.cs" />
+    <Compile Include="Matching\Echoprint\FingerprintGenerator.cs" />
+    <Compile Include="Matching\Echoprint\FingerprintCodeEventArgs.cs" />
+    <Compile Include="Matching\Echoprint\FingerprintHashLookupEntry.cs" />
+    <Compile Include="Matching\Echoprint\FingerprintStore.cs" />
+    <Compile Include="Matching\Echoprint\FPHash.cs" />
+    <Compile Include="Matching\Echoprint\ICollisionMap.cs" />
+    <Compile Include="Matching\Echoprint\MurmurHash2.cs" />
+    <Compile Include="Matching\Echoprint\Profile.cs" />
+    <Compile Include="Matching\Echoprint\SubbandAnalyzer.cs" />
+    <Compile Include="Matching\Echoprint\WhiteningStream.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\BugProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\BassProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\DictionaryCollisionMap.cs" />
