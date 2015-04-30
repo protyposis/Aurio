@@ -26,7 +26,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             // Precompute the threshold function
             thresholdAccept = new double[profile.MatchingMaxFrames];
             thresholdReject = new double[profile.MatchingMaxFrames];
-            double framesPerSec = (double)profile.SamplingRate / 8 / 4 / 8;
+            double framesPerSec = (double)profile.SamplingRate / profile.SampleToCodeQuantizationFactor;
             for (int i = 0; i < thresholdAccept.Length; i++) {
                 thresholdAccept[i] = profile.ThresholdAccept.Calculate(i / framesPerSec);
                 thresholdReject[i] = profile.ThresholdReject.Calculate(i / framesPerSec);
@@ -192,9 +192,9 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                             matches.Add(new Match {
                                 Similarity = 1f / numTried * numMatched,
                                 Track1 = entry1.AudioTrack,
-                                Track1Time = FingerprintGenerator.FingerprintHashIndexToTimeSpan(entry1.Index),
+                                Track1Time = FingerprintGenerator.FingerprintHashIndexToTimeSpan(profile, entry1.Index),
                                 Track2 = entry2.AudioTrack,
-                                Track2Time = FingerprintGenerator.FingerprintHashIndexToTimeSpan(entry2.Index),
+                                Track2Time = FingerprintGenerator.FingerprintHashIndexToTimeSpan(profile, entry2.Index),
                                 Source = "FP-EP"
                             });
                         }

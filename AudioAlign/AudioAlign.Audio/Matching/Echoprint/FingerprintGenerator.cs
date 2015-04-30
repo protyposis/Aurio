@@ -21,7 +21,12 @@ namespace AudioAlign.Audio.Matching.Echoprint {
 
         private const uint HashSeed = 0x9ea5fa36;
         private const uint HashBitmask = 0x000fffff;
-        private const int SubBands = 8;
+
+        private Profile profile;
+
+        public FingerprintGenerator(Profile profile) {
+            this.profile = profile;
+        }
 
         public event EventHandler<FingerprintCodeEventArgs> FingerprintHashesGenerated;
 
@@ -60,20 +65,21 @@ namespace AudioAlign.Audio.Matching.Echoprint {
         public void Generate(AudioTrack track) {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(track.FileInfo)),
-                ResamplingQuality.Medium, 11025);
+                ResamplingQuality.Medium, profile.SamplingRate);
 
-            var whiteningStream = new WhiteningStream(audioStream, 40, 8, 10000);
+            var whiteningStream = new WhiteningStream(audioStream, 
+                profile.WhiteningNumPoles, profile.WhiteningDecaySecs, profile.WhiteningBlockLength);
             var subbandAnalyzer = new SubbandAnalyzer(whiteningStream);
 
-            float[] analyzedFrame = new float[SubBands];
+            float[] analyzedFrame = new float[profile.SubBands];
 
-            var bandAnalyzers = new BandAnalyzer[SubBands];
-            for (int i = 0; i < SubBands; i++) {
-                bandAnalyzers[i] = new BandAnalyzer(i);
+            var bandAnalyzers = new BandAnalyzer[profile.SubBands];
+            for (int i = 0; i < profile.SubBands; i++) {
+                bandAnalyzers[i] = new BandAnalyzer(profile, i);
             }
 
             List<FPCode> codes = new List<FPCode>();
-            CodeSorter codeSorter = new CodeSorter(SubBands);
+            CodeSorter codeSorter = new CodeSorter(profile.SubBands);
 
             var sw = new Stopwatch();
             sw.Start();
@@ -83,7 +89,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             while (subbandAnalyzer.HasNext()) {
                 subbandAnalyzer.ReadFrame(analyzedFrame);
 
-                for (int i = 0; i < SubBands; i++) {
+                for (int i = 0; i < profile.SubBands; i++) {
                     bandAnalyzers[i].ProcessSample(analyzedFrame[i], codeSorter.Queues[i]);
                 }
                 
@@ -123,8 +129,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             Console.WriteLine("time: " + sw.Elapsed);
         }
 
-        public static TimeSpan FingerprintHashIndexToTimeSpan(int index) {
-            return new TimeSpan((long)Math.Round(((double)index * 4 * 8 * 8) / 11025 * 1000 * 1000 * 10));
+        public static TimeSpan FingerprintHashIndexToTimeSpan(Profile profile, int index) {
+            return new TimeSpan((long)Math.Round(index * profile.SampleToCodeQuantizationFactor / profile.SamplingRate * TimeUtil.SECS_TO_TICKS));
         }
 
         /// <summary>
@@ -132,15 +138,10 @@ namespace AudioAlign.Audio.Matching.Echoprint {
         /// </summary>
         private class BandAnalyzer {
 
-            private const int MinOnsetDistance = 128;
-            private const double Overfact = 1.1;  /* threshold rel. to actual peak */ // paper says 1.05
-            private const int TargetOnsetDistance = 345; // 345 ~= 1 sec (11025 / 8 [subband downsampling factor in SubbandAnalyzer] / 4 [RMS downsampling in adaptiveOnsets()] ~= 345 frames per second)
-            private const int RmsWindowSize = 8;
-            private const int RmsHopSize = 4;
-
             private static readonly double[] FilterCoefficientsBn = { 0.1883, 0.4230, 0.3392 }; /* preemph filter */
             private const double FilterCoefficientA1 = 0.98; // feedback filter coefficient
 
+            private Profile profile;
             private int band;
             
             private double H; // threshold
@@ -151,16 +152,23 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             private double Y0; // last filter level (for feedback)
             private uint onsetCount = 0;
             
-            private RingBuffer<float> rmsBlock = new RingBuffer<float>(RmsWindowSize);
-            private float[] rmsWindow = WindowUtil.GetArray(WindowType.Hann, RmsWindowSize);
-            private int sampleCount = 0;
-            private int rmsSampleCount = 0;
-            private RingBuffer<float> rmsSampleBuffer = new RingBuffer<float>(FilterCoefficientsBn.Length * 2 + 1); // needed for filtering
+            private RingBuffer<float> rmsBlock;
+            private float[] rmsWindow;
+            private int sampleCount;
+            private int rmsSampleCount;
+            private RingBuffer<float> rmsSampleBuffer; // needed for filtering
 
-            private RingBuffer<int> onsetBuffer = new RingBuffer<int>(6);
+            private RingBuffer<int> onsetBuffer = new RingBuffer<int>(6); // needed for onset distribution and code generation
 
-            public BandAnalyzer(int band) {
+            public BandAnalyzer(Profile profile, int band) {
+                this.profile = profile;
                 this.band = band;
+
+                rmsBlock = new RingBuffer<float>(profile.OnsetRmsWindowSize);
+                rmsWindow = WindowUtil.GetArray(profile.OnsetRmsWindowType, profile.OnsetRmsWindowSize);
+                sampleCount = 0;
+                rmsSampleCount = 0;
+                rmsSampleBuffer = new RingBuffer<float>(FilterCoefficientsBn.Length * 2 + 1); // needed for filtering
             }
 
             public void ProcessSample(float energySample, Queue<FPCode> codes) {
@@ -171,11 +179,11 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 // hop-size times shorter than the incoming sample sequence. Onsets will be detected from the
                 // aggregated RMS sample sequence.
 
-                if (sampleCount >= 8 && sampleCount % RmsHopSize == 0) {
+                if (sampleCount >= profile.OnsetRmsWindowSize && sampleCount % profile.OnsetRmsHopSize == 0) {
                     float rmsSample = 0;
 
                     // Compute RMS of a block
-                    for (int k = 0; k < RmsWindowSize; k++) {
+                    for (int k = 0; k < profile.OnsetRmsWindowSize; k++) {
                         rmsSample += rmsBlock[k] * rmsWindow[k];
                     }
                     rmsSample = (float)Math.Sqrt(rmsSample);
@@ -216,7 +224,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 /* calculate the filter -  FIR part */
                 if (rmsSampleCount >= 2 * FilterCoefficientsBn.Length) {
                     for (int k = 0; k < FilterCoefficientsBn.Length; ++k) {
-                        xn += FilterCoefficientsBn[k] * (rmsSampleBuffer[rmsSampleBuffer.Length - 1 - k] - rmsSampleBuffer[rmsSampleBuffer.Length - 1 - (2 * FilterCoefficientsBn.Length - k)]);
+                        xn += FilterCoefficientsBn[k] * (rmsSampleBuffer[rmsSampleBuffer.Length - 1 - k] 
+                            - rmsSampleBuffer[rmsSampleBuffer.Length - 1 - (2 * FilterCoefficientsBn.Length - k)]);
                     }
                 }
                 /* IIR part */
@@ -230,7 +239,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
 
                 if (contact) {
                     /* update with new threshold */
-                    H = xn * Overfact;
+                    H = xn * profile.OnsetOverfact;
                 }
                 else {
                     /* apply decays */
@@ -240,7 +249,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 // When the signal does not exceed the threshold anymore, but did in the last frame, we have an onset detected
                 if (!contact && lastContact) {
                     // If the distance between the previous and current onset is too short, we replace the previous onset
-                    if (onsetCount > 0 && rmsSampleCount - onsetBuffer[onsetBuffer.Count - 1] < MinOnsetDistance) {
+                    if (onsetCount > 0 && rmsSampleCount - onsetBuffer[onsetBuffer.Count - 1] < profile.OnsetMinDistance) {
                         onsetBuffer.RemoveHead(); // TODO check if working correctly
                         --onsetCount;
                         onsetCountDelta--;
@@ -255,7 +264,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 ++timeSinceLastOnset;
 
                 // Adjust the decay rate
-                if (timeSinceLastOnset > TargetOnsetDistance) {
+                if (timeSinceLastOnset > profile.OnsetTargetDistance) {
                     // Increase decay above the target onset distance (makes it easier to detect an onset)
                     if (taus > 1) {
                         taus--;
@@ -284,8 +293,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             /// Echoprint source are way too complicated and can be simplified to this function. The offset is omitted
             /// here as it is not needed.
             /// </summary>
-            private static int QuantizeFrameTime(int frame) {
-                return (int)Math.Round(frame / 8d);
+            private int QuantizeFrameTime(int frame) {
+                return (int)Math.Round(frame / profile.CodeTimeQuantizationFactor);
             }
 
             private void GenerateCodes(int band, Queue<FPCode> codes) {
