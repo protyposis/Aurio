@@ -172,12 +172,9 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                             // rate after a long time. The difficulty is to to parameterize it in such a way, that a 
                             // match is detected as fast as possible, while detecting a no-match isn't delayed too far 
                             // as it takes a lot of processing time.
-                            // NOTE The current parameters are just eyeballed, there's a lot of influence on processing speed here
-                            //double threshold = Math.Pow(profile.MatchingThresholdExponentialDecayBase, numIndices / sec / profile.MatchingThresholdExponentialWidthScale) * profile.MatchingThresholdExponentialHeight; // match successful threshold
-                            //double thresholdLow = threshold / profile.MatchingThresholdRejectionFraction; // match abort threshold
                             double rate = 1d / numTried * numMatched;
 
-                            if (frameCount > profile.MatchingMaxFrames || rate < thresholdReject[frameCount]) {
+                            if (frameCount >= profile.MatchingMaxFrames || rate < thresholdReject[frameCount]) {
                                 break; // exit condition
                             }
                             else if (frameCount > profile.MatchingMinFrames && rate > thresholdAccept[frameCount]) {
