@@ -28,7 +28,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             this.profile = profile;
         }
 
-        public event EventHandler<FingerprintCodeEventArgs> FingerprintHashesGenerated;
+        public event EventHandler<FingerprintHashEventArgs> FingerprintHashesGenerated;
 
         /// <summary>
         /// This method generates hash codes from an audio stream in a streaming fashion,
@@ -54,10 +54,10 @@ namespace AudioAlign.Audio.Matching.Echoprint {
         ///                               +------------------+   +----------+------+ 
         ///                                                                 |        
         ///                                    +-----------------+          |        
-        ///   hash codes   <-------------------+ code generation <----------+        
+        ///   hash codes   <-------------------+ hash generation <----------+        
         ///                                    +-----------------+                   
         /// 
-        /// The hash codes from the code generators of each band are then sent though a code
+        /// The hash codes from the hash generators of each band are then sent though a 
         /// sorter which brings them into sequential temporal order before they are stored
         /// in the final list.
         /// </summary>
@@ -78,8 +78,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 bandAnalyzers[i] = new BandAnalyzer(profile, i);
             }
 
-            List<FPCode> codes = new List<FPCode>();
-            CodeSorter codeSorter = new CodeSorter(profile.SubBands);
+            List<FPHash> hashes = new List<FPHash>();
+            HashTimeSorter hashSorter = new HashTimeSorter(profile.SubBands);
 
             var sw = new Stopwatch();
             sw.Start();
@@ -90,20 +90,20 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 subbandAnalyzer.ReadFrame(analyzedFrame);
 
                 for (int i = 0; i < profile.SubBands; i++) {
-                    bandAnalyzers[i].ProcessSample(analyzedFrame[i], codeSorter.Queues[i]);
+                    bandAnalyzers[i].ProcessSample(analyzedFrame[i], hashSorter.Queues[i]);
                 }
                 
                 if (currentFrame % 4096 == 0) {
-                    codeSorter.Fill(codes, false);
+                    hashSorter.Fill(hashes, false);
 
                     if (FingerprintHashesGenerated != null) {
-                        FingerprintHashesGenerated(this, new FingerprintCodeEventArgs {
+                        FingerprintHashesGenerated(this, new FingerprintHashEventArgs {
                             AudioTrack = track,
                             Index = currentFrame,
                             Indices = totalFrames,
-                            Codes = codes
+                            Hashes = hashes
                         });
-                        codes.Clear();
+                        hashes.Clear();
                     }
                 }
 
@@ -111,18 +111,18 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             }
 
             for (int i = 0; i < bandAnalyzers.Length; i++) {
-                bandAnalyzers[i].Flush(codeSorter.Queues[i]);
+                bandAnalyzers[i].Flush(hashSorter.Queues[i]);
             }
-            codeSorter.Fill(codes, true);
+            hashSorter.Fill(hashes, true);
 
             if (FingerprintHashesGenerated != null) {
-                FingerprintHashesGenerated(this, new FingerprintCodeEventArgs {
+                FingerprintHashesGenerated(this, new FingerprintHashEventArgs {
                     AudioTrack = track,
                     Index = currentFrame,
                     Indices = totalFrames,
-                    Codes = codes
+                    Hashes = hashes
                 });
-                codes.Clear();
+                hashes.Clear();
             }
 
             sw.Stop();
@@ -130,7 +130,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
         }
 
         public static TimeSpan FingerprintHashIndexToTimeSpan(Profile profile, int index) {
-            return new TimeSpan((long)Math.Round(index * profile.SampleToCodeQuantizationFactor / profile.SamplingRate * TimeUtil.SECS_TO_TICKS));
+            return new TimeSpan((long)Math.Round(index * profile.SampleToHashQuantizationFactor / profile.SamplingRate * TimeUtil.SECS_TO_TICKS));
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             private int rmsSampleCount;
             private RingBuffer<float> rmsSampleBuffer; // needed for filtering
 
-            private RingBuffer<int> onsetBuffer = new RingBuffer<int>(6); // needed for onset distribution and code generation
+            private RingBuffer<int> onsetBuffer = new RingBuffer<int>(6); // needed for onset distribution and hash generation
 
             public BandAnalyzer(Profile profile, int band) {
                 this.profile = profile;
@@ -171,7 +171,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 rmsSampleBuffer = new RingBuffer<float>(FilterCoefficientsBn.Length * 2 + 1); // needed for filtering
             }
 
-            public void ProcessSample(float energySample, Queue<FPCode> codes) {
+            public void ProcessSample(float energySample, Queue<FPHash> hashes) {
                 rmsBlock.Add(energySample);
                 sampleCount++;
 
@@ -202,18 +202,18 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                     rmsSampleBuffer.Add(rmsSample);
                     int onset = DetectOnset();
                     if (onset != -1 && onsetBuffer.Count == onsetBuffer.Length) {
-                        GenerateCodes(band, codes);
+                        GenerateHashes(band, hashes);
                     }
 
                     rmsSampleCount++;
                 }
             }
 
-            public void Flush(Queue<FPCode> codes) {
-                // Generate codes for last few onsets
+            public void Flush(Queue<FPHash> hashes) {
+                // Generate hashes for the last few onsets
                 for (int i = 0; i < onsetBuffer.Count; i++) {
                     onsetBuffer.RemoveTail();
-                    GenerateCodes(band, codes);
+                    GenerateHashes(band, hashes);
                 }
             }
 
@@ -294,10 +294,10 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             /// here as it is not needed.
             /// </summary>
             private int QuantizeFrameTime(int frame) {
-                return (int)Math.Round(frame / profile.CodeTimeQuantizationFactor);
+                return (int)Math.Round(frame / profile.HashTimeQuantizationFactor);
             }
 
-            private void GenerateCodes(int band, Queue<FPCode> codes) {
+            private void GenerateHashes(int band, Queue<FPHash> hashes) {
                 if (onsetBuffer.Count > 2) {
                     byte[] hashMaterial = new byte[5];
                     // What time was this onset at?
@@ -322,8 +322,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                         }
                     }
 
-                    // For each pair emit a code
-                    // NOTE This always generates 6 codes, even at the end of a band where < 6 pairs
+                    // For each pair emit a hash
+                    // NOTE This always generates 6 hashes, even at the end of a band where < 6 pairs
                     //      are formed. Thats not really a problem though as their delta times will
                     //      always be zero, whereas valid pairs have delta times above zero; therefore
                     //      the chance is very low to get spurious collisions.
@@ -339,49 +339,48 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                         hashMaterial[4] = (byte)band;
                         uint hashCode = MurmurHash2.Hash(hashMaterial, HashSeed) & HashBitmask;
 
-                        // Set the code alongside the time of onset
-                        codes.Enqueue(new FPCode((uint)quantizedOnsetTime, hashCode));
+                        // Set the hash alongside the time of onset
+                        hashes.Enqueue(new FPHash((uint)quantizedOnsetTime, hashCode));
                     }
                 }
             }
         }
 
         /// <summary>
-        /// This class collects codes from different bands, sorts them internally,
-        /// and fills a list with the sorted codes.
+        /// This class collects hashes from different bands, sorts them internally by time,
+        /// and fills a list with the sorted hashes.
         /// 
-        /// Fresh codes should be written to the queue of the source band (Queues[i]), 
-        /// and sorted codes should be fetched through the Fill method. When no more
-        /// codes are going to be written, the remaining ones can be fetched by flushing
+        /// Fresh hashes should be written to the queue of the source band (Queues[i]), 
+        /// and sorted hashes should be fetched through the Fill method. When no more
+        /// hashes are going to be added, the remaining ones can be fetched by flushing
         /// through the Fill method.
         /// </summary>
-        private class CodeSorter {
+        private class HashTimeSorter {
 
-            private Queue<FPCode>[] queues;
-            private int frame;
+            private Queue<FPHash>[] queues;
 
-            public CodeSorter(int bands) {
-                queues = new Queue<FPCode>[bands];
+            public HashTimeSorter(int bands) {
+                queues = new Queue<FPHash>[bands];
                 for(int i = 0; i < bands; i++) {
-                    queues[i] = new Queue<FPCode>();
+                    queues[i] = new Queue<FPHash>();
                 }
             }
 
             /// <summary>
-            /// Gets the array of queues to collect the codes of the separate bands.
+            /// Gets the array of queues to collect the hashes of the separate bands.
             /// </summary>
-            public Queue<FPCode>[] Queues {
+            public Queue<FPHash>[] Queues {
                 get { return queues; }
             }
 
             /// <summary>
-            /// Fills a list with sorted codes.
+            /// Fills a list with sorted hashes.
             /// </summary>
-            /// <param name="list">the list to add the sorted codes to</param>
-            /// <param name="flush">If true, all buffered codes will be added to the list</param>
+            /// <param name="list">the list to add the sorted hashes to</param>
+            /// <param name="flush">If true, all remaining buffered hashes will be added to the list</param>
             /// <returns></returns>
-            public int Fill(List<FPCode> list, bool flush) {
-                int codesTransferred = 0;
+            public int Fill(List<FPHash> list, bool flush) {
+                int hashesTransferred = 0;
 
                 // This block loops until a queue is empty (default mode) or all queues
                 // are empty (flush mode). In default mode, looping stops when a queue is
@@ -410,13 +409,13 @@ namespace AudioAlign.Audio.Matching.Echoprint {
 
                     // Check loop break condition (one or all queues empty, depending on mode)
                     if (minFrameBand == -1) {
-                        return codesTransferred;
+                        return hashesTransferred;
                     }
 
-                    // Transfer all codes from the current minimal frame index to the output list
+                    // Transfer all hashes from the current minimal frame index to the output list
                     while (queues[minFrameBand].Count > 0 && queues[minFrameBand].Peek().Frame == minFrame) {
                         list.Add(queues[minFrameBand].Dequeue());
-                        codesTransferred++;
+                        hashesTransferred++;
                     }
                 }
             }

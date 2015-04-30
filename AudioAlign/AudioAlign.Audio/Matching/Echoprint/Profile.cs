@@ -41,9 +41,9 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             OnsetTargetDistance = 345; // 345 ~= 1 sec (11025 / 8 [SubbandAnalyzer] / 4 [RMS / adaptiveOnsets()] ~= 345 frames per second)
             OnsetOverfact = 1.1; // paper says 1.05 but Echoprint sources say 1.1
 
-            CodeTimeQuantizationFactor = 8;
+            HashTimeQuantizationFactor = 8;
 
-            double framesPerSecond = (double)SamplingRate / SampleToCodeQuantizationFactor;
+            double framesPerSecond = (double)SamplingRate / SampleToHashQuantizationFactor;
             MatchingMinFrames = (int)(framesPerSecond * 3);
             MatchingMaxFrames = (int)(framesPerSecond * 60);
 
@@ -118,9 +118,9 @@ namespace AudioAlign.Audio.Matching.Echoprint {
         public double OnsetOverfact { get; set; }
 
         /// <summary>
-        /// The factor by which the onset times are quantized during code generation.
+        /// The factor by which the onset times are quantized during hash generation.
         /// </summary>
-        public double CodeTimeQuantizationFactor { get; set; }
+        public double HashTimeQuantizationFactor { get; set; }
 
         /// <summary>
         /// The minimum length in frames to classify a match.
@@ -145,8 +145,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
         /// <summary>
         /// The factor to convert the input sample time scale into the output hash time scale.
         /// </summary>
-        public double SampleToCodeQuantizationFactor {
-            get { return SubBands * OnsetRmsHopSize * CodeTimeQuantizationFactor; }
+        public double SampleToHashQuantizationFactor {
+            get { return SubBands * OnsetRmsHopSize * HashTimeQuantizationFactor; }
         }
     }
 }

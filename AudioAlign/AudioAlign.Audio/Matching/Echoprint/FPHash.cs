@@ -5,15 +5,15 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Audio.Matching.Echoprint {
-    [DebuggerDisplay("{Frame}/{Code}")]
-    public struct FPCode {
+    [DebuggerDisplay("{Frame}/{Hash}")]
+    public struct FPHash {
 
         public uint Frame;
-        public uint Code;
+        public uint Hash;
 
-        public FPCode(uint frame, uint code) {
+        public FPHash(uint frame, uint hash) {
             Frame = frame;
-            Code = code;
+            Hash = hash;
         }
     }
 }

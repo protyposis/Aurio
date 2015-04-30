@@ -164,7 +164,7 @@
     <Compile Include="Matching\Echoprint\FingerprintCodeEventArgs.cs" />
     <Compile Include="Matching\Echoprint\FingerprintHashLookupEntry.cs" />
     <Compile Include="Matching\Echoprint\FingerprintStore.cs" />
-    <Compile Include="Matching\Echoprint\FPCode.cs" />
+    <Compile Include="Matching\Echoprint\FPHash.cs" />
     <Compile Include="Matching\Echoprint\ICollisionMap.cs" />
     <Compile Include="Matching\Echoprint\MurmurHash2.cs" />
     <Compile Include="Matching\Echoprint\Profile.cs" />

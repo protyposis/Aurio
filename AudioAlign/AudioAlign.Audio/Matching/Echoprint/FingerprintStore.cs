@@ -26,7 +26,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             // Precompute the threshold function
             thresholdAccept = new double[profile.MatchingMaxFrames];
             thresholdReject = new double[profile.MatchingMaxFrames];
-            double framesPerSec = (double)profile.SamplingRate / profile.SampleToCodeQuantizationFactor;
+            double framesPerSec = (double)profile.SamplingRate / profile.SampleToHashQuantizationFactor;
             for (int i = 0; i < thresholdAccept.Length; i++) {
                 thresholdAccept[i] = profile.ThresholdAccept.Calculate(i / framesPerSec);
                 thresholdReject[i] = profile.ThresholdReject.Calculate(i / framesPerSec);
@@ -37,8 +37,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             get { return collisionMap; }
         }
 
-        public void Add(FingerprintCodeEventArgs e) {
-            if (e.Codes.Count == 0) {
+        public void Add(FingerprintHashEventArgs e) {
+            if (e.Hashes.Count == 0) {
                 return;
             }
 
@@ -48,38 +48,38 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                     store.Add(e.AudioTrack, new TrackStore());
                 }
 
-                int codeListIndex = 0;
-                int codeListIndexCount = 0;
+                int hashListIndex = 0;
+                int hashListIndexCount = 0;
                 uint frame;
-                FPCode code;
-                while (e.Codes.Count > codeListIndex + codeListIndexCount) {
+                FPHash hash;
+                while (e.Hashes.Count > hashListIndex + hashListIndexCount) {
                     int indexIndex = store[e.AudioTrack].hashes.Count;
-                    frame = e.Codes[codeListIndex].Frame;
-                    codeListIndexCount = 0;
-                    while (e.Codes.Count > codeListIndex + codeListIndexCount && (code = e.Codes[codeListIndex + codeListIndexCount]).Frame == frame) {
-                        store[e.AudioTrack].hashes.Add(code.Code);
+                    frame = e.Hashes[hashListIndex].Frame;
+                    hashListIndexCount = 0;
+                    while (e.Hashes.Count > hashListIndex + hashListIndexCount && (hash = e.Hashes[hashListIndex + hashListIndexCount]).Frame == frame) {
+                        store[e.AudioTrack].hashes.Add(hash.Hash);
 
                         // insert a track/index lookup entry for the fingerprint hash
-                        collisionMap.Add(code.Code, new FingerprintHashLookupEntry(e.AudioTrack, (int)frame));
+                        collisionMap.Add(hash.Hash, new FingerprintHashLookupEntry(e.AudioTrack, (int)frame));
 
-                        codeListIndexCount++;
+                        hashListIndexCount++;
                     }
 
-                    if (codeListIndexCount > 0) {
+                    if (hashListIndexCount > 0) {
                         int frameIndex = (int)frame;
                         TrackStore.IndexEntry ie;
                         if (store[e.AudioTrack].index.ContainsKey(frameIndex)) {
                             ie = store[e.AudioTrack].index[frameIndex];
-                            ie.length += codeListIndexCount;
+                            ie.length += hashListIndexCount;
                             store[e.AudioTrack].index.Remove(frameIndex);
                         } else {
-                            ie = new TrackStore.IndexEntry(indexIndex, codeListIndexCount);
+                            ie = new TrackStore.IndexEntry(indexIndex, hashListIndexCount);
                         }
                         // Add the current length of the hash list as start pointer for all hashes belonging to the current index
                         store[e.AudioTrack].index.Add(frameIndex, ie);
                     }
 
-                    codeListIndex += codeListIndexCount;
+                    hashListIndex += hashListIndexCount;
                 }
             }
         }
