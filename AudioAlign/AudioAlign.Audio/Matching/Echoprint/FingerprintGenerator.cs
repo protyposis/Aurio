@@ -123,6 +123,10 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             Console.WriteLine("time: " + sw.Elapsed);
         }
 
+        public static TimeSpan FingerprintHashIndexToTimeSpan(int index) {
+            return new TimeSpan((long)Math.Round(((double)index * 4 * 8 * 8) / 11025 * 1000 * 1000 * 10));
+        }
+
         /// <summary>
         /// Analyzes a subband for onsets and generates hash codes.
         /// </summary>
