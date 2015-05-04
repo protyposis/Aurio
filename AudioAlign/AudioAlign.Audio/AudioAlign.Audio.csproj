@@ -144,6 +144,8 @@
     <Compile Include="FFTUtil.cs" />
     <Compile Include="Matching\Analysis.cs" />
     <Compile Include="Matching\AnalysisMode.cs" />
+    <Compile Include="Matching\Chromaprint\FingerprintGenerator.cs" />
+    <Compile Include="Matching\Chromaprint\Profile.cs" />
     <Compile Include="Matching\CrossCorrelation.cs" />
     <Compile Include="DataStructures\Matrix\ArrayMatrix.cs" />
     <Compile Include="DataStructures\Matrix\DiagonalArrayMatrix.cs" />
