@@ -135,7 +135,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
                                 Track1Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, entry1.Index),
                                 Track2 = entry2.AudioTrack,
                                 Track2Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, entry2.Index),
-                                Source = "FP"
+                                Source = "FP-CP"
                             });
                         }
                     }
