@@ -18,6 +18,9 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         private static readonly uint[] grayCodeMapping = { 0, 1, 3, 2 };
         private Profile profile;
 
+        public event EventHandler<SubFingerprintEventArgs> SubFingerprintCalculated;
+        public event EventHandler Completed;
+
         public FingerprintGenerator(Profile profile) {
             this.profile = profile;
         }
@@ -38,7 +41,8 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             var classifiers = profile.Classifiers;
             var maxFilterWidth = classifiers.Max(c => c.Filter.Width);
             var integralImage = new IntegralImage(maxFilterWidth, Chroma.Bins);
-            int frameTime = 0;
+            int index = 0;
+            int indices = chroma.WindowCount;
             while (chroma.HasNext()) {
                 // Get chroma frame buffer
                 // When the chroma buffer is full, we can take and reuse the oldest array
@@ -92,9 +96,24 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
                     subFingerprint = (subFingerprint << 2) | grayCodeMapping[classifiers[i].Classify(integralImage, 0)];
                 }
                 // We have a SubFingerprint@frameTime
+                if (SubFingerprintCalculated != null) {
+                    SubFingerprintCalculated(this, new SubFingerprintEventArgs(track, new SubFingerprint(subFingerprint), index, indices, false));
+                }
 
-                frameTime++;
+                index++;
             }
+
+            if (Completed != null) {
+                Completed(this, EventArgs.Empty);
+            }
+        }
+
+        public static TimeSpan SubFingerprintIndexToTimeSpan(Profile profile, int index) {
+            return new TimeSpan((long)Math.Round((double)index * profile.HopSize / profile.SamplingRate * TimeUtil.SECS_TO_TICKS));
+        }
+
+        public static int TimeStampToSubFingerprintIndex(Profile profile, TimeSpan timeSpan) {
+            return (int)Math.Round((double)timeSpan.Ticks / TimeUtil.SECS_TO_TICKS * profile.SamplingRate / profile.HopSize);
         }
     }
 }
