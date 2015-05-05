@@ -46,12 +46,12 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             for (int y = 1; y < height; y++) { // iterate (0, 1...h)
                 icol[y] = col[y] + icol[y - 1]; // set (0, y)
             }
-            for (int x = 1; x < width; x++) { // iterate (1...w, y)
+            for (int x = 1; x < image.Count; x++) { // iterate (1...w, y)
                 col = image[x];
                 var prevIcol = icol;
                 icol = integralImage[x];
                 icol[0] = col[0] + prevIcol[0]; // set (x, 0)
-                for (int y = 0; y < height; y++) { // iterate (x, 1...h)
+                for (int y = 1; y < height; y++) { // iterate (x, 1...h)
                     icol[y] = col[y] + prevIcol[y] - prevIcol[y - 1] + icol[y - 1]; // set (x, y)
                 }
             }

@@ -57,7 +57,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
                 for (int i = 0; i < chromaFilterCoefficients.Length; i++) {
                     var frame = chromaBuffer[i];
                     for (int j = 0; j < frame.Length; j++) {
-                        filteredChromaFrame[j] += frame[j] * chromaFilterCoefficients[j];
+                        filteredChromaFrame[j] += frame[j] * chromaFilterCoefficients[i];
                     }
                 }
 

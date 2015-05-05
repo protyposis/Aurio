@@ -35,7 +35,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             fftToChromaBinMappingOffset = minBin;
             fftToChromaBinCount = new int[Bins];
 
-            for (int i = minBin; i < fftFrameBuffer.Length; i++) {
+            for (int i = minBin; i < maxBin; i++) {
                 double fftBinCenterFreq = i * freqToBinRatio;
                 double c = Math.Log(fftBinCenterFreq, 2) - Math.Floor(Math.Log(fftBinCenterFreq, 2)); // paper formula (3)
                 // c ∈ [0, 1) must be mapped to chroma bins {0...11}
