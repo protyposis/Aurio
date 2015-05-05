@@ -1,4 +1,5 @@
-﻿using AudioAlign.Audio.Project;
+﻿using AudioAlign.Audio.DataStructures;
+using AudioAlign.Audio.Project;
 using AudioAlign.Audio.Streams;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
     /// </summary>
     public class FingerprintGenerator {
 
+        private static readonly uint[] grayCodeMapping = { 0, 1, 3, 2 };
         private Profile profile;
 
         public FingerprintGenerator(Profile profile) {
@@ -24,6 +26,75 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(track.FileInfo)),
                 ResamplingQuality.Medium, profile.SamplingRate);
+
+            var chroma = new Chroma(audioStream, profile.WindowSize, profile.HopSize, profile.WindowType,
+                profile.ChromaMinFrequency, profile.ChromaMaxFrequency, false);
+
+
+            float[] chromaFrame;
+            var chromaBuffer = new RingBuffer<float[]>(profile.ChromaFilterCoefficients.Length);
+            var chromaFilterCoefficients = profile.ChromaFilterCoefficients;
+            var filteredChromaFrame = new double[Chroma.Bins];
+            var classifiers = profile.Classifiers;
+            var maxFilterWidth = classifiers.Max(c => c.Filter.Width);
+            var integralImage = new IntegralImage(maxFilterWidth, Chroma.Bins);
+            int frameTime = 0;
+            while (chroma.HasNext()) {
+                // Get chroma frame buffer
+                // When the chroma buffer is full, we can take and reuse the oldest array
+                chromaFrame = chromaBuffer.Count == chromaBuffer.Length ? chromaBuffer[0] : new float[Chroma.Bins];
+
+                // Read chroma frame into buffer
+                chroma.ReadFrame(chromaFrame);
+
+                // ChromaFilter
+                chromaBuffer.Add(chromaFrame);
+                if (chromaBuffer.Count < chromaBuffer.Length) {
+                    // Wait for the buffer to fill completely for the filtering to start
+                    continue;
+                }
+                Array.Clear(filteredChromaFrame, 0, filteredChromaFrame.Length);
+                for (int i = 0; i < chromaFilterCoefficients.Length; i++) {
+                    var frame = chromaBuffer[i];
+                    for (int j = 0; j < frame.Length; j++) {
+                        filteredChromaFrame[j] += frame[j] * chromaFilterCoefficients[j];
+                    }
+                }
+
+                // ChromaNormalizer
+                double euclideanNorm = 0;
+                for (int i = 0; i < filteredChromaFrame.Length; i++) {
+                    var value = filteredChromaFrame[i];
+                    euclideanNorm += value * value;
+                }
+                euclideanNorm = Math.Sqrt(euclideanNorm);
+                if (euclideanNorm < profile.ChromaNormalizationThreshold) {
+                    Array.Clear(filteredChromaFrame, 0, filteredChromaFrame.Length);
+                }
+                else {
+                    for (int i = 0; i < filteredChromaFrame.Length; i++) {
+                        filteredChromaFrame[i] /= euclideanNorm;
+                    }
+                }
+
+                // ImageBuilder
+                // ... just add one feature vector after another as rows to the image
+                integralImage.AddColumn(filteredChromaFrame);
+
+                // FingerprintCalculator
+                if (integralImage.Columns < maxFilterWidth) {
+                    // Wait for the image to fill completely before subfingerprints can be generated
+                    continue;
+                }
+                // Calculate subfingerprint
+                uint subFingerprint = 0;
+                for (int i = 0; i < classifiers.Length; i++) {
+                    subFingerprint = (subFingerprint << 2) | grayCodeMapping[classifiers[i].Classify(integralImage, 0)];
+                }
+                // We have a SubFingerprint@frameTime
+
+                frameTime++;
+            }
         }
     }
 }
