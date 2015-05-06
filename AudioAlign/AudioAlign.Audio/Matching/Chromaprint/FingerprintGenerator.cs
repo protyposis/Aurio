@@ -31,8 +31,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
                 ResamplingQuality.Medium, profile.SamplingRate);
 
             var chroma = new Chroma(audioStream, profile.WindowSize, profile.HopSize, profile.WindowType,
-                profile.ChromaMinFrequency, profile.ChromaMaxFrequency, false);
-
+                profile.ChromaMinFrequency, profile.ChromaMaxFrequency, false, Chroma.MappingType.Chromaprint);
 
             float[] chromaFrame;
             var chromaBuffer = new RingBuffer<float[]>(profile.ChromaFilterCoefficients.Length);
