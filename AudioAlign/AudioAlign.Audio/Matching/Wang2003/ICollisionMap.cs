@@ -10,6 +10,6 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         List<V> GetValues(K key);
     }
 
-    public interface IFingerprintCollisionMap : ICollisionMap<uint, FingerprintHashLookupEntry> {
+    public interface IFingerprintCollisionMap : ICollisionMap<SubFingerprint, FingerprintHashLookupEntry> {
     }
 }

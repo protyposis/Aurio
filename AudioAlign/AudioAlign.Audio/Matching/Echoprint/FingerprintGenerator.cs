@@ -340,7 +340,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                         uint hashCode = MurmurHash2.Hash(hashMaterial, HashSeed) & HashBitmask;
 
                         // Set the hash alongside the time of onset
-                        hashes.Enqueue(new FPHash((uint)quantizedOnsetTime, hashCode));
+                        hashes.Enqueue(new FPHash((uint)quantizedOnsetTime, new SubFingerprint(hashCode)));
                     }
                 }
             }

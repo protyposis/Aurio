@@ -157,7 +157,6 @@
     <Compile Include="Matching\Chromaprint\IntegralImage.cs" />
     <Compile Include="Matching\Chromaprint\Profile.cs" />
     <Compile Include="Matching\Chromaprint\Quantizer.cs" />
-    <Compile Include="Matching\Chromaprint\SubFingerprint.cs" />
     <Compile Include="Matching\Chromaprint\SubFingerprintEventArgs.cs" />
     <Compile Include="Matching\Chromaprint\SubFingerprintLookupEntry.cs" />
     <Compile Include="Matching\Chromaprint\SyncProfile.cs" />
@@ -198,7 +197,7 @@
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintGenerator.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintStore.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\IProfile.cs" />
-    <Compile Include="Matching\HaitsmaKalker2002\SubFingerprint.cs" />
+    <Compile Include="Matching\SubFingerprint.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintEventArgs.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintLookupEntry.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\VoiceProfile.cs" />

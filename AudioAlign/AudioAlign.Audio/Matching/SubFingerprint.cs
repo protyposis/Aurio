@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Chromaprint {
+namespace AudioAlign.Audio.Matching {
     public struct SubFingerprint {
 
         private static UInt32[] bitMasks;
@@ -76,6 +76,14 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
 
         public static bool operator ==(SubFingerprint a, SubFingerprint b) {
             return a.value == b.value;
+        }
+
+        public static bool operator <(SubFingerprint a, SubFingerprint b) {
+            return a.value < b.value;
+        }
+
+        public static bool operator >(SubFingerprint a, SubFingerprint b) {
+            return a.value > b.value;
         }
 
         public SubFingerprint Difference(SubFingerprint subFingerprint) {

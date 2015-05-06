@@ -9,9 +9,9 @@ namespace AudioAlign.Audio.Matching.Echoprint {
     public struct FPHash {
 
         public uint Frame;
-        public uint Hash;
+        public SubFingerprint Hash;
 
-        public FPHash(uint frame, uint hash) {
+        public FPHash(uint frame, SubFingerprint hash) {
             Frame = frame;
             Hash = hash;
         }

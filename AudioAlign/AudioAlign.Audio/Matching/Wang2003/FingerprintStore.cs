@@ -58,7 +58,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             }
         }
 
-        public List<Match> FindMatches(uint hash) {
+        public List<Match> FindMatches(SubFingerprint hash) {
             List<Match> matches = new List<Match>();
             List<FingerprintHashLookupEntry> entries = collisionMap.GetValues(hash);
 
@@ -70,8 +70,8 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
 
                         var store1 = store[entry1.AudioTrack];
                         var store2 = store[entry2.AudioTrack];
-                        List<uint> hashes1 = store1.hashes;
-                        List<uint> hashes2 = store2.hashes;
+                        List<SubFingerprint> hashes1 = store1.hashes;
+                        List<SubFingerprint> hashes2 = store2.hashes;
                         int index1 = entry1.Index;
                         int index2 = entry2.Index;
                         TrackStore.IndexEntry indexEntry1, indexEntry2;
@@ -169,7 +169,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             
             int collisions = collidingKeys.Count;
             int count = 0;
-            foreach (uint hash in collidingKeys) {
+            foreach (SubFingerprint hash in collidingKeys) {
                 matches.AddRange(FindMatches(hash));
 
                 if (count++ % 4096 == 0 && MatchingProgress != null) {
@@ -199,11 +199,11 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 }
             }
 
-            public List<uint> hashes;
+            public List<SubFingerprint> hashes;
             public Dictionary<int, IndexEntry> index;
 
             public TrackStore() {
-                hashes = new List<uint>();
+                hashes = new List<SubFingerprint>();
                 index = new Dictionary<int, IndexEntry>();
             }
         }

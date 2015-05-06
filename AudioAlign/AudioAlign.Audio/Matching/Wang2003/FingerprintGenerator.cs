@@ -287,7 +287,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                     AudioTrack = track,
                     Index = peakPairs[0].Index,
                     Indices = indices,
-                    Hashes = hashes
+                    Hashes = hashes.ConvertAll(h => new SubFingerprint(h))
                 });
             }
         }
