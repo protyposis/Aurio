@@ -97,6 +97,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="BenchmarkEntry.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -125,6 +126,24 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AudioAlign.Audio\AudioAlign.Audio.csproj">
+      <Project>{e868d91e-c5cf-46e4-be2f-f95353acb5e2}</Project>
+      <Name>AudioAlign.Audio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioAlign.FFmpeg\AudioAlign.FFmpeg.csproj">
+      <Project>{8a1a603c-7005-4cc0-9ab7-e6fd3f58f621}</Project>
+      <Name>AudioAlign.FFmpeg</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioAlign.PFFFT\AudioAlign.PFFFT.csproj">
+      <Project>{3960f81d-5aea-4f36-a26c-f295dff3fcb6}</Project>
+      <Name>AudioAlign.PFFFT</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioAlign.Soxr\AudioAlign.Soxr.csproj">
+      <Project>{24228071-5e72-4ba8-90e3-89de331a718c}</Project>
+      <Name>AudioAlign.Soxr</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
