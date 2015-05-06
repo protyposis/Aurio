@@ -97,7 +97,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
                 }
                 // We have a SubFingerprint@frameTime
                 if (SubFingerprintCalculated != null) {
-                    SubFingerprintCalculated(this, new SubFingerprintEventArgs(track, new SubFingerprint(subFingerprint), index, indices, false));
+                    SubFingerprintCalculated(this, new SubFingerprintEventArgs(track, new IndexedSubFingerprint(index, new SubFingerprint(subFingerprint), false), index, indices));
                 }
 
                 index++;

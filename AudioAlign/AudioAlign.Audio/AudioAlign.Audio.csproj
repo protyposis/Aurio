@@ -157,7 +157,6 @@
     <Compile Include="Matching\Chromaprint\IntegralImage.cs" />
     <Compile Include="Matching\Chromaprint\Profile.cs" />
     <Compile Include="Matching\Chromaprint\Quantizer.cs" />
-    <Compile Include="Matching\Chromaprint\SubFingerprintEventArgs.cs" />
     <Compile Include="Matching\Chromaprint\SubFingerprintLookupEntry.cs" />
     <Compile Include="Matching\Chromaprint\SyncProfile.cs" />
     <Compile Include="Matching\CrossCorrelation.cs" />
@@ -177,10 +176,8 @@
     <Compile Include="DataStructures\Graph\UndirectedGraph.cs" />
     <Compile Include="Matching\Echoprint\DictionaryCollisionMap.cs" />
     <Compile Include="Matching\Echoprint\FingerprintGenerator.cs" />
-    <Compile Include="Matching\Echoprint\FingerprintCodeEventArgs.cs" />
     <Compile Include="Matching\Echoprint\FingerprintHashLookupEntry.cs" />
     <Compile Include="Matching\Echoprint\FingerprintStore.cs" />
-    <Compile Include="Matching\Echoprint\FPHash.cs" />
     <Compile Include="Matching\Echoprint\ICollisionMap.cs" />
     <Compile Include="Matching\Echoprint\MurmurHash2.cs" />
     <Compile Include="Matching\Echoprint\Profile.cs" />
@@ -197,8 +194,9 @@
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintGenerator.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintStore.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\IProfile.cs" />
+    <Compile Include="Matching\IndexedSubFingerprint.cs" />
     <Compile Include="Matching\SubFingerprint.cs" />
-    <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintEventArgs.cs" />
+    <Compile Include="Matching\SubFingerprintEventArgs.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintLookupEntry.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\VoiceProfile.cs" />
     <Compile Include="Matching\AnalysisFunctions.cs" />
@@ -211,7 +209,6 @@
     <Compile Include="Features\StreamWindower.cs" />
     <Compile Include="Matching\Wang2003\DictionaryCollisionMap.cs" />
     <Compile Include="Matching\Wang2003\FingerprintGenerator.cs" />
-    <Compile Include="Matching\Wang2003\FingerprintHashEventArgs.cs" />
     <Compile Include="Matching\Wang2003\FingerprintStore.cs" />
     <Compile Include="Matching\Wang2003\FrameProcessedEventArgs.cs" />
     <Compile Include="Matching\Wang2003\ICollisionMap.cs" />

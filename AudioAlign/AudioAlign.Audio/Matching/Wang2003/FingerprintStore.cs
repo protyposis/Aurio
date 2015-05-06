@@ -37,8 +37,8 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             get { return collisionMap; }
         }
 
-        public void Add(FingerprintHashEventArgs e) {
-            if (e.Hashes.Count == 0) {
+        public void Add(SubFingerprintEventArgs e) {
+            if (e.SubFingerprints.Count == 0) {
                 return;
             }
 
@@ -48,12 +48,12 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                     store.Add(e.AudioTrack, new TrackStore());
                 }
                 // Add the current length of the hash list as start pointer for all hashes belonging to the current index
-                store[e.AudioTrack].index.Add(e.Index, new TrackStore.IndexEntry(store[e.AudioTrack].hashes.Count, e.Hashes.Count));
+                store[e.AudioTrack].index.Add(e.Index, new TrackStore.IndexEntry(store[e.AudioTrack].hashes.Count, e.SubFingerprints.Count));
 
-                foreach (var hash in e.Hashes) {
-                    store[e.AudioTrack].hashes.Add(hash);
+                foreach (var hash in e.SubFingerprints) {
+                    store[e.AudioTrack].hashes.Add(hash.SubFingerprint);
                     // insert a track/index lookup entry for the fingerprint hash
-                    collisionMap.Add(hash, new FingerprintHashLookupEntry(e.AudioTrack, e.Index));
+                    collisionMap.Add(hash.SubFingerprint, new FingerprintHashLookupEntry(e.AudioTrack, hash.Index));
                 }
             }
         }

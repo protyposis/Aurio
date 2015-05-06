@@ -23,7 +23,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         private Profile profile;
 
         public event EventHandler<FrameProcessedEventArgs> FrameProcessed;
-        public event EventHandler<FingerprintHashEventArgs> FingerprintHashesGenerated;
+        public event EventHandler<SubFingerprintEventArgs> FingerprintHashesGenerated;
 
         public FingerprintGenerator(Profile profile) {
             this.profile = profile;
@@ -283,12 +283,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 var hashes = peakPairs.ConvertAll(pp => PeakPair.PeakPairToHash(pp));
                 hashes.Sort();
 
-                FingerprintHashesGenerated(this, new FingerprintHashEventArgs {
-                    AudioTrack = track,
-                    Index = peakPairs[0].Index,
-                    Indices = indices,
-                    Hashes = hashes.ConvertAll(h => new SubFingerprint(h))
-                });
+                FingerprintHashesGenerated(this, new SubFingerprintEventArgs(track, hashes.ConvertAll(h => new IndexedSubFingerprint(peakPairs[0].Index, new SubFingerprint(h), false)), peakPairs[0].Index, indices));
             }
         }
 

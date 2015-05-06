@@ -37,8 +37,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             get { return collisionMap; }
         }
 
-        public void Add(FingerprintHashEventArgs e) {
-            if (e.Hashes.Count == 0) {
+        public void Add(SubFingerprintEventArgs e) {
+            if (e.SubFingerprints.Count == 0) {
                 return;
             }
 
@@ -50,17 +50,17 @@ namespace AudioAlign.Audio.Matching.Echoprint {
 
                 int hashListIndex = 0;
                 int hashListIndexCount = 0;
-                uint frame;
-                FPHash hash;
-                while (e.Hashes.Count > hashListIndex + hashListIndexCount) {
+                int frame;
+                IndexedSubFingerprint hash;
+                while (e.SubFingerprints.Count > hashListIndex + hashListIndexCount) {
                     int indexIndex = store[e.AudioTrack].hashes.Count;
-                    frame = e.Hashes[hashListIndex].Frame;
+                    frame = e.SubFingerprints[hashListIndex].Index;
                     hashListIndexCount = 0;
-                    while (e.Hashes.Count > hashListIndex + hashListIndexCount && (hash = e.Hashes[hashListIndex + hashListIndexCount]).Frame == frame) {
-                        store[e.AudioTrack].hashes.Add(hash.Hash);
+                    while (e.SubFingerprints.Count > hashListIndex + hashListIndexCount && (hash = e.SubFingerprints[hashListIndex + hashListIndexCount]).Index == frame) {
+                        store[e.AudioTrack].hashes.Add(hash.SubFingerprint);
 
                         // insert a track/index lookup entry for the fingerprint hash
-                        collisionMap.Add(hash.Hash, new FingerprintHashLookupEntry(e.AudioTrack, (int)frame));
+                        collisionMap.Add(hash.SubFingerprint, new FingerprintHashLookupEntry(e.AudioTrack, (int)frame));
 
                         hashListIndexCount++;
                     }

@@ -110,8 +110,10 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("HaitsmaKalker2002", true);
             int hashCount = 0;
 
-            gen.SubFingerprintCalculated += delegate(object sender, Audio.Matching.HaitsmaKalker2002.SubFingerprintEventArgs e) {
-                store.Add(e.AudioTrack, e.SubFingerprint, e.Index, e.IsVariation);
+            gen.SubFingerprintCalculated += delegate(object sender, SubFingerprintEventArgs e) {
+                foreach (var subFingerprint in e.SubFingerprints) {
+                    store.Add(e.AudioTrack, subFingerprint.SubFingerprint, subFingerprint.Index, subFingerprint.IsVariation);
+                }
                 hashCount++;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
             };
@@ -134,9 +136,9 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Wang2003", true);
             int hashCount = 0;
 
-            gen.FingerprintHashesGenerated += delegate(object sender, Audio.Matching.Wang2003.FingerprintHashEventArgs e) {
+            gen.FingerprintHashesGenerated += delegate(object sender, SubFingerprintEventArgs e) {
                 store.Add(e);
-                hashCount += e.Hashes.Count;
+                hashCount += e.SubFingerprints.Count;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
             };
 
@@ -158,9 +160,9 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Echoprint", true);
             int hashCount = 0;
 
-            gen.FingerprintHashesGenerated += delegate(object sender, Audio.Matching.Echoprint.FingerprintHashEventArgs e) {
+            gen.FingerprintHashesGenerated += delegate(object sender, SubFingerprintEventArgs e) {
                 store.Add(e);
-                hashCount += e.Hashes.Count;
+                hashCount += e.SubFingerprints.Count;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
             };
 
@@ -182,8 +184,10 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Chromaprint", true);
             int hashCount = 0;
 
-            gen.SubFingerprintCalculated += delegate(object sender, Audio.Matching.Chromaprint.SubFingerprintEventArgs e) {
-                store.Add(e.AudioTrack, e.SubFingerprint, e.Index, e.IsVariation);
+            gen.SubFingerprintCalculated += delegate(object sender, SubFingerprintEventArgs e) {
+                foreach (var subFingerprint in e.SubFingerprints) {
+                    store.Add(e.AudioTrack, subFingerprint.SubFingerprint, subFingerprint.Index, subFingerprint.IsVariation);
+                }
                 hashCount++;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
             };
