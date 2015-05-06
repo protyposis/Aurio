@@ -88,7 +88,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
 
             if (SubFingerprintsGenerated != null) {
-                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, new IndexedSubFingerprint(index, subFingerprint, false), index, indices));
+                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, new SubFingerprint(index, subFingerprint, false), index, indices));
             }
 
             if (flipWeakestBits > 0) {
@@ -104,7 +104,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                         }
                     }
                     if (SubFingerprintsGenerated != null) {
-                        SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, new IndexedSubFingerprint(index, flippedSubFingerprint, true), index, indices));
+                        SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, new SubFingerprint(index, flippedSubFingerprint, true), index, indices));
                     }
                 }
             }

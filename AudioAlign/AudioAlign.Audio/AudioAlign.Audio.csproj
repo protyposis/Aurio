@@ -188,7 +188,7 @@
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintGenerator.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintStore.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\IProfile.cs" />
-    <Compile Include="Matching\IndexedSubFingerprint.cs" />
+    <Compile Include="Matching\SubFingerprint.cs" />
     <Compile Include="Matching\SubFingerprintHash.cs" />
     <Compile Include="Matching\SubFingerprintsGeneratedEventArgs.cs" />
     <Compile Include="Matching\SubFingerprintLookupEntry.cs" />

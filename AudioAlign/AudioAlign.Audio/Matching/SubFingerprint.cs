@@ -6,7 +6,7 @@ using System.Text;
 
 namespace AudioAlign.Audio.Matching {
     [DebuggerDisplay("{Frame}/{Hash}")]
-    public struct IndexedSubFingerprint {
+    public struct SubFingerprint {
 
         public int Index;
         public SubFingerprintHash SubFingerprint;
@@ -16,7 +16,7 @@ namespace AudioAlign.Audio.Matching {
         /// </summary>
         public bool IsVariation;
 
-        public IndexedSubFingerprint(int index, SubFingerprintHash subFingerprint, bool variation) {
+        public SubFingerprint(int index, SubFingerprintHash subFingerprint, bool variation) {
             Index = index;
             SubFingerprint = subFingerprint;
             IsVariation = variation;

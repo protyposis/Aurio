@@ -78,7 +78,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 bandAnalyzers[i] = new BandAnalyzer(profile, i);
             }
 
-            List<IndexedSubFingerprint> hashes = new List<IndexedSubFingerprint>();
+            List<SubFingerprint> hashes = new List<SubFingerprint>();
             HashTimeSorter hashSorter = new HashTimeSorter(profile.SubBands);
 
             var sw = new Stopwatch();
@@ -161,7 +161,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 rmsSampleBuffer = new RingBuffer<float>(FilterCoefficientsBn.Length * 2 + 1); // needed for filtering
             }
 
-            public void ProcessSample(float energySample, Queue<IndexedSubFingerprint> hashes) {
+            public void ProcessSample(float energySample, Queue<SubFingerprint> hashes) {
                 rmsBlock.Add(energySample);
                 sampleCount++;
 
@@ -199,7 +199,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 }
             }
 
-            public void Flush(Queue<IndexedSubFingerprint> hashes) {
+            public void Flush(Queue<SubFingerprint> hashes) {
                 // Generate hashes for the last few onsets
                 for (int i = 0; i < onsetBuffer.Count; i++) {
                     onsetBuffer.RemoveTail();
@@ -287,7 +287,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 return (int)Math.Round(frame / profile.HashTimeQuantizationFactor);
             }
 
-            private void GenerateHashes(int band, Queue<IndexedSubFingerprint> hashes) {
+            private void GenerateHashes(int band, Queue<SubFingerprint> hashes) {
                 if (onsetBuffer.Count > 2) {
                     byte[] hashMaterial = new byte[5];
                     // What time was this onset at?
@@ -330,7 +330,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                         uint hashCode = MurmurHash2.Hash(hashMaterial, HashSeed) & HashBitmask;
 
                         // Set the hash alongside the time of onset
-                        hashes.Enqueue(new IndexedSubFingerprint(quantizedOnsetTime, new SubFingerprintHash(hashCode), false));
+                        hashes.Enqueue(new SubFingerprint(quantizedOnsetTime, new SubFingerprintHash(hashCode), false));
                     }
                 }
             }
@@ -347,19 +347,19 @@ namespace AudioAlign.Audio.Matching.Echoprint {
         /// </summary>
         private class HashTimeSorter {
 
-            private Queue<IndexedSubFingerprint>[] queues;
+            private Queue<SubFingerprint>[] queues;
 
             public HashTimeSorter(int bands) {
-                queues = new Queue<IndexedSubFingerprint>[bands];
+                queues = new Queue<SubFingerprint>[bands];
                 for(int i = 0; i < bands; i++) {
-                    queues[i] = new Queue<IndexedSubFingerprint>();
+                    queues[i] = new Queue<SubFingerprint>();
                 }
             }
 
             /// <summary>
             /// Gets the array of queues to collect the hashes of the separate bands.
             /// </summary>
-            public Queue<IndexedSubFingerprint>[] Queues {
+            public Queue<SubFingerprint>[] Queues {
                 get { return queues; }
             }
 
@@ -369,7 +369,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             /// <param name="list">the list to add the sorted hashes to</param>
             /// <param name="flush">If true, all remaining buffered hashes will be added to the list</param>
             /// <returns></returns>
-            public int Fill(List<IndexedSubFingerprint> list, bool flush) {
+            public int Fill(List<SubFingerprint> list, bool flush) {
                 int hashesTransferred = 0;
 
                 // This block loops until a queue is empty (default mode) or all queues

@@ -51,7 +51,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 int hashListIndex = 0;
                 int hashListIndexCount = 0;
                 int frame;
-                IndexedSubFingerprint hash;
+                SubFingerprint hash;
                 while (e.SubFingerprints.Count > hashListIndex + hashListIndexCount) {
                     int indexIndex = store[e.AudioTrack].hashes.Count;
                     frame = e.SubFingerprints[hashListIndex].Index;
