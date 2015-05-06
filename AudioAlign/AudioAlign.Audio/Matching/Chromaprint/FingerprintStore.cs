@@ -63,28 +63,25 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             get { return store; }
         }
 
-        public void Add(AudioTrack audioTrack, SubFingerprint subFingerprint, int index, bool variation) {
-            lock (this) {
-                if (!variation) {
-                    // store the sub-fingerprint in the sequential list of the audio track
-                    if (!store.ContainsKey(audioTrack)) {
-                        /* calculate the number of sub-fingerprints that this audiotrack will be converted to and init the list with it
-                         * avoids fast filling and trashing of the memory, but doesn't have any impact on processing time */
-                        IAudioStream s = audioTrack.CreateAudioStream();
-                        long samples = s.Length / s.SampleBlockSize;
-                        samples = samples / s.Properties.SampleRate * profile.SamplingRate; // convert from source to profile sample rate
-                        /* results in a slightly larger number of sub-fingerprints than actually will be calculated, 
-                         * because the last frame will not be stepped through as there are not enough samples left for 
-                         * further sub-fingerprints but that small overhead doesn't matter */
-                        int subFingerprints = (int)(samples / profile.HopSize);
+        public void Add(SubFingerprintsGeneratedEventArgs e) {
+            if (e.SubFingerprints.Count == 0) {
+                return;
+            }
 
-                        store.Add(audioTrack, new List<SubFingerprint>(subFingerprints));
-                    }
-                    store[audioTrack].Add(subFingerprint);
+            lock (this) {
+                if (!store.ContainsKey(e.AudioTrack)) {
+                    store.Add(e.AudioTrack, new List<SubFingerprint>());
                 }
 
-                // insert a track/index lookup entry for the sub-fingerprint
-                collisionMap.Add(subFingerprint, new SubFingerprintLookupEntry(audioTrack, index));
+                foreach (var sfp in e.SubFingerprints) {
+                    if (!sfp.IsVariation) {
+                        // store the sub-fingerprint in the sequential list of the audio track
+                        store[e.AudioTrack].Add(sfp.SubFingerprint);
+                    }
+
+                    // insert a track/index lookup entry for the sub-fingerprint
+                    collisionMap.Add(sfp.SubFingerprint, new SubFingerprintLookupEntry(e.AudioTrack, sfp.Index));
+                }
             }
         }
 
