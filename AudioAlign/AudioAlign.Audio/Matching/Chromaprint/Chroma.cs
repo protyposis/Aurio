@@ -43,6 +43,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             int minBin = (int)Math.Floor(minFreq / freqToBinRatio);
             int maxBin = (int)Math.Ceiling(maxFreq / freqToBinRatio);
             minBin = Math.Max(minBin, 1); // skip bin 0 in any case (zero f cannot be converted to chroma)
+            maxBin = Math.Min(maxBin, fftFrameBuffer.Length - 1);
 
             fftToChromaBinMapping = new int[maxBin - minBin];
             fftToChromaBinMappingOffset = minBin;
