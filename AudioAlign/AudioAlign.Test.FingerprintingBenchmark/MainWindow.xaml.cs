@@ -110,7 +110,7 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("HaitsmaKalker2002", true);
             int hashCount = 0;
 
-            gen.SubFingerprintCalculated += delegate(object sender, SubFingerprintEventArgs e) {
+            gen.SubFingerprintsGenerated += delegate(object sender, SubFingerprintsGeneratedEventArgs e) {
                 foreach (var subFingerprint in e.SubFingerprints) {
                     store.Add(e.AudioTrack, subFingerprint.SubFingerprint, subFingerprint.Index, subFingerprint.IsVariation);
                 }
@@ -136,7 +136,7 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Wang2003", true);
             int hashCount = 0;
 
-            gen.FingerprintHashesGenerated += delegate(object sender, SubFingerprintEventArgs e) {
+            gen.SubFingerprintsGenerated += delegate(object sender, SubFingerprintsGeneratedEventArgs e) {
                 store.Add(e);
                 hashCount += e.SubFingerprints.Count;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
@@ -160,7 +160,7 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Echoprint", true);
             int hashCount = 0;
 
-            gen.FingerprintHashesGenerated += delegate(object sender, SubFingerprintEventArgs e) {
+            gen.SubFingerprintsGenerated += delegate(object sender, SubFingerprintsGeneratedEventArgs e) {
                 store.Add(e);
                 hashCount += e.SubFingerprints.Count;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
@@ -184,7 +184,7 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Chromaprint", true);
             int hashCount = 0;
 
-            gen.SubFingerprintCalculated += delegate(object sender, SubFingerprintEventArgs e) {
+            gen.SubFingerprintsGenerated += delegate(object sender, SubFingerprintsGeneratedEventArgs e) {
                 foreach (var subFingerprint in e.SubFingerprints) {
                     store.Add(e.AudioTrack, subFingerprint.SubFingerprint, subFingerprint.Index, subFingerprint.IsVariation);
                 }

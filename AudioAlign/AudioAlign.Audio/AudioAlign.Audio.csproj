@@ -196,7 +196,7 @@
     <Compile Include="Matching\HaitsmaKalker2002\IProfile.cs" />
     <Compile Include="Matching\IndexedSubFingerprint.cs" />
     <Compile Include="Matching\SubFingerprint.cs" />
-    <Compile Include="Matching\SubFingerprintEventArgs.cs" />
+    <Compile Include="Matching\SubFingerprintsGeneratedEventArgs.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SubFingerprintLookupEntry.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\VoiceProfile.cs" />
     <Compile Include="Matching\AnalysisFunctions.cs" />

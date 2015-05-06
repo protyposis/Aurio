@@ -23,7 +23,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         private Profile profile;
 
         public event EventHandler<FrameProcessedEventArgs> FrameProcessed;
-        public event EventHandler<SubFingerprintEventArgs> FingerprintHashesGenerated;
+        public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
 
         public FingerprintGenerator(Profile profile) {
             this.profile = profile;
@@ -277,13 +277,13 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         }
 
         private void FireFingerprintHashesGenerated(AudioTrack track, int indices, List<PeakPair> peakPairs) {
-            if (FingerprintHashesGenerated != null && peakPairs.Count > 0) {
+            if (SubFingerprintsGenerated != null && peakPairs.Count > 0) {
                 // This sorting step is neede for the Zipper intersection algorithm 
                 // in the fingerprint store to find matching hashes.
                 var hashes = peakPairs.ConvertAll(pp => PeakPair.PeakPairToHash(pp));
                 hashes.Sort();
 
-                FingerprintHashesGenerated(this, new SubFingerprintEventArgs(track, hashes.ConvertAll(h => new IndexedSubFingerprint(peakPairs[0].Index, new SubFingerprint(h), false)), peakPairs[0].Index, indices));
+                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, hashes.ConvertAll(h => new IndexedSubFingerprint(peakPairs[0].Index, new SubFingerprint(h), false)), peakPairs[0].Index, indices));
             }
         }
 

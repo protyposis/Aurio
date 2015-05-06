@@ -28,7 +28,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             this.profile = profile;
         }
 
-        public event EventHandler<SubFingerprintEventArgs> FingerprintHashesGenerated;
+        public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
 
         /// <summary>
         /// This method generates hash codes from an audio stream in a streaming fashion,
@@ -96,8 +96,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 if (currentFrame % 4096 == 0) {
                     hashSorter.Fill(hashes, false);
 
-                    if (FingerprintHashesGenerated != null) {
-                        FingerprintHashesGenerated(this, new SubFingerprintEventArgs(track, hashes, currentFrame, totalFrames));
+                    if (SubFingerprintsGenerated != null) {
+                        SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, hashes, currentFrame, totalFrames));
                         hashes.Clear();
                     }
                 }
@@ -110,8 +110,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             }
             hashSorter.Fill(hashes, true);
 
-            if (FingerprintHashesGenerated != null) {
-                FingerprintHashesGenerated(this, new SubFingerprintEventArgs(track, hashes, currentFrame, totalFrames));
+            if (SubFingerprintsGenerated != null) {
+                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, hashes, currentFrame, totalFrames));
                 hashes.Clear();
             }
 

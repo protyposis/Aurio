@@ -90,7 +90,7 @@ namespace AudioAlign.Test.FingerprintingWang2003 {
                                 progressReporter.ReportProgress((double)e2.Index / e2.Indices * 100);
                             });
                         };
-                        fpg.FingerprintHashesGenerated += delegate(object sender2, FingerprintHashEventArgs e2) {
+                        fpg.SubFingerprintsGenerated += delegate(object sender2, FingerprintHashEventArgs e2) {
                             hashCollection.AddRange(e2.Hashes);
                             store.Add(e2);
                         };

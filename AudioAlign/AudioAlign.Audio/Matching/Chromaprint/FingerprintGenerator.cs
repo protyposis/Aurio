@@ -19,7 +19,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         private static readonly uint[] grayCodeMapping = { 0, 1, 3, 2 };
         private Profile profile;
 
-        public event EventHandler<SubFingerprintEventArgs> SubFingerprintCalculated;
+        public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
         public event EventHandler Completed;
 
         public FingerprintGenerator(Profile profile) {
@@ -96,8 +96,8 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
                     subFingerprint = (subFingerprint << 2) | grayCodeMapping[classifiers[i].Classify(integralImage, 0)];
                 }
                 // We have a SubFingerprint@frameTime
-                if (SubFingerprintCalculated != null) {
-                    SubFingerprintCalculated(this, new SubFingerprintEventArgs(track, new IndexedSubFingerprint(index, new SubFingerprint(subFingerprint), false), index, indices));
+                if (SubFingerprintsGenerated != null) {
+                    SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, new IndexedSubFingerprint(index, new SubFingerprint(subFingerprint), false), index, indices));
                 }
 
                 index++;

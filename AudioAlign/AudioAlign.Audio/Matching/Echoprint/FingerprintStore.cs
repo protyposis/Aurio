@@ -37,7 +37,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             get { return collisionMap; }
         }
 
-        public void Add(SubFingerprintEventArgs e) {
+        public void Add(SubFingerprintsGeneratedEventArgs e) {
             if (e.SubFingerprints.Count == 0) {
                 return;
             }

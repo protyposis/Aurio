@@ -23,7 +23,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
         private int flipWeakestBits;
 
-        public event EventHandler<SubFingerprintEventArgs> SubFingerprintCalculated;
+        public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
         public event EventHandler Completed;
 
         public FingerprintGenerator(IProfile profile, AudioTrack track)
@@ -87,8 +87,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 bitReliability.Add(m, difference > 0 ? difference : -difference); // take absolute value as reliability weight
             }
 
-            if (SubFingerprintCalculated != null) {
-                SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, new IndexedSubFingerprint(index, subFingerprint, false), index, indices));
+            if (SubFingerprintsGenerated != null) {
+                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, new IndexedSubFingerprint(index, subFingerprint, false), index, indices));
             }
 
             if (flipWeakestBits > 0) {
@@ -103,8 +103,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                             flippedSubFingerprint[weakestBits[j]] = !flippedSubFingerprint[weakestBits[j]];
                         }
                     }
-                    if (SubFingerprintCalculated != null) {
-                        SubFingerprintCalculated(this, new SubFingerprintEventArgs(inputTrack, new IndexedSubFingerprint(index, flippedSubFingerprint, true), index, indices));
+                    if (SubFingerprintsGenerated != null) {
+                        SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, new IndexedSubFingerprint(index, flippedSubFingerprint, true), index, indices));
                     }
                 }
             }

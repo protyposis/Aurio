@@ -37,7 +37,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             get { return collisionMap; }
         }
 
-        public void Add(SubFingerprintEventArgs e) {
+        public void Add(SubFingerprintsGeneratedEventArgs e) {
             if (e.SubFingerprints.Count == 0) {
                 return;
             }
