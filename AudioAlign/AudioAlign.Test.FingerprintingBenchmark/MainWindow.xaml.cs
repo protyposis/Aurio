@@ -1,4 +1,5 @@
-﻿using AudioAlign.Audio.Matching;
+﻿using AudioAlign.Audio;
+using AudioAlign.Audio.Matching;
 using AudioAlign.Audio.Project;
 using AudioAlign.Audio.TaskMonitor;
 using System;
@@ -55,7 +56,7 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             dlg.Filter = "Wave files|*.wav";
 
             if (dlg.ShowDialog() == true) {
-                Benchmark(new AudioTrack(new System.IO.FileInfo(dlg.FileName)));
+                Benchmark(new AudioTrack(new System.IO.FileInfo(dlg.FileName)), warmupCheckbox.IsChecked == true);
             }
         }
 
@@ -65,8 +66,21 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             });
         }
 
-        private void Benchmark(AudioTrack track) {
+        private void Benchmark(AudioTrack track, bool warmup) {
             Task.Factory.StartNew(() => {
+                if (warmup) {
+                    // "Warmup" reads the whole stream before starting the benchmark procedures
+                    // to trigger the file caching in Windows, else the first fingerprinting run
+                    // on a file is always slower than the following because the file is cached
+                    // on successive runs.
+                    var stream = track.CreateAudioStream();
+                    var buffer = new byte[1024 * 1024];
+                    int bytesRead = 0;
+                    while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0) {
+                        // nothing to do here
+                    }
+                }
+
                 BenchmarkHaitsmaKalker(track);
                 BenchmarkWang(track);
                 BenchmarkEchoprint(track);

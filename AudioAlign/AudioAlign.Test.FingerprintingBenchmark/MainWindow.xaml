@@ -16,6 +16,7 @@
                 <DataGridTextColumn Header="Duration" Binding="{Binding Duration}" IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
-        <ProgressBar Name="progressBar1" Height="20" Margin="118,10,10,0" VerticalAlignment="Top"/>
+        <ProgressBar Name="progressBar1" Height="20" Margin="189,10,10,0" VerticalAlignment="Top"/>
+        <CheckBox Name="warmupCheckbox" Content="Warmup" HorizontalAlignment="Left" Margin="118,13,0,0" VerticalAlignment="Top" IsChecked="True"/>
     </Grid>
 </Window>
