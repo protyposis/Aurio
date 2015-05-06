@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Chromaprint {
+namespace AudioAlign.Audio.Matching {
     public class Fingerprint : IEnumerable<SubFingerprintHash> {
 
         private List<SubFingerprintHash> subFingerprintList;
