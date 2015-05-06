@@ -208,8 +208,8 @@
     <Compile Include="Matching\MatchGroup.cs" />
     <Compile Include="Matching\MatchPair.cs" />
     <Compile Include="Matching\MatchProcessor.cs" />
-    <Compile Include="Matching\STFT.cs" />
-    <Compile Include="Matching\StreamWindower.cs" />
+    <Compile Include="Features\STFT.cs" />
+    <Compile Include="Features\StreamWindower.cs" />
     <Compile Include="Matching\Wang2003\DictionaryCollisionMap.cs" />
     <Compile Include="Matching\Wang2003\FingerprintGenerator.cs" />
     <Compile Include="Matching\Wang2003\FingerprintHashEventArgs.cs" />

@@ -7,6 +7,7 @@ using AudioAlign.Audio.Streams;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using AudioAlign.Audio.Features;
 
 namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
     /// <summary>

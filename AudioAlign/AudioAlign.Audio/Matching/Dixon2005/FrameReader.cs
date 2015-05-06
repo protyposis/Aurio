@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using AudioAlign.Audio.Streams;
 using System.Diagnostics;
+using AudioAlign.Audio.Features;
 
 namespace AudioAlign.Audio.Matching.Dixon2005 {
     /// <summary>
