@@ -31,8 +31,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
                 ResamplingQuality.Medium, profile.SamplingRate);
 
             var chroma = new Chroma(audioStream, profile.WindowSize, profile.HopSize, profile.WindowType,
-                profile.ChromaMinFrequency, profile.ChromaMaxFrequency, false);
-
+                profile.ChromaMinFrequency, profile.ChromaMaxFrequency, false, profile.ChromaMappingMode);
 
             float[] chromaFrame;
             var chromaBuffer = new RingBuffer<float[]>(profile.ChromaFilterCoefficients.Length);
@@ -114,6 +113,10 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
 
         public static int TimeStampToSubFingerprintIndex(Profile profile, TimeSpan timeSpan) {
             return (int)Math.Round((double)timeSpan.Ticks / TimeUtil.SECS_TO_TICKS * profile.SamplingRate / profile.HopSize);
+        }
+
+        public static Profile[] GetProfiles() {
+            return new Profile[] { new SyncProfile(), new ChromaprintProfile() };
         }
     }
 }

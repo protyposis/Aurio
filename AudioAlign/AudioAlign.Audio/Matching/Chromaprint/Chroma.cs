@@ -21,30 +21,46 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
 
         private bool normalize;
 
-        public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, float minFreq, float maxFreq, bool normalize)
+        public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, float minFreq, float maxFreq, bool normalize, ChromaMappingMode mappingMode)
             : base(stream, windowSize, hopSize, windowType, false) {
             fftFrameBuffer = new float[windowSize / 2];
 
             // Precompute FFT bin to Chroma bin mapping
             double freqToBinRatio = (double)stream.Properties.SampleRate / windowSize;
-            int minBin = (int)Math.Ceiling(minFreq / freqToBinRatio);
-            int maxBin = (int)Math.Floor(maxFreq / freqToBinRatio);
+            int minBin = (int)Math.Floor(minFreq / freqToBinRatio);
+            int maxBin = (int)Math.Ceiling(maxFreq / freqToBinRatio);
             minBin = Math.Max(minBin, 1); // skip bin 0 in any case (zero f cannot be converted to chroma)
+            maxBin = Math.Min(maxBin, fftFrameBuffer.Length - 1);
 
             fftToChromaBinMapping = new int[maxBin - minBin];
             fftToChromaBinMappingOffset = minBin;
             fftToChromaBinCount = new int[Bins];
 
-            for (int i = minBin; i < maxBin; i++) {
-                double fftBinCenterFreq = i * freqToBinRatio;
-                double c = Math.Log(fftBinCenterFreq, 2) - Math.Floor(Math.Log(fftBinCenterFreq, 2)); // paper formula (3)
-                // c ∈ [0, 1) must be mapped to chroma bins {0...11}
-                // The paper says that the first class is centered around 0. This means that the first class has only half the
-                // size of the others, but also that there's a 13. class (index 12) at the upper end of c. Therefore, we wrap
-                // around the edges with modulo and put the lower and upper end into bin 0, making them all the same size.
-                int chromaBin = (int)Math.Round(c * Bins) % Bins;
-                fftToChromaBinMapping[i - minBin] = chromaBin;
-                fftToChromaBinCount[chromaBin]++; // needed to take the arithmetic mean in formula (6)
+            if (mappingMode == ChromaMappingMode.Paper) {
+                for (int i = minBin; i < maxBin; i++) {
+                    double fftBinCenterFreq = i * freqToBinRatio;
+                    double c = Math.Log(fftBinCenterFreq, 2) - Math.Floor(Math.Log(fftBinCenterFreq, 2)); // paper formula (3)
+                    // c ∈ [0, 1) must be mapped to chroma bins {0...11}
+                    // The paper says that the first class is centered around 0. This means that the first class has only half the
+                    // size of the others, but also that there's a 13. class (index 12) at the upper end of c. Therefore, we wrap
+                    // around the edges with modulo and put the lower and upper end into bin 0, making them all the same size.
+                    int chromaBin = (int)Math.Round(c * Bins) % Bins;
+                    fftToChromaBinMapping[i - minBin] = chromaBin;
+                    fftToChromaBinCount[chromaBin]++; // needed to take the arithmetic mean in formula (6)
+                }
+            }
+            else if (mappingMode == ChromaMappingMode.Chromaprint) {
+                double A0 = 440.0 / 16.0; // Hz
+                for (int i = minBin; i < maxBin; i++) {
+                    double fftBinCenterFreq = i * freqToBinRatio;
+                    double c = Math.Log(fftBinCenterFreq / A0, 2) - Math.Floor(Math.Log(fftBinCenterFreq / A0, 2)); // Chromaprint additionally divides by A0 - WHY?
+                    int chromaBin = (int)(c * Bins); // Chromaprint does the mapping more bluntly
+                    fftToChromaBinMapping[i - minBin] = chromaBin;
+                    fftToChromaBinCount[chromaBin]++; // needed to take the arithmetic mean in formula (6)
+                }
+            }
+            else {
+                throw new ArgumentException("unknown chroma mapping mode " + mappingMode);
             }
 
             this.normalize = normalize;
