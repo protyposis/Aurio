@@ -68,6 +68,9 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
         private void Benchmark(AudioTrack track) {
             Task.Factory.StartNew(() => {
                 BenchmarkHaitsmaKalker(track);
+                BenchmarkWang(track);
+                BenchmarkEchoprint(track);
+                BenchmarkChromaprint(track);
             });
         }
 
@@ -76,7 +79,7 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             var store = new AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintStore(profile);
             var gen = new AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator(profile, track, 3);
 
-            var reporter = ProgressMonitor.GlobalInstance.BeginTask("HK-FP", true);
+            var reporter = ProgressMonitor.GlobalInstance.BeginTask("HaitsmaKalker2002", true);
             int hashCount = 0;
 
             gen.SubFingerprintCalculated += delegate(object sender, Audio.Matching.HaitsmaKalker2002.SubFingerprintEventArgs e) {
@@ -91,7 +94,80 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             gen.Generate();
 
             sw.Stop();
-            ReportBenchmarkResult(new BenchmarkEntry { Track = track, Type = "HK02", HashCount = hashCount, Duration = sw.Elapsed });
+            reporter.Finish();
+            ReportBenchmarkResult(new BenchmarkEntry { Track = track, Type = "HaitsmaKalker2002", HashCount = hashCount, Duration = sw.Elapsed });
+        }
+
+        private void BenchmarkWang(AudioTrack track) {
+            var profile = new AudioAlign.Audio.Matching.Wang2003.Profile();
+            var store = new AudioAlign.Audio.Matching.Wang2003.FingerprintStore(profile);
+            var gen = new AudioAlign.Audio.Matching.Wang2003.FingerprintGenerator(profile);
+
+            var reporter = ProgressMonitor.GlobalInstance.BeginTask("Wang2003", true);
+            int hashCount = 0;
+
+            gen.FingerprintHashesGenerated += delegate(object sender, Audio.Matching.Wang2003.FingerprintHashEventArgs e) {
+                store.Add(e);
+                hashCount += e.Hashes.Count;
+                reporter.ReportProgress((double)e.Index / e.Indices * 100);
+            };
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            gen.Generate(track);
+
+            sw.Stop();
+            reporter.Finish();
+            ReportBenchmarkResult(new BenchmarkEntry { Track = track, Type = "Wang2003", HashCount = hashCount, Duration = sw.Elapsed });
+        }
+
+        private void BenchmarkEchoprint(AudioTrack track) {
+            var profile = new AudioAlign.Audio.Matching.Echoprint.Profile();
+            var store = new AudioAlign.Audio.Matching.Echoprint.FingerprintStore(profile);
+            var gen = new AudioAlign.Audio.Matching.Echoprint.FingerprintGenerator(profile);
+
+            var reporter = ProgressMonitor.GlobalInstance.BeginTask("Echoprint", true);
+            int hashCount = 0;
+
+            gen.FingerprintHashesGenerated += delegate(object sender, Audio.Matching.Echoprint.FingerprintHashEventArgs e) {
+                store.Add(e);
+                hashCount += e.Hashes.Count;
+                reporter.ReportProgress((double)e.Index / e.Indices * 100);
+            };
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            gen.Generate(track);
+
+            sw.Stop();
+            reporter.Finish();
+            ReportBenchmarkResult(new BenchmarkEntry { Track = track, Type = "Echoprint", HashCount = hashCount, Duration = sw.Elapsed });
+        }
+
+        private void BenchmarkChromaprint(AudioTrack track) {
+            var profile = new AudioAlign.Audio.Matching.Chromaprint.Profile();
+            var store = new AudioAlign.Audio.Matching.Chromaprint.FingerprintStore(profile);
+            var gen = new AudioAlign.Audio.Matching.Chromaprint.FingerprintGenerator(profile);
+
+            var reporter = ProgressMonitor.GlobalInstance.BeginTask("Chromaprint", true);
+            int hashCount = 0;
+
+            gen.SubFingerprintCalculated += delegate(object sender, Audio.Matching.Chromaprint.SubFingerprintEventArgs e) {
+                store.Add(e.AudioTrack, e.SubFingerprint, e.Index, e.IsVariation);
+                hashCount++;
+                reporter.ReportProgress((double)e.Index / e.Indices * 100);
+            };
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            gen.Generate(track);
+
+            sw.Stop();
+            reporter.Finish();
+            ReportBenchmarkResult(new BenchmarkEntry { Track = track, Type = "Chromaprint", HashCount = hashCount, Duration = sw.Elapsed });
         }
     }
 }
