@@ -127,7 +127,7 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkWang(AudioTrack track) {
-            var profile = new AudioAlign.Audio.Matching.Wang2003.Profile();
+            var profile = AudioAlign.Audio.Matching.Wang2003.FingerprintGenerator.GetProfiles()[0];
             var store = new AudioAlign.Audio.Matching.Wang2003.FingerprintStore(profile);
             var gen = new AudioAlign.Audio.Matching.Wang2003.FingerprintGenerator(profile);
 
@@ -151,7 +151,7 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkEchoprint(AudioTrack track) {
-            var profile = new AudioAlign.Audio.Matching.Echoprint.Profile();
+            var profile = AudioAlign.Audio.Matching.Echoprint.FingerprintGenerator.GetProfiles()[0];
             var store = new AudioAlign.Audio.Matching.Echoprint.FingerprintStore(profile);
             var gen = new AudioAlign.Audio.Matching.Echoprint.FingerprintGenerator(profile);
 

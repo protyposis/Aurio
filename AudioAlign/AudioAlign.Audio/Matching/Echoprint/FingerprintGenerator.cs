@@ -123,6 +123,10 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             return new TimeSpan((long)Math.Round(index * profile.SampleToHashQuantizationFactor / profile.SamplingRate * TimeUtil.SECS_TO_TICKS));
         }
 
+        public static Profile[] GetProfiles() {
+            return new Profile[] { new DefaultProfile() };
+        }
+
         /// <summary>
         /// Analyzes a subband for onsets and generates hash codes.
         /// </summary>

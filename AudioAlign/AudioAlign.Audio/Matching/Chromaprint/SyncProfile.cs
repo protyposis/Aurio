@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Audio.Matching.Chromaprint {
-    public class SyncProfile : ChromaprintProfile {
+    class SyncProfile : DefaultProfile {
         public SyncProfile() : base() {
             Name = "Sync optimized";
 

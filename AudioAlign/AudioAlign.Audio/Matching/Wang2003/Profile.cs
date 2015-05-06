@@ -10,7 +10,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
     ///  This profile contains settings for configuring fingerprint generation
     ///  and lookup.
     /// </summary>
-    public class Profile {
+    public abstract class Profile {
 
         public interface IThreshold {
             /// <summary>
@@ -34,34 +34,10 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             }
         }
 
-        public Profile() {
-            SamplingRate = 11025;
-            WindowSize = 512;
-            HopSize = 256;
-            SpectrumTemporalSmoothingCoefficient = 0.05f;
-            SpectrumSmoothingLength = 0;
-            PeaksPerFrame = 3;
-            PeakFanout = 5;
-            TargetZoneDistance = 2;
-            TargetZoneLength = 30;
-            TargetZoneWidth = 63;
-
-            double framesPerSecond = (double)SamplingRate / HopSize;
-            MatchingMinFrames = 10;
-            MatchingMaxFrames = (int)(framesPerSecond * 30);
-
-            var threshold = new ExponentialDecayThreshold {
-                Base = 0.5,
-                WidthScale = 2,
-                Height = 0.3
-            };
-            ThresholdAccept = threshold;
-            ThresholdReject = new ExponentialDecayThreshold {
-                Base = threshold.Base,
-                WidthScale = threshold.WidthScale,
-                Height = threshold.Height / 6
-            };
-        }
+        /// <summary>
+        /// The name of this profile.
+        /// </summary>
+        public string Name { get; protected set; }
 
         /// <summary>
         /// The sampling rate at which the STFT is taken to generate the hashes.

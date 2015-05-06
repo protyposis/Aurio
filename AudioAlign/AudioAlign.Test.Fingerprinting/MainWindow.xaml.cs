@@ -27,7 +27,7 @@ namespace AudioAlign.Test.Fingerprinting {
     public partial class MainWindow : Window {
 
         private FingerprintStore store;
-        private IProfile profile;
+        private Profile profile;
 
         public MainWindow() {
             InitializeComponent();

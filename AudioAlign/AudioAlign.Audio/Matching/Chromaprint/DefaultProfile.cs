@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Audio.Matching.Chromaprint {
-    public class ChromaprintProfile : Profile {
-        public ChromaprintProfile() {
+    class DefaultProfile : Profile {
+        public DefaultProfile() {
             Name = "Chromaprint default";
 
             SamplingRate = 11025;

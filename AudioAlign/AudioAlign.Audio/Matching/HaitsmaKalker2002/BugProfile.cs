@@ -11,17 +11,12 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
     /// </summary>
     class BugProfile : DefaultProfile {
 
-        public BugProfile()
-            : base() {
-            //
-        }
-
-        public override string Name {
-            get { return "Buggy"; }
+        public BugProfile() : base() {
+            Name = "Buggy";
         }
 
         public override void MapFrequencies(float[] inputBins, float[] outputBins) {
-            float bandWidth = SAMPLERATE / inputBins.Length;
+            float bandWidth = SampleRate / inputBins.Length;
             for (int x = 0; x < frequencyBands.Length - 1; x++) {
                 outputBins[x] = 0;
                 int lowerIndex = (int)(frequencyBands[x] / bandWidth);

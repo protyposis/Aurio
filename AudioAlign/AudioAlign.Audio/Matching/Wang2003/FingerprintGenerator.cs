@@ -295,6 +295,10 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             return (int)Math.Round((double)timeSpan.Ticks / 10 / 1000 / 1000 * 11025 / 256);
         }
 
+        public static Profile[] GetProfiles() {
+            return new Profile[] { new DefaultProfile() };
+        }
+
         [DebuggerDisplay("{index}/{value}")]
         private struct Peak {
 

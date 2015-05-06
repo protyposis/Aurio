@@ -14,11 +14,11 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
         private int fingerprintSize;
         private float threshold;
-        private IProfile profile;
+        private Profile profile;
         private Dictionary<AudioTrack, List<SubFingerprintHash>> store;
         private IFingerprintCollisionMap collisionMap;
 
-        public FingerprintStore(IProfile profile) {
+        public FingerprintStore(Profile profile) {
             FingerprintSize = DEFAULT_FINGERPRINT_SIZE;
             Threshold = DEFAULT_THRESHOLD;
             this.profile = profile;

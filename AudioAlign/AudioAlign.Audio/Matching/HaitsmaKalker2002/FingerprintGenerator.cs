@@ -19,18 +19,18 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         private const int STREAM_INPUT_BUFFER_SIZE = 32768;
 
         private AudioTrack inputTrack;
-        private IProfile profile;
+        private Profile profile;
 
         private int flipWeakestBits;
 
         public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
         public event EventHandler Completed;
 
-        public FingerprintGenerator(IProfile profile, AudioTrack track)
+        public FingerprintGenerator(Profile profile, AudioTrack track)
             : this(profile, track, 0) {
         }
 
-        public FingerprintGenerator(IProfile profile, AudioTrack track, int flipWeakestBits) {
+        public FingerprintGenerator(Profile profile, AudioTrack track, int flipWeakestBits) {
             this.inputTrack = track;
             this.profile = profile;
             this.flipWeakestBits = flipWeakestBits;
@@ -110,16 +110,16 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
         }
 
-        public static TimeSpan SubFingerprintIndexToTimeSpan(IProfile profile, int index) {
+        public static TimeSpan SubFingerprintIndexToTimeSpan(Profile profile, int index) {
             return new TimeSpan((long)Math.Round((double)index * profile.FrameStep / profile.SampleRate * 1000 * 1000 * 10));
         }
 
-        public static int TimeStampToSubFingerprintIndex(IProfile profile, TimeSpan timeSpan) {
+        public static int TimeStampToSubFingerprintIndex(Profile profile, TimeSpan timeSpan) {
             return (int)Math.Round((double)timeSpan.Ticks / 10 / 1000 / 1000 * profile.SampleRate / profile.FrameStep);
         }
 
-        public static IProfile[] GetProfiles() {
-            return new IProfile[] { new DefaultProfile(), new BugProfile(), new VoiceProfile(), new BassProfile(), new HumanProfile() };
+        public static Profile[] GetProfiles() {
+            return new Profile[] { new DefaultProfile(), new BugProfile(), new VoiceProfile(), new BassProfile(), new HumanProfile() };
         }
     }
 }

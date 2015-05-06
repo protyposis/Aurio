@@ -146,7 +146,7 @@
     <Compile Include="Matching\AnalysisMode.cs" />
     <Compile Include="Features\Chroma.cs" />
     <Compile Include="Features\ChromaMappingMode.cs" />
-    <Compile Include="Matching\Chromaprint\ChromaprintProfile.cs" />
+    <Compile Include="Matching\Chromaprint\DefaultProfile.cs" />
     <Compile Include="Matching\Chromaprint\Classifier.cs" />
     <Compile Include="Matching\Chromaprint\Filter.cs" />
     <Compile Include="Matching\Chromaprint\FingerprintGenerator.cs" />
@@ -170,6 +170,7 @@
     <Compile Include="Matching\Dixon2005\TimeWarpType.cs" />
     <Compile Include="DataStructures\Graph\Edge.cs" />
     <Compile Include="DataStructures\Graph\UndirectedGraph.cs" />
+    <Compile Include="Matching\Echoprint\DefaultProfile.cs" />
     <Compile Include="Matching\Echoprint\FingerprintGenerator.cs" />
     <Compile Include="Matching\Echoprint\FingerprintStore.cs" />
     <Compile Include="Matching\Echoprint\MurmurHash2.cs" />
@@ -186,7 +187,7 @@
     <Compile Include="Matching\HaitsmaKalker2002\DefaultProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintGenerator.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\FingerprintStore.cs" />
-    <Compile Include="Matching\HaitsmaKalker2002\IProfile.cs" />
+    <Compile Include="Matching\HaitsmaKalker2002\Profile.cs" />
     <Compile Include="Matching\SubFingerprint.cs" />
     <Compile Include="Matching\SubFingerprintHash.cs" />
     <Compile Include="Matching\SubFingerprintsGeneratedEventArgs.cs" />
@@ -200,6 +201,7 @@
     <Compile Include="Matching\MatchProcessor.cs" />
     <Compile Include="Features\STFT.cs" />
     <Compile Include="Features\StreamWindower.cs" />
+    <Compile Include="Matching\Wang2003\DefaultProfile.cs" />
     <Compile Include="Matching\Wang2003\FingerprintGenerator.cs" />
     <Compile Include="Matching\Wang2003\FingerprintStore.cs" />
     <Compile Include="Matching\Wang2003\FrameProcessedEventArgs.cs" />
