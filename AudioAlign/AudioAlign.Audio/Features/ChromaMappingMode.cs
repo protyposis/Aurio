@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Chromaprint {
+namespace AudioAlign.Audio.Features {
     public enum ChromaMappingMode {
         /// <summary>
         /// The type of frequency bin to chroma mapping described in

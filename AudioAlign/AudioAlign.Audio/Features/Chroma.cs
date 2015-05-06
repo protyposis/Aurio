@@ -1,16 +1,17 @@
-﻿using AudioAlign.Audio.Streams;
+﻿using AudioAlign.Audio.Matching;
+using AudioAlign.Audio.Streams;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Chromaprint {
+namespace AudioAlign.Audio.Features {
     /// <summary>
     /// Generates a chromatogram from an input audio stream as described in section III.B. of
     /// - Bartsch, Mark A., and Gregory H. Wakefield. "Audio thumbnailing of popular music 
     ///   using chroma-based representations." Multimedia, IEEE Transactions on 7.1 (2005): 96-104.
     /// </summary>
-    class Chroma : STFT {
+    public class Chroma : STFT {
 
         public const int Bins = 12;
 
@@ -64,6 +65,16 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             }
 
             this.normalize = normalize;
+        }
+
+        public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, float minFreq, float maxFreq)
+            : this(stream, windowSize, hopSize, windowType, minFreq, maxFreq, true, ChromaMappingMode.Paper) {
+            //
+        }
+
+        public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType)
+            : this(stream, windowSize, hopSize, windowType, 0, stream.Properties.SampleRate / 2, true, ChromaMappingMode.Paper) {
+            //
         }
 
         public override void ReadFrame(float[] chromaFrame) {
