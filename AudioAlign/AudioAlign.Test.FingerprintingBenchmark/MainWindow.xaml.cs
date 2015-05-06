@@ -175,7 +175,7 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkChromaprint(AudioTrack track) {
-            var profile = new AudioAlign.Audio.Matching.Chromaprint.Profile();
+            var profile = AudioAlign.Audio.Matching.Chromaprint.FingerprintGenerator.GetProfiles()[0];
             var store = new AudioAlign.Audio.Matching.Chromaprint.FingerprintStore(profile);
             var gen = new AudioAlign.Audio.Matching.Chromaprint.FingerprintGenerator(profile);
 
