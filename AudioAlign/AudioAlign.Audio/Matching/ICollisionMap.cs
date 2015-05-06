@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Chromaprint {
+namespace AudioAlign.Audio.Matching {
     public interface ICollisionMap<K, V> {
         void Add(K key, V value);
         List<K> GetCollidingKeys();

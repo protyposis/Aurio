@@ -153,7 +153,6 @@
     <Compile Include="Matching\Chromaprint\Fingerprint.cs" />
     <Compile Include="Matching\Chromaprint\FingerprintGenerator.cs" />
     <Compile Include="Matching\Chromaprint\FingerprintStore.cs" />
-    <Compile Include="Matching\Chromaprint\ICollisionMap.cs" />
     <Compile Include="Matching\Chromaprint\IntegralImage.cs" />
     <Compile Include="Matching\Chromaprint\Profile.cs" />
     <Compile Include="Matching\Chromaprint\Quantizer.cs" />
@@ -176,7 +175,6 @@
     <Compile Include="Matching\Echoprint\DictionaryCollisionMap.cs" />
     <Compile Include="Matching\Echoprint\FingerprintGenerator.cs" />
     <Compile Include="Matching\Echoprint\FingerprintStore.cs" />
-    <Compile Include="Matching\Echoprint\ICollisionMap.cs" />
     <Compile Include="Matching\Echoprint\MurmurHash2.cs" />
     <Compile Include="Matching\Echoprint\Profile.cs" />
     <Compile Include="Matching\Echoprint\SubbandAnalyzer.cs" />
@@ -184,7 +182,7 @@
     <Compile Include="Matching\HaitsmaKalker2002\BugProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\BassProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\DictionaryCollisionMap.cs" />
-    <Compile Include="Matching\HaitsmaKalker2002\ICollisionMap.cs" />
+    <Compile Include="Matching\ICollisionMap.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\SQLiteCollisionMap.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\HumanProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\DefaultProfile.cs" />
@@ -209,7 +207,6 @@
     <Compile Include="Matching\Wang2003\FingerprintGenerator.cs" />
     <Compile Include="Matching\Wang2003\FingerprintStore.cs" />
     <Compile Include="Matching\Wang2003\FrameProcessedEventArgs.cs" />
-    <Compile Include="Matching\Wang2003\ICollisionMap.cs" />
     <Compile Include="Matching\Wang2003\Profile.cs" />
     <Compile Include="MultitrackPlayer.cs" />
     <Compile Include="Project\VideoTrack.cs" />
