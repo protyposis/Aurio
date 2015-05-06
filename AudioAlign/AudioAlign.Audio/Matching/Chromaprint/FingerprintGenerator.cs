@@ -117,7 +117,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         }
 
         public static Profile[] GetProfiles() {
-            return new Profile[] { new SyncProfile(), new ChromaprintProfile() };
+            return new Profile[] { new ChromaprintProfile(), new SyncProfile() };
         }
     }
 }
