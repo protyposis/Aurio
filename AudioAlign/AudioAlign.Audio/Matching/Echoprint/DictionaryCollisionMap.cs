@@ -9,15 +9,15 @@ namespace AudioAlign.Audio.Matching.Echoprint {
     /// </summary>
     class DictionaryCollisionMap : IFingerprintCollisionMap {
 
-        private Dictionary<SubFingerprint, List<FingerprintHashLookupEntry>> lookupTable;
+        private Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>> lookupTable;
 
         public DictionaryCollisionMap() {
-            lookupTable = new Dictionary<SubFingerprint, List<FingerprintHashLookupEntry>>();
+            lookupTable = new Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>>();
         }
 
-        public void Add(SubFingerprint hash, FingerprintHashLookupEntry lookupEntry) {
+        public void Add(SubFingerprint hash, SubFingerprintLookupEntry lookupEntry) {
             if (!lookupTable.ContainsKey(hash)) {
-                lookupTable.Add(hash, new List<FingerprintHashLookupEntry>());
+                lookupTable.Add(hash, new List<SubFingerprintLookupEntry>());
             }
             lookupTable[hash].Add(lookupEntry);
         }
@@ -32,7 +32,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             return hashes;
         }
 
-        public List<FingerprintHashLookupEntry> GetValues(SubFingerprint subFingerprint) {
+        public List<SubFingerprintLookupEntry> GetValues(SubFingerprint subFingerprint) {
             return lookupTable[subFingerprint];
         }
     }

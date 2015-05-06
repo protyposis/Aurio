@@ -60,7 +60,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                         store[e.AudioTrack].hashes.Add(hash.SubFingerprint);
 
                         // insert a track/index lookup entry for the fingerprint hash
-                        collisionMap.Add(hash.SubFingerprint, new FingerprintHashLookupEntry(e.AudioTrack, (int)frame));
+                        collisionMap.Add(hash.SubFingerprint, new SubFingerprintLookupEntry(e.AudioTrack, (int)frame));
 
                         hashListIndexCount++;
                     }
@@ -86,12 +86,12 @@ namespace AudioAlign.Audio.Matching.Echoprint {
 
         public List<Match> FindMatches(SubFingerprint hash) {
             List<Match> matches = new List<Match>();
-            List<FingerprintHashLookupEntry> entries = collisionMap.GetValues(hash);
+            List<SubFingerprintLookupEntry> entries = collisionMap.GetValues(hash);
 
             for (int x = 0; x < entries.Count; x++) {
-                FingerprintHashLookupEntry entry1 = entries[x];
+                SubFingerprintLookupEntry entry1 = entries[x];
                 for (int y = x; y < entries.Count; y++) {
-                    FingerprintHashLookupEntry entry2 = entries[y];
+                    SubFingerprintLookupEntry entry2 = entries[y];
                     if (entry1.AudioTrack != entry2.AudioTrack) { // don't compare tracks with themselves
 
                         var store1 = store[entry1.AudioTrack];
