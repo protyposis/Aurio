@@ -25,28 +25,42 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
     /// </summary>
     public partial class MainWindow : Window {
 
+        private ProgressMonitor progressMonitor;
         private ObservableCollection<BenchmarkEntry> benchmarkResults;
 
         public MainWindow() {
             InitializeComponent();
+            progressMonitor = ProgressMonitor.GlobalInstance;
             benchmarkResults = new ObservableCollection<BenchmarkEntry>();
             dataGrid1.ItemsSource = benchmarkResults;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            ProgressMonitor.GlobalInstance.ProcessingProgressChanged += Instance_ProcessingProgressChanged;
-            ProgressMonitor.GlobalInstance.ProcessingFinished += GlobalInstance_ProcessingFinished;
+            progressBar1.IsEnabled = false;
+            progressBar1Label.Content = "";
+            progressMonitor.ProcessingStarted += ProgressMonitor_ProcessingStarted;
+            progressMonitor.ProcessingProgressChanged += ProgressMonitor_ProcessingProgressChanged;
+            progressMonitor.ProcessingFinished += ProgressMonitor_ProcessingFinished;
         }
 
-        private void Instance_ProcessingProgressChanged(object sender, Audio.ValueEventArgs<float> e) {
+        private void ProgressMonitor_ProcessingStarted(object sender, EventArgs e) {
             progressBar1.Dispatcher.BeginInvoke((Action)delegate {
-                progressBar1.Value = e.Value;
+                progressBar1.IsEnabled = true;
             });
         }
 
-        private void GlobalInstance_ProcessingFinished(object sender, EventArgs e) {
+        private void ProgressMonitor_ProcessingProgressChanged(object sender, Audio.ValueEventArgs<float> e) {
+            progressBar1.Dispatcher.BeginInvoke((Action)delegate {
+                progressBar1.Value = e.Value;
+                progressBar1Label.Content = progressMonitor.StatusMessage;
+            });
+        }
+
+        private void ProgressMonitor_ProcessingFinished(object sender, EventArgs e) {
             progressBar1.Dispatcher.BeginInvoke((Action)delegate {
                 progressBar1.Value = 0;
+                progressBar1.IsEnabled = false;
+                progressBar1Label.Content = "";
             });
         }
 

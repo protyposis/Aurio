@@ -18,5 +18,6 @@
         </DataGrid>
         <ProgressBar Name="progressBar1" Height="20" Margin="189,10,10,0" VerticalAlignment="Top"/>
         <CheckBox Name="warmupCheckbox" Content="Warmup" HorizontalAlignment="Left" Margin="118,13,0,0" VerticalAlignment="Top" IsChecked="True"/>
+        <Label Name="progressBar1Label" Content="Task" Margin="189,7,10,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>
