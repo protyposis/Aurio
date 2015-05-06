@@ -78,7 +78,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         }
 
         private void CalculateSubFingerprint(float[] energyBands, float[] previousEnergyBands) {
-            SubFingerprint subFingerprint = new SubFingerprint();
+            SubFingerprintHash subFingerprint = new SubFingerprintHash();
             Dictionary<int, float> bitReliability = new Dictionary<int, float>();
 
             for (int m = 0; m < 32; m++) {
@@ -97,7 +97,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 // generate fingerprints with all possible bit combinations flipped
                 int variations = 1 << flipWeakestBits;
                 for (int i = 1; i < variations; i++) { // start at 1 since i0 equals to the original subfingerprint
-                    SubFingerprint flippedSubFingerprint = new SubFingerprint(subFingerprint.Value);
+                    SubFingerprintHash flippedSubFingerprint = new SubFingerprintHash(subFingerprint.Value);
                     for (int j = 0; j < flipWeakestBits; j++) {
                         if (((i >> j) & 1) == 1) {
                             flippedSubFingerprint[weakestBits[j]] = !flippedSubFingerprint[weakestBits[j]];

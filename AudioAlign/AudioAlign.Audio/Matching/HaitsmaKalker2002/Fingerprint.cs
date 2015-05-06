@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
-    public class Fingerprint : IEnumerable<SubFingerprint> {
+    public class Fingerprint : IEnumerable<SubFingerprintHash> {
 
-        private List<SubFingerprint> subFingerprintList;
+        private List<SubFingerprintHash> subFingerprintList;
         private int offset;
         private int length;
 
-        public Fingerprint(List<SubFingerprint> subFingerprintList, int index, int length) {
+        public Fingerprint(List<SubFingerprintHash> subFingerprintList, int index, int length) {
             if (index < 0 || index >= subFingerprintList.Count || index + length < 0 || index + length > subFingerprintList.Count) {
                 throw new ArgumentException();
             }
@@ -20,7 +20,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             this.length = length;
         }
 
-        public SubFingerprint this[int index] {
+        public SubFingerprintHash this[int index] {
             get {
                 if (index < 0 || index >= this.length) {
                     throw new IndexOutOfRangeException();
@@ -34,14 +34,14 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         }
 
         public Fingerprint Difference(Fingerprint fp) {
-            List<SubFingerprint> sfpDiffs = new List<SubFingerprint>();
+            List<SubFingerprintHash> sfpDiffs = new List<SubFingerprintHash>();
             for (int x = 0; x < Length; x++) {
                 sfpDiffs.Add(this[x].Difference(fp[x]));
             }
             return new Fingerprint(sfpDiffs, 0, Length);;
         }
 
-        public IEnumerator<SubFingerprint> GetEnumerator() {
+        public IEnumerator<SubFingerprintHash> GetEnumerator() {
             for (int i = this.offset; i < this.offset + this.length; i++) {
                 yield return subFingerprintList[i];
             }

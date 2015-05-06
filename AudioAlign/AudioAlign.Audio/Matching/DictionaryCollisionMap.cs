@@ -6,22 +6,22 @@ using System.Text;
 namespace AudioAlign.Audio.Matching {
     class DictionaryCollisionMap : IFingerprintCollisionMap {
 
-        private Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>> lookupTable;
+        private Dictionary<SubFingerprintHash, List<SubFingerprintLookupEntry>> lookupTable;
 
         public DictionaryCollisionMap() {
-            lookupTable = new Dictionary<SubFingerprint, List<SubFingerprintLookupEntry>>();
+            lookupTable = new Dictionary<SubFingerprintHash, List<SubFingerprintLookupEntry>>();
         }
 
-        public void Add(SubFingerprint subFingerprint, SubFingerprintLookupEntry lookupEntry) {
+        public void Add(SubFingerprintHash subFingerprint, SubFingerprintLookupEntry lookupEntry) {
             if (!lookupTable.ContainsKey(subFingerprint)) {
                 lookupTable.Add(subFingerprint, new List<SubFingerprintLookupEntry>());
             }
             lookupTable[subFingerprint].Add(lookupEntry);
         }
 
-        public List<SubFingerprint> GetCollidingKeys() {
-            List<SubFingerprint> subFingerprints = new List<SubFingerprint>();
-            foreach (SubFingerprint subFingerprint in lookupTable.Keys) {
+        public List<SubFingerprintHash> GetCollidingKeys() {
+            List<SubFingerprintHash> subFingerprints = new List<SubFingerprintHash>();
+            foreach (SubFingerprintHash subFingerprint in lookupTable.Keys) {
                 if (lookupTable[subFingerprint].Count > 1) {
                     subFingerprints.Add(subFingerprint);
                 }
@@ -29,7 +29,7 @@ namespace AudioAlign.Audio.Matching {
             return subFingerprints;
         }
 
-        public List<SubFingerprintLookupEntry> GetValues(SubFingerprint subFingerprint) {
+        public List<SubFingerprintLookupEntry> GetValues(SubFingerprintHash subFingerprint) {
             return lookupTable[subFingerprint];
         }
     }

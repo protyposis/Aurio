@@ -283,7 +283,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 var hashes = peakPairs.ConvertAll(pp => PeakPair.PeakPairToHash(pp));
                 hashes.Sort();
 
-                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, hashes.ConvertAll(h => new IndexedSubFingerprint(peakPairs[0].Index, new SubFingerprint(h), false)), peakPairs[0].Index, indices));
+                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, hashes.ConvertAll(h => new IndexedSubFingerprint(peakPairs[0].Index, new SubFingerprintHash(h), false)), peakPairs[0].Index, indices));
             }
         }
 

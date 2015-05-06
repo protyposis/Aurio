@@ -9,14 +9,14 @@ namespace AudioAlign.Audio.Matching {
     public struct IndexedSubFingerprint {
 
         public int Index;
-        public SubFingerprint SubFingerprint;
+        public SubFingerprintHash SubFingerprint;
         /// <summary>
         /// Gets a value telling if the subfingerprint is a variation of an original fingerprint (which means
         /// the original subfingerprint has been modified) or an unmodified original fingerprint.
         /// </summary>
         public bool IsVariation;
 
-        public IndexedSubFingerprint(int index, SubFingerprint subFingerprint, bool variation) {
+        public IndexedSubFingerprint(int index, SubFingerprintHash subFingerprint, bool variation) {
             Index = index;
             SubFingerprint = subFingerprint;
             IsVariation = variation;

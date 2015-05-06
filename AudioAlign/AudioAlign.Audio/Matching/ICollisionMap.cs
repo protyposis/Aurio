@@ -10,6 +10,6 @@ namespace AudioAlign.Audio.Matching {
         List<V> GetValues(K key);
     }
 
-    public interface IFingerprintCollisionMap : ICollisionMap<SubFingerprint, SubFingerprintLookupEntry> {
+    public interface IFingerprintCollisionMap : ICollisionMap<SubFingerprintHash, SubFingerprintLookupEntry> {
     }
 }

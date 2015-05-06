@@ -90,8 +90,8 @@ namespace AudioAlign.Test.Fingerprinting {
             trackFingerprintListBox.Items.Clear();
             if (trackListBox.SelectedItems.Count > 0) {
                 AudioTrack audioTrack = (AudioTrack)trackListBox.SelectedItem;
-                Dictionary<SubFingerprint, object> hashFilter = new Dictionary<SubFingerprint, object>(); // helper structure to filter out duplicate subfingerprints
-                foreach (SubFingerprint sfp in store.AudioTracks[audioTrack]) {
+                Dictionary<SubFingerprintHash, object> hashFilter = new Dictionary<SubFingerprintHash, object>(); // helper structure to filter out duplicate subfingerprints
+                foreach (SubFingerprintHash sfp in store.AudioTracks[audioTrack]) {
                     if (store.CollisionMap.GetValues(sfp).Count > 1 && !hashFilter.ContainsKey(sfp)) {
                         // only add subfingerprints to the list if it points to at least two different audio tracks
                         List<SubFingerprintLookupEntry> entries = store.CollisionMap.GetValues(sfp);
@@ -111,7 +111,7 @@ namespace AudioAlign.Test.Fingerprinting {
         private void trackFingerprintListBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             fingerprintMatchListBox.Items.Clear();
             if (trackFingerprintListBox.SelectedItems.Count > 0) {
-                SubFingerprint subFingerprint = (SubFingerprint)trackFingerprintListBox.SelectedItem;
+                SubFingerprintHash subFingerprint = (SubFingerprintHash)trackFingerprintListBox.SelectedItem;
                 foreach (SubFingerprintLookupEntry lookupEntry in store.CollisionMap.GetValues(subFingerprint)) {
                     fingerprintMatchListBox.Items.Add(lookupEntry);
                 }
@@ -120,7 +120,7 @@ namespace AudioAlign.Test.Fingerprinting {
 
         private void btnFindMatches_Click(object sender, RoutedEventArgs e) {
             if (trackFingerprintListBox.SelectedItems.Count > 0) {
-                SubFingerprint subFingerprint = (SubFingerprint)trackFingerprintListBox.SelectedItem;
+                SubFingerprintHash subFingerprint = (SubFingerprintHash)trackFingerprintListBox.SelectedItem;
                 PrintMatchResult(store.FindMatches(subFingerprint));
             }
         }

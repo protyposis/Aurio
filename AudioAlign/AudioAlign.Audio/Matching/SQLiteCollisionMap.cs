@@ -29,7 +29,7 @@ namespace AudioAlign.Audio.Matching {
             insertBuffer = new List<DTO>(1000);
         }
 
-        public void Add(SubFingerprint subFingerprint, SubFingerprintLookupEntry lookupEntry) {
+        public void Add(SubFingerprintHash subFingerprint, SubFingerprintLookupEntry lookupEntry) {
             int index = -1;
 
             if(!trackToNumber.TryGetValue(lookupEntry.AudioTrack, out index)) {
@@ -81,21 +81,21 @@ namespace AudioAlign.Audio.Matching {
             Debug.WriteLine("Cleanup count after: " + count);
         }
 
-        public List<SubFingerprint> GetCollidingKeys() {
+        public List<SubFingerprintHash> GetCollidingKeys() {
             InsertBuffered();
             CreateLookupIndex();
 
             var start = DateTime.Now;
             IEnumerable<DTO> result = db.Query<DTO>("select * from (select SubFingerprint As SubFingerprint, COUNT(*) As Count from DTO group by SubFingerprint) where Count > 1");
-            List<SubFingerprint> subFingerprints = new List<SubFingerprint>();
+            List<SubFingerprintHash> subFingerprints = new List<SubFingerprintHash>();
             foreach (DTO dto in result) {
-                subFingerprints.Add(new SubFingerprint(dto.SubFingerprint));
+                subFingerprints.Add(new SubFingerprintHash(dto.SubFingerprint));
             }
             Debug.WriteLine("GetCollidingSubFingerprints duration: " + (DateTime.Now - start));
             return subFingerprints;
         }
 
-        public List<SubFingerprintLookupEntry> GetValues(SubFingerprint subFingerprint) {
+        public List<SubFingerprintLookupEntry> GetValues(SubFingerprintHash subFingerprint) {
             if (insertBuffer.Count > 0) {
                 InsertBuffered();
             }
