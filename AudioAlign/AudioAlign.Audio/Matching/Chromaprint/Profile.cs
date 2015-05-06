@@ -11,8 +11,10 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             WindowSize = 4096;
             HopSize = WindowSize / 3;
             WindowType = WindowType.Hamming;
+
             ChromaMinFrequency = 28;
             ChromaMaxFrequency = 3520;
+            ChromaMappingMode = ChromaMappingMode.Chromaprint;
             ChromaFilterCoefficients = new double[] { 0.25, 0.75, 1.0, 0.75, 0.25 }; // Gauss-filter(?) for temporal chroma smoothing
             ChromaNormalizationThreshold = 0.01;
 
@@ -47,6 +49,8 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         public float ChromaMinFrequency { get; set; }
 
         public float ChromaMaxFrequency { get; set; }
+
+        public ChromaMappingMode ChromaMappingMode { get; set; }
 
         public double[] ChromaFilterCoefficients { get; set; }
 
