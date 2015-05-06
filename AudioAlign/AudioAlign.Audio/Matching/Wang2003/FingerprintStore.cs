@@ -51,9 +51,9 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 store[e.AudioTrack].index.Add(e.Index, new TrackStore.IndexEntry(store[e.AudioTrack].hashes.Count, e.SubFingerprints.Count));
 
                 foreach (var hash in e.SubFingerprints) {
-                    store[e.AudioTrack].hashes.Add(hash.SubFingerprint);
+                    store[e.AudioTrack].hashes.Add(hash.Hash);
                     // insert a track/index lookup entry for the fingerprint hash
-                    collisionMap.Add(hash.SubFingerprint, new SubFingerprintLookupEntry(e.AudioTrack, hash.Index));
+                    collisionMap.Add(hash.Hash, new SubFingerprintLookupEntry(e.AudioTrack, hash.Index));
                 }
             }
         }

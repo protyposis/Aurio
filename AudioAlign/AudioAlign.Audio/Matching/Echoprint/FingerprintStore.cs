@@ -57,10 +57,10 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                     frame = e.SubFingerprints[hashListIndex].Index;
                     hashListIndexCount = 0;
                     while (e.SubFingerprints.Count > hashListIndex + hashListIndexCount && (hash = e.SubFingerprints[hashListIndex + hashListIndexCount]).Index == frame) {
-                        store[e.AudioTrack].hashes.Add(hash.SubFingerprint);
+                        store[e.AudioTrack].hashes.Add(hash.Hash);
 
                         // insert a track/index lookup entry for the fingerprint hash
-                        collisionMap.Add(hash.SubFingerprint, new SubFingerprintLookupEntry(e.AudioTrack, (int)frame));
+                        collisionMap.Add(hash.Hash, new SubFingerprintLookupEntry(e.AudioTrack, (int)frame));
 
                         hashListIndexCount++;
                     }

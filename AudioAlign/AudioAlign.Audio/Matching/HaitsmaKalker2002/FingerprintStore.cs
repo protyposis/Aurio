@@ -76,11 +76,11 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 foreach (var sfp in e.SubFingerprints) {
                     if (!sfp.IsVariation) {
                         // store the sub-fingerprint in the sequential list of the audio track
-                        store[e.AudioTrack].Add(sfp.SubFingerprint);
+                        store[e.AudioTrack].Add(sfp.Hash);
                     }
 
                     // insert a track/index lookup entry for the sub-fingerprint
-                    collisionMap.Add(sfp.SubFingerprint, new SubFingerprintLookupEntry(e.AudioTrack, sfp.Index));
+                    collisionMap.Add(sfp.Hash, new SubFingerprintLookupEntry(e.AudioTrack, sfp.Index));
                 }
             }
         }
