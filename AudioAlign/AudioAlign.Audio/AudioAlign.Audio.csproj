@@ -146,6 +146,7 @@
     <Compile Include="Matching\AnalysisMode.cs" />
     <Compile Include="Matching\Chromaprint\Chroma.cs" />
     <Compile Include="Matching\Chromaprint\ChromaMappingMode.cs" />
+    <Compile Include="Matching\Chromaprint\ChromaprintProfile.cs" />
     <Compile Include="Matching\Chromaprint\Classifier.cs" />
     <Compile Include="Matching\Chromaprint\DictionaryCollisionMap.cs" />
     <Compile Include="Matching\Chromaprint\Filter.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="Matching\Chromaprint\SubFingerprint.cs" />
     <Compile Include="Matching\Chromaprint\SubFingerprintEventArgs.cs" />
     <Compile Include="Matching\Chromaprint\SubFingerprintLookupEntry.cs" />
+    <Compile Include="Matching\Chromaprint\SyncProfile.cs" />
     <Compile Include="Matching\CrossCorrelation.cs" />
     <Compile Include="DataStructures\Matrix\ArrayMatrix.cs" />
     <Compile Include="DataStructures\Matrix\DiagonalArrayMatrix.cs" />
