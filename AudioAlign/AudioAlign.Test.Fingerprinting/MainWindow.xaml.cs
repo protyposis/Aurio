@@ -68,7 +68,7 @@ namespace AudioAlign.Test.Fingerprinting {
                         fpg.SubFingerprintsGenerated += new EventHandler<SubFingerprintsGeneratedEventArgs>(delegate(object s2, SubFingerprintsGeneratedEventArgs e2) {
                             subFingerprintsCalculated++;
                             progressReporter.ReportProgress((double)e2.Index / e2.Indices * 100);
-                            store.Add(e2.AudioTrack, e2.SubFingerprint, e2.Index, e2.IsVariation);
+                            store.Add(e2);
                         });
 
                         fpg.Generate();
@@ -172,9 +172,9 @@ namespace AudioAlign.Test.Fingerprinting {
             Fingerprint fp1 = store.GetFingerprint(sfp1);
             Fingerprint fp2 = store.GetFingerprint(sfp2);
             Fingerprint fpDifference = fp1.Difference(fp2);
-            fingerprintView1.SubFingerprints = fp1;
-            fingerprintView2.SubFingerprints = fp2;
-            fingerprintView3.SubFingerprints = fpDifference;
+            fingerprintView1.Fingerprint = fp1;
+            fingerprintView2.Fingerprint = fp2;
+            fingerprintView3.Fingerprint = fpDifference;
             berLabel.Content = Fingerprint.CalculateBER(fp1, fp2);
         }
     }

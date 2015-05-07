@@ -1,4 +1,5 @@
-﻿using AudioAlign.Audio.Matching.Wang2003;
+﻿using AudioAlign.Audio.Matching;
+using AudioAlign.Audio.Matching.Wang2003;
 using AudioAlign.Audio.Project;
 using AudioAlign.Audio.Streams;
 using AudioAlign.Audio.TaskMonitor;
@@ -56,7 +57,7 @@ namespace AudioAlign.Test.FingerprintingWang2003 {
             dlg.Filter = "Wave files|*.wav";
 
             if (dlg.ShowDialog() == true) {
-                var profile = new Profile();
+                var profile = FingerprintGenerator.GetProfiles()[0];
 
                 spectrogram1.SpectrogramSize = profile.WindowSize / 2;
                 spectrogram2.SpectrogramSize = profile.WindowSize / 2;
@@ -78,7 +79,7 @@ namespace AudioAlign.Test.FingerprintingWang2003 {
                         AudioTrack audioTrack = new AudioTrack(new FileInfo(file));
                         IAudioStream audioStream = audioTrack.CreateAudioStream();
                         IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating fingerprints for " + audioTrack.FileInfo.Name, true);
-                        var hashCollection = new List<uint>();
+                        int hashCount = 0;
 
                         FingerprintGenerator fpg = new FingerprintGenerator(profile);
                         fpg.FrameProcessed += delegate(object sender2, FrameProcessedEventArgs e2) {
@@ -90,13 +91,13 @@ namespace AudioAlign.Test.FingerprintingWang2003 {
                                 progressReporter.ReportProgress((double)e2.Index / e2.Indices * 100);
                             });
                         };
-                        fpg.SubFingerprintsGenerated += delegate(object sender2, FingerprintHashEventArgs e2) {
-                            hashCollection.AddRange(e2.Hashes);
+                        fpg.SubFingerprintsGenerated += delegate(object sender2, SubFingerprintsGeneratedEventArgs e2) {
+                            hashCount += e2.SubFingerprints.Count;
                             store.Add(e2);
                         };
 
                         fpg.Generate(audioTrack);
-                        Debug.WriteLine("{0} hashes (mem {1:0.00} mb)", hashCollection.Count, (hashCollection.Count * Marshal.SizeOf(typeof(uint))) / 1024f / 1024f);
+                        Debug.WriteLine("{0} hashes (mem {1:0.00} mb)", hashCount, (hashCount * Marshal.SizeOf(typeof(SubFingerprintHash))) / 1024f / 1024f);
 
                         progressReporter.Finish();
                     }
