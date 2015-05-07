@@ -87,17 +87,17 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
 
                 // FingerprintCalculator
                 if (integralImage.Columns < maxFilterWidth) {
-                    // Wait for the image to fill completely before subfingerprints can be generated
+                    // Wait for the image to fill completely before hashes can be generated
                     continue;
                 }
-                // Calculate subfingerprint
-                uint subFingerprint = 0;
+                // Calculate subfingerprint hash
+                uint hash = 0;
                 for (int i = 0; i < classifiers.Length; i++) {
-                    subFingerprint = (subFingerprint << 2) | grayCodeMapping[classifiers[i].Classify(integralImage, 0)];
+                    hash = (hash << 2) | grayCodeMapping[classifiers[i].Classify(integralImage, 0)];
                 }
                 // We have a SubFingerprint@frameTime
                 if (SubFingerprintsGenerated != null) {
-                    SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, new SubFingerprint(index, new SubFingerprintHash(subFingerprint), false), index, indices));
+                    SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, new SubFingerprint(index, new SubFingerprintHash(hash), false), index, indices));
                 }
 
                 index++;

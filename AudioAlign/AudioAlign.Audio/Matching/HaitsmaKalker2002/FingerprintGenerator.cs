@@ -78,33 +78,33 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         }
 
         private void CalculateSubFingerprint(float[] energyBands, float[] previousEnergyBands) {
-            SubFingerprintHash subFingerprint = new SubFingerprintHash();
+            SubFingerprintHash hash = new SubFingerprintHash();
             Dictionary<int, float> bitReliability = new Dictionary<int, float>();
 
             for (int m = 0; m < 32; m++) {
                 float difference = energyBands[m] - energyBands[m + 1] - (previousEnergyBands[m] - previousEnergyBands[m + 1]);
-                subFingerprint[m] = difference > 0;
+                hash[m] = difference > 0;
                 bitReliability.Add(m, difference > 0 ? difference : -difference); // take absolute value as reliability weight
             }
 
             if (SubFingerprintsGenerated != null) {
-                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, new SubFingerprint(index, subFingerprint, false), index, indices));
+                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, new SubFingerprint(index, hash, false), index, indices));
             }
 
             if (flipWeakestBits > 0) {
-                // calculate probable subfingerprints by flipping the most unreliable bits (the bits with the least energy differences)
+                // calculate probable hashes by flipping the most unreliable bits (the bits with the least energy differences)
                 List<int> weakestBits = new List<int>(bitReliability.Keys.OrderBy(key => bitReliability[key]));
-                // generate fingerprints with all possible bit combinations flipped
+                // generate hashes with all possible bit combinations flipped
                 int variations = 1 << flipWeakestBits;
-                for (int i = 1; i < variations; i++) { // start at 1 since i0 equals to the original subfingerprint
-                    SubFingerprintHash flippedSubFingerprint = new SubFingerprintHash(subFingerprint.Value);
+                for (int i = 1; i < variations; i++) { // start at 1 since i0 equals to the original hash
+                    SubFingerprintHash flippedHash = new SubFingerprintHash(hash.Value);
                     for (int j = 0; j < flipWeakestBits; j++) {
                         if (((i >> j) & 1) == 1) {
-                            flippedSubFingerprint[weakestBits[j]] = !flippedSubFingerprint[weakestBits[j]];
+                            flippedHash[weakestBits[j]] = !flippedHash[weakestBits[j]];
                         }
                     }
                     if (SubFingerprintsGenerated != null) {
-                        SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, new SubFingerprint(index, flippedSubFingerprint, true), index, indices));
+                        SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, new SubFingerprint(index, flippedHash, true), index, indices));
                     }
                 }
             }

@@ -59,7 +59,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         public double ChromaNormalizationThreshold { get; set; }
 
         /// <summary>
-        /// The classifiers used to convert the chromatrogram to subfingerprints.
+        /// The classifiers used to convert the chromatrogram to hashes.
         /// </summary>
         internal Classifier[] Classifiers { get; set; }
     }

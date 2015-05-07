@@ -86,8 +86,8 @@ namespace AudioAlign.Audio.Matching {
             return a.value > b.value;
         }
 
-        public SubFingerprintHash Difference(SubFingerprintHash subFingerprint) {
-            return new SubFingerprintHash(this.value ^ subFingerprint.value);
+        public SubFingerprintHash Difference(SubFingerprintHash hash) {
+            return new SubFingerprintHash(this.value ^ hash.value);
         }
     }
 }

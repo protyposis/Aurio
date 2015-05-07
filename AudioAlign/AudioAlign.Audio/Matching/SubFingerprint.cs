@@ -11,8 +11,8 @@ namespace AudioAlign.Audio.Matching {
         public int Index;
         public SubFingerprintHash Hash;
         /// <summary>
-        /// Gets a value telling if the subfingerprint is a variation of an original fingerprint (which means
-        /// the original subfingerprint has been modified) or an unmodified original fingerprint.
+        /// Gets a value telling if the subfingerprint is a variation of an original subfingerprint (which means
+        /// the original subfingerprint has been modified) or an unmodified original subfingerprint.
         /// </summary>
         public bool IsVariation;
 

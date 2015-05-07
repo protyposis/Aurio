@@ -12,25 +12,25 @@ namespace AudioAlign.Audio.Matching {
             lookupTable = new Dictionary<SubFingerprintHash, List<SubFingerprintLookupEntry>>();
         }
 
-        public void Add(SubFingerprintHash subFingerprint, SubFingerprintLookupEntry lookupEntry) {
-            if (!lookupTable.ContainsKey(subFingerprint)) {
-                lookupTable.Add(subFingerprint, new List<SubFingerprintLookupEntry>());
+        public void Add(SubFingerprintHash hash, SubFingerprintLookupEntry lookupEntry) {
+            if (!lookupTable.ContainsKey(hash)) {
+                lookupTable.Add(hash, new List<SubFingerprintLookupEntry>());
             }
-            lookupTable[subFingerprint].Add(lookupEntry);
+            lookupTable[hash].Add(lookupEntry);
         }
 
         public List<SubFingerprintHash> GetCollidingKeys() {
-            List<SubFingerprintHash> subFingerprints = new List<SubFingerprintHash>();
-            foreach (SubFingerprintHash subFingerprint in lookupTable.Keys) {
-                if (lookupTable[subFingerprint].Count > 1) {
-                    subFingerprints.Add(subFingerprint);
+            List<SubFingerprintHash> hashes = new List<SubFingerprintHash>();
+            foreach (SubFingerprintHash hash in lookupTable.Keys) {
+                if (lookupTable[hash].Count > 1) {
+                    hashes.Add(hash);
                 }
             }
-            return subFingerprints;
+            return hashes;
         }
 
-        public List<SubFingerprintLookupEntry> GetValues(SubFingerprintHash subFingerprint) {
-            return lookupTable[subFingerprint];
+        public List<SubFingerprintLookupEntry> GetValues(SubFingerprintHash hash) {
+            return lookupTable[hash];
         }
     }
 }

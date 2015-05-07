@@ -85,9 +85,9 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
         }
 
-        public List<Match> FindMatches(SubFingerprintHash subFingerprint) {
+        public List<Match> FindMatches(SubFingerprintHash hash) {
             List<Match> matches = new List<Match>();
-            List<SubFingerprintLookupEntry> entries = collisionMap.GetValues(subFingerprint);
+            List<SubFingerprintLookupEntry> entries = collisionMap.GetValues(hash);
 
             //Debug.WriteLine("Finding matches...");
 
@@ -101,26 +101,26 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                         //Debug.WriteLine("Comparing " + entry1.AudioTrack.Name + " with " + entry2.AudioTrack.Name + ":");
                         if (store[entry1.AudioTrack].Count - entry1.Index < fingerprintSize
                             || store[entry2.AudioTrack].Count - entry2.Index < fingerprintSize) {
-                            // the end of at least one track has been reached and there are not enough subfingerprints left
+                            // the end of at least one track has been reached and there are not enough hashes left
                             // to do a fingerprint comparison
                             continue;
                         }
 
                         // sum up the bit errors
-                        List<SubFingerprintHash> track1SubFingerprints = store[entry1.AudioTrack];
-                        List<SubFingerprintHash> track2SubFingerprints = store[entry2.AudioTrack];
+                        List<SubFingerprintHash> track1Hashes = store[entry1.AudioTrack];
+                        List<SubFingerprintHash> track2Hashes = store[entry2.AudioTrack];
                         uint bitErrors = 0;
                         for (int s = 0; s < fingerprintSize; s++) {
-                            SubFingerprintHash track1SubFingerprint = track1SubFingerprints[entry1.Index + s];
-                            SubFingerprintHash track2SubFingerprint = track2SubFingerprints[entry2.Index + s];
-                            if (track1SubFingerprint.Value == 0 || track2SubFingerprint.Value == 0) {
+                            SubFingerprintHash track1Hash = track1Hashes[entry1.Index + s];
+                            SubFingerprintHash track2Hash = track2Hashes[entry2.Index + s];
+                            if (track1Hash.Value == 0 || track2Hash.Value == 0) {
                                 bitErrors = (uint)fingerprintSize * 32;
                                 break;
                             }
-                            // skip fingerprints with subfingerprints that are zero, since it is probably from 
+                            // skip fingerprints with hashes that are zero, since it is probably from 
                             // a track section with silence
                             // by setting the bitErrors to the maximum, the match will not be added
-                            bitErrors += track1SubFingerprint.HammingDistance(track2SubFingerprint);
+                            bitErrors += track1Hash.HammingDistance(track2Hash);
                         }
 
                         float bitErrorRate = bitErrors / (float)(fingerprintSize * 32); // sub-fingerprints * 32 bits
@@ -148,10 +148,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             List<Match> matches = new List<Match>();
             //collisionMap.CreateLookupIndex(); // TODO evaluate if this call speeds the process up
             //collisionMap.Cleanup();
-            foreach (SubFingerprintHash subFingerprint in collisionMap.GetCollidingKeys()) {
-                // skip all subfingerprints whose bits are all zero, since this is probably a position with silence
-                if (subFingerprint.Value != 0) {
-                    matches.AddRange(FindMatches(subFingerprint));
+            foreach (SubFingerprintHash hash in collisionMap.GetCollidingKeys()) {
+                // skip all hashes whose bits are all zero, since this is probably a position with silence
+                if (hash.Value != 0) {
+                    matches.AddRange(FindMatches(hash));
                 }
             }
             return matches;

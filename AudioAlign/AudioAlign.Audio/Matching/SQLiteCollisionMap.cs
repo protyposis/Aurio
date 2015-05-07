@@ -10,7 +10,7 @@ namespace AudioAlign.Audio.Matching {
     class SQLiteCollisionMap : IFingerprintCollisionMap {
 
         private class DTO {
-            public UInt32 SubFingerprint { get; set; }
+            public UInt32 Hash { get; set; }
             public int TrackNumber { get; set; }
             public int TrackPositionIndex { get; set; }
         }
@@ -29,7 +29,7 @@ namespace AudioAlign.Audio.Matching {
             insertBuffer = new List<DTO>(1000);
         }
 
-        public void Add(SubFingerprintHash subFingerprint, SubFingerprintLookupEntry lookupEntry) {
+        public void Add(SubFingerprintHash hash, SubFingerprintLookupEntry lookupEntry) {
             int index = -1;
 
             if(!trackToNumber.TryGetValue(lookupEntry.AudioTrack, out index)) {
@@ -43,7 +43,7 @@ namespace AudioAlign.Audio.Matching {
             }
 
             var dto = new DTO {
-                SubFingerprint = subFingerprint.Value,
+                Hash = hash.Value,
                 TrackNumber = index,
                 TrackPositionIndex = lookupEntry.Index
             };
@@ -65,7 +65,7 @@ namespace AudioAlign.Audio.Matching {
         public void CreateLookupIndex() {
             InsertBuffered();
             var start = DateTime.Now;
-            db.Execute("create index if not exists DTO_SubFingerprint on DTO(SubFingerprint)");
+            db.Execute("create index if not exists DTO_Hash on DTO(Hash)");
             Debug.WriteLine("CreateLookupIndex duration: " + (DateTime.Now - start));
         }
 
@@ -75,7 +75,7 @@ namespace AudioAlign.Audio.Matching {
             int count = db.ExecuteScalar<int>("select count(*) from DTO");
             Debug.WriteLine("Cleanup count before: " + count);
 
-            db.Execute("delete from DTO where SubFingerprint in (select SubFingerprint from (select SubFingerprint As SubFingerprint, COUNT(*) As Count from DTO group by SubFingerprint) where Count = 1)");
+            db.Execute("delete from DTO where Hash in (select Hash from (select Hash As Hash, COUNT(*) As Count from DTO group by Hash) where Count = 1)");
 
             count = db.ExecuteScalar<int>("select count(*) from DTO");
             Debug.WriteLine("Cleanup count after: " + count);
@@ -86,22 +86,22 @@ namespace AudioAlign.Audio.Matching {
             CreateLookupIndex();
 
             var start = DateTime.Now;
-            IEnumerable<DTO> result = db.Query<DTO>("select * from (select SubFingerprint As SubFingerprint, COUNT(*) As Count from DTO group by SubFingerprint) where Count > 1");
-            List<SubFingerprintHash> subFingerprints = new List<SubFingerprintHash>();
+            IEnumerable<DTO> result = db.Query<DTO>("select * from (select Hash As Hash, COUNT(*) As Count from DTO group by Hash) where Count > 1");
+            List<SubFingerprintHash> hashes = new List<SubFingerprintHash>();
             foreach (DTO dto in result) {
-                subFingerprints.Add(new SubFingerprintHash(dto.SubFingerprint));
+                hashes.Add(new SubFingerprintHash(dto.Hash));
             }
-            Debug.WriteLine("GetCollidingSubFingerprints duration: " + (DateTime.Now - start));
-            return subFingerprints;
+            Debug.WriteLine("GetCollidingHashes duration: " + (DateTime.Now - start));
+            return hashes;
         }
 
-        public List<SubFingerprintLookupEntry> GetValues(SubFingerprintHash subFingerprint) {
+        public List<SubFingerprintLookupEntry> GetValues(SubFingerprintHash hash) {
             if (insertBuffer.Count > 0) {
                 InsertBuffered();
             }
 
             //var start = DateTime.Now;
-            IEnumerable<DTO> result = db.Query<DTO>("select * from DTO where SubFingerprint = ?", subFingerprint.Value);
+            IEnumerable<DTO> result = db.Query<DTO>("select * from DTO where Hash = ?", hash.Value);
             List<SubFingerprintLookupEntry> lookupEntries = new List<SubFingerprintLookupEntry>();
             foreach (DTO dto in result) {
                 lookupEntries.Add(new SubFingerprintLookupEntry(numberToTrack[dto.TrackNumber], dto.TrackPositionIndex));

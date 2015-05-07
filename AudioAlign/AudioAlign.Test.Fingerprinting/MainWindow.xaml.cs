@@ -90,16 +90,16 @@ namespace AudioAlign.Test.Fingerprinting {
             trackFingerprintListBox.Items.Clear();
             if (trackListBox.SelectedItems.Count > 0) {
                 AudioTrack audioTrack = (AudioTrack)trackListBox.SelectedItem;
-                Dictionary<SubFingerprintHash, object> hashFilter = new Dictionary<SubFingerprintHash, object>(); // helper structure to filter out duplicate subfingerprints
-                foreach (SubFingerprintHash sfp in store.AudioTracks[audioTrack]) {
-                    if (store.CollisionMap.GetValues(sfp).Count > 1 && !hashFilter.ContainsKey(sfp)) {
-                        // only add subfingerprints to the list if it points to at least two different audio tracks
-                        List<SubFingerprintLookupEntry> entries = store.CollisionMap.GetValues(sfp);
+                Dictionary<SubFingerprintHash, object> hashFilter = new Dictionary<SubFingerprintHash, object>(); // helper structure to filter out duplicate hashes
+                foreach (SubFingerprintHash hash in store.AudioTracks[audioTrack]) {
+                    if (store.CollisionMap.GetValues(hash).Count > 1 && !hashFilter.ContainsKey(hash)) {
+                        // only add hash to the list if it points to at least two different audio tracks
+                        List<SubFingerprintLookupEntry> entries = store.CollisionMap.GetValues(hash);
                         SubFingerprintLookupEntry firstEntry = entries[0];
                         for (int x = 1; x < entries.Count; x++) {
                             if (entries[x].AudioTrack != firstEntry.AudioTrack) {
-                                trackFingerprintListBox.Items.Add(sfp);
-                                hashFilter.Add(sfp, null);
+                                trackFingerprintListBox.Items.Add(hash);
+                                hashFilter.Add(hash, null);
                                 break;
                             }
                         }
@@ -111,8 +111,8 @@ namespace AudioAlign.Test.Fingerprinting {
         private void trackFingerprintListBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             fingerprintMatchListBox.Items.Clear();
             if (trackFingerprintListBox.SelectedItems.Count > 0) {
-                SubFingerprintHash subFingerprint = (SubFingerprintHash)trackFingerprintListBox.SelectedItem;
-                foreach (SubFingerprintLookupEntry lookupEntry in store.CollisionMap.GetValues(subFingerprint)) {
+                SubFingerprintHash hash = (SubFingerprintHash)trackFingerprintListBox.SelectedItem;
+                foreach (SubFingerprintLookupEntry lookupEntry in store.CollisionMap.GetValues(hash)) {
                     fingerprintMatchListBox.Items.Add(lookupEntry);
                 }
             }
@@ -120,8 +120,8 @@ namespace AudioAlign.Test.Fingerprinting {
 
         private void btnFindMatches_Click(object sender, RoutedEventArgs e) {
             if (trackFingerprintListBox.SelectedItems.Count > 0) {
-                SubFingerprintHash subFingerprint = (SubFingerprintHash)trackFingerprintListBox.SelectedItem;
-                PrintMatchResult(store.FindMatches(subFingerprint));
+                SubFingerprintHash hash = (SubFingerprintHash)trackFingerprintListBox.SelectedItem;
+                PrintMatchResult(store.FindMatches(hash));
             }
         }
 
