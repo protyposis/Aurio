@@ -105,7 +105,7 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
         private void BenchmarkHaitsmaKalker(AudioTrack track) {
             var profile = AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator.GetProfiles()[0];
             var store = new AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintStore(profile);
-            var gen = new AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator(profile, track, 3);
+            var gen = new AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator(profile, track);
 
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("HaitsmaKalker2002", true);
             int hashCount = 0;

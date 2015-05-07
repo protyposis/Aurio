@@ -26,14 +26,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
         public event EventHandler Completed;
 
-        public FingerprintGenerator(Profile profile, AudioTrack track)
-            : this(profile, track, 0) {
-        }
-
-        public FingerprintGenerator(Profile profile, AudioTrack track, int flipWeakestBits) {
+        public FingerprintGenerator(Profile profile, AudioTrack track) {
             this.inputTrack = track;
             this.profile = profile;
-            this.flipWeakestBits = flipWeakestBits;
+            this.flipWeakestBits = profile.FlipWeakestBits;
         }
 
         private int index;

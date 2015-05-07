@@ -23,6 +23,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
         public int FrequencyBands { get; set; }
 
+        public int FlipWeakestBits { get; set; }
+
         /// <summary>
         /// Maps the frequency bins from the FFT result to the target frequency bins that the fingerprint
         /// will be generated from.

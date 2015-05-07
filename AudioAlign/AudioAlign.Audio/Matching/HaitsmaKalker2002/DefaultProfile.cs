@@ -22,6 +22,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             MaxFrequency = 2000;
             FrequencyBands = 33;
 
+            FlipWeakestBits = 3;
+
             this.frequencyBands = FFTUtil.CalculateFrequencyBoundariesLog(MinFrequency, MaxFrequency, FrequencyBands);
         }
 
