@@ -45,7 +45,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         /// <summary>
         /// The mode in which spectral bins are mapped to chroma bins.
         /// </summary>
-        public ChromaMappingMode ChromaMappingMode { get; set; }
+        public Chroma.MappingMode ChromaMappingMode { get; set; }
 
         /// <summary>
         /// The FIR filter coefficients used to filter/smooth the chroma bins over time.

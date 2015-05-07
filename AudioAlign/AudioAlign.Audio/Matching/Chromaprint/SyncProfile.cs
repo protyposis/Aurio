@@ -14,7 +14,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             WindowSize = 2048;
             HopSize = 64;
 
-            ChromaMappingMode = ChromaMappingMode.Paper;
+            ChromaMappingMode = Chroma.MappingMode.Paper;
         }
     }
 }

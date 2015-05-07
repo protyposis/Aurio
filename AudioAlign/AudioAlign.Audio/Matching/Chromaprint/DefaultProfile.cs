@@ -16,7 +16,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
 
             ChromaMinFrequency = 28;
             ChromaMaxFrequency = 3520;
-            ChromaMappingMode = ChromaMappingMode.Chromaprint;
+            ChromaMappingMode = Chroma.MappingMode.Chromaprint;
             ChromaFilterCoefficients = new double[] { 0.25, 0.75, 1.0, 0.75, 0.25 }; // Gauss-filter(?) for temporal chroma smoothing
             ChromaNormalizationThreshold = 0.01;
 
