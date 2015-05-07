@@ -43,6 +43,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             var integralImage = new IntegralImage(maxFilterWidth, Chroma.Bins);
             int index = 0;
             int indices = chroma.WindowCount;
+            var subFingerprints = new List<SubFingerprint>();
             while (chroma.HasNext()) {
                 // Get chroma frame buffer
                 // When the chroma buffer is full, we can take and reuse the oldest array
@@ -96,11 +97,18 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
                     hash = (hash << 2) | grayCodeMapping[classifiers[i].Classify(integralImage, 0)];
                 }
                 // We have a SubFingerprint@frameTime
-                if (SubFingerprintsGenerated != null) {
-                    SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, new SubFingerprint(index, new SubFingerprintHash(hash), false), index, indices));
-                }
+                subFingerprints.Add(new SubFingerprint(index, new SubFingerprintHash(hash), false));
 
                 index++;
+
+                if (index % 512 == 0 && SubFingerprintsGenerated != null) {
+                    SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, subFingerprints, index, indices));
+                    subFingerprints.Clear();
+                }
+            }
+
+            if (SubFingerprintsGenerated != null) {
+                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, subFingerprints, index, indices));
             }
 
             if (Completed != null) {
