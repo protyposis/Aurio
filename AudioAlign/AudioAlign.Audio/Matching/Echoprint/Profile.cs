@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Audio.Matching.Echoprint {
-    public abstract class Profile {
+    public abstract class Profile : IProfile {
         public interface IThreshold {
             /// <summary>
             /// Returns, for a given x (time), a threshold value in the range of [0,1].
@@ -120,5 +120,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
         public double SampleToHashQuantizationFactor {
             get { return SubBands * OnsetRmsHopSize * HashTimeQuantizationFactor; }
         }
+
+        public double HashTimeScale { get; protected set; }
     }
 }

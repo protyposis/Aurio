@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Audio.Matching.Chromaprint {
-    public abstract class Profile {
+    public abstract class Profile : IProfile {
 
         /// <summary>
         /// The name of this profile.
@@ -62,5 +62,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         /// The classifiers used to convert the chromatrogram to hashes.
         /// </summary>
         internal Classifier[] Classifiers { get; set; }
+
+        public double HashTimeScale { get; protected set; }
     }
 }

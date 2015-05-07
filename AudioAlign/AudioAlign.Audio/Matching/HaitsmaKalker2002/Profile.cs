@@ -7,7 +7,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
     /// <summary>
     /// Profile interface for the fingerprint generator.
     /// </summary>
-    public abstract class Profile {
+    public abstract class Profile : IProfile {
 
         public string Name { get; protected set; }
 
@@ -24,6 +24,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         public int FrequencyBands { get; set; }
 
         public int FlipWeakestBits { get; set; }
+
+        public double HashTimeScale { get; protected set; }
 
         /// <summary>
         /// Maps the frequency bins from the FFT result to the target frequency bins that the fingerprint

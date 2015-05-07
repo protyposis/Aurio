@@ -113,5 +113,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         /// The threshold that rejects a match candidate and stops the matching process if it's matching rate drops below.
         /// </summary>
         public IThreshold ThresholdReject { get; set; }
+
+        public double HashTimeScale { get; protected set; }
     }
 }

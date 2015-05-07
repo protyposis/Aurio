@@ -119,10 +119,6 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             Console.WriteLine("time: " + sw.Elapsed);
         }
 
-        public static TimeSpan FingerprintHashIndexToTimeSpan(Profile profile, int index) {
-            return new TimeSpan((long)Math.Round(index * profile.SampleToHashQuantizationFactor / profile.SamplingRate * TimeUtil.SECS_TO_TICKS));
-        }
-
         public static Profile[] GetProfiles() {
             return new Profile[] { new DefaultProfile() };
         }

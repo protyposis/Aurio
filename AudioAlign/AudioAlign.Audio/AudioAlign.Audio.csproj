@@ -181,6 +181,7 @@
     <Compile Include="Matching\HaitsmaKalker2002\BassProfile.cs" />
     <Compile Include="Matching\DictionaryCollisionMap.cs" />
     <Compile Include="Matching\ICollisionMap.cs" />
+    <Compile Include="Matching\IProfile.cs" />
     <Compile Include="Matching\SQLiteCollisionMap.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\HumanProfile.cs" />
     <Compile Include="Matching\HaitsmaKalker2002\DefaultProfile.cs" />

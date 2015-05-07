@@ -17,6 +17,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             MaxFrequency = 16000;
             FrequencyBands = 33;
 
+            HashTimeScale = 1d / SampleRate * FrameStep;
+
             this.frequencyBands = FFTUtil.CalculateFrequencyBoundariesLog(MinFrequency, MaxFrequency, FrequencyBands);
         }
     }

@@ -129,9 +129,9 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
                             matches.Add(new Match {
                                 Similarity = 1 - bitErrorRate,
                                 Track1 = entry1.AudioTrack,
-                                Track1Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, entry1.Index),
+                                Track1Time = SubFingerprintIndexToTimeSpan(entry1.Index),
                                 Track2 = entry2.AudioTrack,
-                                Track2Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, entry2.Index),
+                                Track2Time = SubFingerprintIndexToTimeSpan(entry2.Index),
                                 Source = "FP-CP"
                             });
                         }
@@ -163,6 +163,10 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
                 indexOffset = Math.Min(indexOffset, -fingerprintSize + store[entry.AudioTrack].Count - entry.Index);
             }
             return new Fingerprint(store[entry.AudioTrack], entry.Index + indexOffset, fingerprintSize);
+        }
+
+        private TimeSpan SubFingerprintIndexToTimeSpan(int index) {
+            return new TimeSpan((long)Math.Round(index * profile.HashTimeScale * TimeUtil.SECS_TO_TICKS));
         }
     }
 }

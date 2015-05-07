@@ -38,6 +38,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 WidthScale = threshold.WidthScale,
                 Height = threshold.Height / 3
             };
+
+            HashTimeScale = 1d / SamplingRate * SampleToHashQuantizationFactor;
         }
     }
 }

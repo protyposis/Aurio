@@ -109,14 +109,6 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
         }
 
-        public static TimeSpan SubFingerprintIndexToTimeSpan(Profile profile, int index) {
-            return new TimeSpan((long)Math.Round((double)index * profile.FrameStep / profile.SampleRate * 1000 * 1000 * 10));
-        }
-
-        public static int TimeStampToSubFingerprintIndex(Profile profile, TimeSpan timeSpan) {
-            return (int)Math.Round((double)timeSpan.Ticks / 10 / 1000 / 1000 * profile.SampleRate / profile.FrameStep);
-        }
-
         public static Profile[] GetProfiles() {
             return new Profile[] { new DefaultProfile(), new BugProfile(), new VoiceProfile(), new BassProfile(), new HumanProfile() };
         }

@@ -38,6 +38,8 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
                 new Classifier(new Filter(1, 9, 12, 2), new Quantizer(-0.272556, 0.019424, 0.302559)),
                 new Classifier(new Filter(3, 4, 14, 2), new Quantizer(-0.164292, -0.0321188, 0.0846339))
             };
+
+            HashTimeScale = 1d / SamplingRate * HopSize;
         }
     }
 }

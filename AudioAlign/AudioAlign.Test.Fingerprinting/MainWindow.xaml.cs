@@ -17,6 +17,7 @@ using AudioAlign.Audio.Project;
 using System.Threading.Tasks;
 using AudioAlign.Audio.TaskMonitor;
 using System.Diagnostics;
+using AudioAlign.Audio;
 using AudioAlign.Audio.Streams;
 using AudioAlign.Audio.Matching;
 
@@ -162,8 +163,8 @@ namespace AudioAlign.Test.Fingerprinting {
             if (match == null) {
                 return;
             }
-            int index1 = FingerprintGenerator.TimeStampToSubFingerprintIndex(profile, match.Track1Time);
-            int index2 = FingerprintGenerator.TimeStampToSubFingerprintIndex(profile, match.Track2Time);
+            int index1 = (int)Math.Round((double)match.Track1Time.Ticks / TimeUtil.SECS_TO_TICKS * profile.HashTimeScale);
+            int index2 = (int)Math.Round((double)match.Track2Time.Ticks / TimeUtil.SECS_TO_TICKS * profile.HashTimeScale);
             ShowFingerprints(new SubFingerprintLookupEntry(match.Track1, index1),
                 new SubFingerprintLookupEntry(match.Track2, index2));
         }

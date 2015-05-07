@@ -192,9 +192,9 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                             matches.Add(new Match {
                                 Similarity = 1f / numTried * numMatched,
                                 Track1 = entry1.AudioTrack,
-                                Track1Time = FingerprintGenerator.FingerprintHashIndexToTimeSpan(profile, entry1.Index),
+                                Track1Time = SubFingerprintIndexToTimeSpan(entry1.Index),
                                 Track2 = entry2.AudioTrack,
-                                Track2Time = FingerprintGenerator.FingerprintHashIndexToTimeSpan(profile, entry2.Index),
+                                Track2Time = SubFingerprintIndexToTimeSpan(entry2.Index),
                                 Source = "FP-EP"
                             });
                         }
@@ -227,6 +227,10 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             }
             
             return matches;
+        }
+
+        private TimeSpan SubFingerprintIndexToTimeSpan(int index) {
+            return new TimeSpan((long)Math.Round(index * profile.HashTimeScale * TimeUtil.SECS_TO_TICKS));
         }
 
         private class TrackStore {

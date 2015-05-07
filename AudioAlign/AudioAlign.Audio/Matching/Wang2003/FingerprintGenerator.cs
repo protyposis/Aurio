@@ -287,14 +287,6 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             }
         }
 
-        public static TimeSpan FingerprintHashIndexToTimeSpan(int index) {
-            return new TimeSpan((long)Math.Round((double)index * 256 / 11025 * 1000 * 1000 * 10));
-        }
-
-        public static int TimeStampToFingerprintHashIndex(TimeSpan timeSpan) {
-            return (int)Math.Round((double)timeSpan.Ticks / 10 / 1000 / 1000 * 11025 / 256);
-        }
-
         public static Profile[] GetProfiles() {
             return new Profile[] { new DefaultProfile() };
         }

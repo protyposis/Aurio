@@ -148,9 +148,9 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             matches.Add(new Match {
                                 Similarity = 1f / numTried * numMatched,
                                 Track1 = entry1.AudioTrack,
-                                Track1Time = FingerprintGenerator.FingerprintHashIndexToTimeSpan(entry1.Index),
+                                Track1Time = SubFingerprintIndexToTimeSpan(entry1.Index),
                                 Track2 = entry2.AudioTrack,
-                                Track2Time = FingerprintGenerator.FingerprintHashIndexToTimeSpan(entry2.Index),
+                                Track2Time = SubFingerprintIndexToTimeSpan(entry2.Index),
                                 Source = "FP-W03"
                             });
                         }
@@ -183,6 +183,10 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             }
             
             return matches;
+        }
+
+        private TimeSpan SubFingerprintIndexToTimeSpan(int index) {
+            return new TimeSpan((long)Math.Round(index * profile.HashTimeScale * TimeUtil.SECS_TO_TICKS));
         }
 
         private class TrackStore {

@@ -15,6 +15,8 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             HopSize = 64;
 
             ChromaMappingMode = Chroma.MappingMode.Paper;
+
+            HashTimeScale = 1d / SamplingRate * HopSize;
         }
     }
 }
