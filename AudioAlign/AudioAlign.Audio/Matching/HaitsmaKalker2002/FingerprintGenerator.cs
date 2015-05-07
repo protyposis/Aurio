@@ -35,6 +35,8 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         private int index;
         private int indices;
         private float[] frameBuffer;
+        private float[] bands = new float[33];
+        private float[] bandsPrev = new float[33];
 
         public void Generate() {
             IAudioStream audioStream = new ResamplingStream(
@@ -46,11 +48,30 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             indices = stft.WindowCount;
 
             frameBuffer = new float[profile.FrameSize / 2];
+            List<SubFingerprint> subFingerprints = new List<SubFingerprint>();
 
             while (stft.HasNext()) {
+                // Get FFT spectrum
                 stft.ReadFrame(frameBuffer);
-                ProcessFrame(frameBuffer);
+
+                // Sum FFT bins into target frequency bands
+                profile.MapFrequencies(frameBuffer, bands);
+
+                CalculateSubFingerprint(bandsPrev, bands, subFingerprints);
+
+                CommonUtil.Swap<float[]>(ref bands, ref bandsPrev);
                 index++;
+
+                // Output subfingerprints every once in a while
+                if (index % 512 == 0 && SubFingerprintsGenerated != null) {
+                    SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, subFingerprints, index, indices));
+                    subFingerprints.Clear();
+                }
+            }
+
+            // Output remaining subfingerprints
+            if (SubFingerprintsGenerated != null) {
+                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, subFingerprints, index, indices));
             }
 
             if (Completed != null) {
@@ -58,24 +79,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             }
         }
 
-        private float[] bands = new float[33];
-        private float[] bandsPrev = new float[33];
-
-        private void ProcessFrame(float[] fftResult) {
-            if (fftResult.Length != profile.FrameSize / 2) {
-                throw new Exception();
-            }
-
-            profile.MapFrequencies(fftResult, bands);
-
-            CalculateSubFingerprint(bandsPrev, bands);
-
-            CommonUtil.Swap<float[]>(ref bands, ref bandsPrev);
-        }
-
-        private void CalculateSubFingerprint(float[] energyBands, float[] previousEnergyBands) {
+        private void CalculateSubFingerprint(float[] energyBands, float[] previousEnergyBands, List<SubFingerprint> list) {
             SubFingerprintHash hash = new SubFingerprintHash();
             Dictionary<int, float> bitReliability = new Dictionary<int, float>();
+            List<SubFingerprint> subFingerprints = new List<SubFingerprint>(1 + flipWeakestBits);
 
             for (int m = 0; m < 32; m++) {
                 float difference = energyBands[m] - energyBands[m + 1] - (previousEnergyBands[m] - previousEnergyBands[m + 1]);
@@ -83,9 +90,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 bitReliability.Add(m, difference > 0 ? difference : -difference); // take absolute value as reliability weight
             }
 
-            if (SubFingerprintsGenerated != null) {
-                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, new SubFingerprint(index, hash, false), index, indices));
-            }
+            list.Add(new SubFingerprint(index, hash, false));
 
             if (flipWeakestBits > 0) {
                 // calculate probable hashes by flipping the most unreliable bits (the bits with the least energy differences)
@@ -99,9 +104,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                             flippedHash[weakestBits[j]] = !flippedHash[weakestBits[j]];
                         }
                     }
-                    if (SubFingerprintsGenerated != null) {
-                        SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, new SubFingerprint(index, flippedHash, true), index, indices));
-                    }
+                    list.Add(new SubFingerprint(index, flippedHash, true));
                 }
             }
         }
