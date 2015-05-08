@@ -8,29 +8,47 @@ using System.Text;
 namespace AudioAlign.Audio.Matching.Wang2003 {
     public class FingerprintStore {
 
-        private Profile profile;
+        private IProfile profile;
         private Dictionary<AudioTrack, TrackStore> store;
         private IFingerprintCollisionMap collisionMap;
 
+        private int matchingMinFrames;
+        private int matchingMaxFrames;
         private double[] thresholdAccept;
         private double[] thresholdReject;
+
+        private string matchSourceName;
 
         public event EventHandler<ValueEventArgs<double>> MatchingProgress;
         public event EventHandler<ValueEventArgs<List<Match>>> MatchingFinished;
 
+        protected FingerprintStore() {
+            // called by subclasses
+        }
+
         public FingerprintStore(Profile profile) {
+            // Precompute the threshold function
+            var thresholdAccept = new double[profile.MatchingMaxFrames];
+            var thresholdReject = new double[profile.MatchingMaxFrames];
+            for (int i = 0; i < thresholdAccept.Length; i++) {
+                thresholdAccept[i] = profile.ThresholdAccept.Calculate(i * profile.HashTimeScale);
+                thresholdReject[i] = profile.ThresholdReject.Calculate(i * profile.HashTimeScale);
+            }
+
+            // Setup the store
+            Initialize(profile, profile.MatchingMinFrames, profile.MatchingMaxFrames, thresholdAccept, thresholdReject, "FP-W03");
+        }
+
+        protected void Initialize(IProfile profile, int matchingMinFrames, int matchingMaxFrames, double[] thresholdAccept, double[] thresholdReject, string matchSourceName) {
             this.profile = profile;
+            this.matchingMinFrames = matchingMinFrames;
+            this.matchingMaxFrames = matchingMaxFrames;
+            this.thresholdAccept = thresholdAccept;
+            this.thresholdReject = thresholdReject;
+            this.matchSourceName = matchSourceName;
+
             store = new Dictionary<AudioTrack, TrackStore>();
             collisionMap = new DictionaryCollisionMap();
-
-            // Precompute the threshold function
-            thresholdAccept = new double[profile.MatchingMaxFrames];
-            thresholdReject = new double[profile.MatchingMaxFrames];
-            double framesPerSec = (double)profile.SamplingRate / profile.HopSize;
-            for (int i = 0; i < thresholdAccept.Length; i++) {
-                thresholdAccept[i] = profile.ThresholdAccept.Calculate(i / framesPerSec);
-                thresholdReject[i] = profile.ThresholdReject.Calculate(i / framesPerSec);
-            }
         }
 
         public IFingerprintCollisionMap CollisionMap {
@@ -182,10 +200,10 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             // NOTE The current parameters are just eyeballed, there's a lot of influence on processing speed and matching rate here
                             double rate = 1d / numTried * numMatched;
 
-                            if (frameCount >= profile.MatchingMaxFrames || rate < thresholdReject[frameCount]) {
+                            if (frameCount >= matchingMaxFrames || rate < thresholdReject[frameCount]) {
                                 break; // exit condition
                             }
-                            else if (frameCount > profile.MatchingMinFrames && rate > thresholdAccept[frameCount]) {
+                            else if (frameCount > matchingMinFrames && rate > thresholdAccept[frameCount]) {
                                 matchFound = true;
                                 break;
                             }
@@ -203,7 +221,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                                 Track1Time = SubFingerprintIndexToTimeSpan(entry1.Index),
                                 Track2 = entry2.AudioTrack,
                                 Track2Time = SubFingerprintIndexToTimeSpan(entry2.Index),
-                                Source = "FP-W03"
+                                Source = matchSourceName
                             });
                         }
                     }

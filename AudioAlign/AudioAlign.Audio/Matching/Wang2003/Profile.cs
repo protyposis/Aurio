@@ -10,7 +10,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
     ///  This profile contains settings for configuring fingerprint generation
     ///  and lookup.
     /// </summary>
-    public abstract class Profile {
+    public abstract class Profile : IProfile {
 
         public interface IThreshold {
             /// <summary>
