@@ -3,29 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Chromaprint {
-    public class Fingerprint : IEnumerable<SubFingerprint> {
+namespace AudioAlign.Audio.Matching {
+    public class Fingerprint : IEnumerable<SubFingerprintHash> {
 
-        private List<SubFingerprint> subFingerprintList;
+        private List<SubFingerprintHash> hashList;
         private int offset;
         private int length;
 
-        public Fingerprint(List<SubFingerprint> subFingerprintList, int index, int length) {
-            if (index < 0 || index >= subFingerprintList.Count || index + length < 0 || index + length > subFingerprintList.Count) {
+        public Fingerprint(List<SubFingerprintHash> hashList, int index, int length) {
+            if (index < 0 || index >= hashList.Count || index + length < 0 || index + length > hashList.Count) {
                 throw new ArgumentException();
             }
 
-            this.subFingerprintList = subFingerprintList;
+            this.hashList = hashList;
             this.offset = index;
             this.length = length;
         }
 
-        public SubFingerprint this[int index] {
+        public SubFingerprintHash this[int index] {
             get {
                 if (index < 0 || index >= this.length) {
                     throw new IndexOutOfRangeException();
                 }
-                return subFingerprintList[this.offset + index];
+                return hashList[this.offset + index];
             }
         }
 
@@ -34,16 +34,16 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         }
 
         public Fingerprint Difference(Fingerprint fp) {
-            List<SubFingerprint> sfpDiffs = new List<SubFingerprint>();
+            List<SubFingerprintHash> hashDiffs = new List<SubFingerprintHash>();
             for (int x = 0; x < Length; x++) {
-                sfpDiffs.Add(this[x].Difference(fp[x]));
+                hashDiffs.Add(this[x].Difference(fp[x]));
             }
-            return new Fingerprint(sfpDiffs, 0, Length);;
+            return new Fingerprint(hashDiffs, 0, Length);;
         }
 
-        public IEnumerator<SubFingerprint> GetEnumerator() {
+        public IEnumerator<SubFingerprintHash> GetEnumerator() {
             for (int i = this.offset; i < this.offset + this.length; i++) {
-                yield return subFingerprintList[i];
+                yield return hashList[i];
             }
         }
 

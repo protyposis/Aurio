@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Audio.Matching.Chromaprint {
-    public class SyncProfile : ChromaprintProfile {
+    class SyncProfile : DefaultProfile {
         public SyncProfile() : base() {
             Name = "Sync optimized";
 
@@ -14,7 +14,9 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             WindowSize = 2048;
             HopSize = 64;
 
-            ChromaMappingMode = ChromaMappingMode.Paper;
+            ChromaMappingMode = Chroma.MappingMode.Paper;
+
+            HashTimeScale = 1d / SamplingRate * HopSize;
         }
     }
 }

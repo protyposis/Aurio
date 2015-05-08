@@ -15,14 +15,15 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
         private int fingerprintSize;
         private float threshold;
         private IProfile profile;
-        private Dictionary<AudioTrack, List<SubFingerprint>> store;
+        private Dictionary<AudioTrack, List<SubFingerprintHash>> store;
         private IFingerprintCollisionMap collisionMap;
+        private string matchSourceName;
 
-        public FingerprintStore(IProfile profile) {
+        protected FingerprintStore(IProfile profile, string matchSourceName) {
             FingerprintSize = DEFAULT_FINGERPRINT_SIZE;
             Threshold = DEFAULT_THRESHOLD;
             this.profile = profile;
-            store = new Dictionary<AudioTrack, List<SubFingerprint>>();
+            store = new Dictionary<AudioTrack, List<SubFingerprintHash>>();
 
             // Dictionary is faster, SQLite needs less memory
             collisionMap = new DictionaryCollisionMap(); // new SQLiteCollisionMap();
@@ -33,6 +34,12 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
              * written to disk (instead of in-memory like now) and the user given the 
              * choice between them (or automatically chosen depending on the amount of data).
              */
+
+            this.matchSourceName = matchSourceName;
+        }
+
+        public FingerprintStore(IProfile profile) : this(profile, "FP-HK02") {
+            //
         }
 
         public int FingerprintSize {
@@ -59,38 +66,35 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             get { return collisionMap; }
         }
 
-        public Dictionary<AudioTrack, List<SubFingerprint>> AudioTracks {
+        public Dictionary<AudioTrack, List<SubFingerprintHash>> AudioTracks {
             get { return store; }
         }
 
-        public void Add(AudioTrack audioTrack, SubFingerprint subFingerprint, int index, bool variation) {
-            lock (this) {
-                if (!variation) {
-                    // store the sub-fingerprint in the sequential list of the audio track
-                    if (!store.ContainsKey(audioTrack)) {
-                        /* calculate the number of sub-fingerprints that this audiotrack will be converted to and init the list with it
-                         * avoids fast filling and trashing of the memory, but doesn't have any impact on processing time */
-                        IAudioStream s = audioTrack.CreateAudioStream();
-                        long samples = s.Length / s.SampleBlockSize;
-                        samples = samples / s.Properties.SampleRate * profile.SampleRate; // convert from source to profile sample rate
-                        /* results in a slightly larger number of sub-fingerprints than actually will be calculated, 
-                         * because the last frame will not be stepped through as there are not enough samples left for 
-                         * further sub-fingerprints but that small overhead doesn't matter */
-                        int subFingerprints = (int)(samples / profile.FrameStep);
+        public void Add(SubFingerprintsGeneratedEventArgs e) {
+            if (e.SubFingerprints.Count == 0) {
+                return;
+            }
 
-                        store.Add(audioTrack, new List<SubFingerprint>(subFingerprints));
-                    }
-                    store[audioTrack].Add(subFingerprint);
+            lock (this) {
+                if (!store.ContainsKey(e.AudioTrack)) {
+                    store.Add(e.AudioTrack, new List<SubFingerprintHash>());
                 }
 
-                // insert a track/index lookup entry for the sub-fingerprint
-                collisionMap.Add(subFingerprint, new SubFingerprintLookupEntry(audioTrack, index));
+                foreach (var sfp in e.SubFingerprints) {
+                    if (!sfp.IsVariation) {
+                        // store the sub-fingerprint in the sequential list of the audio track
+                        store[e.AudioTrack].Add(sfp.Hash);
+                    }
+
+                    // insert a track/index lookup entry for the sub-fingerprint
+                    collisionMap.Add(sfp.Hash, new SubFingerprintLookupEntry(e.AudioTrack, sfp.Index));
+                }
             }
         }
 
-        public List<Match> FindMatches(SubFingerprint subFingerprint) {
+        public List<Match> FindMatches(SubFingerprintHash hash) {
             List<Match> matches = new List<Match>();
-            List<SubFingerprintLookupEntry> entries = collisionMap.GetValues(subFingerprint);
+            List<SubFingerprintLookupEntry> entries = collisionMap.GetValues(hash);
 
             //Debug.WriteLine("Finding matches...");
 
@@ -104,26 +108,26 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                         //Debug.WriteLine("Comparing " + entry1.AudioTrack.Name + " with " + entry2.AudioTrack.Name + ":");
                         if (store[entry1.AudioTrack].Count - entry1.Index < fingerprintSize
                             || store[entry2.AudioTrack].Count - entry2.Index < fingerprintSize) {
-                            // the end of at least one track has been reached and there are not enough subfingerprints left
+                            // the end of at least one track has been reached and there are not enough hashes left
                             // to do a fingerprint comparison
                             continue;
                         }
 
                         // sum up the bit errors
-                        List<SubFingerprint> track1SubFingerprints = store[entry1.AudioTrack];
-                        List<SubFingerprint> track2SubFingerprints = store[entry2.AudioTrack];
+                        List<SubFingerprintHash> track1Hashes = store[entry1.AudioTrack];
+                        List<SubFingerprintHash> track2Hashes = store[entry2.AudioTrack];
                         uint bitErrors = 0;
                         for (int s = 0; s < fingerprintSize; s++) {
-                            SubFingerprint track1SubFingerprint = track1SubFingerprints[entry1.Index + s];
-                            SubFingerprint track2SubFingerprint = track2SubFingerprints[entry2.Index + s];
-                            if (track1SubFingerprint.Value == 0 || track2SubFingerprint.Value == 0) {
+                            SubFingerprintHash track1Hash = track1Hashes[entry1.Index + s];
+                            SubFingerprintHash track2Hash = track2Hashes[entry2.Index + s];
+                            if (track1Hash.Value == 0 || track2Hash.Value == 0) {
                                 bitErrors = (uint)fingerprintSize * 32;
                                 break;
                             }
-                            // skip fingerprints with subfingerprints that are zero, since it is probably from 
+                            // skip fingerprints with hashes that are zero, since it is probably from 
                             // a track section with silence
                             // by setting the bitErrors to the maximum, the match will not be added
-                            bitErrors += track1SubFingerprint.HammingDistance(track2SubFingerprint);
+                            bitErrors += track1Hash.HammingDistance(track2Hash);
                         }
 
                         float bitErrorRate = bitErrors / (float)(fingerprintSize * 32); // sub-fingerprints * 32 bits
@@ -132,10 +136,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                             matches.Add(new Match {
                                 Similarity = 1 - bitErrorRate,
                                 Track1 = entry1.AudioTrack,
-                                Track1Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, entry1.Index),
+                                Track1Time = SubFingerprintIndexToTimeSpan(entry1.Index),
                                 Track2 = entry2.AudioTrack,
-                                Track2Time = FingerprintGenerator.SubFingerprintIndexToTimeSpan(profile, entry2.Index),
-                                Source = "FP-HK02"
+                                Track2Time = SubFingerprintIndexToTimeSpan(entry2.Index),
+                                Source = matchSourceName
                             });
                         }
                     }
@@ -151,10 +155,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
             List<Match> matches = new List<Match>();
             //collisionMap.CreateLookupIndex(); // TODO evaluate if this call speeds the process up
             //collisionMap.Cleanup();
-            foreach (SubFingerprint subFingerprint in collisionMap.GetCollidingKeys()) {
-                // skip all subfingerprints whose bits are all zero, since this is probably a position with silence
-                if (subFingerprint.Value != 0) {
-                    matches.AddRange(FindMatches(subFingerprint));
+            foreach (SubFingerprintHash hash in collisionMap.GetCollidingKeys()) {
+                // skip all hashes whose bits are all zero, since this is probably a position with silence
+                if (hash.Value != 0) {
+                    matches.AddRange(FindMatches(hash));
                 }
             }
             return matches;
@@ -166,6 +170,10 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                 indexOffset = Math.Min(indexOffset, -fingerprintSize + store[entry.AudioTrack].Count - entry.Index);
             }
             return new Fingerprint(store[entry.AudioTrack], entry.Index + indexOffset, fingerprintSize);
+        }
+
+        private TimeSpan SubFingerprintIndexToTimeSpan(int index) {
+            return new TimeSpan((long)Math.Round(index * profile.HashTimeScale * TimeUtil.SECS_TO_TICKS));
         }
     }
 }

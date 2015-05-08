@@ -19,7 +19,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         private static readonly uint[] grayCodeMapping = { 0, 1, 3, 2 };
         private Profile profile;
 
-        public event EventHandler<SubFingerprintEventArgs> SubFingerprintCalculated;
+        public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
         public event EventHandler Completed;
 
         public FingerprintGenerator(Profile profile) {
@@ -43,6 +43,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             var integralImage = new IntegralImage(maxFilterWidth, Chroma.Bins);
             int index = 0;
             int indices = chroma.WindowCount;
+            var subFingerprints = new List<SubFingerprint>();
             while (chroma.HasNext()) {
                 // Get chroma frame buffer
                 // When the chroma buffer is full, we can take and reuse the oldest array
@@ -87,20 +88,27 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
 
                 // FingerprintCalculator
                 if (integralImage.Columns < maxFilterWidth) {
-                    // Wait for the image to fill completely before subfingerprints can be generated
+                    // Wait for the image to fill completely before hashes can be generated
                     continue;
                 }
-                // Calculate subfingerprint
-                uint subFingerprint = 0;
+                // Calculate subfingerprint hash
+                uint hash = 0;
                 for (int i = 0; i < classifiers.Length; i++) {
-                    subFingerprint = (subFingerprint << 2) | grayCodeMapping[classifiers[i].Classify(integralImage, 0)];
+                    hash = (hash << 2) | grayCodeMapping[classifiers[i].Classify(integralImage, 0)];
                 }
                 // We have a SubFingerprint@frameTime
-                if (SubFingerprintCalculated != null) {
-                    SubFingerprintCalculated(this, new SubFingerprintEventArgs(track, new SubFingerprint(subFingerprint), index, indices, false));
-                }
+                subFingerprints.Add(new SubFingerprint(index, new SubFingerprintHash(hash), false));
 
                 index++;
+
+                if (index % 512 == 0 && SubFingerprintsGenerated != null) {
+                    SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, subFingerprints, index, indices));
+                    subFingerprints.Clear();
+                }
+            }
+
+            if (SubFingerprintsGenerated != null) {
+                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, subFingerprints, index, indices));
             }
 
             if (Completed != null) {
@@ -108,16 +116,8 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             }
         }
 
-        public static TimeSpan SubFingerprintIndexToTimeSpan(Profile profile, int index) {
-            return new TimeSpan((long)Math.Round((double)index * profile.HopSize / profile.SamplingRate * TimeUtil.SECS_TO_TICKS));
-        }
-
-        public static int TimeStampToSubFingerprintIndex(Profile profile, TimeSpan timeSpan) {
-            return (int)Math.Round((double)timeSpan.Ticks / TimeUtil.SECS_TO_TICKS * profile.SamplingRate / profile.HopSize);
-        }
-
         public static Profile[] GetProfiles() {
-            return new Profile[] { new ChromaprintProfile(), new SyncProfile() };
+            return new Profile[] { new DefaultProfile(), new SyncProfile() };
         }
     }
 }

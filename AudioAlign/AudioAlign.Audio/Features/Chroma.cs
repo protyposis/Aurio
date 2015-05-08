@@ -13,6 +13,19 @@ namespace AudioAlign.Audio.Features {
     /// </summary>
     public class Chroma : STFT {
 
+        public enum MappingMode {
+            /// <summary>
+            /// The type of frequency bin to chroma mapping described in
+            /// - Bartsch, Mark A., and Gregory H. Wakefield. "Audio thumbnailing of popular music 
+            ///   using chroma-based representations." Multimedia, IEEE Transactions on 7.1 (2005): 96-104.
+            /// </summary>
+            Paper,
+            /// <summary>
+            /// The type of frequency bin to chroma mapping applied by Chromaprint.
+            /// </summary>
+            Chromaprint
+        }
+
         public const int Bins = 12;
 
         private float[] fftFrameBuffer;
@@ -22,7 +35,7 @@ namespace AudioAlign.Audio.Features {
 
         private bool normalize;
 
-        public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, float minFreq, float maxFreq, bool normalize, ChromaMappingMode mappingMode)
+        public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, float minFreq, float maxFreq, bool normalize, MappingMode mappingMode)
             : base(stream, windowSize, hopSize, windowType, false) {
             fftFrameBuffer = new float[windowSize / 2];
 
@@ -37,7 +50,7 @@ namespace AudioAlign.Audio.Features {
             fftToChromaBinMappingOffset = minBin;
             fftToChromaBinCount = new int[Bins];
 
-            if (mappingMode == ChromaMappingMode.Paper) {
+            if (mappingMode == MappingMode.Paper) {
                 for (int i = minBin; i < maxBin; i++) {
                     double fftBinCenterFreq = i * freqToBinRatio;
                     double c = Math.Log(fftBinCenterFreq, 2) - Math.Floor(Math.Log(fftBinCenterFreq, 2)); // paper formula (3)
@@ -50,7 +63,7 @@ namespace AudioAlign.Audio.Features {
                     fftToChromaBinCount[chromaBin]++; // needed to take the arithmetic mean in formula (6)
                 }
             }
-            else if (mappingMode == ChromaMappingMode.Chromaprint) {
+            else if (mappingMode == MappingMode.Chromaprint) {
                 double A0 = 440.0 / 16.0; // Hz
                 for (int i = minBin; i < maxBin; i++) {
                     double fftBinCenterFreq = i * freqToBinRatio;
@@ -68,12 +81,12 @@ namespace AudioAlign.Audio.Features {
         }
 
         public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, float minFreq, float maxFreq)
-            : this(stream, windowSize, hopSize, windowType, minFreq, maxFreq, true, ChromaMappingMode.Paper) {
+            : this(stream, windowSize, hopSize, windowType, minFreq, maxFreq, true, Chroma.MappingMode.Paper) {
             //
         }
 
         public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType)
-            : this(stream, windowSize, hopSize, windowType, 0, stream.Properties.SampleRate / 2, true, ChromaMappingMode.Paper) {
+            : this(stream, windowSize, hopSize, windowType, 0, stream.Properties.SampleRate / 2, true, Chroma.MappingMode.Paper) {
             //
         }
 

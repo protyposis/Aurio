@@ -28,7 +28,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             this.profile = profile;
         }
 
-        public event EventHandler<FingerprintHashEventArgs> FingerprintHashesGenerated;
+        public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
 
         /// <summary>
         /// This method generates hash codes from an audio stream in a streaming fashion,
@@ -78,7 +78,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 bandAnalyzers[i] = new BandAnalyzer(profile, i);
             }
 
-            List<FPHash> hashes = new List<FPHash>();
+            List<SubFingerprint> hashes = new List<SubFingerprint>();
             HashTimeSorter hashSorter = new HashTimeSorter(profile.SubBands);
 
             var sw = new Stopwatch();
@@ -96,13 +96,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 if (currentFrame % 4096 == 0) {
                     hashSorter.Fill(hashes, false);
 
-                    if (FingerprintHashesGenerated != null) {
-                        FingerprintHashesGenerated(this, new FingerprintHashEventArgs {
-                            AudioTrack = track,
-                            Index = currentFrame,
-                            Indices = totalFrames,
-                            Hashes = hashes
-                        });
+                    if (SubFingerprintsGenerated != null) {
+                        SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, hashes, currentFrame, totalFrames));
                         hashes.Clear();
                     }
                 }
@@ -115,13 +110,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             }
             hashSorter.Fill(hashes, true);
 
-            if (FingerprintHashesGenerated != null) {
-                FingerprintHashesGenerated(this, new FingerprintHashEventArgs {
-                    AudioTrack = track,
-                    Index = currentFrame,
-                    Indices = totalFrames,
-                    Hashes = hashes
-                });
+            if (SubFingerprintsGenerated != null) {
+                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, hashes, currentFrame, totalFrames));
                 hashes.Clear();
             }
 
@@ -129,8 +119,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             Console.WriteLine("time: " + sw.Elapsed);
         }
 
-        public static TimeSpan FingerprintHashIndexToTimeSpan(Profile profile, int index) {
-            return new TimeSpan((long)Math.Round(index * profile.SampleToHashQuantizationFactor / profile.SamplingRate * TimeUtil.SECS_TO_TICKS));
+        public static Profile[] GetProfiles() {
+            return new Profile[] { new DefaultProfile() };
         }
 
         /// <summary>
@@ -171,7 +161,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 rmsSampleBuffer = new RingBuffer<float>(FilterCoefficientsBn.Length * 2 + 1); // needed for filtering
             }
 
-            public void ProcessSample(float energySample, Queue<FPHash> hashes) {
+            public void ProcessSample(float energySample, Queue<SubFingerprint> hashes) {
                 rmsBlock.Add(energySample);
                 sampleCount++;
 
@@ -209,7 +199,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 }
             }
 
-            public void Flush(Queue<FPHash> hashes) {
+            public void Flush(Queue<SubFingerprint> hashes) {
                 // Generate hashes for the last few onsets
                 for (int i = 0; i < onsetBuffer.Count; i++) {
                     onsetBuffer.RemoveTail();
@@ -297,7 +287,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 return (int)Math.Round(frame / profile.HashTimeQuantizationFactor);
             }
 
-            private void GenerateHashes(int band, Queue<FPHash> hashes) {
+            private void GenerateHashes(int band, Queue<SubFingerprint> hashes) {
                 if (onsetBuffer.Count > 2) {
                     byte[] hashMaterial = new byte[5];
                     // What time was this onset at?
@@ -340,7 +330,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                         uint hashCode = MurmurHash2.Hash(hashMaterial, HashSeed) & HashBitmask;
 
                         // Set the hash alongside the time of onset
-                        hashes.Enqueue(new FPHash((uint)quantizedOnsetTime, hashCode));
+                        hashes.Enqueue(new SubFingerprint(quantizedOnsetTime, new SubFingerprintHash(hashCode), false));
                     }
                 }
             }
@@ -357,19 +347,19 @@ namespace AudioAlign.Audio.Matching.Echoprint {
         /// </summary>
         private class HashTimeSorter {
 
-            private Queue<FPHash>[] queues;
+            private Queue<SubFingerprint>[] queues;
 
             public HashTimeSorter(int bands) {
-                queues = new Queue<FPHash>[bands];
+                queues = new Queue<SubFingerprint>[bands];
                 for(int i = 0; i < bands; i++) {
-                    queues[i] = new Queue<FPHash>();
+                    queues[i] = new Queue<SubFingerprint>();
                 }
             }
 
             /// <summary>
             /// Gets the array of queues to collect the hashes of the separate bands.
             /// </summary>
-            public Queue<FPHash>[] Queues {
+            public Queue<SubFingerprint>[] Queues {
                 get { return queues; }
             }
 
@@ -379,7 +369,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             /// <param name="list">the list to add the sorted hashes to</param>
             /// <param name="flush">If true, all remaining buffered hashes will be added to the list</param>
             /// <returns></returns>
-            public int Fill(List<FPHash> list, bool flush) {
+            public int Fill(List<SubFingerprint> list, bool flush) {
                 int hashesTransferred = 0;
 
                 // This block loops until a queue is empty (default mode) or all queues
@@ -388,7 +378,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                 // could still be higher than the frame index thats going to be filled next 
                 // into the empty queue.
                 while (true) {
-                    uint minFrame = int.MaxValue;
+                    int minFrame = int.MaxValue;
                     int minFrameBand = -1;
 
                     for (int i = 0; i < queues.Length; i++) {
@@ -401,8 +391,8 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                             minFrameBand = -1;
                             break;
                         }
-                        else if (queues[i].Peek().Frame < minFrame) {
-                            minFrame = queues[i].Peek().Frame;
+                        else if (queues[i].Peek().Index < minFrame) {
+                            minFrame = queues[i].Peek().Index;
                             minFrameBand = i;
                         }
                     }
@@ -413,7 +403,7 @@ namespace AudioAlign.Audio.Matching.Echoprint {
                     }
 
                     // Transfer all hashes from the current minimal frame index to the output list
-                    while (queues[minFrameBand].Count > 0 && queues[minFrameBand].Peek().Frame == minFrame) {
+                    while (queues[minFrameBand].Count > 0 && queues[minFrameBand].Peek().Index == minFrame) {
                         list.Add(queues[minFrameBand].Dequeue());
                         hashesTransferred++;
                     }

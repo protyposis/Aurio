@@ -8,70 +8,121 @@ using System.Text;
 namespace AudioAlign.Audio.Matching.Wang2003 {
     public class FingerprintStore {
 
-        private Profile profile;
+        private IProfile profile;
         private Dictionary<AudioTrack, TrackStore> store;
         private IFingerprintCollisionMap collisionMap;
 
+        private int matchingMinFrames;
+        private int matchingMaxFrames;
         private double[] thresholdAccept;
         private double[] thresholdReject;
+
+        private string matchSourceName;
 
         public event EventHandler<ValueEventArgs<double>> MatchingProgress;
         public event EventHandler<ValueEventArgs<List<Match>>> MatchingFinished;
 
+        protected FingerprintStore() {
+            // called by subclasses
+        }
+
         public FingerprintStore(Profile profile) {
+            // Precompute the threshold function
+            var thresholdAccept = new double[profile.MatchingMaxFrames];
+            var thresholdReject = new double[profile.MatchingMaxFrames];
+            for (int i = 0; i < thresholdAccept.Length; i++) {
+                thresholdAccept[i] = profile.ThresholdAccept.Calculate(i * profile.HashTimeScale);
+                thresholdReject[i] = profile.ThresholdReject.Calculate(i * profile.HashTimeScale);
+            }
+
+            // Setup the store
+            Initialize(profile, profile.MatchingMinFrames, profile.MatchingMaxFrames, thresholdAccept, thresholdReject, "FP-W03");
+        }
+
+        protected void Initialize(IProfile profile, int matchingMinFrames, int matchingMaxFrames, double[] thresholdAccept, double[] thresholdReject, string matchSourceName) {
             this.profile = profile;
+            this.matchingMinFrames = matchingMinFrames;
+            this.matchingMaxFrames = matchingMaxFrames;
+            this.thresholdAccept = thresholdAccept;
+            this.thresholdReject = thresholdReject;
+            this.matchSourceName = matchSourceName;
+
             store = new Dictionary<AudioTrack, TrackStore>();
             collisionMap = new DictionaryCollisionMap();
-
-            // Precompute the threshold function
-            thresholdAccept = new double[profile.MatchingMaxFrames];
-            thresholdReject = new double[profile.MatchingMaxFrames];
-            double framesPerSec = (double)profile.SamplingRate / profile.HopSize;
-            for (int i = 0; i < thresholdAccept.Length; i++) {
-                thresholdAccept[i] = profile.ThresholdAccept.Calculate(i / framesPerSec);
-                thresholdReject[i] = profile.ThresholdReject.Calculate(i / framesPerSec);
-            }
         }
 
         public IFingerprintCollisionMap CollisionMap {
             get { return collisionMap; }
         }
 
-        public void Add(FingerprintHashEventArgs e) {
-            if (e.Hashes.Count == 0) {
+        public void Add(SubFingerprintsGeneratedEventArgs e) {
+            if (e.SubFingerprints.Count == 0) {
                 return;
             }
 
             lock (this) {
-                // Make sure there's an index list for the track
+                // Make sure there's a store for the track and get it
                 if (!store.ContainsKey(e.AudioTrack)) {
                     store.Add(e.AudioTrack, new TrackStore());
                 }
-                // Add the current length of the hash list as start pointer for all hashes belonging to the current index
-                store[e.AudioTrack].index.Add(e.Index, new TrackStore.IndexEntry(store[e.AudioTrack].hashes.Count, e.Hashes.Count));
+                var trackStore = store[e.AudioTrack];
 
-                foreach (var hash in e.Hashes) {
-                    store[e.AudioTrack].hashes.Add(hash);
-                    // insert a track/index lookup entry for the fingerprint hash
-                    collisionMap.Add(hash, new FingerprintHashLookupEntry(e.AudioTrack, e.Index));
+                int hashListIndex = 0;
+                SubFingerprint hash;
+
+                // Iterate through the sequence of input hashes and add them to the store (in batches of the same frame index)
+                while (e.SubFingerprints.Count > hashListIndex) {
+                    int storeHashIndex = trackStore.hashes.Count;
+                    int storeIndex = e.SubFingerprints[hashListIndex].Index;
+                    int hashCount = 0;
+
+                    // Count all sequential input hashes with the same frame index (i.e. batch) and add them to the store
+                    while (e.SubFingerprints.Count > hashListIndex + hashCount
+                        && (hash = e.SubFingerprints[hashListIndex + hashCount]).Index == storeIndex) {
+                        // Insert hash into the sequential store
+                        trackStore.hashes.Add(hash.Hash);
+
+                        // Insert a track/index lookup entry for the fingerprint hash
+                        collisionMap.Add(hash.Hash, new SubFingerprintLookupEntry(e.AudioTrack, hash.Index));
+
+                        hashCount++;
+                    }
+
+                    // Add an index entry which tells where a hash with a specific frame index can be found in the store
+                    if (hashCount > 0) {
+                        TrackStore.IndexEntry ie;
+                        // If there is already an entry for the frame index, take it and update its length, ...
+                        if (trackStore.index.ContainsKey(storeIndex)) {
+                            ie = trackStore.index[storeIndex];
+                            ie.length += hashCount;
+                            trackStore.index.Remove(storeIndex);
+                        }
+                        else { // ... else create a new entry
+                            ie = new TrackStore.IndexEntry(storeHashIndex, hashCount);
+                        }
+                        // Add the current length of the hash list as start pointer for all hashes belonging to the current index
+                        trackStore.index.Add(storeIndex, ie);
+                    }
+
+                    hashListIndex += hashCount;
                 }
             }
         }
 
-        public List<Match> FindMatches(uint hash) {
+        public List<Match> FindMatches(SubFingerprintHash hash) {
             List<Match> matches = new List<Match>();
-            List<FingerprintHashLookupEntry> entries = collisionMap.GetValues(hash);
+            List<SubFingerprintLookupEntry> entries = collisionMap.GetValues(hash);
 
             for (int x = 0; x < entries.Count; x++) {
-                FingerprintHashLookupEntry entry1 = entries[x];
+                SubFingerprintLookupEntry entry1 = entries[x];
                 for (int y = x; y < entries.Count; y++) {
-                    FingerprintHashLookupEntry entry2 = entries[y];
+                    SubFingerprintLookupEntry entry2 = entries[y];
                     if (entry1.AudioTrack != entry2.AudioTrack) { // don't compare tracks with themselves
 
                         var store1 = store[entry1.AudioTrack];
                         var store2 = store[entry2.AudioTrack];
-                        List<uint> hashes1 = store1.hashes;
-                        List<uint> hashes2 = store2.hashes;
+                        List<SubFingerprintHash> hashes1 = store1.hashes;
+                        List<SubFingerprintHash> hashes2 = store2.hashes;
                         int index1 = entry1.Index;
                         int index2 = entry2.Index;
                         TrackStore.IndexEntry indexEntry1, indexEntry2;
@@ -81,9 +132,10 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                         bool matchFound = false;
 
                         // Iterate through sequential frames
-                        while(store1.index.ContainsKey(index1) && store2.index.ContainsKey(index2)) {
-                            indexEntry1 = store1.index[index1];
-                            indexEntry2 = store2.index[index2];
+                        TrackStore.IndexEntry indexEntryNone = new TrackStore.IndexEntry();
+                        while (true) {
+                            indexEntry1 = store1.index.ContainsKey(index1) ? store1.index[index1] : indexEntryNone;
+                            indexEntry2 = store2.index.ContainsKey(index2) ? store2.index[index2] : indexEntryNone;
 
                             // Hash collision
                             // The union of the two ranges is the total number of distinct hashes
@@ -119,9 +171,24 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             numMatched += intersectionCount;
                             numTried += indexEntry1.length + indexEntry2.length - intersectionCount;
 
-                            index1++;
-                            index2++;
-                            frameCount++;
+                            // Determine the next indices to check for collisions
+                            int nextIndex1Increment = 0;
+                            if (hashes1.Count > i_e) {
+                                do {
+                                    nextIndex1Increment++;
+                                } while (!store1.index.ContainsKey(index1 + nextIndex1Increment));
+                            }
+                            int nextIndex2Increment = 0;
+                            if (hashes2.Count > j_e) {
+                                do {
+                                    nextIndex2Increment++;
+                                } while (!store2.index.ContainsKey(index2 + nextIndex2Increment));
+                            }
+                            int nextIndexIncrement = Math.Min(nextIndex1Increment, nextIndex2Increment);
+
+                            index1 += nextIndexIncrement;
+                            index2 += nextIndexIncrement;
+                            frameCount += nextIndexIncrement;
 
                             // Match detection
                             // This approach trades the hash matching rate with time, i.e. the rate required
@@ -130,17 +197,20 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             // rate after a long time. The difficulty is to to parameterize it in such a way, that a 
                             // match is detected as fast as possible, while detecting a no-match isn't delayed too far 
                             // as it takes a lot of processing time.
-                            // NOTE The current parameters are just eyeballed, there's a lot of influence on processing speed here
-                            //double threshold = Math.Pow(profile.MatchingThresholdExponentialDecayBase, numIndices / sec / profile.MatchingThresholdExponentialWidthScale) * profile.MatchingThresholdExponentialHeight; // match successful threshold
-                            //double thresholdLow = threshold / profile.MatchingThresholdRejectionFraction; // match abort threshold
+                            // NOTE The current parameters are just eyeballed, there's a lot of influence on processing speed and matching rate here
                             double rate = 1d / numTried * numMatched;
 
-                            if (frameCount > profile.MatchingMinFrames && rate > thresholdAccept[frameCount]) {
+                            if (frameCount >= matchingMaxFrames || rate < thresholdReject[frameCount]) {
+                                break; // exit condition
+                            }
+                            else if (frameCount > matchingMinFrames && rate > thresholdAccept[frameCount]) {
                                 matchFound = true;
                                 break;
                             }
-                            else if (rate < thresholdReject[frameCount] || frameCount > profile.MatchingMaxFrames) {
-                                break; // exit condition
+
+                            if (nextIndexIncrement == 0) {
+                                // We reached the end of a hash list
+                                break; // Break the while loop
                             }
                         }
 
@@ -148,10 +218,10 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             matches.Add(new Match {
                                 Similarity = 1f / numTried * numMatched,
                                 Track1 = entry1.AudioTrack,
-                                Track1Time = FingerprintGenerator.FingerprintHashIndexToTimeSpan(entry1.Index),
+                                Track1Time = SubFingerprintIndexToTimeSpan(entry1.Index),
                                 Track2 = entry2.AudioTrack,
-                                Track2Time = FingerprintGenerator.FingerprintHashIndexToTimeSpan(entry2.Index),
-                                Source = "FP-W03"
+                                Track2Time = SubFingerprintIndexToTimeSpan(entry2.Index),
+                                Source = matchSourceName
                             });
                         }
                     }
@@ -169,7 +239,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             
             int collisions = collidingKeys.Count;
             int count = 0;
-            foreach (uint hash in collidingKeys) {
+            foreach (SubFingerprintHash hash in collidingKeys) {
                 matches.AddRange(FindMatches(hash));
 
                 if (count++ % 4096 == 0 && MatchingProgress != null) {
@@ -183,6 +253,10 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             }
             
             return matches;
+        }
+
+        private TimeSpan SubFingerprintIndexToTimeSpan(int index) {
+            return new TimeSpan((long)Math.Round(index * profile.HashTimeScale * TimeUtil.SECS_TO_TICKS));
         }
 
         private class TrackStore {
@@ -199,11 +273,11 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 }
             }
 
-            public List<uint> hashes;
+            public List<SubFingerprintHash> hashes;
             public Dictionary<int, IndexEntry> index;
 
             public TrackStore() {
-                hashes = new List<uint>();
+                hashes = new List<SubFingerprintHash>();
                 index = new Dictionary<int, IndexEntry>();
             }
         }

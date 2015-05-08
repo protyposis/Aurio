@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace AudioAlign.Models {
     public class HaitsmaKalkerFingerprintingModel {
 
-        private IProfile[] profiles;
+        private Profile[] profiles;
         private FingerprintStore store;
 
         public event EventHandler FingerprintingFinished;
@@ -28,11 +28,11 @@ namespace AudioAlign.Models {
             Reset();
         }
 
-        public IProfile[] Profiles {
+        public Profile[] Profiles {
             get { return profiles; }
         }
 
-        public IProfile SelectedProfile { get; set; }
+        public Profile SelectedProfile { get; set; }
 
         public float FingerprintBerThreshold { get; set; }
 
@@ -42,7 +42,7 @@ namespace AudioAlign.Models {
         /// Resets the model by clearing all data and configuring it with a new profile.
         /// </summary>
         /// <param name="profile">the new profile to configure the model with</param>
-        public void Reset(IProfile profile) {
+        public void Reset(Profile profile) {
             if (profile == null) {
                 throw new ArgumentNullException("profile must not be null");
             }
@@ -70,13 +70,13 @@ namespace AudioAlign.Models {
                 track => {
                     var startTime = DateTime.Now;
                     var progressReporter = progressMonitor.BeginTask("Generating sub-fingerprints for " + track.FileInfo.Name, true);
-                    var generator = new FingerprintGenerator(SelectedProfile, track, 3);
+                    var generator = new FingerprintGenerator(SelectedProfile, track);
                     int subFingerprintsCalculated = 0;
 
-                    generator.SubFingerprintCalculated += new EventHandler<SubFingerprintEventArgs>(delegate(object s2, SubFingerprintEventArgs e2) {
-                        subFingerprintsCalculated++;
+                    generator.SubFingerprintsGenerated += new EventHandler<SubFingerprintsGeneratedEventArgs>(delegate(object s2, SubFingerprintsGeneratedEventArgs e2) {
+                        subFingerprintsCalculated += e2.SubFingerprints.Count;
                         progressReporter.ReportProgress((double)e2.Index / e2.Indices * 100);
-                        store.Add(e2.AudioTrack, e2.SubFingerprint, e2.Index, e2.IsVariation);
+                        store.Add(e2);
                     });
 
                     generator.Generate();

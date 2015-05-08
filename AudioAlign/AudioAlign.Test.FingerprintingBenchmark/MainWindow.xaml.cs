@@ -105,14 +105,14 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
         private void BenchmarkHaitsmaKalker(AudioTrack track) {
             var profile = AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator.GetProfiles()[0];
             var store = new AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintStore(profile);
-            var gen = new AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator(profile, track, 3);
+            var gen = new AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator(profile, track);
 
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("HaitsmaKalker2002", true);
             int hashCount = 0;
 
-            gen.SubFingerprintCalculated += delegate(object sender, Audio.Matching.HaitsmaKalker2002.SubFingerprintEventArgs e) {
-                store.Add(e.AudioTrack, e.SubFingerprint, e.Index, e.IsVariation);
-                hashCount++;
+            gen.SubFingerprintsGenerated += delegate(object sender, SubFingerprintsGeneratedEventArgs e) {
+                store.Add(e);
+                hashCount += e.SubFingerprints.Count;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
             };
 
@@ -127,16 +127,16 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkWang(AudioTrack track) {
-            var profile = new AudioAlign.Audio.Matching.Wang2003.Profile();
+            var profile = AudioAlign.Audio.Matching.Wang2003.FingerprintGenerator.GetProfiles()[0];
             var store = new AudioAlign.Audio.Matching.Wang2003.FingerprintStore(profile);
             var gen = new AudioAlign.Audio.Matching.Wang2003.FingerprintGenerator(profile);
 
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Wang2003", true);
             int hashCount = 0;
 
-            gen.FingerprintHashesGenerated += delegate(object sender, Audio.Matching.Wang2003.FingerprintHashEventArgs e) {
+            gen.SubFingerprintsGenerated += delegate(object sender, SubFingerprintsGeneratedEventArgs e) {
                 store.Add(e);
-                hashCount += e.Hashes.Count;
+                hashCount += e.SubFingerprints.Count;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
             };
 
@@ -151,16 +151,16 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkEchoprint(AudioTrack track) {
-            var profile = new AudioAlign.Audio.Matching.Echoprint.Profile();
+            var profile = AudioAlign.Audio.Matching.Echoprint.FingerprintGenerator.GetProfiles()[0];
             var store = new AudioAlign.Audio.Matching.Echoprint.FingerprintStore(profile);
             var gen = new AudioAlign.Audio.Matching.Echoprint.FingerprintGenerator(profile);
 
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Echoprint", true);
             int hashCount = 0;
 
-            gen.FingerprintHashesGenerated += delegate(object sender, Audio.Matching.Echoprint.FingerprintHashEventArgs e) {
+            gen.SubFingerprintsGenerated += delegate(object sender, SubFingerprintsGeneratedEventArgs e) {
                 store.Add(e);
-                hashCount += e.Hashes.Count;
+                hashCount += e.SubFingerprints.Count;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
             };
 
@@ -182,9 +182,9 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Chromaprint", true);
             int hashCount = 0;
 
-            gen.SubFingerprintCalculated += delegate(object sender, Audio.Matching.Chromaprint.SubFingerprintEventArgs e) {
-                store.Add(e.AudioTrack, e.SubFingerprint, e.Index, e.IsVariation);
-                hashCount++;
+            gen.SubFingerprintsGenerated += delegate(object sender, SubFingerprintsGeneratedEventArgs e) {
+                store.Add(e);
+                hashCount += e.SubFingerprints.Count;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
             };
 

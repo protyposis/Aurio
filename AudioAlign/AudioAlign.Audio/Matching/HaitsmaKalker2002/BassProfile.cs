@@ -6,16 +6,14 @@ using System.Text;
 namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
     class BassProfile : DefaultProfile {
 
-        // bass range 80 - 350 Hz: http://www.listenhear.co.uk/general_acoustics.htm
-        protected new const int FREQ_MIN = 80;
-        protected new const int FREQ_MAX = 350;
+        public BassProfile() : base() {
+            Name = "Bass";
 
-        public BassProfile() {
-            this.frequencyBands = FFTUtil.CalculateFrequencyBoundariesLog(FREQ_MIN, FREQ_MAX, FREQ_BANDS);
-        }
+            // bass range 80 - 350 Hz: http://www.listenhear.co.uk/general_acoustics.htm
+            MinFrequency = 80;
+            MaxFrequency = 350;
 
-        public override string Name { 
-            get { return "Bass"; } 
+            this.frequencyBands = FFTUtil.CalculateFrequencyBoundariesLog(MinFrequency, MaxFrequency, FrequencyBands);
         }
     }
 }

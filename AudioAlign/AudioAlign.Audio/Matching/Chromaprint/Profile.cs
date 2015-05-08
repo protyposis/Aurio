@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Audio.Matching.Chromaprint {
-    public abstract class Profile {
+    public abstract class Profile : IProfile {
 
         /// <summary>
         /// The name of this profile.
@@ -45,7 +45,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         /// <summary>
         /// The mode in which spectral bins are mapped to chroma bins.
         /// </summary>
-        public ChromaMappingMode ChromaMappingMode { get; set; }
+        public Chroma.MappingMode ChromaMappingMode { get; set; }
 
         /// <summary>
         /// The FIR filter coefficients used to filter/smooth the chroma bins over time.
@@ -59,8 +59,10 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         public double ChromaNormalizationThreshold { get; set; }
 
         /// <summary>
-        /// The classifiers used to convert the chromatrogram to subfingerprints.
+        /// The classifiers used to convert the chromatrogram to hashes.
         /// </summary>
         internal Classifier[] Classifiers { get; set; }
+
+        public double HashTimeScale { get; protected set; }
     }
 }

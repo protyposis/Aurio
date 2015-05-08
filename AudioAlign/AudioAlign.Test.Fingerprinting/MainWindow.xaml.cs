@@ -17,6 +17,7 @@ using AudioAlign.Audio.Project;
 using System.Threading.Tasks;
 using AudioAlign.Audio.TaskMonitor;
 using System.Diagnostics;
+using AudioAlign.Audio;
 using AudioAlign.Audio.Streams;
 using AudioAlign.Audio.Matching;
 
@@ -27,7 +28,7 @@ namespace AudioAlign.Test.Fingerprinting {
     public partial class MainWindow : Window {
 
         private FingerprintStore store;
-        private IProfile profile;
+        private Profile profile;
 
         public MainWindow() {
             InitializeComponent();
@@ -63,12 +64,12 @@ namespace AudioAlign.Test.Fingerprinting {
                     Task.Factory.StartNew(() => {
                         IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating sub-fingerprints for " + audioTrack.FileInfo.Name, true);
 
-                        FingerprintGenerator fpg = new FingerprintGenerator(profile, audioTrack, 3);
+                        FingerprintGenerator fpg = new FingerprintGenerator(profile, audioTrack);
                         int subFingerprintsCalculated = 0;
-                        fpg.SubFingerprintCalculated += new EventHandler<SubFingerprintEventArgs>(delegate(object s2, SubFingerprintEventArgs e2) {
+                        fpg.SubFingerprintsGenerated += new EventHandler<SubFingerprintsGeneratedEventArgs>(delegate(object s2, SubFingerprintsGeneratedEventArgs e2) {
                             subFingerprintsCalculated++;
                             progressReporter.ReportProgress((double)e2.Index / e2.Indices * 100);
-                            store.Add(e2.AudioTrack, e2.SubFingerprint, e2.Index, e2.IsVariation);
+                            store.Add(e2);
                         });
 
                         fpg.Generate();
@@ -90,16 +91,16 @@ namespace AudioAlign.Test.Fingerprinting {
             trackFingerprintListBox.Items.Clear();
             if (trackListBox.SelectedItems.Count > 0) {
                 AudioTrack audioTrack = (AudioTrack)trackListBox.SelectedItem;
-                Dictionary<SubFingerprint, object> hashFilter = new Dictionary<SubFingerprint, object>(); // helper structure to filter out duplicate subfingerprints
-                foreach (SubFingerprint sfp in store.AudioTracks[audioTrack]) {
-                    if (store.CollisionMap.GetValues(sfp).Count > 1 && !hashFilter.ContainsKey(sfp)) {
-                        // only add subfingerprints to the list if it points to at least two different audio tracks
-                        List<SubFingerprintLookupEntry> entries = store.CollisionMap.GetValues(sfp);
+                Dictionary<SubFingerprintHash, object> hashFilter = new Dictionary<SubFingerprintHash, object>(); // helper structure to filter out duplicate hashes
+                foreach (SubFingerprintHash hash in store.AudioTracks[audioTrack]) {
+                    if (store.CollisionMap.GetValues(hash).Count > 1 && !hashFilter.ContainsKey(hash)) {
+                        // only add hash to the list if it points to at least two different audio tracks
+                        List<SubFingerprintLookupEntry> entries = store.CollisionMap.GetValues(hash);
                         SubFingerprintLookupEntry firstEntry = entries[0];
                         for (int x = 1; x < entries.Count; x++) {
                             if (entries[x].AudioTrack != firstEntry.AudioTrack) {
-                                trackFingerprintListBox.Items.Add(sfp);
-                                hashFilter.Add(sfp, null);
+                                trackFingerprintListBox.Items.Add(hash);
+                                hashFilter.Add(hash, null);
                                 break;
                             }
                         }
@@ -111,8 +112,8 @@ namespace AudioAlign.Test.Fingerprinting {
         private void trackFingerprintListBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             fingerprintMatchListBox.Items.Clear();
             if (trackFingerprintListBox.SelectedItems.Count > 0) {
-                SubFingerprint subFingerprint = (SubFingerprint)trackFingerprintListBox.SelectedItem;
-                foreach (SubFingerprintLookupEntry lookupEntry in store.CollisionMap.GetValues(subFingerprint)) {
+                SubFingerprintHash hash = (SubFingerprintHash)trackFingerprintListBox.SelectedItem;
+                foreach (SubFingerprintLookupEntry lookupEntry in store.CollisionMap.GetValues(hash)) {
                     fingerprintMatchListBox.Items.Add(lookupEntry);
                 }
             }
@@ -120,8 +121,8 @@ namespace AudioAlign.Test.Fingerprinting {
 
         private void btnFindMatches_Click(object sender, RoutedEventArgs e) {
             if (trackFingerprintListBox.SelectedItems.Count > 0) {
-                SubFingerprint subFingerprint = (SubFingerprint)trackFingerprintListBox.SelectedItem;
-                PrintMatchResult(store.FindMatches(subFingerprint));
+                SubFingerprintHash hash = (SubFingerprintHash)trackFingerprintListBox.SelectedItem;
+                PrintMatchResult(store.FindMatches(hash));
             }
         }
 
@@ -162,8 +163,8 @@ namespace AudioAlign.Test.Fingerprinting {
             if (match == null) {
                 return;
             }
-            int index1 = FingerprintGenerator.TimeStampToSubFingerprintIndex(profile, match.Track1Time);
-            int index2 = FingerprintGenerator.TimeStampToSubFingerprintIndex(profile, match.Track2Time);
+            int index1 = (int)Math.Round((double)match.Track1Time.Ticks / TimeUtil.SECS_TO_TICKS * profile.HashTimeScale);
+            int index2 = (int)Math.Round((double)match.Track2Time.Ticks / TimeUtil.SECS_TO_TICKS * profile.HashTimeScale);
             ShowFingerprints(new SubFingerprintLookupEntry(match.Track1, index1),
                 new SubFingerprintLookupEntry(match.Track2, index2));
         }
@@ -172,9 +173,9 @@ namespace AudioAlign.Test.Fingerprinting {
             Fingerprint fp1 = store.GetFingerprint(sfp1);
             Fingerprint fp2 = store.GetFingerprint(sfp2);
             Fingerprint fpDifference = fp1.Difference(fp2);
-            fingerprintView1.SubFingerprints = fp1;
-            fingerprintView2.SubFingerprints = fp2;
-            fingerprintView3.SubFingerprints = fpDifference;
+            fingerprintView1.Fingerprint = fp1;
+            fingerprintView2.Fingerprint = fp2;
+            fingerprintView3.Fingerprint = fpDifference;
             berLabel.Content = Fingerprint.CalculateBER(fp1, fp2);
         }
     }

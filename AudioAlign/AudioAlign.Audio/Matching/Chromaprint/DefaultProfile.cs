@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Audio.Matching.Chromaprint {
-    public class ChromaprintProfile : Profile {
-        public ChromaprintProfile() {
+    class DefaultProfile : Profile {
+        public DefaultProfile() {
             Name = "Chromaprint default";
 
             SamplingRate = 11025;
@@ -16,7 +16,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
 
             ChromaMinFrequency = 28;
             ChromaMaxFrequency = 3520;
-            ChromaMappingMode = ChromaMappingMode.Chromaprint;
+            ChromaMappingMode = Chroma.MappingMode.Chromaprint;
             ChromaFilterCoefficients = new double[] { 0.25, 0.75, 1.0, 0.75, 0.25 }; // Gauss-filter(?) for temporal chroma smoothing
             ChromaNormalizationThreshold = 0.01;
 
@@ -38,6 +38,8 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
                 new Classifier(new Filter(1, 9, 12, 2), new Quantizer(-0.272556, 0.019424, 0.302559)),
                 new Classifier(new Filter(3, 4, 14, 2), new Quantizer(-0.164292, -0.0321188, 0.0846339))
             };
+
+            HashTimeScale = 1d / SamplingRate * HopSize;
         }
     }
 }

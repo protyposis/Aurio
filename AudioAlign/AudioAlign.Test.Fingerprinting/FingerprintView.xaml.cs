@@ -11,7 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using AudioAlign.Audio.Matching.HaitsmaKalker2002;
+using AudioAlign.Audio.Matching;
 using System.IO;
 
 namespace AudioAlign.Test.Fingerprinting {
@@ -26,27 +26,27 @@ namespace AudioAlign.Test.Fingerprinting {
             InitializeComponent();
         }
 
-        public Fingerprint SubFingerprints {
-            get { return (Fingerprint)GetValue(SubFingerprintsProperty); }
-            set { SetValue(SubFingerprintsProperty, value); }
+        public Fingerprint Fingerprint {
+            get { return (Fingerprint)GetValue(FingerprintProperty); }
+            set { SetValue(FingerprintProperty, value); }
         }
 
-        public static readonly DependencyProperty SubFingerprintsProperty =
-            DependencyProperty.Register("SubFingerprints", typeof(Fingerprint), typeof(FingerprintView), new UIPropertyMetadata(null,
-                new PropertyChangedCallback(OnSubFingerprintsChanged)));
+        public static readonly DependencyProperty FingerprintProperty =
+            DependencyProperty.Register("Fingerprint", typeof(Fingerprint), typeof(FingerprintView), new UIPropertyMetadata(null,
+                new PropertyChangedCallback(OnFingerprintChanged)));
 
-        public static void OnSubFingerprintsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        public static void OnFingerprintChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
             FingerprintView fv = (FingerprintView)d;
 
             int width = 32;
-            int height = fv.SubFingerprints.Length;
+            int height = fv.Fingerprint.Length;
             int dpi = 96;
             byte[] pixelData = new byte[width * height];
 
             int index = 0;
-            foreach (SubFingerprint sfp in fv.SubFingerprints) {
+            foreach (SubFingerprintHash hash in fv.Fingerprint) {
                 for (int x = 0; x < 32; x++) {
-                    pixelData[index++] = (byte)(sfp[x] ? 0 : 255);
+                    pixelData[index++] = (byte)(hash[x] ? 0 : 255);
                 }
             }
 

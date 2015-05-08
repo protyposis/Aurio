@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Chromaprint {
-    public struct SubFingerprint {
+namespace AudioAlign.Audio.Matching {
+    public struct SubFingerprintHash : IComparable<SubFingerprintHash> {
 
         private static UInt32[] bitMasks;
 
-        static SubFingerprint() {
+        static SubFingerprintHash() {
             bitMasks = new UInt32[32];
             for (int x = 0; x < 32; x++) {
                 bitMasks[x] = 1u << x;
@@ -17,7 +17,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
 
         private UInt32 value;
 
-        public SubFingerprint(UInt32 value) {
+        public SubFingerprintHash(UInt32 value) {
             this.value = value;
         }
 
@@ -46,7 +46,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         }
 
         public override bool Equals(object obj) {
-            return this.value.Equals(((SubFingerprint)obj).value);
+            return this.value.Equals(((SubFingerprintHash)obj).value);
         }
 
         public override int GetHashCode() {
@@ -62,7 +62,7 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
         /// </summary>
         /// <param name="sfp"></param>
         /// <returns></returns>
-        public uint HammingDistance(SubFingerprint sfp) {
+        public uint HammingDistance(SubFingerprintHash sfp) {
             uint i = this.value ^ sfp.value;
             // Count the number of set bits: http://stackoverflow.com/a/109025
             i = i - ((i >> 1) & 0x55555555);
@@ -70,16 +70,34 @@ namespace AudioAlign.Audio.Matching.Chromaprint {
             return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
         }
 
-        public static bool operator !=(SubFingerprint a, SubFingerprint b) {
+        public static bool operator !=(SubFingerprintHash a, SubFingerprintHash b) {
             return a.value != b.value;
         }
 
-        public static bool operator ==(SubFingerprint a, SubFingerprint b) {
+        public static bool operator ==(SubFingerprintHash a, SubFingerprintHash b) {
             return a.value == b.value;
         }
 
-        public SubFingerprint Difference(SubFingerprint subFingerprint) {
-            return new SubFingerprint(this.value ^ subFingerprint.value);
+        public static bool operator <(SubFingerprintHash a, SubFingerprintHash b) {
+            return a.value < b.value;
+        }
+
+        public static bool operator >(SubFingerprintHash a, SubFingerprintHash b) {
+            return a.value > b.value;
+        }
+
+        public SubFingerprintHash Difference(SubFingerprintHash hash) {
+            return new SubFingerprintHash(this.value ^ hash.value);
+        }
+
+        public int CompareTo(SubFingerprintHash other) {
+            if (value < other.value) {
+                return -1;
+            }
+            else if (value > other.value) {
+                return 1;
+            }
+            return 0;
         }
     }
 }

@@ -23,7 +23,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
         private Profile profile;
 
         public event EventHandler<FrameProcessedEventArgs> FrameProcessed;
-        public event EventHandler<FingerprintHashEventArgs> FingerprintHashesGenerated;
+        public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
 
         public FingerprintGenerator(Profile profile) {
             this.profile = profile;
@@ -47,6 +47,8 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
 
             var peakHistory = new PeakHistory(1 + profile.TargetZoneDistance + profile.TargetZoneLength, spectrum.Length / 2);
             var peakPairs = new List<PeakPair>(profile.PeaksPerFrame * profile.PeakFanout); // keep a single instance of the list to avoid instantiation overhead
+
+            var subFingerprints = new List<SubFingerprint>();
 
             while (stft.HasNext()) {
                 // Get the FFT spectrum
@@ -132,7 +134,12 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 if (processedFrames >= peakHistory.Length) {
                     peakPairs.Clear();
                     FindPairsWithMaxEnergy(peakHistory, peakPairs);
-                    FireFingerprintHashesGenerated(track, indices, peakPairs);
+                    ConvertPairsToSubFingerprints(peakPairs, subFingerprints);
+                }
+
+                if (subFingerprints.Count > 512) {
+                    FireFingerprintHashesGenerated(track, indices, subFingerprints);
+                    subFingerprints.Clear();
                 }
             }
 
@@ -143,8 +150,9 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 peakHistory.Add(-1, peaks);
                 peakPairs.Clear();
                 FindPairsWithMaxEnergy(peakHistory, peakPairs);
-                FireFingerprintHashesGenerated(track, indices, peakPairs);
+                ConvertPairsToSubFingerprints(peakPairs, subFingerprints);
             }
+            FireFingerprintHashesGenerated(track, indices, subFingerprints);
         }
 
         /// <summary>
@@ -276,28 +284,23 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             }
         }
 
-        private void FireFingerprintHashesGenerated(AudioTrack track, int indices, List<PeakPair> peakPairs) {
-            if (FingerprintHashesGenerated != null && peakPairs.Count > 0) {
-                // This sorting step is neede for the Zipper intersection algorithm 
-                // in the fingerprint store to find matching hashes.
-                var hashes = peakPairs.ConvertAll(pp => PeakPair.PeakPairToHash(pp));
-                hashes.Sort();
+        private void ConvertPairsToSubFingerprints(List<PeakPair> peakPairs, List<SubFingerprint> subFingerprints) {
+            // This sorting step is needed for the Zipper intersection algorithm in the fingerprint 
+            // store to find matching hashes, which expects them sorted by frame index. Sorting works
+            // because the index is coded in the most significant bits of the hashes.
+            var hashes = peakPairs.ConvertAll(pp => new SubFingerprintHash(PeakPair.PeakPairToHash(pp)));
+            hashes.Sort();
+            subFingerprints.AddRange(hashes.ConvertAll(h => new SubFingerprint(peakPairs[0].Index, h, false)));
+        }
 
-                FingerprintHashesGenerated(this, new FingerprintHashEventArgs {
-                    AudioTrack = track,
-                    Index = peakPairs[0].Index,
-                    Indices = indices,
-                    Hashes = hashes
-                });
+        private void FireFingerprintHashesGenerated(AudioTrack track, int indices, List<SubFingerprint> subFingerprints) {
+            if (SubFingerprintsGenerated != null) {
+                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, subFingerprints, subFingerprints[0].Index, indices));
             }
         }
 
-        public static TimeSpan FingerprintHashIndexToTimeSpan(int index) {
-            return new TimeSpan((long)Math.Round((double)index * 256 / 11025 * 1000 * 1000 * 10));
-        }
-
-        public static int TimeStampToFingerprintHashIndex(TimeSpan timeSpan) {
-            return (int)Math.Round((double)timeSpan.Ticks / 10 / 1000 / 1000 * 11025 / 256);
+        public static Profile[] GetProfiles() {
+            return new Profile[] { new DefaultProfile() };
         }
 
         [DebuggerDisplay("{index}/{value}")]
@@ -422,6 +425,18 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             public void Add(int index, List<Peak> list) {
                 indexHistory.Add(index);
                 peakHistory.Add(list);
+            }
+
+            public void DebugPrint() {
+                Console.WriteLine("--------");
+                for (int i = 0; i < Length; i++) {
+                    Console.Write(indexHistory[i] + ": ");
+                    foreach (var peak in peakHistory[i]) {
+                        Console.Write(peak.Index + " ");
+                    }
+                    Console.WriteLine("");
+                }
+                Console.WriteLine("--------");
             }
         }
     }
