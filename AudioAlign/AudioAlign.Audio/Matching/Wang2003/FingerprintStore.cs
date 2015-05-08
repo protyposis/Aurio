@@ -114,9 +114,10 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                         bool matchFound = false;
 
                         // Iterate through sequential frames
-                        while(store1.index.ContainsKey(index1) && store2.index.ContainsKey(index2)) {
-                            indexEntry1 = store1.index[index1];
-                            indexEntry2 = store2.index[index2];
+                        TrackStore.IndexEntry indexEntryNone = new TrackStore.IndexEntry();
+                        while (true) {
+                            indexEntry1 = store1.index.ContainsKey(index1) ? store1.index[index1] : indexEntryNone;
+                            indexEntry2 = store2.index.ContainsKey(index2) ? store2.index[index2] : indexEntryNone;
 
                             // Hash collision
                             // The union of the two ranges is the total number of distinct hashes
@@ -152,9 +153,24 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             numMatched += intersectionCount;
                             numTried += indexEntry1.length + indexEntry2.length - intersectionCount;
 
-                            index1++;
-                            index2++;
-                            frameCount++;
+                            // Determine the next indices to check for collisions
+                            int nextIndex1Increment = 0;
+                            if (hashes1.Count > i_e) {
+                                do {
+                                    nextIndex1Increment++;
+                                } while (!store1.index.ContainsKey(index1 + nextIndex1Increment));
+                            }
+                            int nextIndex2Increment = 0;
+                            if (hashes2.Count > j_e) {
+                                do {
+                                    nextIndex2Increment++;
+                                } while (!store2.index.ContainsKey(index2 + nextIndex2Increment));
+                            }
+                            int nextIndexIncrement = Math.Min(nextIndex1Increment, nextIndex2Increment);
+
+                            index1 += nextIndexIncrement;
+                            index2 += nextIndexIncrement;
+                            frameCount += nextIndexIncrement;
 
                             // Match detection
                             // This approach trades the hash matching rate with time, i.e. the rate required
@@ -163,17 +179,20 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                             // rate after a long time. The difficulty is to to parameterize it in such a way, that a 
                             // match is detected as fast as possible, while detecting a no-match isn't delayed too far 
                             // as it takes a lot of processing time.
-                            // NOTE The current parameters are just eyeballed, there's a lot of influence on processing speed here
-                            //double threshold = Math.Pow(profile.MatchingThresholdExponentialDecayBase, numIndices / sec / profile.MatchingThresholdExponentialWidthScale) * profile.MatchingThresholdExponentialHeight; // match successful threshold
-                            //double thresholdLow = threshold / profile.MatchingThresholdRejectionFraction; // match abort threshold
+                            // NOTE The current parameters are just eyeballed, there's a lot of influence on processing speed and matching rate here
                             double rate = 1d / numTried * numMatched;
 
-                            if (frameCount > profile.MatchingMinFrames && rate > thresholdAccept[frameCount]) {
+                            if (frameCount >= profile.MatchingMaxFrames || rate < thresholdReject[frameCount]) {
+                                break; // exit condition
+                            }
+                            else if (frameCount > profile.MatchingMinFrames && rate > thresholdAccept[frameCount]) {
                                 matchFound = true;
                                 break;
                             }
-                            else if (rate < thresholdReject[frameCount] || frameCount > profile.MatchingMaxFrames) {
-                                break; // exit condition
+
+                            if (nextIndexIncrement == 0) {
+                                // We reached the end of a hash list
+                                break; // Break the while loop
                             }
                         }
 
