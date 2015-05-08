@@ -48,6 +48,8 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             var peakHistory = new PeakHistory(1 + profile.TargetZoneDistance + profile.TargetZoneLength, spectrum.Length / 2);
             var peakPairs = new List<PeakPair>(profile.PeaksPerFrame * profile.PeakFanout); // keep a single instance of the list to avoid instantiation overhead
 
+            var subFingerprints = new List<SubFingerprint>();
+
             while (stft.HasNext()) {
                 // Get the FFT spectrum
                 stft.ReadFrame(spectrum);
@@ -132,7 +134,12 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 if (processedFrames >= peakHistory.Length) {
                     peakPairs.Clear();
                     FindPairsWithMaxEnergy(peakHistory, peakPairs);
-                    FireFingerprintHashesGenerated(track, indices, peakPairs);
+                    ConvertPairsToSubFingerprints(peakPairs, subFingerprints);
+                }
+
+                if (subFingerprints.Count > 512) {
+                    FireFingerprintHashesGenerated(track, indices, subFingerprints);
+                    subFingerprints.Clear();
                 }
             }
 
@@ -143,8 +150,9 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 peakHistory.Add(-1, peaks);
                 peakPairs.Clear();
                 FindPairsWithMaxEnergy(peakHistory, peakPairs);
-                FireFingerprintHashesGenerated(track, indices, peakPairs);
+                ConvertPairsToSubFingerprints(peakPairs, subFingerprints);
             }
+            FireFingerprintHashesGenerated(track, indices, subFingerprints);
         }
 
         /// <summary>
@@ -276,15 +284,18 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             }
         }
 
-        private void FireFingerprintHashesGenerated(AudioTrack track, int indices, List<PeakPair> peakPairs) {
-            if (SubFingerprintsGenerated != null && peakPairs.Count > 0) {
-                // This sorting step is needed for the Zipper intersection algorithm in the fingerprint 
-                // store to find matching hashes, which expects them sorted by frame index. Sorting works
-                // because the index is coded in the most significant bits of the hashes.
-                var hashes = peakPairs.ConvertAll(pp => PeakPair.PeakPairToHash(pp));
-                hashes.Sort();
+        private void ConvertPairsToSubFingerprints(List<PeakPair> peakPairs, List<SubFingerprint> subFingerprints) {
+            // This sorting step is needed for the Zipper intersection algorithm in the fingerprint 
+            // store to find matching hashes, which expects them sorted by frame index. Sorting works
+            // because the index is coded in the most significant bits of the hashes.
+            var hashes = peakPairs.ConvertAll(pp => new SubFingerprintHash(PeakPair.PeakPairToHash(pp)));
+            hashes.Sort();
+            subFingerprints.AddRange(hashes.ConvertAll(h => new SubFingerprint(peakPairs[0].Index, h, false)));
+        }
 
-                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, hashes.ConvertAll(h => new SubFingerprint(peakPairs[0].Index, new SubFingerprintHash(h), false)), peakPairs[0].Index, indices));
+        private void FireFingerprintHashesGenerated(AudioTrack track, int indices, List<SubFingerprint> subFingerprints) {
+            if (SubFingerprintsGenerated != null) {
+                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, subFingerprints, subFingerprints[0].Index, indices));
             }
         }
 

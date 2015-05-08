@@ -37,7 +37,7 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
             get { return collisionMap; }
         }
 
-        public void Add(SubFingerprintsGeneratedEventArgs e) {
+        public void Add(SubFingerprintsGeneratedEventArgs e) { // 50013 vs 50360 vs 50500?? ...  10095???
             if (e.SubFingerprints.Count == 0) {
                 return;
             }
@@ -47,13 +47,42 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 if (!store.ContainsKey(e.AudioTrack)) {
                     store.Add(e.AudioTrack, new TrackStore());
                 }
-                // Add the current length of the hash list as start pointer for all hashes belonging to the current index
-                store[e.AudioTrack].index.Add(e.Index, new TrackStore.IndexEntry(store[e.AudioTrack].hashes.Count, e.SubFingerprints.Count));
 
-                foreach (var hash in e.SubFingerprints) {
-                    store[e.AudioTrack].hashes.Add(hash.Hash);
-                    // insert a track/index lookup entry for the fingerprint hash
-                    collisionMap.Add(hash.Hash, new SubFingerprintLookupEntry(e.AudioTrack, hash.Index));
+                int hashListIndex = 0;
+                int hashListIndexCount = 0;
+                int frame;
+                SubFingerprint hash;
+                while (e.SubFingerprints.Count > hashListIndex) {
+                    int indexIndex = store[e.AudioTrack].hashes.Count;
+                    frame = e.SubFingerprints[hashListIndex].Index;
+                    hashListIndexCount = 0;
+                    while (e.SubFingerprints.Count > hashListIndex + hashListIndexCount 
+                        && (hash = e.SubFingerprints[hashListIndex + hashListIndexCount]).Index == frame) {
+                        // Insert hash into the sequential store
+                        store[e.AudioTrack].hashes.Add(hash.Hash);
+
+                        // Insert a track/index lookup entry for the fingerprint hash
+                        collisionMap.Add(hash.Hash, new SubFingerprintLookupEntry(e.AudioTrack, hash.Index));
+
+                        hashListIndexCount++;
+                    }
+
+                    if (hashListIndexCount > 0) {
+                        int frameIndex = (int)frame;
+                        TrackStore.IndexEntry ie;
+                        if (store[e.AudioTrack].index.ContainsKey(frameIndex)) {
+                            ie = store[e.AudioTrack].index[frameIndex];
+                            ie.length += hashListIndexCount;
+                            store[e.AudioTrack].index.Remove(frameIndex);
+                        }
+                        else {
+                            ie = new TrackStore.IndexEntry(indexIndex, hashListIndexCount);
+                        }
+                        // Add the current length of the hash list as start pointer for all hashes belonging to the current index
+                        store[e.AudioTrack].index.Add(frameIndex, ie);
+                    }
+
+                    hashListIndex += hashListIndexCount;
                 }
             }
         }

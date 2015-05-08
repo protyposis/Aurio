@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 namespace AudioAlign.Audio.Matching {
-    public struct SubFingerprintHash {
+    public struct SubFingerprintHash : IComparable<SubFingerprintHash> {
 
         private static UInt32[] bitMasks;
 
@@ -88,6 +88,16 @@ namespace AudioAlign.Audio.Matching {
 
         public SubFingerprintHash Difference(SubFingerprintHash hash) {
             return new SubFingerprintHash(this.value ^ hash.value);
+        }
+
+        public int CompareTo(SubFingerprintHash other) {
+            if (value < other.value) {
+                return -1;
+            }
+            else if (value > other.value) {
+                return 1;
+            }
+            return 0;
         }
     }
 }
