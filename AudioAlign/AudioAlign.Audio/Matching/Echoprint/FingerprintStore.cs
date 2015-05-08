@@ -43,43 +43,50 @@ namespace AudioAlign.Audio.Matching.Echoprint {
             }
 
             lock (this) {
-                // Make sure there's an index list for the track
+                // Make sure there's a store for the track and get it
                 if (!store.ContainsKey(e.AudioTrack)) {
                     store.Add(e.AudioTrack, new TrackStore());
                 }
+                var trackStore = store[e.AudioTrack];
 
                 int hashListIndex = 0;
-                int hashListIndexCount = 0;
-                int frame;
                 SubFingerprint hash;
-                while (e.SubFingerprints.Count > hashListIndex + hashListIndexCount) {
-                    int indexIndex = store[e.AudioTrack].hashes.Count;
-                    frame = e.SubFingerprints[hashListIndex].Index;
-                    hashListIndexCount = 0;
-                    while (e.SubFingerprints.Count > hashListIndex + hashListIndexCount && (hash = e.SubFingerprints[hashListIndex + hashListIndexCount]).Index == frame) {
-                        store[e.AudioTrack].hashes.Add(hash.Hash);
 
-                        // insert a track/index lookup entry for the fingerprint hash
-                        collisionMap.Add(hash.Hash, new SubFingerprintLookupEntry(e.AudioTrack, (int)frame));
+                // Iterate through the sequence of input hashes and add them to the store (in batches of the same frame index)
+                while (e.SubFingerprints.Count > hashListIndex) {
+                    int storeHashIndex = trackStore.hashes.Count;
+                    int storeIndex = e.SubFingerprints[hashListIndex].Index;
+                    int hashCount = 0;
 
-                        hashListIndexCount++;
+                    // Count all sequential input hashes with the same frame index (i.e. batch) and add them to the store
+                    while (e.SubFingerprints.Count > hashListIndex + hashCount
+                        && (hash = e.SubFingerprints[hashListIndex + hashCount]).Index == storeIndex) {
+                        // Insert hash into the sequential store
+                        trackStore.hashes.Add(hash.Hash);
+
+                        // Insert a track/index lookup entry for the fingerprint hash
+                        collisionMap.Add(hash.Hash, new SubFingerprintLookupEntry(e.AudioTrack, hash.Index));
+
+                        hashCount++;
                     }
 
-                    if (hashListIndexCount > 0) {
-                        int frameIndex = (int)frame;
+                    // Add an index entry which tells where a hash with a specific frame index can be found in the store
+                    if (hashCount > 0) {
                         TrackStore.IndexEntry ie;
-                        if (store[e.AudioTrack].index.ContainsKey(frameIndex)) {
-                            ie = store[e.AudioTrack].index[frameIndex];
-                            ie.length += hashListIndexCount;
-                            store[e.AudioTrack].index.Remove(frameIndex);
-                        } else {
-                            ie = new TrackStore.IndexEntry(indexIndex, hashListIndexCount);
+                        // If there is already an entry for the frame index, take it and update its length, ...
+                        if (trackStore.index.ContainsKey(storeIndex)) {
+                            ie = trackStore.index[storeIndex];
+                            ie.length += hashCount;
+                            trackStore.index.Remove(storeIndex);
+                        }
+                        else { // ... else create a new entry
+                            ie = new TrackStore.IndexEntry(storeHashIndex, hashCount);
                         }
                         // Add the current length of the hash list as start pointer for all hashes belonging to the current index
-                        store[e.AudioTrack].index.Add(frameIndex, ie);
+                        trackStore.index.Add(storeIndex, ie);
                     }
 
-                    hashListIndex += hashListIndexCount;
+                    hashListIndex += hashCount;
                 }
             }
         }
