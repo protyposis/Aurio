@@ -49,40 +49,43 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 }
 
                 int hashListIndex = 0;
-                int hashListIndexCount = 0;
-                int frame;
                 SubFingerprint hash;
+
+                // Iterate through the sequence of input hashes and add them to the store (in batches of the same frame index)
                 while (e.SubFingerprints.Count > hashListIndex) {
-                    int indexIndex = store[e.AudioTrack].hashes.Count;
-                    frame = e.SubFingerprints[hashListIndex].Index;
-                    hashListIndexCount = 0;
-                    while (e.SubFingerprints.Count > hashListIndex + hashListIndexCount 
-                        && (hash = e.SubFingerprints[hashListIndex + hashListIndexCount]).Index == frame) {
+                    int storeHashIndex = store[e.AudioTrack].hashes.Count;
+                    int storeIndex = e.SubFingerprints[hashListIndex].Index;
+                    int hashCount = 0;
+
+                    // Count all sequential input hashes with the same frame index (i.e. batch) and add them to the store
+                    while (e.SubFingerprints.Count > hashListIndex + hashCount 
+                        && (hash = e.SubFingerprints[hashListIndex + hashCount]).Index == storeIndex) {
                         // Insert hash into the sequential store
                         store[e.AudioTrack].hashes.Add(hash.Hash);
 
                         // Insert a track/index lookup entry for the fingerprint hash
                         collisionMap.Add(hash.Hash, new SubFingerprintLookupEntry(e.AudioTrack, hash.Index));
 
-                        hashListIndexCount++;
+                        hashCount++;
                     }
 
-                    if (hashListIndexCount > 0) {
-                        int frameIndex = (int)frame;
+                    // Add an index entry which tells where a hash with a specific frame index can be found in the store
+                    if (hashCount > 0) {
                         TrackStore.IndexEntry ie;
-                        if (store[e.AudioTrack].index.ContainsKey(frameIndex)) {
-                            ie = store[e.AudioTrack].index[frameIndex];
-                            ie.length += hashListIndexCount;
-                            store[e.AudioTrack].index.Remove(frameIndex);
+                        // If there is already an entry for the frame index, take it and update its length, ...
+                        if (store[e.AudioTrack].index.ContainsKey(storeIndex)) {
+                            ie = store[e.AudioTrack].index[storeIndex];
+                            ie.length += hashCount;
+                            store[e.AudioTrack].index.Remove(storeIndex);
                         }
-                        else {
-                            ie = new TrackStore.IndexEntry(indexIndex, hashListIndexCount);
+                        else { // ... else create a new entry
+                            ie = new TrackStore.IndexEntry(storeHashIndex, hashCount);
                         }
                         // Add the current length of the hash list as start pointer for all hashes belonging to the current index
-                        store[e.AudioTrack].index.Add(frameIndex, ie);
+                        store[e.AudioTrack].index.Add(storeIndex, ie);
                     }
 
-                    hashListIndex += hashListIndexCount;
+                    hashListIndex += hashCount;
                 }
             }
         }
