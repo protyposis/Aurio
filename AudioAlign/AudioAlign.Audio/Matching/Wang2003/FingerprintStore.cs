@@ -59,10 +59,10 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                     int hashCount = 0;
 
                     // Count all sequential input hashes with the same frame index (i.e. batch) and add them to the store
-                    while (e.SubFingerprints.Count > hashListIndex + hashCount 
+                    while (e.SubFingerprints.Count > hashListIndex + hashCount
                         && (hash = e.SubFingerprints[hashListIndex + hashCount]).Index == storeIndex) {
                         // Insert hash into the sequential store
-                            trackStore.hashes.Add(hash.Hash);
+                        trackStore.hashes.Add(hash.Hash);
 
                         // Insert a track/index lookup entry for the fingerprint hash
                         collisionMap.Add(hash.Hash, new SubFingerprintLookupEntry(e.AudioTrack, hash.Index));
