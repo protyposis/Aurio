@@ -278,8 +278,9 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
 
         private void FireFingerprintHashesGenerated(AudioTrack track, int indices, List<PeakPair> peakPairs) {
             if (SubFingerprintsGenerated != null && peakPairs.Count > 0) {
-                // This sorting step is neede for the Zipper intersection algorithm 
-                // in the fingerprint store to find matching hashes.
+                // This sorting step is needed for the Zipper intersection algorithm in the fingerprint 
+                // store to find matching hashes, which expects them sorted by frame index. Sorting works
+                // because the index is coded in the most significant bits of the hashes.
                 var hashes = peakPairs.ConvertAll(pp => PeakPair.PeakPairToHash(pp));
                 hashes.Sort();
 
