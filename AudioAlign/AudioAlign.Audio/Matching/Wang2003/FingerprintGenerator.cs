@@ -426,6 +426,18 @@ namespace AudioAlign.Audio.Matching.Wang2003 {
                 indexHistory.Add(index);
                 peakHistory.Add(list);
             }
+
+            public void DebugPrint() {
+                Console.WriteLine("--------");
+                for (int i = 0; i < Length; i++) {
+                    Console.Write(indexHistory[i] + ": ");
+                    foreach (var peak in peakHistory[i]) {
+                        Console.Write(peak.Index + " ");
+                    }
+                    Console.WriteLine("");
+                }
+                Console.WriteLine("--------");
+            }
         }
     }
 }
