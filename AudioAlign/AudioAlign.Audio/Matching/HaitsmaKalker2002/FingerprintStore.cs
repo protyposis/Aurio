@@ -14,11 +14,12 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
 
         private int fingerprintSize;
         private float threshold;
-        private Profile profile;
+        private IProfile profile;
         private Dictionary<AudioTrack, List<SubFingerprintHash>> store;
         private IFingerprintCollisionMap collisionMap;
+        private string matchSourceName;
 
-        public FingerprintStore(Profile profile) {
+        protected FingerprintStore(IProfile profile, string matchSourceName) {
             FingerprintSize = DEFAULT_FINGERPRINT_SIZE;
             Threshold = DEFAULT_THRESHOLD;
             this.profile = profile;
@@ -33,6 +34,12 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
              * written to disk (instead of in-memory like now) and the user given the 
              * choice between them (or automatically chosen depending on the amount of data).
              */
+
+            this.matchSourceName = matchSourceName;
+        }
+
+        public FingerprintStore(IProfile profile) : this(profile, "FP-HK02") {
+            //
         }
 
         public int FingerprintSize {
@@ -132,7 +139,7 @@ namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
                                 Track1Time = SubFingerprintIndexToTimeSpan(entry1.Index),
                                 Track2 = entry2.AudioTrack,
                                 Track2Time = SubFingerprintIndexToTimeSpan(entry2.Index),
-                                Source = "FP-HK02"
+                                Source = matchSourceName
                             });
                         }
                     }
