@@ -34,7 +34,9 @@ namespace AudioAlign.FFTW {
         }
 
         ~FFTW() {
-            interop.destroy_plan(plan);
+            if (plan != IntPtr.Zero) {
+                interop.destroy_plan(plan);
+            }
             bufferHandle.Free();
         }
 
