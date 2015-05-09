@@ -35,15 +35,22 @@ namespace AudioAlign.Test.Fingerprinting {
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            ProgressMonitor.GlobalInstance.ProcessingProgressChanged += new EventHandler<Audio.ValueEventArgs<float>>(Instance_ProcessingProgressChanged);
+            ProgressMonitor.GlobalInstance.ProcessingProgressChanged += GlobalInstance_ProcessingProgressChanged;
+            ProgressMonitor.GlobalInstance.ProcessingFinished += GlobalInstance_ProcessingFinished;
 
             trackListBox.SelectionChanged += new SelectionChangedEventHandler(trackListBox_SelectionChanged);
             trackFingerprintListBox.SelectionChanged += new SelectionChangedEventHandler(trackFingerprintListBox_SelectionChanged);
         }
 
-        void Instance_ProcessingProgressChanged(object sender, Audio.ValueEventArgs<float> e) {
+        void GlobalInstance_ProcessingProgressChanged(object sender, Audio.ValueEventArgs<float> e) {
             progressBar1.Dispatcher.BeginInvoke((Action)delegate {
                 progressBar1.Value = e.Value;
+            });
+        }
+
+        void GlobalInstance_ProcessingFinished(object sender, EventArgs e) {
+            progressBar1.Dispatcher.BeginInvoke((Action)delegate {
+                progressBar1.Value = 0;
             });
         }
 
@@ -54,36 +61,35 @@ namespace AudioAlign.Test.Fingerprinting {
             dlg.Filter = "Wave files|*.wav";
 
             if (dlg.ShowDialog() == true) {
+                trackListBox.Items.Clear();
+
                 profile = FingerprintGenerator.GetProfiles()[0];
                 store = new FingerprintStore(profile);
                 store.Threshold = 0.45f;
-                foreach (string file in dlg.FileNames) {
-                    AudioTrack audioTrack = new AudioTrack(new FileInfo(file));
-                    IAudioStream audioStream = audioTrack.CreateAudioStream();
 
-                    Task.Factory.StartNew(() => {
-                        IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating sub-fingerprints for " + audioTrack.FileInfo.Name, true);
+                Task.Factory.StartNew(() => Parallel.ForEach<string>(dlg.FileNames,
+                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+                fileName => {
+                    AudioTrack audioTrack = new AudioTrack(new FileInfo(fileName));
+                    IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating sub-fingerprints for " + audioTrack.FileInfo.Name, true);
 
-                        FingerprintGenerator fpg = new FingerprintGenerator(profile, audioTrack);
-                        int subFingerprintsCalculated = 0;
-                        fpg.SubFingerprintsGenerated += new EventHandler<SubFingerprintsGeneratedEventArgs>(delegate(object s2, SubFingerprintsGeneratedEventArgs e2) {
-                            subFingerprintsCalculated++;
-                            progressReporter.ReportProgress((double)e2.Index / e2.Indices * 100);
-                            store.Add(e2);
-                        });
-
-                        fpg.Generate();
-                        //store.Analyze();
-                        progressReporter.Finish();
+                    FingerprintGenerator fpg = new FingerprintGenerator(profile, audioTrack);
+                    int subFingerprintsCalculated = 0;
+                    fpg.SubFingerprintsGenerated += new EventHandler<SubFingerprintsGeneratedEventArgs>(delegate(object s2, SubFingerprintsGeneratedEventArgs e2) {
+                        subFingerprintsCalculated++;
+                        progressReporter.ReportProgress((double)e2.Index / e2.Indices * 100);
+                        store.Add(e2);
                     });
-                }
-            }
-        }
 
-        private void btnRefresh_Click(object sender, RoutedEventArgs e) {
-            trackListBox.Items.Clear();
-            foreach (AudioTrack audioTrack in store.AudioTracks.Keys) {
-                trackListBox.Items.Add(audioTrack);
+                    fpg.Generate();
+                    //store.Analyze();
+                    progressReporter.Finish();
+                }))
+                .ContinueWith(task => {
+                    foreach (AudioTrack audioTrack in store.AudioTracks.Keys) {
+                        trackListBox.Items.Add(audioTrack);
+                    }
+                }, TaskScheduler.FromCurrentSynchronizationContext());
             }
         }
 
@@ -122,7 +128,8 @@ namespace AudioAlign.Test.Fingerprinting {
         private void btnFindMatches_Click(object sender, RoutedEventArgs e) {
             if (trackFingerprintListBox.SelectedItems.Count > 0) {
                 SubFingerprintHash hash = (SubFingerprintHash)trackFingerprintListBox.SelectedItem;
-                PrintMatchResult(store.FindMatches(hash));
+                var matches = store.FindMatches(hash);
+                ListMatches(matches);
             }
         }
 
@@ -142,19 +149,13 @@ namespace AudioAlign.Test.Fingerprinting {
             }
         }
 
-        private void btnStats_Click(object sender, RoutedEventArgs e) {
-            //store.PrintStats();
-        }
-
         private void btnFindAllMatches_Click(object sender, RoutedEventArgs e) {
-            //List<Match> matches = store.FindAllMatches();
-            //PrintMatchResult(matches);
-            //matchGrid.ItemsSource = matches;
+            List<Match> matches = store.FindAllMatches();
+            ListMatches(matches);
         }
 
-        private void btnFindAllMatchingMatches_Click(object sender, RoutedEventArgs e) {
-            List<Match> matches = store.FindAllMatches();
-            PrintMatchResult(matches);
+        private void ListMatches(List<Match> matches) {
+            //PrintMatchResult(matches);
             matchGrid.ItemsSource = matches;
         }
 

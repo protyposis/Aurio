@@ -3,16 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="523" Width="869" Loaded="Window_Loaded" xmlns:my="clr-namespace:AudioAlign.Test.Fingerprinting">
     <Grid>
-        <Button Content="Load File" Height="23" HorizontalAlignment="Left" Margin="12,12,0,0" Name="button1" VerticalAlignment="Top" Width="75" Click="button1_Click" />
-        <ProgressBar Height="21" HorizontalAlignment="Left" Margin="12,41,0,0" Name="progressBar1" VerticalAlignment="Top" Width="479" />
-        
-        <Button Content="Refresh" Height="23" HorizontalAlignment="Left" Margin="93,12,0,0" Name="btnRefresh" VerticalAlignment="Top" Width="75" Click="btnRefresh_Click" />
-        
-        <Grid Margin="12,80,12,12">
+        <Button Content="Scan Files" Height="23" HorizontalAlignment="Left" Margin="12,12,0,0" Name="button1" VerticalAlignment="Top" Width="75" Click="button1_Click" />
+        <ProgressBar Height="23" Margin="92,12,314,0" Name="progressBar1" VerticalAlignment="Top" />
+
+        <Grid Margin="12,40,12,12">
             <Grid.RowDefinitions>
                 <RowDefinition Height=".3*"/>
                 <RowDefinition/>
-                <RowDefinition Height=".3*"/>
+                <RowDefinition Height=".4*"/>
             </Grid.RowDefinitions>
             <ListBox Name="trackListBox"/>
             <Grid Grid.Row="1">
@@ -39,7 +37,7 @@
                     <Label Content="0" Grid.Row="1" Grid.Column="2" ContentStringFormat="{}BER: {0}" HorizontalContentAlignment="Center" Name="berLabel"/>
                 </Grid>
             </Grid>
-            <DataGrid Name="matchGrid" Grid.Row="2" SelectionUnit="FullRow" AutoGenerateColumns="False" GridLinesVisibility="Horizontal" HeadersVisibility="Column" SelectionChanged="matchGrid_SelectionChanged">
+            <DataGrid Name="matchGrid" Grid.Row="2" SelectionUnit="FullRow" AutoGenerateColumns="False" GridLinesVisibility="Horizontal" HeadersVisibility="Column" SelectionChanged="matchGrid_SelectionChanged" CanUserAddRows="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Track A" Width="SizeToCells" Binding="{Binding Track1.Name}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Track B" Width="SizeToCells" Binding="{Binding Track2.Name}" IsReadOnly="True"/>
@@ -49,9 +47,7 @@
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
-        <Button Content="Find Matches for selected SFB" Height="23" HorizontalAlignment="Left" Margin="174,12,0,0" Name="btnFindMatches" VerticalAlignment="Top" Width="183" Click="btnFindMatches_Click" />
-        <Button Content="Find All Matches" Height="23" HorizontalAlignment="Left" Margin="363,12,0,0" Name="btnFindAllMatches" VerticalAlignment="Top" Width="109" Click="btnFindAllMatches_Click" />
-        <Button Content="Find All Matching Matches" Height="23" HorizontalAlignment="Left" Margin="478,12,0,0" Name="btnFindAllMatchingMatches" VerticalAlignment="Top" Width="166" Click="btnFindAllMatchingMatches_Click" />
-        <Button Content="Print Stats" Height="23" HorizontalAlignment="Left" Margin="652,12,0,0" Name="btnStats" VerticalAlignment="Top" Width="75" Click="btnStats_Click" />
+        <Button Content="Find Matches for selected SFB" Height="23" HorizontalAlignment="Right" Margin="0,12,126,0" Name="btnFindMatches" VerticalAlignment="Top" Width="183" Click="btnFindMatches_Click" />
+        <Button Content="Find All Matches" Height="23" Margin="0,12,12,0" Name="btnFindAllMatches" VerticalAlignment="Top" Click="btnFindAllMatches_Click" HorizontalAlignment="Right" Width="109" />
     </Grid>
 </Window>
