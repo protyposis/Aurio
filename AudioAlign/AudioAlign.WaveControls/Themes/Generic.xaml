@@ -462,28 +462,6 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type local:DragDropDecorator}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type local:DragDropDecorator}">
-                    <Grid>
-                        <ContentPresenter/>
-                        <Rectangle Name="DropMarker" Height="3" Fill="Red" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Visibility="Hidden">
-                            <Rectangle.Effect>
-                                <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="Red" Opacity="1"/>
-                            </Rectangle.Effect>
-                        </Rectangle>
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsDragOver" Value="True">
-                            <Setter TargetName="DropMarker" Property="Visibility" Value="Visible"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <Style TargetType="{x:Type local:VUMeter}">
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Template">
