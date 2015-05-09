@@ -164,8 +164,8 @@ namespace AudioAlign.Test.Fingerprinting {
             if (match == null) {
                 return;
             }
-            int index1 = (int)Math.Round((double)match.Track1Time.Ticks / TimeUtil.SECS_TO_TICKS * profile.HashTimeScale);
-            int index2 = (int)Math.Round((double)match.Track2Time.Ticks / TimeUtil.SECS_TO_TICKS * profile.HashTimeScale);
+            int index1 = (int)Math.Round((double)match.Track1Time.Ticks / TimeUtil.SECS_TO_TICKS / profile.HashTimeScale);
+            int index2 = (int)Math.Round((double)match.Track2Time.Ticks / TimeUtil.SECS_TO_TICKS / profile.HashTimeScale);
             ShowFingerprints(new SubFingerprintLookupEntry(match.Track1, index1),
                 new SubFingerprintLookupEntry(match.Track2, index2));
         }
