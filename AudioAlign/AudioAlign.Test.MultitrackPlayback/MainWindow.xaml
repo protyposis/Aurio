@@ -19,10 +19,10 @@
                         <my:ExtendedSlider Name="volumeSlider" Width="100" Minimum="0" Maximum="2" SmallChange="0.001" LargeChange="0.01" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Margin="3" Value="{Binding Path=Volume}" DefaultValue="1"/>
                         <Label Name="decibelLabel" Content="{Binding ElementName=volumeSlider, Path=Value, FallbackValue=dB, Converter={StaticResource LinearDecibelConverter}}" ContentStringFormat="{}{0:0.0}" HorizontalAlignment="Right" Width="40"/>
                         <ToggleButton IsChecked="{Binding Path=Mute, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
-                            <Image Source="{StaticResource IconSoundMute}" Width="16" Height="16" />
+                            <TextBlock Text="M"/>
                         </ToggleButton>
                         <ToggleButton IsChecked="{Binding Path=Solo, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
-                            <Image Source="{StaticResource IconSound}" Width="16" Height="16" />
+                            <TextBlock Text="S"/>
                         </ToggleButton>
                     </StackPanel>
                 </DockPanel>
