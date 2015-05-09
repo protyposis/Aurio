@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace AudioAlign.WaveControls {
@@ -32,11 +33,16 @@ namespace AudioAlign.WaveControls {
             string input = (string)value;
             string format = parameter as string ?? DEFAULT_FORMAT;
 
-            if (targetType == typeof(long)) {
-                return TimeSpan.ParseExact(input, format, null).Ticks;
+            try {
+                if (targetType == typeof(long)) {
+                    return TimeSpan.ParseExact(input, format, null).Ticks;
+                }
+                else if (targetType == typeof(TimeSpan)) {
+                    return TimeSpan.ParseExact(input, format, null);
+                }
             }
-            else if (targetType == typeof(TimeSpan)) {
-                return TimeSpan.ParseExact(input, format, null);
+            catch (Exception e) {
+                return new ValidationResult(false, e.Message);
             }
 
             return null;
