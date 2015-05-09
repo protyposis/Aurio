@@ -29,7 +29,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.LibSampleRate", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Audio.ResamplingStreamTest", "AudioAlign.Audio.ResamplingStreamTest\AudioAlign.Audio.ResamplingStreamTest.csproj", "{06905325-4F46-44BC-BE60-C61526073998}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Test.Fingerprinting", "AudioAlign.Test.Fingerprinting\AudioAlign.Test.Fingerprinting.csproj", "{38F3B4F3-9739-4FE2-A6F3-41436D6297D0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Test.FingerprintingHaitsmaKalker2002", "AudioAlign.Test.FingerprintingHaitsmaKalker2002\AudioAlign.Test.FingerprintingHaitsmaKalker2002.csproj", "{38F3B4F3-9739-4FE2-A6F3-41436D6297D0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Test.Streams", "AudioAlign.Test.Streams\AudioAlign.Test.Streams.csproj", "{C7062944-F8C0-4FF6-8B3A-E30588F39612}"
 EndProject
