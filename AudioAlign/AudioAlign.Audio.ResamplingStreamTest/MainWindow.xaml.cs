@@ -35,6 +35,9 @@ namespace AudioAlign.LibSampleRate.Test {
             NAudioSinkStream naudioSink = new NAudioSinkStream(resampler);
             audioOutput.Init(naudioSink);
 
+            mixingSampleRateLabel.Content = mixer.Properties.SampleRate;
+            playbackSampleRateLabel.Content = audioOutput.OutputWaveFormat.SampleRate;
+
             sliderSampleRate.ValueChanged += new RoutedPropertyChangedEventHandler<double>(delegate(object s2, RoutedPropertyChangedEventArgs<double> e2) {
                 if (resampler.CheckTargetSampleRate(sliderSampleRate.Value)) {
                     resampler.TargetSampleRate = sliderSampleRate.Value;
@@ -48,9 +51,13 @@ namespace AudioAlign.LibSampleRate.Test {
             dlg.Filter = "Wave files|*.wav";
 
             if (dlg.ShowDialog() == true) {
+                var stream = new IeeeStream(new NAudioSourceStream(new WaveFileReader(dlg.FileName)));
                 mixer.Clear();
-                mixer.Add(new IeeeStream(new NAudioSourceStream(new WaveFileReader(dlg.FileName))));
+                mixer.Add(stream);
                 lblFile.Content = dlg.FileName;
+
+                fileSampleRateLabel.Content = stream.Properties.SampleRate;
+                sliderSampleRate.Value = stream.Properties.SampleRate;
             }
         }
 
