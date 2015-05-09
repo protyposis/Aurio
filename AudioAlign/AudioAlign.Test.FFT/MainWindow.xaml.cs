@@ -15,6 +15,7 @@ using AudioAlign.Audio;
 using AudioAlign.Audio.Streams;
 using Exocortex.DSP;
 using System.Diagnostics;
+using System.IO;
 
 namespace AudioAlign.Test.FFT {
     /// <summary>
@@ -31,6 +32,35 @@ namespace AudioAlign.Test.FFT {
         }
 
         private void button2_Click(object sender, RoutedEventArgs e) {
+            Exception missingLibraryException = null;
+            FFTLibrary fftLib = (FFTLibrary)fftLibComboBox.SelectedValue;
+
+            try {
+                Generate(fftLib);
+            }
+            catch (DllNotFoundException ex) {
+                // Account for native DLLs
+                missingLibraryException = ex;
+            }
+            catch (FileNotFoundException ex) {
+                // Account for .NET assemblies
+                missingLibraryException = ex;
+            }
+            catch (BadImageFormatException ex) {
+                // Account for invalid files (e.g. dummy files)
+                missingLibraryException = ex;
+            }
+
+            if (missingLibraryException != null) {
+                fftOutputGraph.Reset();
+                fftNormalizedOutputGraph.Reset();
+                fftdBOutputGraph.Reset();
+                MessageBox.Show(this, missingLibraryException.Message, fftLib + ": Library not found!", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void Generate(FFTLibrary fftLib) {
             // FFT resources:
             // http://www.mathworks.de/support/tech-notes/1700/1702.html
             // http://stackoverflow.com/questions/6627288/audio-spectrum-analysis-using-fft-algorithm-in-java
@@ -83,9 +113,10 @@ namespace AudioAlign.Test.FFT {
 
             float[] fftIO = (float[])window.Clone();
 
-            FFTLibrary fftLib = (FFTLibrary)fftLibComboBox.SelectedValue;
             if (fftLib == FFTLibrary.ExocortexDSP) {
-                Fourier.RFFT(fftIO, FourierDirection.Forward);
+                // This function call indirection is needed to allow this method execute even when the
+                // Exocortex FFT assembly is missing.
+                ApplyExocortexDSP(fftIO);
             }
             else if (fftLib == FFTLibrary.FFTW) {
                 FFTW.FFTW fftw = new FFTW.FFTW(fftIO.Length);
@@ -145,6 +176,10 @@ namespace AudioAlign.Test.FFT {
                 fftIO.Min(), fftIO.Max(),
                 fftResult.Min(), fftResult.Max(), fftResult.Length, sum,
                 fftResultdB.Min(), fftResultdB.Max());
+        }
+
+        private void ApplyExocortexDSP(float[] samples) {
+            Fourier.RFFT(samples, FourierDirection.Forward);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {

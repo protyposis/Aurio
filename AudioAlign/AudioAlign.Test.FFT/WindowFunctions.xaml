@@ -1,14 +1,15 @@
 ﻿<Window x:Class="AudioAlign.Test.FFT.WindowFunctions"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WindowFunctions" Height="818" Width="1006" xmlns:my="clr-namespace:AudioAlign.WaveControls;assembly=AudioAlign.WaveControls" Loaded="Window_Loaded">
+        Title="Window Functions" Height="818" Width="1006" xmlns:my="clr-namespace:AudioAlign.WaveControls;assembly=AudioAlign.WaveControls" Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
-            <Slider Name="sampleCountSlider" IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="TopLeft" Maximum="65536" Minimum="1" Ticks="1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16348,32768,65536" ValueChanged="sampleCountSlider_ValueChanged" />
+            <Slider Name="sampleCountSlider" IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="TopLeft" Maximum="65536" Minimum="1" Ticks="1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16348,32768,65536" ValueChanged="sampleCountSlider_ValueChanged" Margin="116,0,0,0" />
+            <Label Content="Sample Resolution:" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         </Grid>
         <Grid Grid.Row="1">
             <ScrollViewer>
