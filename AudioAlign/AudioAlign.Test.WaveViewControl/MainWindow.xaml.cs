@@ -38,6 +38,10 @@ namespace AudioAlign {
                 // Open document
                 string filename = dlg.FileName;
                 waveView.AudioTrack = new Audio.Project.AudioTrack(new System.IO.FileInfo(filename));
+
+                // Fit waveform into view
+                waveView.TrackLength = waveView.AudioTrack.Length.Ticks;
+                waveView.VirtualViewportWidth = waveView.AudioTrack.Length.Ticks;
             }
         }
     }
