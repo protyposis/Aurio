@@ -118,7 +118,6 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="ChannelsToTextConverter.cs" />
     <Compile Include="ColorGradient.cs" />
     <Compile Include="CorrelationMeter.cs" />
     <Compile Include="ExtendedTickBar.cs" />
@@ -129,20 +128,12 @@
     </Compile>
     <Compile Include="GraphMode.cs" />
     <Compile Include="LinearDecibelConverter.cs" />
-    <Compile Include="ListBoxItemIndexConverter.cs" />
     <Compile Include="LogSlider.cs" />
-    <Compile Include="MultiTrackConnectionAdorner.cs" />
-    <Compile Include="MultiTrackListBox.cs" />
-    <Compile Include="MultiTrackViewer.cs" />
-    <Compile Include="ResizeDecorator.cs" />
-    <Compile Include="MultiplicationConverter.cs" />
     <Compile Include="Spectrogram.cs" />
     <Compile Include="SpectrogramMode.cs" />
-    <Compile Include="UIUtil.cs" />
     <Compile Include="StereoVUMeter.cs" />
     <Compile Include="TimeScale.cs" />
     <Compile Include="TimeSpanConverter.cs" />
-    <Compile Include="CaretOverlay.cs" />
     <Compile Include="TimeSpanTicksConverter.cs" />
     <Compile Include="VirtualContentViewBase.cs" />
     <Compile Include="VirtualView.cs" />
@@ -160,10 +151,6 @@
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Themes\Images.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -196,26 +183,6 @@
       <Project>{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}</Project>
       <Name>AudioAlign.Audio</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\sound_mute.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\sound.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\key_m.png" />
-    <Resource Include="Resources\key_s.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\arrow_switch.png" />
-    <Resource Include="Resources\draw_wave.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\speakers.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\lock.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
