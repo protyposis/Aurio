@@ -6,7 +6,7 @@ using System.Text;
 
 namespace AudioAlign.WaveControls
 {
-    interface VirtualView
+    public interface VirtualView
     {
         long VirtualViewportOffset { get; set; }
         long VirtualViewportWidth { get; set; }
