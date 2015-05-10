@@ -8,8 +8,8 @@
     <ProjectGuid>{06905325-4F46-44BC-BE60-C61526073998}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudioAlign.LibSampleRate.Test</RootNamespace>
-    <AssemblyName>AudioAlign.LibSampleRate.Test</AssemblyName>
+    <RootNamespace>AudioAlign.Test.ResamplingStream</RootNamespace>
+    <AssemblyName>AudioAlign.Test.ResamplingStream</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>

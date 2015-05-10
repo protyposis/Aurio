@@ -8,8 +8,8 @@
     <ProjectGuid>{38F3B4F3-9739-4FE2-A6F3-41436D6297D0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudioAlign.Test.Fingerprinting</RootNamespace>
-    <AssemblyName>AudioAlign.Test.Fingerprinting</AssemblyName>
+    <RootNamespace>AudioAlign.Test.FingerprintingHaitsmaKalker2002</RootNamespace>
+    <AssemblyName>AudioAlign.Test.FingerprintingHaitsmaKalker2002</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>

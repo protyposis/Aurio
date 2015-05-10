@@ -1,20 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using NAudio.Wave;
+﻿using System.Windows;
 using AudioAlign.Audio.Streams;
+using NAudio.Wave;
 
-namespace AudioAlign.LibSampleRate.Test {
+namespace AudioAlign.Test.ResamplingStream {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -31,7 +19,7 @@ namespace AudioAlign.LibSampleRate.Test {
             audioOutput = new WasapiOut(global::NAudio.CoreAudioApi.AudioClientShareMode.Shared, true, 10);
             mixer = new MixerStream(2, 44100);
             MonoStream mono = new MonoStream(mixer);
-            ResamplingStream resampler = new ResamplingStream(mono, ResamplingQuality.VariableRate, 44100);
+            Audio.Streams.ResamplingStream resampler = new Audio.Streams.ResamplingStream(mono, ResamplingQuality.VariableRate, 44100);
             NAudioSinkStream naudioSink = new NAudioSinkStream(resampler);
             audioOutput.Init(naudioSink);
 

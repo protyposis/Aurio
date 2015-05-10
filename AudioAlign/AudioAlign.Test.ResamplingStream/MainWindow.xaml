@@ -1,4 +1,4 @@
-﻿<Window x:Class="AudioAlign.LibSampleRate.Test.MainWindow"
+﻿<Window x:Class="AudioAlign.Test.ResamplingStream.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Resampling Stream Test" Height="134" Width="587" Loaded="Window_Loaded" Closing="Window_Closing" ResizeMode="NoResize">

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Windows;
+﻿using System.Windows;
 
-namespace AudioAlign.LibSampleRate.Test {
+namespace AudioAlign.Test.ResamplingStream {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
