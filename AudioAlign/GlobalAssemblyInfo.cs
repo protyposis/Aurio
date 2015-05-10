@@ -5,9 +5,8 @@ using System.Runtime.InteropServices;
 
 // http://stackoverflow.com/questions/62353/what-are-the-best-practices-for-using-assembly-attributes
 
-[assembly: AssemblyProduct("AudioAlign")]
-[assembly: AssemblyCompany("Mario Guggenberger")]
-[assembly: AssemblyCopyright("Copyright © 2011-2012 Mario Guggenberger")]
+[assembly: AssemblyCompany("Mario Guggenberger / protyposis.net")]
+[assembly: AssemblyProduct("AudioAlign Audio Processing, Analysis and Retrieval Library http://protyposis.net")]
 //[assembly: AssemblyTrademark("")]
 
 #if DEBUG

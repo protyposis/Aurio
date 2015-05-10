@@ -6,7 +6,8 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("AudioAlign.FFTW")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("AudioAlign FFTW Interface")]
+[assembly: AssemblyCopyright("Copyright © 2011-2015 Mario Guggenberger")]
 
 
 // Setting ComVisible to false makes the types in this assembly not visible 

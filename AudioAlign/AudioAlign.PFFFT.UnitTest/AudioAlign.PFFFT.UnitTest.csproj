@@ -89,6 +89,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="PffftTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
