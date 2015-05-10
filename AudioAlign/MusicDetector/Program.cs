@@ -12,6 +12,13 @@ namespace MusicDetector {
 
             if (args.Length == 0) {
                 Console.WriteLine("no file(s) specified");
+                Console.WriteLine();
+                Console.WriteLine("Usage: MusicDetector file_1 file_2 ... file_n");
+                Console.WriteLine("");
+                Console.WriteLine("This tool expects at least one file, either specified as filename or " +
+                                  "filename wildcard pattern. It scans all files for music content and writes " +
+                                  "detection results in separate text files named {file_x}.music. Errors are logged " +
+                                  "to a seperate error.log text file.");
                 return;
             }
 
