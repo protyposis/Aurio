@@ -132,6 +132,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResamplingStreamTest.cs" />
     <Compile Include="UndirectedGraphTest.cs" />
+    <Compile Include="SineGeneratorStreamTest.cs" />
     <Compile Include="VolumeUtilTest.cs" />
   </ItemGroup>
   <ItemGroup>

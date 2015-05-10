@@ -54,5 +54,23 @@ namespace AudioAlign.Audio {
             }
             return value;
         }
+
+        /// <summary>
+        /// Reads all bytes until the end of the stream and returns the number of bytes read.
+        /// </summary>
+        /// <remarks>
+        /// This method is intended for testing and debugging.
+        /// </remarks>
+        public static long ReadAllAndCount(IAudioStream s) {
+            var temp = new byte[1024*1024];
+            long totalBytesRead = 0;
+            int bytesRead;
+
+            while ((bytesRead = s.Read(temp, 0, temp.Length)) > 0) {
+                totalBytesRead += bytesRead;
+            }
+
+            return totalBytesRead;
+        }
     }
 }
