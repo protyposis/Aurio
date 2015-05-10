@@ -212,6 +212,7 @@
     <Compile Include="Streams\AudioFormat.cs" />
     <Compile Include="Streams\AudioProperties.cs" />
     <Compile Include="Streams\BufferedStream.cs" />
+    <Compile Include="Streams\ConcatenationStream.cs" />
     <Compile Include="Streams\CropStream.cs" />
     <Compile Include="Streams\DataMonitorStream.cs" />
     <Compile Include="Streams\DebugStream.cs" />
