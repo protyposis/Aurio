@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -26,18 +27,30 @@ namespace WaveCutter {
         private BackgroundWorker bw;
 
         public MainWindow() {
+            Parameters = new Parameters {
+                MinLength = 180,
+                MaxLength = 600,
+                SourceFiles = new ObservableCollection<FileInfo>()
+            };
+
             InitializeComponent();
         }
+
+        public Parameters Parameters { get; set; }
 
         private void openFileButton_Click(object sender, RoutedEventArgs e) {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.DefaultExt = ".wav";
             dlg.Filter = "Wave files|*.wav";
-            dlg.Multiselect = false;
+            dlg.Multiselect = true;
 
             if (dlg.ShowDialog() == true) {
-                //dlg.FileName
+                dlg.FileNames.ToList().ForEach(f => Parameters.SourceFiles.Add(new FileInfo(f)));
+            }
+        }
 
+        private void executeButton_Click(object sender, RoutedEventArgs e) {
+            if (Parameters.SourceFiles.Count > 0) {
                 bw = new BackgroundWorker();
                 bw.WorkerReportsProgress = true;
                 bw.WorkerSupportsCancellation = true;
@@ -47,27 +60,23 @@ namespace WaveCutter {
 
                 openFileButton.IsEnabled = false;
                 cancelButton.IsEnabled = true;
-                fileNameLabel.Content = dlg.FileName;
 
-                bw.RunWorkerAsync(new Parameters {
-                    MinLength = int.Parse(minLengthText.Text),
-                    MaxLength = int.Parse(maxLengthText.Text),
-                    SourceFileName = dlg.FileName
-                });
+                bw.RunWorkerAsync(Parameters);
             }
         }
 
         private void bw_DoWork(object sender, DoWorkEventArgs e) {
             BackgroundWorker worker = sender as BackgroundWorker;
             Parameters parameters = (Parameters)e.Argument;
-            FileInfo sourceFileInfo = new FileInfo(parameters.SourceFileName);
+
+            var streams = parameters.SourceFiles.Select(fi => AudioStreamFactory.FromFileInfo(fi));
 
             // load source stream
-            IAudioStream sourceStream = AudioStreamFactory.FromFileInfo(sourceFileInfo);
-            Debug.WriteLine("source stream properties: " + sourceStream.Properties);
+            var sourceStream = new ConcatenationStream(streams.ToArray());
 
-            string targetFileNamePrefix = sourceFileInfo.FullName.Remove(sourceFileInfo.FullName.Length - sourceFileInfo.Extension.Length);
-            string targetFileNameSuffix = sourceFileInfo.Extension;
+            var firstFile = parameters.SourceFiles.First();
+            string targetFileNamePrefix = firstFile.FullName.Remove(firstFile.FullName.Length - firstFile.Extension.Length);
+            string targetFileNameSuffix = firstFile.Extension;
 
             int partCount = 0;
             Random random = new Random();
@@ -99,7 +108,7 @@ namespace WaveCutter {
             openFileButton.IsEnabled = true;
             cancelButton.IsEnabled = false;
             progressBar1.Value = 0;
-            fileNameLabel.Content = "";
+            Parameters.SourceFiles.Clear();
         }
 
         private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e) {
