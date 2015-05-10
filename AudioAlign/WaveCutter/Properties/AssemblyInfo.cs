@@ -7,8 +7,7 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WaveCutter")]
-[assembly: AssemblyDescription("Wave File Cutting Tool powered by AudioAlign")]
+[assembly: AssemblyTitle("WaveCutter Wave File Cutting Tool powered by AudioAlign")]
 [assembly: AssemblyCopyright("Copyright © 2011 Mario Guggenberger")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
