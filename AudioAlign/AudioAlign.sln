@@ -35,10 +35,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign.Audio.UnitTest",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0AF26727-F1F0-4DA1-A9C8-6DDCCF1F1E56}"
 	ProjectSection(SolutionItems) = preProject
-		AudioAlign.vsmdi = AudioAlign.vsmdi
 		GlobalAssemblyInfo.cs = GlobalAssemblyInfo.cs
-		Local.testsettings = Local.testsettings
-		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exocortex.DSP", "..\ExocortexDSP\Exocortex.DSP.csproj", "{1904A41B-D1B8-40E5-ADBB-728DDCF7C816}"
