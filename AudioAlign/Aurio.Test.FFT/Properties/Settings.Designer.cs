@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AudioAlign.Test.FFT.Properties {
+namespace Aurio.Test.FFT.Properties {
 
 
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

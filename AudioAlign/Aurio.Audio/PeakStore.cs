@@ -5,11 +5,11 @@ using System.Text;
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace AudioAlign.Audio {
+namespace Aurio.Audio {
     public class PeakStore {
 
         private static readonly int PEAK_BYTE_SIZE;
-        private static readonly char[] MAGICNUMBER = { 'A', 'A', 'P', 'K' }; // AudioAlignPeaKfile
+        private static readonly char[] MAGICNUMBER = { 'A', 'A', 'P', 'K' }; // AurioPeaKfile
 
         /// <summary>
         /// The first file format didn't have a header and just contained the raw peaks.

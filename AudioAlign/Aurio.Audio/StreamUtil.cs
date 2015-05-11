@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 
-namespace AudioAlign.Audio {
+namespace Aurio.Audio {
     public static class StreamUtil {
 
         public static int ForceRead(IAudioStream audioStream, byte[] buffer, int offset, int count) {

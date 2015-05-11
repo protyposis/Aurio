@@ -5,7 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 
-namespace AudioAlign.Test.FingerprintingWang2003 {
+namespace Aurio.Test.FingerprintingWang2003 {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>

@@ -8,8 +8,8 @@
     <ProjectGuid>{38F3B4F3-9739-4FE2-A6F3-41436D6297D0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudioAlign.Test.FingerprintingHaitsmaKalker2002</RootNamespace>
-    <AssemblyName>AudioAlign.Test.FingerprintingHaitsmaKalker2002</AssemblyName>
+    <RootNamespace>Aurio.Test.FingerprintingHaitsmaKalker2002</RootNamespace>
+    <AssemblyName>Aurio.Test.FingerprintingHaitsmaKalker2002</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -41,7 +41,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <CodeAnalysisLogFile>bin\Debug\AudioAlign.Test.Fingerprinting.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisLogFile>bin\Debug\Aurio.Test.Fingerprinting.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
@@ -55,7 +55,7 @@
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
-    <CodeAnalysisLogFile>bin\Release\AudioAlign.Test.Fingerprinting.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisLogFile>bin\Release\Aurio.Test.Fingerprinting.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
@@ -69,7 +69,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisLogFile>bin\Debug\AudioAlign.Test.Fingerprinting.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisLogFile>bin\Debug\Aurio.Test.Fingerprinting.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
@@ -85,7 +85,7 @@
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisLogFile>bin\Release\AudioAlign.Test.Fingerprinting.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisLogFile>bin\Release\Aurio.Test.Fingerprinting.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
@@ -163,17 +163,17 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AudioAlign.Audio\AudioAlign.Audio.csproj">
+    <ProjectReference Include="..\Aurio.Audio\Aurio.Audio.csproj">
       <Project>{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}</Project>
-      <Name>AudioAlign.Audio</Name>
+      <Name>Aurio.Audio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AudioAlign.FFTW\AudioAlign.FFTW.csproj">
+    <ProjectReference Include="..\Aurio.FFTW\Aurio.FFTW.csproj">
       <Project>{880F644B-5370-47D6-A4B6-F98338073631}</Project>
-      <Name>AudioAlign.FFTW</Name>
+      <Name>Aurio.FFTW</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AudioAlign.Soxr\AudioAlign.Soxr.csproj">
+    <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj">
       <Project>{24228071-5e72-4ba8-90e3-89de331a718c}</Project>
-      <Name>AudioAlign.Soxr</Name>
+      <Name>Aurio.Soxr</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

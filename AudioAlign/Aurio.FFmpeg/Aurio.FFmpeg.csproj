@@ -7,8 +7,8 @@
     <ProjectGuid>{8A1A603C-7005-4CC0-9AB7-E6FD3F58F621}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudioAlign.FFmpeg</RootNamespace>
-    <AssemblyName>AudioAlign.FFmpeg</AssemblyName>
+    <RootNamespace>Aurio.FFmpeg</RootNamespace>
+    <AssemblyName>Aurio.FFmpeg</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -87,43 +87,43 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\AudioAlign.FFmpeg.Proxy32\bin\Debug\AudioAlign.FFmpeg.Proxy32.dll">
-      <Link>ffmpeg32\AudioAlign.FFmpeg.Proxy32.dll</Link>
+    <Content Include="..\Aurio.FFmpeg.Proxy32\bin\Debug\Aurio.FFmpeg.Proxy32.dll">
+      <Link>ffmpeg32\Aurio.FFmpeg.Proxy32.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\AudioAlign.FFmpeg.Proxy32\bin\Debug\avcodec-56.dll">
+    <Content Include="..\Aurio.FFmpeg.Proxy32\bin\Debug\avcodec-56.dll">
       <Link>ffmpeg32\avcodec-56.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\AudioAlign.FFmpeg.Proxy32\bin\Debug\avformat-56.dll">
+    <Content Include="..\Aurio.FFmpeg.Proxy32\bin\Debug\avformat-56.dll">
       <Link>ffmpeg32\avformat-56.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\AudioAlign.FFmpeg.Proxy32\bin\Debug\avutil-54.dll">
+    <Content Include="..\Aurio.FFmpeg.Proxy32\bin\Debug\avutil-54.dll">
       <Link>ffmpeg32\avutil-54.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\AudioAlign.FFmpeg.Proxy32\bin\Debug\swresample-1.dll">
+    <Content Include="..\Aurio.FFmpeg.Proxy32\bin\Debug\swresample-1.dll">
       <Link>ffmpeg32\swresample-1.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\AudioAlign.FFmpeg.Proxy64\bin\Debug\AudioAlign.FFmpeg.Proxy64.dll">
-      <Link>ffmpeg64\AudioAlign.FFmpeg.Proxy64.dll</Link>
+    <Content Include="..\Aurio.FFmpeg.Proxy64\bin\Debug\Aurio.FFmpeg.Proxy64.dll">
+      <Link>ffmpeg64\Aurio.FFmpeg.Proxy64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\AudioAlign.FFmpeg.Proxy64\bin\Debug\avcodec-56.dll">
+    <Content Include="..\Aurio.FFmpeg.Proxy64\bin\Debug\avcodec-56.dll">
       <Link>ffmpeg64\avcodec-56.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\AudioAlign.FFmpeg.Proxy64\bin\Debug\avformat-56.dll">
+    <Content Include="..\Aurio.FFmpeg.Proxy64\bin\Debug\avformat-56.dll">
       <Link>ffmpeg64\avformat-56.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\AudioAlign.FFmpeg.Proxy64\bin\Debug\avutil-54.dll">
+    <Content Include="..\Aurio.FFmpeg.Proxy64\bin\Debug\avutil-54.dll">
       <Link>ffmpeg64\avutil-54.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\AudioAlign.FFmpeg.Proxy64\bin\Debug\swresample-1.dll">
+    <Content Include="..\Aurio.FFmpeg.Proxy64\bin\Debug\swresample-1.dll">
       <Link>ffmpeg64\swresample-1.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

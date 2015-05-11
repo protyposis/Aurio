@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Project;
+using Aurio.Audio.Project;
 using NAudio.Wave;
 using System.Timers;
 using System.Diagnostics;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 using NAudio.CoreAudioApi;
-using AudioAlign.Audio.TaskMonitor;
+using Aurio.Audio.TaskMonitor;
 
-namespace AudioAlign.Audio {
+namespace Aurio.Audio {
     public class MultitrackPlayer : IDisposable {
 
         public event EventHandler PlaybackStateChanged;
@@ -176,7 +176,7 @@ namespace AudioAlign.Audio {
              * with the target samplerate to avoid NAudio's internal ResamplerDmoStream for the target
              * samplerate conversion. ResamplerDmoStream works strangely and often requests zero bytes
              * from the audio pipeline which makes the playback stop and screws up the whole playback
-             * in AudioAlign. */
+             * in Aurio. */
             MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
             MMDevice mmdevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
 

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Project;
-using AudioAlign.Audio.Streams;
-using AudioAlign.Audio;
+using Aurio.Audio.Project;
+using Aurio.Audio.Streams;
+using Aurio.Audio;
 using System.IO;
 
-namespace AudioAlign.Audio.Features.ContinuousFrequencyActivation {
+namespace Aurio.Audio.Features.ContinuousFrequencyActivation {
     /// <summary>
     /// Continuous Frequency Activation
     /// 

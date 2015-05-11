@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace AudioAlign.Audio.Project {
+namespace Aurio.Audio.Project {
     public class VideoTrack : Track {
 
         public VideoTrack(FileInfo fileInfo)

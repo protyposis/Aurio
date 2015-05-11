@@ -5,10 +5,10 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.ComponentModel;
-using AudioAlign.Audio;
-using AudioAlign.Audio.Project;
+using Aurio.Audio;
+using Aurio.Audio.Project;
 
-namespace AudioAlign.WaveControls
+namespace Aurio.WaveControls
 {
     public partial class WaveView {
 

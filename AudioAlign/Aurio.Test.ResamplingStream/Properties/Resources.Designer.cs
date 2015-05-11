@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AudioAlign.Test.ResamplingStream.Properties {
+namespace Aurio.Test.ResamplingStream.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace AudioAlign.Test.ResamplingStream.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AudioAlign.Test.ResamplingStream.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Aurio.Test.ResamplingStream.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

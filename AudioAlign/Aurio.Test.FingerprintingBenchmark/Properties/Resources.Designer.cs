@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AudioAlign.Test.FingerprintingBenchmark.Properties {
+namespace Aurio.Test.FingerprintingBenchmark.Properties {
 
 
     /// <summary>
@@ -38,7 +38,7 @@ namespace AudioAlign.Test.FingerprintingBenchmark.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if ((resourceMan == null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AudioAlign.Test.FingerprintingBenchmark.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Aurio.Test.FingerprintingBenchmark.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

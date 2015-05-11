@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{11C4D931-21A8-44DD-8093-E98CACD13468}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>AudioAlignFFmpegProxy64</RootNamespace>
+    <RootNamespace>AurioFFmpegProxy64</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -100,10 +100,10 @@ copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\swresample-1.dll $(OutDir)</Command
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\AudioAlign.FFmpeg.Proxy32\proxy.c" />
+    <ClCompile Include="..\Aurio.FFmpeg.Proxy32\proxy.c" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\AudioAlign.FFmpeg.Proxy32\bitdepths.txt" />
+    <Text Include="..\Aurio.FFmpeg.Proxy32\bitdepths.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

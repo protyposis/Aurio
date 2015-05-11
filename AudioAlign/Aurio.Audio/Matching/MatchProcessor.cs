@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Project;
+using Aurio.Audio.Project;
 using System.Diagnostics;
-using AudioAlign.Audio.Streams;
-using AudioAlign.Audio.DataStructures.Graph;
+using Aurio.Audio.Streams;
+using Aurio.Audio.DataStructures.Graph;
 
-namespace AudioAlign.Audio.Matching {
+namespace Aurio.Audio.Matching {
     public class MatchProcessor {
 
         /// <summary>

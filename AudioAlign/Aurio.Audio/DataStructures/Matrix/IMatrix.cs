@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.DataStructures.Matrix {
+namespace Aurio.Audio.DataStructures.Matrix {
     /// <summary>
     /// Common interface for (sparse) matrix implementations.
     /// </summary>

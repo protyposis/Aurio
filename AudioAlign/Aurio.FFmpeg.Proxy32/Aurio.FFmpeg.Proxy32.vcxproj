@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{950C1FC8-EC9F-457D-854C-5361FA61B267}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>AudioAlignFFmpegProxy32</RootNamespace>
+    <RootNamespace>AurioFFmpegProxy32</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -7,8 +7,8 @@
     <ProjectGuid>{84A2C4C9-874C-47E7-8397-47D5ED8C00D4}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudioAlign.Test.FingerprintingBenchmark</RootNamespace>
-    <AssemblyName>AudioAlign.Test.FingerprintingBenchmark</AssemblyName>
+    <RootNamespace>Aurio.Test.FingerprintingBenchmark</RootNamespace>
+    <AssemblyName>Aurio.Test.FingerprintingBenchmark</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -131,21 +131,21 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AudioAlign.Audio\AudioAlign.Audio.csproj">
+    <ProjectReference Include="..\Aurio.Audio\Aurio.Audio.csproj">
       <Project>{e868d91e-c5cf-46e4-be2f-f95353acb5e2}</Project>
-      <Name>AudioAlign.Audio</Name>
+      <Name>Aurio.Audio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AudioAlign.FFmpeg\AudioAlign.FFmpeg.csproj">
+    <ProjectReference Include="..\Aurio.FFmpeg\Aurio.FFmpeg.csproj">
       <Project>{8a1a603c-7005-4cc0-9ab7-e6fd3f58f621}</Project>
-      <Name>AudioAlign.FFmpeg</Name>
+      <Name>Aurio.FFmpeg</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AudioAlign.PFFFT\AudioAlign.PFFFT.csproj">
+    <ProjectReference Include="..\Aurio.PFFFT\Aurio.PFFFT.csproj">
       <Project>{3960f81d-5aea-4f36-a26c-f295dff3fcb6}</Project>
-      <Name>AudioAlign.PFFFT</Name>
+      <Name>Aurio.PFFFT</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AudioAlign.Soxr\AudioAlign.Soxr.csproj">
+    <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj">
       <Project>{24228071-5e72-4ba8-90e3-89de331a718c}</Project>
-      <Name>AudioAlign.Soxr</Name>
+      <Name>Aurio.Soxr</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

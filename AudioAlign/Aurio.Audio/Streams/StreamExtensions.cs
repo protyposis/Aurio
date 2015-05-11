@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 
-namespace AudioAlign.Audio.Streams {
+namespace Aurio.Audio.Streams {
     public static class StreamExtensions {
         /// <summary>
         /// Searches for a stream of a given type in a hierarchy of nested streams.

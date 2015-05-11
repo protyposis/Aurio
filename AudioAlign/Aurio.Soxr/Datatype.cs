@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Soxr {
+namespace Aurio.Soxr {
     enum Datatype : uint {
         SOXR_FLOAT32_I = 0,
         SOXR_FLOAT64_I,

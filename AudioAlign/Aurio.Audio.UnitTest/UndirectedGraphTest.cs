@@ -1,8 +1,8 @@
-﻿using AudioAlign.Audio.DataStructures.Graph;
+﻿using Aurio.Audio.DataStructures.Graph;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace AudioAlign.Audio.UnitTest
+namespace Aurio.Audio.UnitTest
 {
     
     

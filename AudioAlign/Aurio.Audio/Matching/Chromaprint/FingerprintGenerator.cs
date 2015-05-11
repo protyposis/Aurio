@@ -1,13 +1,13 @@
-﻿using AudioAlign.Audio.DataStructures;
-using AudioAlign.Audio.Features;
-using AudioAlign.Audio.Project;
-using AudioAlign.Audio.Streams;
+﻿using Aurio.Audio.DataStructures;
+using Aurio.Audio.Features;
+using Aurio.Audio.Project;
+using Aurio.Audio.Streams;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Chromaprint {
+namespace Aurio.Audio.Matching.Chromaprint {
     /// <summary>
     /// Chromaprint fingerprint generator as described in:
     /// - https://oxygene.sk/2010/07/introducing-chromaprint/

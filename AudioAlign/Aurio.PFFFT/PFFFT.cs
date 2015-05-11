@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace AudioAlign.PFFFT {
+namespace Aurio.PFFFT {
     public unsafe class PFFFT : IDisposable {
 
         private int size;
@@ -33,7 +33,7 @@ namespace AudioAlign.PFFFT {
 
         private void Transform(float* input, float* output, Direction direction) {
             // The non-ordered transform pffft_transform may be faster, 
-            // but all AudioAlign algorithms expect the canonical ordered form
+            // but all Aurio algorithms expect the canonical ordered form
             InteropWrapper.pffft_transform_ordered(setup, input, output, null, direction);
         }
 

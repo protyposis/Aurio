@@ -1,11 +1,11 @@
-﻿using AudioAlign.Audio.DataStructures;
-using AudioAlign.Audio.Streams;
+﻿using Aurio.Audio.DataStructures;
+using Aurio.Audio.Streams;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Echoprint {
+namespace Aurio.Audio.Matching.Echoprint {
     /// <summary>
     /// Whitens a stream by calculating an LPC filter block by block from the autocorrelation, 
     /// effectively removing stationary frequencies from the stream. This can be used to analyze

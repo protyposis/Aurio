@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AudioAlign.Test.Streams.Properties {
+namespace Aurio.Test.Streams.Properties {
 
 
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

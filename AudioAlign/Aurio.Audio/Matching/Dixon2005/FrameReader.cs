@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 using System.Diagnostics;
-using AudioAlign.Audio.Features;
+using Aurio.Audio.Features;
 
-namespace AudioAlign.Audio.Matching.Dixon2005 {
+namespace Aurio.Audio.Matching.Dixon2005 {
     /// <summary>
     /// Audio frame reader for the OLTW algorithm.
     /// Inspiration taken from reverse engineered MATCH - PerformanceMatcher GetFrame() / ProcessFrame()

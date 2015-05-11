@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace AudioAlign.PFFFT {
+namespace Aurio.PFFFT {
     internal unsafe class Interop64 {
 
         private const string PFFFTLIB = "pffft.x64.dll";

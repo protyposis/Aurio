@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Streams;
-using AudioAlign.Audio.TaskMonitor;
+using Aurio.Audio.Streams;
+using Aurio.Audio.TaskMonitor;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
-using AudioAlign.Audio.DataStructures;
-using AudioAlign.Audio.DataStructures.Matrix;
+using Aurio.Audio.DataStructures;
+using Aurio.Audio.DataStructures.Matrix;
 
-namespace AudioAlign.Audio.Matching.Dixon2005 {
+namespace Aurio.Audio.Matching.Dixon2005 {
     /// <summary>
     /// On-line Time Warping
     /// - Dixon, Simon. "An On-Line Time Warping Algorithm for Tracking Musical Performances." IJCAI. 2005.

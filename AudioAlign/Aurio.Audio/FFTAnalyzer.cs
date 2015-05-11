@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 
-namespace AudioAlign.Audio {
+namespace Aurio.Audio {
     public class FFTAnalyzer {
 
         public event EventHandler<ValueEventArgs<float[]>> WindowAnalyzed;

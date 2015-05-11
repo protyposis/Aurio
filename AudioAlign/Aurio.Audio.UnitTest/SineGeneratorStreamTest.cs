@@ -1,8 +1,8 @@
 ﻿using System;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AudioAlign.Audio.UnitTest {
+namespace Aurio.Audio.UnitTest {
     [TestClass]
     public class SineGeneratorStreamTest {
         [TestMethod]

@@ -1,7 +1,7 @@
-﻿using AudioAlign.Audio;
-using AudioAlign.Audio.Matching;
-using AudioAlign.Audio.Project;
-using AudioAlign.Audio.TaskMonitor;
+﻿using Aurio.Audio;
+using Aurio.Audio.Matching;
+using Aurio.Audio.Project;
+using Aurio.Audio.TaskMonitor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,7 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AudioAlign.Test.FingerprintingBenchmark {
+namespace Aurio.Test.FingerprintingBenchmark {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -103,9 +103,9 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkHaitsmaKalker(AudioTrack track) {
-            var profile = AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator.GetProfiles()[0];
-            var store = new AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintStore(profile);
-            var gen = new AudioAlign.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator(profile, track);
+            var profile = Aurio.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator.GetProfiles()[0];
+            var store = new Aurio.Audio.Matching.HaitsmaKalker2002.FingerprintStore(profile);
+            var gen = new Aurio.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator(profile, track);
 
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("HaitsmaKalker2002", true);
             int hashCount = 0;
@@ -127,9 +127,9 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkWang(AudioTrack track) {
-            var profile = AudioAlign.Audio.Matching.Wang2003.FingerprintGenerator.GetProfiles()[0];
-            var store = new AudioAlign.Audio.Matching.Wang2003.FingerprintStore(profile);
-            var gen = new AudioAlign.Audio.Matching.Wang2003.FingerprintGenerator(profile);
+            var profile = Aurio.Audio.Matching.Wang2003.FingerprintGenerator.GetProfiles()[0];
+            var store = new Aurio.Audio.Matching.Wang2003.FingerprintStore(profile);
+            var gen = new Aurio.Audio.Matching.Wang2003.FingerprintGenerator(profile);
 
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Wang2003", true);
             int hashCount = 0;
@@ -151,9 +151,9 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkEchoprint(AudioTrack track) {
-            var profile = AudioAlign.Audio.Matching.Echoprint.FingerprintGenerator.GetProfiles()[0];
-            var store = new AudioAlign.Audio.Matching.Echoprint.FingerprintStore(profile);
-            var gen = new AudioAlign.Audio.Matching.Echoprint.FingerprintGenerator(profile);
+            var profile = Aurio.Audio.Matching.Echoprint.FingerprintGenerator.GetProfiles()[0];
+            var store = new Aurio.Audio.Matching.Echoprint.FingerprintStore(profile);
+            var gen = new Aurio.Audio.Matching.Echoprint.FingerprintGenerator(profile);
 
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Echoprint", true);
             int hashCount = 0;
@@ -175,9 +175,9 @@ namespace AudioAlign.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkChromaprint(AudioTrack track) {
-            var profile = AudioAlign.Audio.Matching.Chromaprint.FingerprintGenerator.GetProfiles()[0];
-            var store = new AudioAlign.Audio.Matching.Chromaprint.FingerprintStore(profile);
-            var gen = new AudioAlign.Audio.Matching.Chromaprint.FingerprintGenerator(profile);
+            var profile = Aurio.Audio.Matching.Chromaprint.FingerprintGenerator.GetProfiles()[0];
+            var store = new Aurio.Audio.Matching.Chromaprint.FingerprintStore(profile);
+            var gen = new Aurio.Audio.Matching.Chromaprint.FingerprintGenerator(profile);
 
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Chromaprint", true);
             int hashCount = 0;

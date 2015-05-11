@@ -3,9 +3,9 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AudioAlign.Audio;
+using Aurio.Audio;
 
-namespace AudioAlign.Audio.UnitTest {
+namespace Aurio.Audio.UnitTest {
     [TestClass]
     public class AudioBufferTest {
         [TestMethod]

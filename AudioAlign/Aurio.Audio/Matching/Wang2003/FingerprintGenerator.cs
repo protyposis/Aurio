@@ -1,14 +1,14 @@
-﻿using AudioAlign.Audio.DataStructures;
-using AudioAlign.Audio.Features;
-using AudioAlign.Audio.Project;
-using AudioAlign.Audio.Streams;
+﻿using Aurio.Audio.DataStructures;
+using Aurio.Audio.Features;
+using Aurio.Audio.Project;
+using Aurio.Audio.Streams;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Wang2003 {
+namespace Aurio.Audio.Matching.Wang2003 {
     /// <summary>
     /// Generates fingerprints according to what is described in:
     /// - Wang, Avery. "An Industrial Strength Audio Search Algorithm." ISMIR. 2003.

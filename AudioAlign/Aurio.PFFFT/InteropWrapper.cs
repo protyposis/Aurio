@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.PFFFT {
+namespace Aurio.PFFFT {
     internal unsafe class InteropWrapper {
 
         public delegate IntPtr d_pffft_new_setup(int size, Transform transform);

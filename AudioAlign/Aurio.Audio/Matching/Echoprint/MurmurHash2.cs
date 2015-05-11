@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Echoprint {
+namespace Aurio.Audio.Matching.Echoprint {
     /// <summary>
     /// MurmurHash2, by Austin Appleby
     /// http://sites.google.com/site/murmurhash

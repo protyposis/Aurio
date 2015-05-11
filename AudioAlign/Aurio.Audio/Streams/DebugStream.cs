@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 
-namespace AudioAlign.Audio.Streams {
+namespace Aurio.Audio.Streams {
     public class DebugStream : AbstractAudioStreamWrapper {
 
         private long totalBytesRead;

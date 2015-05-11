@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.PFFFT {
+namespace Aurio.PFFFT {
     public enum Transform : uint {
         Real,
         Complex

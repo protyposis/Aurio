@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Soxr {
+namespace Aurio.Soxr {
     [Flags]
     public enum RuntimeFlags : uint {
         /// <summary>

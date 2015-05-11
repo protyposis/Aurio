@@ -1,10 +1,10 @@
-﻿using AudioAlign.Audio.Features;
+﻿using Aurio.Audio.Features;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Chromaprint {
+namespace Aurio.Audio.Matching.Chromaprint {
     class DefaultProfile : Profile {
         public DefaultProfile() {
             Name = "Chromaprint default";

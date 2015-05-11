@@ -1,13 +1,13 @@
-﻿using AudioAlign.Audio.DataStructures;
-using AudioAlign.Audio.Project;
-using AudioAlign.Audio.Streams;
+﻿using Aurio.Audio.DataStructures;
+using Aurio.Audio.Project;
+using Aurio.Audio.Streams;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Echoprint {
+namespace Aurio.Audio.Matching.Echoprint {
     /// <summary>
     /// Echoprint code generator as described in:
     /// - Ellis, Daniel PW, Brian Whitman, and Alastair Porter. "Echoprint: 

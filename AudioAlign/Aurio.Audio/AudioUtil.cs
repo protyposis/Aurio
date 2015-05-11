@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 
-namespace AudioAlign.Audio {
+namespace Aurio.Audio {
     public static class AudioUtil {
         /// <summary>
         /// Calculates the length of a sample in units of ticks. Results is a floating point number as it

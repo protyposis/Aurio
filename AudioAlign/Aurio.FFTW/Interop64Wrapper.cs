@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.FFTW {
+namespace Aurio.FFTW {
     internal class Interop64Wrapper :IInteropWrapper {
         #region IInteropWrapper Members
 

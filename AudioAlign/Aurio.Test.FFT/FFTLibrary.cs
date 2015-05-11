@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Test.FFT {
+namespace Aurio.Test.FFT {
     enum FFTLibrary {
         ExocortexDSP,
         FFTW,

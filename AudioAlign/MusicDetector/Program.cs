@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using AudioAlign.Audio.Project;
-using AudioAlign.Audio.Features.ContinuousFrequencyActivation;
+using Aurio.Audio.Project;
+using Aurio.Audio.Features.ContinuousFrequencyActivation;
 
 namespace MusicDetector {
     class Program {

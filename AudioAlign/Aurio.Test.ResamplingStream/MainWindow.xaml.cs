@@ -1,8 +1,8 @@
 ﻿using System.Windows;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 using NAudio.Wave;
 
-namespace AudioAlign.Test.ResamplingStream {
+namespace Aurio.Test.ResamplingStream {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>

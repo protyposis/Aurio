@@ -5,7 +5,7 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
-namespace AudioAlign.Audio.Streams {
+namespace Aurio.Audio.Streams {
     public class TimeWarpCollection : ObservableCollection<TimeWarp> {
 
         private bool sorting = false;

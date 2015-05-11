@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace AudioAlign.Audio.Features {
+namespace Aurio.Audio.Features {
     /// <summary>
     /// Reads consecutive windows from a stream, specified by the window size and hop size.
     /// </summary>

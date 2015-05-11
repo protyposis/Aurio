@@ -7,8 +7,8 @@
     <ProjectGuid>{FF2B695C-7567-4DDD-A8F4-E16BE2E49A65}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudioAlign.Test.FingerprintingWang2003</RootNamespace>
-    <AssemblyName>AudioAlign.Test.FingerprintingWang2003</AssemblyName>
+    <RootNamespace>Aurio.Test.FingerprintingWang2003</RootNamespace>
+    <AssemblyName>Aurio.Test.FingerprintingWang2003</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -130,21 +130,21 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AudioAlign.Audio\AudioAlign.Audio.csproj">
+    <ProjectReference Include="..\Aurio.Audio\Aurio.Audio.csproj">
       <Project>{e868d91e-c5cf-46e4-be2f-f95353acb5e2}</Project>
-      <Name>AudioAlign.Audio</Name>
+      <Name>Aurio.Audio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AudioAlign.PFFFT\AudioAlign.PFFFT.csproj">
+    <ProjectReference Include="..\Aurio.PFFFT\Aurio.PFFFT.csproj">
       <Project>{3960f81d-5aea-4f36-a26c-f295dff3fcb6}</Project>
-      <Name>AudioAlign.PFFFT</Name>
+      <Name>Aurio.PFFFT</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AudioAlign.Soxr\AudioAlign.Soxr.csproj">
+    <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj">
       <Project>{24228071-5e72-4ba8-90e3-89de331a718c}</Project>
-      <Name>AudioAlign.Soxr</Name>
+      <Name>Aurio.Soxr</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AudioAlign.WaveControls\AudioAlign.WaveControls.csproj">
+    <ProjectReference Include="..\Aurio.WaveControls\Aurio.WaveControls.csproj">
       <Project>{fd0c6cc5-b509-4441-9aa2-e8b34bad9f95}</Project>
-      <Name>AudioAlign.WaveControls</Name>
+      <Name>Aurio.WaveControls</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

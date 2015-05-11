@@ -7,7 +7,7 @@ using SoxrInstance = System.IntPtr;
 using SoxrError = System.IntPtr;
 using System.Runtime.InteropServices;
 
-namespace AudioAlign.Soxr {
+namespace Aurio.Soxr {
     internal unsafe class InteropWrapper {
 
         /* 

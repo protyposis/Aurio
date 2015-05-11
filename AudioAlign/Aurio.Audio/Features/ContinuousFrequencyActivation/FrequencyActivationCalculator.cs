@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 
-namespace AudioAlign.Audio.Features.ContinuousFrequencyActivation {
+namespace Aurio.Audio.Features.ContinuousFrequencyActivation {
     class FrequencyActivationCalculator : Binarizer {
 
         private const int BLOCK_SIZE = 100; // F, frames = ~ 2,6 secs

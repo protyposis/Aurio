@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AudioAlign.Soxr.UnitTest {
+namespace Aurio.Soxr.UnitTest {
     [TestClass]
     public class SoxResamplerTest {
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Soxr {
+namespace Aurio.Soxr {
     public class SoxrException : Exception {
         public SoxrException() : base() { }
         public SoxrException(string message) : base(message) { }

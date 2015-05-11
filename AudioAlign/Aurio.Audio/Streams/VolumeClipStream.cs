@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using NAudio.Wave;
 
-namespace AudioAlign.Audio.Streams {
+namespace Aurio.Audio.Streams {
     public class VolumeClipStream : AbstractAudioStreamWrapper {
 
         public VolumeClipStream(IAudioStream sourceStream)

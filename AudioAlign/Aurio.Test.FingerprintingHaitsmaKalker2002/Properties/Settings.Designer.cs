@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AudioAlign.Test.FingerprintingHaitsmaKalker2002.Properties {
+namespace Aurio.Test.FingerprintingHaitsmaKalker2002.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

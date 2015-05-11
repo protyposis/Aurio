@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 
-namespace AudioAlign.Audio.Features.ContinuousFrequencyActivation {
+namespace Aurio.Audio.Features.ContinuousFrequencyActivation {
     class LocalPeakEmphasizer : PowerSpectrumCalculator {
 
         private const int LOCAL_WINDOW_SIZE = 21;

@@ -1,11 +1,11 @@
-﻿using AudioAlign.Audio.Streams;
+﻿using Aurio.Audio.Streams;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.DataStructures {
+namespace Aurio.Audio.DataStructures {
     static class ByteBufferExtensions {
 
         public static void ResizeIfTooSmall(this ByteBuffer buffer, int count) {

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Project;
+using Aurio.Audio.Project;
 using System.Diagnostics;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 
-namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
+namespace Aurio.Audio.Matching.HaitsmaKalker2002 {
     public class FingerprintStore {
 
         public const int DEFAULT_FINGERPRINT_SIZE = 256;

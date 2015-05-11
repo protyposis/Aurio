@@ -1,8 +1,8 @@
-﻿using AudioAlign.Audio.Streams;
+﻿using Aurio.Audio.Streams;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace AudioAlign.Audio.UnitTest {
+namespace Aurio.Audio.UnitTest {
 
 
     /// <summary>

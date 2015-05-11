@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.DataStructures {
+namespace Aurio.Audio.DataStructures {
     /// <summary>
     /// Base interface for average calculator implementations.
     /// </summary>

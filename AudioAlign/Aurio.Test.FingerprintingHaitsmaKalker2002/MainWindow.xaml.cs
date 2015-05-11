@@ -5,13 +5,13 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using AudioAlign.Audio;
-using AudioAlign.Audio.Matching;
-using AudioAlign.Audio.Matching.HaitsmaKalker2002;
-using AudioAlign.Audio.Project;
-using AudioAlign.Audio.TaskMonitor;
+using Aurio.Audio;
+using Aurio.Audio.Matching;
+using Aurio.Audio.Matching.HaitsmaKalker2002;
+using Aurio.Audio.Project;
+using Aurio.Audio.TaskMonitor;
 
-namespace AudioAlign.Test.FingerprintingHaitsmaKalker2002 {
+namespace Aurio.Test.FingerprintingHaitsmaKalker2002 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>

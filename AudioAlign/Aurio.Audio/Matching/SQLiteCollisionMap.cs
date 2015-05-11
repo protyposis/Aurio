@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SQLite;
-using AudioAlign.Audio.Project;
+using Aurio.Audio.Project;
 using System.Diagnostics;
 
-namespace AudioAlign.Audio.Matching {
+namespace Aurio.Audio.Matching {
     class SQLiteCollisionMap : IFingerprintCollisionMap {
 
         private class DTO {

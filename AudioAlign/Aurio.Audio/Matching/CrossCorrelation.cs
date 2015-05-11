@@ -5,10 +5,10 @@ using System.Text;
 using NAudio.Wave;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using AudioAlign.Audio.TaskMonitor;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.TaskMonitor;
+using Aurio.Audio.Streams;
 
-namespace AudioAlign.Audio.Matching {
+namespace Aurio.Audio.Matching {
     public class CrossCorrelation {
 
         public class Result {

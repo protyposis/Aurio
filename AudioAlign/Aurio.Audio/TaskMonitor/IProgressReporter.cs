@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.TaskMonitor {
+namespace Aurio.Audio.TaskMonitor {
     public interface IProgressReporter {
         string Name { get; }
         bool IsProgressReporting { get; }

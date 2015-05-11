@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Chromaprint {
+namespace Aurio.Audio.Matching.Chromaprint {
     class Quantizer {
 
         private double t0, t1, t2;

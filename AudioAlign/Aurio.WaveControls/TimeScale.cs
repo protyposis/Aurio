@@ -7,9 +7,9 @@ using System.Windows.Media;
 using System.Windows;
 using System.Globalization;
 using System.ComponentModel;
-using AudioAlign.Audio;
+using Aurio.Audio;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     public class TimeScale: VirtualViewBase {
 
         public static readonly DependencyProperty IntervalTextColorProperty;

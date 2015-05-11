@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Project;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Project;
+using Aurio.Audio.Streams;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using AudioAlign.Audio.Features;
+using Aurio.Audio.Features;
 
-namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
+namespace Aurio.Audio.Matching.HaitsmaKalker2002 {
     /// <summary>
     /// Generates fingerprints according to what is described in:
     /// - Haitsma, Jaap, and Ton Kalker. "A highly robust audio fingerprinting system." ISMIR. 2002.

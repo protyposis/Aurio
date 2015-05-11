@@ -14,7 +14,7 @@ using System.Windows.Shapes;
 using System.Windows.Interop;
 using System.Windows.Controls.Primitives;
 
-namespace AudioAlign.Test.HugeControlRendering
+namespace Aurio.Test.HugeControlRendering
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

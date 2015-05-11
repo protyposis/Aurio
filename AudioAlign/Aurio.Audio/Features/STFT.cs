@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 
-namespace AudioAlign.Audio.Features {
+namespace Aurio.Audio.Features {
     /// <summary>
     /// Short-Time Fourier Tranformation
     /// </summary>

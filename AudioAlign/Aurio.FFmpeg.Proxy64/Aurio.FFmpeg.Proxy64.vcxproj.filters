@@ -15,11 +15,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\AudioAlign.FFmpeg.Proxy32\proxy.c">
+    <ClCompile Include="..\Aurio.FFmpeg.Proxy32\proxy.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\AudioAlign.FFmpeg.Proxy32\bitdepths.txt" />
+    <Text Include="..\Aurio.FFmpeg.Proxy32\bitdepths.txt" />
   </ItemGroup>
 </Project>

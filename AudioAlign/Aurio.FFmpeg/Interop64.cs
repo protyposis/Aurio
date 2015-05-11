@@ -4,10 +4,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace AudioAlign.FFmpeg {
+namespace Aurio.FFmpeg {
     internal class Interop64 {
 
-        private const string FFMPEGPROXYLIB = "ffmpeg64\\AudioAlign.FFmpeg.Proxy64.dll";
+        private const string FFMPEGPROXYLIB = "ffmpeg64\\Aurio.FFmpeg.Proxy64.dll";
         private const CallingConvention CC = CallingConvention.Cdecl;
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = CC)]

@@ -5,9 +5,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using AudioAlign.Audio.Matching;
+using Aurio.Audio.Matching;
 
-namespace AudioAlign.Test.FingerprintingHaitsmaKalker2002 {
+namespace Aurio.Test.FingerprintingHaitsmaKalker2002 {
     /// <summary>
     /// Interaction logic for FingerprintView.xaml
     /// </summary>

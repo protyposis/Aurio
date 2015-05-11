@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.LibSampleRate {
+namespace Aurio.LibSampleRate {
     /// <summary>
     /// Secret Rabbit Code has a number of different converters which can be selected using the converter_type parameter when calling 
     /// src_simple or src_new. Currently, the five converters available are: 

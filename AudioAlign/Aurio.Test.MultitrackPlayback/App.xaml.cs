@@ -5,7 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 
-namespace AudioAlign.Test.MultitrackPlayback {
+namespace Aurio.Test.MultitrackPlayback {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>

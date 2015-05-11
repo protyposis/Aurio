@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     public class ColorGradient {
 
         public class Stop {

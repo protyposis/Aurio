@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio {
+namespace Aurio.Audio {
     public static class TimeUtil {
 
         public static readonly long SECS_TO_TICKS;

@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Timers;
 using System.ComponentModel;
 
-namespace AudioAlign.Audio.TaskMonitor {
+namespace Aurio.Audio.TaskMonitor {
     public sealed class ProgressMonitor {
 
         private class ProgressReporter : IProgressReporter {

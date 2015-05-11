@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AudioAlign.Test.HugeControlRendering.Properties
+namespace Aurio.Test.HugeControlRendering.Properties
 {
 
 
@@ -44,7 +44,7 @@ namespace AudioAlign.Test.HugeControlRendering.Properties
             {
                 if ((resourceMan == null))
                 {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AudioAlign.Test.HugeControlRendering.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Aurio.Test.HugeControlRendering.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

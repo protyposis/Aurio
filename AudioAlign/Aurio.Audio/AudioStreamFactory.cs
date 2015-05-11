@@ -6,12 +6,12 @@ using NAudio.Wave;
 using System.IO;
 using System.Threading.Tasks;
 using System.Diagnostics;
-using AudioAlign.Audio.Project;
-using AudioAlign.Audio.TaskMonitor;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Project;
+using Aurio.Audio.TaskMonitor;
+using Aurio.Audio.Streams;
 using System.Collections.Concurrent;
 
-namespace AudioAlign.Audio {
+namespace Aurio.Audio {
     public static class AudioStreamFactory {
 
         private const int SAMPLES_PER_PEAK = 256;

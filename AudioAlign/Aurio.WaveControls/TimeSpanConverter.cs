@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     /// <summary>
     /// Converts a TimeSpan struct to its string representative by formatting it with the format specified by the parameter.
     /// </summary>

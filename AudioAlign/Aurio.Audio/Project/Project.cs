@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Matching;
+using Aurio.Audio.Matching;
 using System.IO;
 using System.Xml.Serialization;
 using System.Xml;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 using System.Globalization;
 using System.Collections.ObjectModel;
 
-namespace AudioAlign.Audio.Project {
+namespace Aurio.Audio.Project {
     public class Project {
 
         public const int FormatVersion = 2;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.DataStructures {
+namespace Aurio.Audio.DataStructures {
     /// <summary>
     /// An exponential moving average calculator.
     /// http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average

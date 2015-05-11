@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Project;
+using Aurio.Audio.Project;
 
-namespace AudioAlign.Audio.Matching {
+namespace Aurio.Audio.Matching {
     public class MatchPair {
 
         public AudioTrack Track1 { get; set; }

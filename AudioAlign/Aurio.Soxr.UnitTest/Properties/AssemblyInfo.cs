@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("AudioAlign SoxResampler Unit Tests")]
+[assembly: AssemblyTitle("Aurio SoxResampler Unit Tests")]
 [assembly: AssemblyCopyright("Copyright © 2010-2015 Mario Guggenberger")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

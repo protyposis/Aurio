@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching {
+namespace Aurio.Audio.Matching {
     /// <summary>
     /// The method with which a match will be chosen from a collection of matches
     /// </summary>

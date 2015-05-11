@@ -8,7 +8,7 @@ using StringPtr = System.IntPtr;
 using SoxrInstance = System.IntPtr;
 using SoxrError = System.IntPtr;
 
-namespace AudioAlign.Soxr {
+namespace Aurio.Soxr {
     //[SuppressUnmanagedCodeSecurity]
     internal unsafe class Interop32 {
 

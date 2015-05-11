@@ -11,13 +11,13 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using AudioAlign.Audio;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio;
+using Aurio.Audio.Streams;
 using Exocortex.DSP;
 using System.Diagnostics;
 using System.IO;
 
-namespace AudioAlign.Test.FFT {
+namespace Aurio.Test.FFT {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>

@@ -1,8 +1,8 @@
-﻿<Window x:Class="AudioAlign.Test.HugeControlRendering.MainWindow"
+﻿<Window x:Class="Aurio.Test.HugeControlRendering.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Huge Control Rendering Imprecision Demo" Height="380" Width="600" 
-        xmlns:my="clr-namespace:AudioAlign.Test.HugeControlRendering"
+        xmlns:my="clr-namespace:Aurio.Test.HugeControlRendering"
         xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <Window.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="RenderModeValues">

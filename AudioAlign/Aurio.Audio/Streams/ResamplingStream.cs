@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-using AudioAlign.Soxr;
-using AudioAlign.Audio.DataStructures;
+using Aurio.Soxr;
+using Aurio.Audio.DataStructures;
 
-namespace AudioAlign.Audio.Streams {
+namespace Aurio.Audio.Streams {
     public class ResamplingStream : AbstractAudioStreamWrapper {
 
         private ResamplingQuality quality;

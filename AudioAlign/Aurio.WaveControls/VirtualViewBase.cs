@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows;
-using AudioAlign.Audio;
+using Aurio.Audio;
 using System.Diagnostics;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     public class VirtualViewBase: Control, VirtualView {
 
         public static readonly DependencyProperty VirtualViewportOffsetProperty = DependencyProperty.Register(

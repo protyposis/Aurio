@@ -1,10 +1,10 @@
-﻿using AudioAlign.Audio;
+﻿using Aurio.Audio;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.WaveControls
+namespace Aurio.WaveControls
 {
     public interface VirtualView
     {

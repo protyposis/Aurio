@@ -11,16 +11,16 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using AudioAlign.Audio.Project;
+using Aurio.Audio.Project;
 using System.IO;
 using NAudio.Wave;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 using System.Timers;
 using System.Windows.Interop;
 using System.Windows.Threading;
-using AudioAlign.Audio;
+using Aurio.Audio;
 
-namespace AudioAlign.Test.MultitrackPlayback {
+namespace Aurio.Test.MultitrackPlayback {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>

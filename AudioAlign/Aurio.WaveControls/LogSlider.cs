@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows;
 using System.Diagnostics;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     public class LogSlider: Slider {
 
         static LogSlider() {

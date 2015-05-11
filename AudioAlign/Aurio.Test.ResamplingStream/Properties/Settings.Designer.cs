@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AudioAlign.Test.ResamplingStream.Properties {
+namespace Aurio.Test.ResamplingStream.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

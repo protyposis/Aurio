@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 
-namespace AudioAlign.Audio.Project {
+namespace Aurio.Audio.Project {
     public class AudioTrack : Track {
 
         public const string PEAKFILE_EXTENSION = ".aapeaks";

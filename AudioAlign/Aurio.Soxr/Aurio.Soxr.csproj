@@ -7,8 +7,8 @@
     <ProjectGuid>{24228071-5E72-4BA8-90E3-89DE331A718C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudioAlign.Soxr</RootNamespace>
-    <AssemblyName>AudioAlign.Soxr</AssemblyName>
+    <RootNamespace>Aurio.Soxr</RootNamespace>
+    <AssemblyName>Aurio.Soxr</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

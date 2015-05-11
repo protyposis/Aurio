@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace AudioAlign.Test.ResamplingStream {
+namespace Aurio.Test.ResamplingStream {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AudioAlign.Test.HugeControlRendering.Properties
+namespace Aurio.Test.HugeControlRendering.Properties
 {
 
 

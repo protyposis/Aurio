@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
+namespace Aurio.Audio.Matching.HaitsmaKalker2002 {
     /// <summary>
     /// Profile interface for the fingerprint generator.
     /// </summary>

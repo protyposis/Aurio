@@ -5,7 +5,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Collections;
 
-namespace AudioAlign.Audio.Streams {
+namespace Aurio.Audio.Streams {
     public class TimeWarpStream : AbstractAudioStreamWrapper {
 
         private TimeWarpCollection mappings;

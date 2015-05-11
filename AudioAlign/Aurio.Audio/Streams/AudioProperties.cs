@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Streams {
+namespace Aurio.Audio.Streams {
     public class AudioProperties {
 
         public AudioProperties(int channels, int sampleRate, int bitDepth, AudioFormat format) {

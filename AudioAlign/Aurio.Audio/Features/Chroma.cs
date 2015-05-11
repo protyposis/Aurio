@@ -1,11 +1,11 @@
-﻿using AudioAlign.Audio.Matching;
-using AudioAlign.Audio.Streams;
+﻿using Aurio.Audio.Matching;
+using Aurio.Audio.Streams;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Features {
+namespace Aurio.Audio.Features {
     /// <summary>
     /// Generates a chromatogram from an input audio stream as described in section III.B. of
     /// - Bartsch, Mark A., and Gregory H. Wakefield. "Audio thumbnailing of popular music 

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-using AudioAlign.Audio.DataStructures;
+using Aurio.Audio.DataStructures;
 
-namespace AudioAlign.Audio.Streams {
+namespace Aurio.Audio.Streams {
     public class IeeeStream : AbstractAudioStreamWrapper {
 
         private AudioProperties properties;

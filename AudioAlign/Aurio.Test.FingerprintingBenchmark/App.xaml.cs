@@ -5,7 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 
-namespace AudioAlign.Test.FingerprintingBenchmark {
+namespace Aurio.Test.FingerprintingBenchmark {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>

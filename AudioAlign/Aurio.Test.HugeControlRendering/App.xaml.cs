@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Interop;
 
-namespace AudioAlign.Test.HugeControlRendering
+namespace Aurio.Test.HugeControlRendering
 {
     /// <summary>
     /// Interaction logic for App.xaml

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AudioAlign.Test.MultitrackPlayback.Properties {
+namespace Aurio.Test.MultitrackPlayback.Properties {
 
 
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

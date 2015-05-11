@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.DataStructures.Matrix {
+namespace Aurio.Audio.DataStructures.Matrix {
     /// <summary>
     /// Implements a sparse matrix supporting densely filled regions with minimal memory overhead.
     /// 

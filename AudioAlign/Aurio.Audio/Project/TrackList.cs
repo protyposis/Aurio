@@ -6,7 +6,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Collections.Specialized;
 
-namespace AudioAlign.Audio.Project {
+namespace Aurio.Audio.Project {
     public class TrackList<T> : IEnumerable<T>, INotifyPropertyChanged, INotifyCollectionChanged where T : Track {
         private readonly List<T> list;
 

@@ -10,10 +10,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using AudioAlign.Audio;
+using Aurio.Audio;
 using System.Diagnostics;
 
-namespace AudioAlign.Test.FFT {
+namespace Aurio.Test.FFT {
     /// <summary>
     /// Interaction logic for WindowFunctions.xaml
     /// </summary>

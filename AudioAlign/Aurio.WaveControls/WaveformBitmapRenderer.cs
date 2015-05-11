@@ -6,9 +6,9 @@ using System.Windows.Media.Imaging;
 using System.Windows;
 using System.Windows.Media;
 using System.Diagnostics;
-using AudioAlign.Audio;
+using Aurio.Audio;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     class WaveformBitmapRenderer : IWaveformRenderer {
 
         private WriteableBitmap wb;

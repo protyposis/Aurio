@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Echoprint {
+namespace Aurio.Audio.Matching.Echoprint {
     class DefaultProfile : Profile {
         public DefaultProfile() {
             Name = "Echoprint default";

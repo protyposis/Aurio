@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
+namespace Aurio.Audio.Matching.HaitsmaKalker2002 {
     /// <summary>
     /// Implements the buggy profile that I implemented at first, which works much better for
     /// some live recordings than the default profile, but doesn't work at all in other cases where

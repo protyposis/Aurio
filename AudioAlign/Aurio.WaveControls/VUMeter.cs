@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Controls;
 using System.Windows;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     [TemplatePart(Name = "PART_Indicator", Type = typeof(FrameworkElement))]
     [TemplatePart(Name = "PART_IndicatorContainer", Type = typeof(FrameworkElement))]
     public class VUMeter : Control {

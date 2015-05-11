@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using AudioAlign.Audio.DataStructures;
+using Aurio.Audio.DataStructures;
 
-namespace AudioAlign.Audio.Streams {
+namespace Aurio.Audio.Streams {
     public class BufferedStream : AbstractAudioStreamWrapper {
 
         private class Buffer : ByteBuffer {

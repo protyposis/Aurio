@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 
-namespace AudioAlign.Audio.Matching {
+namespace Aurio.Audio.Matching {
     public class AnalysisFunctions {
 
         private static WindowFunction windowFunction = null;

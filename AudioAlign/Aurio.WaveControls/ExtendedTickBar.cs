@@ -7,7 +7,7 @@ using System.Windows.Media;
 using System.Globalization;
 using System.Windows.Controls;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     public class ExtendedTickBar : FrameworkElement {
 
         public static readonly DependencyProperty MinimumProperty;

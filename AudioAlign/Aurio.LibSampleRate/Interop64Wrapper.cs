@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.LibSampleRate {
+namespace Aurio.LibSampleRate {
     internal class Interop64Wrapper : IInteropWrapper {
         #region IInteropWrapper Members
 

@@ -7,8 +7,8 @@
     <ProjectGuid>{616330A6-6386-40F1-907D-CD46884FA86F}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudioAlign.FFmpeg.Test</RootNamespace>
-    <AssemblyName>AudioAlign.FFmpeg.Test</AssemblyName>
+    <RootNamespace>Aurio.FFmpeg.Test</RootNamespace>
+    <AssemblyName>Aurio.FFmpeg.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -88,13 +88,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AudioAlign.Audio\AudioAlign.Audio.csproj">
+    <ProjectReference Include="..\Aurio.Audio\Aurio.Audio.csproj">
       <Project>{e868d91e-c5cf-46e4-be2f-f95353acb5e2}</Project>
-      <Name>AudioAlign.Audio</Name>
+      <Name>Aurio.Audio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AudioAlign.FFmpeg\AudioAlign.FFmpeg.csproj">
+    <ProjectReference Include="..\Aurio.FFmpeg\Aurio.FFmpeg.csproj">
       <Project>{8a1a603c-7005-4cc0-9ab7-e6fd3f58f621}</Project>
-      <Name>AudioAlign.FFmpeg</Name>
+      <Name>Aurio.FFmpeg</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

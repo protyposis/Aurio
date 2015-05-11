@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Streams {
+namespace Aurio.Audio.Streams {
     /// <summary>
     /// A stream to concatenate multiple source streams sequentially into a single longer stream.
     /// </summary>

@@ -1,10 +1,10 @@
-﻿using AudioAlign.Audio.Project;
+﻿using Aurio.Audio.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Wang2003 {
+namespace Aurio.Audio.Matching.Wang2003 {
     public class FrameProcessedEventArgs : EventArgs {
         public AudioTrack AudioTrack { get; set; }
         public int Index { get; set; }

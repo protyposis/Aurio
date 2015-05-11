@@ -7,8 +7,8 @@
     <ProjectGuid>{3960F81D-5AEA-4F36-A26C-F295DFF3FCB6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudioAlign.PFFFT</RootNamespace>
-    <AssemblyName>AudioAlign.PFFFT</AssemblyName>
+    <RootNamespace>Aurio.PFFFT</RootNamespace>
+    <AssemblyName>Aurio.PFFFT</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

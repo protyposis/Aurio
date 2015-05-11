@@ -5,7 +5,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace AudioAlign.LibSampleRate {
+namespace Aurio.LibSampleRate {
     internal class Interop64 {
 
         private const string LIBSAMPLERATE = "libsamplerate-0.x64.dll";

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Streams {
+namespace Aurio.Audio.Streams {
     /// <summary>
     /// Stream that avoids exceptions, e.g. when a position beyond the stream length is set.
     /// </summary>

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Matching;
-using AudioAlign.Audio;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Matching;
+using Aurio.Audio;
+using Aurio.Audio.Streams;
 
-namespace AudioAlign.Audio.Features.ContinuousFrequencyActivation {
+namespace Aurio.Audio.Features.ContinuousFrequencyActivation {
     class PowerSpectrumCalculator : STFT {
 
         private const WindowType WINDOW_TYPE = WindowType.Hann; // "Hanning" window

@@ -12,9 +12,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NAudio.Wave;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Streams;
 
-namespace AudioAlign.Test.Streams {
+namespace Aurio.Test.Streams {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>

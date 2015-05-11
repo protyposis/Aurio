@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching {
+namespace Aurio.Audio.Matching {
     public struct SubFingerprintHash : IComparable<SubFingerprintHash> {
 
         private static UInt32[] bitMasks;

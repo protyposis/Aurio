@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Echoprint {
+namespace Aurio.Audio.Matching.Echoprint {
     public abstract class Profile : IProfile {
         public interface IThreshold {
             /// <summary>

@@ -1,4 +1,4 @@
-﻿using AudioAlign.Audio.Streams;
+﻿using Aurio.Audio.Streams;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.FFmpeg.Test {
+namespace Aurio.FFmpeg.Test {
     class Program {
         static void Main(string[] args) {
             if (args.Length == 0) {

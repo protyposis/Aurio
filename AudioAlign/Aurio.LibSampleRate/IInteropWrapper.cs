@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.LibSampleRate {
+namespace Aurio.LibSampleRate {
     internal interface IInteropWrapper {
         IntPtr src_new(ConverterType converter_type, int channels, out int error);
         IntPtr src_delete(IntPtr state);

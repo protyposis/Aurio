@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AudioAlign.Test.FingerprintingWang2003.Properties {
+namespace Aurio.Test.FingerprintingWang2003.Properties {
 
 
     /// <summary>
@@ -38,7 +38,7 @@ namespace AudioAlign.Test.FingerprintingWang2003.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if ((resourceMan == null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AudioAlign.Test.FingerprintingWang2003.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Aurio.Test.FingerprintingWang2003.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

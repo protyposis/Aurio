@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AudioAlign.Test.FingerprintingWang2003.Properties {
+namespace Aurio.Test.FingerprintingWang2003.Properties {
 
 
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

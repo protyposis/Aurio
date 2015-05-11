@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     interface IWaveformRenderer {
         /// <summary>
         /// Renders a list of points (samples/peaks) to a drawing. Depending on the input parameters

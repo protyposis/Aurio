@@ -13,8 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.ComponentModel;
-using AudioAlign.Audio.Streams;
-using AudioAlign.Audio;
+using Aurio.Audio.Streams;
+using Aurio.Audio;
 using System.Diagnostics;
 using System.IO;
 

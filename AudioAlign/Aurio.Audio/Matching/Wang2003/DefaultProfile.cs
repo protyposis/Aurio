@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Wang2003 {
+namespace Aurio.Audio.Matching.Wang2003 {
     class DefaultProfile : Profile {
         public DefaultProfile() {
             Name = "Wang03 guessed default";

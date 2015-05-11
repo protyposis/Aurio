@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace AudioAlign.FFmpeg {
+namespace Aurio.FFmpeg {
 
     [StructLayout(LayoutKind.Sequential)]
     public struct OutputFormat {

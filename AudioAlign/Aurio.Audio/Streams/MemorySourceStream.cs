@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Streams {
+namespace Aurio.Audio.Streams {
 
     /// <summary>
     /// A stream sourced from a <see cref="System.IO.MemoryStream"/>, which can also wrap a raw byte buffer.

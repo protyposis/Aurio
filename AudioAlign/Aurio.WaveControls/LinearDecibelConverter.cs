@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Data;
-using AudioAlign.Audio;
+using Aurio.Audio;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     public class LinearDecibelConverter : IValueConverter {
         #region IValueConverter Members
 

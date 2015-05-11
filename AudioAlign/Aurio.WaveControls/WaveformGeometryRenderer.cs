@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Media;
 using System.Windows;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     class WaveformGeometryRenderer : IWaveformRenderer {
 
         public WaveformGeometryRenderer() {

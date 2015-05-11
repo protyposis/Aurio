@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.DataStructures {
+namespace Aurio.Audio.DataStructures {
     /// <summary>
     /// A generic ring buffer with a fixed size.
     /// </summary>

@@ -1,9 +1,9 @@
-﻿using AudioAlign.Audio.Matching;
-using AudioAlign.Audio.Matching.Wang2003;
-using AudioAlign.Audio.Project;
-using AudioAlign.Audio.Streams;
-using AudioAlign.Audio.TaskMonitor;
-using AudioAlign.WaveControls;
+﻿using Aurio.Audio.Matching;
+using Aurio.Audio.Matching.Wang2003;
+using Aurio.Audio.Project;
+using Aurio.Audio.Streams;
+using Aurio.Audio.TaskMonitor;
+using Aurio.WaveControls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,7 +22,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AudioAlign.Test.FingerprintingWang2003 {
+namespace Aurio.Test.FingerprintingWang2003 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>

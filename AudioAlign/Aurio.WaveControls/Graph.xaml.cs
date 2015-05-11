@@ -13,7 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Diagnostics;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     /// <summary>
     /// Interaction logic for Graph.xaml
     /// </summary>

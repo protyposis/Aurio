@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace AudioAlign.Audio {
+namespace Aurio.Audio {
     /// <summary>
     /// NOTE This class only works correctly in the byte->float direction. In the other direction there are problems with array length and access.
     /// Inspiration taken from: http://mark-dot-net.blogspot.com/2008/06/wavebuffer-casting-byte-arrays-to-float.html

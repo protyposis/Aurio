@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.DataStructures {
+namespace Aurio.Audio.DataStructures {
     /// <summary>
     /// A byte buffer to manage internal buffering in streams. This buffer
     /// requires to be filled when empty, and then be read sequentially until all

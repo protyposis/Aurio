@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.DataStructures.Graph {
+namespace Aurio.Audio.DataStructures.Graph {
     public class Edge<TVertex, TWeight> {
 
         public Edge(TVertex v1, TVertex v2, TWeight weight) {

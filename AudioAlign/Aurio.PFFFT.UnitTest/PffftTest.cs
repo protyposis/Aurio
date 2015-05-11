@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AudioAlign.PFFFT.UnitTest {
+namespace Aurio.PFFFT.UnitTest {
     [TestClass]
     public class PffftTest {
 

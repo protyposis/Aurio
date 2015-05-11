@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace AudioAlign.FFTW {
+namespace Aurio.FFTW {
     // taken from: http://www.sdss.jhu.edu/~tamas/bytes/fftwcsharp.html (no license applied)
 
     // FFTW Interop Classes

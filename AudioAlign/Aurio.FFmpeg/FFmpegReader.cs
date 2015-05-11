@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace AudioAlign.FFmpeg {
+namespace Aurio.FFmpeg {
     public class FFmpegReader : IDisposable {
 
         private string filename; // store source filename for debugging

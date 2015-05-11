@@ -10,7 +10,7 @@ using System.Windows.Media;
 using System.Globalization;
 using System.Windows.Media.Imaging;
 
-namespace AudioAlign.Test.HugeControlRendering {
+namespace Aurio.Test.HugeControlRendering {
     public partial class SineWave : Control {
 
         public static readonly DependencyProperty LineProperty = DependencyProperty.Register(

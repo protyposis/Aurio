@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using System.ComponentModel;
 
-namespace AudioAlign.Audio.Project {
+namespace Aurio.Audio.Project {
     public abstract class Track : INotifyPropertyChanged {
 
         public static readonly string DEFAULT_COLOR = "#FF6495ED";

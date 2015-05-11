@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.HaitsmaKalker2002 {
+namespace Aurio.Audio.Matching.HaitsmaKalker2002 {
     /// <summary>
     /// Implements the default fingerprint frequency mapping profile as described in the paper.
     /// </summary>

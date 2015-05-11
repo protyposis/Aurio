@@ -8,7 +8,7 @@ using System.Drawing.Imaging;
 using System.Windows.Media;
 using System.Windows;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     public class Spectrogram : Control {
 
         /// <summary>

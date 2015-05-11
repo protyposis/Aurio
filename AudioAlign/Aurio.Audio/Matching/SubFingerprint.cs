@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching {
+namespace Aurio.Audio.Matching {
     [DebuggerDisplay("{Index}/{Hash}")]
     public struct SubFingerprint {
 

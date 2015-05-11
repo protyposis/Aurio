@@ -1,10 +1,10 @@
-﻿using AudioAlign.Audio.DataStructures;
+﻿using Aurio.Audio.DataStructures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Chromaprint {
+namespace Aurio.Audio.Matching.Chromaprint {
     /// <summary>
     /// Maintains a sliding window image of the specified size and its associated integral image.
     /// - Viola, Paul, and Michael Jones. "Rapid object detection using a boosted cascade of 

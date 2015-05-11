@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Data;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     /// <summary>
     /// Converts between TimeSpan structs and long integers (represented by TimeSpan.Ticks).
     /// </summary>

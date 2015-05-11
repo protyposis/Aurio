@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Chromaprint {
+namespace Aurio.Audio.Matching.Chromaprint {
     class Filter {
 
         private delegate double FilterFunctionDelegate(IntegralImage i, int x, int y, int w, int h);

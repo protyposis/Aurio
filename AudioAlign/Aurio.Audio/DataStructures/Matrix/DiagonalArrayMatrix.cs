@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.DataStructures.Matrix {
+namespace Aurio.Audio.DataStructures.Matrix {
     /// <summary>
     /// Stores a diagonal matrix with a max diagonal height as a square matrix with column offsets.
     /// http://en.wikipedia.org/wiki/Diagonal_matrix

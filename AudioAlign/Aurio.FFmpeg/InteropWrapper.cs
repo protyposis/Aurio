@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.FFmpeg {
+namespace Aurio.FFmpeg {
     /// <summary>
     /// Wraps the x86 and x64 interop functions and provides the correct ones depending on the execution platform.
     /// </summary>

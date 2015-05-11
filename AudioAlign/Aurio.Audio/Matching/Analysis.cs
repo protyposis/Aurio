@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Project;
-using AudioAlign.Audio.Streams;
+using Aurio.Audio.Project;
+using Aurio.Audio.Streams;
 using System.Diagnostics;
-using AudioAlign.Audio.TaskMonitor;
+using Aurio.Audio.TaskMonitor;
 using System.Threading.Tasks;
 
-namespace AudioAlign.Audio.Matching {
+namespace Aurio.Audio.Matching {
     public class Analysis {
 
         private AnalysisMode type;

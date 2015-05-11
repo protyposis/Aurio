@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace AudioAlign.Audio {
+namespace Aurio.Audio {
     public static class BinaryIOExtensions {
 
         public static void Write(this BinaryWriter bw, Peak peak) {

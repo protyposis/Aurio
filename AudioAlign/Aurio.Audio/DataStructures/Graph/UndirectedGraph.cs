@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.DataStructures.Graph {
+namespace Aurio.Audio.DataStructures.Graph {
     public class UndirectedGraph<TVertex, TWeight> where TWeight : IComparable<TWeight> {
 
         private List<TVertex> vertices;

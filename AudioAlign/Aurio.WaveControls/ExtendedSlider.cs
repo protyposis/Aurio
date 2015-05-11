@@ -7,7 +7,7 @@ using System.Windows;
 using System.ComponentModel;
 using System.Windows.Controls.Primitives;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     public class ExtendedSlider : FormattedAutoTooltipSlider {
 
         private static readonly DependencyProperty DefaultValueProperty = DependencyProperty.Register(

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Audio.Matching.Wang2003 {
+namespace Aurio.Audio.Matching.Wang2003 {
     /// <summary>
     ///  The basic configuration profile for the Wang fingerprinting algorithm.
     ///  

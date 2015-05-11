@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AudioAlign.Audio.Project;
+using Aurio.Audio.Project;
 using System.Collections.Specialized;
 
-namespace AudioAlign.Audio.Matching {
+namespace Aurio.Audio.Matching {
     public class SubFingerprintsGeneratedEventArgs : EventArgs {
 
         public SubFingerprintsGeneratedEventArgs(AudioTrack audioTrack, List<SubFingerprint> subFingerprints, int index, int indices) {

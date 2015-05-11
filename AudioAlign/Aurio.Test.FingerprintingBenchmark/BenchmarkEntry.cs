@@ -1,10 +1,10 @@
-﻿using AudioAlign.Audio.Project;
+﻿using Aurio.Audio.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace AudioAlign.Test.FingerprintingBenchmark {
+namespace Aurio.Test.FingerprintingBenchmark {
     class BenchmarkEntry {
         public AudioTrack Track { get; set; }
         public String Type { get; set; }

@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace AudioAlign.WaveControls {
+namespace Aurio.WaveControls {
     public class StereoVUMeter : Control {
         
         public static readonly DependencyProperty AmplitudeLeftProperty;
