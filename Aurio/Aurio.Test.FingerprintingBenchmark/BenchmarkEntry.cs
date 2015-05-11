@@ -1,4 +1,4 @@
-﻿using Aurio.Audio.Project;
+﻿using Aurio.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,7 +1,7 @@
-﻿using Aurio.Audio;
-using Aurio.Audio.Matching;
-using Aurio.Audio.Project;
-using Aurio.Audio.TaskMonitor;
+﻿using Aurio;
+using Aurio.Matching;
+using Aurio.Project;
+using Aurio.TaskMonitor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -49,7 +49,7 @@ namespace Aurio.Test.FingerprintingBenchmark {
             });
         }
 
-        private void ProgressMonitor_ProcessingProgressChanged(object sender, Audio.ValueEventArgs<float> e) {
+        private void ProgressMonitor_ProcessingProgressChanged(object sender, ValueEventArgs<float> e) {
             progressBar1.Dispatcher.BeginInvoke((Action)delegate {
                 progressBar1.Value = e.Value;
                 progressBar1Label.Content = progressMonitor.StatusMessage;
@@ -103,9 +103,9 @@ namespace Aurio.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkHaitsmaKalker(AudioTrack track) {
-            var profile = Aurio.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator.GetProfiles()[0];
-            var store = new Aurio.Audio.Matching.HaitsmaKalker2002.FingerprintStore(profile);
-            var gen = new Aurio.Audio.Matching.HaitsmaKalker2002.FingerprintGenerator(profile, track);
+            var profile = Aurio.Matching.HaitsmaKalker2002.FingerprintGenerator.GetProfiles()[0];
+            var store = new Aurio.Matching.HaitsmaKalker2002.FingerprintStore(profile);
+            var gen = new Aurio.Matching.HaitsmaKalker2002.FingerprintGenerator(profile, track);
 
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("HaitsmaKalker2002", true);
             int hashCount = 0;
@@ -127,9 +127,9 @@ namespace Aurio.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkWang(AudioTrack track) {
-            var profile = Aurio.Audio.Matching.Wang2003.FingerprintGenerator.GetProfiles()[0];
-            var store = new Aurio.Audio.Matching.Wang2003.FingerprintStore(profile);
-            var gen = new Aurio.Audio.Matching.Wang2003.FingerprintGenerator(profile);
+            var profile = Aurio.Matching.Wang2003.FingerprintGenerator.GetProfiles()[0];
+            var store = new Aurio.Matching.Wang2003.FingerprintStore(profile);
+            var gen = new Aurio.Matching.Wang2003.FingerprintGenerator(profile);
 
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Wang2003", true);
             int hashCount = 0;
@@ -151,9 +151,9 @@ namespace Aurio.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkEchoprint(AudioTrack track) {
-            var profile = Aurio.Audio.Matching.Echoprint.FingerprintGenerator.GetProfiles()[0];
-            var store = new Aurio.Audio.Matching.Echoprint.FingerprintStore(profile);
-            var gen = new Aurio.Audio.Matching.Echoprint.FingerprintGenerator(profile);
+            var profile = Aurio.Matching.Echoprint.FingerprintGenerator.GetProfiles()[0];
+            var store = new Aurio.Matching.Echoprint.FingerprintStore(profile);
+            var gen = new Aurio.Matching.Echoprint.FingerprintGenerator(profile);
 
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Echoprint", true);
             int hashCount = 0;
@@ -175,9 +175,9 @@ namespace Aurio.Test.FingerprintingBenchmark {
         }
 
         private void BenchmarkChromaprint(AudioTrack track) {
-            var profile = Aurio.Audio.Matching.Chromaprint.FingerprintGenerator.GetProfiles()[0];
-            var store = new Aurio.Audio.Matching.Chromaprint.FingerprintStore(profile);
-            var gen = new Aurio.Audio.Matching.Chromaprint.FingerprintGenerator(profile);
+            var profile = Aurio.Matching.Chromaprint.FingerprintGenerator.GetProfiles()[0];
+            var store = new Aurio.Matching.Chromaprint.FingerprintStore(profile);
+            var gen = new Aurio.Matching.Chromaprint.FingerprintGenerator(profile);
 
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Chromaprint", true);
             int hashCount = 0;

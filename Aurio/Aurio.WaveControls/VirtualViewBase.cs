@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows;
-using Aurio.Audio;
+using Aurio;
 using System.Diagnostics;
 
 namespace Aurio.WaveControls {

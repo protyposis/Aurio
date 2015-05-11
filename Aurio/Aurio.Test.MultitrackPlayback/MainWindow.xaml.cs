@@ -11,14 +11,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Aurio.Audio.Project;
+using Aurio.Project;
 using System.IO;
 using NAudio.Wave;
-using Aurio.Audio.Streams;
+using Aurio.Streams;
 using System.Timers;
 using System.Windows.Interop;
 using System.Windows.Threading;
-using Aurio.Audio;
+using Aurio;
 
 namespace Aurio.Test.MultitrackPlayback {
     /// <summary>

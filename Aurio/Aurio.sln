@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAlign", "AudioAlign\Au
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.WaveControls", "Aurio.WaveControls\Aurio.WaveControls.csproj", "{FD0C6CC5-B509-4441-9AA2-E8B34BAD9F95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.Audio", "Aurio.Audio\Aurio.Audio.csproj", "{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio", "Aurio\Aurio.csproj", "{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.Test.HugeControlRendering", "Aurio.Test.HugeControlRendering\Aurio.Test.HugeControlRendering.csproj", "{EDD59524-641D-4EB3-BF96-7138BBA8D009}"
 EndProject
@@ -31,7 +31,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.Test.FingerprintingHa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.Test.Streams", "Aurio.Test.Streams\Aurio.Test.Streams.csproj", "{C7062944-F8C0-4FF6-8B3A-E30588F39612}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.Audio.UnitTest", "Aurio.Audio.UnitTest\Aurio.Audio.UnitTest.csproj", "{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.UnitTest", "Aurio.UnitTest\Aurio.UnitTest.csproj", "{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0AF26727-F1F0-4DA1-A9C8-6DDCCF1F1E56}"
 	ProjectSection(SolutionItems) = preProject

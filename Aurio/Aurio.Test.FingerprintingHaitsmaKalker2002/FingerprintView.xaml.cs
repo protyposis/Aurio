@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Aurio.Audio.Matching;
+using Aurio.Matching;
 
 namespace Aurio.Test.FingerprintingHaitsmaKalker2002 {
     /// <summary>

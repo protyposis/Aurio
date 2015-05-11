@@ -7,7 +7,7 @@ using System.Windows.Media;
 using System.Windows;
 using System.Globalization;
 using System.ComponentModel;
-using Aurio.Audio;
+using Aurio;
 
 namespace Aurio.WaveControls {
     public class TimeScale: VirtualViewBase {

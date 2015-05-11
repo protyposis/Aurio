@@ -6,7 +6,7 @@ using System.Windows.Media.Imaging;
 using System.Windows;
 using System.Windows.Media;
 using System.Diagnostics;
-using Aurio.Audio;
+using Aurio;
 
 namespace Aurio.WaveControls {
     class WaveformBitmapRenderer : IWaveformRenderer {

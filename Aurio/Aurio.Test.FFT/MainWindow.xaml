@@ -4,7 +4,7 @@
         Title="FFT &amp; Window Functions Test App" Height="319" Width="827" 
         xmlns:local="clr-namespace:Aurio.Test.FFT"
         xmlns:my="clr-namespace:Aurio.WaveControls;assembly=Aurio.WaveControls"
-        xmlns:audio="clr-namespace:Aurio.Audio;assembly=Aurio.Audio"
+        xmlns:audio="clr-namespace:Aurio;assembly=Aurio"
         xmlns:sys="clr-namespace:System;assembly=mscorlib" Loaded="Window_Loaded">
     <Window.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="WindowTypeValues">

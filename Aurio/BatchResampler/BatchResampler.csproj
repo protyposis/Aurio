@@ -92,9 +92,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Aurio.Audio\Aurio.Audio.csproj">
+    <ProjectReference Include="..\Aurio\Aurio.csproj">
       <Project>{e868d91e-c5cf-46e4-be2f-f95353acb5e2}</Project>
-      <Name>Aurio.Audio</Name>
+      <Name>Aurio</Name>
     </ProjectReference>
     <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj">
       <Project>{24228071-5e72-4ba8-90e3-89de331a718c}</Project>

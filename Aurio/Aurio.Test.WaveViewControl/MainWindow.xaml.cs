@@ -11,7 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Aurio.Audio;
+using Aurio;
 
 namespace Aurio {
     /// <summary>
@@ -37,7 +37,7 @@ namespace Aurio {
             if (result == true) {
                 // Open document
                 string filename = dlg.FileName;
-                waveView.AudioTrack = new Audio.Project.AudioTrack(new System.IO.FileInfo(filename));
+                waveView.AudioTrack = new Project.AudioTrack(new System.IO.FileInfo(filename));
 
                 // Fit waveform into view
                 waveView.TrackLength = waveView.AudioTrack.Length.Ticks;

@@ -1,5 +1,5 @@
-﻿using Aurio.Audio;
-using Aurio.Audio.Streams;
+﻿using Aurio;
+using Aurio.Streams;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

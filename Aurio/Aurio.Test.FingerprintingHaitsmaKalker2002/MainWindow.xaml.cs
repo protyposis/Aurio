@@ -5,11 +5,11 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Aurio.Audio;
-using Aurio.Audio.Matching;
-using Aurio.Audio.Matching.HaitsmaKalker2002;
-using Aurio.Audio.Project;
-using Aurio.Audio.TaskMonitor;
+using Aurio;
+using Aurio.Matching;
+using Aurio.Matching.HaitsmaKalker2002;
+using Aurio.Project;
+using Aurio.TaskMonitor;
 
 namespace Aurio.Test.FingerprintingHaitsmaKalker2002 {
     /// <summary>
@@ -32,7 +32,7 @@ namespace Aurio.Test.FingerprintingHaitsmaKalker2002 {
             trackFingerprintListBox.SelectionChanged += new SelectionChangedEventHandler(trackFingerprintListBox_SelectionChanged);
         }
 
-        void GlobalInstance_ProcessingProgressChanged(object sender, Audio.ValueEventArgs<float> e) {
+        void GlobalInstance_ProcessingProgressChanged(object sender, ValueEventArgs<float> e) {
             progressBar1.Dispatcher.BeginInvoke((Action)delegate {
                 progressBar1.Value = e.Value;
             });

@@ -13,8 +13,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Globalization;
 using System.Diagnostics;
-using Aurio.Audio;
-using Aurio.Audio.Streams;
+using Aurio;
+using Aurio.Streams;
 using System.Windows.Controls.Primitives;
 using System.ComponentModel;
 

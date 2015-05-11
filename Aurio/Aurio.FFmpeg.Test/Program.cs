@@ -1,4 +1,4 @@
-﻿using Aurio.Audio.Streams;
+﻿using Aurio.Streams;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;

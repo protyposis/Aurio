@@ -5,8 +5,8 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.ComponentModel;
-using Aurio.Audio;
-using Aurio.Audio.Project;
+using Aurio;
+using Aurio.Project;
 
 namespace Aurio.WaveControls
 {

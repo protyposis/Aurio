@@ -177,9 +177,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Aurio.Audio\Aurio.Audio.csproj">
+    <ProjectReference Include="..\Aurio\Aurio.csproj">
       <Project>{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}</Project>
-      <Name>Aurio.Audio</Name>
+      <Name>Aurio</Name>
     </ProjectReference>
     <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj">
       <Project>{24228071-5e72-4ba8-90e3-89de331a718c}</Project>

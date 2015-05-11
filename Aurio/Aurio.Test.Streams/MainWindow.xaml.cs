@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NAudio.Wave;
-using Aurio.Audio.Streams;
+using Aurio.Streams;
 
 namespace Aurio.Test.Streams {
     /// <summary>

@@ -1,5 +1,5 @@
 ﻿using System.Windows;
-using Aurio.Audio.Streams;
+using Aurio.Streams;
 using NAudio.Wave;
 
 namespace Aurio.Test.ResamplingStream {
@@ -19,7 +19,7 @@ namespace Aurio.Test.ResamplingStream {
             audioOutput = new WasapiOut(global::NAudio.CoreAudioApi.AudioClientShareMode.Shared, true, 10);
             mixer = new MixerStream(2, 44100);
             MonoStream mono = new MonoStream(mixer);
-            Audio.Streams.ResamplingStream resampler = new Audio.Streams.ResamplingStream(mono, ResamplingQuality.VariableRate, 44100);
+            Streams.ResamplingStream resampler = new Streams.ResamplingStream(mono, ResamplingQuality.VariableRate, 44100);
             NAudioSinkStream naudioSink = new NAudioSinkStream(resampler);
             audioOutput.Init(naudioSink);
 

@@ -1,8 +1,8 @@
-﻿using Aurio.Audio.Matching;
-using Aurio.Audio.Matching.Wang2003;
-using Aurio.Audio.Project;
-using Aurio.Audio.Streams;
-using Aurio.Audio.TaskMonitor;
+﻿using Aurio.Matching;
+using Aurio.Matching.Wang2003;
+using Aurio.Project;
+using Aurio.Streams;
+using Aurio.TaskMonitor;
 using Aurio.WaveControls;
 using System;
 using System.Collections.Generic;
@@ -38,7 +38,7 @@ namespace Aurio.Test.FingerprintingWang2003 {
 
         
 
-        private void Instance_ProcessingProgressChanged(object sender, Audio.ValueEventArgs<float> e) {
+        private void Instance_ProcessingProgressChanged(object sender, ValueEventArgs<float> e) {
             progressBar1.Dispatcher.BeginInvoke((Action)delegate {
                 progressBar1.Value = e.Value;
             });

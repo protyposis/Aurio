@@ -10,7 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Aurio.Audio;
+using Aurio;
 using System.Diagnostics;
 
 namespace Aurio.Test.FFT {
