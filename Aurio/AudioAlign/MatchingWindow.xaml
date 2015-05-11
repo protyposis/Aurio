@@ -1,0 +1,184 @@
+﻿<Window x:Class="AudioAlign.MatchingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:my="clr-namespace:Aurio.WaveControls;assembly=Aurio.WaveControls"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Match &amp; Align" Height="499.278" Width="838.753" 
+        FontSize="11" 
+        Background="{StaticResource WindowBackgroundBrush}" WindowStyle="ToolWindow" Loaded="Window_Loaded" Unloaded="Window_Unloaded"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <Window.Resources>
+        <my:TimeSpanConverter x:Key="TimeSpanConverter"/>
+    </Window.Resources>
+    <Grid>
+        <Grid Margin="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TabControl Height="100">
+                <TabItem Header="Fingerprint (HK02)">
+                    <Grid>
+                        <ComboBox ItemsSource="{Binding HaitsmaKalkerFingerprinting.Profiles}" SelectedItem="{Binding Path=HaitsmaKalkerFingerprinting.SelectedProfile, Mode=TwoWay}" DisplayMemberPath="Name" Height="23" HorizontalAlignment="Left" Margin="46,6,0,0" VerticalAlignment="Top" Width="120" />
+                        <Label Content="Error Threshold" Height="17" HorizontalAlignment="Left" Margin="188,10,0,0" VerticalAlignment="Top" />
+                        <TextBox Height="23" HorizontalAlignment="Left" Margin="269,7,0,0" VerticalAlignment="Top" Width="60" Text="{Binding Path=HaitsmaKalkerFingerprinting.FingerprintBerThreshold, Mode=TwoWay}" />
+                        <Label Content="Fingerprint Size" Height="17" HorizontalAlignment="Left" Margin="349,10,0,0" VerticalAlignment="Top" />
+                        <TextBox Height="23" HorizontalAlignment="Left" Margin="430,7,0,0" Text="{Binding Path=HaitsmaKalkerFingerprinting.FingerprintSize, Mode=TwoWay}" VerticalAlignment="Top" Width="60" />
+                        <Label Content="Profile" Height="17" HorizontalAlignment="Left" Margin="6,10,0,0" VerticalAlignment="Top" />
+                        <Button Content="Find Matches" Command="{Binding HaitsmaKalkerFingerprinting.FindMatchesCommand}" Height="23" Margin="10,0,0,6" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="75" />
+                        <Button Content="Clear" Command="{Binding HaitsmaKalkerFingerprinting.ClearCommand}" Height="23" Margin="90,0,0,6" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="75" />
+                        <Button Content="Start" Command="{Binding HaitsmaKalkerFingerprinting.FingerprintCommand}" Height="23" Width="75" Margin="0,0,6,6" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Fingerprint (W03)">
+                    <Grid>
+                        <Button Content="Find Matches" Height="23" Width="75" Command="{Binding WangFingerprinting.FindMatchesCommand}" Margin="10,0,0,6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                        <Button Content="Clear" Height="23" Width="75" Command="{Binding WangFingerprinting.ClearCommand}" Margin="90,0,0,6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                        <Button Content="Start" Height="23" Width="75" Command="{Binding WangFingerprinting.FingerprintCommand}" Margin="0,0,6,6" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Fingerprint (EP)">
+                    <Grid>
+                        <Button Content="Find Matches" Height="23" Width="75" Command="{Binding EchoprintFingerprinting.FindMatchesCommand}" Margin="10,0,0,6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                        <Button Content="Clear" Height="23" Width="75" Command="{Binding EchoprintFingerprinting.ClearCommand}" Margin="90,0,0,6" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                        <Button Content="Start" Height="23" Width="75" Command="{Binding EchoprintFingerprinting.FingerprintCommand}" Margin="0,0,6,6" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Fingerprint (CP)">
+                    <Grid>
+                        <Label Content="Error Threshold" Height="17" HorizontalAlignment="Left" Margin="188,10,0,0" VerticalAlignment="Top" />
+                        <TextBox Height="23" HorizontalAlignment="Left" Margin="269,7,0,0" VerticalAlignment="Top" Width="60" Text="{Binding Path=ChromaprintFingerprinting.FingerprintBerThreshold, Mode=TwoWay}" />
+                        <Label Content="Fingerprint Size" Height="17" HorizontalAlignment="Left" Margin="349,10,0,0" VerticalAlignment="Top" />
+                        <TextBox Height="23" HorizontalAlignment="Left" Margin="430,7,0,0" Text="{Binding Path=ChromaprintFingerprinting.FingerprintSize, Mode=TwoWay}" VerticalAlignment="Top" Width="60" />
+                        <Button Content="Find Matches" Command="{Binding ChromaprintFingerprinting.FindMatchesCommand}" Height="23" Margin="10,0,0,6" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="75" />
+                        <Button Content="Clear" Command="{Binding ChromaprintFingerprinting.ClearCommand}" Height="23" Margin="90,0,0,6" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="75" />
+                        <Button Content="Start" Command="{Binding ChromaprintFingerprinting.FingerprintCommand}" Height="23" Width="75" Margin="0,0,6,6" HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+                        <ComboBox ItemsSource="{Binding ChromaprintFingerprinting.Profiles}" SelectedItem="{Binding ChromaprintFingerprinting.SelectedProfile, Mode=TwoWay}" DisplayMemberPath="Name" Height="23" HorizontalAlignment="Left" Margin="46,6,0,0" VerticalAlignment="Top" Width="120" />
+                        <Label Content="Profile" Height="17" HorizontalAlignment="Left" Margin="6,10,0,0" VerticalAlignment="Top" />
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Dynamic Time Warping">
+                    <Grid>
+                        <Button Content="Start" Height="23" Name="dtwButton" Width="75" Click="dtwButton_Click" Margin="0,0,6,6" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+                        <Label Content="Type:" Height="17" HorizontalAlignment="Left" Margin="6,6,0,0" VerticalAlignment="Top" />
+                        <RadioButton Content="DTW" Height="16" HorizontalAlignment="Left" Margin="63,6,0,0" Name="dtwRadioButton" VerticalAlignment="Top" />
+                        <RadioButton Content="OLTW" Height="16" HorizontalAlignment="Left" Margin="112,6,0,0" Name="oltwRadioButton" VerticalAlignment="Top" />
+                        <Label Content="Similarity:" Height="17" HorizontalAlignment="Left" Margin="6,55,0,0" VerticalAlignment="Top" />
+                        <CheckBox Content="calculate correlation" Height="16" HorizontalAlignment="Left" Margin="63,55,0,0" Name="dtwSimilarityCheckBox" VerticalAlignment="Top" />
+                        <CheckBox Content="normalize to 100%" Height="16" HorizontalAlignment="Left" Margin="188,55,0,0" Name="dtwSimilarityNormalizationCheckBox" VerticalAlignment="Top" IsChecked="True" IsEnabled="{Binding ElementName=dtwSimilarityCheckBox, Path=IsChecked}" />
+                        <Label Content="Filter:" Height="17" HorizontalAlignment="Left" Margin="7,31,0,0" VerticalAlignment="Top" />
+                        <TextBox Height="23" HorizontalAlignment="Left" Margin="63,28,0,0" VerticalAlignment="Top" Width="54" Text="{Binding Path=TimeWarpFilterSize, Mode=TwoWay}" />
+                        <Label Content="(take every n-th match)" Height="17" HorizontalAlignment="Left" Margin="123,31,0,0" VerticalAlignment="Top" />
+                        <TextBox Height="23" HorizontalAlignment="Left" Margin="253,3,0,0" Text="{Binding Path=TimeWarpSearchWidth, Mode=TwoWay}" VerticalAlignment="Top" Width="60" />
+                        <Label Content="Search Width:" Height="17" HorizontalAlignment="Left" Margin="180,6,0,0" VerticalAlignment="Top" />
+                        <Label Content="Mode:" Height="17" HorizontalAlignment="Left" Margin="331,6,0,0" VerticalAlignment="Top" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="368,6,0,0">
+                            <RadioButton Name="timeWarpModeFirstTwoTracksRadioButton" Content="first two tracks" Margin="0,0,3,0"/>
+                            <RadioButton Name="timeWarpModeBorderSectionsRadioButton" Content="border sections" Margin="0,0,3,0"/>
+                            <RadioButton Name="timeWarpModeAllSectionsRadioButton" Content="all sections" Margin="0,0,3,0"/>
+                        </StackPanel>
+                        <CheckBox Content="median smoothing" Height="16" HorizontalAlignment="Left" IsChecked="{Binding Path=TimeWarpSmoothing, Mode=TwoWay}" Margin="245,31,0,0" Name="dtwSmoothingCheckBox" VerticalAlignment="Top" />
+                        <CheckBox Content="display matrix" Height="16" HorizontalAlignment="Right" IsChecked="{Binding Path=TimeWarpDisplay, Mode=TwoWay}" Margin="0,0,87,9" Name="dtwDisplayMatrixCheckBox" VerticalAlignment="Bottom" />
+                        <CheckBox Content="in/out cue" Height="16" HorizontalAlignment="Left" IsChecked="{Binding Path=TimeWarpInOutCue, Mode=TwoWay}" Margin="368,32,0,0" Name="dtwInOutCue" VerticalAlignment="Top" />
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Cross-Correlation">
+                    <Grid>
+                        <Label Content="Window Size:" Height="20" HorizontalAlignment="Left" Margin="6,9,0,0" VerticalAlignment="Top" />
+                        <TextBox Height="23" HorizontalAlignment="Left" Margin="77,6,0,0" Text="{Binding Path=CorrelationWindowSize, Mode=TwoWay}" VerticalAlignment="Top" Width="54" />
+                        <Label Content="Interval Size:" Height="20" HorizontalAlignment="Left" Margin="6,38,0,0" VerticalAlignment="Top" />
+                        <TextBox Height="23" HorizontalAlignment="Left" Margin="77,35,0,0" Text="{Binding Path=CorrelationIntervalSize, Mode=TwoWay}" VerticalAlignment="Top" Width="54" />
+                        <Button Content="Start" Height="23" HorizontalAlignment="Right" Margin="0,0,6,6" Name="correlationButton" VerticalAlignment="Bottom" Width="75" Click="correlationButton_Click" />
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Jiku">
+                    <Grid>
+                        <TextBox Text="{Binding JikuTools.SelectionRegex}" Height="23" TextWrapping="Wrap" Margin="10,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="154"/>
+                        <TextBox Text="{Binding JikuTools.MovementOffset, Converter={StaticResource TimeSpanConverter}}" Height="23" Margin="169,10,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="151" />
+                        <Button Content="Move" Command="{Binding JikuTools.MoveCommand}" Height="23" HorizontalAlignment="Left" Margin="325,10,0,0" VerticalAlignment="Top" Width="117" />
+                        <Button Content="DriftCorrectMatches" Command="{Binding JikuTools.DriftCorrectCommand}" Height="23" HorizontalAlignment="Left" Margin="10,45,0,0" VerticalAlignment="Top" Width="117" />
+                        <Button Content="Evaluate Offsets" Command="{Binding JikuTools.EvaluateOffsetsCommand}" Height="23" HorizontalAlignment="Left" Margin="132,45,0,0" VerticalAlignment="Top" Width="117" />
+                        <Button Content="Timestamp Align" Command="{Binding JikuTools.TimestampAlignCommand}" Height="23" HorizontalAlignment="Left" Margin="254,45,0,0" VerticalAlignment="Top" Width="117" />
+                    </Grid>
+                </TabItem>
+            </TabControl>
+            <Grid Grid.Row="1" Margin="0,3,0,0" Height="25">
+                <ProgressBar Name="progressBar" />
+                <Label VerticalContentAlignment="Center" VerticalAlignment="Stretch" Margin="6,0" FontSize="11">
+                    <TextBlock Name="progressBarLabel" TextTrimming="CharacterEllipsis" />
+                </Label>
+            </Grid>
+            <GroupBox Grid.Row="2" Header="Matching Points" Margin="0,3,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <DataGrid Name="matchGrid" Margin="0,3,0,0" SelectionUnit="FullRow" AutoGenerateColumns="False" GridLinesVisibility="Horizontal" 
+                          HeadersVisibility="Column" CanUserAddRows="False" SelectionChanged="matchGrid_SelectionChanged" MouseDoubleClick="matchGrid_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Track A" Binding="{Binding Track1.Name}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Track B" Binding="{Binding Track2.Name}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Track A Position" Binding="{Binding Track1Time}" IsReadOnly="False"/>
+                            <DataGridTextColumn Header="Track B Position" Binding="{Binding Track2Time}" IsReadOnly="False"/>
+                            <DataGridTextColumn Header="Similarity" Binding="{Binding Similarity}" IsReadOnly="False"/>
+                            <DataGridTextColumn Header="Offset" Binding="{Binding Offset}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Source" Binding="{Binding Source}" IsReadOnly="False"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <DockPanel Grid.Row="1" Margin="0,3,0,0">
+                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                            <Button Name="clearMatchesButton" Content="Clear" Height="23" Width="85" Margin="0,0,3,0" Click="clearMatchesButton_Click" />
+                        </StackPanel>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Add from timeline..." Height="23" Name="addManualMatchButton" Width="110" Click="addManualMatchButton_Click" />
+                            <Popup Name="addManualMatchPopup" PlacementTarget="{Binding ElementName=addManualMatchButton}" Placement="Relative" VerticalOffset="{Binding ElementName=addManualMatchButton, Path=ActualHeight}" PopupAnimation="Slide" AllowsTransparency="True" StaysOpen="False">
+                                <Border Background="{StaticResource WindowBackgroundBrush}" BorderBrush="{DynamicResource NormalBorderBrush}" BorderThickness="1">
+                                    <Grid Margin="3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Label Margin="3" Grid.Column="0" Grid.Row="0" Content="Track A:" VerticalAlignment="Center"/>
+                                        <Label Margin="3" Grid.Column="0" Grid.Row="1" Content="Track B:" VerticalAlignment="Center"/>
+                                        <ComboBox Margin="3" Grid.Column="1" Grid.Row="0" Name="addManualMatchPopupComboBoxA" SelectionChanged="AddManualMatchPopupComboBoxA_OnSelectionChanged"/>
+                                        <ComboBox Margin="3" Grid.Column="1" Grid.Row="1" Name="addManualMatchPopupComboBoxB" SelectionChanged="AddManualMatchPopupComboBoxB_OnSelectionChanged"/>
+                                        <Button Margin="3" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" Content="Add" Height="23" Width="40" Click="addManualMatchPopupAddButton_Click"/>
+                                    </Grid>
+                                </Border>
+                            </Popup>
+                            <Button Name="crossCorrelateButton" Content="Cross-correlate selection" Height="23" Margin="3,0,0,0" Width="135" Click="crossCorrelateButton_Click" />
+                            <Button Name="matchSyncButton" Content="Sync match" Height="23" Margin="3,0,0,0" Width="73" Click="matchSyncButton_Click" VerticalAlignment="Bottom" />
+                            <Button Name="matchDetailsButton" Content="Match details" Height="23" Margin="3,0,0,0" Width="80" Click="matchDetailsButton_Click" />
+                            <Button Name="driftCalcButton" Content="Calculate drift" Height="23" Margin="3,0,0,0" Width="73" Click="driftCalcButton_Click" VerticalAlignment="Bottom" />
+                        </StackPanel>
+                    </DockPanel>
+                </Grid>
+            </GroupBox>
+            <GroupBox Grid.Row="3" Header="Alignment" Margin="0,3,0,0">
+                <Grid Height="73">
+                    <RadioButton Content="best" Height="16" Margin="43,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Name="bestMatchRadioButton" />
+                    <RadioButton Content="last" Height="16" Margin="182,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Name="lastMatchRadioButton" />
+                    <RadioButton Content="all *" Height="16" Margin="226,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Name="allMatchRadioButton" />
+                    <Button Name="alignTracksButton" Content="Align Tracks" Width="75" HorizontalAlignment="Right" Click="alignTracksButton_Click" Margin="0,50,0,0" />
+                    <Button Name="filterMatchesButton" Content="Filter Matches" Height="23" Width="80" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="filterMatchesButton_Click" Margin="0,0,81,0" />
+                    <TextBox Height="23" Margin="106,26,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="60" Text="{Binding Path=MatchFilterWindowSize, Mode=TwoWay}" />
+                    <RadioButton Content="first" Height="16" HorizontalAlignment="Left" Margin="91,6,0,0" VerticalAlignment="Top" Name="firstMatchRadioButton" />
+                    <Label Content="Mode:" Height="17" HorizontalAlignment="Left" Margin="6,6,0,0" Name="label1" VerticalAlignment="Top" />
+                    <Label Content="Window Size (secs):" Height="28" HorizontalAlignment="Left" Margin="6,29,0,0" Name="label2" VerticalAlignment="Top" />
+                    <CheckBox Content="post-process matching points (cross-correlation)" Height="16" HorizontalAlignment="Left" Margin="6,52,0,0" Name="postProcessMatchingPointsCheckBox" VerticalAlignment="Top" />
+                    <Label Content="(*) dynamic resampling" Height="15" HorizontalAlignment="Left" Margin="369,6,0,0" Name="label3" VerticalAlignment="Top" />
+                    <RadioButton Content="mid" Height="16" HorizontalAlignment="Left" Margin="136,6,0,0" Name="midMatchRadioButton" VerticalAlignment="Top" />
+                    <CheckBox Content="windowed *" Height="16" HorizontalAlignment="Left" Margin="272,6,0,0" Name="windowedModeCheckBox" VerticalAlignment="Top" />
+                    <CheckBox Content="remove unused matching points" Height="16" HorizontalAlignment="Left" Margin="268,52,0,0" Name="removeUnusedMatchingPointsCheckBox" VerticalAlignment="Top" IsChecked="True" />
+                </Grid>
+            </GroupBox>
+        </Grid>
+    </Grid>
+</Window>
