@@ -9,7 +9,7 @@ namespace Aurio {
     public class PeakStore {
 
         private static readonly int PEAK_BYTE_SIZE;
-        private static readonly char[] MAGICNUMBER = { 'A', 'A', 'P', 'K' }; // AurioPeaKfile
+        private static readonly char[] MAGICNUMBER = { 'A', 'A', 'P', 'K' }; // AurioAudioPeaKfile
 
         /// <summary>
         /// The first file format didn't have a header and just contained the raw peaks.
