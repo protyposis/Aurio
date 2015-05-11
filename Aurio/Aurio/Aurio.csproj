@@ -125,6 +125,7 @@
     </Compile>
     <Compile Include="AudioStreamFactory.cs" />
     <Compile Include="AudioUtil.cs" />
+    <Compile Include="License.cs" />
     <Compile Include="BinaryIOExtensions.cs" />
     <Compile Include="AudioBuffer.cs" />
     <Compile Include="CommonUtil.cs" />
@@ -277,7 +278,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="licenseinfo.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>copy "$(ProjectDir)\..\..\NOTICE" "$(ProjectDir)\licenseinfo.txt"</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

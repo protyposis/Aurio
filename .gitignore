@@ -6,3 +6,5 @@ obj/
 
 # NuGet
 **/packages/*
+
+licenseinfo.txt
