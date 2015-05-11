@@ -1,4 +1,4 @@
-Aurio: Audio Processing, Analysis and Retrieval Libary
+Aurio: Audio Processing, Analysis and Retrieval Library
 Copyright 2010-2015 Mario Guggenberger <mg@protyposis.net>
 http://protyposis.net
 
@@ -37,10 +37,6 @@ https://github.com/praeclarum/sqlite-net
 Copyright (c) 2009-2015 Krueger Systems, Inc.
 Released under the MIT License
 http://opensource.org/licenses/MIT
-
-Icons from the Tango Icon Library
-http://tango.freedesktop.org/Tango_Icon_Library
-Released into the Public Domain
 
 
 The following libraries can be added and used optionally:
