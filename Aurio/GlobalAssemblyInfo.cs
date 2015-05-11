@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // http://stackoverflow.com/questions/62353/what-are-the-best-practices-for-using-assembly-attributes
 
 [assembly: AssemblyCompany("Mario Guggenberger / protyposis.net")]
-[assembly: AssemblyProduct("Aurio Audio Processing, Analysis and Retrieval Library http://protyposis.net")]
+[assembly: AssemblyProduct("Aurio Audio Processing, Analysis and Retrieval Library")]
 //[assembly: AssemblyTrademark("")]
 
 #if DEBUG
