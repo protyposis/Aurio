@@ -92,9 +92,9 @@
       <Project>{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}</Project>
       <Name>Aurio</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Aurio.FFTW\Aurio.FFTW.csproj">
-      <Project>{880F644B-5370-47D6-A4B6-F98338073631}</Project>
-      <Name>Aurio.FFTW</Name>
+    <ProjectReference Include="..\Aurio.PFFFT\Aurio.PFFFT.csproj">
+      <Project>{3960f81d-5aea-4f36-a26c-f295dff3fcb6}</Project>
+      <Name>Aurio.PFFFT</Name>
     </ProjectReference>
     <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj">
       <Project>{24228071-5e72-4ba8-90e3-89de331a718c}</Project>
