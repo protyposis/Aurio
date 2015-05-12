@@ -68,10 +68,10 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\..\libs\ffmpeg\win32\bin\avformat-56.dll $(OutDir)
-copy $(SolutionDir)\..\libs\ffmpeg\win32\bin\avcodec-56.dll $(OutDir)
-copy $(SolutionDir)\..\libs\ffmpeg\win32\bin\avutil-54.dll $(OutDir)
-copy $(SolutionDir)\..\libs\ffmpeg\win32\bin\swresample-1.dll $(OutDir)</Command>
+      <Command>copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avformat-56.dll $(OutDir)
+copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avcodec-56.dll $(OutDir)
+copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avutil-54.dll $(OutDir)
+copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\swresample-1.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
