@@ -1,25 +1,20 @@
-/**
- * Simple proxy layer to read audio streams through FFmpeg.
- *
- *
- * This program contains code excerpts from:
- *
- ** decoding_encoding.c Copyright (c) 2001 Fabrice Bellard
- ** https://gitorious.org/ffmpeg/ffmpeg/source/07d508e4f55f6045b83df3346448b149faab5d7d:doc/examples/decoding_encoding.c
- **
- ** demuxing_decoding.c Copyright (c) 2012 Stefano Sabatini
- ** https://gitorious.org/ffmpeg/ffmpeg/source/07d508e4f55f6045b83df3346448b149faab5d7d:doc/examples/demuxing_decoding.c
- **
- ** Permission is hereby granted, free of charge, to any person obtaining a copy
- ** of this software and associated documentation files (the "Software"), to deal
- ** in the Software without restriction, including without limitation the rights
- ** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- ** copies of the Software, and to permit persons to whom the Software is
- ** furnished to do so, subject to the following conditions:
- **
- ** The above copyright notice and this permission notice shall be included in
- ** all copies or substantial portions of the Software.
- */
+// 
+// Aurio: Audio Processing, Analysis and Retrieval Library
+// Copyright (C) 2010-2015  Mario Guggenberger <mg@protyposis.net>
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+// 
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 
 /* Compatibility settings for the MSVC compiler */
 #ifdef _MSC_VER
@@ -46,6 +41,29 @@
 #define EXPORT __declspec(dllexport)
 #define DEBUG 0
 
+
+/**
+* Simple proxy layer to read audio streams through FFmpeg.
+*
+*
+* This program contains code excerpts from:
+*
+** decoding_encoding.c Copyright (c) 2001 Fabrice Bellard
+** https://gitorious.org/ffmpeg/ffmpeg/source/07d508e4f55f6045b83df3346448b149faab5d7d:doc/examples/decoding_encoding.c
+**
+** demuxing_decoding.c Copyright (c) 2012 Stefano Sabatini
+** https://gitorious.org/ffmpeg/ffmpeg/source/07d508e4f55f6045b83df3346448b149faab5d7d:doc/examples/demuxing_decoding.c
+**
+** Permission is hereby granted, free of charge, to any person obtaining a copy
+** of this software and associated documentation files (the "Software"), to deal
+** in the Software without restriction, including without limitation the rights
+** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+** copies of the Software, and to permit persons to whom the Software is
+** furnished to do so, subject to the following conditions:
+**
+** The above copyright notice and this permission notice shall be included in
+** all copies or substantial portions of the Software.
+*/
 
 
 // structs
