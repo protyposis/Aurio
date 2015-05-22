@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Aurio.Features {
     /// <summary>
-    /// Generates a chromatogram from an input audio stream as described in section III.B. of
+    /// Generates a chromagram from an input audio stream as described in section III.B. of
     /// - Bartsch, Mark A., and Gregory H. Wakefield. "Audio thumbnailing of popular music 
     ///   using chroma-based representations." Multimedia, IEEE Transactions on 7.1 (2005): 96-104.
     /// </summary>

@@ -32,7 +32,7 @@ namespace Aurio.Matching.Echoprint {
 
         /// <summary>
         /// This method generates hash codes from an audio stream in a streaming fashion,
-        /// which means that it only maintains a small consntat-size state and can process
+        /// which means that it only maintains a small constant-size state and can process
         /// streams of arbitrary length.
         /// 
         /// Here is a scheme of the data processing flow. After the subband splitting
