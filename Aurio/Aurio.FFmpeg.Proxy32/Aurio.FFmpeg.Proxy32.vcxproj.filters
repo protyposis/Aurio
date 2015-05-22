@@ -22,4 +22,7 @@
   <ItemGroup>
     <Text Include="bitdepths.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\aurio.licenseheader" />
+  </ItemGroup>
 </Project>

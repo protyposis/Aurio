@@ -22,4 +22,7 @@
   <ItemGroup>
     <Text Include="..\Aurio.FFmpeg.Proxy32\bitdepths.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\aurio.licenseheader" />
+  </ItemGroup>
 </Project>

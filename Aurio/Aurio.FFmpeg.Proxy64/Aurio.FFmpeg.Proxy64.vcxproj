@@ -105,6 +105,9 @@ copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\swresample-1.dll $(OutDir)</Command
   <ItemGroup>
     <Text Include="..\Aurio.FFmpeg.Proxy32\bitdepths.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\aurio.licenseheader" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

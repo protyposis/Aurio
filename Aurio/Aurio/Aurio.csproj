@@ -277,9 +277,13 @@
       <Name>Aurio.Soxr</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="licenseinfo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Aurio.licenseheader">
+      <Link>Aurio.licenseheader</Link>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
