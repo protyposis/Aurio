@@ -71,7 +71,7 @@ namespace Aurio.Matching {
         }
 
         public override string ToString() {
-            return "SubFingerprint {" + Convert.ToString(this.value, 2).PadLeft(32, '0') + " (" + this.value + ")}";
+            return "SFPHash {" + Convert.ToString(this.value, 2).PadLeft(32, '0') + " (" + this.value + ")}";
         }
 
         /// <summary>
