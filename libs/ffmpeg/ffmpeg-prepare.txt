@@ -4,4 +4,17 @@
 
 3. Place contents of shared and dev archives (without root folder) in win32 or win64 subfolder
 
+4. The final folder structure should look like this:
+
+   .(this folder)
+   |
+   |-- win32
+   |   |--bin (containing dlls)
+   |   |--include (containing headers in subdirectories)
+   |   |--lib (containing libs)
+   |
+   |-- win64
+       |... same as above
+
+
 currently used: FFmpeg 2.5.2 from http://ffmpeg.zeranoe.com/blog/?p=394
