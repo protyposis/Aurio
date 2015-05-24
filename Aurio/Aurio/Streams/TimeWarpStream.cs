@@ -275,6 +275,7 @@ namespace Aurio.Streams {
                 // Or it is the EOS position so it isn't caught by the loop above
                 // but it is still considered part of the last interval that the loop
                 // stopped at.
+                currentIndex--;
             }
         }
     }
