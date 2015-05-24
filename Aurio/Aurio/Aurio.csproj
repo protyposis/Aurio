@@ -166,7 +166,6 @@
     <Compile Include="DataStructures\RingBuffer.cs" />
     <Compile Include="DataStructures\Matrix\SparseMatrix.cs" />
     <Compile Include="DataStructures\Matrix\PatchMatrix.cs" />
-    <Compile Include="Matching\Dixon2005\TimeWarpMode.cs" />
     <Compile Include="Matching\Dixon2005\TimeWarpType.cs" />
     <Compile Include="DataStructures\Graph\Edge.cs" />
     <Compile Include="DataStructures\Graph\UndirectedGraph.cs" />
