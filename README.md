@@ -22,7 +22,7 @@ Features
  *  [Echoprint](http://echoprint.me/codegen) (Ellis, Daniel PW, Brian Whitman, and Alastair Porter. "Echoprint: An open music identification service." ISMIR. 2011.)
  *  AcoustID [Chromaprint](https://acoustid.org/chromaprint)
 
-All audio processing (incl. fingerprinting) is stream-based and supports processing of arbitrarily long streams at constant memory usage. All fingerprinting methods are implemented from scratch, not ports from exisiting libraries, while keeping compatibility where possible.
+All audio processing (incl. fingerprinting) is stream-based and supports processing of arbitrarily long streams at constant memory usage. All fingerprinting methods are implemented from scratch, not ports from existing libraries, while keeping compatibility where possible.
 
 Aurio.WaveControls provides WPF widgets for user interfaces:
 
@@ -64,8 +64,8 @@ Examples
 ### Reading, Processing & Writing
 
 ```csharp
-/* Read a high definition MKV video file with FFmpeg, 
- * convert it to telephone sound quality, 
+/* Read a high definition MKV video file with FFmpeg,
+ * convert it to telephone sound quality,
  * and write it to a WAV file with NAudio. */
 var sourceStream = new FFmpegSourceStream(new FileInfo("high-definition-video.mkv"));
 var ieee32BitStream = new IeeeStream(sourceStream);
@@ -139,7 +139,7 @@ generator.Generate(audioTrack2);
 
 // Check if tracks match
 if (store.FindAllMatches().Count > 0) {
-   Console.WriteLine("overlap detected!"); 
+   Console.WriteLine("overlap detected!");
 }
 ```
 
