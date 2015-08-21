@@ -1,5 +1,5 @@
-Aurio: Audio Processing, Analysis and Retrieval
-===============================================
+Aurio: Audio Fingerprinting & Retrieval for .NET
+================================================
 
 Aurio is a .NET library that focuses on audio processing, analysis, media synchronization and media retrieval and implements various audio fingerprinting methods. It has been developed for research purposes and is a by-product of the media synchronization application [AudioAlign](https://github.com/protyposis/AudioAlign).
 
@@ -56,6 +56,12 @@ Documentation
 -------------
 
 Not available yet. If you have any questions, feel free to open an issue!
+
+
+Publications
+------------
+
+> M. Guggenberger, [Aurio: Audio Processing, Analysis and Retrieval](http://protyposis.net/publications/), In Proceedings of the 23st ACM International Conference on Multimedia, MM ’15, Brisbane, QLD, Australia, 2015. ACM. to appear.
 
 
 Examples
