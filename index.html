@@ -2,7 +2,7 @@
 <html lang="en-us">
   <head>
     <meta charset="UTF-8">
-    <title>Aurio by protyposis</title>
+    <title>Aurio - Audio Fingerprinting &amp; Retrieval for .NET</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
@@ -14,15 +14,11 @@
       <h1 class="project-name">Aurio</h1>
       <h2 class="project-tagline">Audio Fingerprinting &amp; Retrieval for .NET</h2>
       <a href="https://github.com/protyposis/Aurio" class="btn">View on GitHub</a>
-      <a href="https://github.com/protyposis/Aurio/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/protyposis/Aurio/tarball/master" class="btn">Download .tar.gz</a>
     </section>
 
     <section class="main-content">
-      <h1>
-<a id="aurio-audio-processing-analysis-and-retrieval" class="anchor" href="#aurio-audio-processing-analysis-and-retrieval" aria-hidden="true"><span class="octicon octicon-link"></span></a>Aurio: Audio Processing, Analysis and Retrieval</h1>
 
-<p>Aurio is a .NET library that focuses on audio processing, analysis, media synchronization and media retrieval and implements various audio fingerprinting methods. It has been developed for research purposes and is a by-product of the media synchronization application <a href="https://github.com/protyposis/AudioAlign">AudioAlign</a>.</p>
+<p>Aurio is a .NET library that focuses on audio processing, analysis, media synchronization and media retrieval and implements various audio fingerprinting methods.</p>
 
 <h2>
 <a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h2>
@@ -49,7 +45,7 @@
 </li>
 </ul>
 
-<p>All audio processing (incl. fingerprinting) is stream-based and supports processing of arbitrarily long streams at constant memory usage. All fingerprinting methods are implemented from scratch, not ports from exisiting libraries, while keeping compatibility where possible.</p>
+<p>All audio processing (incl. fingerprinting) is stream-based and supports processing of arbitrarily long streams at constant memory usage. All fingerprinting methods are implemented from scratch, not ports from existing libraries, while keeping compatibility where possible.</p>
 
 <p>Aurio.WaveControls provides WPF widgets for user interfaces:</p>
 
@@ -63,27 +59,9 @@
 </ul>
 
 <h2>
-<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements, Build Instructions, Documentation</h2>
 
-<ul>
-<li>Windows</li>
-<li>Visual Studio 2013</li>
-<li>.NET Framework 4.0</li>
-</ul>
-
-<p>Aurio has been developed for Windows but since only a small part depends on the OS, it should be portable to the Mono platform and other OS'.</p>
-
-<h2>
-<a id="build-instructions" class="anchor" href="#build-instructions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Build Instructions</h2>
-
-<p>Aurio comes with all required dependencies except for FFmpeg (which would blow up the repo size too much). See <code>libs\ffmpeg\ffmpeg-prepare.txt</code> for instructions on how to download and where to put FFmpeg.</p>
-
-<p>Building works as easy as building any other Visual Studio solution and should work without problems if all dependencies have been set up correctly. Open the Visual Studio solution <code>Aurio\Aurio.sln</code> in Visual Studio 2013 and build the <code>Aurio</code> project and optionally the <code>Aurio.WaveControls</code> project. The compiled DLLs will be built in each project's <code>bin</code> folder.</p>
-
-<h2>
-<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h2>
-
-<p>Not available yet. If you have any questions, feel free to open an issue!</p>
+For requirements and build instructions visit the <a href="https://github.com/protyposis/Aurio">GitHub repository</a>. There is no documentation available yet, but the library comes with a few sample applications and is also used by the open source <a href="#audioalign">AudioAlign</a> application that can be used as a reference. If you're experiencing issues or have any questions, please <a href="http://protyposis.net/contact/">get in touch</a>.
 
 <h2>
 <a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
@@ -163,7 +141,7 @@ generator.Generate(audioTrack2);
 
 <span class="pl-c">// Check if tracks match</span>
 <span class="pl-k">if</span> (store.FindAllMatches().Count &gt; <span class="pl-c1">0</span>) {
-   Console.WriteLine(<span class="pl-s"><span class="pl-pds">"</span>overlap detected!<span class="pl-pds">"</span></span>); 
+   Console.WriteLine(<span class="pl-s"><span class="pl-pds">"</span>overlap detected!<span class="pl-pds">"</span></span>);
 }</pre></div>
 
 <h3>
@@ -177,46 +155,28 @@ generator.Generate(audioTrack2);
 <span class="pl-k">new</span> MultitrackPlayer(band).Play();</pre></div>
 
 <h2>
-<a id="example-applications" class="anchor" href="#example-applications" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example Applications</h2>
+<a id="audioalign" class="anchor" href="#audioalign" aria-hidden="true"><span class="octicon octicon-link"></span></a>AudioAlign</h2>
 
-<p>Aurio comes with a few tools and test applications that can be taken as a reference:</p>
+<p><a href="https://github.com/protyposis/AudioAlign">AudioAlign</a> is an audio synchronization and analysis tool written for research purposes to automatically synchronize audio and video recordings that have either been recorded in parallel at the same event or contain the same aural information. It is basically a GUI for the Aurio library with a little bit of glue code in between.
 
-<ul>
-<li>
-<strong>Aurio.Test.FingerprintingBenchmark</strong> runs a file through all fingerprinting algorithms and measures the required time.</li>
-<li>
-<strong>Aurio.Test.FingerprintingHaitsmaKalker</strong> fingerprints files and builds a hash store to match the fingerprinted files. The matches can be browsed and fingerprints inspected.</li>
-<li>
-<strong>Aurio.Test.FingerprintingWang2003</strong> display the spectrogram and constellation map while fingerprinting a file.</li>
-<li>
-<strong>Aurio.Test.WaveViewControl</strong> is a test bed for the WaveView WPF control.</li>
-<li>
-<strong>Aurio.Test.MultitrackPlayback</strong> is a multitrack audio player with a simple user interface.</li>
-<li>
-<strong>BatchResampler</strong> resamples wave files according to a configuration file.</li>
-<li>
-<strong>MusicDetector</strong> analyzes audio files for music content.</li>
-<li>
-<strong>WaveCutter</strong> cuts a number of concatenated files into slices of random length.</li>
-</ul>
-
-<p>Aurio has originally been developed for <a href="https://github.com/protyposis/AudioAlign">AudioAlign</a>, a tool to automatically synchronize overlapping audio and video recordings, which uses almost all functionality of Aurio. Its sources are also available and can be used as a implementation reference.</p>
+<p style="text-align: center;"><img src="audioalign1.png"/></p>
 
 <h2>
-<a id="patents" class="anchor" href="#patents" aria-hidden="true"><span class="octicon octicon-link"></span></a>Patents</h2>
+<a id="publications" class="anchor" href="#publications" aria-hidden="true"><span class="octicon octicon-link"></span></a>Publications</h2>
 
-<p>The fingerprinting methods by Haitsma&amp;Kalker and Wang are protected worldwide, and Echoprint is protected in the US by patents. Their usage is therefore severely limited. In Europe, patented methods can be used privately or for research purposes.</p>
+Aurio has been accepted to the ACM Multimedia 2015 <a href="http://www.acmmm.org/2015/call-for-contributions/open-source-software-competition/">Open-Source Software Competition</a>. The paper describing the library in more detail is available <a href="http://protyposis.net/publications/">here</a>.
+
+
 
 <h2>
 <a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
 
-<p>Copyright (C) 2010-2015 Mario Guggenberger <a href="mailto:mg@protyposis.net">mg@protyposis.net</a>.
-This project is released under the terms of the GNU Affero General Public License. See <code>LICENSE</code> for details. The library can be built to be free of any copyleft requirements; get in touch if the AGPL does not suit your needs.</p>
+<p>This project is released under the terms of the GNU Affero General Public License. The library can be built to be free of any copyleft requirements; get in touch if the AGPL does not suit your needs.</p>
 
       <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/protyposis/Aurio">Aurio</a> is maintained by <a href="https://github.com/protyposis">protyposis</a>.</span>
+        <span class="site-footer-owner"><a href="https://github.com/protyposis/Aurio">Aurio</a> is maintained by <a href="https://github.com/protyposis">Mario Guggenberger</a>.</span>
 
-        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+        <span class="site-footer-credits">This page uses a customized version of the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
 
     </section>
