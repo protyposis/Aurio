@@ -19,8 +19,10 @@
 /* Compatibility settings for the MSVC compiler */
 #ifdef _MSC_VER
 	#define inline __inline // support for "inline" http://stackoverflow.com/a/24435157
-	#define snprintf _snprintf // support for "snprintf" http://stackoverflow.com/questions/2915672
-	#define _CRT_SECURE_NO_WARNINGS // disable _snprintf compile warning
+	#if _MSC_VER < 1900 // snfprint support added in VS2015 http://stackoverflow.com/a/27754829
+		#define snprintf _snprintf // support for "snprintf" http://stackoverflow.com/questions/2915672
+		#define _CRT_SECURE_NO_WARNINGS // disable _snprintf compile warning
+	#endif
 #endif
 
 // System includes
