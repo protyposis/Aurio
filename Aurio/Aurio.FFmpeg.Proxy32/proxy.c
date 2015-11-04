@@ -418,7 +418,7 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 		av_free_packet(&pi->pkt);
 	}
 
-	if (got_audio_frame) {
+	if (*got_audio_frame) {
 		pi->frame_pts = pi->pkt.pts;
 	}
 
