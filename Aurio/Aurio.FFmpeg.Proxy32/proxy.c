@@ -139,7 +139,7 @@ int64_t file_seek(FILE* f, int64_t offset, int whence) {
 		fseek(f, 0, SEEK_END);				// seek to end
 		long file_size = ftell(f);			// end position == file size
 		fseek(f, current_pos, SEEK_SET);	// return to original position
-		return current_pos;
+		return file_size;
 	}
 	return fseek(f, (long)offset, whence);
 }
@@ -257,10 +257,6 @@ ProxyInstance *stream_open_bufferedio(
 	pi->fmt_ctx->pb = io_ctx;
 
 	// NOTE format does not need to be probed manually, FFmpeg does the probing itself and does not crash anymore
-
-	// TODO fix "moov atom not found" for MP4 files
-	// This error happens at the avformat_open_input call for files where the moov atom is at the end of the file
-	// A hacky solution is to increase the buffer to the file size, then FFmpeg can find the atom. But this needs to be avoided at all cost!
 
 	if ((ret = avformat_open_input(&pi->fmt_ctx, NULL, NULL, NULL)) < 0) {
 		fprintf(stderr, "Could not open source stream: %s\n", av_err2str(ret));
