@@ -28,7 +28,7 @@ namespace Aurio.FFmpeg {
         private const CallingConvention CC = CallingConvention.Cdecl;
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = CC)]
-        public static extern IntPtr stream_open(string filename);
+        public static extern IntPtr stream_open_file(string filename);
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = CC)]
         public static extern IntPtr stream_get_output_config(IntPtr instance);

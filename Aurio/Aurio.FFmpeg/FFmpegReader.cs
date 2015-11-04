@@ -32,7 +32,7 @@ namespace Aurio.FFmpeg {
 
         public FFmpegReader(string filename) {
             this.filename = filename;
-            instance = InteropWrapper.stream_open(filename);
+            instance = InteropWrapper.stream_open_file(filename);
 
             IntPtr ocp = InteropWrapper.stream_get_output_config(instance);
             outputConfig = (OutputConfig)Marshal.PtrToStructure(ocp, typeof(OutputConfig));
