@@ -30,15 +30,55 @@ namespace Aurio.FFmpeg {
         private IntPtr instance = IntPtr.Zero;
         private OutputConfig outputConfig;
 
+        // Delegates for buffered IO mode (stream source)
+        // Because the CLR does not know about the references from the native proxy code,
+        // They must be stored in class fields to keep a reference and prevent them from being collected.
+        private InteropWrapper.CallbackDelegateReadPacket readPacketDelegate;
+        private InteropWrapper.CallbackDelegateSeek seekDelegate;
+
         public FFmpegReader(string filename) {
             this.filename = filename;
-            instance = InteropWrapper.stream_open(filename);
+            instance = InteropWrapper.stream_open_file(filename);
 
             IntPtr ocp = InteropWrapper.stream_get_output_config(instance);
             outputConfig = (OutputConfig)Marshal.PtrToStructure(ocp, typeof(OutputConfig));
         }
 
         public FFmpegReader(FileInfo fileInfo) : this(fileInfo.FullName) { }
+
+        public FFmpegReader(Stream stream) {
+            this.filename = "bufferedIO_stream";
+
+            var transferBuffer = new byte[0];
+            readPacketDelegate = delegate (IntPtr opaque, IntPtr buffer, int bufferSize) {
+                /* NOTE there's no way to cast the IntPtr to a byte array which is required 
+                 * for stream reading, so we need to add an intermediary transfer buffer.
+                 */
+                // Increase transfer buffer's size if too small
+                if (transferBuffer.Length < bufferSize) {
+                    transferBuffer = new byte[bufferSize];
+                }
+                // Read data into transfer buffer
+                int bytesRead = stream.Read(transferBuffer, 0, bufferSize);
+
+                // Transfer data to unmanaged memory
+                Marshal.Copy(transferBuffer, 0, buffer, bytesRead);
+
+                // Return number of bytes read
+                return bytesRead;
+            };
+            seekDelegate = delegate (IntPtr opaque, long offset, int whence) {
+                if (whence == 0x10000 /* AVSEEK_SIZE */) {
+                    return stream.Length;
+                }
+                return stream.Seek(offset, (SeekOrigin)whence);
+            };
+
+            instance = InteropWrapper.stream_open_bufferedio(IntPtr.Zero, readPacketDelegate, seekDelegate);
+
+            IntPtr ocp = InteropWrapper.stream_get_output_config(instance);
+            outputConfig = (OutputConfig)Marshal.PtrToStructure(ocp, typeof(OutputConfig));
+        }
 
         public OutputConfig OutputConfig {
             get { return outputConfig; }
@@ -73,6 +113,8 @@ namespace Aurio.FFmpeg {
                 if (instance != IntPtr.Zero) {
                     InteropWrapper.stream_close(instance);
                     instance = IntPtr.Zero;
+                    readPacketDelegate = null;
+                    seekDelegate = null;
                 }
             }
             disposed = true;

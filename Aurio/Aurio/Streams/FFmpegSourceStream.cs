@@ -38,6 +38,7 @@ namespace Aurio.Streams {
 
         public FFmpegSourceStream(FileInfo fileInfo) {
             reader = new FFmpegReader(fileInfo);
+            //reader = new FFmpegReader(fileInfo.OpenRead()); // use buffered IO with stream
 
             if (reader.OutputConfig.length == long.MinValue) {
                 /* 

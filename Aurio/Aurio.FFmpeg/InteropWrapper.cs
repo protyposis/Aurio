@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Aurio.FFmpeg {
@@ -26,17 +27,27 @@ namespace Aurio.FFmpeg {
     /// </summary>
     internal class InteropWrapper {
 
+        public const CallingConvention CC = CallingConvention.Cdecl;
+
         // It would be cleaner/shorter to use Func<> pointers to save the delegate definitions, 
         // but they are not defined for out parameters
         // http://stackoverflow.com/a/20560385
 
-        public delegate IntPtr d_stream_open(string filename);
+        [UnmanagedFunctionPointer(CC)]
+        public delegate int CallbackDelegateReadPacket(IntPtr opaque, IntPtr buffer, int bufferSize);
+
+        [UnmanagedFunctionPointer(CC)]
+        public delegate long CallbackDelegateSeek(IntPtr opaque, [MarshalAs(UnmanagedType.I8)] long offset, int whence);
+
+        public delegate IntPtr d_stream_open_file(string filename);
+        public delegate IntPtr d_stream_open_bufferedio(IntPtr opaque, CallbackDelegateReadPacket readPacket, CallbackDelegateSeek seek);
         public delegate IntPtr d_stream_get_output_config(IntPtr instance);
         public delegate int d_stream_read_frame(IntPtr instance, out long timestamp, byte[] output_buffer, int output_buffer_size);
         public delegate void d_stream_seek(IntPtr instance, long timestamp);
         public delegate void d_stream_close(IntPtr instance);
 
-        public static d_stream_open stream_open;
+        public static d_stream_open_file stream_open_file;
+        public static d_stream_open_bufferedio stream_open_bufferedio;
         public static d_stream_get_output_config stream_get_output_config;
         public static d_stream_read_frame stream_read_frame;
         public static d_stream_seek stream_seek;
@@ -44,14 +55,16 @@ namespace Aurio.FFmpeg {
 
         static InteropWrapper() {
             if (Environment.Is64BitProcess) {
-                stream_open = Interop64.stream_open;
+                stream_open_file = Interop64.stream_open_file;
+                stream_open_bufferedio = Interop64.stream_open_bufferedio;
                 stream_get_output_config = Interop64.stream_get_output_config;
                 stream_read_frame = Interop64.stream_read_frame;
                 stream_seek = Interop64.stream_seek;
                 stream_close = Interop64.stream_close;
             }
             else {
-                stream_open = Interop32.stream_open;
+                stream_open_file = Interop32.stream_open_file;
+                stream_open_bufferedio = Interop32.stream_open_bufferedio;
                 stream_get_output_config = Interop32.stream_get_output_config;
                 stream_read_frame = Interop32.stream_read_frame;
                 stream_seek = Interop32.stream_seek;

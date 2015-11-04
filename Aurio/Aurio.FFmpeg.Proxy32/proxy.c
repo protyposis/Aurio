@@ -21,8 +21,8 @@
 	#define inline __inline // support for "inline" http://stackoverflow.com/a/24435157
 	#if _MSC_VER < 1900 // snfprint support added in VS2015 http://stackoverflow.com/a/27754829
 		#define snprintf _snprintf // support for "snprintf" http://stackoverflow.com/questions/2915672
-		#define _CRT_SECURE_NO_WARNINGS // disable _snprintf compile warning
 	#endif
+	#define _CRT_SECURE_NO_WARNINGS // disable _snprintf compile warning, disable fopen compile error
 #endif
 
 // System includes
@@ -96,7 +96,9 @@ typedef struct ProxyInstance {
 } ProxyInstance;
 
 // function definitions
-EXPORT ProxyInstance *stream_open(char *filename);
+EXPORT ProxyInstance *stream_open_file(char *filename);
+EXPORT ProxyInstance *stream_open_bufferedio(void *opaque, int(*read_packet)(void *opaque, uint8_t *buf, int buf_size), int64_t(*seek)(void *opaque, int64_t offset, int whence));
+ProxyInstance *stream_open(ProxyInstance *pi);
 EXPORT void *stream_get_output_config(ProxyInstance *pi);
 EXPORT int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame);
 EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size);
@@ -114,6 +116,35 @@ static int determine_target_format(AVCodecContext *audio_codec_ctx);
 static inline int64_t pts_to_samples(ProxyInstance *pi, AVRational time_base, int64_t time);
 static inline int64_t samples_to_pts(ProxyInstance *pi, AVRational time_base, int64_t time);
 
+// THESE FUNCTIONS ARE ONLY FOR STANDALONE DEBUG PURPOSES
+FILE *file_open(const char *filename) {
+	return fopen(filename, "rb");
+}
+
+void file_rewind(FILE *f) {
+	rewind(f);
+}
+
+int file_close(FILE *f) {
+	return fclose(f);
+}
+
+int file_read_packet(FILE* f, uint8_t *buf, int buf_size) {
+	return fread(buf, 1, buf_size, f);
+}
+
+int64_t file_seek(FILE* f, int64_t offset, int whence) {
+	if (whence == AVSEEK_SIZE) {
+		long current_pos = ftell(f);		// temporarily save current position
+		fseek(f, 0, SEEK_END);				// seek to end
+		long file_size = ftell(f);			// end position == file size
+		fseek(f, current_pos, SEEK_SET);	// return to original position
+		return file_size;
+	}
+	return fseek(f, (long)offset, whence);
+}
+//////////////////////////////////////////////////////////
+
 int main(int argc, char *argv[])
 {
 	ProxyInstance *pi;
@@ -121,41 +152,70 @@ int main(int argc, char *argv[])
 	int ret;
 	uint8_t *output_buffer;
 	int output_buffer_size;
+	const int stream_mode = 1; // 0 =  file, 1 = buffered stream IO
+	FILE *f = NULL; // used for buffered stream IO
 
 	if (argc < 2) {
 		fprintf(stderr, "No source file specified\n");
 		exit(1);
 	}
 
-	pi = stream_open(argv[1]);
+	if (stream_mode) { // buffered stream IO
+		f = file_open(argv[1]);
+		pi = stream_open_bufferedio(f, file_read_packet, file_seek);
+	}
+	else { // file IO
+		pi = stream_open_file(argv[1]);
+	}
+
+	//info(pi->fmt_ctx);
+
+	printf("audio length: %lld, frame size: %d\n", pi->output.length, pi->output.frame_size);
+	printf("audio format (samplerate/samplesize/channels): %d/%d/%d\n", 
+		pi->output.format.sample_rate, pi->output.format.sample_size, pi->output.format.channels);
 
 	output_buffer_size = pi->output.frame_size * pi->output.format.channels * pi->output.format.sample_size;
 	output_buffer = malloc(output_buffer_size);
 
 	// read full stream
+	int64_t count1 = 0, last_ts1;
 	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size)) >= 0) {
 		printf("read %d @ %lld\n", ret, timestamp);
+		count1++;
+		last_ts1 = timestamp;
 	}
 
 	// seek back to start
 	stream_seek(pi, 0);
 
 	// read again (output should be the same as above)
+	int64_t count2 = 0, last_ts2;
 	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size)) >= 0) {
 		printf("read %d @ %lld\n", ret, timestamp);
+		count2++;
+		last_ts2 = timestamp;
 	}
+
+	printf("read1 count: %lld, timestamp: %lld\n", count1, last_ts1);
+	printf("read2 count: %lld, timestamp: %lld\n", count2, last_ts2);
 
 	free(output_buffer);
 
 	stream_close(pi);
 
+	if (stream_mode) {
+		file_close(f);
+	}
+
 	return 0;
 }
 
-ProxyInstance *stream_open(char *filename)
+/*
+ * Opens a stream from a file specified by filename.
+ */
+ProxyInstance *stream_open_file(char *filename)
 {
 	ProxyInstance *pi;
-	int ret;
 
 	pi_init(&pi);
 
@@ -163,6 +223,67 @@ ProxyInstance *stream_open(char *filename)
 
 	if (avformat_open_input(&pi->fmt_ctx, filename, NULL, NULL) < 0) {
 		fprintf(stderr, "Could not open source file %s\n", filename);
+		exit(1);
+	}
+
+	return stream_open(pi);
+}
+
+/*
+ * Opens a buffered I/O stream through data reading callbacks, allowing for arbitrary data sources (e.g. online streams, custom file input streams).
+ */
+ProxyInstance *stream_open_bufferedio(
+	// User-specific data that is returned with each callback (e.g. an instance pointer, a stream id, or the source stream object). Optional, can be NULL.
+	void *opaque, 
+	// Callback to read a data packet of given length.
+	int(*read_packet)(void *opaque, uint8_t *buf, int buf_size), 
+	// Callback for a seek operation. Optional, can be NULL.
+	// whence: SEEK_SET/0, SEEK_CUR/1, SEEK_END/2, AVSEEK_SIZE/0x10000 (optional, return -1 of not supported), AVSEEK_FORCE/0x20000 (ored into whence, can be ignored)
+	int64_t(*seek)(void *opaque, int64_t offset, int whence))
+{
+	ProxyInstance *pi;
+	const int buffer_size = 32 * 1024;
+	char *buffer;
+	AVIOContext *io_ctx;
+	int ret;
+
+	pi_init(&pi);
+
+	av_register_all();
+
+	// Allocate IO buffer for the AVIOContext. 
+	// Must later be freed by av_free() from AVIOContext.buffer (which could be the same or a replacement buffer).
+	buffer = av_malloc(buffer_size + FF_INPUT_BUFFER_PADDING_SIZE);
+
+	// Allocate the AVIOContext. Must later be freed by av_free().
+	io_ctx = avio_alloc_context(buffer, buffer_size, 0 /* not writeable */, opaque, read_packet, NULL /* no write_packet needed */, seek);
+
+	// Allocate and configure AVFormatContext. Must later bee freed by avformat_close_input().
+	pi->fmt_ctx = avformat_alloc_context();
+	pi->fmt_ctx->pb = io_ctx;
+
+	// NOTE format does not need to be probed manually, FFmpeg does the probing itself and does not crash anymore
+
+	if ((ret = avformat_open_input(&pi->fmt_ctx, NULL, NULL, NULL)) < 0) {
+		fprintf(stderr, "Could not open source stream: %s\n", av_err2str(ret));
+		exit(1);
+	}
+
+	// NOTE AVFMT_FLAG_CUSTOM_IO is automatically set by avformat_open_input, can be checked when closing the stream to free allocated resources
+
+	return stream_open(pi);
+}
+
+/*
+ * Opens a stream from an initialized AVFormatContext. The AVFormatContext needs to be 
+ * initialized separately, to allow for filename and buffered IO contexts.
+ */
+ProxyInstance *stream_open(ProxyInstance *pi)
+{
+	int ret;
+
+	if (pi->fmt_ctx == NULL) {
+		fprintf(stderr, "AVFormatContext missing / not initialized");
 		exit(1);
 	}
 
@@ -389,6 +510,11 @@ static void pi_free(ProxyInstance **pi) {
 	ProxyInstance *_pi = *pi;
 
 	/* close & free FFmpeg stuff */
+	if ((_pi->fmt_ctx->flags & AVFMT_FLAG_CUSTOM_IO) != 0) {
+		// buffered stream IO mode
+		av_free(_pi->fmt_ctx->pb->buffer);
+		av_free(_pi->fmt_ctx->pb);
+	}
 	av_free_packet(&_pi->pkt);
 	av_frame_free(&_pi->frame);
 	swr_free(&_pi->swr);
