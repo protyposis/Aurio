@@ -40,6 +40,36 @@ namespace Aurio.FFmpeg {
 
         public FFmpegReader(FileInfo fileInfo) : this(fileInfo.FullName) { }
 
+        public FFmpegReader(Stream stream) {
+            this.filename = "bufferedIO_stream";
+
+            var transferBuffer = new byte[0];
+            instance = InteropWrapper.stream_open_bufferedio(IntPtr.Zero,
+                delegate (IntPtr opaque, IntPtr buffer, int bufferSize) {
+                    /* NOTE there's no way to cast the IntPtr to a byte array which is required 
+                     * for stream reading, so we need to add an intermediary transfer buffer.
+                     */
+                    // Increase transfer buffer's size if too small
+                    if(transferBuffer.Length < bufferSize) {
+                        transferBuffer = new byte[bufferSize];
+                    }
+                    // Read data into transfer buffer
+                    int bytesRead = stream.Read(transferBuffer, 0, bufferSize);
+
+                    // Transfer data to unmanaged memory
+                    Marshal.Copy(transferBuffer, 0, buffer, bytesRead);
+
+                    // Return number of bytes read
+                    return bytesRead;
+                }, delegate (IntPtr opaque, long offset, int whence) {
+                    if (whence == 0x10000 /* AVSEEK_SIZE */)
+                    {
+                        return stream.Length;
+                    }
+                    return stream.Seek(offset, (SeekOrigin)whence);
+                });
+        }
+
         public OutputConfig OutputConfig {
             get { return outputConfig; }
         }
