@@ -41,7 +41,7 @@
 #pragma comment(lib, "swresample.lib")
 
 #define EXPORT __declspec(dllexport)
-#define DEBUG 0
+#define DEBUG 1
 
 
 /**
@@ -74,9 +74,12 @@
  * and most importantly to run several decoders in parallel.
  */
 typedef struct ProxyInstance {
+	int					mode;
 	AVFormatContext		*fmt_ctx;
 	AVStream			*audio_stream;
+	AVStream			*video_stream;
 	AVCodecContext		*audio_codec_ctx;
+	AVCodecContext		*video_codec_ctx;
 	AVPacket			pkt;
 	AVFrame				*frame;
 	SwrContext			*swr;
@@ -92,16 +95,31 @@ typedef struct ProxyInstance {
 		}					format;
 		int64_t				length;
 		int					frame_size;
-	}					output;
+	}					audio_output;
+
+	struct {
+		struct {
+			int					width;
+			int					height;
+			double				frame_rate;
+			double				aspect_ratio;
+		}					format;
+		int64_t				length;
+		int					frame_size;
+	}					video_output;
 } ProxyInstance;
 
+#define MODE_NONE  0x00
+#define MODE_AUDIO 0x01
+#define MODE_VIDEO 0x02
+
 // function definitions
-EXPORT ProxyInstance *stream_open_file(char *filename);
-EXPORT ProxyInstance *stream_open_bufferedio(void *opaque, int(*read_packet)(void *opaque, uint8_t *buf, int buf_size), int64_t(*seek)(void *opaque, int64_t offset, int whence));
+EXPORT ProxyInstance *stream_open_file(int mode, char *filename);
+EXPORT ProxyInstance *stream_open_bufferedio(int mode, void *opaque, int(*read_packet)(void *opaque, uint8_t *buf, int buf_size), int64_t(*seek)(void *opaque, int64_t offset, int whence));
 ProxyInstance *stream_open(ProxyInstance *pi);
 EXPORT void *stream_get_output_config(ProxyInstance *pi);
-EXPORT int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame);
-EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size);
+EXPORT int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type);
+EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size, int *frame_type);
 EXPORT void stream_seek(ProxyInstance *pi, int64_t timestamp);
 EXPORT void stream_close(ProxyInstance *pi);
 
@@ -109,8 +127,9 @@ static void pi_init(ProxyInstance **pi);
 static void pi_free(ProxyInstance **pi);
 
 static void info(AVFormatContext *fmt_ctx);
-static int open_audio_codec_context(AVFormatContext *fmt_ctx);
+static int open_codec_context(AVFormatContext *fmt_ctx, int type);
 static int decode_audio_packet(ProxyInstance *pi, int *got_audio_frame, int cached);
+static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cached);
 static int convert_samples(ProxyInstance *pi);
 static int determine_target_format(AVCodecContext *audio_codec_ctx);
 static inline int64_t pts_to_samples(ProxyInstance *pi, AVRational time_base, int64_t time);
@@ -151,9 +170,11 @@ int main(int argc, char *argv[])
 	int64_t timestamp;
 	int ret;
 	uint8_t *output_buffer;
-	int output_buffer_size;
+	int audio_output_buffer_size = 0, video_output_buffer_size = 0, output_buffer_size;
+	int frame_type;
 	const int stream_mode = 1; // 0 =  file, 1 = buffered stream IO
 	FILE *f = NULL; // used for buffered stream IO
+	int mode = MODE_VIDEO;
 
 	if (argc < 2) {
 		fprintf(stderr, "No source file specified\n");
@@ -162,25 +183,39 @@ int main(int argc, char *argv[])
 
 	if (stream_mode) { // buffered stream IO
 		f = file_open(argv[1]);
-		pi = stream_open_bufferedio(f, file_read_packet, file_seek);
+		if (!f) {
+			fprintf(stderr, "input file not found: %s\n", argv[1]);
+			exit(1);
+		}
+		pi = stream_open_bufferedio(mode, f, file_read_packet, file_seek);
 	}
 	else { // file IO
-		pi = stream_open_file(argv[1]);
+		pi = stream_open_file(mode, argv[1]);
 	}
 
 	//info(pi->fmt_ctx);
 
-	printf("audio length: %lld, frame size: %d\n", pi->output.length, pi->output.frame_size);
-	printf("audio format (samplerate/samplesize/channels): %d/%d/%d\n", 
-		pi->output.format.sample_rate, pi->output.format.sample_size, pi->output.format.channels);
+	if (mode & MODE_AUDIO) {
+		printf("audio length: %lld, frame size: %d\n", pi->audio_output.length, pi->audio_output.frame_size);
+		printf("audio format (samplerate/samplesize/channels): %d/%d/%d\n",
+			pi->audio_output.format.sample_rate, pi->audio_output.format.sample_size, pi->audio_output.format.channels);
 
-	output_buffer_size = pi->output.frame_size * pi->output.format.channels * pi->output.format.sample_size;
+		audio_output_buffer_size = pi->audio_output.frame_size * pi->audio_output.format.channels * pi->audio_output.format.sample_size;
+	}
+	if (mode & MODE_VIDEO) {
+		printf("video length: %lld, frame size: %d\n", pi->video_output.length, pi->video_output.frame_size);
+		printf("video format (width/height/fps/aspect): %d/%d/%f/%f\n",
+			pi->video_output.format.width, pi->video_output.format.height, pi->video_output.format.frame_rate, pi->video_output.format.aspect_ratio);
+
+		video_output_buffer_size = pi->video_output.frame_size;
+	}
+	output_buffer_size = max(audio_output_buffer_size, video_output_buffer_size);
 	output_buffer = malloc(output_buffer_size);
 
 	// read full stream
 	int64_t count1 = 0, last_ts1;
-	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size)) >= 0) {
-		printf("read %d @ %lld\n", ret, timestamp);
+	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size, &frame_type)) >= 0) {
+		printf("read %d @ %lld type %d\n", ret, timestamp, frame_type);
 		count1++;
 		last_ts1 = timestamp;
 	}
@@ -190,8 +225,8 @@ int main(int argc, char *argv[])
 
 	// read again (output should be the same as above)
 	int64_t count2 = 0, last_ts2;
-	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size)) >= 0) {
-		printf("read %d @ %lld\n", ret, timestamp);
+	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size, &frame_type)) >= 0) {
+		printf("read %d @ %lld type %d\n", ret, timestamp, frame_type);
 		count2++;
 		last_ts2 = timestamp;
 	}
@@ -213,11 +248,12 @@ int main(int argc, char *argv[])
 /*
  * Opens a stream from a file specified by filename.
  */
-ProxyInstance *stream_open_file(char *filename)
+ProxyInstance *stream_open_file(int mode, char *filename)
 {
 	ProxyInstance *pi;
 
 	pi_init(&pi);
+	pi->mode = mode;
 
 	av_register_all();
 
@@ -232,7 +268,7 @@ ProxyInstance *stream_open_file(char *filename)
 /*
  * Opens a buffered I/O stream through data reading callbacks, allowing for arbitrary data sources (e.g. online streams, custom file input streams).
  */
-ProxyInstance *stream_open_bufferedio(
+ProxyInstance *stream_open_bufferedio(int mode,
 	// User-specific data that is returned with each callback (e.g. an instance pointer, a stream id, or the source stream object). Optional, can be NULL.
 	void *opaque, 
 	// Callback to read a data packet of given length.
@@ -248,6 +284,7 @@ ProxyInstance *stream_open_bufferedio(
 	int ret;
 
 	pi_init(&pi);
+	pi->mode = mode;
 
 	av_register_all();
 
@@ -282,6 +319,11 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 {
 	int ret;
 
+	if (pi->mode == MODE_NONE) {
+		fprintf(stderr, "no mode specified");
+		exit(1);
+	}
+
 	if (pi->fmt_ctx == NULL) {
 		fprintf(stderr, "AVFormatContext missing / not initialized");
 		exit(1);
@@ -296,31 +338,112 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 
 	//info(pi->fmt_ctx);
 
-	// open audio stream
-	if ((ret = open_audio_codec_context(pi->fmt_ctx)) < 0) {
-		fprintf(stderr, "Cannot find audio stream\n");
-		exit(1);
+	if (pi->mode & MODE_AUDIO) {
+		// open audio stream
+		if ((ret = open_codec_context(pi->fmt_ctx, AVMEDIA_TYPE_AUDIO)) < 0) {
+			fprintf(stderr, "Cannot find audio stream\n");
+			exit(1);
+		}
+
+		pi->audio_stream = pi->fmt_ctx->streams[ret];
+		pi->audio_codec_ctx = pi->audio_stream->codec;
+
+		/* initialize sample format converter */
+		// http://stackoverflow.com/a/15372417
+		pi->swr = swr_alloc();
+		if (!pi->audio_codec_ctx->channel_layout) {
+			// when no channel layout is set, set default layout
+			pi->audio_codec_ctx->channel_layout = av_get_default_channel_layout(pi->audio_codec_ctx->channels);
+		}
+		av_opt_set_int(pi->swr, "in_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
+		av_opt_set_int(pi->swr, "out_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
+		av_opt_set_int(pi->swr, "in_sample_rate", pi->audio_codec_ctx->sample_rate, 0);
+		av_opt_set_int(pi->swr, "out_sample_rate", pi->audio_codec_ctx->sample_rate, 0);
+		av_opt_set_sample_fmt(pi->swr, "in_sample_fmt", pi->audio_codec_ctx->sample_fmt, 0);
+		av_opt_set_sample_fmt(pi->swr, "out_sample_fmt", determine_target_format(pi->audio_codec_ctx), 0);
+		swr_init(pi->swr);
+	
+
+		/* set output properties */
+
+		pi->audio_output.format.sample_rate = pi->audio_codec_ctx->sample_rate;
+		pi->audio_output.format.sample_size = av_get_bytes_per_sample(determine_target_format(pi->audio_codec_ctx));
+		pi->audio_output.format.channels = pi->audio_codec_ctx->channels;
+
+		if (DEBUG) {
+			printf("audio_output.format: %d sample_rate, %d sample_size, %d channels\n",
+				pi->audio_output.format.sample_rate,
+				pi->audio_output.format.sample_size,
+				pi->audio_output.format.channels);
+		}
+
+		pi->audio_output.length = pi->audio_stream->duration != AV_NOPTS_VALUE ?
+			pts_to_samples(pi, pi->audio_stream->time_base, pi->audio_stream->duration) : AV_NOPTS_VALUE;
+
+		/*
+		* TODO To get the frame size, read the first frame, take the size, and seek back to the start.
+		* This only works under the assumption that
+		*  1. the frame size stays constant over time (are there codecs with variable sized frames?)
+		*  2. the first frame is always of "full" size
+		*  3. only the last frame can be smaller
+		* Alternatively, the frame size could be announced through a callback after reading the first
+		* frame, but this still requires an intermediate buffer. The best case would be to let the
+		* program that calls this library manage the buffer.
+		*
+		* For now, a frame size of 1 second should be big enough to fit all occurring frame sizes (frame
+		* sizes were always smaller during tests).
+		*/
+		pi->audio_output.frame_size = pi->audio_output.format.sample_rate; // 1 sec default frame size
+
+		if (DEBUG) {
+			printf("output: %lld length, %d frame_size\n", pi->audio_output.length, pi->audio_output.frame_size);
+		}
+
+		if (pi->audio_codec_ctx->codec->capabilities & CODEC_CAP_DELAY) {
+			// When CODEC_CAP_DELAY is set, there is a delay between input and output of the decoder
+			printf("warning: cap delay!\n");
+		}
 	}
 
-	pi->audio_stream = pi->fmt_ctx->streams[ret];
-	pi->audio_codec_ctx = pi->audio_stream->codec;
+	if (pi->mode & MODE_VIDEO) {
+		// open audio stream
+		if ((ret = open_codec_context(pi->fmt_ctx, AVMEDIA_TYPE_VIDEO)) < 0) {
+			fprintf(stderr, "Cannot find video stream\n");
+			exit(1);
+		}
 
-	/* initialize sample format converter */
-	// http://stackoverflow.com/a/15372417
-	pi->swr = swr_alloc();
-	if (!pi->audio_codec_ctx->channel_layout) {
-		// when no channel layout is set, set default layout
-		pi->audio_codec_ctx->channel_layout = av_get_default_channel_layout(pi->audio_codec_ctx->channels);
+		pi->video_stream = pi->fmt_ctx->streams[ret];
+		pi->video_codec_ctx = pi->video_stream->codec;
+
+		/* set output properties */
+
+		pi->video_output.format.width = pi->video_codec_ctx->width;
+		pi->video_output.format.height = pi->video_codec_ctx->height;
+		pi->video_output.format.frame_rate = av_q2d(pi->video_codec_ctx->framerate);
+		pi->video_output.format.aspect_ratio = av_q2d(pi->video_codec_ctx->sample_aspect_ratio);
+
+		if (DEBUG) {
+			printf("video_output.format: %d width, %d height, %f frame_rate, %f aspect_ratio\n",
+				pi->video_output.format.width,
+				pi->video_output.format.height,
+				pi->video_output.format.frame_rate,
+				pi->video_output.format.aspect_ratio);
+		}
+
+		pi->video_output.length = pi->video_stream->duration != AV_NOPTS_VALUE ?
+			pts_to_samples(pi, pi->video_stream->time_base, pi->video_stream->duration) : AV_NOPTS_VALUE;
+
+		pi->video_output.frame_size = pi->video_output.format.width * pi->video_output.format.height * 4; // TODO determine real size
+
+		if (DEBUG) {
+			printf("output: %lld length, %d frame_size\n", pi->video_output.length, pi->video_output.frame_size);
+		}
+
+		if (pi->video_codec_ctx->codec->capabilities & CODEC_CAP_DELAY) {
+			// When CODEC_CAP_DELAY is set, there is a delay between input and output of the decoder
+			printf("warning: cap delay!\n");
+		}
 	}
-	av_opt_set_int(pi->swr, "in_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
-	av_opt_set_int(pi->swr, "out_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
-	av_opt_set_int(pi->swr, "in_sample_rate", pi->audio_codec_ctx->sample_rate, 0);
-	av_opt_set_int(pi->swr, "out_sample_rate", pi->audio_codec_ctx->sample_rate, 0);
-	av_opt_set_sample_fmt(pi->swr, "in_sample_fmt", pi->audio_codec_ctx->sample_fmt, 0);
-	av_opt_set_sample_fmt(pi->swr, "out_sample_fmt", determine_target_format(pi->audio_codec_ctx), 0);
-	swr_init(pi->swr);
-
-
 
 	/* initialize packet, set data to NULL, let the demuxer fill it */
 	av_init_packet(&pi->pkt);
@@ -329,60 +452,24 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 
 	pi->frame = av_frame_alloc();
 
-	/* set output properties */
-
-	pi->output.format.sample_rate = pi->audio_codec_ctx->sample_rate;
-	pi->output.format.sample_size = av_get_bytes_per_sample(determine_target_format(pi->audio_codec_ctx));
-	pi->output.format.channels = pi->audio_codec_ctx->channels;
-
-	if (DEBUG) {
-		printf("output.format: %d sample_rate, %d sample_size, %d channels\n",
-			pi->output.format.sample_rate,
-			pi->output.format.sample_size,
-			pi->output.format.channels);
-	}
-
-	pi->output.length = pi->audio_stream->duration != AV_NOPTS_VALUE ? 
-		pts_to_samples(pi, pi->audio_stream->time_base, pi->audio_stream->duration) : AV_NOPTS_VALUE;
-	/*
-	 * TODO To get the frame size, read the first frame, take the size, and seek back to the start.
-	 * This only works under the assumption that 
-	 *  1. the frame size stays constant over time (are there codecs with variable sized frames?)
-	 *  2. the first frame is always of "full" size
-	 *  3. only the last frame can be smaller
-	 * Alternatively, the frame size could be announced through a callback after reading the first
-	 * frame, but this still requires an intermediate buffer. The best case would be to let the
-	 * program that calls this library manage the buffer.
-	 * 
-	 * For now, a frame size of 1 second should be big enough to fit all occurring frame sizes (frame
-	 * sizes were always smaller during tests).
-	 */
-	pi->output.frame_size = pi->output.format.sample_rate; // 1 sec default frame size
-
-	if (DEBUG) {
-		printf("output: %lld length, %d frame_size\n", pi->output.length, pi->output.frame_size);
-	}
-
-	if (pi->audio_codec_ctx->codec->capabilities & CODEC_CAP_DELAY) {
-		// When CODEC_CAP_DELAY is set, there is a delay between input and output of the decoder
-		printf("warning: cap delay!\n");
-	}
-
 	return pi;
 }
 
 void *stream_get_output_config(ProxyInstance *pi)
 {
-	return &pi->output;
+	return &pi->audio_output;
 }
 
 /*
  * Reads the next frame in the stream.
  */
-int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
+int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 {
 	int ret;
 	int cached = 0;
+
+	*got_frame = 0;
+	*frame_type = MODE_NONE;
 
 	// if packet is emtpy, read new packet from stream
 	if (pi->pkt.size == 0) {
@@ -394,13 +481,24 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 		}
 	}
 
-	ret = decode_audio_packet(pi, got_audio_frame, cached);
+	if (pi->mode & MODE_AUDIO) {
+		ret = decode_audio_packet(pi, got_frame, cached);
+	}
+	if (*got_frame) {
+		*frame_type = MODE_AUDIO;
+	}
+	else if (pi->mode & MODE_VIDEO) {
+		ret = decode_video_packet(pi, got_frame, cached);
+	}
+	if (*got_frame) {
+		*frame_type = MODE_VIDEO;
+	}
 	
 	if (ret < 0) {
 		av_free_packet(&pi->pkt);
 		return -1; // decoding failed, signal EOF
 	}
-	else if (cached && !*got_audio_frame) {
+	else if (cached && !*got_frame) {
 		av_free_packet(&pi->pkt);
 		return -1; // signal the caller EOF
 	}
@@ -408,7 +506,7 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 	pi->pkt.data += ret;
 	pi->pkt.size -= ret;
 
-	if (convert_samples(pi) < 0) {
+	if (pi->mode & MODE_AUDIO && convert_samples(pi) < 0) {
 		av_free_packet(&pi->pkt);
 		return -1; // conversion failed, signal EOF
 	}
@@ -418,7 +516,7 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 		av_free_packet(&pi->pkt);
 	}
 
-	if (*got_audio_frame) {
+	if (*got_frame) {
 		pi->frame_pts = pi->pkt.pts;
 	}
 
@@ -426,26 +524,32 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_audio_frame)
 	 * Return the number of samples per channel read, to keep API consistent.
 	 * All "sizes" in the API are in samples, none in bytes.
 	 */
-	return pi->frame->nb_samples; 
+	return pi->frame->nb_samples; // TODO return some video size as well (this only returns the audio samples)
 }
 
 /*
- * Read the next audio frame, skipping other frame types in between.
+ * Read the next desired frame, skipping other frame types in between.
  */
-int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size)
+int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size, int *frame_type)
 {
 	int ret;
-	int got_audio_frame;
+	int got_frame;
 
 	*timestamp = -1;
 	
 	while (1) {
 		pi->output_buffer = output_buffer;
 		pi->output_buffer_size = output_buffer_size;
-		ret = stream_read_frame_any(pi, &got_audio_frame);
-		if (ret < 0 || got_audio_frame) {
-			*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ? 
-				pts_to_samples(pi, pi->audio_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
+		ret = stream_read_frame_any(pi, &got_frame, frame_type);
+		if (ret < 0 || got_frame) {
+			if (*frame_type == MODE_AUDIO) {
+				*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ?
+					pts_to_samples(pi, pi->audio_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
+			}
+			else if (frame_type == MODE_VIDEO) {
+				*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ?
+					pts_to_samples(pi, pi->video_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
+			}
 			return ret;
 		}
 	}
@@ -496,7 +600,9 @@ static void pi_init(ProxyInstance **pi) {
 
 	_pi->fmt_ctx = NULL;
 	_pi->audio_stream = NULL;
+	_pi->video_stream = NULL;
 	_pi->audio_codec_ctx = NULL;
+	_pi->video_codec_ctx = NULL;
 	_pi->frame = NULL;
 	_pi->swr = NULL;
 	_pi->output_buffer_size = 0;
@@ -519,6 +625,7 @@ static void pi_free(ProxyInstance **pi) {
 	av_frame_free(&_pi->frame);
 	swr_free(&_pi->swr);
 	avcodec_close(_pi->audio_codec_ctx);
+	avcodec_close(_pi->video_codec_ctx);
 	avformat_close_input(&_pi->fmt_ctx);
 
 	/* free instance data */
@@ -589,7 +696,7 @@ static void info(AVFormatContext *fmt_ctx)
 	}
 }
 
-static int open_audio_codec_context(AVFormatContext *fmt_ctx)
+static int open_codec_context(AVFormatContext *fmt_ctx, int type)
 {
 	int stream_idx;
 	AVStream *stream = NULL;
@@ -598,7 +705,7 @@ static int open_audio_codec_context(AVFormatContext *fmt_ctx)
 	AVDictionary *opts = NULL;
 
 	/* Find stream of given type */
-	stream_idx = av_find_best_stream(fmt_ctx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
+	stream_idx = av_find_best_stream(fmt_ctx, type, -1, -1, NULL, 0);
 
 	if (stream_idx < 0) {
 		fprintf(stderr, "Could not find stream\n");
@@ -622,12 +729,18 @@ static int open_audio_codec_context(AVFormatContext *fmt_ctx)
 		}
 
 		if (DEBUG) {
-			printf("sampleformat: %s, planar: %d, channels: %d, raw bitdepth: %d, bitdepth: %d\n",
-				av_get_sample_fmt_name(codec_ctx->sample_fmt),
-				av_sample_fmt_is_planar(codec_ctx->sample_fmt),
-				codec_ctx->channels,
-				codec_ctx->bits_per_raw_sample,
-				av_get_bytes_per_sample(codec_ctx->sample_fmt) * 8);
+			if (type == AVMEDIA_TYPE_AUDIO) {
+				printf("audio sampleformat: %s, planar: %d, channels: %d, raw bitdepth: %d, bitdepth: %d\n",
+					av_get_sample_fmt_name(codec_ctx->sample_fmt),
+					av_sample_fmt_is_planar(codec_ctx->sample_fmt),
+					codec_ctx->channels,
+					codec_ctx->bits_per_raw_sample,
+					av_get_bytes_per_sample(codec_ctx->sample_fmt) * 8);
+			}
+			else if (type == AVMEDIA_TYPE_VIDEO) {
+				printf("video sampleformat: raw bitdepth: %d\n",
+					codec_ctx->bits_per_raw_sample);
+			}
 		}
 	}
 
@@ -668,6 +781,49 @@ static int decode_audio_packet(ProxyInstance *pi, int *got_audio_frame, int cach
 			printf("audio_frame%s n:%d nb_samples:%d pts:%s\n",
 				cached ? "(cached)" : "",
 				audio_frame_count++, pi->frame->nb_samples,
+				av_ts2timestr(pi->frame->pts, &pi->audio_stream->time_base));
+		}
+	}
+
+	return decoded;
+}
+
+static int video_frame_count = 0;
+/*
+* Decodes a video frame and returns the number of bytes consumed from the input packet,
+* or a negative error code (it is basically the result of avcodec_decode_audio4).
+*/
+static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cached)
+{
+	int ret = 0;
+	int decoded = pi->pkt.size; // to skip non-target stream packets, return the full packet size
+
+	*got_video_frame = 0;
+
+	if (pi->pkt.stream_index == pi->video_stream->index) {
+		/* decode audio frame */
+		printf("%d, %d, %d\n", pi->video_codec_ctx, pi->frame, &pi->pkt);
+		ret = avcodec_decode_video2(pi->video_codec_ctx, pi->frame, got_video_frame, &pi->pkt);
+		if (ret < 0) {
+			fprintf(stderr, "Error decoding video frame (%s)\n", av_err2str(ret));
+			return ret;
+		}
+		/* Some video decoders decode only part of the packet, and have to be
+		* called again with the remainder of the packet data.
+		* Sample: fate-suite/lossless-audio/luckynight-partial.shn
+		* Also, some decoders might over-read the packet. */
+		// TODO validate if this is true for video decoders too (it is for audio decoders)
+		decoded = FFMIN(ret, pi->pkt.size);
+
+		if (*got_video_frame && DEBUG) {
+			printf("packet dts:%s pts:%s duration:%s\n",
+				av_ts2timestr(pi->pkt.dts, &pi->video_stream->time_base),
+				av_ts2timestr(pi->pkt.pts, &pi->video_stream->time_base),
+				av_ts2timestr(pi->pkt.duration, &pi->video_stream->time_base));
+
+			printf("video_frame%s n:%d nb_samples:%d pts:%s\n",
+				cached ? "(cached)" : "",
+				video_frame_count++, pi->frame->nb_samples,
 				av_ts2timestr(pi->frame->pts, &pi->audio_stream->time_base));
 		}
 	}
@@ -726,10 +882,10 @@ static int determine_target_format(AVCodecContext *audio_codec_ctx)
 
 static inline int64_t pts_to_samples(ProxyInstance *pi, AVRational time_base, int64_t time)
 {
-	return (int64_t)round((av_q2d(time_base) * time) * pi->output.format.sample_rate);
+	return (int64_t)round((av_q2d(time_base) * time) * pi->audio_output.format.sample_rate);
 }
 
 static inline int64_t samples_to_pts(ProxyInstance *pi, AVRational time_base, int64_t time)
 {
-	return (int64_t)round(time / av_q2d(time_base) / pi->output.format.sample_rate);
+	return (int64_t)round(time / av_q2d(time_base) / pi->audio_output.format.sample_rate);
 }
