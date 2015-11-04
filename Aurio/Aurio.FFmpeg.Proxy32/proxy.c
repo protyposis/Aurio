@@ -168,6 +168,12 @@ int main(int argc, char *argv[])
 		pi = stream_open_file(argv[1]);
 	}
 
+	//info(pi->fmt_ctx);
+
+	printf("audio length: %lld, frame size: %d\n", pi->output.length, pi->output.frame_size);
+	printf("audio format (samplerate/samplesize/channels): %d/%d/%d\n", 
+		pi->output.format.sample_rate, pi->output.format.sample_size, pi->output.format.channels);
+
 	output_buffer_size = pi->output.frame_size * pi->output.format.channels * pi->output.format.sample_size;
 	output_buffer = malloc(output_buffer_size);
 
