@@ -40,7 +40,7 @@ namespace Aurio.Streams {
             reader = new FFmpegReader(fileInfo, FFmpeg.Type.Audio);
             //reader = new FFmpegReader(fileInfo.OpenRead()); // use buffered IO with stream
 
-            if (reader.OutputConfig.length == long.MinValue) {
+            if (reader.AudioOutputConfig.length == long.MinValue) {
                 /* 
                  * length == FFmpeg AV_NOPTS_VALUE
                  * 
@@ -56,15 +56,15 @@ namespace Aurio.Streams {
             }
 
             properties = new AudioProperties(
-                reader.OutputConfig.format.channels,
-                reader.OutputConfig.format.sample_rate,
-                reader.OutputConfig.format.sample_size * 8,
-                reader.OutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM);
+                reader.AudioOutputConfig.format.channels,
+                reader.AudioOutputConfig.format.sample_rate,
+                reader.AudioOutputConfig.format.sample_size * 8,
+                reader.AudioOutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM);
 
             readerPosition = 0;
-            sourceBuffer = new byte[reader.OutputConfig.frame_size * 
-                reader.OutputConfig.format.channels * 
-                reader.OutputConfig.format.sample_size];
+            sourceBuffer = new byte[reader.AudioOutputConfig.frame_size * 
+                reader.AudioOutputConfig.format.channels * 
+                reader.AudioOutputConfig.format.sample_size];
             sourceBufferPosition = 0;
             sourceBufferLength = -1; // -1 means buffer empty, >= 0 means valid buffer data
 
@@ -84,7 +84,7 @@ namespace Aurio.Streams {
         }
 
         public long Length {
-            get { return reader.OutputConfig.length * properties.SampleBlockByteSize; }
+            get { return reader.AudioOutputConfig.length * properties.SampleBlockByteSize; }
         }
 
         private long SamplePosition {
@@ -168,16 +168,16 @@ namespace Aurio.Streams {
 
             // workaround to get NAudio WaveFormat (instead of creating it manually here)
             var mss = new MemorySourceStream(null, new AudioProperties(
-                reader.OutputConfig.format.channels, 
-                reader.OutputConfig.format.sample_rate, 
-                reader.OutputConfig.format.sample_size * 8, 
-                reader.OutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM));
+                reader.AudioOutputConfig.format.channels, 
+                reader.AudioOutputConfig.format.sample_rate, 
+                reader.AudioOutputConfig.format.sample_size * 8, 
+                reader.AudioOutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM));
             var nass = new NAudioSinkStream(mss);
             var waveFormat = nass.WaveFormat;
 
             var writer = new WaveFileWriter(outputFileInfo.FullName, waveFormat);
 
-            int output_buffer_size = reader.OutputConfig.frame_size * mss.SampleBlockSize;
+            int output_buffer_size = reader.AudioOutputConfig.frame_size * mss.SampleBlockSize;
             byte[] output_buffer = new byte[output_buffer_size];
 
             int samplesRead;
