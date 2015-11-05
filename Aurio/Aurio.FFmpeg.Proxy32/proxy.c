@@ -43,7 +43,7 @@
 #pragma comment(lib, "swscale.lib")
 
 #define EXPORT __declspec(dllexport)
-#define DEBUG 1
+#define DEBUG 0
 
 
 /**
