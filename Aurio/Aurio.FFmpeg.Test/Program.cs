@@ -2,22 +2,58 @@
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Aurio.FFmpeg.Test {
     class Program {
         static void Main(string[] args) {
             if (args.Length == 0) {
+                Console.WriteLine("usage: Aurio.FFmpeg.Test [options] filename");
+                Console.WriteLine("options:");
+                Console.WriteLine("  -a   decode audio to wav file (default setting)");
+                Console.WriteLine("  -v   decode video frames to jpg files");
+                Console.WriteLine("  -vi  video frame decoding interval (default: 1000)");
                 Console.WriteLine("no input file specified");
                 return;
             }
 
-            // TODO read audio from FFmpeg
-            FFmpegReader reader = new FFmpegReader(args[0], Type.Audio);
+            Type type = Type.Audio;
+            int videoFrameInterval = 1000;
+            int i = 0;
 
-            Console.WriteLine("length {0}, frame_size {1}, sample_rate {2}, sample_size {3}, channels {4}", 
+            for (; i < args.Length - 1; i++) {
+                switch (args[i]) {
+                    case "-a":
+                        type = Type.Audio;
+                        break;
+                    case "-v":
+                        type = Type.Video;
+                        break;
+                    case "-vi":
+                        videoFrameInterval = int.Parse(args[++i]);
+                        break;
+                }
+            }
+
+            string filename = args[i]; // last argument
+
+            if (type == Type.Audio) {
+                DecodeAudio(filename);
+            }
+            else if(type == Type.Video) {
+                DecodeVideo(filename, videoFrameInterval);
+            }
+        }
+
+        private static void DecodeAudio(string filename) {
+            FFmpegReader reader = new FFmpegReader(filename, Type.Audio);
+
+            Console.WriteLine("length {0}, frame_size {1}, sample_rate {2}, sample_size {3}, channels {4}",
                 reader.AudioOutputConfig.length,
                 reader.AudioOutputConfig.frame_size,
                 reader.AudioOutputConfig.format.sample_rate,
@@ -26,7 +62,7 @@ namespace Aurio.FFmpeg.Test {
 
             int sampleBlockSize = reader.AudioOutputConfig.format.channels * reader.AudioOutputConfig.format.sample_size;
 
-            int output_buffer_size = reader.AudioOutputConfig.frame_size * 
+            int output_buffer_size = reader.AudioOutputConfig.frame_size *
                 reader.AudioOutputConfig.format.channels * reader.AudioOutputConfig.format.sample_size;
             byte[] output_buffer = new byte[output_buffer_size];
 
@@ -57,14 +93,52 @@ namespace Aurio.FFmpeg.Test {
             // write memory to wav file
             ms.Position = 0;
             MemorySourceStream mss = new MemorySourceStream(ms, new AudioProperties(
-                reader.AudioOutputConfig.format.channels, 
-                reader.AudioOutputConfig.format.sample_rate, 
-                reader.AudioOutputConfig.format.sample_size * 8, 
+                reader.AudioOutputConfig.format.channels,
+                reader.AudioOutputConfig.format.sample_rate,
+                reader.AudioOutputConfig.format.sample_size * 8,
                 reader.AudioOutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM));
             IeeeStream ieee = new IeeeStream(mss);
             NAudioSinkStream nAudioSink = new NAudioSinkStream(ieee);
-            WaveFileWriter.CreateWaveFile(args[0] + ".ffmpeg.wav", nAudioSink);
+            WaveFileWriter.CreateWaveFile(filename + ".ffmpeg.wav", nAudioSink);
+        }
 
+        private static void DecodeVideo(string filename, int videoFrameInterval) {
+            FFmpegReader reader = new FFmpegReader(filename, Type.Video);
+
+            Console.WriteLine("length {0}, frame_size {1}x{2}, frame_rate {3}, aspect_ratio {4}",
+                reader.VideoOutputConfig.length,
+                reader.VideoOutputConfig.format.width,
+                reader.VideoOutputConfig.format.height,
+                reader.VideoOutputConfig.format.frame_rate,
+                reader.VideoOutputConfig.format.aspect_ratio);
+
+            int output_buffer_size = reader.VideoOutputConfig.format.width * reader.VideoOutputConfig.format.height * 3 /* RGB */;
+            byte[] output_buffer = new byte[output_buffer_size];
+
+            int frameRead;
+            long timestamp;
+            Type type;
+            int frameCount = 0;
+
+            Bitmap rgbFrame = new Bitmap(reader.VideoOutputConfig.format.width, reader.VideoOutputConfig.format.height);
+
+            // read full stream
+            while ((frameRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0) {
+                Console.WriteLine("read frame " + frameCount + " @ " + timestamp);
+
+                if(frameCount % videoFrameInterval == 0) {
+                    BitmapData rgbFrameData = rgbFrame.LockBits(new Rectangle(0, 0, rgbFrame.Width, rgbFrame.Height), 
+                        ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+                    Marshal.Copy(output_buffer, 0, rgbFrameData.Scan0, output_buffer_size);
+                    rgbFrame.UnlockBits(rgbFrameData);
+
+                    rgbFrame.Save(String.Format("{0}.{1:00000000}.png", filename, frameCount), ImageFormat.Png);
+                }
+
+                frameCount++;
+            }
+
+            reader.Dispose();
         }
     }
 }
