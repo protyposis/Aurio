@@ -502,16 +502,17 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 
 	if (pi->mode & MODE_AUDIO) {
 		ret = decode_audio_packet(pi, got_frame, cached);
+		if (*got_frame) {
+			*frame_type = MODE_AUDIO;
+		}
 	}
-	if (*got_frame) {
-		*frame_type = MODE_AUDIO;
-	}
-	else if (pi->mode & MODE_VIDEO) {
+	if (!*got_frame && pi->mode & MODE_VIDEO) {
 		ret = decode_video_packet(pi, got_frame, cached);
+		if (*got_frame) {
+			*frame_type = MODE_VIDEO;
+		}
 	}
-	if (*got_frame) {
-		*frame_type = MODE_VIDEO;
-	}
+	
 	
 	if (ret < 0) {
 		av_free_packet(&pi->pkt);
