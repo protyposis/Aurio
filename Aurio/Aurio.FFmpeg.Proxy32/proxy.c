@@ -110,6 +110,12 @@ typedef struct ProxyInstance {
 		}					format;
 		int64_t				length;
 		int					frame_size;
+		struct VideoFrameProps {
+			int					keyframe;
+			enum AVPictureType	pict_type;
+			int					interlaced;
+			int					top_field_first;
+		}					current_frame;
 	}					video_output;
 } ProxyInstance;
 
@@ -123,7 +129,7 @@ EXPORT ProxyInstance *stream_open_bufferedio(int mode, void *opaque, int(*read_p
 ProxyInstance *stream_open(ProxyInstance *pi);
 EXPORT void *stream_get_output_config(ProxyInstance *pi);
 EXPORT int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type);
-EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size, int *frame_type);
+EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size, int *frame_type, void **video_frame_props);
 EXPORT void stream_seek(ProxyInstance *pi, int64_t timestamp);
 EXPORT void stream_close(ProxyInstance *pi);
 
@@ -177,6 +183,8 @@ int main(int argc, char *argv[])
 	uint8_t *output_buffer;
 	int audio_output_buffer_size = 0, video_output_buffer_size = 0, output_buffer_size;
 	int frame_type;
+	struct VideoFrameProps *video_frame_props = NULL;
+
 	const int stream_mode = 1; // 0 =  file, 1 = buffered stream IO
 	FILE *f = NULL; // used for buffered stream IO
 	int mode = MODE_AUDIO | MODE_VIDEO;
@@ -219,8 +227,12 @@ int main(int argc, char *argv[])
 
 	// read full stream
 	int64_t count1 = 0, last_ts1;
-	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size, &frame_type)) >= 0) {
+	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size, &frame_type, &video_frame_props)) >= 0) {
 		printf("read %d @ %lld type %d\n", ret, timestamp, frame_type);
+		if (frame_type == MODE_VIDEO) {
+			printf("keyframe %d, pict_type %d, interlaced %d, top_field_first %d\n", 
+				video_frame_props->keyframe, video_frame_props->pict_type, video_frame_props->interlaced, video_frame_props->top_field_first);
+		}
 		count1++;
 		last_ts1 = timestamp;
 	}
@@ -230,7 +242,7 @@ int main(int argc, char *argv[])
 
 	// read again (output should be the same as above)
 	int64_t count2 = 0, last_ts2;
-	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size, &frame_type)) >= 0) {
+	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size, &frame_type, &video_frame_props)) >= 0) {
 		printf("read %d @ %lld type %d\n", ret, timestamp, frame_type);
 		count2++;
 		last_ts2 = timestamp;
@@ -554,12 +566,13 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 /*
  * Read the next desired frame, skipping other frame types in between.
  */
-int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size, int *frame_type)
+int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size, int *frame_type, void **video_frame_props)
 {
 	int ret;
 	int got_frame;
 
 	*timestamp = -1;
+	video_frame_props = NULL;
 	
 	while (1) {
 		pi->output_buffer = output_buffer;
@@ -573,6 +586,11 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buf
 			else if (*frame_type == MODE_VIDEO) {
 				*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ?
 					pts_to_samples(pi, pi->video_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
+				pi->video_output.current_frame.keyframe = pi->frame->key_frame;
+				pi->video_output.current_frame.pict_type = pi->frame->pict_type;
+				pi->video_output.current_frame.interlaced = pi->frame->interlaced_frame;
+				pi->video_output.current_frame.top_field_first = pi->frame->top_field_first;
+				*video_frame_props = &pi->video_output.current_frame;
 			}
 			return ret;
 		}
