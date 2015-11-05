@@ -83,8 +83,10 @@
     <Compile Include="Interop32.cs" />
     <Compile Include="InteropWrapper.cs" />
     <Compile Include="Interop64.cs" />
-    <Compile Include="OutputConfig.cs" />
+    <Compile Include="Type.cs" />
+    <Compile Include="AudioOutputConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VideoOutputConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Aurio.FFmpeg.Proxy32\bin\Debug\Aurio.FFmpeg.Proxy32.dll">
@@ -107,6 +109,10 @@
       <Link>ffmpeg32\swresample-1.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\Aurio.FFmpeg.Proxy32\bin\Debug\swscale-3.dll">
+      <Link>ffmpeg32\swscale-3.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\Aurio.FFmpeg.Proxy64\bin\Debug\Aurio.FFmpeg.Proxy64.dll">
       <Link>ffmpeg64\Aurio.FFmpeg.Proxy64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -125,6 +131,10 @@
     </Content>
     <Content Include="..\Aurio.FFmpeg.Proxy64\bin\Debug\swresample-1.dll">
       <Link>ffmpeg64\swresample-1.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Aurio.FFmpeg.Proxy64\bin\Debug\swscale-3.dll">
+      <Link>ffmpeg64\swscale-3.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

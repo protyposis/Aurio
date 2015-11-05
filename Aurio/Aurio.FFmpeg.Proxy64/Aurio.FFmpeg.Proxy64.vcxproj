@@ -71,7 +71,8 @@
       <Command>copy $(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avformat-56.dll $(OutDir)
 copy $(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avcodec-56.dll $(OutDir)
 copy $(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avutil-54.dll $(OutDir)
-copy $(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swresample-1.dll $(OutDir)</Command>
+copy $(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swresample-1.dll $(OutDir)
+copy $(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swscale-3.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -93,10 +94,11 @@ copy $(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swresample-1.dll $(OutDir)</Comma
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\avformat-56.dll $(OutDir)
-copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\avcodec-56.dll $(OutDir)
-copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\avutil-54.dll $(OutDir)
-copy $(SolutionDir)\..\libs\ffmpeg\win64\bin\swresample-1.dll $(OutDir)</Command>
+      <Command>copy $(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avformat-56.dll $(OutDir)
+copy $(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avcodec-56.dll $(OutDir)
+copy $(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avutil-54.dll $(OutDir)
+copy $(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swresample-1.dll $(OutDir)
+copy $(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swscale-3.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

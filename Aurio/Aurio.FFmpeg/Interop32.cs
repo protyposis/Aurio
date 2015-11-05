@@ -27,19 +27,19 @@ namespace Aurio.FFmpeg {
         private const string FFMPEGPROXYLIB = "ffmpeg32\\Aurio.FFmpeg.Proxy32.dll";
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
-        public static extern IntPtr stream_open_file(string filename);
+        public static extern IntPtr stream_open_file(Type mode, string filename);
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
-        public static extern IntPtr stream_open_bufferedio(IntPtr opaque, InteropWrapper.CallbackDelegateReadPacket readPacket, InteropWrapper.CallbackDelegateSeek seek);
+        public static extern IntPtr stream_open_bufferedio(Type mode, IntPtr opaque, InteropWrapper.CallbackDelegateReadPacket readPacket, InteropWrapper.CallbackDelegateSeek seek);
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
-        public static extern IntPtr stream_get_output_config(IntPtr instance);
+        public static extern IntPtr stream_get_output_config(IntPtr instance, Type type);
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
-        public static extern int stream_read_frame(IntPtr instance, out long timestamp, byte[] output_buffer, int output_buffer_size);
+        public static extern int stream_read_frame(IntPtr instance, out long timestamp, byte[] output_buffer, int output_buffer_size, out int frame_type);
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
-        public static extern void stream_seek(IntPtr instance, long timestamp);
+        public static extern void stream_seek(IntPtr instance, long timestamp, Type type);
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
         public static extern void stream_close(IntPtr instance);
