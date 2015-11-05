@@ -130,7 +130,7 @@ ProxyInstance *stream_open(ProxyInstance *pi);
 EXPORT void *stream_get_output_config(ProxyInstance *pi, int type);
 int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type);
 EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size, int *frame_type);
-EXPORT void stream_seek(ProxyInstance *pi, int64_t timestamp);
+EXPORT void stream_seek(ProxyInstance *pi, int64_t timestamp, int type);
 EXPORT void stream_close(ProxyInstance *pi);
 
 static void pi_init(ProxyInstance **pi);
@@ -143,8 +143,8 @@ static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cach
 static int convert_audio_samples(ProxyInstance *pi);
 static int convert_video_frame(ProxyInstance *pi);
 static int determine_target_format(AVCodecContext *audio_codec_ctx);
-static inline int64_t pts_to_samples(ProxyInstance *pi, AVRational time_base, int64_t time);
-static inline int64_t samples_to_pts(ProxyInstance *pi, AVRational time_base, int64_t time);
+static inline int64_t pts_to_samples(double sample_rate, AVRational time_base, int64_t time);
+static inline int64_t samples_to_pts(double sample_rate, AVRational time_base, int64_t time);
 
 // THESE FUNCTIONS ARE ONLY FOR STANDALONE DEBUG PURPOSES
 FILE *file_open(const char *filename) {
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
 	}
 
 	// seek back to start
-	stream_seek(pi, 0);
+	stream_seek(pi, 0, mode == TYPE_VIDEO ? TYPE_VIDEO : TYPE_AUDIO);
 
 	// read again (output should be the same as above)
 	int64_t count2 = 0, last_ts2;
@@ -396,7 +396,7 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 		}
 
 		pi->audio_output.length = pi->audio_stream->duration != AV_NOPTS_VALUE ?
-			pts_to_samples(pi, pi->audio_stream->time_base, pi->audio_stream->duration) : AV_NOPTS_VALUE;
+			pts_to_samples(pi->audio_output.format.sample_rate, pi->audio_stream->time_base, pi->audio_stream->duration) : AV_NOPTS_VALUE;
 
 		/*
 		* TODO To get the frame size, read the first frame, take the size, and seek back to the start.
@@ -463,7 +463,7 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 		}
 
 		pi->video_output.length = pi->video_stream->duration != AV_NOPTS_VALUE ?
-			pts_to_samples(pi, pi->video_stream->time_base, pi->video_stream->duration) : AV_NOPTS_VALUE;
+			pts_to_samples(pi->video_output.format.frame_rate, pi->video_stream->time_base, pi->video_stream->duration) : AV_NOPTS_VALUE;
 
 		pi->video_output.frame_size = pi->video_output.format.width * pi->video_output.format.height * 4; // TODO determine real size
 
@@ -588,11 +588,11 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buf
 		if (ret < 0 || got_frame) {
 			if (*frame_type == TYPE_AUDIO) {
 				*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ?
-					pts_to_samples(pi, pi->audio_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
+					pts_to_samples(pi->audio_output.format.sample_rate, pi->audio_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
 			}
 			else if (*frame_type == TYPE_VIDEO) {
 				*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ?
-					pts_to_samples(pi, pi->video_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
+					pts_to_samples(pi->video_output.format.frame_rate, pi->video_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
 				pi->video_output.current_frame.keyframe = pi->frame->key_frame;
 				pi->video_output.current_frame.pict_type = pi->frame->pict_type;
 				pi->video_output.current_frame.interlaced = pi->frame->interlaced_frame;
@@ -603,10 +603,26 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buf
 	}
 }
 
-void stream_seek(ProxyInstance *pi, int64_t timestamp)
+void stream_seek(ProxyInstance *pi, int64_t timestamp, int type)
 {
+	AVStream *seek_stream;
+	double sample_rate;
+
+	if (pi->mode & TYPE_AUDIO && type == TYPE_AUDIO) {
+		seek_stream = pi->audio_stream;
+		sample_rate = pi->audio_output.format.sample_rate;
+	}
+	else if (pi->mode & TYPE_VIDEO && type == TYPE_VIDEO) {
+		seek_stream = pi->video_stream;
+		sample_rate = pi->video_output.format.frame_rate;
+	}
+	else {
+		fprintf(stderr, "unsupported seek stream type %d\n", type);
+		exit(1);
+	}
+
 	// convert sample time to time_base time
-	timestamp = samples_to_pts(pi, pi->audio_stream->time_base, timestamp);
+	timestamp = samples_to_pts(sample_rate, seek_stream->time_base, timestamp);
 
 	/*
 	 * When seeking to a timestamp which is not exactly a frame PTS but 
@@ -624,10 +640,11 @@ void stream_seek(ProxyInstance *pi, int64_t timestamp)
 	 */
 
 	// do seek
-	av_seek_frame(pi->fmt_ctx, pi->audio_stream->index, timestamp, AVSEEK_FLAG_BACKWARD);
+	av_seek_frame(pi->fmt_ctx, seek_stream->index, timestamp, AVSEEK_FLAG_BACKWARD);
 	
 	// flush codec
-	avcodec_flush_buffers(pi->audio_codec_ctx);
+	if (pi->mode & TYPE_AUDIO) avcodec_flush_buffers(pi->audio_codec_ctx);
+	if (pi->mode & TYPE_VIDEO) avcodec_flush_buffers(pi->video_codec_ctx);
 
 	// avcodec_flush_buffers invalidates the packet reference
 	pi->pkt.data = NULL;
@@ -670,8 +687,10 @@ static void pi_free(ProxyInstance **pi) {
 		av_free(_pi->fmt_ctx->pb->buffer);
 		av_free(_pi->fmt_ctx->pb);
 	}
-	sws_freeContext(_pi->sws);
-	avpicture_free(&_pi->video_picture);
+	if (_pi->mode & TYPE_VIDEO) {
+		sws_freeContext(_pi->sws);
+		avpicture_free(&_pi->video_picture);
+	}
 	av_free_packet(&_pi->pkt);
 	av_frame_free(&_pi->frame);
 	swr_free(&_pi->swr);
@@ -947,12 +966,12 @@ static int determine_target_format(AVCodecContext *audio_codec_ctx)
 	return AV_SAMPLE_FMT_FLT;
 }
 
-static inline int64_t pts_to_samples(ProxyInstance *pi, AVRational time_base, int64_t time)
+static inline int64_t pts_to_samples(double sample_rate, AVRational time_base, int64_t time)
 {
-	return (int64_t)round((av_q2d(time_base) * time) * pi->audio_output.format.sample_rate);
+	return (int64_t)round((av_q2d(time_base) * time) * sample_rate);
 }
 
-static inline int64_t samples_to_pts(ProxyInstance *pi, AVRational time_base, int64_t time)
+static inline int64_t samples_to_pts(double sample_rate, AVRational time_base, int64_t time)
 {
-	return (int64_t)round(time / av_q2d(time_base) / pi->audio_output.format.sample_rate);
+	return (int64_t)round(time / av_q2d(time_base) / sample_rate);
 }
