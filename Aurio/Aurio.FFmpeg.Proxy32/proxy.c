@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
 	int frame_type;
 	const int stream_mode = 1; // 0 =  file, 1 = buffered stream IO
 	FILE *f = NULL; // used for buffered stream IO
-	int mode = MODE_VIDEO;
+	int mode = MODE_AUDIO | MODE_VIDEO;
 
 	if (argc < 2) {
 		fprintf(stderr, "No source file specified\n");
