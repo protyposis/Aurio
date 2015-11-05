@@ -834,12 +834,6 @@ static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cach
 			fprintf(stderr, "Error decoding video frame (%s)\n", av_err2str(ret));
 			return ret;
 		}
-		/* Some video decoders decode only part of the packet, and have to be
-		* called again with the remainder of the packet data.
-		* Sample: fate-suite/lossless-audio/luckynight-partial.shn
-		* Also, some decoders might over-read the packet. */
-		// TODO validate if this is true for video decoders too (it is for audio decoders)
-		decoded = FFMIN(ret, pi->pkt.size);
 
 		if (*got_video_frame && DEBUG) {
 			printf("packet dts:%s pts:%s duration:%s\n",
@@ -847,9 +841,9 @@ static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cach
 				av_ts2timestr(pi->pkt.pts, &pi->video_stream->time_base),
 				av_ts2timestr(pi->pkt.duration, &pi->video_stream->time_base));
 
-			printf("video_frame%s n:%d nb_samples:%d pts:%s\n",
+			printf("video_frame%s n:%d coded_n:%d pts:%s\n",
 				cached ? "(cached)" : "",
-				video_frame_count++, pi->frame->nb_samples,
+				video_frame_count++, pi->frame->coded_picture_number,
 				av_ts2timestr(pi->frame->pts, &pi->audio_stream->time_base));
 		}
 	}
