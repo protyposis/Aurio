@@ -33,12 +33,14 @@
 #include "libavutil\timestamp.h"
 #include "libswresample\swresample.h"
 #include "libavutil\opt.h"
+#include "libswscale\swscale.h"
 
 // FFmpeg libs
 #pragma comment(lib, "avformat.lib")
 #pragma comment(lib, "avcodec.lib")
 #pragma comment(lib, "avutil.lib")
 #pragma comment(lib, "swresample.lib")
+#pragma comment(lib, "swscale.lib")
 
 #define EXPORT __declspec(dllexport)
 #define DEBUG 1
@@ -83,6 +85,8 @@ typedef struct ProxyInstance {
 	AVPacket			pkt;
 	AVFrame				*frame;
 	SwrContext			*swr;
+	struct SwsContext	*sws;
+	AVPicture			video_picture;
 	int					output_buffer_size;
 	uint8_t				*output_buffer;
 	int64_t				frame_pts;
@@ -130,7 +134,8 @@ static void info(AVFormatContext *fmt_ctx);
 static int open_codec_context(AVFormatContext *fmt_ctx, int type);
 static int decode_audio_packet(ProxyInstance *pi, int *got_audio_frame, int cached);
 static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cached);
-static int convert_samples(ProxyInstance *pi);
+static int convert_audio_samples(ProxyInstance *pi);
+static int convert_video_frame(ProxyInstance *pi);
 static int determine_target_format(AVCodecContext *audio_codec_ctx);
 static inline int64_t pts_to_samples(ProxyInstance *pi, AVRational time_base, int64_t time);
 static inline int64_t samples_to_pts(ProxyInstance *pi, AVRational time_base, int64_t time);
@@ -415,6 +420,20 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 		pi->video_stream = pi->fmt_ctx->streams[ret];
 		pi->video_codec_ctx = pi->video_stream->codec;
 
+		/* Initialize video frame converter */
+		// PIX_FMT_BGR24 format needed by C# for correct color interpretation (PixelFormat.Format24bppRgb)
+		pi->sws = sws_getContext(pi->video_codec_ctx->width, pi->video_codec_ctx->height, pi->video_codec_ctx->pix_fmt, 
+			pi->video_codec_ctx->width, pi->video_codec_ctx->height, PIX_FMT_BGR24, SWS_BICUBIC, NULL, NULL, NULL);
+		if (pi->sws == NULL) {
+			fprintf(stderr, "error creating swscontext\n");
+			exit(1);
+		}
+
+		if (avpicture_alloc(&pi->video_picture, PIX_FMT_RGB24, pi->video_codec_ctx->width, pi->video_codec_ctx->height) != 0) {
+			fprintf(stderr, "error allocating AVPicture\n");
+			exit(1);
+		}
+
 		/* set output properties */
 
 		pi->video_output.format.width = pi->video_codec_ctx->width;
@@ -506,7 +525,11 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	pi->pkt.data += ret;
 	pi->pkt.size -= ret;
 
-	if (pi->mode & MODE_AUDIO && convert_samples(pi) < 0) {
+	if (*frame_type == MODE_AUDIO && convert_audio_samples(pi) < 0) {
+		av_free_packet(&pi->pkt);
+		return -1; // conversion failed, signal EOF
+	}
+	else if (*frame_type == MODE_VIDEO && convert_video_frame(pi) < 0) {
 		av_free_packet(&pi->pkt);
 		return -1; // conversion failed, signal EOF
 	}
@@ -546,7 +569,7 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buf
 				*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ?
 					pts_to_samples(pi, pi->audio_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
 			}
-			else if (frame_type == MODE_VIDEO) {
+			else if (*frame_type == MODE_VIDEO) {
 				*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ?
 					pts_to_samples(pi, pi->video_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
 			}
@@ -605,6 +628,7 @@ static void pi_init(ProxyInstance **pi) {
 	_pi->video_codec_ctx = NULL;
 	_pi->frame = NULL;
 	_pi->swr = NULL;
+	_pi->sws = NULL;
 	_pi->output_buffer_size = 0;
 	_pi->output_buffer = NULL;
 }
@@ -621,6 +645,8 @@ static void pi_free(ProxyInstance **pi) {
 		av_free(_pi->fmt_ctx->pb->buffer);
 		av_free(_pi->fmt_ctx->pb);
 	}
+	sws_freeContext(_pi->sws);
+	avpicture_free(&_pi->video_picture);
 	av_free_packet(&_pi->pkt);
 	av_frame_free(&_pi->frame);
 	swr_free(&_pi->swr);
@@ -802,7 +828,6 @@ static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cach
 
 	if (pi->pkt.stream_index == pi->video_stream->index) {
 		/* decode audio frame */
-		printf("%d, %d, %d\n", pi->video_codec_ctx, pi->frame, &pi->pkt);
 		ret = avcodec_decode_video2(pi->video_codec_ctx, pi->frame, got_video_frame, &pi->pkt);
 		if (ret < 0) {
 			fprintf(stderr, "Error decoding video frame (%s)\n", av_err2str(ret));
@@ -831,7 +856,7 @@ static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cach
 	return decoded;
 }
 
-static int convert_samples(ProxyInstance *pi) {
+static int convert_audio_samples(ProxyInstance *pi) {
 	/* prepare/update sample format conversion buffer */
 	int output_buffer_size_needed = pi->frame->nb_samples * pi->frame->channels * av_get_bytes_per_sample(pi->audio_codec_ctx->sample_fmt);
 	if (pi->output_buffer_size < output_buffer_size_needed) {
@@ -848,6 +873,29 @@ static int convert_samples(ProxyInstance *pi) {
 	}
 
 	return ret; // if >= 0, the number of samples converted
+}
+
+static int convert_video_frame(ProxyInstance *pi) {
+	/* convert frame to target format */
+	int ret = sws_scale(pi->sws, pi->frame->data, pi->frame->linesize, 0, pi->video_codec_ctx->height, pi->video_picture.data, pi->video_picture.linesize);
+	if (ret < 0) {
+		fprintf(stderr, "Could not convert frame\n");
+	}
+
+	// VERY VERBOSE DEBUG: print monochromatic scaled down frame picture to console
+	if (DEBUG && 0) {
+		const char *QUANT_STEPS = " .:ioIX";
+
+		for (int y = 0; y < pi->video_codec_ctx->height; y += pi->video_codec_ctx->height / 20) {
+			for (int x = 0; x < pi->video_codec_ctx->width; x += pi->video_codec_ctx->width / 64) {
+				printf("%c", QUANT_STEPS[(pi->video_picture.data[0][y * pi->video_picture.linesize[0] + x * 3 /* blue channel */]) / 40]);
+			}
+			printf("\n");
+		}
+		printf("\n");
+	}
+
+	return ret; // if >= 0, the height of the output frame
 }
 
 /* 
