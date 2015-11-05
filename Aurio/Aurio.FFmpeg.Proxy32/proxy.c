@@ -568,7 +568,15 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	 * Return the number of samples per channel read, to keep API consistent.
 	 * All "sizes" in the API are in samples, none in bytes.
 	 */
-	return pi->frame->nb_samples; // TODO return some video size as well (this only returns the audio samples)
+	if (*frame_type == TYPE_AUDIO) {
+		return pi->frame->nb_samples;
+	}
+	else if (*frame_type == TYPE_VIDEO) {
+		return 1; // signal decoding of 1 frame
+	}
+	else {
+		return 0;
+	}
 }
 
 /*
