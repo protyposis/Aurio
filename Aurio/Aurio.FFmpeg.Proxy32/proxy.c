@@ -127,7 +127,7 @@ typedef struct ProxyInstance {
 EXPORT ProxyInstance *stream_open_file(int mode, char *filename);
 EXPORT ProxyInstance *stream_open_bufferedio(int mode, void *opaque, int(*read_packet)(void *opaque, uint8_t *buf, int buf_size), int64_t(*seek)(void *opaque, int64_t offset, int whence));
 ProxyInstance *stream_open(ProxyInstance *pi);
-EXPORT void *stream_get_output_config(ProxyInstance *pi);
+EXPORT void *stream_get_output_config(ProxyInstance *pi, int type);
 int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type);
 EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size, int *frame_type, void **video_frame_props);
 EXPORT void stream_seek(ProxyInstance *pi, int64_t timestamp);
@@ -486,9 +486,16 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 	return pi;
 }
 
-void *stream_get_output_config(ProxyInstance *pi)
+void *stream_get_output_config(ProxyInstance *pi, int type)
 {
-	return &pi->audio_output;
+	if (type == TYPE_AUDIO) {
+		return &pi->audio_output;
+	}
+	else if (type == TYPE_VIDEO) {
+		return &pi->video_output;
+	}
+
+	return NULL;
 }
 
 /*
