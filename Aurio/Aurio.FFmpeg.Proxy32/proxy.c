@@ -561,7 +561,11 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	}
 
 	if (*got_frame) {
-		pi->frame_pts = pi->pkt.pts;
+		// pi->pkt.pts is the PTS of the last read packet, which is not necessarily the PTS of frame 
+		// that the decoder returns, because there can be a delay between decoder input and output 
+		// (e.g. depending on threads and frame ordering)
+		// http://stackoverflow.com/a/30575055
+		pi->frame_pts = pi->frame->pkt_pts;
 	}
 
 	/* 
@@ -595,12 +599,12 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buf
 		ret = stream_read_frame_any(pi, &got_frame, frame_type);
 		if (ret < 0 || got_frame) {
 			if (*frame_type == TYPE_AUDIO) {
-				*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ?
-					pts_to_samples(pi->audio_output.format.sample_rate, pi->audio_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
+				*timestamp = pi->frame->pkt_pts != AV_NOPTS_VALUE ?
+					pts_to_samples(pi->audio_output.format.sample_rate, pi->audio_stream->time_base, pi->frame->pkt_pts) : pi->pkt.pos;
 			}
 			else if (*frame_type == TYPE_VIDEO) {
-				*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ?
-					pts_to_samples(pi->video_output.format.frame_rate, pi->video_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
+				*timestamp = pi->frame->pkt_pts != AV_NOPTS_VALUE ?
+					pts_to_samples(pi->video_output.format.frame_rate, pi->video_stream->time_base, pi->frame->pkt_pts) : pi->pkt.pos;
 				pi->video_output.current_frame.keyframe = pi->frame->key_frame;
 				pi->video_output.current_frame.pict_type = pi->frame->pict_type;
 				pi->video_output.current_frame.interlaced = pi->frame->interlaced_frame;
