@@ -39,7 +39,7 @@ namespace Aurio.FFmpeg {
         public static extern int stream_read_frame(IntPtr instance, out long timestamp, byte[] output_buffer, int output_buffer_size, out int frame_type);
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
-        public static extern void stream_seek(IntPtr instance, long timestamp);
+        public static extern void stream_seek(IntPtr instance, long timestamp, Type type);
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
         public static extern void stream_close(IntPtr instance);

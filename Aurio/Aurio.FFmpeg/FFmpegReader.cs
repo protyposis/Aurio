@@ -107,8 +107,8 @@ namespace Aurio.FFmpeg {
             return ret;
         }
 
-        public void Seek(long timestamp) {
-            InteropWrapper.stream_seek(instance, timestamp);
+        public void Seek(long timestamp, Type type) {
+            InteropWrapper.stream_seek(instance, timestamp, type);
         }
 
         #region IDisposable & destructor

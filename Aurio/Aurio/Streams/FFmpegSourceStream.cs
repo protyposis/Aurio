@@ -99,7 +99,7 @@ namespace Aurio.Streams {
                 long seekTarget = (value / SampleBlockSize) + readerFirstPTS;
 
                 // seek to target position
-                reader.Seek(seekTarget);
+                reader.Seek(seekTarget, FFmpeg.Type.Audio);
 
                 // get target position
                 FFmpeg.Type type;
