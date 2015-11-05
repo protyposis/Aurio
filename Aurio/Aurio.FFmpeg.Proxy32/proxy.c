@@ -490,7 +490,7 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	*got_frame = 0;
 	*frame_type = MODE_NONE;
 
-	// if packet is emtpy, read new packet from stream
+	// if packet is empty, read new packet from stream
 	if (pi->pkt.size == 0) {
 		if ((ret = av_read_frame(pi->fmt_ctx, &pi->pkt)) < 0) {
 			// probably EOF, check for cached frames (e.g. SHN)
