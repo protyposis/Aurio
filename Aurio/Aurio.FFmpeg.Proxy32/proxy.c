@@ -927,7 +927,13 @@ static int convert_audio_samples(ProxyInstance *pi) {
 
 static int convert_video_frame(ProxyInstance *pi) {
 	/* convert frame to target format */
-	int ret = sws_scale(pi->sws, pi->frame->data, pi->frame->linesize, 0, pi->video_codec_ctx->height, pi->video_picture.data, pi->video_picture.linesize);
+	/* Instead of writing the converted image into the AVPicture and then transferring it to the output 
+	 * buffer, it gets directly written into the output buffer to save the memory transfer. The additional
+	 * variable is required because sws_scale expects an array of buffers, with the first buffer allocated.
+	 * The AVPicture could actually be completely omitted by passing an array  int linesize[1] = { rgbstride },
+	 * with e.g. rgbstride = 960 for a 320px wide picture. */
+	uint8_t *output_buffer_workaround = pi->output_buffer;
+	int ret = sws_scale(pi->sws, pi->frame->data, pi->frame->linesize, 0, pi->video_codec_ctx->height, &output_buffer_workaround, pi->video_picture.linesize);
 	if (ret < 0) {
 		fprintf(stderr, "Could not convert frame\n");
 	}
@@ -938,7 +944,7 @@ static int convert_video_frame(ProxyInstance *pi) {
 
 		for (int y = 0; y < pi->video_codec_ctx->height; y += pi->video_codec_ctx->height / 20) {
 			for (int x = 0; x < pi->video_codec_ctx->width; x += pi->video_codec_ctx->width / 64) {
-				printf("%c", QUANT_STEPS[(pi->video_picture.data[0][y * pi->video_picture.linesize[0] + x * 3 /* blue channel */]) / 40]);
+				printf("%c", QUANT_STEPS[(pi->output_buffer[y * pi->video_picture.linesize[0] + x * 3 /* blue channel */]) / 40]);
 			}
 			printf("\n");
 		}
