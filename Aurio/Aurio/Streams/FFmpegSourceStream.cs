@@ -37,7 +37,7 @@ namespace Aurio.Streams {
 
 
         public FFmpegSourceStream(FileInfo fileInfo) {
-            reader = new FFmpegReader(fileInfo);
+            reader = new FFmpegReader(fileInfo, FFmpeg.Type.Audio);
             //reader = new FFmpegReader(fileInfo.OpenRead()); // use buffered IO with stream
 
             if (reader.OutputConfig.length == long.MinValue) {
@@ -102,7 +102,8 @@ namespace Aurio.Streams {
                 reader.Seek(seekTarget);
 
                 // get target position
-                sourceBufferLength = reader.ReadFrame(out readerPosition, sourceBuffer, sourceBuffer.Length);
+                FFmpeg.Type type;
+                sourceBufferLength = reader.ReadFrame(out readerPosition, sourceBuffer, sourceBuffer.Length, out type);
 
                 // check if seek ended up at seek target (or earlier because of frame size, depends on file format and stream codec)
                 // TODO handle seek offset with bufferPosition
@@ -130,7 +131,8 @@ namespace Aurio.Streams {
         public int Read(byte[] buffer, int offset, int count) {
             if (sourceBufferLength == -1) {
                 long newPosition;
-                sourceBufferLength = reader.ReadFrame(out newPosition, sourceBuffer, sourceBuffer.Length);
+                FFmpeg.Type type;
+                sourceBufferLength = reader.ReadFrame(out newPosition, sourceBuffer, sourceBuffer.Length, out type);
 
                 if (newPosition == -1 || sourceBufferLength == -1) {
                     return 0; // end of stream
@@ -162,7 +164,7 @@ namespace Aurio.Streams {
                 return outputFileInfo;
             }
 
-            var reader = new FFmpegReader(fileInfo);
+            var reader = new FFmpegReader(fileInfo, FFmpeg.Type.Audio);
 
             // workaround to get NAudio WaveFormat (instead of creating it manually here)
             var mss = new MemorySourceStream(null, new AudioProperties(
@@ -180,9 +182,10 @@ namespace Aurio.Streams {
 
             int samplesRead;
             long timestamp;
+            FFmpeg.Type type;
 
             // sequentially read samples from decoder and write it to wav file
-            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size)) > 0) {
+            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0) {
                 int bytesRead = samplesRead * mss.SampleBlockSize;
                 writer.Write(output_buffer, 0, bytesRead);
             }

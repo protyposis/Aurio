@@ -27,8 +27,10 @@ namespace Aurio.FFmpeg {
 
         private string filename; // store source filename for debugging
         private bool disposed = false;
+        private Type mode;
         private IntPtr instance = IntPtr.Zero;
-        private OutputConfig outputConfig;
+        private AudioOutputConfig audioOutputConfig;
+        private VideoOutputConfig videoOutputConfig;
 
         // Delegates for buffered IO mode (stream source)
         // Because the CLR does not know about the references from the native proxy code,
@@ -36,18 +38,19 @@ namespace Aurio.FFmpeg {
         private InteropWrapper.CallbackDelegateReadPacket readPacketDelegate;
         private InteropWrapper.CallbackDelegateSeek seekDelegate;
 
-        public FFmpegReader(string filename) {
+        public FFmpegReader(string filename, Type mode) {
             this.filename = filename;
-            instance = InteropWrapper.stream_open_file(filename);
+            instance = InteropWrapper.stream_open_file(mode, filename);
+            this.mode = mode;
 
-            IntPtr ocp = InteropWrapper.stream_get_output_config(instance);
-            outputConfig = (OutputConfig)Marshal.PtrToStructure(ocp, typeof(OutputConfig));
+            ReadOutputConfig();
         }
 
-        public FFmpegReader(FileInfo fileInfo) : this(fileInfo.FullName) { }
+        public FFmpegReader(FileInfo fileInfo, Type mode) : this(fileInfo.FullName, mode) { }
 
-        public FFmpegReader(Stream stream) {
+        public FFmpegReader(Stream stream, Type mode) {
             this.filename = "bufferedIO_stream";
+            this.mode = mode;
 
             var transferBuffer = new byte[0];
             readPacketDelegate = delegate (IntPtr opaque, IntPtr buffer, int bufferSize) {
@@ -74,18 +77,34 @@ namespace Aurio.FFmpeg {
                 return stream.Seek(offset, (SeekOrigin)whence);
             };
 
-            instance = InteropWrapper.stream_open_bufferedio(IntPtr.Zero, readPacketDelegate, seekDelegate);
+            instance = InteropWrapper.stream_open_bufferedio(mode, IntPtr.Zero, readPacketDelegate, seekDelegate);
 
-            IntPtr ocp = InteropWrapper.stream_get_output_config(instance);
-            outputConfig = (OutputConfig)Marshal.PtrToStructure(ocp, typeof(OutputConfig));
+            ReadOutputConfig();
         }
 
-        public OutputConfig OutputConfig {
-            get { return outputConfig; }
+        private void ReadOutputConfig() {
+            if ((mode & Type.Audio) != 0) {
+                IntPtr ocp = InteropWrapper.stream_get_output_config(instance, Type.Audio);
+                audioOutputConfig = (AudioOutputConfig)Marshal.PtrToStructure(ocp, typeof(AudioOutputConfig));
+            }
+
+            if ((mode & Type.Video) != 0) {
+                IntPtr ocp = InteropWrapper.stream_get_output_config(instance, Type.Video);
+                videoOutputConfig = (VideoOutputConfig)Marshal.PtrToStructure(ocp, typeof(VideoOutputConfig));
+            }
         }
 
-        public int ReadFrame(out long timestamp, byte[] output_buffer, int output_buffer_size) {
-            return InteropWrapper.stream_read_frame(instance, out timestamp, output_buffer, output_buffer_size);
+        public AudioOutputConfig OutputConfig {
+            get { return audioOutputConfig; }
+        }
+
+        public int ReadFrame(out long timestamp, byte[] output_buffer, int output_buffer_size, out Type frameType) {
+            int type;
+
+            int ret = InteropWrapper.stream_read_frame(instance, out timestamp, output_buffer, output_buffer_size, out type);
+            frameType = (Type)type;
+
+            return ret;
         }
 
         public void Seek(long timestamp) {
