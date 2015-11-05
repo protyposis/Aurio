@@ -76,7 +76,7 @@
  * and most importantly to run several decoders in parallel.
  */
 typedef struct ProxyInstance {
-	int					mode;
+	int					mode; // contains the desired packet types to decode
 	AVFormatContext		*fmt_ctx;
 	AVStream			*audio_stream;
 	AVStream			*video_stream;
@@ -119,9 +119,9 @@ typedef struct ProxyInstance {
 	}					video_output;
 } ProxyInstance;
 
-#define MODE_NONE  0x00
-#define MODE_AUDIO 0x01
-#define MODE_VIDEO 0x02
+#define TYPE_NONE  0x00
+#define TYPE_AUDIO 0x01
+#define TYPE_VIDEO 0x02
 
 // function definitions
 EXPORT ProxyInstance *stream_open_file(int mode, char *filename);
@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 
 	const int stream_mode = 1; // 0 =  file, 1 = buffered stream IO
 	FILE *f = NULL; // used for buffered stream IO
-	int mode = MODE_AUDIO | MODE_VIDEO;
+	int mode = TYPE_AUDIO | TYPE_VIDEO;
 
 	if (argc < 2) {
 		fprintf(stderr, "No source file specified\n");
@@ -208,14 +208,14 @@ int main(int argc, char *argv[])
 
 	//info(pi->fmt_ctx);
 
-	if (mode & MODE_AUDIO) {
+	if (mode & TYPE_AUDIO) {
 		printf("audio length: %lld, frame size: %d\n", pi->audio_output.length, pi->audio_output.frame_size);
 		printf("audio format (samplerate/samplesize/channels): %d/%d/%d\n",
 			pi->audio_output.format.sample_rate, pi->audio_output.format.sample_size, pi->audio_output.format.channels);
 
 		audio_output_buffer_size = pi->audio_output.frame_size * pi->audio_output.format.channels * pi->audio_output.format.sample_size;
 	}
-	if (mode & MODE_VIDEO) {
+	if (mode & TYPE_VIDEO) {
 		printf("video length: %lld, frame size: %d\n", pi->video_output.length, pi->video_output.frame_size);
 		printf("video format (width/height/fps/aspect): %d/%d/%f/%f\n",
 			pi->video_output.format.width, pi->video_output.format.height, pi->video_output.format.frame_rate, pi->video_output.format.aspect_ratio);
@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
 	int64_t count1 = 0, last_ts1;
 	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size, &frame_type, &video_frame_props)) >= 0) {
 		printf("read %d @ %lld type %d\n", ret, timestamp, frame_type);
-		if (frame_type == MODE_VIDEO) {
+		if (frame_type == TYPE_VIDEO) {
 			printf("keyframe %d, pict_type %d, interlaced %d, top_field_first %d\n", 
 				video_frame_props->keyframe, video_frame_props->pict_type, video_frame_props->interlaced, video_frame_props->top_field_first);
 		}
@@ -336,7 +336,7 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 {
 	int ret;
 
-	if (pi->mode == MODE_NONE) {
+	if (pi->mode == TYPE_NONE) {
 		fprintf(stderr, "no mode specified");
 		exit(1);
 	}
@@ -355,7 +355,7 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 
 	//info(pi->fmt_ctx);
 
-	if (pi->mode & MODE_AUDIO) {
+	if (pi->mode & TYPE_AUDIO) {
 		// open audio stream
 		if ((ret = open_codec_context(pi->fmt_ctx, AVMEDIA_TYPE_AUDIO)) < 0) {
 			fprintf(stderr, "Cannot find audio stream\n");
@@ -422,7 +422,7 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 		}
 	}
 
-	if (pi->mode & MODE_VIDEO) {
+	if (pi->mode & TYPE_VIDEO) {
 		// open audio stream
 		if ((ret = open_codec_context(pi->fmt_ctx, AVMEDIA_TYPE_VIDEO)) < 0) {
 			fprintf(stderr, "Cannot find video stream\n");
@@ -500,7 +500,7 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	int cached = 0;
 
 	*got_frame = 0;
-	*frame_type = MODE_NONE;
+	*frame_type = TYPE_NONE;
 
 	// if packet is empty, read new packet from stream
 	if (pi->pkt.size == 0) {
@@ -512,16 +512,16 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 		}
 	}
 
-	if (pi->mode & MODE_AUDIO) {
+	if (pi->mode & TYPE_AUDIO) {
 		ret = decode_audio_packet(pi, got_frame, cached);
 		if (*got_frame) {
-			*frame_type = MODE_AUDIO;
+			*frame_type = TYPE_AUDIO;
 		}
 	}
-	if (!*got_frame && pi->mode & MODE_VIDEO) {
+	if (!*got_frame && pi->mode & TYPE_VIDEO) {
 		ret = decode_video_packet(pi, got_frame, cached);
 		if (*got_frame) {
-			*frame_type = MODE_VIDEO;
+			*frame_type = TYPE_VIDEO;
 		}
 	}
 	
@@ -538,11 +538,11 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	pi->pkt.data += ret;
 	pi->pkt.size -= ret;
 
-	if (*frame_type == MODE_AUDIO && convert_audio_samples(pi) < 0) {
+	if (*frame_type == TYPE_AUDIO && convert_audio_samples(pi) < 0) {
 		av_free_packet(&pi->pkt);
 		return -1; // conversion failed, signal EOF
 	}
-	else if (*frame_type == MODE_VIDEO && convert_video_frame(pi) < 0) {
+	else if (*frame_type == TYPE_VIDEO && convert_video_frame(pi) < 0) {
 		av_free_packet(&pi->pkt);
 		return -1; // conversion failed, signal EOF
 	}
@@ -579,11 +579,11 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buf
 		pi->output_buffer_size = output_buffer_size;
 		ret = stream_read_frame_any(pi, &got_frame, frame_type);
 		if (ret < 0 || got_frame) {
-			if (*frame_type == MODE_AUDIO) {
+			if (*frame_type == TYPE_AUDIO) {
 				*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ?
 					pts_to_samples(pi, pi->audio_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
 			}
-			else if (*frame_type == MODE_VIDEO) {
+			else if (*frame_type == TYPE_VIDEO) {
 				*timestamp = pi->pkt.pts != AV_NOPTS_VALUE ?
 					pts_to_samples(pi, pi->video_stream->time_base, pi->pkt.pts) : pi->pkt.pos;
 				pi->video_output.current_frame.keyframe = pi->frame->key_frame;
