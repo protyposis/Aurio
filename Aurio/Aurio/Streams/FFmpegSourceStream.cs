@@ -35,10 +35,13 @@ namespace Aurio.Streams {
         private int sourceBufferLength; // samples
         private int sourceBufferPosition; // samples
 
-
-        public FFmpegSourceStream(FileInfo fileInfo) {
-            reader = new FFmpegReader(fileInfo, FFmpeg.Type.Audio);
+        public FFmpegSourceStream(FileInfo fileInfo) : this(fileInfo.OpenRead()) {
+            //reader = new FFmpegReader(fileInfo); // use filesystem IO
             //reader = new FFmpegReader(fileInfo.OpenRead()); // use buffered IO with stream
+        }
+
+        public FFmpegSourceStream(Stream stream) {
+            reader = new FFmpegReader(stream, FFmpeg.Type.Audio);
 
             if (reader.AudioOutputConfig.length == long.MinValue) {
                 /* 

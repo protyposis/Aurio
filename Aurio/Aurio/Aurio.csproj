@@ -219,6 +219,7 @@
     <Compile Include="Streams\DebugStreamController.cs" />
     <Compile Include="Streams\FFmpegSourceStream.cs" />
     <Compile Include="Streams\MemorySourceStream.cs" />
+    <Compile Include="Streams\MultiStream.cs" />
     <Compile Include="Streams\SineGeneratorStream.cs" />
     <Compile Include="Streams\StreamExtensions.cs" />
     <Compile Include="Streams\TimeWarp.cs" />
