@@ -53,6 +53,10 @@ namespace Aurio.Streams {
             return sourceStream.Read(buffer, offset, count);
         }
 
+        public virtual void Close() {
+            sourceStream.Close();
+        }
+
         protected void ValidateSampleBlockAlignment(long value) {
             if (value % SampleBlockSize != 0) {
                 throw new Exception("misaligned stream position (not aligned to the sample block size");

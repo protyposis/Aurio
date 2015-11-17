@@ -115,5 +115,11 @@ namespace Aurio.Streams {
 
             return currentStream.Read(buffer, offset, count);
         }
+
+        public void Close() {
+            foreach(IAudioStream sourceStream in sourceStreams) {
+                sourceStream.Close();
+            }
+        }
     }
 }

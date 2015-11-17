@@ -90,5 +90,9 @@ namespace Aurio.Streams {
 
             return bytesRead;
         }
+
+        public void Close() {
+            sourceStream.Close();
+        }
     }
 }

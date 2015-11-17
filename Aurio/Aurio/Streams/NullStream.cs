@@ -69,6 +69,10 @@ namespace Aurio.Streams {
             return bytesRead;
         }
 
+        public void Close() {
+            // nothing to release
+        }
+
         #endregion
     }
 }

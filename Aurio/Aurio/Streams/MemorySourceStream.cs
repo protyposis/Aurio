@@ -56,5 +56,9 @@ namespace Aurio.Streams {
         public int Read(byte[] buffer, int offset, int count) {
             return source.Read(buffer, offset, count);
         }
+
+        public void Close() {
+            source.Close();
+        }
     }
 }

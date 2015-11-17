@@ -134,6 +134,12 @@ namespace Aurio.Streams {
             }
         }
 
+        public void Close() {
+            foreach (IAudioStream s in sourceStreams) {
+                s.Close();
+            }
+        }
+
         public void UpdateLength() {
             lock (this) {
                 long length = 0;

@@ -21,11 +21,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Aurio.Streams {
     public class FFmpegSourceStream : IAudioStream {
 
+        private Stream sourceStream;
         private FFmpegReader reader;
         private AudioProperties properties;
         private long readerPosition; // samples
@@ -52,6 +54,7 @@ namespace Aurio.Streams {
         /// <param name="stream">the stream to decode</param>
         /// <param name="fileName">optional file name hint for FFmpeg</param>
         public FFmpegSourceStream(Stream stream, string fileName) {
+            sourceStream = stream;
             reader = new FFmpegReader(stream, FFmpeg.Type.Audio, fileName);
 
             if (reader.AudioOutputConfig.length == long.MinValue) {
@@ -176,8 +179,40 @@ namespace Aurio.Streams {
             return bytesToCopy;
         }
 
-        public static FileInfo CreateWaveProxy(FileInfo fileInfo) {
-            var outputFileInfo = new FileInfo(fileInfo.FullName + ".ffproxy.wav");
+        public void Close() {
+            reader.Dispose();
+            if(sourceStream != null) {
+                sourceStream.Close();
+                sourceStream = null;
+            }
+        }
+
+        /// <summary>
+        /// Creates a Wave format proxy file in the same directory and with the same name as the specified file,
+        /// if no storage directory is specified (i.e. if it is null). If a storage directory is specified, the proxy
+        /// file will be stored in the specified directory with a hashed file name to avoid name collisions and
+        /// file overwrites. The story directory option is convenient for the usage of temporary or working directories.
+        /// </summary>
+        /// <param name="fileInfo">the file for which a proxy file should be created</param>
+        /// <param name="storageDirectory">optional directory where the proxy file will be stored, can be null</param>
+        /// <returns>the FileInfo of the proxy file</returns>
+        public static FileInfo CreateWaveProxy(FileInfo fileInfo, DirectoryInfo storageDirectory) {
+            FileInfo outputFileInfo;
+
+            if (storageDirectory == null) {
+                // Without a storage directory, store the proxy file beside the original file
+                outputFileInfo = new FileInfo(fileInfo.FullName + ".ffproxy.wav");
+            }
+            else {
+                // With a storage directory specified, store the proxy file with a hashed name 
+                // (to avoid name collision / overwrites) in the target directory (e.g. a temp or working directory)
+                using (var sha256 = SHA256.Create()) {
+                    byte[] hash = sha256.ComputeHash(Encoding.Unicode.GetBytes(fileInfo.FullName));
+                    string hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                    outputFileInfo = new FileInfo(Path.Combine(storageDirectory.FullName, hashString + ".ffproxy.wav"));
+                }
+            }
+
 
             if (outputFileInfo.Exists) {
                 Console.WriteLine("Proxy already existing, using " + outputFileInfo.Name);
@@ -214,6 +249,15 @@ namespace Aurio.Streams {
             writer.Close();
 
             return outputFileInfo;
+        }
+
+        /// <summary>
+        /// Creates a Wave format proxy file in the same directory and with the same name as the specified file.
+        /// </summary>
+        /// <param name="fileInfo">the file for which a proxy file will be created</param>
+        /// <returns>the FileInfo of the proxy file</returns>
+        public static FileInfo CreateWaveProxy(FileInfo fileInfo) {
+            return CreateWaveProxy(fileInfo, null);
         }
 
         public class FileNotSeekableException : Exception {

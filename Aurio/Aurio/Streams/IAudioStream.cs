@@ -75,5 +75,10 @@ namespace Aurio.Streams {
         /// <param name="count">the number of bytes to read</param>
         /// <returns>the number of bytes read, or 0 if the end of the stream has been reached</returns>
         int Read(byte[] buffer, int offset, int count);
+
+        /// <summary>
+        /// Closes the stream and releases all associated resources.
+        /// </summary>
+        void Close();
     }
 }

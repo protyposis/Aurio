@@ -112,6 +112,9 @@ namespace Aurio.Streams {
                 // mapping has changed, stream subsection must be renewed
                 if (hardReset) {
                     cropStream = new CropStream(sourceStream, mL.From, mH.From);
+                    if(resamplingStream != null) {
+                        resamplingStream.Close();
+                    }
                     resamplingStream = new ResamplingStream(cropStream, ResamplingQuality.VariableRate, ByteTimeWarp.CalculateSampleRateRatio(mL, mH));
                     resamplingStream.Position = position - mL.To;
                 }
@@ -176,6 +179,13 @@ namespace Aurio.Streams {
 
             position += bytesRead;
             return bytesRead;
+        }
+
+        public override void Close() {
+            if(resamplingStream != null) {
+                resamplingStream.Close();
+            }
+            base.Close();
         }
 
         private void PrintDebugStatus() {

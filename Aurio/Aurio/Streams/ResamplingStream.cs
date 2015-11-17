@@ -224,6 +224,11 @@ namespace Aurio.Streams {
             return outputLengthGenerated;
         }
 
+        public override void Close() {
+            soxr.Dispose();
+            base.Close();
+        }
+
         public bool CheckTargetSampleRate(double sampleRate) {
             return CheckSampleRateRatio(sampleRate / sourceStream.Properties.SampleRate);
         }

@@ -72,5 +72,9 @@ namespace Aurio.Streams {
             AudioBuffer audioBuffer = new AudioBuffer(buffer);
             return Read(audioBuffer.FloatData, offset / 4, count / 4) * 4;
         }
+
+        public void Close() {
+            // nothing to release
+        }
     }
 }
