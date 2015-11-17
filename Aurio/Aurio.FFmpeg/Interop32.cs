@@ -30,7 +30,7 @@ namespace Aurio.FFmpeg {
         public static extern IntPtr stream_open_file(Type mode, string filename);
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
-        public static extern IntPtr stream_open_bufferedio(Type mode, IntPtr opaque, InteropWrapper.CallbackDelegateReadPacket readPacket, InteropWrapper.CallbackDelegateSeek seek);
+        public static extern IntPtr stream_open_bufferedio(Type mode, IntPtr opaque, InteropWrapper.CallbackDelegateReadPacket readPacket, InteropWrapper.CallbackDelegateSeek seek, string filename);
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
         public static extern IntPtr stream_get_output_config(IntPtr instance, Type type);

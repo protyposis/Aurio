@@ -40,7 +40,7 @@ namespace Aurio.FFmpeg {
         public delegate long CallbackDelegateSeek(IntPtr opaque, [MarshalAs(UnmanagedType.I8)] long offset, int whence);
 
         public delegate IntPtr d_stream_open_file(Type mode, string filename);
-        public delegate IntPtr d_stream_open_bufferedio(Type mode, IntPtr opaque, CallbackDelegateReadPacket readPacket, CallbackDelegateSeek seek);
+        public delegate IntPtr d_stream_open_bufferedio(Type mode, IntPtr opaque, CallbackDelegateReadPacket readPacket, CallbackDelegateSeek seek, string filename);
         public delegate IntPtr d_stream_get_output_config(IntPtr instance, Type type);
         public delegate int d_stream_read_frame(IntPtr instance, out long timestamp, byte[] output_buffer, int output_buffer_size, out int frame_type);
         public delegate void d_stream_seek(IntPtr instance, long timestamp, Type type);

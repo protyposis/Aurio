@@ -125,7 +125,7 @@ typedef struct ProxyInstance {
 
 // function definitions
 EXPORT ProxyInstance *stream_open_file(int mode, char *filename);
-EXPORT ProxyInstance *stream_open_bufferedio(int mode, void *opaque, int(*read_packet)(void *opaque, uint8_t *buf, int buf_size), int64_t(*seek)(void *opaque, int64_t offset, int whence));
+EXPORT ProxyInstance *stream_open_bufferedio(int mode, void *opaque, int(*read_packet)(void *opaque, uint8_t *buf, int buf_size), int64_t(*seek)(void *opaque, int64_t offset, int whence), char* filename);
 ProxyInstance *stream_open(ProxyInstance *pi);
 EXPORT void *stream_get_output_config(ProxyInstance *pi, int type);
 int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type);
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "input file not found: %s\n", argv[1]);
 			exit(1);
 		}
-		pi = stream_open_bufferedio(mode, f, file_read_packet, file_seek);
+		pi = stream_open_bufferedio(mode, f, file_read_packet, file_seek, argv[1]);
 	}
 	else { // file IO
 		pi = stream_open_file(mode, argv[1]);
@@ -293,7 +293,9 @@ ProxyInstance *stream_open_bufferedio(int mode,
 	int(*read_packet)(void *opaque, uint8_t *buf, int buf_size), 
 	// Callback for a seek operation. Optional, can be NULL.
 	// whence: SEEK_SET/0, SEEK_CUR/1, SEEK_END/2, AVSEEK_SIZE/0x10000 (optional, return -1 of not supported), AVSEEK_FORCE/0x20000 (ored into whence, can be ignored)
-	int64_t(*seek)(void *opaque, int64_t offset, int whence))
+	int64_t(*seek)(void *opaque, int64_t offset, int whence),
+	// Filename used by FFmpeg to determine the file format (in cases where there is no distinct header). Optional, can be NULL.
+	char* filename)
 {
 	ProxyInstance *pi;
 	const int buffer_size = 32 * 1024;
@@ -319,7 +321,7 @@ ProxyInstance *stream_open_bufferedio(int mode,
 
 	// NOTE format does not need to be probed manually, FFmpeg does the probing itself and does not crash anymore
 
-	if ((ret = avformat_open_input(&pi->fmt_ctx, NULL, NULL, NULL)) < 0) {
+	if ((ret = avformat_open_input(&pi->fmt_ctx, filename, NULL, NULL)) < 0) {
 		fprintf(stderr, "Could not open source stream: %s\n", av_err2str(ret));
 		exit(1);
 	}

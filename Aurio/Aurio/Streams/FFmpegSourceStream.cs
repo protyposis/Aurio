@@ -35,13 +35,24 @@ namespace Aurio.Streams {
         private int sourceBufferLength; // samples
         private int sourceBufferPosition; // samples
 
-        public FFmpegSourceStream(FileInfo fileInfo) : this(fileInfo.OpenRead()) {
+        /// <summary>
+        /// Decodes an audio stream through FFmpeg from an encoded file.
+        /// </summary>
+        /// <param name="fileInfo">the file to decode</param>
+        public FFmpegSourceStream(FileInfo fileInfo) : this(fileInfo.OpenRead(), fileInfo.Name) {
             //reader = new FFmpegReader(fileInfo); // use filesystem IO
             //reader = new FFmpegReader(fileInfo.OpenRead()); // use buffered IO with stream
         }
 
-        public FFmpegSourceStream(Stream stream) {
-            reader = new FFmpegReader(stream, FFmpeg.Type.Audio);
+        /// <summary>
+        /// Decodes an audio stream through FFmpeg from an encoded file stream.
+        /// Accepts an optional file name hint to help FFmpeg determine the format of
+        /// the encoded data.
+        /// </summary>
+        /// <param name="stream">the stream to decode</param>
+        /// <param name="fileName">optional file name hint for FFmpeg</param>
+        public FFmpegSourceStream(Stream stream, string fileName) {
+            reader = new FFmpegReader(stream, FFmpeg.Type.Audio, fileName);
 
             if (reader.AudioOutputConfig.length == long.MinValue) {
                 /* 
@@ -81,6 +92,12 @@ namespace Aurio.Streams {
                 Console.WriteLine("first PTS = " + readerFirstPTS);
             }
         }
+
+        /// <summary>
+        /// Decodes an audio stream through FFmpeg from an encoded file stream.
+        /// </summary>
+        /// <param name="stream">the stream to decode</param>
+        public FFmpegSourceStream(Stream stream) : this(stream, null) { }
 
         public AudioProperties Properties {
             get { return properties; }

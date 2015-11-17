@@ -38,6 +38,12 @@ namespace Aurio.FFmpeg {
         private InteropWrapper.CallbackDelegateReadPacket readPacketDelegate;
         private InteropWrapper.CallbackDelegateSeek seekDelegate;
 
+        /// <summary>
+        /// Instatiates an FFmpeg reader that works in file mode, where FFmpeg gets the file name and
+        /// handles file access itself.
+        /// </summary>
+        /// <param name="filename">the name of the file to read</param>
+        /// <param name="mode">the types of data to read</param>
         public FFmpegReader(string filename, Type mode) {
             this.filename = filename;
             instance = InteropWrapper.stream_open_file(mode, filename);
@@ -46,10 +52,25 @@ namespace Aurio.FFmpeg {
             ReadOutputConfig();
         }
 
+        /// <summary>
+        /// Instatiates an FFmpeg reader that works in file mode, where FFmpeg gets the file name and
+        /// handles file access itself.
+        /// </summary>
+        /// <param name="fileInfo">a FileInfo object of the file to read</param>
+        /// <param name="mode">the types of data to read</param>
         public FFmpegReader(FileInfo fileInfo, Type mode) : this(fileInfo.FullName, mode) { }
 
-        public FFmpegReader(Stream stream, Type mode) {
-            this.filename = "bufferedIO_stream";
+        /// <summary>
+        /// Instantiates an FFmpeg reader in stream mode, where FFmpeg only gets stream reading callbacks
+        /// and the actual file access is handled by the caller. An optional file name hint can be passed
+        /// to FFmpeg to help it detect the file format, which is useful for file formats without
+        /// distinct headers (e.g. SHN).
+        /// </summary>
+        /// <param name="stream">the stream to decode</param>
+        /// <param name="mode">the types of data to read</param>
+        /// <param name="fileName">optional filename as a hint for FFmpeg to determine the data format</param>
+        public FFmpegReader(Stream stream, Type mode, string fileName) {
+            this.filename = fileName ?? "bufferedIO_stream";
             this.mode = mode;
 
             var transferBuffer = new byte[0];
@@ -77,10 +98,18 @@ namespace Aurio.FFmpeg {
                 return stream.Seek(offset, (SeekOrigin)whence);
             };
 
-            instance = InteropWrapper.stream_open_bufferedio(mode, IntPtr.Zero, readPacketDelegate, seekDelegate);
+            instance = InteropWrapper.stream_open_bufferedio(mode, IntPtr.Zero, readPacketDelegate, seekDelegate, fileName);
 
             ReadOutputConfig();
         }
+
+        /// <summary>
+        /// Instantiates an FFmpeg reader in stream mode, where FFmpeg only gets stream reading callbacks
+        /// and the actual file access is handled by the caller.
+        /// </summary>
+        /// <param name="stream">the stream to decode</param>
+        /// <param name="mode">the types of data to read</param>
+        public FFmpegReader(Stream stream, Type mode) : this(stream, mode, null) { }
 
         private void ReadOutputConfig() {
             if ((mode & Type.Audio) != 0) {
