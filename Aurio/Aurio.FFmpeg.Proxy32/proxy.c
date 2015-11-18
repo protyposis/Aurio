@@ -601,6 +601,7 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buf
 		ret = stream_read_frame_any(pi, &got_frame, frame_type);
 		if (ret < 0 || got_frame) {
 			if (*frame_type == TYPE_AUDIO) {
+				// TODO eventually change to av_frame_get_best_effort_timestamp (result is the same though)
 				*timestamp = pi->frame->pkt_pts != AV_NOPTS_VALUE ?
 					pts_to_samples(pi->audio_output.format.sample_rate, pi->audio_stream->time_base, pi->frame->pkt_pts) : pi->pkt.pos;
 			}
@@ -985,6 +986,8 @@ static int determine_target_format(AVCodecContext *audio_codec_ctx)
 	// default format
 	return AV_SAMPLE_FMT_FLT;
 }
+
+// TODO eventually switch to av_rescale_q/av_inv_q (with sample_rate as AVRational)
 
 static inline int64_t pts_to_samples(double sample_rate, AVRational time_base, int64_t time)
 {
