@@ -51,7 +51,7 @@ namespace Aurio {
             if ((waveStream = OpenFile(fileInfo)) != null) {
                 return new NAudioSourceStream(waveStream);
             }
-            else if (new List<string>() { ".shn", ".ape" }.Exists(ext => fileInfo.Extension.Equals(ext))) {
+            else if (FFmpegSourceStream.WaveProxySuggested(fileInfo)) {
                 Console.WriteLine("File format with known seek problems, creating proxy file...");
                 return TryOpenSourceStream(FFmpegSourceStream.CreateWaveProxy(fileInfo));
             }

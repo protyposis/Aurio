@@ -260,6 +260,18 @@ namespace Aurio.Streams {
             return CreateWaveProxy(fileInfo, null);
         }
 
+        /// <summary>
+        /// Checks for a file if it is recommended to build a wave proxy.. A proxy is recommended if the file
+        /// format does not support seeking or is known to have seek issues.
+        /// An alternative is to scan the file and build a seek index, but this is not implemented yet.
+        /// </summary>
+        /// <param name="fileInfo">the file for which to check if a proxy is recommended</param>
+        /// <returns>true is a proxy is recommended, else false</returns>
+        public static bool WaveProxySuggested(FileInfo fileInfo) {
+            // Suggest wave proxy for file formats with known seek issues
+            return new List<string>() { ".shn", ".ape" }.Exists(ext => fileInfo.Extension.ToLowerInvariant().Equals(ext));
+        }
+
         public class FileNotSeekableException : Exception {
             public FileNotSeekableException() : base() { }
             public FileNotSeekableException(string message) : base(message) { }
