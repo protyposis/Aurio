@@ -17,4 +17,4 @@
        |... same as above
 
 
-currently used: FFmpeg 2.5.2 from http://ffmpeg.zeranoe.com/blog/?p=394
+currently used: FFmpeg 2.8.2 from https://ffmpeg.zeranoe.com/blog/?p=447
