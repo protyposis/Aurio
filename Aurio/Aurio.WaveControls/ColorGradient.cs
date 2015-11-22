@@ -146,5 +146,10 @@ namespace Aurio.WaveControls {
         public static int ColorToArgb(Color c) {
             return c.A << 24 | c.R << 16 | c.G << 8 | c.B;
         }
+
+        public static Color SetAlpha(Color c, byte alpha) {
+            c.A = alpha;
+            return c;
+        }
     }
 }
