@@ -537,11 +537,11 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	
 	
 	if (ret < 0) {
-		av_free_packet(&pi->pkt);
+		av_packet_unref(&pi->pkt);
 		return -1; // decoding failed, signal EOF
 	}
 	else if (cached && !*got_frame) {
-		av_free_packet(&pi->pkt);
+		av_packet_unref(&pi->pkt);
 		return -1; // signal the caller EOF
 	}
 
@@ -549,17 +549,17 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	pi->pkt.size -= ret;
 
 	if (*frame_type == TYPE_AUDIO && convert_audio_samples(pi) < 0) {
-		av_free_packet(&pi->pkt);
+		av_packet_unref(&pi->pkt);
 		return -1; // conversion failed, signal EOF
 	}
 	else if (*frame_type == TYPE_VIDEO && convert_video_frame(pi) < 0) {
-		av_free_packet(&pi->pkt);
+		av_packet_unref(&pi->pkt);
 		return -1; // conversion failed, signal EOF
 	}
 
 	// free packet if all content has been read
 	if (pi->pkt.size == 0) {
-		av_free_packet(&pi->pkt);
+		av_packet_unref(&pi->pkt);
 	}
 
 	if (*got_frame) {
@@ -706,7 +706,7 @@ static void pi_free(ProxyInstance **pi) {
 		sws_freeContext(_pi->sws);
 		avpicture_free(&_pi->video_picture);
 	}
-	av_free_packet(&_pi->pkt);
+	av_packet_unref(&_pi->pkt);
 	av_frame_free(&_pi->frame);
 	swr_free(&_pi->swr);
 	avcodec_close(_pi->audio_codec_ctx);
