@@ -186,5 +186,5 @@ The fingerprinting methods by Haitsma&Kalker and Wang are protected worldwide, a
 License
 -------
 
-Copyright (C) 2010-2015 Mario Guggenberger <mg@protyposis.net>.
+Copyright (C) 2010-2016 Mario Guggenberger <mg@protyposis.net>.
 This project is released under the terms of the GNU Affero General Public License. See `LICENSE` for details. The library can be built to be free of any copyleft requirements; get in touch if the AGPL does not suit your needs.
