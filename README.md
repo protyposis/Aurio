@@ -70,7 +70,7 @@ Build Instructions
 
 Aurio comes with all required dependencies except for FFmpeg (which would blow up the repo size too much). See `libs\ffmpeg\ffmpeg-prepare.txt` for instructions on how to download and where to put FFmpeg.
 
-Building works as easy as building any other Visual Studio solution and should work without problems if all dependencies have been set up correctly. Open the Visual Studio solution `Aurio\Aurio.sln` in Visual Studio 2013 and build the `Aurio` project and optionally the `Aurio.WaveControls` project. The compiled DLLs will be built in each project's `bin` folder.
+Building works as easy as building any other Visual Studio solution and should work without problems if all dependencies have been set up correctly. Open the Visual Studio solution `Aurio\Aurio.sln` and build the `Aurio` project and optionally the `Aurio.WaveControls` project. The compiled DLLs will be built in each project's `bin` folder.
 
 
 Documentation
@@ -186,6 +186,7 @@ Example Applications
 
 Aurio comes with a few tools and test applications that can be taken as a reference:
 
+* **Aurio.FFmpeg.Test** decodes audio to wav files or video to frame images
 * **Aurio.Test.FingerprintingBenchmark** runs a file through all fingerprinting algorithms and measures the required time.
 * **Aurio.Test.FingerprintingHaitsmaKalker** fingerprints files and builds a hash store to match the fingerprinted files. The matches can be browsed and fingerprints inspected.
 * **Aurio.Test.FingerprintingWang2003** display the spectrogram and constellation map while fingerprinting a file.
