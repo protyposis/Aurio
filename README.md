@@ -34,6 +34,27 @@ Aurio.WaveControls provides WPF widgets for user interfaces:
 * Wave View
 
 
+What's new
+----------
+
+### 2016-03-01 fe49ea5
+
+* Support for Visual Studio 2015
+* FFmpeg setup helper script
+* FFmpeg updated to 2.8.2
+* Decoding of various files formats through FFmpeg
+  * Direct processing of audio from compressed formats and (video) containers
+  * Video decoding (see Aurio.FFmpeg.Test program)
+  * Automatic creation of wav proxy files for audio formats that don't allow seeking (shn, ape)
+* Stream input support in FFmpeg decoder (required a file input before)
+* Close-method and IDisposable implementation in audio streams to free resources
+* Close all audio streams after use
+* MultiStream to concatenate files/streams for decoding (e.g. vob files) 
+* Support additional video files (ts, mkv, mov) for automatic EDL export wav proxy replacement
+* Fix release config postbuild event commands
+* Fix FFmpeg proxy compile error in VS2013
+
+
 Requirements
 ------------
 
