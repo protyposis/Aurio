@@ -1,6 +1,6 @@
 ﻿// 
 // Aurio: Audio Processing, Analysis and Retrieval Library
-// Copyright (C) 2010-2015  Mario Guggenberger <mg@protyposis.net>
+// Copyright (C) 2010-2016  Mario Guggenberger <mg@protyposis.net>
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -100,27 +101,7 @@ namespace Aurio.WaveControls
             WaveView waveView = d as WaveView;
             AudioTrack audioTrack = e.NewValue as AudioTrack;
             if (waveView != null && audioTrack != null) {
-                waveView.audioStream = AudioStreamFactory.FromAudioTrackForGUI(audioTrack);
-                waveView.audioStream.WaveformChanged += new EventHandler(delegate(object sender2, EventArgs e2) {
-                    waveView.Dispatcher.BeginInvoke((Action)delegate {
-                        waveView.InvalidateVisual();
-                    });
-                });
-                audioTrack.LengthChanged += new EventHandler<ValueEventArgs<TimeSpan>>(delegate(object sender2, ValueEventArgs<TimeSpan> e2) {
-                    waveView.Dispatcher.BeginInvoke((Action)delegate {
-                        waveView.InvalidateVisual();
-                    });
-                });
-                audioTrack.VolumeChanged += new EventHandler<ValueEventArgs<float>>(delegate(object sender2, ValueEventArgs<float> e2) {
-                    waveView.Dispatcher.BeginInvoke((Action)delegate {
-                        waveView.InvalidateVisual();
-                    });
-                });
-                audioTrack.BalanceChanged += new EventHandler<ValueEventArgs<float>>(delegate(object sender2, ValueEventArgs<float> e2) {
-                    waveView.Dispatcher.BeginInvoke((Action)delegate {
-                        waveView.InvalidateVisual();
-                    });
-                });
+                waveView.SetAudioTrack(audioTrack);
             }
         }
 

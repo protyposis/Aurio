@@ -1,6 +1,6 @@
 ﻿// 
 // Aurio: Audio Processing, Analysis and Retrieval Library
-// Copyright (C) 2010-2015  Mario Guggenberger <mg@protyposis.net>
+// Copyright (C) 2010-2016  Mario Guggenberger <mg@protyposis.net>
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -340,7 +341,6 @@ namespace Aurio.Matching {
                     Debug.WriteLine("warped: " + trackToAlign);
 
                     // adjust all other matches related to the currently warped track
-                    AudioProperties properties = trackToAlign.CreateAudioStream().Properties;
                     List<Match> adjustedMatches = new List<Match>();
                     foreach (Match match in allMatches) {
                         if (!trackPair.Matches.Contains(match)) {

@@ -1,6 +1,6 @@
 ﻿// 
 // Aurio: Audio Processing, Analysis and Retrieval Library
-// Copyright (C) 2010-2015  Mario Guggenberger <mg@protyposis.net>
+// Copyright (C) 2010-2016  Mario Guggenberger <mg@protyposis.net>
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -356,8 +357,11 @@ namespace Aurio {
         }
 
         private void RemoveTrack(AudioTrack audioTrack) {
-            audioMixer.Remove(trackListStreams[audioTrack]);
+            IAudioStream audioStream = trackListStreams[audioTrack];
+            audioMixer.Remove(audioStream);
             trackListStreams.Remove(audioTrack);
+
+            audioStream.Close();
 
             if (trackListStreams.Count == 0) {
                 // Last track has been removed and timeline is empty, set mixer to default sample rate

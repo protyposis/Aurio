@@ -1,6 +1,6 @@
 ﻿// 
 // Aurio: Audio Processing, Analysis and Retrieval Library
-// Copyright (C) 2010-2015  Mario Guggenberger <mg@protyposis.net>
+// Copyright (C) 2010-2016  Mario Guggenberger <mg@protyposis.net>
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +48,9 @@ namespace Aurio.Project {
             : base(fileInfo) {
                 this.TimeWarps = new TimeWarpCollection();
                 if (initialize) {
-                    this.sourceProperties = AudioStreamFactory.FromFileInfo(FileInfo).Properties;
+                    using (IAudioStream stream = AudioStreamFactory.FromFileInfo(FileInfo)) {
+                        sourceProperties = stream.Properties;
+                    }
                     InitializeLength();
                 }
         }
@@ -61,8 +64,9 @@ namespace Aurio.Project {
         }
 
         private void InitializeLength() {
-            IAudioStream audioStream = CreateAudioStream();
-            Length = TimeUtil.BytesToTimeSpan(audioStream.Length, audioStream.Properties);
+            using (IAudioStream audioStream = CreateAudioStream()) {
+                Length = TimeUtil.BytesToTimeSpan(audioStream.Length, audioStream.Properties);
+            }
         }
 
         public IAudioStream CreateAudioStream() {

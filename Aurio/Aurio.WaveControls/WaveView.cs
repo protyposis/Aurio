@@ -1,6 +1,6 @@
 ﻿// 
 // Aurio: Audio Processing, Analysis and Retrieval Library
-// Copyright (C) 2010-2015  Mario Guggenberger <mg@protyposis.net>
+// Copyright (C) 2010-2016  Mario Guggenberger <mg@protyposis.net>
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,7 @@ using Aurio;
 using Aurio.Streams;
 using System.Windows.Controls.Primitives;
 using System.ComponentModel;
+using Aurio.Project;
 
 namespace Aurio.WaveControls {
     public partial class WaveView : VirtualViewBase {
@@ -42,6 +44,7 @@ namespace Aurio.WaveControls {
         private SolidColorBrush _backgroundBrush;
         private WaveformBitmapRenderer[] waveformBitmapRenderers;
         private WaveformGeometryRenderer[] waveformGeometryRenderers;
+        private AudioTrack audioTrack;
         private VisualizingStream audioStream;
 
         // variables used for mouse dragging
@@ -68,6 +71,11 @@ namespace Aurio.WaveControls {
 
             _lineBrush = WaveformLine;
             _backgroundBrush = WaveformBackground;
+
+            // Free all references to the audio track and stream when the control gets unloaded
+            Unloaded += delegate (object o, RoutedEventArgs e) {
+                UnsetAudioTrack();
+            };
         }
 
         public bool Antialiased {
@@ -309,6 +317,51 @@ namespace Aurio.WaveControls {
             }
             foreach (var renderer in waveformGeometryRenderers) {
                 renderer.WaveformLine = _lineBrush;
+            }
+        }
+
+        private void OnAudioStreamWaveformChanged(object sender, EventArgs e) {
+            DispatchInvalidateVisual();
+        }
+
+        private void OnAudioTrackLengthChanged(object sender, ValueEventArgs<TimeSpan> e) {
+            DispatchInvalidateVisual();
+        }
+
+        private void OnAudioTrackVolumeChanged(object sender, ValueEventArgs<float> e) {
+            DispatchInvalidateVisual();
+        }
+
+        private void OnAudioTrackBalanceChanged(object sender, ValueEventArgs<float> e) {
+            DispatchInvalidateVisual();
+        }
+
+        private void DispatchInvalidateVisual() {
+            Dispatcher.BeginInvoke((Action)delegate {
+                InvalidateVisual();
+            });
+        }
+
+        private void SetAudioTrack(AudioTrack audioTrack) {
+            UnsetAudioTrack();
+
+            this.audioTrack = audioTrack;
+            audioStream = AudioStreamFactory.FromAudioTrackForGUI(audioTrack);
+            audioStream.WaveformChanged += OnAudioStreamWaveformChanged;
+            audioTrack.LengthChanged += OnAudioTrackLengthChanged;
+            audioTrack.VolumeChanged += OnAudioTrackVolumeChanged;
+            audioTrack.BalanceChanged += OnAudioTrackBalanceChanged;
+        }
+
+        private void UnsetAudioTrack() {
+            if (audioTrack != null) {
+                audioTrack.BalanceChanged -= OnAudioTrackBalanceChanged;
+                audioTrack.VolumeChanged -= OnAudioTrackVolumeChanged;
+                audioTrack.LengthChanged -= OnAudioTrackLengthChanged;
+                audioStream.WaveformChanged -= OnAudioStreamWaveformChanged;
+                audioStream.Close();
+                audioStream = null;
+                audioTrack = null;
             }
         }
     }

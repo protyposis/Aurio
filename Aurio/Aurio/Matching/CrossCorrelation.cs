@@ -1,6 +1,6 @@
 ﻿// 
 // Aurio: Audio Processing, Analysis and Retrieval Library
-// Copyright (C) 2010-2015  Mario Guggenberger <mg@protyposis.net>
+// Copyright (C) 2010-2016  Mario Guggenberger <mg@protyposis.net>
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -221,10 +222,11 @@ namespace Aurio.Matching {
                 iT1 += adjust;
                 iT2 += adjust;
 
-                TimeSpan offset = Calculate(
-                    match.Track1.CreateAudioStream(), iT1,
-                    match.Track2.CreateAudioStream(), iT2,
-                    progressMonitor, out result);
+                IAudioStream s1 = match.Track1.CreateAudioStream();
+                IAudioStream s2 = match.Track2.CreateAudioStream();
+                TimeSpan offset = Calculate(s1, iT1, s2, iT2, progressMonitor, out result);
+                s1.Close();
+                s2.Close();
                 Debug.WriteLine("CC: " + match + ": " + offset + " (" + sw.Elapsed + ")");
                 Debug.WriteLine("CCEV;" + match + ";" + offset.TotalMilliseconds + ";" + result.MaxValue + ";" + result.AbsoluteMaxValue + ";" + result.Correlations.Average() + ";" + result.Correlations.Average(f => Math.Abs(f)));
 
