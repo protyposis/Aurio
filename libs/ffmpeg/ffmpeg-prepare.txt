@@ -1,8 +1,16 @@
-1. Go to http://ffmpeg.zeranoe.com/
+1. Download required FFmpeg files from http://ffmpeg.zeranoe.com/
 
-2. Download 32 and 64 bit shared and dev packages
+   Currently used: FFmpeg 2.8.2 from https://ffmpeg.zeranoe.com/blog/?p=447
+   ----------------------------
 
-3. Place contents of shared and dev archives (without root folder) in win32 or win64 subfolder
+2. Download "win32" and "win64" "shared" and "dev" packages
+   (7-zip is required to extract them: http://www.7-zip.org/download.html)
+
+3a. Automatically setup FFmpeg directory structure by placing downloaded files into this file's directory, calling "ffmpeg-extract.bat" and following instructions
+
+   -- OR --
+
+3b. Manually extract and place contents of shared and dev archives (without root folder) in win32 or win64 subfolder
 
 4. The final folder structure should look like this:
 
@@ -15,6 +23,3 @@
    |
    |-- win64
        |... same as above
-
-
-currently used: FFmpeg 2.8.2 from https://ffmpeg.zeranoe.com/blog/?p=447
