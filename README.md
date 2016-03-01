@@ -38,7 +38,7 @@ Requirements
 ------------
 
 * Windows
-* Visual Studio 2013
+* Visual Studio 2013 or 2015
 * .NET Framework 4.0
 
 Aurio has been developed for Windows but since only a small part depends on the OS, it should be portable to the Mono platform and other OS'.
