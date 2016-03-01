@@ -61,7 +61,7 @@ Not available yet. If you have any questions, feel free to open an issue!
 Publications
 ------------
 
-> M. Guggenberger, [Aurio: Audio Processing, Analysis and Retrieval](http://protyposis.net/publications/), In Proceedings of the 23st ACM International Conference on Multimedia, MM ’15, Brisbane, QLD, Australia, 2015. ACM. to appear.
+> Mario Guggenberger. 2015. [Aurio: Audio Processing, Analysis and Retrieval](http://protyposis.net/publications/). In Proceedings of the 23rd ACM international conference on Multimedia (MM '15). ACM, New York, NY, USA, 705-708. DOI=http://dx.doi.org/10.1145/2733373.2807408
 
 
 Examples
