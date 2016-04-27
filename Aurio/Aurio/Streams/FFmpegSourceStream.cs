@@ -20,6 +20,7 @@ using Aurio.FFmpeg;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -95,6 +96,17 @@ namespace Aurio.Streams {
                 readerPosition = 0;
                 Console.WriteLine("first PTS = " + readerFirstPTS);
             }
+
+            // Detect if a seek index is necessary and build it
+            // NOTE The seek index requirement is detected very simplistically and might
+            // not work for every case. It works by seeking a few bytes before the end and checking
+            // if the seek was successful. If the seek didn't work correctly, an index is required.
+            try {
+                Position = Length - 10;
+            } catch (FileSeekException) {
+                reader.CreateSeekIndex(FFmpeg.Type.Audio);
+            }
+            Position = 0;
         }
 
         /// <summary>
@@ -140,6 +152,10 @@ namespace Aurio.Streams {
                 }
                 else if (seekTarget < readerPosition) {
                     throw new InvalidOperationException("illegal state");
+                }
+
+                if(Position != value) {
+                    throw new FileSeekException(String.Format("seeking did not work correctly: expected {0}, result {1}", value, Position));
                 }
 
                 // seek back to seek point for successive reads to return expected data (not one frame in advance) PROBABLY NOT NEEDED
@@ -295,6 +311,12 @@ namespace Aurio.Streams {
             public FileNotSeekableException() : base() { }
             public FileNotSeekableException(string message) : base(message) { }
             public FileNotSeekableException(string message, Exception innerException) : base(message, innerException) { }
+        }
+
+        public class FileSeekException : Exception {
+            public FileSeekException() : base() { }
+            public FileSeekException(string message) : base(message) { }
+            public FileSeekException(string message, Exception innerException) : base(message, innerException) { }
         }
     }
 }
