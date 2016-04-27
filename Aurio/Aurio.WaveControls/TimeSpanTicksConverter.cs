@@ -30,10 +30,15 @@ namespace Aurio.WaveControls {
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
             if (value is TimeSpan) {
-                return ((TimeSpan)value).Ticks;
+                long returnValue = ((TimeSpan)value).Ticks;
+
+                if (targetType == typeof(double))
+                    return (double)returnValue;
+
+                return returnValue;
             }
-            else if (value is long) {
-                return new TimeSpan((long)value);
+            else if (value is long || value is double) {
+                return new TimeSpan(System.Convert.ToInt64(value));
             }
 
             return null;
