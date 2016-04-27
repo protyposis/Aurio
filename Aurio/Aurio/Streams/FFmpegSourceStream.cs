@@ -39,6 +39,8 @@ namespace Aurio.Streams {
         private int sourceBufferLength; // samples
         private int sourceBufferPosition; // samples
 
+        private bool seekIndexCreated;
+
         /// <summary>
         /// Decodes an audio stream through FFmpeg from an encoded file.
         /// </summary>
@@ -97,16 +99,7 @@ namespace Aurio.Streams {
                 Console.WriteLine("first PTS = " + readerFirstPTS);
             }
 
-            // Detect if a seek index is necessary and build it
-            // NOTE The seek index requirement is detected very simplistically and might
-            // not work for every case. It works by seeking a few bytes before the end and checking
-            // if the seek was successful. If the seek didn't work correctly, an index is required.
-            try {
-                Position = Length - 10;
-            } catch (FileSeekException) {
-                reader.CreateSeekIndex(FFmpeg.Type.Audio);
-            }
-            Position = 0;
+            seekIndexCreated = false;
         }
 
         /// <summary>
@@ -155,7 +148,21 @@ namespace Aurio.Streams {
                 }
 
                 if(Position != value) {
-                    throw new FileSeekException(String.Format("seeking did not work correctly: expected {0}, result {1}", value, Position));
+                    // When seeking fails by ending up at another position than the requested position, we create a seek index
+                    // to support the seeking process which takes some time but hopefully solved the problem. If this does not
+                    // solve the problem and it happens again, we throw an exception because we cannot count on this stream.
+                    if (!seekIndexCreated) {
+                        reader.CreateSeekIndex(FFmpeg.Type.Audio);
+                        seekIndexCreated = true;
+                        Console.WriteLine("seek index created");
+
+                        // With the seek index, try seeking again. 
+                        // This does not result in an endless recursion because of the seekIndexCreated flag.
+                        Position = value;
+                    }
+                    else {
+                        throw new FileSeekException(String.Format("seeking did not work correctly: expected {0}, result {1}", value, Position));
+                    }
                 }
 
                 // seek back to seek point for successive reads to return expected data (not one frame in advance) PROBABLY NOT NEEDED
