@@ -146,19 +146,24 @@ void seekindex_build_finalize(SeekIndex *si) {
 int seekindex_find(SeekIndex *si, int64_t timestamp, int64_t *index_timestamp) {
 	size_t left, right, mid;
 
+	if (si->index == NULL) {
+		fprintf(stderr, "index not finalized\n");
+		return -1;
+	}
+
 	// Init binary search boundaries
 	left = 0;
 	right = si->size - 1;
 
 	if (timestamp < si->index[left]) {
-		return -1;
+		return -2;
 	}
 
 	while (1) {
 		mid = left + ((right - left) / 2); // calculate the middle item to test
 
-		//printf("l/m/r: %zu/%zu/%zu (%lld/%lld/%lld)\n", left, mid, right, 
-		//	si->index[left], si->index[mid], si->index[right]);
+		//printf("l/m/r: %zu/%zu/%zu (%lld/%lld/%lld, %lld)\n", left, mid, right, 
+		//	si->index[left], si->index[mid], si->index[right], timestamp);
 
 		if (left == right) {
 			*index_timestamp = si->index[mid];
@@ -180,7 +185,7 @@ int seekindex_find(SeekIndex *si, int64_t timestamp, int64_t *index_timestamp) {
 		}
 	}
 
-	return -1;
+	return -3;
 }
 
 /*
