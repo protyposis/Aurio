@@ -88,18 +88,24 @@ namespace Aurio.Project {
             get { return list.Count; }
         }
 
-        public bool Remove(T track) {
+        private bool Remove(T track, bool suppressCollectionChangedEvent) {
             if (list.Contains(track)) {
                 int index = list.IndexOf(track);
                 if (list.Remove(track)) {
                     track.LengthChanged -= Track_LengthOrOffsetChanged;
                     track.OffsetChanged -= Track_LengthOrOffsetChanged;
                     OnTrackRemoved(new TrackListEventArgs(track, index));
-                    OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, track, index));
+                    if (!suppressCollectionChangedEvent) {
+                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, track, index));
+                    }
                     return true;
                 }
             }
             return false;
+        }
+
+        public bool Remove(T track) {
+            return Remove(track, false);
         }
 
         public T this[int index] {
@@ -118,7 +124,7 @@ namespace Aurio.Project {
         public void Clear() {
             List<T> copy = new List<T>(list);
             foreach (T track in copy) {
-                Remove(track);
+                Remove(track, true);
             }
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
