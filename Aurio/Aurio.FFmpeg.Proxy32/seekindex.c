@@ -164,11 +164,19 @@ int seekindex_find(SeekIndex *si, int64_t timestamp, int64_t *index_timestamp) {
 			*index_timestamp = si->index[mid];
 			return 0;
 		}
+		else if (right - left == 1) {
+			if (timestamp >= si->index[right]) {
+				left++;
+			}
+			else {
+				right--;
+			}
+		}
 		else if (timestamp < si->index[mid]) {
 			right = mid;
 		}
 		else {
-			left = mid + 1;
+			left = mid;
 		}
 	}
 
