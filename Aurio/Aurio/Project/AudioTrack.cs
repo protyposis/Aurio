@@ -51,9 +51,9 @@ namespace Aurio.Project {
                 if (initialize) {
                     using (IAudioStream stream = AudioStreamFactory.FromFileInfo(FileInfo)) {
                         sourceProperties = stream.Properties;
+                        InitializeLength(stream);
                     }
-                    InitializeLength();
-                }
+            }
         }
 
         public AudioTrack(FileInfo fileInfo, bool initialize)
@@ -72,8 +72,8 @@ namespace Aurio.Project {
             get { return MediaType.Audio; }
         }
 
-        private void InitializeLength() {
-            using (IAudioStream audioStream = CreateAudioStream()) {
+        private void InitializeLength(IAudioStream audioStream = null) {
+            using (audioStream = audioStream ?? CreateAudioStream()) {
                 Length = TimeUtil.BytesToTimeSpan(audioStream.Length, audioStream.Properties);
             }
         }
