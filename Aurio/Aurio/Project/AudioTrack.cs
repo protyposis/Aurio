@@ -51,7 +51,14 @@ namespace Aurio.Project {
                 if (initialize) {
                     using (IAudioStream stream = AudioStreamFactory.FromFileInfo(FileInfo)) {
                         sourceProperties = stream.Properties;
-                        InitializeLength(stream);
+                        if (MultiFile) {
+                            // For multi-file tracks, we need to get a concatenated stream of all files for the length
+                            InitializeLength();
+                        }
+                        else {
+                            // Single-file tracks can just reuse this stream to get the length
+                            InitializeLength(stream);
+                        }
                     }
             }
         }
