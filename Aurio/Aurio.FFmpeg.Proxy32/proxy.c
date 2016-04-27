@@ -243,14 +243,31 @@ int main(int argc, char *argv[])
 
 	// read again (output should be the same as above)
 	int64_t count2 = 0, last_ts2;
+	int64_t accumulated_frame_length = 0;
+	int last_ret = 0;
 	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size, &frame_type)) >= 0) {
 		printf("read %d @ %lld type %d\n", ret, timestamp, frame_type);
 		count2++;
 		last_ts2 = timestamp;
+		if (frame_type == TYPE_AUDIO) {
+			accumulated_frame_length += ret;
+			last_ret = ret;
+		}
 	}
+	int64_t length_from_last_ts = last_ts2 + last_ret; // last timestamp + frame length
 
 	printf("read1 count: %lld, timestamp: %lld\n", count1, last_ts1);
 	printf("read2 count: %lld, timestamp: %lld\n", count2, last_ts2);
+
+	if (mode & TYPE_AUDIO) {
+		// Print lengths from 
+		// - the header, 
+		// - summed over all frames, 
+		// - and from the last timestamp + frame length
+		// to compare for inconsistencies.
+		printf("audio length header/accumulated/last_ts: %lld/%lld/%lld\n",
+			pi->audio_output.length, accumulated_frame_length, length_from_last_ts);
+	}
 
 	free(output_buffer);
 
