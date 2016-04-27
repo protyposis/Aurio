@@ -67,17 +67,18 @@ namespace Aurio.Project {
         public void Add(T track) {
             list.Add(track);
             OnTrackAdded(new TrackListEventArgs(track, list.IndexOf(track)));
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, track));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, track, list.IndexOf(track)));
             track.LengthChanged += Track_LengthOrOffsetChanged;
             track.OffsetChanged += Track_LengthOrOffsetChanged;
         }
 
         public void Add(IEnumerable<T> tracks) {
+            int startIndex = list.Count;
             foreach (T track in tracks) {
                 list.Add(track);
                 OnTrackAdded(new TrackListEventArgs(track, list.IndexOf(track)));
             }
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, tracks));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<T>(tracks), startIndex));
         }
 
         public bool Contains(T item) {
