@@ -103,12 +103,16 @@ copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\swscale-3.dll $(OutDir)</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="proxy.c" />
+    <ClCompile Include="seekindex.c" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="bitdepths.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\aurio.licenseheader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="seekindex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

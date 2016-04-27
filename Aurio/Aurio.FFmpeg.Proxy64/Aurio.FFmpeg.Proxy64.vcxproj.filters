@@ -18,11 +18,19 @@
     <ClCompile Include="..\Aurio.FFmpeg.Proxy32\proxy.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Aurio.FFmpeg.Proxy32\seekindex.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Aurio.FFmpeg.Proxy32\bitdepths.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\aurio.licenseheader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Aurio.FFmpeg.Proxy32\seekindex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

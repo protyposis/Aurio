@@ -18,11 +18,19 @@
     <ClCompile Include="proxy.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="seekindex.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="bitdepths.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\aurio.licenseheader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="seekindex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
