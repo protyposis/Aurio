@@ -144,6 +144,14 @@ namespace Aurio.FFmpeg {
             InteropWrapper.stream_seek(instance, timestamp, type);
         }
 
+        public void CreateSeekIndex(Type type) {
+            InteropWrapper.stream_seekindex_create(instance, type);
+        }
+
+        public void RemoveSeekIndex(Type type) {
+            InteropWrapper.stream_seekindex_remove(instance, type);
+        }
+
         #region IDisposable & destructor
 
         public void Dispose() {

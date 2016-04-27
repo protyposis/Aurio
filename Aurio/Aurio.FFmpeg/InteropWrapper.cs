@@ -44,6 +44,8 @@ namespace Aurio.FFmpeg {
         public delegate IntPtr d_stream_get_output_config(IntPtr instance, Type type);
         public delegate int d_stream_read_frame(IntPtr instance, out long timestamp, byte[] output_buffer, int output_buffer_size, out int frame_type);
         public delegate void d_stream_seek(IntPtr instance, long timestamp, Type type);
+        public delegate void d_stream_seekindex_create(IntPtr instance, Type type);
+        public delegate void d_stream_seekindex_remove(IntPtr instance, Type type);
         public delegate void d_stream_close(IntPtr instance);
 
         public static d_stream_open_file stream_open_file;
@@ -51,6 +53,8 @@ namespace Aurio.FFmpeg {
         public static d_stream_get_output_config stream_get_output_config;
         public static d_stream_read_frame stream_read_frame;
         public static d_stream_seek stream_seek;
+        public static d_stream_seekindex_create stream_seekindex_create;
+        public static d_stream_seekindex_remove stream_seekindex_remove;
         public static d_stream_close stream_close;
 
         static InteropWrapper() {
@@ -60,6 +64,8 @@ namespace Aurio.FFmpeg {
                 stream_get_output_config = Interop64.stream_get_output_config;
                 stream_read_frame = Interop64.stream_read_frame;
                 stream_seek = Interop64.stream_seek;
+                stream_seekindex_create = Interop64.stream_seekindex_create;
+                stream_seekindex_remove = Interop64.stream_seekindex_remove;
                 stream_close = Interop64.stream_close;
             }
             else {
@@ -68,6 +74,8 @@ namespace Aurio.FFmpeg {
                 stream_get_output_config = Interop32.stream_get_output_config;
                 stream_read_frame = Interop32.stream_read_frame;
                 stream_seek = Interop32.stream_seek;
+                stream_seekindex_create = Interop32.stream_seekindex_create;
+                stream_seekindex_remove = Interop32.stream_seekindex_remove;
                 stream_close = Interop32.stream_close;
             }
         }
