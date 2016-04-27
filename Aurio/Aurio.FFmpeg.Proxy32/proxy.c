@@ -35,6 +35,8 @@
 #include "libavutil\opt.h"
 #include "libswscale\swscale.h"
 
+#include "seekindex.h"
+
 // FFmpeg libs
 #pragma comment(lib, "avformat.lib")
 #pragma comment(lib, "avcodec.lib")
@@ -90,6 +92,8 @@ typedef struct ProxyInstance {
 	int					output_buffer_size;
 	uint8_t				*output_buffer;
 	int64_t				frame_pts;
+	SeekIndex			*audio_seekindex;
+	SeekIndex			*video_seekindex;
 
 	struct {
 		struct {
@@ -131,6 +135,8 @@ EXPORT void *stream_get_output_config(ProxyInstance *pi, int type);
 int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type);
 EXPORT int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buffer, int output_buffer_size, int *frame_type);
 EXPORT void stream_seek(ProxyInstance *pi, int64_t timestamp, int type);
+EXPORT void stream_seekindex_create(ProxyInstance *pi, int type);
+EXPORT void stream_seekindex_remove(ProxyInstance *pi, int type);
 EXPORT void stream_close(ProxyInstance *pi);
 
 static void pi_init(ProxyInstance **pi);
@@ -237,6 +243,8 @@ int main(int argc, char *argv[])
 		count1++;
 		last_ts1 = timestamp;
 	}
+
+	stream_seekindex_create(pi, mode);
 
 	// seek back to start
 	stream_seek(pi, 0, mode == TYPE_VIDEO ? TYPE_VIDEO : TYPE_AUDIO);
@@ -639,14 +647,17 @@ void stream_seek(ProxyInstance *pi, int64_t timestamp, int type)
 {
 	AVStream *seek_stream;
 	double sample_rate;
+	SeekIndex *seekindex;
 
 	if (pi->mode & TYPE_AUDIO && type == TYPE_AUDIO) {
 		seek_stream = pi->audio_stream;
 		sample_rate = pi->audio_output.format.sample_rate;
+		seekindex = pi->audio_seekindex;
 	}
 	else if (pi->mode & TYPE_VIDEO && type == TYPE_VIDEO) {
 		seek_stream = pi->video_stream;
 		sample_rate = pi->video_output.format.frame_rate;
+		seekindex = pi->video_seekindex;
 	}
 	else {
 		fprintf(stderr, "unsupported seek stream type %d\n", type);
@@ -655,6 +666,14 @@ void stream_seek(ProxyInstance *pi, int64_t timestamp, int type)
 
 	// convert sample time to time_base time
 	timestamp = samples_to_pts(sample_rate, seek_stream->time_base, timestamp);
+
+	if (seekindex != NULL) {
+		int64_t index_timestamp;
+		if (seekindex_find(seekindex, timestamp, &index_timestamp) == 0) {
+			printf("adjusting seek timestamp by index: %lld -> %lld\n", timestamp, index_timestamp);
+			timestamp = index_timestamp;
+		}
+	}
 
 	/*
 	 * When seeking to a timestamp which is not exactly a frame PTS but 
@@ -683,6 +702,57 @@ void stream_seek(ProxyInstance *pi, int64_t timestamp, int type)
 	pi->pkt.size = 0;
 }
 
+void stream_seekindex_create(ProxyInstance *pi, int type) {
+	// Remove previous index
+	stream_seekindex_remove(pi, type);
+
+	// Seek to beginning of stream
+	stream_seek(pi, 0, pi->mode == TYPE_VIDEO ? TYPE_VIDEO : TYPE_AUDIO);
+
+	if (type & TYPE_AUDIO) {
+		pi->audio_seekindex = seekindex_build();
+	}
+	if (type & TYPE_VIDEO) {
+		pi->video_seekindex = seekindex_build();
+	}
+
+	// Scan through the stream to create the index
+	int ret;
+	int64_t timestamp;
+	int frame_type;
+	uint8_t *buffer;
+	int buffer_size = 32768 * 10;
+	buffer = malloc(buffer_size);
+	while ((ret = stream_read_frame(pi, &timestamp, buffer, buffer_size, &frame_type)) >= 0) {
+		if (frame_type & type) {
+			if (frame_type == TYPE_AUDIO) {
+				seekindex_build_add(pi->audio_seekindex, timestamp);
+			} else if(frame_type == TYPE_VIDEO) {
+				seekindex_build_add(pi->video_seekindex, timestamp);
+			}
+		}
+	}
+	free(buffer);
+
+	if (type & TYPE_AUDIO) {
+		seekindex_build_finalize(pi->audio_seekindex);
+	}
+	if (type & TYPE_VIDEO) {
+		seekindex_build_finalize(pi->video_seekindex);
+	}
+}
+
+void stream_seekindex_remove(ProxyInstance *pi, int type) {
+	if (type & TYPE_AUDIO && pi->audio_seekindex != NULL) {
+		seekindex_free(pi->audio_seekindex);
+		pi->audio_seekindex = NULL;
+	}
+	if (type & TYPE_VIDEO && pi->video_seekindex != NULL) {
+		seekindex_free(pi->video_seekindex);
+		pi->video_seekindex = NULL;
+	}
+}
+
 void stream_close(ProxyInstance *pi)
 {
 	pi_free(&pi);
@@ -705,6 +775,8 @@ static void pi_init(ProxyInstance **pi) {
 	_pi->sws = NULL;
 	_pi->output_buffer_size = 0;
 	_pi->output_buffer = NULL;
+	_pi->audio_seekindex = NULL;
+	_pi->video_seekindex = NULL;
 }
 
 /*
@@ -712,6 +784,8 @@ static void pi_init(ProxyInstance **pi) {
 */
 static void pi_free(ProxyInstance **pi) {
 	ProxyInstance *_pi = *pi;
+
+	stream_seekindex_remove(_pi, TYPE_AUDIO | TYPE_VIDEO);
 
 	/* close & free FFmpeg stuff */
 	if ((_pi->fmt_ctx->flags & AVFMT_FLAG_CUSTOM_IO) != 0) {
