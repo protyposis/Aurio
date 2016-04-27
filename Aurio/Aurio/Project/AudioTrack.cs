@@ -22,6 +22,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using Aurio.Streams;
+using System.Security.Cryptography;
 
 namespace Aurio.Project {
     public class AudioTrack : Track {
@@ -44,8 +45,8 @@ namespace Aurio.Project {
         private bool monoDownmix = false;
         private TimeWarpCollection timeWarps;
 
-        public AudioTrack(FileInfo fileInfo, bool initialize)
-            : base(fileInfo) {
+        public AudioTrack(FileInfo[] fileInfos, bool initialize)
+            : base(fileInfos) {
                 this.TimeWarps = new TimeWarpCollection();
                 if (initialize) {
                     using (IAudioStream stream = AudioStreamFactory.FromFileInfo(FileInfo)) {
@@ -55,8 +56,16 @@ namespace Aurio.Project {
                 }
         }
 
+        public AudioTrack(FileInfo fileInfo, bool initialize)
+            : this(new FileInfo[] { fileInfo }, initialize) {
+        }
+
+        public AudioTrack(FileInfo[] fileInfos)
+            : this(fileInfos, true) {
+        }
+
         public AudioTrack(FileInfo fileInfo)
-            : this(fileInfo, true) {
+            : this(new FileInfo[] { fileInfo }, true) {
         }
 
         public override MediaType MediaType {
@@ -70,12 +79,36 @@ namespace Aurio.Project {
         }
 
         public IAudioStream CreateAudioStream() {
-            return new TimeWarpStream(AudioStreamFactory.FromFileInfoIeee32(FileInfo), timeWarps);
+            IAudioStream stream = null;
+            if(MultiFile) {
+                stream = new ConcatenationStream(FileInfos.Select(fi => AudioStreamFactory.FromFileInfoIeee32(fi)).ToArray());
+            } else {
+                stream = AudioStreamFactory.FromFileInfoIeee32(FileInfo);
+            }
+            return new TimeWarpStream(stream, timeWarps);
+        }
+
+        protected string GeneratePeakFileName() {
+            string name = GenerateName();
+            if(MultiFile) {
+                // When the track consists of multiple files, we take the default track name and append a hash
+                // value calculated from all files belonging to this track. This results in a short name while
+                // avoiding file name collisions when different sets of concatenated files start with the same file (name).
+                string concatenatedNames = FileInfos.Select(fi => fi.Name).Aggregate((s1, s2) => s1 + "+" + s2);
+                using (var sha = SHA1.Create()) {
+                    byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(concatenatedNames));
+                    string hashString = BitConverter.ToString(hash).Replace("-", "").ToLower();
+
+                    // append Git-style shorted hash
+                    name += "[" + hashString.Substring(0, 6) + "]";
+                }
+            }
+            return name;
         }
 
         public FileInfo PeakFile {
             get {
-                return new FileInfo(FileInfo.FullName + PEAKFILE_EXTENSION);
+                return new FileInfo(Path.Combine(FileInfo.DirectoryName, GeneratePeakFileName() + PEAKFILE_EXTENSION));
             }
         }
 

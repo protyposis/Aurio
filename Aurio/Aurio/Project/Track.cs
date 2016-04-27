@@ -39,13 +39,28 @@ namespace Aurio.Project {
         private string color = DEFAULT_COLOR;
         private bool locked = false;
 
-        public Track(FileInfo fileInfo) {
-            if (!fileInfo.Exists) {
-                throw new ArgumentException("the specified file does not exist");
+        public Track(FileInfo[] fileInfos) {
+            if (fileInfos == null || fileInfos.Length == 0) {
+                throw new ArgumentException("no file(s) specified");
             }
-            this.FileInfo = fileInfo;
-            this.Name = fileInfo.Name;
+            if (!fileInfos.All(fi => fi.Exists)) {
+                throw new ArgumentException("one or more files do not exist");
+            }
+            
+            this.FileInfos = fileInfos;
+            this.Name = GenerateName();
         }
+
+        protected string GenerateName() {
+            string name = FileInfo.Name;
+            if(MultiFile) {
+                // Add "+X" suffix to signal that this track consists of multiple concatenated files
+                name += "+" + (FileInfos.Length - 1);
+            }
+            return name;
+        }
+
+        public Track(FileInfo fileInfo) : this(new FileInfo[] { fileInfo }) { }
 
         public abstract MediaType MediaType { get; }
 
@@ -59,7 +74,15 @@ namespace Aurio.Project {
             set { offset = value; OnOffsetChanged(); }
         }
 
-        public FileInfo FileInfo { get; private set; }
+        public FileInfo FileInfo {
+            get { return FileInfos[0]; }
+        }
+
+        public FileInfo[] FileInfos { get; private set; }
+
+        public bool MultiFile {
+            get { return FileInfos.Length > 1; }
+        }
 
         public string Name {
             get { return name; }

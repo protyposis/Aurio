@@ -172,7 +172,7 @@ namespace Aurio {
                 float[] max = new float[channels];
                 BinaryWriter[] peakWriters = peakStore.CreateMemoryStreams().WrapWithBinaryWriters();
 
-                IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating peaks for " + audioTrack.FileInfo.Name, true);
+                IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating peaks for " + audioTrack.Name, true);
                 DateTime startTime = DateTime.Now;
                 int sampleBlockCount = 0;
                 int peakCount = 0;

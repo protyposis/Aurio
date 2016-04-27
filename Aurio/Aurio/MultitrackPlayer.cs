@@ -246,12 +246,9 @@ namespace Aurio {
                 ChangeMixingSampleRate(audioTrack.SourceProperties.SampleRate);
             }
 
-            IAudioStream input = AudioStreamFactory.FromFileInfo(audioTrack.FileInfo);
-            IAudioStream baseStream = new IeeeStream(new TolerantStream(new BufferedStream(input, 1024 * 256 * input.SampleBlockSize, true)));
-            TimeWarpStream timeWarpStream = new TimeWarpStream(baseStream) {
-                Mappings = audioTrack.TimeWarps
-            };
-            OffsetStream offsetStream = new OffsetStream(timeWarpStream) {
+            IAudioStream input = audioTrack.CreateAudioStream();
+            IAudioStream baseStream = new TolerantStream(new BufferedStream(input, 1024 * 256 * input.SampleBlockSize, true));
+            OffsetStream offsetStream = new OffsetStream(baseStream) {
                 Offset = TimeUtil.TimeSpanToBytes(audioTrack.Offset, baseStream.Properties) 
             };
 
