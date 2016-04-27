@@ -243,6 +243,7 @@
     <Compile Include="Streams\VolumeMeteringStream.cs" />
     <Compile Include="StreamUtil.cs" />
     <Compile Include="TaskMonitor\IProgressReporter.cs" />
+    <Compile Include="TimeSpanExtensions.cs" />
     <Compile Include="TimeUtil.cs" />
     <Compile Include="VolumeUtil.cs" />
     <Compile Include="Interval.cs" />
