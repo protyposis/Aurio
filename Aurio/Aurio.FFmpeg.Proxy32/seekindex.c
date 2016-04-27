@@ -201,6 +201,16 @@ void seekindex_free(SeekIndex *si) {
 	free(si);
 }
 
+void seekindex_debugoutput(SeekIndex *si) {
+	if (si == NULL) {
+		printf("no instance passed\n");
+		return;
+	}
+
+	printf("si.index %p\n", si->index);
+	printf("si.size  %zu\n", si->size);
+}
+
 void seekindex_test() {
 	SeekIndex *si;
 	int64_t interval = 2500; // results in 3 linked table parts

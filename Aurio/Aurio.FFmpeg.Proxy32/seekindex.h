@@ -22,3 +22,4 @@ void seekindex_build_finalize(SeekIndex *si);
 int seekindex_find(SeekIndex *si, int64_t timestamp, int64_t *index_timestamp);
 void seekindex_free(SeekIndex *si);
 void seekindex_test();
+void seekindex_debugoutput(SeekIndex *si);
