@@ -93,6 +93,10 @@ namespace Aurio {
             get { return audioOutput.PlaybackState == PlaybackState.Playing; }
         }
 
+        public bool Playing {
+            get { return audioOutput.PlaybackState == PlaybackState.Playing; }
+        }
+
         public bool Play() {
             if (audioOutput.PlaybackState != PlaybackState.Playing) {
                 if (audioOutput.PlaybackState == PlaybackState.Stopped) {
@@ -116,6 +120,10 @@ namespace Aurio {
                 MaxSampleValues = new float[] { float.NegativeInfinity, float.NegativeInfinity }
             });
             return true;
+        }
+
+        public bool PlayPauseToggle() {
+            return Playing ? Pause() : Play();
         }
 
         private void SaveToFile(IAudioStream fileOutputStream, System.IO.FileInfo outputFile, IProgressReporter progressReporter) {
