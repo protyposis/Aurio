@@ -84,7 +84,10 @@ namespace Aurio {
 
         public TimeSpan CurrentTime {
             get { return TimeUtil.BytesToTimeSpan(audioOutputStream.Position, audioOutputStream.Properties); }
-            set { audioOutputStream.Position = TimeUtil.TimeSpanToBytes(value, audioOutputStream.Properties); }
+            set {
+                audioOutputStream.Position = TimeUtil.TimeSpanToBytes(value, audioOutputStream.Properties);
+                OnCurrentTimeChanged();
+            }
         }
 
         public bool CanPlay {
