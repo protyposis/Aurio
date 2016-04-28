@@ -27,9 +27,10 @@ using System.Diagnostics;
 using Aurio.Streams;
 using NAudio.CoreAudioApi;
 using Aurio.TaskMonitor;
+using System.ComponentModel;
 
 namespace Aurio {
-    public class MultitrackPlayer : IDisposable {
+    public class MultitrackPlayer : IDisposable, INotifyPropertyChanged {
 
         public event EventHandler PlaybackStateChanged;
         public event EventHandler PlaybackStarted;
@@ -37,6 +38,7 @@ namespace Aurio {
         public event EventHandler PlaybackStopped;
 
         public event EventHandler<StreamVolumeEventArgs> VolumeAnnounced;
+        public event EventHandler<ValueEventArgs<TimeSpan>> TotalTimeChanged;
         public event EventHandler<ValueEventArgs<TimeSpan>> CurrentTimeChanged;
         public event EventHandler<StreamDataMonitorEventArgs> SamplesMonitored;
 
@@ -387,10 +389,12 @@ namespace Aurio {
 
         private void trackList_TrackAdded(object sender, TrackList<AudioTrack>.TrackListEventArgs e) {
             AddTrack(e.Track);
+            OnTotalTimeChanged();
         }
 
         private void trackList_TrackRemoved(object sender, TrackList<AudioTrack>.TrackListEventArgs e) {
             RemoveTrack(e.Track);
+            OnTotalTimeChanged();
         }
 
         private void dataMonitorStream_DataRead(object sender, StreamDataMonitorEventArgs e) {
@@ -408,6 +412,9 @@ namespace Aurio {
             if (PlaybackStateChanged != null) {
                 PlaybackStateChanged(this, EventArgs.Empty);
             }
+            OnPropertyChanged("CanPlay");
+            OnPropertyChanged("CanPause");
+            OnPropertyChanged("Playing");
         }
 
         protected virtual void OnPlaybackStarted() {
@@ -437,15 +444,35 @@ namespace Aurio {
             }
         }
 
+        protected virtual void OnTotalTimeChanged() {
+            if (TotalTimeChanged != null) {
+                TotalTimeChanged(this, new ValueEventArgs<TimeSpan>(TotalTime));
+            }
+            OnPropertyChanged("TotalTime");
+        }
+
         protected virtual void OnCurrentTimeChanged() {
             if (CurrentTimeChanged != null) {
                 CurrentTimeChanged(this, new ValueEventArgs<TimeSpan>(CurrentTime));
             }
+            OnPropertyChanged("CurrentTime");
         }
 
         private void OnSamplesMonitored(StreamDataMonitorEventArgs e) {
             if (SamplesMonitored != null) {
                 SamplesMonitored(this, e);
+            }
+        }
+
+        #endregion
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string name) {
+            if (PropertyChanged != null) {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
             }
         }
 
