@@ -26,6 +26,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <local:DecibelStringConverter x:Key="DecibelStringConverter"/>
     <local:LinearDecibelStringConverter x:Key="LinearDecibelStringConverter"/>
 
+    <Style TargetType="{x:Type local:CaretOverlay}">
+        <Setter Property="ClipToBounds" Value="True"/>
+        <Setter Property="Focusable" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:CaretOverlay}">
+                    <Grid>
+                        <ContentPresenter/>
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <Canvas Name="CaretContainer" Visibility="{TemplateBinding CaretVisibility}">
+                                <Rectangle Name="PART_Caret"
+                                           Width="1" 
+                                           Fill="Black" 
+                                           Height="{Binding ElementName=CaretContainer, Path=ActualHeight}" 
+                                           Canvas.Left="{TemplateBinding PhysicalCaretOffset}"
+                                           IsHitTestVisible="False"/>
+                            </Canvas>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style BasedOn="{StaticResource {x:Type Slider}}" TargetType="{x:Type local:LogSlider}"/>
 
     <Style TargetType="{x:Type local:VUMeter}">
