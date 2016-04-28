@@ -158,7 +158,7 @@ namespace Aurio.WaveControls {
 
         public long VirtualCaretOffset {
             get { return (long)GetValue(VirtualCaretOffsetProperty); }
-            private set { SetValue(VirtualCaretOffsetProperty, value); }
+            set { SetValue(VirtualCaretOffsetProperty, value); }
         }
 
         public Visibility CaretVisibility {
