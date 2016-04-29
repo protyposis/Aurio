@@ -18,12 +18,22 @@ namespace Aurio.WaveControls {
     /// </summary>
     public abstract class ContentOverlay : VirtualContentViewBase {
 
+        public static readonly DependencyProperty OverlayOpacityProperty;
+
         static ContentOverlay() {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(ContentOverlay),
                 new FrameworkPropertyMetadata(typeof(ContentOverlay)));
+
+            OverlayOpacityProperty = DependencyProperty.Register("OverlayOpacity",
+                typeof(double), typeof(ContentOverlay));
         }
 
         internal ContentOverlayDrawSurface DrawSurface { get; set; }
+
+        public double OverlayOpacity {
+            get { return (double)GetValue(OverlayOpacityProperty); }
+            set { SetValue(OverlayOpacityProperty, value); }
+        }
 
         internal abstract void OnRenderOverlay(DrawingContext drawingContext);
 

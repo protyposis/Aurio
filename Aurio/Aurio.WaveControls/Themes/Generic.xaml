@@ -178,7 +178,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 <ControlTemplate TargetType="{x:Type local:ContentOverlay}">
                     <Grid>
                         <ContentPresenter/>
-                        <local:ContentOverlayDrawSurface />
+                        <local:ContentOverlayDrawSurface Opacity="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:ContentOverlay}}, Path=OverlayOpacity}" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
