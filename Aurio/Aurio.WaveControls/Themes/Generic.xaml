@@ -170,4 +170,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </Setter>
     </Style>
 
+    <Style TargetType="{x:Type local:ContentOverlay}">
+        <Setter Property="ClipToBounds" Value="True"/>
+        <Setter Property="Focusable" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:ContentOverlay}">
+                    <Grid>
+                        <ContentPresenter/>
+                        <local:ContentOverlayDrawSurface />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
