@@ -137,7 +137,9 @@
     <Compile Include="TimeScale.cs" />
     <Compile Include="TimeSpanConverter.cs" />
     <Compile Include="TimeSpanTicksConverter.cs" />
+    <Compile Include="TrackMarker.cs" />
     <Compile Include="ContentOverlayDrawSurface.cs" />
+    <Compile Include="TrackMarkerOverlay.cs" />
     <Compile Include="VirtualContentViewBase.cs" />
     <Compile Include="VirtualView.cs" />
     <Compile Include="VirtualViewBase.cs" />
