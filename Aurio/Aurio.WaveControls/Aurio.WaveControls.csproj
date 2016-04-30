@@ -131,6 +131,7 @@
     <Compile Include="GraphMode.cs" />
     <Compile Include="LinearDecibelConverter.cs" />
     <Compile Include="LogSlider.cs" />
+    <Compile Include="MultiplicationConverter.cs" />
     <Compile Include="Spectrogram.cs" />
     <Compile Include="SpectrogramMode.cs" />
     <Compile Include="StereoVUMeter.cs" />
