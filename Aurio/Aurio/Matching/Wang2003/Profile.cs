@@ -107,7 +107,7 @@ namespace Aurio.Matching.Wang2003 {
         public int TargetZoneLength { get; set; }
 
         /// <summary>
-        /// The spectral width in peaks of the target peak zone.
+        /// The spectral width in frequency bins (peak indices) of the target peak zone.
         /// </summary>
         public int TargetZoneWidth { get; set; }
 
