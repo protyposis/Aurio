@@ -100,6 +100,10 @@
       <Project>{3960f81d-5aea-4f36-a26c-f295dff3fcb6}</Project>
       <Name>Aurio.PFFFT</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Aurio\Aurio.csproj">
+      <Project>{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}</Project>
+      <Name>Aurio</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

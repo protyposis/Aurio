@@ -1,5 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Aurio.Streams;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Aurio.PFFFT.UnitTest {
     [TestClass]
@@ -72,6 +75,65 @@ namespace Aurio.PFFFT.UnitTest {
             var dataOut = new float[size];
 
             pffft.Forward(dataIn, dataOut);
+        }
+
+        [TestMethod]
+        public void TransformBackwardInPlace() {
+            int size = 4096;
+            var pffft = new PFFFT(size, Transform.Real);
+            var data = new float[size];
+
+            pffft.Backward(data);
+        }
+
+        [TestMethod]
+        public void TransformBackward() {
+            int size = 4096;
+            var pffft = new PFFFT(size, Transform.Real);
+            var dataIn = new float[size];
+            var dataOut = new float[size];
+
+            pffft.Backward(dataIn, dataOut);
+        }
+
+        [TestMethod]
+        public void TransformForwardAndBackward() {
+            int size = 4096;
+            var pffft = new PFFFT(size, Transform.Real);
+            var dataIn = new float[size];
+            var dataOut = new float[size];
+            var dataBack = new float[size];
+
+            var generator = new SineGeneratorStream(4096, 100, TimeSpan.FromSeconds(1));
+            generator.Read(dataIn, 0, size);
+
+            pffft.Forward(dataIn, dataOut);
+            pffft.Backward(dataOut, dataBack);
+
+            CollectionAssert.AreEqual(dataIn, dataBack, new FFTComparer());
+        }
+
+        private class FFTComparer : IComparer, IComparer<float> {
+
+            private const float deltaThreshold = 0.000001f;
+
+            public int Compare(object x, object y) {
+                return Compare((float)x, (float)y);
+            }
+
+            public int Compare(float x, float y) {
+                float delta = x - y;
+
+                if(Math.Abs(delta) < deltaThreshold) {
+                    // Both are considered equal if difference is below delta
+                    // to account for floating point imprecisions in FFT
+                    return 0;
+                } else if(delta < 0) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
         }
     }
 }

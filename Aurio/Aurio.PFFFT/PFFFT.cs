@@ -52,6 +52,13 @@ namespace Aurio.PFFFT {
             // The non-ordered transform pffft_transform may be faster, 
             // but all Aurio algorithms expect the canonical ordered form
             InteropWrapper.pffft_transform_ordered(setup, input, output, null, direction);
+
+            // Scale backward transform by 1/N (according to docs)
+            if(direction == Direction.Backward) {
+                for(int x = 0; x < size; x++) {
+                    output[x] /= size;
+                }
+            }
         }
 
         private void CheckSize(float[] array) {
@@ -74,6 +81,23 @@ namespace Aurio.PFFFT {
 
             Marshal.Copy(input, 0, alignedBuffer1, input.Length);
             Transform((float*)alignedBuffer1, (float*)alignedBuffer2, Direction.Forward);
+            Marshal.Copy(alignedBuffer2, output, 0, output.Length);
+        }
+
+        public void Backward(float[] inPlaceBuffer) {
+            CheckSize(inPlaceBuffer);
+
+            Marshal.Copy(inPlaceBuffer, 0, alignedBuffer1, inPlaceBuffer.Length);
+            Transform((float*)alignedBuffer1, (float*)alignedBuffer1, Direction.Backward);
+            Marshal.Copy(alignedBuffer1, inPlaceBuffer, 0, inPlaceBuffer.Length);
+        }
+
+        public void Backward(float[] input, float[] output) {
+            CheckSize(input);
+            CheckSize(output);
+
+            Marshal.Copy(input, 0, alignedBuffer1, input.Length);
+            Transform((float*)alignedBuffer1, (float*)alignedBuffer2, Direction.Backward);
             Marshal.Copy(alignedBuffer2, output, 0, output.Length);
         }
 
