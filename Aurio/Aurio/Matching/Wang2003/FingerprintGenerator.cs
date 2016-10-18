@@ -115,7 +115,7 @@ namespace Aurio.Matching.Wang2003 {
 
                 // Find local peaks in the residual
                 // The advantage of finding peaks in the residual instead of the spectrum is that spectrum energy is usually
-                // concentrated in the low frequencies, resulting in a clustering if the highest peaks in the lows. Getting
+                // concentrated in the low frequencies, resulting in a clustering of the highest peaks in the lows. Getting
                 // peaks from the residual distributes the peaks more evenly across the spectrum.
                 var peaks = peakHistory.List; // take oldest list,
                 peaks.Clear(); // clear it, and
@@ -178,7 +178,7 @@ namespace Aurio.Matching.Wang2003 {
         /// <summary>
         /// Local peak picking works as follows: 
         /// A local peak is always a highest value surrounded by lower values. 
-        /// In case of a plateau, the index if the first plateu value marks the peak.
+        /// In case of a plateau, the index of the first plateu value marks the peak.
         /// 
         ///      |      |    |
         ///      |      |    |
