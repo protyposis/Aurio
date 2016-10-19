@@ -24,6 +24,8 @@ using Aurio.Streams;
 namespace Aurio {
     public static class StreamUtil {
 
+        public const float FLOAT_EPSILON = 0.0000001f;
+
         public static int ForceRead(IAudioStream audioStream, byte[] buffer, int offset, int count) {
             int totalBytesRead = 0;
             int bytesRead = 0;
@@ -44,12 +46,13 @@ namespace Aurio {
             byte[] temp = new byte[1024 * 32 * channels];
 
             if (samplesToRead > array.Length) {
-                throw new ArgumentException("cannot read the requested interval (" + samplesToRead 
+                throw new ArgumentException("cannot read the requested interval (" + samplesToRead
                     + ") - the target array is too small (" + array.Length + ")");
             }
 
             while ((bytesRead = s.Read(temp, 0, temp.Length)) > 0) {
-                unsafe {
+                unsafe
+                {
                     fixed (byte* sampleBuffer = &temp[0]) {
                         float* samples = (float*)sampleBuffer;
                         for (int x = 0; x < bytesRead / 4; x++) {
@@ -79,7 +82,7 @@ namespace Aurio {
         /// This method is intended for testing and debugging.
         /// </remarks>
         public static long ReadAllAndCount(IAudioStream s) {
-            var temp = new byte[1024*1024];
+            var temp = new byte[1024 * 1024];
             long totalBytesRead = 0;
             int bytesRead;
 
@@ -88,6 +91,120 @@ namespace Aurio {
             }
 
             return totalBytesRead;
+        }
+
+        /// <summary>
+        /// Compares two streams byte by byte and returns the number of similar bytes.
+        /// </summary>
+        /// <param name="stream1">the first stream to compare</param>
+        /// <param name="stream2">the second stream to compare</param>
+        /// <returns>the number of similar bytes</returns>
+        public static long CompareBytes(IAudioStream stream1, IAudioStream stream2) {
+            byte[] buffer1 = new byte[10000 * stream1.SampleBlockSize];
+            byte[] buffer2 = new byte[10000 * stream2.SampleBlockSize];
+
+            int s1BytesRead = 0;
+            int s2BytesRead = 0;
+
+            int bytesToRead = (int)Math.Min(
+                Math.Min(buffer1.Length, stream1.Length - stream1.Position),
+                Math.Min(buffer2.Length, stream2.Length - stream2.Position));
+
+            long similarBytes = 0;
+
+            while ((s1BytesRead = ForceRead(stream1, buffer1, 0, bytesToRead)) > 0 && (s2BytesRead = ForceRead(stream2, buffer2, 0, bytesToRead)) > 0) {
+                if (s1BytesRead != s2BytesRead) {
+                    // Because of the calculation of bytesToRead, which is the minimum that can be read from both streams, this should never happen
+                    throw new Exception("invalid state, shall not happen");
+                }
+
+                bool abortComparison = false;
+                for (int i = 0; i < s1BytesRead; i++) {
+                    if (buffer1[i] == buffer2[i]) {
+                        similarBytes++;
+                    }
+                    else {
+                        // When one byte is different, do not compare any following bytes
+                        abortComparison = true;
+                        break;
+                    }
+                }
+
+                if (abortComparison) {
+                    break;
+                }
+            }
+
+            return similarBytes;
+        }
+
+        /// <summary>
+        /// Compares two streams float by float and returns the number of similar floats.
+        /// </summary>
+        /// <param name="stream1">the first stream to compare</param>
+        /// <param name="stream2">the second stream to compare</param>
+        /// <param name="epsilon">the allowed variance with which two floats are still considered equal (accounts for floating point inccuracy)</param>
+        /// <returns>the number of similar floats</returns>
+        public static long CompareFloats(IAudioStream stream1, IAudioStream stream2, float epsilon) {
+            if (stream1.Properties.Format != AudioFormat.IEEE || stream1.Properties.Format != AudioFormat.IEEE) {
+                throw new ArgumentException("streams must be in 32bit float format");
+            }
+
+            byte[] buffer1 = new byte[1000 * stream1.SampleBlockSize];
+            byte[] buffer2 = new byte[1000 * stream2.SampleBlockSize];
+
+            int s1BytesRead = 0;
+            int s2BytesRead = 0;
+
+            int bytesToRead = (int)Math.Min(
+                Math.Min(buffer1.Length, stream1.Length - stream1.Position),
+                Math.Min(buffer2.Length, stream2.Length - stream2.Position));
+
+            long similarFloats = 0;
+
+            while ((s1BytesRead = ForceRead(stream1, buffer1, 0, bytesToRead)) > 0 && (s2BytesRead = ForceRead(stream2, buffer2, 0, bytesToRead)) > 0) {
+                if (s1BytesRead != s2BytesRead) {
+                    // Because of the calculation of bytesToRead, which is the minimum that can be read from both streams, this should never happen
+                    throw new Exception("invalid state, shall not happen");
+                }
+
+                bool abortComparison = false;
+                unsafe
+                {
+                    fixed (byte* pBuffer1 = &buffer1[0], pBuffer2 = &buffer2[0]) {
+                        float* fBuffer1 = (float*)pBuffer1;
+                        float* fBuffer2 = (float*)pBuffer2;
+
+                        for (int i = 0; i < s1BytesRead / stream1.SampleBlockSize; i++) {
+                            if (Math.Abs(fBuffer1[i] - fBuffer2[i]) < epsilon) {
+                                similarFloats++;
+                            }
+                            else {
+                                // When one float is different, do not compare any following floats
+                                abortComparison = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+
+                if (abortComparison) {
+                    break;
+                }
+            }
+
+            return similarFloats;
+        }
+
+        /// <summary>
+        /// Compares two streams float by float and returns the number of similar floats.
+        /// </summary>
+        /// <param name="stream1">the first stream to compare</param>
+        /// <param name="stream2">the second stream to compare</param>
+        /// <returns>the number of similar floats</returns>
+        public static long CompareFloats(IAudioStream stream1, IAudioStream stream2) {
+            return CompareFloats(stream1, stream2, FLOAT_EPSILON);
         }
     }
 }
