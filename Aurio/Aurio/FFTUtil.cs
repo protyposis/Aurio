@@ -42,7 +42,7 @@ namespace Aurio {
         /// </summary>
         public static float CalculateMagnitude(float re, float im) {
             // calculate magnitude of a FFT bin (L2 norm)
-            return (float)Math.Sqrt(re * re + im * im);
+            return (float)new Complex(re, im).Magnitude;
         }
 
         public static void CalculateMagnitudes(float[] complexFFTOutput, float[] resultMagnitudes, int resultMagnitudesOffset) {
@@ -58,7 +58,7 @@ namespace Aurio {
         }
 
         public static float CalculatePhase(float re, float im) {
-            return (float)Math.Atan2(im, re);
+            return (float)new Complex(re, im).Phase;
         }
 
         public static void CalculatePhases(float[] complexFFTOutput, float[] resultPhases, int resultPhasesOffset) {
