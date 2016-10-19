@@ -53,7 +53,7 @@ namespace Aurio.Features {
         private bool normalize;
 
         public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, float minFreq, float maxFreq, bool normalize, MappingMode mappingMode)
-            : base(stream, windowSize, hopSize, windowType, false) {
+            : base(stream, windowSize, hopSize, windowType, OutputFormat.MagnitudesSquared) {
             fftFrameBuffer = new float[windowSize / 2];
 
             // Precompute FFT bin to Chroma bin mapping

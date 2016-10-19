@@ -27,9 +27,17 @@ namespace Aurio.Features {
     /// </summary>
     public class STFT: StreamWindower {
 
+        public enum OutputFormat {
+            Raw,
+            Magnitudes,
+            MagnitudesSquared,
+            MagnitudesAndPhases,
+            Decibel
+        }
+
         private float[] frameBuffer;
         private PFFFT.PFFFT fft;
-        private bool normalizeTo_dB;
+        private OutputFormat outputFormat;
 
         // <summary>
         /// Initializes a new STFT for the specified stream with the specified window and hop size.
@@ -39,21 +47,28 @@ namespace Aurio.Features {
         /// <param name="hopSize">the hop size in the dimension of samples</param>
         /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="normalizeTo_dB">true if the FFT result should be normalized to dB scale, false if raw FFT magnitudes are desired</param>
-        public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, bool normalizeTo_dB)
+        public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, OutputFormat outputFormat)
             : base(stream, windowSize, hopSize, windowType) {
                 frameBuffer = new float[WindowSize];
                 fft = new PFFFT.PFFFT(WindowSize, PFFFT.Transform.Real);
-                this.normalizeTo_dB = normalizeTo_dB;
-        }
-
-        public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType)
-            : this(stream, windowSize, hopSize, windowType, true) {
-
+                this.outputFormat = outputFormat;
         }
 
         public override void ReadFrame(float[] fftResult) {
-            if (fftResult.Length != WindowSize / 2) {
-                throw new ArgumentException("the provided FFT result array has an invalid size");
+            // Check output array size
+            switch (outputFormat) {
+                case OutputFormat.Decibel:
+                case OutputFormat.Magnitudes:
+                case OutputFormat.MagnitudesSquared:
+                    if (fftResult.Length != WindowSize / 2) {
+                        throw new ArgumentException("the provided FFT result array has an invalid size");
+                    }
+                    break;
+                default:
+                    if (fftResult.Length != WindowSize) {
+                        throw new ArgumentException("the provided FFT result array has an invalid size");
+                    }
+                    break;
             }
 
             base.ReadFrame(frameBuffer);
@@ -62,14 +77,28 @@ namespace Aurio.Features {
             fft.Forward(frameBuffer);
 
             // normalize fourier results
-            if (normalizeTo_dB) {
-                // TODO check if calculation corresponds to Haitsma & Kalker paper
-                FFTUtil.Results(frameBuffer, fftResult);
-            }
-            else {
-                //FFTUtil.CalculateMagnitudes(frameBuffer, fftResult);
-                // TEMP TEST FOR OLTW
-                FFTUtil.CalculateMagnitudesSquared(frameBuffer, fftResult);
+            switch (outputFormat) {
+                case OutputFormat.Decibel:
+                    // TODO check if calculation corresponds to Haitsma & Kalker paper
+                    FFTUtil.Results(frameBuffer, fftResult);
+                    break;
+                case OutputFormat.Magnitudes:
+                    FFTUtil.CalculateMagnitudes(frameBuffer, fftResult);
+                    break;
+                case OutputFormat.MagnitudesSquared:
+                    // TODO check if consumers of this mode really want it or if they want unsquared magnitudes instead 
+                    // (e.g. OLTW; this code path returns CalculateMagnitudesSquared for some time, as a temp test for OLTW, 
+                    // but originally returned CalculateMagnitudes)
+                    FFTUtil.CalculateMagnitudesSquared(frameBuffer, fftResult);
+                    break;
+                case OutputFormat.MagnitudesAndPhases:
+                    FFTUtil.CalculateMagnitudes(frameBuffer, fftResult, 0);
+                    FFTUtil.CalculatePhases(frameBuffer, fftResult, WindowSize / 2);
+                    break;
+                case OutputFormat.Raw:
+                    // Nothing to do here, result is already in raw format, just copy it to output buffer
+                    Buffer.BlockCopy(frameBuffer, 0, fftResult, 0, WindowSize);
+                    break;
             }
 
             OnFrameReadSTFT(fftResult);

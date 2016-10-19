@@ -39,7 +39,7 @@ namespace Aurio.Matching.Dixon2005 {
         private int[] frequencyMap;
 
         public FrameReader(IAudioStream stream)
-            : base(stream, WINDOW_SIZE, WINDOW_HOP_SIZE, WINDOW_TYPE, false) {
+            : base(stream, WINDOW_SIZE, WINDOW_HOP_SIZE, WINDOW_TYPE, OutputFormat.MagnitudesSquared) {
                 if (stream.Properties.SampleRate != SAMPLERATE) {
                     throw new ArgumentException("wrong sample rate");
                 }

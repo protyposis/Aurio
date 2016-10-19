@@ -61,7 +61,7 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(inputTrack.FileInfo)),
                 ResamplingQuality.Medium, profile.SampleRate);
 
-            STFT stft = new STFT(audioStream, profile.FrameSize, profile.FrameStep, WindowType.Hann);
+            STFT stft = new STFT(audioStream, profile.FrameSize, profile.FrameStep, WindowType.Hann, STFT.OutputFormat.Decibel);
             index = 0;
             indices = stft.WindowCount;
 

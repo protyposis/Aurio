@@ -45,12 +45,32 @@ namespace Aurio {
             return (float)Math.Sqrt(re * re + im * im);
         }
 
-        public static void CalculateMagnitudes(float[] complexFFTOutput, float[] resultMagnitudes) {
+        public static void CalculateMagnitudes(float[] complexFFTOutput, float[] resultMagnitudes, int resultMagnitudesOffset) {
             int y = 0;
             for (int x = 0; x < complexFFTOutput.Length; x += 2) {
-                resultMagnitudes[y] = CalculateMagnitude(complexFFTOutput[x], complexFFTOutput[x + 1]);
+                resultMagnitudes[resultMagnitudesOffset + y] = CalculateMagnitude(complexFFTOutput[x], complexFFTOutput[x + 1]);
                 y++;
             }
+        }
+
+        public static void CalculateMagnitudes(float[] complexFFTOutput, float[] resultMagnitudes) {
+            CalculateMagnitudes(complexFFTOutput, resultMagnitudes, 0);
+        }
+
+        public static float CalculatePhase(float re, float im) {
+            return (float)Math.Atan2(im, re);
+        }
+
+        public static void CalculatePhases(float[] complexFFTOutput, float[] resultPhases, int resultPhasesOffset) {
+            int y = 0;
+            for (int x = 0; x < complexFFTOutput.Length; x += 2) {
+                resultPhases[resultPhasesOffset + y] = CalculatePhase(complexFFTOutput[x], complexFFTOutput[x + 1]);
+                y++;
+            }
+        }
+
+        public static void CalculatePhases(float[] complexFFTOutput, float[] resultPhases) {
+            CalculatePhases(complexFFTOutput, resultPhases, 0);
         }
 
         /// <summary>

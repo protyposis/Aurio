@@ -52,7 +52,7 @@ namespace Aurio.Matching.Wang2003 {
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(track.FileInfo)),
                 ResamplingQuality.Medium, profile.SamplingRate);
 
-            STFT stft = new STFT(audioStream, profile.WindowSize, profile.HopSize, WindowType.Hann);
+            STFT stft = new STFT(audioStream, profile.WindowSize, profile.HopSize, WindowType.Hann, STFT.OutputFormat.Decibel);
             int index = 0;
             int indices = stft.WindowCount;
             int processedFrames = 0;
