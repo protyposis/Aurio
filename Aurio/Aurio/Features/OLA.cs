@@ -14,6 +14,7 @@ namespace Aurio.Features {
         private readonly IAudioWriterStream stream;
         private readonly int windowSize;
         private readonly int hopSize;
+        private readonly int overlapSize;
 
         /// <summary>
         /// Initializes a new overlap-adder for the specified stream with the specified window and hop size.
@@ -29,13 +30,14 @@ namespace Aurio.Features {
                 throw new ArgumentException("no multichannel support");
             }
 
-            if(hopSize * 2 > windowSize) {
-                throw new ArgumentOutOfRangeException("overlap cannot be larger than 50%");
+            if(hopSize > windowSize) {
+                throw new ArgumentOutOfRangeException("overlap cannot be larger than 100%");
             }
 
             this.stream = stream;
             this.windowSize = windowSize;
             this.hopSize = hopSize;
+            this.overlapSize = windowSize - hopSize;
 
             Initialize();
         }
@@ -67,9 +69,9 @@ namespace Aurio.Features {
         private bool flushed;
 
         private void Initialize() {
-            overlapInBytes = hopSize * stream.SampleBlockSize;
-            nonoverlapInBytes = (windowSize - 2 * hopSize) * stream.SampleBlockSize;
-            buffer = new byte[overlapInBytes];
+            overlapInBytes = overlapSize * stream.SampleBlockSize;
+            nonoverlapInBytes = (windowSize - 2 * overlapSize) * stream.SampleBlockSize;
+            buffer = new byte[Math.Max(overlapInBytes, nonoverlapInBytes)]; // buffer must be able to hold overlap and non-overlap parts
             flushed = false;
             Array.Clear(buffer, 0, buffer.Length);
         }
@@ -92,7 +94,7 @@ namespace Aurio.Features {
             {
                 fixed (byte* byteBuffer = &buffer[0]) {
                     float* floatBuffer = (float*)byteBuffer;
-                    
+
                     for (int i = 0; i < hopSize; i++) {
                         floatBuffer[i] += frame[i];
                     }
