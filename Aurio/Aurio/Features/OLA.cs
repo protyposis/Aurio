@@ -105,6 +105,7 @@ namespace Aurio.Features {
             // Write nonoverlapped middle section, if existing
             if (nonoverlapInBytes > 0) {
                 Buffer.BlockCopy(frame, overlapInBytes, buffer, 0, nonoverlapInBytes);
+                stream.Write(buffer, 0, nonoverlapInBytes);
             }
 
             // Write the second overlap part to the buffer for addition with next frame
