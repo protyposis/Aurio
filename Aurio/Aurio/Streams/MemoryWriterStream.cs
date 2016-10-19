@@ -10,6 +10,10 @@ namespace Aurio.Streams {
             base(target, properties) {
         }
 
+        public MemoryWriterStream(AudioProperties properties) :
+            base(new MemoryStream(), properties) {
+        }
+
         public void Write(byte[] buffer, int offset, int count) {
             // Default stream checks according to MSDN
             if(buffer == null) {
