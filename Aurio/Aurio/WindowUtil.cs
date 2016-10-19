@@ -73,10 +73,10 @@ namespace Aurio {
         /// (Cosinus-Glockenfenster; (von) Hann; Hanning [sic])
         /// </summary>
         public static void Hann(float[] samples, int offset, int length) {
-            int index = 0;
-            int N = length - 1;
+            int index = 1;
+            int N = length + 1;
             for (int x = offset; x < offset + length; x++) {
-                samples[x] *= (float)(0.5 - 0.5 * Math.Cos(2 * Math.PI * index / N));
+                samples[x] *= (float)(0.5 * (1f - Math.Cos(2 * Math.PI * index / N)));
                 index++;
             }
         }
