@@ -73,6 +73,24 @@ namespace Aurio {
             CalculatePhases(complexFFTOutput, resultPhases, 0);
         }
 
+        public static void MagnitudesAndPhasesToFFT(float[] magnitudes, int magnitudesOffset, float[] phases, int phasesOffset, float[] fftResult, int fftResultOffset, int count) {
+            if (magnitudes.Length < magnitudesOffset + count) {
+                throw new ArgumentOutOfRangeException("magnitudes");
+            }
+            if (phases.Length < phasesOffset + count) {
+                throw new ArgumentOutOfRangeException("phases");
+            }
+            if (fftResult.Length < count * 2) {
+                throw new ArgumentOutOfRangeException("FFT result");
+            }
+
+            for (int i = 0; i < count; i++) {
+                var c = Complex.FromMagnitudeAndPhase(magnitudes[magnitudesOffset + i], phases[phasesOffset + i]);
+                fftResult[fftResultOffset + 2 * i + 0] = (float)c.Real;
+                fftResult[fftResultOffset + 2 * i + 1] = (float)c.Imaginary;
+            }
+        }
+
         /// <summary>
         /// Calculates the squared magnitude of a complex FFT output bin. Can be used in conjunction with
         /// decibel conversion to avoid the square root calculation and double->float cast.
