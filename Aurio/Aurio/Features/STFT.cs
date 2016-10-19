@@ -97,7 +97,7 @@ namespace Aurio.Features {
                     break;
                 case OutputFormat.Raw:
                     // Nothing to do here, result is already in raw format, just copy it to output buffer
-                    Buffer.BlockCopy(frameBuffer, 0, fftResult, 0, WindowSize);
+                    Buffer.BlockCopy(frameBuffer, 0, fftResult, 0, WindowSize * 4);
                     break;
             }
 
