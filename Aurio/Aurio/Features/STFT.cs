@@ -27,7 +27,6 @@ namespace Aurio.Features {
     /// </summary>
     public class STFT: StreamWindower {
 
-        private WindowFunction windowFunction;
         private float[] frameBuffer;
         private PFFFT.PFFFT fft;
         private bool normalizeTo_dB;
@@ -41,8 +40,7 @@ namespace Aurio.Features {
         /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="normalizeTo_dB">true if the FFT result should be normalized to dB scale, false if raw FFT magnitudes are desired</param>
         public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, bool normalizeTo_dB)
-            : base(stream, windowSize, hopSize) {
-                windowFunction = WindowUtil.GetFunction(windowType, WindowSize);
+            : base(stream, windowSize, hopSize, windowType) {
                 frameBuffer = new float[WindowSize];
                 fft = new PFFFT.PFFFT(WindowSize, PFFFT.Transform.Real);
                 this.normalizeTo_dB = normalizeTo_dB;
@@ -59,9 +57,6 @@ namespace Aurio.Features {
             }
 
             base.ReadFrame(frameBuffer);
-
-            // apply window function
-            windowFunction.Apply(frameBuffer);
 
             // do fourier transform
             fft.Forward(frameBuffer);

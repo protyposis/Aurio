@@ -32,6 +32,7 @@ namespace Aurio.Features {
         private readonly IAudioStream stream;
         private readonly int windowSize;
         private readonly int hopSize;
+        private readonly WindowFunction windowFunction;
 
         /// <summary>
         /// Initializes a new windower for the specified stream with the specified window and hop size.
@@ -39,12 +40,24 @@ namespace Aurio.Features {
         /// <param name="stream">the stream to read the audio data to process from</param>
         /// <param name="windowSize">the window size in the dimension of samples</param>
         /// <param name="hopSize">the hop size in the dimension of samples</param>
-        public StreamWindower(IAudioStream stream, int windowSize, int hopSize) {
+        /// <param name="windowType">the type of the window function to apply</param>
+        public StreamWindower(IAudioStream stream, int windowSize, int hopSize, WindowType windowType) {
             this.stream = stream;
             this.windowSize = windowSize;
             this.hopSize = hopSize;
+            this.windowFunction = WindowUtil.GetFunction(windowType, WindowSize);
 
             Initialize();
+        }
+
+        /// <summary>
+        /// Initializes a new windower for the specified stream with the specified window and hop size and a rectangular window function.
+        /// </summary>
+        /// <param name="stream">the stream to read the audio data to process from</param>
+        /// <param name="windowSize">the window size in the dimension of samples</param>
+        /// <param name="hopSize">the hop size in the dimension of samples</param>
+        public StreamWindower(IAudioStream stream, int windowSize, int hopSize)
+            : this(stream, windowSize, hopSize, WindowType.Rectangle) {
         }
 
         /// <summary>
@@ -53,7 +66,8 @@ namespace Aurio.Features {
         /// <param name="stream">the stream to read the audio data to process from</param>
         /// <param name="windowSize">the window size in the dimension of time</param>
         /// <param name="hopSize">the hop size in the dimension of time</param>
-        public StreamWindower(IAudioStream stream, TimeSpan windowSize, TimeSpan hopSize) {
+        /// <param name="windowType">the type of the window function to apply</param>
+        public StreamWindower(IAudioStream stream, TimeSpan windowSize, TimeSpan hopSize, WindowType windowType) {
             this.stream = stream;
             this.windowSize = (int)TimeUtil.TimeSpanToBytes(windowSize, stream.Properties) / stream.Properties.SampleByteSize;
             this.hopSize = (int)TimeUtil.TimeSpanToBytes(hopSize, stream.Properties) / stream.Properties.SampleByteSize;
@@ -76,6 +90,16 @@ namespace Aurio.Features {
             }
 
             Initialize();
+        }
+
+        /// <summary>
+        /// Initializes a new windower for the specified stream with the specified window and hop size and a rectangular window function.
+        /// </summary>
+        /// <param name="stream">the stream to read the audio data to process from</param>
+        /// <param name="windowSize">the window size in the dimension of time</param>
+        /// <param name="hopSize">the hop size in the dimension of time</param>
+        public StreamWindower(IAudioStream stream, TimeSpan windowSize, TimeSpan hopSize)
+            : this(stream, windowSize, hopSize, WindowType.Rectangle) {
         }
 
         /// <summary>
@@ -183,6 +207,10 @@ namespace Aurio.Features {
             // copy window to frame buffer
             Buffer.BlockCopy(streamBuffer, frameOffset, frame, 0, frameSize);
             frameOffset += hopSizeB;
+
+            // apply window function
+            windowFunction.Apply(frame);
+
             OnFrameRead(frame);
         }
 
