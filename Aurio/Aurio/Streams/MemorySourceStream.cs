@@ -29,8 +29,8 @@ namespace Aurio.Streams {
     /// </summary>
     public class MemorySourceStream : IAudioStream {
 
-        private MemoryStream source;
-        private AudioProperties properties;
+        protected MemoryStream source;
+        protected AudioProperties properties;
 
         public MemorySourceStream(MemoryStream source, AudioProperties properties) {
             this.source = source;

@@ -137,6 +137,7 @@
     <Compile Include="SineGeneratorStreamTest.cs" />
     <Compile Include="ConcatenationStreamTest.cs" />
     <Compile Include="CommonStreamTest.cs" />
+    <Compile Include="MemoryWriterStreamTest.cs" />
     <Compile Include="VolumeUtilTest.cs" />
   </ItemGroup>
   <ItemGroup>
