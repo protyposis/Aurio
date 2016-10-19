@@ -138,6 +138,7 @@
     <Compile Include="ConcatenationStreamTest.cs" />
     <Compile Include="CommonStreamTest.cs" />
     <Compile Include="MemoryWriterStreamTest.cs" />
+    <Compile Include="OLATest.cs" />
     <Compile Include="VolumeUtilTest.cs" />
   </ItemGroup>
   <ItemGroup>
