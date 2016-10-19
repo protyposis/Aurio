@@ -59,8 +59,9 @@ namespace Aurio.Streams {
         public int Read(float[] buffer, int offset, int count) {
             count = Math.Min((int)(Length - Position) / 4, count);
             float frequencyFactor = Properties.SampleRate / frequency;
+            long samplePosition = position / 4;
             for (int x = 0; x < count; x++) {
-                buffer[offset + x] = (float)Math.Sin((position + x) / frequencyFactor * Math.PI * 2);
+                buffer[offset + x] = (float)Math.Sin((samplePosition + x) / frequencyFactor * Math.PI * 2);
             }
             position += count * 4;
             return count;
