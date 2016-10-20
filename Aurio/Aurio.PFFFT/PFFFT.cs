@@ -48,6 +48,10 @@ namespace Aurio.PFFFT {
             alignedBuffer2 = InteropWrapper.pffft_aligned_malloc(new UIntPtr(bufferByteSize));
         }
 
+        public int Size {
+            get { return size; }
+        }
+
         private void Transform(float* input, float* output, Direction direction) {
             // The non-ordered transform pffft_transform may be faster, 
             // but all Aurio algorithms expect the canonical ordered form
