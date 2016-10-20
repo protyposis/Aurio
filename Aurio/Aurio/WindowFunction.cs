@@ -33,8 +33,12 @@ namespace Aurio {
         public WindowType Type { get; private set; }
         public int Size { get { return window.Length; } }
 
+        public void Apply(float[] values, int valuesOffset) {
+            WindowUtil.Apply(values, valuesOffset, window);
+        }
+
         public void Apply(float[] values) {
-            WindowUtil.Apply(values, window);
+            Apply(values, 0);
         }
     }
 }

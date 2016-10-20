@@ -198,13 +198,13 @@ namespace Aurio {
             return new WindowFunction(GetArray(windowType, windowSize), windowType);
         }
 
-        public static void Apply(float[] values, float[] window) {
-            if (values.Length != window.Length) {
+        public static void Apply(float[] values, int valuesOffset, float[] window) {
+            if (values.Length - valuesOffset < window.Length) {
                 throw new ArgumentException("lengths of input arrays don't match");
             }
 
-            for (int x = 0; x < values.Length; x++) {
-                values[x] *= window[x];
+            for (int x = 0; x < window.Length; x++) {
+                values[x + valuesOffset] *= window[x];
             }
         }
     }
