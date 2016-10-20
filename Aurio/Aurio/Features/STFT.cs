@@ -36,6 +36,7 @@ namespace Aurio.Features {
         }
 
         private float[] frameBuffer;
+        private float[] fftBuffer;
         private PFFFT.PFFFT fft;
         private OutputFormat outputFormat;
 
@@ -55,6 +56,7 @@ namespace Aurio.Features {
                     throw new ArgumentOutOfRangeException("fftSize must be >= windowSize");
                 }
                 frameBuffer = new float[fftSize];
+                fftBuffer = new float[fftSize];
                 Array.Clear(frameBuffer, 0, frameBuffer.Length); // init with zeros (assure zero padding)
                 fft = new PFFFT.PFFFT(fftSize, PFFFT.Transform.Real);
                 this.outputFormat = outputFormat;
@@ -92,30 +94,30 @@ namespace Aurio.Features {
             base.ReadFrame(frameBuffer);
 
             // do fourier transform
-            fft.Forward(frameBuffer);
+            fft.Forward(frameBuffer, fftBuffer);
 
             // normalize fourier results
             switch (outputFormat) {
                 case OutputFormat.Decibel:
                     // TODO check if calculation corresponds to Haitsma & Kalker paper
-                    FFTUtil.Results(frameBuffer, fftResult);
+                    FFTUtil.Results(fftBuffer, fftResult);
                     break;
                 case OutputFormat.Magnitudes:
-                    FFTUtil.CalculateMagnitudes(frameBuffer, fftResult);
+                    FFTUtil.CalculateMagnitudes(fftBuffer, fftResult);
                     break;
                 case OutputFormat.MagnitudesSquared:
                     // TODO check if consumers of this mode really want it or if they want unsquared magnitudes instead 
                     // (e.g. OLTW; this code path returns CalculateMagnitudesSquared for some time, as a temp test for OLTW, 
                     // but originally returned CalculateMagnitudes)
-                    FFTUtil.CalculateMagnitudesSquared(frameBuffer, fftResult);
+                    FFTUtil.CalculateMagnitudesSquared(fftBuffer, fftResult);
                     break;
                 case OutputFormat.MagnitudesAndPhases:
-                    FFTUtil.CalculateMagnitudes(frameBuffer, fftResult, 0);
-                    FFTUtil.CalculatePhases(frameBuffer, fftResult, WindowSize / 2);
+                    FFTUtil.CalculateMagnitudes(fftBuffer, fftResult, 0);
+                    FFTUtil.CalculatePhases(fftBuffer, fftResult, fft.Size / 2);
                     break;
                 case OutputFormat.Raw:
                     // Nothing to do here, result is already in raw format, just copy it to output buffer
-                    Buffer.BlockCopy(frameBuffer, 0, fftResult, 0, WindowSize * 4);
+                    Buffer.BlockCopy(fftBuffer, 0, fftResult, 0, fft.Size * 4);
                     break;
             }
 
