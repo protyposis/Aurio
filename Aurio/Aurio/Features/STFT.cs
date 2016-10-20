@@ -39,7 +39,28 @@ namespace Aurio.Features {
         private PFFFT.PFFFT fft;
         private OutputFormat outputFormat;
 
-        // <summary>
+        /// <summary>
+        /// Initializes a new STFT for the specified stream with the specified window, hop, and FFT size.
+        /// An FFT size larger than the window size can be used to increase frequency resolution. Window will be right-padded with zeros for FFT.
+        /// </summary>
+        /// <param name="stream">the stream to read the audio data to process from</param>
+        /// <param name="windowSize">the window size in the dimension of samples</param>
+        /// <param name="hopSize">the hop size in the dimension of samples</param>
+        /// <param name="fftSize">the FFT size, must be >= windowSize</param>
+        /// <param name="windowType">the type of the window function to apply</param>
+        /// <param name="normalizeTo_dB">true if the FFT result should be normalized to dB scale, false if raw FFT magnitudes are desired</param>
+        public STFT(IAudioStream stream, int windowSize, int hopSize, int fftSize, WindowType windowType, OutputFormat outputFormat)
+            : base(stream, windowSize, hopSize, windowType) {
+                if(fftSize < windowSize) {
+                    throw new ArgumentOutOfRangeException("fftSize must be >= windowSize");
+                }
+                frameBuffer = new float[fftSize];
+                Array.Clear(frameBuffer, 0, frameBuffer.Length); // init with zeros (assure zero padding)
+                fft = new PFFFT.PFFFT(fftSize, PFFFT.Transform.Real);
+                this.outputFormat = outputFormat;
+        }
+
+        /// <summary>
         /// Initializes a new STFT for the specified stream with the specified window and hop size.
         /// </summary>
         /// <param name="stream">the stream to read the audio data to process from</param>
@@ -48,10 +69,7 @@ namespace Aurio.Features {
         /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="normalizeTo_dB">true if the FFT result should be normalized to dB scale, false if raw FFT magnitudes are desired</param>
         public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, OutputFormat outputFormat)
-            : base(stream, windowSize, hopSize, windowType) {
-                frameBuffer = new float[WindowSize];
-                fft = new PFFFT.PFFFT(WindowSize, PFFFT.Transform.Real);
-                this.outputFormat = outputFormat;
+            : this(stream, windowSize, hopSize, windowSize, windowType, outputFormat) {
         }
 
         public override void ReadFrame(float[] fftResult) {
@@ -60,12 +78,12 @@ namespace Aurio.Features {
                 case OutputFormat.Decibel:
                 case OutputFormat.Magnitudes:
                 case OutputFormat.MagnitudesSquared:
-                    if (fftResult.Length != WindowSize / 2) {
+                    if (fftResult.Length != fft.Size / 2) {
                         throw new ArgumentException("the provided FFT result array has an invalid size");
                     }
                     break;
                 default:
-                    if (fftResult.Length != WindowSize) {
+                    if (fftResult.Length != fft.Size) {
                         throw new ArgumentException("the provided FFT result array has an invalid size");
                     }
                     break;

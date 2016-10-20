@@ -195,7 +195,7 @@ namespace Aurio.Features {
         /// </summary>
         /// <param name="frame">the target array where the frame will be copied to</param>
         public virtual void ReadFrame(float[] frame) {
-            if (frame.Length != windowSize) {
+            if (frame.Length < windowSize) {
                 throw new ArgumentException("the provided frame array has an invalid size");
             }
             if (frameOffset + frameSize > streamBufferLevel) {

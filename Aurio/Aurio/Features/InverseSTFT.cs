@@ -14,10 +14,17 @@ namespace Aurio.Features {
         private float[] frameBuffer;
         private PFFFT.PFFFT fft;
 
-        public InverseSTFT(IAudioWriterStream stream, int windowSize, int hopSize) 
+        public InverseSTFT(IAudioWriterStream stream, int windowSize, int hopSize, int fftSize) 
             : base(stream, windowSize, hopSize) {
-            frameBuffer = new float[WindowSize];
-            fft = new PFFFT.PFFFT(WindowSize, PFFFT.Transform.Real);
+            if (fftSize < windowSize) {
+                throw new ArgumentOutOfRangeException("fftSize must be >= windowSize");
+            }
+            frameBuffer = new float[fftSize];
+            fft = new PFFFT.PFFFT(fftSize, PFFFT.Transform.Real);
+        }
+
+        public InverseSTFT(IAudioWriterStream stream, int windowSize, int hopSize)
+            : this(stream, windowSize, hopSize, windowSize) {
         }
 
         /// <summary>
@@ -25,7 +32,7 @@ namespace Aurio.Features {
         /// </summary>
         /// <param name="fftResult">raw FFT frame as output by STFT in OutputFormat.Raw mode</param>
         public override void WriteFrame(float[] fftResult) {
-            if (fftResult.Length != WindowSize) {
+            if (fftResult.Length != fft.Size) {
                 throw new ArgumentException("the provided FFT result array has an invalid size");
             }
 

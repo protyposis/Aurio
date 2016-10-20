@@ -85,7 +85,7 @@ namespace Aurio.Features {
                 // After writing the last buffer through Flush, we cannot write any more frames
                 throw new InvalidOperationException("already flushed");
             }
-            if (frame.Length != windowSize) {
+            if (frame.Length < windowSize) {
                 throw new ArgumentException("the provided frame array has an invalid size");
             }
 
