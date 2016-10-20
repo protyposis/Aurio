@@ -24,7 +24,14 @@ namespace Aurio {
     public enum WindowType {
         Rectangle,
         Triangle,
+        /// <summary>
+        /// Symmetric Hann window. COLA with hop size at (length-1)/2.
+        /// </summary>
         Hann,
+        /// <summary>
+        /// Periodic Hann window. COLA with hop size at length/2.
+        /// </summary>
+        HannPeriodic,
         Hamming,
         Blackman,
         Nuttall,
@@ -73,12 +80,21 @@ namespace Aurio {
         /// (Cosinus-Glockenfenster; (von) Hann; Hanning [sic])
         /// </summary>
         public static void Hann(float[] samples, int offset, int length) {
-            int index = 1;
-            int N = length + 1;
+            int index = 0;
+            int N = length - 1;
             for (int x = offset; x < offset + length; x++) {
                 samples[x] *= (float)(0.5 * (1f - Math.Cos(2 * Math.PI * index / N)));
                 index++;
             }
+        }
+
+        /// <summary>
+        /// Hann window with COLA property when length is even hop size is length/2, useful for FFT and overlap-add.
+        /// For uneven lengths, COLA can be achieved by using the normal Hann window with a hop size of (length-1)/2.
+        /// </summary>
+        public static void HannPeriodic(float[] samples, int offset, int length) {
+            float[] hann = GetArray(WindowType.Hann, length + 1);
+            Buffer.BlockCopy(hann, 0, samples, offset, length * sizeof(float));
         }
 
         public static void Hamming(float[] samples, int offset, int length) {
@@ -152,6 +168,9 @@ namespace Aurio {
                     break;
                 case WindowType.Hann:
                     Hann(window, 0, window.Length);
+                    break;
+                case WindowType.HannPeriodic:
+                    HannPeriodic(window, 0, window.Length);
                     break;
                 case WindowType.Hamming:
                     Hamming(window, 0, window.Length);
