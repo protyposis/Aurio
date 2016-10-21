@@ -15,18 +15,18 @@ namespace Aurio.Features {
         private PFFFT.PFFFT fft;
         private WindowFunction synthesisWindow;
 
-        public InverseSTFT(IAudioWriterStream stream, int windowSize, int hopSize, int fftSize, WindowType windowType) 
+        public InverseSTFT(IAudioWriterStream stream, int windowSize, int hopSize, int fftSize, WindowType windowType, float windowNormalizationFactor) 
             : base(stream, windowSize, hopSize) {
             if (fftSize < windowSize) {
                 throw new ArgumentOutOfRangeException("fftSize must be >= windowSize");
             }
             frameBuffer = new float[fftSize];
             fft = new PFFFT.PFFFT(fftSize, PFFFT.Transform.Real);
-            synthesisWindow = WindowUtil.GetFunction(windowType, windowSize);
+            synthesisWindow = WindowUtil.GetFunction(windowType, windowSize, windowNormalizationFactor);
         }
 
         public InverseSTFT(IAudioWriterStream stream, int windowSize, int hopSize, WindowType windowType)
-            : this(stream, windowSize, hopSize, windowSize, windowType) {
+            : this(stream, windowSize, hopSize, windowSize, windowType, 1.0f) {
         }
 
         /// <summary>
