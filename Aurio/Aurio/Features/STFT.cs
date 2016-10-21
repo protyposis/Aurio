@@ -28,10 +28,28 @@ namespace Aurio.Features {
     public class STFT: StreamWindower {
 
         public enum OutputFormat {
+            /// <summary>
+            /// Raw FFT output, a sequency of complex numbers.
+            /// </summary>
             Raw,
+            /// <summary>
+            /// Magnitudes calculated from the FFT result.
+            /// </summary>
             Magnitudes,
+            /// <summary>
+            /// Squared magnitudes from the FFT result.
+            /// Saves the sqrt() operation of the squared result and can be useful where processing 
+            /// time is important and only relative differences are required.
+            /// </summary>
             MagnitudesSquared,
+            /// <summary>
+            /// Magnitudes and phases calculated from the FFT result. 
+            /// The first half of the output contains the magnitudes, the second half the phases.
+            /// </summary>
             MagnitudesAndPhases,
+            /// <summary>
+            /// Spectrum in Decibel, calculated from the magnitudes.
+            /// </summary>
             Decibel
         }
 
@@ -49,7 +67,7 @@ namespace Aurio.Features {
         /// <param name="hopSize">the hop size in the dimension of samples</param>
         /// <param name="fftSize">the FFT size, must be >= windowSize</param>
         /// <param name="windowType">the type of the window function to apply</param>
-        /// <param name="normalizeTo_dB">true if the FFT result should be normalized to dB scale, false if raw FFT magnitudes are desired</param>
+        /// <param name="outputFormat">format of the output data, e.g. raw FFT complex numbers or dB spectrum</param>
         public STFT(IAudioStream stream, int windowSize, int hopSize, int fftSize, WindowType windowType, OutputFormat outputFormat)
             : base(stream, windowSize, hopSize, windowType) {
                 if(fftSize < windowSize) {
@@ -69,7 +87,7 @@ namespace Aurio.Features {
         /// <param name="windowSize">the window size in the dimension of samples</param>
         /// <param name="hopSize">the hop size in the dimension of samples</param>
         /// <param name="windowType">the type of the window function to apply</param>
-        /// <param name="normalizeTo_dB">true if the FFT result should be normalized to dB scale, false if raw FFT magnitudes are desired</param>
+        /// <param name="outputFormat">format of the output data, e.g. raw FFT complex numbers or dB spectrum</param>
         public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, OutputFormat outputFormat)
             : this(stream, windowSize, hopSize, windowSize, windowType, outputFormat) {
         }
