@@ -63,17 +63,21 @@ namespace Aurio.Features {
             get { return hopSize; }
         }
 
-        private byte[] buffer;
+        private byte[] buffer; // transfer buffer for the non-overlapping part
+        private byte[] overlapBuffer;
+        private int hopInBytes;
         private int overlapInBytes;
         private int nonoverlapInBytes;
         private bool flushed;
 
         private void Initialize() {
+            hopInBytes = hopSize * stream.SampleBlockSize;
             overlapInBytes = overlapSize * stream.SampleBlockSize;
-            nonoverlapInBytes = (windowSize - 2 * overlapSize) * stream.SampleBlockSize;
-            buffer = new byte[Math.Max(overlapInBytes, nonoverlapInBytes)]; // buffer must be able to hold overlap and non-overlap parts
+            nonoverlapInBytes = Math.Max(0, (windowSize - 2 * overlapSize) * stream.SampleBlockSize);
+            buffer = new byte[nonoverlapInBytes];
+            overlapBuffer = new byte[overlapInBytes];
             flushed = false;
-            Array.Clear(buffer, 0, buffer.Length);
+            Array.Clear(overlapBuffer, 0, overlapBuffer.Length);
         }
 
         /// <summary>
@@ -92,26 +96,40 @@ namespace Aurio.Features {
             // Add up the first overlap part
             unsafe
             {
-                fixed (byte* byteBuffer = &buffer[0]) {
+                fixed (byte* byteBuffer = &overlapBuffer[0]) {
                     float* floatBuffer = (float*)byteBuffer;
 
-                    for (int i = 0; i < hopSize; i++) {
+                    for (int i = 0; i < overlapSize; i++) {
                         floatBuffer[i] += frame[i];
                     }
                 }
             }
 
             // Write overlapped part to target stream
-            stream.Write(buffer, 0, overlapInBytes);
+            if (hopSize < overlapSize) {
+                stream.Write(overlapBuffer, 0, hopInBytes);
+            } else {
+                stream.Write(overlapBuffer, 0, overlapInBytes);
+            }
 
+            // When hop is less than overlap, overlap buffer is added up multiple times, but must be removed of the previously written part
+            if(hopSize < overlapSize) {
+                // Shift remaining overlap to the beginning of the array (BlockCopy handles overlapping elements)
+                // This is more expensive but much simpler than implementing a circle buffer
+                Buffer.BlockCopy(overlapBuffer, hopInBytes, overlapBuffer, 0, overlapInBytes - hopInBytes);
+            }
             // Write nonoverlapped middle section, if existing
-            if (nonoverlapInBytes > 0) {
+            else if (nonoverlapInBytes > 0) {
                 Buffer.BlockCopy(frame, overlapInBytes, buffer, 0, nonoverlapInBytes);
                 stream.Write(buffer, 0, nonoverlapInBytes);
             }
 
             // Write the second overlap part to the buffer for addition with next frame
-            Buffer.BlockCopy(frame, overlapInBytes + nonoverlapInBytes, buffer, 0, overlapInBytes);
+            if (hopSize < overlapSize) {
+                Buffer.BlockCopy(frame, overlapInBytes, overlapBuffer, overlapInBytes - hopInBytes, hopInBytes);
+            } else {
+                Buffer.BlockCopy(frame, hopInBytes, overlapBuffer, 0, overlapInBytes);
+            }
 
             OnFrameWritten(frame);
         }
@@ -125,7 +143,7 @@ namespace Aurio.Features {
             }
 
             // Write overlapped part to target stream
-            stream.Write(buffer, 0, overlapInBytes);
+            stream.Write(overlapBuffer, 0, overlapInBytes);
         }
 
         protected virtual void OnFrameWritten(float[] frame) {
