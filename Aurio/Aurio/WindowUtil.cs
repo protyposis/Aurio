@@ -153,10 +153,10 @@ namespace Aurio {
             }
         }
 
-        public static float[] GetArray(WindowType windowType, int windowSize) {
+        public static float[] GetArray(WindowType windowType, int windowSize, float normalizationFactor) {
             float[] window = new float[windowSize];
             for (int x = 0; x < window.Length; x++) {
-                window[x] = 1;
+                window[x] = normalizationFactor;
             }
 
             switch (windowType) {
@@ -192,6 +192,14 @@ namespace Aurio {
             }
 
             return window;
+        }
+
+        public static float[] GetArray(WindowType windowType, int windowSize) {
+            return GetArray(windowType, windowSize, 1.0f);
+        }
+
+        public static WindowFunction GetFunction(WindowType windowType, int windowSize, float normalizationFactor) {
+            return new WindowFunction(GetArray(windowType, windowSize, normalizationFactor), windowType);
         }
 
         public static WindowFunction GetFunction(WindowType windowType, int windowSize) {
