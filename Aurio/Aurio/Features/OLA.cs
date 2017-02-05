@@ -94,13 +94,15 @@ namespace Aurio.Features {
             }
 
             // Add up the first overlap part
-            unsafe
-            {
-                fixed (byte* byteBuffer = &overlapBuffer[0]) {
-                    float* floatBuffer = (float*)byteBuffer;
+            if (overlapSize > 0) {
+                unsafe
+                {
+                    fixed (byte* byteBuffer = &overlapBuffer[0]) {
+                        float* floatBuffer = (float*)byteBuffer;
 
-                    for (int i = 0; i < overlapSize; i++) {
-                        floatBuffer[i] += frame[i];
+                        for (int i = 0; i < overlapSize; i++) {
+                            floatBuffer[i] += frame[i];
+                        }
                     }
                 }
             }
