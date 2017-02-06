@@ -1,6 +1,6 @@
 // 
 // Aurio: Audio Processing, Analysis and Retrieval Library
-// Copyright (C) 2010-2015  Mario Guggenberger <mg@protyposis.net>
+// Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
