@@ -10,9 +10,10 @@ Features
 * 32-bit floating point audio processing engine
 * File I/O through NAudio and FFmpeg
 * Audio playback through NAudio
-* FFT through PFFFT, FFTW (optional) and Exocortex.DSP (optional)
+* FFT/iFFT through PFFFT, FFTW (optional) and Exocortex.DSP (optional)
 * Resampling through Soxr and SecretRabbitCode/libsamplerate (optional)
-* STFT
+* Stream windowing and overlap-adding
+* STFT, inverse STFT
 * Chroma
 * Dynamic Time Warping
 * On-line Time Warping (Dixon, Simon. "Live tracking of musical performances using on-line time warping." Proceedings of the 8th International Conference on Digital Audio Effects. 2005.)
@@ -37,6 +38,28 @@ Aurio.WaveControls provides WPF widgets for user interfaces:
 What's new
 ----------
 
+### 2017-02-06 5c34643
+
+* `Complex` type
+* Various `StreamWindower` `OutputFormat`s: `Raw`, `Magnitudes`, `MagnitudesSquared`, `MagnitudesAndPhases`, and `Decibel`
+* Overlap-adder `OLA`
+* Inverse STFT `InverseSTFT`
+* Writable audio streams
+  * `IAudioWriterStream` interface
+  * `MemoryWriterStream` that writes audio to memory
+* `Aurio.WaveControls`:
+  * `CaretOverlay`, `MultiplicationConverter` migrated from AudioAlign
+  * `TrackMarkerOverlay` to add markers with labels onto audio tracks
+* Inverse FFT transformation in `Aurio.PFFFT`
+* Concatenated `AudioTrack`s (audio tracks consisting of multiple files)
+* Seek indizes for FFmpeg input
+  * Seek index support in `Aurio.FFmpeg.Proxy` and `Aurio.FFmpeg`'s `FFmpegReader`
+  * Automatic seek index generation in `FFmpegSourceStream` for streams that do not natively support seeking
+* Windowing moved from `STFT` to `StreamWindower`
+* NAudio updated to fix Windows 10 high CPU utilization during playback
+* Various unit tests
+* Many bug fixes, optimizations, and enhancements
+
 ### 2016-03-01 fe49ea5
 
 * Support for Visual Studio 2015
@@ -49,11 +72,17 @@ What's new
 * Stream input support in FFmpeg decoder (required a file input before)
 * Close-method and IDisposable implementation in audio streams to free resources
 * Close all audio streams after use
-* MultiStream to concatenate files/streams for decoding (e.g. vob files) 
+* `MultiStream` to concatenate files/streams for decoding (e.g. vob files) 
 * Support additional video files (ts, mkv, mov) for automatic EDL export wav proxy replacement
 * Fix release config postbuild event commands
 * Fix FFmpeg proxy compile error in VS2013
 
+
+Support
+-------
+
+For questions and issues, please open an issue on the issue tracker. Commercial support, development
+and consultation is available through [Protyposis Multimedia Solutions](https://protyposis.com).
 
 Requirements
 ------------
@@ -208,5 +237,5 @@ The fingerprinting methods by Haitsma&Kalker and Wang are protected worldwide, a
 License
 -------
 
-Copyright (C) 2010-2016 Mario Guggenberger <mg@protyposis.net>.
+Copyright (C) 2010-2017 Mario Guggenberger <mg@protyposis.net>.
 This project is released under the terms of the GNU Affero General Public License. See `LICENSE` for details. The library can be built to be free of any copyleft requirements; get in touch if the AGPL does not suit your needs.
