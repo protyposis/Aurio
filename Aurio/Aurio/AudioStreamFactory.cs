@@ -122,7 +122,7 @@ namespace Aurio {
             IAudioStream audioInputStream = audioTrack.CreateAudioStream();
 
             PeakStore peakStore = new PeakStore(SAMPLES_PER_PEAK, audioInputStream.Properties.Channels,
-                (int)Math.Ceiling((float)audioInputStream.Length / audioInputStream.SampleBlockSize / SAMPLES_PER_PEAK));
+                (int)Math.Ceiling((double)audioInputStream.Length / audioInputStream.SampleBlockSize / SAMPLES_PER_PEAK));
 
             Action peakStoreFillAction = delegate {
                 FillPeakStore(audioTrack, fileSupport, audioInputStream, peakStore);
