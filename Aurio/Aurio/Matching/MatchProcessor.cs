@@ -59,7 +59,7 @@ namespace Aurio.Matching {
                 }
 
                 // Report progress
-                if (++index % 1000 == 0) {
+                if (++index % 1000 == 0 || index == total) {
                     progressCallback(100d / total * index);
                 }
             }
