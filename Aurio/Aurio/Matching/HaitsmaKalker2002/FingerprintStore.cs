@@ -169,17 +169,29 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
             return matches;
         }
 
-        public List<Match> FindAllMatches() {
+        public List<Match> FindAllMatches(Action<double> progressCallback) {
             List<Match> matches = new List<Match>();
             //collisionMap.CreateLookupIndex(); // TODO evaluate if this call speeds the process up
             //collisionMap.Cleanup();
-            foreach (SubFingerprintHash hash in collisionMap.GetCollidingKeys()) {
+            var collidingKeys = collisionMap.GetCollidingKeys();
+            long total = collidingKeys.Count;
+            long index = 0;
+            foreach (SubFingerprintHash hash in collidingKeys) {
                 // skip all hashes whose bits are all zero, since this is probably a position with silence
                 if (hash.Value != 0) {
                     matches.AddRange(FindMatches(hash));
                 }
+
+                // Report progress
+                if (++index % 1000 == 0) {
+                    progressCallback(100d / total * index);
+                }
             }
             return matches;
+        }
+
+        public List<Match> FindAllMatches() {
+            return FindAllMatches((progress) => { });
         }
 
         public Fingerprint GetFingerprint(SubFingerprintLookupEntry entry) {
