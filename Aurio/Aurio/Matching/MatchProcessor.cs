@@ -28,17 +28,12 @@ using Aurio.DataStructures.Graph;
 namespace Aurio.Matching {
     public class MatchProcessor {
 
-        /// <summary>
-        /// Detects duplicate matches and returns a list without those duplicates.
-        /// A match is considered as a duplicate of another match, if both refer to the same two tracks 
-        /// and positions within the tracks, and the similarity is the same (which automatically results from
-        /// the identical track positions).
-        /// </summary>
-        /// <param name="matches">a list of matches to check for duplicates</param>
-        /// <returns>a filtered list without duplicate matches</returns>
-        public static List<Match> FilterDuplicateMatches(List<Match> matches) {
+       
+        public static List<Match> FilterDuplicateMatches(List<Match> matches, Action<double> progressCallback) {
             List<Match> filteredMatches = new List<Match>();
             Dictionary<TimeSpan, List<Match>> filter = new Dictionary<TimeSpan, List<Match>>();
+            long total = matches.Count;
+            long index = 0;
             foreach (Match match in matches) {
                 bool duplicateFound = false;
                 // at first group the matches by the sum of their matching times (only matches with the same sum can be duplicates)
@@ -62,8 +57,25 @@ namespace Aurio.Matching {
                     filter[sum].Add(match);
                     filteredMatches.Add(match);
                 }
+
+                // Report progress
+                if (++index % 1000 == 0) {
+                    progressCallback(100d / total * index);
+                }
             }
             return filteredMatches;
+        }
+
+        /// <summary>
+        /// Detects duplicate matches and returns a list without those duplicates.
+        /// A match is considered as a duplicate of another match, if both refer to the same two tracks 
+        /// and positions within the tracks, and the similarity is the same (which automatically results from
+        /// the identical track positions).
+        /// </summary>
+        /// <param name="matches">a list of matches to check for duplicates</param>
+        /// <returns>a filtered list without duplicate matches</returns>
+        public static List<Match> FilterDuplicateMatches(List<Match> matches) {
+            return FilterDuplicateMatches(matches, (progress) => { });
         }
 
         /// <summary>
