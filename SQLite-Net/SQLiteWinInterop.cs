@@ -13,7 +13,7 @@ namespace SQLite {
 
     static class X86Interop {
 
-        private const string SQLITELIB = "mysql3.x86.dll";
+        private const string SQLITELIB = "sqlite3.x86.dll";
 
         [DllImport(SQLITELIB, EntryPoint = "sqlite3_threadsafe", CallingConvention = CallingConvention.Cdecl)]
         public static extern int Threadsafe();
@@ -174,7 +174,7 @@ namespace SQLite {
 
     static class X64Interop {
 
-        private const string SQLITELIB = "mysql3.x64.dll";
+        private const string SQLITELIB = "sqlite3.x64.dll";
 
         [DllImport(SQLITELIB, EntryPoint = "sqlite3_threadsafe", CallingConvention = CallingConvention.Cdecl)]
         public static extern int Threadsafe();
