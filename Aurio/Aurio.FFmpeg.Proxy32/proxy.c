@@ -542,26 +542,33 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 			pi->pkt.data = NULL;
 			pi->pkt.size = 0;
 			cached = 1;
+			if (DEBUG) fprintf(stderr, "Reaching packet EOF, setting cached flag\n");
 		}
 
-		if (pi->mode & TYPE_AUDIO && pi->pkt.stream_index == pi->audio_stream->index) {
+		if (DEBUG && ret == AVERROR_EOF) {
+			fprintf(stderr, "Packet EOF\n");
+		}
+
+		if (pi->mode & TYPE_AUDIO && (pi->pkt.stream_index == pi->audio_stream->index || cached)) {
+			if (DEBUG && cached) fprintf(stderr, "Feeding empty EOF packet to audio decoder\n");
 			ret = avcodec_send_packet(pi->audio_codec_ctx, &pi->pkt);
 			if (ret < 0) {
 				fprintf(stderr, "Error sending audio packet to decoder (%s)\n", av_err2str(ret));
 				if (ret == AVERROR_EOF) {
-					fprintf(stderr, "Audio EOF comung up??\n");
+					fprintf(stderr, "Audio EOF coming up??\n");
 				}
 				else {
 					return ret;
 				}
 			}
 		}
-		else if (pi->mode & TYPE_VIDEO && pi->pkt.stream_index == pi->video_stream->index) {
+		else if (pi->mode & TYPE_VIDEO && (pi->pkt.stream_index == pi->video_stream->index || cached)) {
+			if (DEBUG && cached) fprintf(stderr, "Feeding empty EOF packet to video decoder\n");
 			ret = avcodec_send_packet(pi->video_codec_ctx, &pi->pkt);
 			if (ret < 0) {
 				fprintf(stderr, "Error sending video packet to decoder (%s)\n", av_err2str(ret));
 				if (ret == AVERROR_EOF) {
-					fprintf(stderr, "Video EOF comung up??\n");
+					fprintf(stderr, "Video EOF coming up??\n");
 				}
 				else {
 					return ret;
@@ -992,43 +999,40 @@ static int decode_audio_packet(ProxyInstance *pi, int *got_audio_frame, int cach
 
 	*got_audio_frame = 0;
 
-	if (pi->pkt.stream_index == pi->audio_stream->index) {
-		/* decode audio frame */
-		ret = avcodec_receive_frame(pi->audio_codec_ctx, pi->frame);
-		if (ret < 0) {
-			if (ret == AVERROR(EAGAIN)) {
-				// More input required
-				return 0;
-			}
-			else if (ret == AVERROR_EOF) {
-				// That's it, no more frames
-				return 0;
-			}
-			else {
-				fprintf(stderr, "Error receiving decoded audio frame (%s)\n", av_err2str(ret));
-				return ret;
-			}
+	/* decode audio frame */
+	ret = avcodec_receive_frame(pi->audio_codec_ctx, pi->frame);
+	if (ret < 0) {
+		if (ret == AVERROR(EAGAIN)) {
+			// More input required
+			return 0;
+		}
+		else if (ret == AVERROR_EOF) {
+			// That's it, no more frames
+			if (DEBUG) fprintf(stderr, "Audio frame EOF\n");
+			return 0;
 		}
 		else {
-			*got_audio_frame = 1;
+			fprintf(stderr, "Error receiving decoded audio frame (%s)\n", av_err2str(ret));
+			return ret;
 		}
-
-		if (*got_audio_frame && DEBUG) {
-			printf("packet dts:%s pts:%s duration:%s\n",
-				av_ts2timestr(pi->pkt.dts, &pi->audio_stream->time_base),
-				av_ts2timestr(pi->pkt.pts, &pi->audio_stream->time_base),
-				av_ts2timestr(pi->pkt.duration, &pi->audio_stream->time_base));
-
-			printf("audio_frame%s n:%d nb_samples:%d pts:%s\n",
-				cached ? "(cached)" : "",
-				audio_frame_count++, pi->frame->nb_samples,
-				av_ts2timestr(pi->frame->pts, &pi->audio_stream->time_base));
-		}
-
-		return 1;
+	}
+	else {
+		*got_audio_frame = 1;
 	}
 
-	return 0;
+	if (*got_audio_frame && DEBUG) {
+		printf("packet dts:%s pts:%s duration:%s\n",
+			av_ts2timestr(pi->pkt.dts, &pi->audio_stream->time_base),
+			av_ts2timestr(pi->pkt.pts, &pi->audio_stream->time_base),
+			av_ts2timestr(pi->pkt.duration, &pi->audio_stream->time_base));
+
+		printf("audio_frame%s n:%d nb_samples:%d pts:%s\n",
+			cached ? "(cached)" : "",
+			audio_frame_count++, pi->frame->nb_samples,
+			av_ts2timestr(pi->frame->pts, &pi->audio_stream->time_base));
+	}
+
+	return 1;
 }
 
 static int video_frame_count = 0;
@@ -1041,43 +1045,40 @@ static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cach
 
 	*got_video_frame = 0;
 
-	if (pi->pkt.stream_index == pi->video_stream->index) {
-		/* decode audio frame */
-		ret = avcodec_receive_frame(pi->video_codec_ctx, pi->frame);
-		if (ret < 0) {
-			if (ret == AVERROR(EAGAIN)) {
-				// More input required
-				return 0;
-			}
-			else if (ret == AVERROR_EOF) {
-				// That's it, no more frames
-				return 0;
-			}
-			else {
-				fprintf(stderr, "Error receiving decoded video frame (%s)\n", av_err2str(ret));
-				return ret;
-			}
+	/* decode video frame */
+	ret = avcodec_receive_frame(pi->video_codec_ctx, pi->frame);
+	if (ret < 0) {
+		if (ret == AVERROR(EAGAIN)) {
+			// More input required
+			return 0;
+		}
+		else if (ret == AVERROR_EOF) {
+			// That's it, no more frames
+			if (DEBUG) fprintf(stderr, "Video frame EOF\n");
+			return 0;
 		}
 		else {
-			*got_video_frame = 1;
+			fprintf(stderr, "Error receiving decoded video frame (%s)\n", av_err2str(ret));
+			return ret;
 		}
-
-		if (*got_video_frame && DEBUG) {
-			printf("packet dts:%s pts:%s duration:%s\n",
-				av_ts2timestr(pi->pkt.dts, &pi->video_stream->time_base),
-				av_ts2timestr(pi->pkt.pts, &pi->video_stream->time_base),
-				av_ts2timestr(pi->pkt.duration, &pi->video_stream->time_base));
-
-			printf("video_frame%s n:%d coded_n:%d pts:%s\n",
-				cached ? "(cached)" : "",
-				video_frame_count++, pi->frame->coded_picture_number,
-				av_ts2timestr(pi->frame->pts, &pi->video_stream->time_base));
-		}
-
-		return 1;
+	}
+	else {
+		*got_video_frame = 1;
 	}
 
-	return 0;
+	if (*got_video_frame && DEBUG) {
+		printf("packet dts:%s pts:%s duration:%s\n",
+			av_ts2timestr(pi->pkt.dts, &pi->video_stream->time_base),
+			av_ts2timestr(pi->pkt.pts, &pi->video_stream->time_base),
+			av_ts2timestr(pi->pkt.duration, &pi->video_stream->time_base));
+
+		printf("video_frame%s n:%d coded_n:%d pts:%s\n",
+			cached ? "(cached)" : "",
+			video_frame_count++, pi->frame->coded_picture_number,
+			av_ts2timestr(pi->frame->pts, &pi->video_stream->time_base));
+	}
+
+	return 1;
 }
 
 static int convert_audio_samples(ProxyInstance *pi) {
