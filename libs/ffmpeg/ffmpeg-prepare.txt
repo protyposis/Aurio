@@ -1,6 +1,6 @@
-1. Download required FFmpeg files from http://ffmpeg.zeranoe.com/
+1. Download required FFmpeg files from https://ffmpeg.zeranoe.com/builds/
 
-   Currently used: FFmpeg 2.8.2 from https://ffmpeg.zeranoe.com/blog/?p=447
+   Currently used: FFmpeg 3.3.3
    ----------------------------
 
 2. Download "win32" and "win64" "shared" and "dev" packages
