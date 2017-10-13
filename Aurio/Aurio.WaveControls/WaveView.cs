@@ -55,17 +55,6 @@ namespace Aurio.WaveControls {
             // event gets triggered when ActualWidth or ActualHeight change
             SizeChanged += WaveView_SizeChanged;
 
-            // init renderers
-            // NOTE assume that 2 channels will be the maximum for now - increase if needed
-            waveformBitmapRenderers = new WaveformBitmapRenderer[2];
-            for (int i = 0; i < waveformBitmapRenderers.Length; i++) {
-                waveformBitmapRenderers[i] = new WaveformBitmapRenderer();
-            }
-            waveformGeometryRenderers = new WaveformGeometryRenderer[2];
-            for (int i = 0; i < waveformGeometryRenderers.Length; i++) {
-                waveformGeometryRenderers[i] = new WaveformGeometryRenderer();
-            }
-
             DependencyPropertyDescriptor.FromProperty(Selector.IsSelectedProperty, typeof(WaveView))
                 .AddValueChanged(this, new EventHandler(OnSelectionChanged));
 
@@ -344,6 +333,16 @@ namespace Aurio.WaveControls {
 
         private void SetAudioTrack(AudioTrack audioTrack) {
             UnsetAudioTrack();
+
+            // init renderers
+            waveformBitmapRenderers = new WaveformBitmapRenderer[audioTrack.SourceProperties.Channels];
+            for (int i = 0; i < waveformBitmapRenderers.Length; i++) {
+                waveformBitmapRenderers[i] = new WaveformBitmapRenderer();
+            }
+            waveformGeometryRenderers = new WaveformGeometryRenderer[audioTrack.SourceProperties.Channels];
+            for (int i = 0; i < waveformGeometryRenderers.Length; i++) {
+                waveformGeometryRenderers[i] = new WaveformGeometryRenderer();
+            }
 
             this.audioTrack = audioTrack;
             audioStream = AudioStreamFactory.FromAudioTrackForGUI(audioTrack);
