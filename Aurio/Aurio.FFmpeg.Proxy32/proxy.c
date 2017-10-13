@@ -639,6 +639,37 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	}
 }
 
+void update_position_and_get_timestamp(AVFrame *frame, int sample_rate, AVRational time_base, 
+	int num_samples_read, int64_t *sample_position, int64_t *timestamp)
+{
+	if (frame->pkt_pts != AV_NOPTS_VALUE) {
+		// The first frame from a packet has the timestamp always set. The
+		// timestamp is the time at the beginning of the frame, whereas the
+		// sample_positon is the position until where we have read, so it's
+		// the time at the end of a frame, which means we need to add the
+		// number of read samples.
+		// TODO eventually change to av_frame_get_best_effort_timestamp (result is the same though)
+		*sample_position = pts_to_samples(sample_rate, time_base, frame->pkt_pts) + num_samples_read;
+	}
+	else if (num_samples_read > 0) {
+		// ... but succeeding frames from the same packet do not (packets of 
+		// some compressed audio can contain multiple frames), so we need to
+		// track the position by adding the number of read samples.
+		*sample_position += num_samples_read;
+	}
+
+	if (num_samples_read > 0) {
+		// To return the correct timestamp (beginning of frame), we need to
+		// subtract the number of read samples from the sample_position.
+		*timestamp = *sample_position - num_samples_read;
+	}
+	else {
+		// If no frame was read, we did not advance and the timestamp is
+		// the end of the previous frame.
+		*timestamp = *sample_position;
+	}
+}
+
 /*
  * Read the next desired frame, skipping other frame types in between.
  */
@@ -655,26 +686,12 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buf
 		ret = stream_read_frame_any(pi, &got_frame, frame_type);
 		if (ret < 0 || got_frame) {
 			if (*frame_type == TYPE_AUDIO) {
-				if (pi->frame->pkt_pts != AV_NOPTS_VALUE) {
-					pi->audio_output.sample_position = 
-						pts_to_samples(pi->audio_output.format.sample_rate, pi->audio_stream->time_base, pi->frame->pkt_pts);
-				}
-				else if (ret > 0) {
-					pi->audio_output.sample_position += ret;
-				}
-				// TODO eventually change to av_frame_get_best_effort_timestamp (result is the same though)
-				*timestamp = pi->audio_output.sample_position;
+				update_position_and_get_timestamp(pi->frame, pi->audio_output.format.sample_rate, pi->audio_stream->time_base,
+					ret, &pi->audio_output.sample_position, timestamp);
 			}
 			else if (*frame_type == TYPE_VIDEO) {
-				if (pi->frame->pkt_pts != AV_NOPTS_VALUE) {
-					pi->video_output.sample_position =
-						pts_to_samples(pi->video_output.format.frame_rate, pi->video_stream->time_base, pi->frame->pkt_pts);
-				}
-				else if (ret > 0) {
-					pi->video_output.sample_position += ret;
-				}
-				// TODO eventually change to av_frame_get_best_effort_timestamp (result is the same though)
-				*timestamp = pi->audio_output.sample_position;
+				update_position_and_get_timestamp(pi->frame, pi->video_output.format.frame_rate, pi->video_stream->time_base,
+					ret, &pi->video_output.sample_position, timestamp);
 				pi->video_output.current_frame.keyframe = pi->frame->key_frame;
 				pi->video_output.current_frame.pict_type = pi->frame->pict_type;
 				pi->video_output.current_frame.interlaced = pi->frame->interlaced_frame;
