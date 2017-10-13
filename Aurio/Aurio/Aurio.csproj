@@ -227,6 +227,7 @@
     <Compile Include="Streams\MultiStream.cs" />
     <Compile Include="Streams\SineGeneratorStream.cs" />
     <Compile Include="Streams\StreamExtensions.cs" />
+    <Compile Include="Streams\SurroundDownmixStream.cs" />
     <Compile Include="Streams\TimeWarp.cs" />
     <Compile Include="Streams\TimeWarpCollection.cs" />
     <Compile Include="Streams\TimeWarpStream.cs" />
