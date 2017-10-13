@@ -1054,7 +1054,7 @@ static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cach
 			printf("video_frame%s n:%d coded_n:%d pts:%s\n",
 				cached ? "(cached)" : "",
 				video_frame_count++, pi->frame->coded_picture_number,
-				av_ts2timestr(pi->frame->pts, &pi->audio_stream->time_base));
+				av_ts2timestr(pi->frame->pts, &pi->video_stream->time_base));
 		}
 
 		return 1;
@@ -1090,7 +1090,8 @@ static int convert_video_frame(ProxyInstance *pi) {
 	 * The AVPicture could actually be completely omitted by passing an array  int linesize[1] = { rgbstride },
 	 * with e.g. rgbstride = 960 for a 320px wide picture. */
 	uint8_t *output_buffer_workaround = pi->output_buffer;
-	int ret = sws_scale(pi->sws, pi->frame->data, pi->frame->linesize, 0, pi->video_codec_ctx->height, &output_buffer_workaround, pi->frame->linesize);
+	int rgbstride[1] = { pi->frame->linesize[0] * 3 };
+	int ret = sws_scale(pi->sws, pi->frame->data, pi->frame->linesize, 0, pi->video_codec_ctx->height, &output_buffer_workaround, rgbstride);
 	if (ret < 0) {
 		fprintf(stderr, "Could not convert frame\n");
 	}
@@ -1101,7 +1102,7 @@ static int convert_video_frame(ProxyInstance *pi) {
 
 		for (int y = 0; y < pi->video_codec_ctx->height; y += pi->video_codec_ctx->height / 20) {
 			for (int x = 0; x < pi->video_codec_ctx->width; x += pi->video_codec_ctx->width / 64) {
-				printf("%c", QUANT_STEPS[(pi->output_buffer[y * pi->frame->linesize[0] + x * 3 /* blue channel */]) / 40]);
+				printf("%c", QUANT_STEPS[(pi->output_buffer[y * rgbstride[0] + x * 3 /* blue channel */]) / 40]);
 			}
 			printf("\n");
 		}
