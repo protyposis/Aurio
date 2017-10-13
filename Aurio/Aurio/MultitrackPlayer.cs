@@ -271,14 +271,17 @@ namespace Aurio {
                     audioMixer.UpdateLength();
                 });
 
-            // Upmix mono inputs to dual channel stereo to allow channel balancing
-            MonoStream stereoStream = new MonoStream(offsetStream, 2);
-            if (offsetStream.Properties.Channels > 1) {
-                stereoStream.Downmix = false;
+            // Upmix mono inputs to dual channel stereo or downmix surround to allow channel balancing
+            // TODO add better multichannel stream support and allow balancing of surround
+            IAudioStream mixToStereoStream = offsetStream;
+            if (mixToStereoStream.Properties.Channels == 1) {
+                mixToStereoStream = new MonoStream(mixToStereoStream, 2);
+            } else if (mixToStereoStream.Properties.Channels > 2) {
+                mixToStereoStream = new SurroundDownmixStream(mixToStereoStream);
             }
 
             // control the track phase
-            PhaseInversionStream phaseInversion = new PhaseInversionStream(stereoStream) {
+            PhaseInversionStream phaseInversion = new PhaseInversionStream(mixToStereoStream) {
                 Invert = audioTrack.InvertedPhase
             };
 
