@@ -58,7 +58,12 @@ namespace Aurio {
             }
             else {
                 try {
-                    return new FFmpegSourceStream(fileInfo);
+                    FFmpegSourceStream stream = new FFmpegSourceStream(fileInfo);
+
+                    // Make a seek to test if it works or if it throws an exception
+                    stream.Position = 0;
+
+                    return stream;
                 }
                 catch (FFmpegSourceStream.FileNotSeekableException) {
                     /* 
@@ -71,6 +76,14 @@ namespace Aurio {
                      * additional space though).
                      */
                     Console.WriteLine("File not seekable, creating proxy file...");
+                    return TryOpenSourceStream(FFmpegSourceStream.CreateWaveProxy(fileInfo));
+                }
+                catch (FFmpegSourceStream.FileSeekException) {
+                    /* 
+                     * This exception gets thrown if a file should be seekable but seeking still does 
+                     * not work correctly. We also create a proxy in this case.
+                     */
+                    Console.WriteLine("File test seek failed, creating proxy file...");
                     return TryOpenSourceStream(FFmpegSourceStream.CreateWaveProxy(fileInfo));
                 }
                 catch (DllNotFoundException) {
