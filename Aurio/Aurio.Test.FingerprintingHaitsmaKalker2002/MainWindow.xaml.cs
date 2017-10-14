@@ -48,7 +48,7 @@ namespace Aurio.Test.FingerprintingHaitsmaKalker2002 {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.DefaultExt = ".wav";
             dlg.Multiselect = true;
-            dlg.Filter = "Wave files|*.wav";
+            dlg.Filter = "Media files|*.wav;*.mp4;*.m4a;*.mp3;*.mkv;*.aac;*.webm";
 
             if (dlg.ShowDialog() == true) {
                 trackListBox.Items.Clear();
