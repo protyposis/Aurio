@@ -36,7 +36,7 @@ namespace Aurio.Streams {
         public TimeWarpStream(IAudioStream sourceStream)
             : base(sourceStream) {
                 byteMappings = new ByteTimeWarpCollection(0);
-                Mappings = new TimeWarpCollection();
+                Mappings = null;
                 length = sourceStream.Length;
                 position = sourceStream.Position;
 
@@ -51,10 +51,22 @@ namespace Aurio.Streams {
         public TimeWarpCollection Mappings {
             get { return mappings; }
             set {
+                // Unsubscribe from previous mappings
                 if (mappings != null) {
                     mappings.CollectionChanged -= mappings_CollectionChanged;
                 }
-                mappings = value;
+
+                if (value != null) {
+                    // Assign new mappings
+                    mappings = value;
+                } else {
+                    // If no mappings were passed in, it was either for the intention to get rid of the
+                    // reference to the previous mappings or to clear the mappings to an empty list,
+                    // so we create a new empty list.
+                    mappings = new TimeWarpCollection();
+                }
+      
+                // Subscribe to changes in the new mappings
                 mappings.CollectionChanged += mappings_CollectionChanged;
                 mappings_CollectionChanged(null, null);
             }
@@ -112,10 +124,18 @@ namespace Aurio.Streams {
             if (cropStream == null || cropStream.Begin != mL.From || cropStream.End != mH.From || resamplingStream.Length != byteMappings.Omega.To) {
                 // mapping has changed, stream subsection must be renewed
                 if (hardReset) {
-                    cropStream = new CropStream(sourceStream, mL.From, mH.From);
+                    // Each internal stream for each warped/resampled section works on the same underlying source stream, so
+                    // we add the SourceClosePreventionStream to avoid the source being closed when an internally used stream
+                    // of a section is disposed or closed (as in the call below). The source stream continues to get closed
+                    // when this stream is closed.
+                    cropStream = new CropStream(new SourceClosePreventionStream(sourceStream), mL.From, mH.From);
+
+                    // Get rid of stream for previous section
                     if(resamplingStream != null) {
                         resamplingStream.Close();
                     }
+
+                    // Create stream for current section
                     resamplingStream = new ResamplingStream(cropStream, ResamplingQuality.VariableRate, ByteTimeWarp.CalculateSampleRateRatio(mL, mH));
                     resamplingStream.Position = position - mL.To;
                 }
@@ -183,9 +203,15 @@ namespace Aurio.Streams {
         }
 
         public override void Close() {
+            // Unreference the mappings which may be passed in from outside
+            Mappings = null;
+
+            // Close stream of current section
             if(resamplingStream != null) {
                 resamplingStream.Close();
             }
+
+            // Close the source stream
             base.Close();
         }
 
@@ -287,6 +313,20 @@ namespace Aurio.Streams {
                 // but it is still considered part of the last interval that the loop
                 // stopped at.
                 currentIndex--;
+            }
+        }
+
+        /// <summary>
+        /// This stream prevents closing of its source stream. When Close() is called, it thus does not hand the 
+        /// call to its source, and closing of the stream stops here.
+        /// </summary>
+        private class SourceClosePreventionStream : AbstractAudioStreamWrapper {
+            public SourceClosePreventionStream(IAudioStream sourceStream) : base(sourceStream) {
+            }
+
+            public override void Close() {
+                Debug.WriteLine("Inhibiting Close");
+                // Don't close base stream
             }
         }
     }
