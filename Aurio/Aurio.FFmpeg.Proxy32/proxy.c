@@ -88,7 +88,6 @@ typedef struct ProxyInstance {
 	AVFrame				*frame;
 	SwrContext			*swr;
 	struct SwsContext	*sws;
-	AVPicture			video_picture;
 	int					output_buffer_size;
 	uint8_t				*output_buffer;
 	int64_t				frame_pts;
@@ -103,6 +102,7 @@ typedef struct ProxyInstance {
 		}					format;
 		int64_t				length;
 		int					frame_size;
+		int64_t				sample_position;
 	}					audio_output;
 
 	struct {
@@ -120,6 +120,7 @@ typedef struct ProxyInstance {
 			int					interlaced;
 			int					top_field_first;
 		}					current_frame;
+		int64_t				sample_position;
 	}					video_output;
 } ProxyInstance;
 
@@ -244,7 +245,9 @@ int main(int argc, char *argv[])
 		last_ts1 = timestamp;
 	}
 
+	printf("creating seekindex... ");
 	stream_seekindex_create(pi, mode);
+	printf("done\n");
 
 	// seek back to start
 	stream_seek(pi, 0, mode == TYPE_VIDEO ? TYPE_VIDEO : TYPE_AUDIO);
@@ -463,14 +466,9 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 		/* Initialize video frame converter */
 		// PIX_FMT_BGR24 format needed by C# for correct color interpretation (PixelFormat.Format24bppRgb)
 		pi->sws = sws_getContext(pi->video_codec_ctx->width, pi->video_codec_ctx->height, pi->video_codec_ctx->pix_fmt, 
-			pi->video_codec_ctx->width, pi->video_codec_ctx->height, PIX_FMT_BGR24, SWS_BICUBIC, NULL, NULL, NULL);
+			pi->video_codec_ctx->width, pi->video_codec_ctx->height, AV_PIX_FMT_BGR24, SWS_BICUBIC, NULL, NULL, NULL);
 		if (pi->sws == NULL) {
 			fprintf(stderr, "error creating swscontext\n");
-			exit(1);
-		}
-
-		if (avpicture_alloc(&pi->video_picture, PIX_FMT_RGB24, pi->video_codec_ctx->width, pi->video_codec_ctx->height) != 0) {
-			fprintf(stderr, "error allocating AVPicture\n");
 			exit(1);
 		}
 
@@ -544,6 +542,42 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 			pi->pkt.data = NULL;
 			pi->pkt.size = 0;
 			cached = 1;
+			if (DEBUG) fprintf(stderr, "Reaching packet EOF, setting cached flag\n");
+		}
+
+		if (DEBUG && ret == AVERROR_EOF) {
+			fprintf(stderr, "Packet EOF\n");
+		}
+
+		if (pi->mode & TYPE_AUDIO && (pi->pkt.stream_index == pi->audio_stream->index || cached)) {
+			if (DEBUG && cached) fprintf(stderr, "Feeding empty EOF packet to audio decoder\n");
+			ret = avcodec_send_packet(pi->audio_codec_ctx, &pi->pkt);
+			if (ret < 0) {
+				fprintf(stderr, "Error sending audio packet to decoder (%s)\n", av_err2str(ret));
+				if (ret == AVERROR_EOF) {
+					fprintf(stderr, "Audio EOF coming up??\n");
+				}
+				else {
+					return ret;
+				}
+			}
+		}
+		else if (pi->mode & TYPE_VIDEO && (pi->pkt.stream_index == pi->video_stream->index || cached)) {
+			if (DEBUG && cached) fprintf(stderr, "Feeding empty EOF packet to video decoder\n");
+			ret = avcodec_send_packet(pi->video_codec_ctx, &pi->pkt);
+			if (ret < 0) {
+				fprintf(stderr, "Error sending video packet to decoder (%s)\n", av_err2str(ret));
+				if (ret == AVERROR_EOF) {
+					fprintf(stderr, "Video EOF coming up??\n");
+				}
+				else {
+					return ret;
+				}
+			}
+		}
+		else {
+			// Skip to next packet by signalling that the packet was completely read
+			pi->pkt.size = 0;
 		}
 	}
 
@@ -570,8 +604,10 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 		return -1; // signal the caller EOF
 	}
 
-	pi->pkt.data += ret;
-	pi->pkt.size -= ret;
+	if (!*got_frame) {
+		// if no frame was read, signal that we need to read the next packet
+		pi->pkt.size = 0;
+	}
 
 	if (*frame_type == TYPE_AUDIO && convert_audio_samples(pi) < 0) {
 		av_packet_unref(&pi->pkt);
@@ -610,6 +646,37 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	}
 }
 
+void update_position_and_get_timestamp(AVFrame *frame, int sample_rate, AVRational time_base, 
+	int num_samples_read, int64_t *sample_position, int64_t *timestamp)
+{
+	if (frame->pkt_pts != AV_NOPTS_VALUE) {
+		// The first frame from a packet has the timestamp always set. The
+		// timestamp is the time at the beginning of the frame, whereas the
+		// sample_positon is the position until where we have read, so it's
+		// the time at the end of a frame, which means we need to add the
+		// number of read samples.
+		// TODO eventually change to av_frame_get_best_effort_timestamp (result is the same though)
+		*sample_position = pts_to_samples(sample_rate, time_base, frame->pkt_pts) + num_samples_read;
+	}
+	else if (num_samples_read > 0) {
+		// ... but succeeding frames from the same packet do not (packets of 
+		// some compressed audio can contain multiple frames), so we need to
+		// track the position by adding the number of read samples.
+		*sample_position += num_samples_read;
+	}
+
+	if (num_samples_read > 0) {
+		// To return the correct timestamp (beginning of frame), we need to
+		// subtract the number of read samples from the sample_position.
+		*timestamp = *sample_position - num_samples_read;
+	}
+	else {
+		// If no frame was read, we did not advance and the timestamp is
+		// the end of the previous frame.
+		*timestamp = *sample_position;
+	}
+}
+
 /*
  * Read the next desired frame, skipping other frame types in between.
  */
@@ -626,13 +693,12 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buf
 		ret = stream_read_frame_any(pi, &got_frame, frame_type);
 		if (ret < 0 || got_frame) {
 			if (*frame_type == TYPE_AUDIO) {
-				// TODO eventually change to av_frame_get_best_effort_timestamp (result is the same though)
-				*timestamp = pi->frame->pkt_pts != AV_NOPTS_VALUE ?
-					pts_to_samples(pi->audio_output.format.sample_rate, pi->audio_stream->time_base, pi->frame->pkt_pts) : pi->pkt.pos;
+				update_position_and_get_timestamp(pi->frame, pi->audio_output.format.sample_rate, pi->audio_stream->time_base,
+					ret, &pi->audio_output.sample_position, timestamp);
 			}
 			else if (*frame_type == TYPE_VIDEO) {
-				*timestamp = pi->frame->pkt_pts != AV_NOPTS_VALUE ?
-					pts_to_samples(pi->video_output.format.frame_rate, pi->video_stream->time_base, pi->frame->pkt_pts) : pi->pkt.pos;
+				update_position_and_get_timestamp(pi->frame, pi->video_output.format.frame_rate, pi->video_stream->time_base,
+					ret, &pi->video_output.sample_position, timestamp);
 				pi->video_output.current_frame.keyframe = pi->frame->key_frame;
 				pi->video_output.current_frame.pict_type = pi->frame->pict_type;
 				pi->video_output.current_frame.interlaced = pi->frame->interlaced_frame;
@@ -795,7 +861,6 @@ static void pi_free(ProxyInstance **pi) {
 	}
 	if (_pi->mode & TYPE_VIDEO) {
 		sws_freeContext(_pi->sws);
-		avpicture_free(&_pi->video_picture);
 	}
 	av_packet_unref(&_pi->pkt);
 	av_frame_free(&_pi->frame);
@@ -925,79 +990,95 @@ static int open_codec_context(AVFormatContext *fmt_ctx, int type)
 
 static int audio_frame_count = 0;
 /*
- * Decodes an audio frame and returns the number of bytes consumed from the input packet,
- * or a negative error code (it is basically the result of avcodec_decode_audio4).
+ * Decodes an audio frame and returns 1 if a frame was decoded, 0 if no frame was decoded,
+ * or a negative error code (it is basically the result of avcodec_receive_frame).
  */
 static int decode_audio_packet(ProxyInstance *pi, int *got_audio_frame, int cached)
 {
 	int ret = 0;
-	int decoded = pi->pkt.size; // to skip non-target stream packets, return the full packet size
 
 	*got_audio_frame = 0;
 
-	if (pi->pkt.stream_index == pi->audio_stream->index) {
-		/* decode audio frame */
-		ret = avcodec_decode_audio4(pi->audio_codec_ctx, pi->frame, got_audio_frame, &pi->pkt);
-		if (ret < 0) {
-			fprintf(stderr, "Error decoding audio frame (%s)\n", av_err2str(ret));
+	/* decode audio frame */
+	ret = avcodec_receive_frame(pi->audio_codec_ctx, pi->frame);
+	if (ret < 0) {
+		if (ret == AVERROR(EAGAIN)) {
+			// More input required
+			return 0;
+		}
+		else if (ret == AVERROR_EOF) {
+			// That's it, no more frames
+			if (DEBUG) fprintf(stderr, "Audio frame EOF\n");
+			return 0;
+		}
+		else {
+			fprintf(stderr, "Error receiving decoded audio frame (%s)\n", av_err2str(ret));
 			return ret;
 		}
-		/* Some audio decoders decode only part of the packet, and have to be
-		* called again with the remainder of the packet data.
-		* Sample: fate-suite/lossless-audio/luckynight-partial.shn
-		* Also, some decoders might over-read the packet. */
-		decoded = FFMIN(ret, pi->pkt.size);
-
-		if (*got_audio_frame && DEBUG) {
-			printf("packet dts:%s pts:%s duration:%s\n",
-				av_ts2timestr(pi->pkt.dts, &pi->audio_stream->time_base),
-				av_ts2timestr(pi->pkt.pts, &pi->audio_stream->time_base),
-				av_ts2timestr(pi->pkt.duration, &pi->audio_stream->time_base));
-
-			printf("audio_frame%s n:%d nb_samples:%d pts:%s\n",
-				cached ? "(cached)" : "",
-				audio_frame_count++, pi->frame->nb_samples,
-				av_ts2timestr(pi->frame->pts, &pi->audio_stream->time_base));
-		}
+	}
+	else {
+		*got_audio_frame = 1;
 	}
 
-	return decoded;
+	if (*got_audio_frame && DEBUG) {
+		printf("packet dts:%s pts:%s duration:%s\n",
+			av_ts2timestr(pi->pkt.dts, &pi->audio_stream->time_base),
+			av_ts2timestr(pi->pkt.pts, &pi->audio_stream->time_base),
+			av_ts2timestr(pi->pkt.duration, &pi->audio_stream->time_base));
+
+		printf("audio_frame%s n:%d nb_samples:%d pts:%s\n",
+			cached ? "(cached)" : "",
+			audio_frame_count++, pi->frame->nb_samples,
+			av_ts2timestr(pi->frame->pts, &pi->audio_stream->time_base));
+	}
+
+	return 1;
 }
 
 static int video_frame_count = 0;
 /*
-* Decodes a video frame and returns the number of bytes consumed from the input packet,
-* or a negative error code (it is basically the result of avcodec_decode_audio4).
+* Same as decode_audio_packet, but for video.
 */
 static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cached)
 {
 	int ret = 0;
-	int decoded = pi->pkt.size; // to skip non-target stream packets, return the full packet size
 
 	*got_video_frame = 0;
 
-	if (pi->pkt.stream_index == pi->video_stream->index) {
-		/* decode audio frame */
-		ret = avcodec_decode_video2(pi->video_codec_ctx, pi->frame, got_video_frame, &pi->pkt);
-		if (ret < 0) {
-			fprintf(stderr, "Error decoding video frame (%s)\n", av_err2str(ret));
+	/* decode video frame */
+	ret = avcodec_receive_frame(pi->video_codec_ctx, pi->frame);
+	if (ret < 0) {
+		if (ret == AVERROR(EAGAIN)) {
+			// More input required
+			return 0;
+		}
+		else if (ret == AVERROR_EOF) {
+			// That's it, no more frames
+			if (DEBUG) fprintf(stderr, "Video frame EOF\n");
+			return 0;
+		}
+		else {
+			fprintf(stderr, "Error receiving decoded video frame (%s)\n", av_err2str(ret));
 			return ret;
 		}
-
-		if (*got_video_frame && DEBUG) {
-			printf("packet dts:%s pts:%s duration:%s\n",
-				av_ts2timestr(pi->pkt.dts, &pi->video_stream->time_base),
-				av_ts2timestr(pi->pkt.pts, &pi->video_stream->time_base),
-				av_ts2timestr(pi->pkt.duration, &pi->video_stream->time_base));
-
-			printf("video_frame%s n:%d coded_n:%d pts:%s\n",
-				cached ? "(cached)" : "",
-				video_frame_count++, pi->frame->coded_picture_number,
-				av_ts2timestr(pi->frame->pts, &pi->audio_stream->time_base));
-		}
+	}
+	else {
+		*got_video_frame = 1;
 	}
 
-	return decoded;
+	if (*got_video_frame && DEBUG) {
+		printf("packet dts:%s pts:%s duration:%s\n",
+			av_ts2timestr(pi->pkt.dts, &pi->video_stream->time_base),
+			av_ts2timestr(pi->pkt.pts, &pi->video_stream->time_base),
+			av_ts2timestr(pi->pkt.duration, &pi->video_stream->time_base));
+
+		printf("video_frame%s n:%d coded_n:%d pts:%s\n",
+			cached ? "(cached)" : "",
+			video_frame_count++, pi->frame->coded_picture_number,
+			av_ts2timestr(pi->frame->pts, &pi->video_stream->time_base));
+	}
+
+	return 1;
 }
 
 static int convert_audio_samples(ProxyInstance *pi) {
@@ -1027,7 +1108,8 @@ static int convert_video_frame(ProxyInstance *pi) {
 	 * The AVPicture could actually be completely omitted by passing an array  int linesize[1] = { rgbstride },
 	 * with e.g. rgbstride = 960 for a 320px wide picture. */
 	uint8_t *output_buffer_workaround = pi->output_buffer;
-	int ret = sws_scale(pi->sws, pi->frame->data, pi->frame->linesize, 0, pi->video_codec_ctx->height, &output_buffer_workaround, pi->video_picture.linesize);
+	int rgbstride[1] = { pi->frame->linesize[0] * 3 };
+	int ret = sws_scale(pi->sws, pi->frame->data, pi->frame->linesize, 0, pi->video_codec_ctx->height, &output_buffer_workaround, rgbstride);
 	if (ret < 0) {
 		fprintf(stderr, "Could not convert frame\n");
 	}
@@ -1038,7 +1120,7 @@ static int convert_video_frame(ProxyInstance *pi) {
 
 		for (int y = 0; y < pi->video_codec_ctx->height; y += pi->video_codec_ctx->height / 20) {
 			for (int x = 0; x < pi->video_codec_ctx->width; x += pi->video_codec_ctx->width / 64) {
-				printf("%c", QUANT_STEPS[(pi->output_buffer[y * pi->video_picture.linesize[0] + x * 3 /* blue channel */]) / 40]);
+				printf("%c", QUANT_STEPS[(pi->output_buffer[y * rgbstride[0] + x * 3 /* blue channel */]) / 40]);
 			}
 			printf("\n");
 		}

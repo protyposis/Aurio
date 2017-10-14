@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 
 REM This script automatically extracts the downloaded FFmpeg 7-zip archives and sets up the required folder structure
 
-SET version=ffmpeg-2.8.2
+SET version=ffmpeg-3.3.3
 SET platforms="win32" "win64"
 SET disttypes="dev" "shared"
 
@@ -39,7 +39,7 @@ SET filenotfound=0
 
 FOR %%p in (%platforms%) DO (
     FOR %%d in (%disttypes%) DO (
-        SET file=%version%-%%~p-%%~d.7z
+        SET file=%version%-%%~p-%%~d.zip
 
         REM echo without newline at end
         ECHO|SET /p=Checking !file!... 
@@ -71,7 +71,7 @@ FOR %%p in (%platforms%) DO (
         SET name=%version%-%%~p-%%~d
 
         REM extract archive without cmd output
-        %sevenzip% x -y !name!.7z >nul
+        %sevenzip% x -y !name!.zip >nul
 
         REM move necessary folders from extracted archive to target folder
         REM (not every archive contains every folder)
