@@ -124,8 +124,14 @@ namespace Aurio.Streams {
                 CommonUtil.Swap<Buffer>(ref frontBuffer, ref backBuffer);
                 FillBufferAsync(backBuffer, frontBuffer.streamPosition + frontBuffer.Length);
             } else {
-                // both buffers empty (happens at start or a position change beyond the buffered area)
+                // both buffers empty (happens at start or a position change beyond the buffered area, or at the end of the stream)
                 FillBufferSync(frontBuffer, position);
+
+                // If the buffer couldn't be filled with any data, the end of the stream is reached
+                if (frontBuffer.Empty) {
+                    return 0;
+                }
+
                 if (doubleBuffered && !backBuffer.locked) {
                     FillBufferAsync(backBuffer, frontBuffer.streamPosition + frontBuffer.Length);
                 }
