@@ -124,6 +124,12 @@ namespace Aurio.FFmpeg {
             }
         }
 
+        private void CheckAndHandleActiveInstance() {
+            if (disposed) {
+                throw new IOException("Cannot operate on a disposed stream");
+            }
+        }
+
         private void ReadOutputConfig() {
             if ((mode & Type.Audio) != 0) {
                 IntPtr ocp = InteropWrapper.stream_get_output_config(instance, Type.Audio);
@@ -147,6 +153,8 @@ namespace Aurio.FFmpeg {
         public int ReadFrame(out long timestamp, byte[] output_buffer, int output_buffer_size, out Type frameType) {
             int type;
 
+            CheckAndHandleActiveInstance();
+
             int ret = InteropWrapper.stream_read_frame(instance, out timestamp, output_buffer, output_buffer_size, out type);
             frameType = (Type)type;
 
@@ -154,14 +162,17 @@ namespace Aurio.FFmpeg {
         }
 
         public void Seek(long timestamp, Type type) {
+            CheckAndHandleActiveInstance();
             InteropWrapper.stream_seek(instance, timestamp, type);
         }
 
         public void CreateSeekIndex(Type type) {
+            CheckAndHandleActiveInstance();
             InteropWrapper.stream_seekindex_create(instance, type);
         }
 
         public void RemoveSeekIndex(Type type) {
+            CheckAndHandleActiveInstance();
             InteropWrapper.stream_seekindex_remove(instance, type);
         }
 
