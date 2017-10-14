@@ -62,7 +62,7 @@ namespace Aurio {
                 }
                 catch (FFmpegSourceStream.FileNotSeekableException) {
                     /* 
-                     * This exception gets thrown is a file is not seekable and therefore cannot
+                     * This exception gets thrown if a file is not seekable and therefore cannot
                      * provide all the functionality that is needed for an IAudioStream, although
                      * the problem could be solved by creating a seek index. See FFmpegSourceStream
                      * for further information.
