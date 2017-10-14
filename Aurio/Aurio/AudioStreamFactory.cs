@@ -86,15 +86,10 @@ namespace Aurio {
                     Console.WriteLine("File test seek failed, creating proxy file...");
                     return TryOpenSourceStream(FFmpegSourceStream.CreateWaveProxy(fileInfo));
                 }
-                catch (DllNotFoundException) {
-                    Console.WriteLine("Cannot open file through FFmpeg: DLL missing");
-                }
-                catch {
-                    // file probably unsupported
-                    Console.WriteLine("unsupported file format");
+                catch (DllNotFoundException e) {
+                    throw new DllNotFoundException("Cannot open file through FFmpeg: DLL missing", e);
                 }
             }
-            return null;
         }
 
         public static IAudioStream FromFileInfo(FileInfo fileInfo) {
@@ -124,7 +119,16 @@ namespace Aurio {
         /// <param name="fileName">the filename to check</param>
         /// <returns>true if the file is supported, else false</returns>
         public static bool IsSupportedFile(string fileName) {
-            return TryOpenSourceStream(new FileInfo(fileName)) != null;
+            try {
+                TryOpenSourceStream(new FileInfo(fileName));
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        public static void IsSupportedFileOrThrow(string fileName) {
+            TryOpenSourceStream(new FileInfo(fileName));
         }
 
         public static void WriteToFile(IAudioStream stream, string targetFileName) {
