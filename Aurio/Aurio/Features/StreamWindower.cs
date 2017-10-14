@@ -162,8 +162,7 @@ namespace Aurio.Features {
         /// <returns>true if there's a frame to read, false if the end of the stream has been reached</returns>
         public bool HasNext() {
             return (frameOffset + frameSize <= streamBufferLevel) || // either there's another frame in the buffer
-                frameSize <= ((streamBufferLevel - frameOffset) + // or the remaining buffer data plus the remaining stream data hold another frame
-                    (stream.Length - stream.Position));
+                FillBuffer(); // or we try to read the next frame and check if it succeeded
         }
 
         /// <summary>
@@ -202,6 +201,7 @@ namespace Aurio.Features {
             if (frameOffset + frameSize > streamBufferLevel) {
                 // if there's no more frame in the stream buffer, refill it
                 if (!FillBuffer()) {
+                    // This case only happens if HasNext() is not used to check if there actually is another frame
                     throw new Exception("end of stream reached - no more frames to read");
                 }
             }
