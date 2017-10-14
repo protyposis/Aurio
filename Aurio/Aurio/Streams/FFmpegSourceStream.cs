@@ -149,7 +149,7 @@ namespace Aurio.Streams {
 
                 if(Position != value) {
                     // When seeking fails by ending up at another position than the requested position, we create a seek index
-                    // to support the seeking process which takes some time but hopefully solved the problem. If this does not
+                    // to support the seeking process which takes some time but hopefully solves the problem. If this does not
                     // solve the problem and it happens again, we throw an exception because we cannot count on this stream.
                     if (!seekIndexCreated) {
                         reader.CreateSeekIndex(FFmpeg.Type.Audio);
