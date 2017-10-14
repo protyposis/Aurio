@@ -79,6 +79,8 @@
  */
 typedef struct ProxyInstance {
 	int					mode; // contains the desired packet types to decode
+	int					state;
+	char				*error_message; // in case of state == PI_STATE_ERROR
 	AVFormatContext		*fmt_ctx;
 	AVStream			*audio_stream;
 	AVStream			*video_stream;
@@ -128,6 +130,9 @@ typedef struct ProxyInstance {
 #define TYPE_AUDIO 0x01
 #define TYPE_VIDEO 0x02
 
+#define PI_STATE_OK 0
+#define PI_STATE_ERROR -1
+
 // function definitions
 EXPORT ProxyInstance *stream_open_file(int mode, char *filename);
 EXPORT ProxyInstance *stream_open_bufferedio(int mode, void *opaque, int(*read_packet)(void *opaque, uint8_t *buf, int buf_size), int64_t(*seek)(void *opaque, int64_t offset, int whence), char* filename);
@@ -139,9 +144,13 @@ EXPORT void stream_seek(ProxyInstance *pi, int64_t timestamp, int type);
 EXPORT void stream_seekindex_create(ProxyInstance *pi, int type);
 EXPORT void stream_seekindex_remove(ProxyInstance *pi, int type);
 EXPORT void stream_close(ProxyInstance *pi);
+EXPORT int stream_has_error(ProxyInstance *pi);
+EXPORT char* stream_get_error(ProxyInstance *pi);
 
 static void pi_init(ProxyInstance **pi);
 static void pi_free(ProxyInstance **pi);
+static void pi_set_error(ProxyInstance *pi, const char* fmt, ...);
+static int pi_has_error(ProxyInstance *pi);
 
 static void info(AVFormatContext *fmt_ctx);
 static int open_codec_context(AVFormatContext *fmt_ctx, int type);
@@ -208,6 +217,12 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 		pi = stream_open_bufferedio(mode, f, file_read_packet, file_seek, argv[1]);
+
+		if (stream_has_error(pi)) {
+			stream_get_error(pi);
+			stream_close(pi);
+			exit(1);
+		}
 	}
 	else { // file IO
 		pi = stream_open_file(mode, argv[1]);
@@ -304,8 +319,8 @@ ProxyInstance *stream_open_file(int mode, char *filename)
 	av_register_all();
 
 	if (avformat_open_input(&pi->fmt_ctx, filename, NULL, NULL) < 0) {
-		fprintf(stderr, "Could not open source file %s\n", filename);
-		exit(1);
+		pi_set_error(pi, "Could not open source file %s", filename);
+		return pi;
 	}
 
 	return stream_open(pi);
@@ -350,8 +365,8 @@ ProxyInstance *stream_open_bufferedio(int mode,
 	// NOTE format does not need to be probed manually, FFmpeg does the probing itself and does not crash anymore
 
 	if ((ret = avformat_open_input(&pi->fmt_ctx, filename, NULL, NULL)) < 0) {
-		fprintf(stderr, "Could not open source stream: %s\n", av_err2str(ret));
-		exit(1);
+		pi_set_error(pi, "Could not open source stream: %s", av_err2str(ret));
+		return pi;
 	}
 
 	// NOTE AVFMT_FLAG_CUSTOM_IO is automatically set by avformat_open_input, can be checked when closing the stream to free allocated resources
@@ -368,18 +383,18 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 	int ret;
 
 	if (pi->mode == TYPE_NONE) {
-		fprintf(stderr, "no mode specified");
-		exit(1);
+		pi_set_error(pi, "no mode specified");
+		return pi;
 	}
 
 	if (pi->fmt_ctx == NULL) {
-		fprintf(stderr, "AVFormatContext missing / not initialized");
-		exit(1);
+		pi_set_error(pi, "AVFormatContext missing / not initialized");
+		return pi;
 	}
 
 	if (avformat_find_stream_info(pi->fmt_ctx, NULL) < 0) {
-		fprintf(stderr, "Could not find stream information\n");
-		exit(1);
+		pi_set_error(pi, "Could not find stream information");
+		return pi;
 	}
 
 	//av_dump_format(pi->fmt_ctx, 0, filename, 0);
@@ -389,8 +404,8 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 	if (pi->mode & TYPE_AUDIO) {
 		// open audio stream
 		if ((ret = open_codec_context(pi->fmt_ctx, AVMEDIA_TYPE_AUDIO)) < 0) {
-			fprintf(stderr, "Cannot find audio stream\n");
-			exit(1);
+			pi_set_error(pi, "Cannot find audio stream");
+			return pi;
 		}
 
 		pi->audio_stream = pi->fmt_ctx->streams[ret];
@@ -456,8 +471,8 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 	if (pi->mode & TYPE_VIDEO) {
 		// open audio stream
 		if ((ret = open_codec_context(pi->fmt_ctx, AVMEDIA_TYPE_VIDEO)) < 0) {
-			fprintf(stderr, "Cannot find video stream\n");
-			exit(1);
+			pi_set_error(pi, "Cannot find video stream");
+			return pi;
 		}
 
 		pi->video_stream = pi->fmt_ctx->streams[ret];
@@ -468,8 +483,8 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 		pi->sws = sws_getContext(pi->video_codec_ctx->width, pi->video_codec_ctx->height, pi->video_codec_ctx->pix_fmt, 
 			pi->video_codec_ctx->width, pi->video_codec_ctx->height, AV_PIX_FMT_BGR24, SWS_BICUBIC, NULL, NULL, NULL);
 		if (pi->sws == NULL) {
-			fprintf(stderr, "error creating swscontext\n");
-			exit(1);
+			pi_set_error(pi, "error creating swscontext");
+			return pi;
 		}
 
 		/* set output properties */
@@ -824,6 +839,16 @@ void stream_close(ProxyInstance *pi)
 	pi_free(&pi);
 }
 
+int stream_has_error(ProxyInstance *pi)
+{
+	return pi_has_error(pi);
+}
+
+char* stream_get_error(ProxyInstance *pi)
+{
+	return pi->error_message;
+}
+
 /*
 * Initialize an instance data object to manage the decoding of audio.
 */
@@ -831,6 +856,8 @@ static void pi_init(ProxyInstance **pi) {
 	ProxyInstance *_pi;
 	*pi = _pi = malloc(sizeof(ProxyInstance));
 
+	_pi->state = PI_STATE_OK;
+	_pi->error_message = NULL;
 	_pi->fmt_ctx = NULL;
 	_pi->audio_stream = NULL;
 	_pi->video_stream = NULL;
@@ -854,7 +881,7 @@ static void pi_free(ProxyInstance **pi) {
 	stream_seekindex_remove(_pi, TYPE_AUDIO | TYPE_VIDEO);
 
 	/* close & free FFmpeg stuff */
-	if ((_pi->fmt_ctx->flags & AVFMT_FLAG_CUSTOM_IO) != 0) {
+	if (_pi->fmt_ctx != NULL && (_pi->fmt_ctx->flags & AVFMT_FLAG_CUSTOM_IO) != 0) {
 		// buffered stream IO mode
 		av_free(_pi->fmt_ctx->pb->buffer);
 		av_free(_pi->fmt_ctx->pb);
@@ -862,7 +889,6 @@ static void pi_free(ProxyInstance **pi) {
 	if (_pi->mode & TYPE_VIDEO) {
 		sws_freeContext(_pi->sws);
 	}
-	av_packet_unref(&_pi->pkt);
 	av_frame_free(&_pi->frame);
 	swr_free(&_pi->swr);
 	avcodec_close(_pi->audio_codec_ctx);
@@ -870,7 +896,35 @@ static void pi_free(ProxyInstance **pi) {
 	avformat_close_input(&_pi->fmt_ctx);
 
 	/* free instance data */
+	free(_pi->error_message);
 	free(_pi);
+}
+
+static void pi_set_error(ProxyInstance *pi, const char* fmt, ...)
+{
+	va_list args;
+	int error_message_length = 100;
+	char *error_message = malloc(error_message_length);
+
+	// Print the string with the argument list into the error message char array
+	va_start(args, fmt);
+	vsnprintf(error_message, error_message_length, fmt, args);
+	va_end(args);
+
+	// Set the proxy error state
+	pi->state = PI_STATE_ERROR;
+	pi->error_message = error_message;
+
+	// Also print error to error output
+	fprintf(stderr, "%s\n", pi->error_message);
+}
+
+static int pi_has_error(ProxyInstance *pi)
+{
+	if (pi->state == PI_STATE_ERROR) {
+		return 1;
+	}
+	return 0;
 }
 
 static void info(AVFormatContext *fmt_ctx)

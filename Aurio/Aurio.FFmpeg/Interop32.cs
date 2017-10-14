@@ -50,5 +50,11 @@ namespace Aurio.FFmpeg {
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
         public static extern void stream_close(IntPtr instance);
+        [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
+        public static extern bool stream_has_error(IntPtr instance);
+        [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
+        // We need to return the string pointer as pointer, because directly marshalling to string
+        // makes the CLR free the char memory afterwards which it should not do and crashes the program
+        public static extern IntPtr stream_get_error(IntPtr instance);
     }
 }

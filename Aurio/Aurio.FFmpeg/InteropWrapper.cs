@@ -48,6 +48,8 @@ namespace Aurio.FFmpeg {
         public delegate void d_stream_seekindex_create(IntPtr instance, Type type);
         public delegate void d_stream_seekindex_remove(IntPtr instance, Type type);
         public delegate void d_stream_close(IntPtr instance);
+        public delegate bool d_stream_has_error(IntPtr instance);
+        public delegate IntPtr d_stream_get_error(IntPtr instance);
 
         public static d_stream_open_file stream_open_file;
         public static d_stream_open_bufferedio stream_open_bufferedio;
@@ -57,6 +59,8 @@ namespace Aurio.FFmpeg {
         public static d_stream_seekindex_create stream_seekindex_create;
         public static d_stream_seekindex_remove stream_seekindex_remove;
         public static d_stream_close stream_close;
+        public static d_stream_has_error stream_has_error;
+        public static d_stream_get_error stream_get_error;
 
         static InteropWrapper() {
             if (Environment.Is64BitProcess) {
@@ -68,6 +72,8 @@ namespace Aurio.FFmpeg {
                 stream_seekindex_create = Interop64.stream_seekindex_create;
                 stream_seekindex_remove = Interop64.stream_seekindex_remove;
                 stream_close = Interop64.stream_close;
+                stream_has_error = Interop64.stream_has_error;
+                stream_get_error = Interop64.stream_get_error;
             }
             else {
                 stream_open_file = Interop32.stream_open_file;
@@ -78,6 +84,8 @@ namespace Aurio.FFmpeg {
                 stream_seekindex_create = Interop32.stream_seekindex_create;
                 stream_seekindex_remove = Interop32.stream_seekindex_remove;
                 stream_close = Interop32.stream_close;
+                stream_has_error = Interop32.stream_has_error;
+                stream_get_error = Interop32.stream_get_error;
             }
         }
     }

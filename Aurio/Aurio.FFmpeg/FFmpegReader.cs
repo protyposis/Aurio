@@ -47,8 +47,11 @@ namespace Aurio.FFmpeg {
         /// <param name="mode">the types of data to read</param>
         public FFmpegReader(string filename, Type mode) {
             this.filename = filename;
-            instance = InteropWrapper.stream_open_file(mode, filename);
             this.mode = mode;
+
+            instance = InteropWrapper.stream_open_file(mode, filename);
+
+            CheckAndHandleOpeningError();
 
             ReadOutputConfig();
         }
@@ -101,6 +104,8 @@ namespace Aurio.FFmpeg {
 
             instance = InteropWrapper.stream_open_bufferedio(mode, IntPtr.Zero, readPacketDelegate, seekDelegate, fileName);
 
+            CheckAndHandleOpeningError();
+
             ReadOutputConfig();
         }
 
@@ -111,6 +116,13 @@ namespace Aurio.FFmpeg {
         /// <param name="stream">the stream to decode</param>
         /// <param name="mode">the types of data to read</param>
         public FFmpegReader(Stream stream, Type mode) : this(stream, mode, null) { }
+
+        private void CheckAndHandleOpeningError() {
+            if (InteropWrapper.stream_has_error(instance)) {
+                string errorMessage = Marshal.PtrToStringAnsi(InteropWrapper.stream_get_error(instance));
+                throw new IOException("Error opening the FFmpeg stream: " + errorMessage);
+            }
+        }
 
         private void ReadOutputConfig() {
             if ((mode & Type.Audio) != 0) {
