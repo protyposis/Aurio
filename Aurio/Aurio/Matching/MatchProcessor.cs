@@ -303,6 +303,21 @@ namespace Aurio.Matching {
                 });
                 m2.Track2Time = targetTime;
                 // TODO alle anderen Matches die Track 2 betreffen anpassen
+
+        public static void ValidateMatches(List<MatchGroup> trackGroups) {
+            foreach (MatchGroup trackGroup in trackGroups) {
+                foreach (MatchPair trackPair in trackGroup.MatchPairs) {
+                    var timeWarpCollection = new TimeWarpCollection();
+
+                    // (By convention, we always warp the second track of a pair of tracks.)
+                    var timeWarps = GetTimeWarps(trackPair.Matches, trackPair.Track2);
+
+                    // Adding all warps to the collection triggers the validation.
+                    // This will validate the warps and throw an exception if something is wrong.
+                    timeWarpCollection.AddRange(timeWarps.Values);
+                }
+            }
+        }
             }
 
             // apply time warps to the track
