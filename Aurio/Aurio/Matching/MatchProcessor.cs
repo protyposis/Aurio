@@ -264,25 +264,33 @@ namespace Aurio.Matching {
             }
         }
 
-        public static AudioTrack TimeWarp(List<Match> matches, AudioTrack trackToWarp) {
+        /// <summary>
+        /// Calculates timewarps from the supplied list of matches and returns a dictionary that associates
+        /// each match with its resulting warp.
+        /// The list of warps can then be used to apply warping to a track, and the dictionary serves the purpose
+        /// that the matches can be updated with the warped times once warping has been applied.
+        /// </summary>
+        public static Dictionary<Match, TimeWarp> GetTimeWarps(List<Match> matches, AudioTrack trackToWarp) {
             if (matches.Count == 0) {
                 throw new ArgumentException("no matches to filter");
             }
             if (GetTracks(matches).Count != 2) {
                 throw new ArgumentException("matches must contain a single pair of affected tracks");
             }
+
+            var timeWarps = new Dictionary<Match, TimeWarp>();
+
             if (matches.Count < 2) {
                 // warping needs at least 2 matches that form a warped interval; nothing to do here
-                return trackToWarp;
+                return timeWarps;
             }
 
             AudioTrack track = trackToWarp;
-            List<TimeWarp> timeWarps = new List<TimeWarp>();
 
             if (track == matches[0].Track1) {
                 // since we always warp the second track and the requested track to warp is currently the
                 // first one, the matches need to be swapped
-                foreach(Match match in matches) {
+                foreach (Match match in matches) {
                     match.SwapTracks();
                 }
             }
@@ -290,19 +298,21 @@ namespace Aurio.Matching {
             // calculate time warps from track's matches
             Match m1 = matches[0];
             Match m2 = null;
-            timeWarps.Add(new TimeWarp() { // the start of the warping section
+            timeWarps.Add(m1, new TimeWarp() { // the start of the warping section
                 From = m1.Track2Time,
                 To = m1.Track2Time
             });
             for (int i = 1; i < matches.Count; i++) {
                 m2 = matches[i];
                 TimeSpan targetTime = m1.Track2Time + (m2.Track1Time - m1.Track1Time);
-                timeWarps.Add(new TimeWarp() {
+                timeWarps.Add(m2, new TimeWarp() {
                     From = m2.Track2Time,
                     To = targetTime
                 });
-                m2.Track2Time = targetTime;
-                // TODO alle anderen Matches die Track 2 betreffen anpassen
+            }
+
+            return timeWarps;
+        }
 
         public static void ValidateMatches(List<MatchGroup> trackGroups) {
             foreach (MatchGroup trackGroup in trackGroups) {
@@ -318,12 +328,24 @@ namespace Aurio.Matching {
                 }
             }
         }
+
+        public static AudioTrack TimeWarp(List<Match> matches, AudioTrack trackToWarp) {
+            var timeWarps = GetTimeWarps(matches, trackToWarp);
+
+            if (timeWarps.Count == 0) {
+                // warping needs at least 1 warp; nothing to do here
+                return trackToWarp;
             }
 
             // apply time warps to the track
-            track.TimeWarps.AddRange(timeWarps);
+            trackToWarp.TimeWarps.AddRange(timeWarps.Values);
 
-            return track;
+            // Update the matches to reflect the changes induced by warping
+            foreach (var entry in timeWarps) {
+                entry.Key.Track2Time = entry.Value.To;
+            }
+
+            return trackToWarp;
         }
 
         public static void AlignTracks(List<MatchPair> trackPairs) {
