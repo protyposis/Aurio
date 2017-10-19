@@ -38,6 +38,13 @@ Aurio.WaveControls provides WPF widgets for user interfaces:
 What's new
 ----------
 
+### 2017-10-15 14c7c92
+* FFmpeg updated to 3.3.3
+* `SurroundDownmixStream` for 4.0/5.1/7.1 to stereo downmixing
+* Validate matches before executing alignment and throw exception when an invalid match sequence is detected
+* Add progress callback to `FingerprintStore`s match finder
+* Various bug fixes
+
 ### 2017-02-06 3e703cd
 
 * `Complex` type
