@@ -68,11 +68,11 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avformat-57.dll $(OutDir)
-copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avcodec-57.dll $(OutDir)
-copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avutil-55.dll $(OutDir)
-copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\swresample-2.dll $(OutDir)
-copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\swscale-4.dll $(OutDir)</Command>
+      <Command>copy "$(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avformat-57.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avcodec-57.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avutil-55.dll" "$(OutDir)""
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win32\bin\swresample-2.dll" "$(OutDir)""
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win32\bin\swscale-4.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -94,11 +94,11 @@ copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\swscale-4.dll $(OutDir)</Command>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avformat-57.dll $(OutDir)
-copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avcodec-57.dll $(OutDir)
-copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avutil-55.dll $(OutDir)
-copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\swresample-2.dll $(OutDir)
-copy $(ProjectDir)\..\..\libs\ffmpeg\win32\bin\swscale-4.dll $(OutDir)</Command>
+      <Command>copy "$(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avformat-57.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avcodec-57.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win32\bin\avutil-55.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win32\bin\swresample-2.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win32\bin\swscale-4.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
