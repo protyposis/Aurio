@@ -38,7 +38,7 @@ Aurio.WaveControls provides WPF widgets for user interfaces:
 What's new
 ----------
 
-### 2017-02-06 5c34643
+### 2017-02-06 3e703cd
 
 * `Complex` type
 * Various `StreamWindower` `OutputFormat`s: `Raw`, `Magnitudes`, `MagnitudesSquared`, `MagnitudesAndPhases`, and `Decibel`
