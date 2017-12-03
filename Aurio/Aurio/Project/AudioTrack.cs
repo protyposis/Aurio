@@ -75,6 +75,10 @@ namespace Aurio.Project {
             : this(new FileInfo[] { fileInfo }, true) {
         }
 
+        public AudioTrack(IAudioStream stream, string name) : base(stream, name) {
+            sourceProperties = stream.Properties;
+        }
+
         public override MediaType MediaType {
             get { return MediaType.Audio; }
         }

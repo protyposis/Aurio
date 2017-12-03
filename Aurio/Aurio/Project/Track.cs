@@ -22,6 +22,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.ComponentModel;
+using Aurio.Streams;
 
 namespace Aurio.Project {
     public abstract class Track : INotifyPropertyChanged {
@@ -50,6 +51,11 @@ namespace Aurio.Project {
             
             this.FileInfos = fileInfos;
             this.Name = GenerateName();
+        }
+
+        public Track(IAudioStream stream, string name) {
+            this.Stream = stream;
+            this.Name = name;
         }
 
         protected string GenerateName() {
@@ -81,8 +87,14 @@ namespace Aurio.Project {
 
         public FileInfo[] FileInfos { get; private set; }
 
+        public IAudioStream Stream { get; private set; }
+
         public bool MultiFile {
             get { return FileInfos.Length > 1; }
+        }
+
+        public bool File {
+            get { return FileInfos != null && FileInfos.Length > 0; }
         }
 
         public string Name {
