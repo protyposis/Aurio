@@ -57,9 +57,12 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
         private float[] bandsPrev = new float[33];
 
         public void Generate() {
-            IAudioStream audioStream = new ResamplingStream(
-                new MonoStream(AudioStreamFactory.FromFileInfoIeee32(inputTrack.FileInfo)),
-                ResamplingQuality.Medium, profile.SampleRate);
+            IAudioStream audioStream = inputTrack.File ? 
+                AudioStreamFactory.FromFileInfoIeee32(inputTrack.FileInfo) : 
+                inputTrack.Stream;
+
+            audioStream = new MonoStream(audioStream);
+            audioStream = new ResamplingStream(audioStream, ResamplingQuality.Medium, profile.SampleRate);
 
             STFT stft = new STFT(audioStream, profile.FrameSize, profile.FrameStep, WindowType.Hann, STFT.OutputFormat.Decibel);
             index = 0;
