@@ -202,7 +202,7 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
             return new Fingerprint(store[entry.AudioTrack], entry.Index + indexOffset, fingerprintSize);
         }
 
-        private TimeSpan SubFingerprintIndexToTimeSpan(int index) {
+        public TimeSpan SubFingerprintIndexToTimeSpan(int index) {
             return new TimeSpan((long)Math.Round(index * profile.HashTimeScale * TimeUtil.SECS_TO_TICKS));
         }
     }
