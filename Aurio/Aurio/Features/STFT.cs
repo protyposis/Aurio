@@ -69,8 +69,8 @@ namespace Aurio.Features {
         /// <param name="fftSize">the FFT size, must be >= windowSize</param>
         /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="outputFormat">format of the output data, e.g. raw FFT complex numbers or dB spectrum</param>
-        public STFT(IAudioStream stream, int windowSize, int hopSize, int fftSize, WindowType windowType, OutputFormat outputFormat)
-            : base(stream, windowSize, hopSize, windowType) {
+        public STFT(IAudioStream stream, int windowSize, int hopSize, int fftSize, WindowType windowType, OutputFormat outputFormat, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
+            : base(stream, windowSize, hopSize, windowType, bufferSize) {
                 if(fftSize < windowSize) {
                     throw new ArgumentOutOfRangeException("fftSize must be >= windowSize");
                 }
@@ -89,8 +89,8 @@ namespace Aurio.Features {
         /// <param name="hopSize">the hop size in the dimension of samples</param>
         /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="outputFormat">format of the output data, e.g. raw FFT complex numbers or dB spectrum</param>
-        public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, OutputFormat outputFormat)
-            : this(stream, windowSize, hopSize, windowSize, windowType, outputFormat) {
+        public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, OutputFormat outputFormat, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
+            : this(stream, windowSize, hopSize, windowSize, windowType, outputFormat, bufferSize) {
         }
 
         public override void ReadFrame(float[] fftResult) {

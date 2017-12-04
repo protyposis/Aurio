@@ -41,15 +41,17 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
 
         private int flipWeakestBits;
         private readonly int eventInterval;
+        private readonly int bufferSize;
 
         public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
         public event EventHandler Completed;
 
-        public FingerprintGenerator(Profile profile, AudioTrack track, int eventInterval = 512) {
+        public FingerprintGenerator(Profile profile, AudioTrack track, int eventInterval = 512, int bufferSize = StreamWindower.DEFAULT_STREAM_INPUT_BUFFER_SIZE) {
             this.inputTrack = track;
             this.profile = profile;
             this.flipWeakestBits = profile.FlipWeakestBits;
             this.eventInterval = eventInterval;
+            this.bufferSize = bufferSize;
         }
 
         private int index;
@@ -66,7 +68,7 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
             audioStream = new MonoStream(audioStream);
             audioStream = new ResamplingStream(audioStream, ResamplingQuality.Medium, profile.SampleRate);
 
-            STFT stft = new STFT(audioStream, profile.FrameSize, profile.FrameStep, WindowType.Hann, STFT.OutputFormat.Decibel);
+            STFT stft = new STFT(audioStream, profile.FrameSize, profile.FrameStep, WindowType.Hann, STFT.OutputFormat.Decibel, this.bufferSize);
             index = 0;
             indices = stft.WindowCount;
 
