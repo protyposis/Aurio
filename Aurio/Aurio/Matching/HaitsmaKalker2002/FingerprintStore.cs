@@ -214,7 +214,6 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
             }
 
             var matches = new List<Match>();
-            var externalAudioTrackDummy = new AudioTrack(new NullStream(new AudioProperties(1, 1, 16, AudioFormat.IEEE), 0), "external");
 
             for (int i = 0; i < hashes.Count; i++) {
                 try {
