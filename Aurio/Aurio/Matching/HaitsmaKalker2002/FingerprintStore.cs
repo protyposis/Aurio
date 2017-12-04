@@ -238,7 +238,7 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
                         throw new Exception("invalid fingerprint size");
                     }
 
-                    Fingerprint externalFingerprint = new Fingerprint(hashes, externalFingerprintBeginIndex, externalFingerprintEndIndex);
+                    Fingerprint externalFingerprint = new Fingerprint(hashes, externalFingerprintBeginIndex, this.fingerprintSize);
                     // TODO sync with external fingerprint, they cannot match at the right border as they use 
                     // the same overflow avoidance technique, but independently
                     Fingerprint internalFingerprint = GetFingerprint(collision);
