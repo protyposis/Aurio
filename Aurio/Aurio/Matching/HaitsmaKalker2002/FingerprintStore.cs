@@ -216,52 +216,45 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
             var matches = new List<Match>();
 
             for (int i = 0; i < hashes.Count; i++) {
-                try {
-                    List<SubFingerprintLookupEntry> collisions = this.collisionMap.GetValues(hashes[i]);
+                List<SubFingerprintLookupEntry> collisions = this.collisionMap.GetValues(hashes[i]);
 
-                    foreach (var collision in collisions) {
-                        // We build fingerprints by starting with the current hash and adding the required number
-                        // of following hashes
-                        int externalFingerprintBeginIndex = i;
-                        int externalFingerprintEndIndex = externalFingerprintBeginIndex + this.fingerprintSize;
+                foreach (var collision in collisions) {
+                    // We build fingerprints by starting with the current hash and adding the required number
+                    // of following hashes
+                    int externalFingerprintBeginIndex = i;
+                    int externalFingerprintEndIndex = externalFingerprintBeginIndex + this.fingerprintSize;
 
-                        // When we arrive at the right edge of the hash list, we need to shift the fingerprint
-                        // to the left to stay within the hash list
-                        // TODO detect and skip duplicate fingerprint comparisons
-                        if (externalFingerprintEndIndex > hashes.Count - 1) {
-                            int overflow = externalFingerprintEndIndex - (hashes.Count - 1);
-                            externalFingerprintBeginIndex -= overflow;
-                            externalFingerprintEndIndex -= overflow;
-                        }
-
-                        // TODO This check is just for development and should be removed once this code is stable
-                        if (externalFingerprintEndIndex - externalFingerprintBeginIndex != this.fingerprintSize) {
-                            throw new Exception("invalid fingerprint size");
-                        }
-
-                        Fingerprint externalFingerprint = new Fingerprint(hashes, externalFingerprintBeginIndex, externalFingerprintEndIndex);
-                        // TODO sync with external fingerprint, they cannot match at the right border as they use 
-                        // the same overflow avoidance technique, but independently
-                        Fingerprint internalFingerprint = GetFingerprint(collision);
-
-                        float bitErrorRate = Fingerprint.CalculateBER(externalFingerprint, internalFingerprint);
-
-                        if (bitErrorRate < threshold) {
-                            matches.Add(new Match {
-                                Similarity = 1 - bitErrorRate,
-                                Track1 = collision.AudioTrack,
-                                Track1Time = SubFingerprintIndexToTimeSpan(collision.Index),
-                                Track2 = audioTrack,
-                                Track2Time = SubFingerprintIndexToTimeSpan(externalFingerprintBeginIndex),
-                                Source = matchSourceName,
-                            });
-                        }
+                    // When we arrive at the right edge of the hash list, we need to shift the fingerprint
+                    // to the left to stay within the hash list
+                    // TODO detect and skip duplicate fingerprint comparisons
+                    if (externalFingerprintEndIndex > hashes.Count - 1) {
+                        int overflow = externalFingerprintEndIndex - (hashes.Count - 1);
+                        externalFingerprintBeginIndex -= overflow;
+                        externalFingerprintEndIndex -= overflow;
                     }
 
-                }
-                catch {
-                    // Skip non-colliding hashes
-                    // TODO avoid try/catch because that takes a lot of time
+                    // TODO This check is just for development and should be removed once this code is stable
+                    if (externalFingerprintEndIndex - externalFingerprintBeginIndex != this.fingerprintSize) {
+                        throw new Exception("invalid fingerprint size");
+                    }
+
+                    Fingerprint externalFingerprint = new Fingerprint(hashes, externalFingerprintBeginIndex, externalFingerprintEndIndex);
+                    // TODO sync with external fingerprint, they cannot match at the right border as they use 
+                    // the same overflow avoidance technique, but independently
+                    Fingerprint internalFingerprint = GetFingerprint(collision);
+
+                    float bitErrorRate = Fingerprint.CalculateBER(externalFingerprint, internalFingerprint);
+
+                    if (bitErrorRate < threshold) {
+                        matches.Add(new Match {
+                            Similarity = 1 - bitErrorRate,
+                            Track1 = collision.AudioTrack,
+                            Track1Time = SubFingerprintIndexToTimeSpan(collision.Index),
+                            Track2 = audioTrack,
+                            Track2Time = SubFingerprintIndexToTimeSpan(externalFingerprintBeginIndex),
+                            Source = matchSourceName,
+                        });
+                    }
                 }
             }
 
