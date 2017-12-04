@@ -222,20 +222,13 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
                     // We build fingerprints by starting with the current hash and adding the required number
                     // of following hashes
                     int externalFingerprintBeginIndex = i;
-                    int externalFingerprintEndIndex = externalFingerprintBeginIndex + this.fingerprintSize;
 
                     // When we arrive at the right edge of the hash list, we need to shift the fingerprint
                     // to the left to stay within the hash list
                     // TODO detect and skip duplicate fingerprint comparisons
-                    if (externalFingerprintEndIndex > hashes.Count - 1) {
-                        int overflow = externalFingerprintEndIndex - (hashes.Count - 1);
+                    if (hashes.Count - externalFingerprintBeginIndex < this.fingerprintSize) {
+                        int overflow = this.fingerprintSize - (hashes.Count - externalFingerprintBeginIndex);
                         externalFingerprintBeginIndex -= overflow;
-                        externalFingerprintEndIndex -= overflow;
-                    }
-
-                    // TODO This check is just for development and should be removed once this code is stable
-                    if (externalFingerprintEndIndex - externalFingerprintBeginIndex != this.fingerprintSize) {
-                        throw new Exception("invalid fingerprint size");
                     }
 
                     Fingerprint externalFingerprint = new Fingerprint(hashes, externalFingerprintBeginIndex, this.fingerprintSize);
