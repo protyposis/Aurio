@@ -40,14 +40,16 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
         private Profile profile;
 
         private int flipWeakestBits;
+        private readonly int eventInterval;
 
         public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
         public event EventHandler Completed;
 
-        public FingerprintGenerator(Profile profile, AudioTrack track) {
+        public FingerprintGenerator(Profile profile, AudioTrack track, int eventInterval = 512) {
             this.inputTrack = track;
             this.profile = profile;
             this.flipWeakestBits = profile.FlipWeakestBits;
+            this.eventInterval = eventInterval;
         }
 
         private int index;
@@ -84,7 +86,7 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
                 index++;
 
                 // Output subfingerprints every once in a while
-                if (index % 512 == 0 && SubFingerprintsGenerated != null) {
+                if (index % this.eventInterval == 0 && SubFingerprintsGenerated != null) {
                     SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, subFingerprints, index, indices));
                     subFingerprints.Clear();
                 }
