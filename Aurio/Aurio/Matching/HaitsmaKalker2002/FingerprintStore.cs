@@ -80,6 +80,10 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
             }
         }
 
+        public TimeSpan FingerprintDuration {
+            get { return SubFingerprintIndexToTimeSpan(fingerprintSize); }
+        }
+
         public IFingerprintCollisionMap CollisionMap {
             get { return collisionMap; }
         }
