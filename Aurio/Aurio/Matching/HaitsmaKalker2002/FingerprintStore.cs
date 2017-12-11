@@ -92,7 +92,7 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
             get { return store; }
         }
 
-        public void Add(SubFingerprintsGeneratedEventArgs e) {
+        public void Add(SubFingerprintsGeneratedEventArgs e, bool suppressSilentCollisions = false) {
             if (e.SubFingerprints.Count == 0) {
                 return;
             }
@@ -106,6 +106,12 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
                     if (!sfp.IsVariation) {
                         // store the sub-fingerprint in the sequential list of the audio track
                         store[e.AudioTrack].Add(sfp.Hash);
+                    }
+
+                    if (suppressSilentCollisions && sfp.Hash.Value == 0)
+                    {
+                        // Skip a silent hash, i.e. a hash without any changes, as it happens with silent signals as input
+                        continue;
                     }
 
                     // insert a track/index lookup entry for the sub-fingerprint
