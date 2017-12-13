@@ -224,42 +224,80 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
             }
 
             var matches = new List<Match>();
+            int collisionCount = 0;
 
             for (int i = 0; i < hashes.Count; i++) {
                 List<SubFingerprintLookupEntry> collisions = this.collisionMap.GetValues(hashes[i]);
 
                 foreach (var collision in collisions) {
-                    // We build fingerprints by starting with the current hash and adding the required number
-                    // of following hashes
-                    int externalFingerprintBeginIndex = i;
+                    collisionCount++;
 
-                    // When we arrive at the right edge of the hash list, we need to shift the fingerprint
-                    // to the left to stay within the hash list
-                    // TODO detect and skip duplicate fingerprint comparisons
-                    if (hashes.Count - externalFingerprintBeginIndex < this.fingerprintSize) {
-                        int overflow = this.fingerprintSize - (hashes.Count - externalFingerprintBeginIndex);
-                        externalFingerprintBeginIndex -= overflow;
+                    // The indices at which the fingerprints begin within the hash lists
+                    int externalIndex = i;
+                    int internalIndex = collision.Index;
+
+                    // The hash lists
+                    var externalHashes = hashes;
+                    var internalHashes = store[collision.AudioTrack];
+
+                    // The lengths of the hash lists (the number of subfingerprints/hashes)
+                    int externalHashCount = externalHashes.Count;
+                    int internalHashCount = internalHashes.Count;
+
+                    // The overflow if directly taken at the indices
+                    int externalOverflow = this.fingerprintSize - (externalHashCount - externalIndex);
+                    int internalOverflow = this.fingerprintSize - (internalHashCount - internalIndex);
+
+                    // The bigger of both overflows is the value by which we need to shift the sampling to the left
+                    int leftShift = Math.Max(externalOverflow, internalOverflow);
+
+                    // Check if we need to do a shift
+                    // If the left shift is > 0, we need to shift the fingerprints to the left
+                    // if the shift is <= 0, the fingerprints can be directly sampled from the hash lists 
+                    // (the negative value is their distance to the right border)
+                    if (leftShift > 0) {
+                        // We need to shift the fingerprints to the left because one or both would otherwise overflow the right border
+                        externalIndex -= leftShift;
+                        internalIndex -= leftShift;
+
+                        // Before we take the fingerprints, we need to check if that is even possible or if a fingerprint 
+                        // would then overflow the left border
+                        if (externalIndex < 0 || internalIndex < 0) {
+                            // A fingerprint would now overflow the left border, so for this collision it is not possible
+                            // to take fingerprints that we can compare
+                            // Skip to the next collision
+                            continue;
+                        }
                     }
 
-                    Fingerprint externalFingerprint = new Fingerprint(hashes, externalFingerprintBeginIndex, this.fingerprintSize);
-                    // TODO sync with external fingerprint, they cannot match at the right border as they use 
-                    // the same overflow avoidance technique, but independently
-                    Fingerprint internalFingerprint = GetFingerprint(collision);
+                    // TODO detect duplicate matching attempts and skip them to minimize matching cost
+                    // A matching attempt can be described as the tuple (internalAudioTrack, externalIndex, internalIndex)
 
+                    // Take the fingerprints that we want to compare
+                    Fingerprint externalFingerprint = new Fingerprint(externalHashes, externalIndex, this.fingerprintSize);
+                    // We don't use GetFingerprint here because that functions shifts the fingerprint left for an unknown offset
+                    // if taken at the right border
+                    Fingerprint internalFingerprint = new Fingerprint(internalHashes, internalIndex, this.fingerprintSize);
+
+                    // Calculate the bit error rate between both fingerprints
                     float bitErrorRate = Fingerprint.CalculateBER(externalFingerprint, internalFingerprint);
+
+                    Console.WriteLine(String.Format("{0} <> {1} => {2}", externalFingerprint.Index, internalFingerprint.Index, bitErrorRate));
 
                     if (bitErrorRate < threshold) {
                         matches.Add(new Match {
                             Similarity = 1 - bitErrorRate,
                             Track1 = collision.AudioTrack,
-                            Track1Time = SubFingerprintIndexToTimeSpan(collision.Index),
+                            Track1Time = SubFingerprintIndexToTimeSpan(internalIndex),
                             Track2 = audioTrack,
-                            Track2Time = SubFingerprintIndexToTimeSpan(externalFingerprintBeginIndex),
+                            Track2Time = SubFingerprintIndexToTimeSpan(externalIndex),
                             Source = matchSourceName,
                         });
                     }
                 }
             }
+
+            Console.WriteLine(String.Format("{0} collisions, {1} matches", collisionCount, matches.Count));
 
             return matches;
         }
