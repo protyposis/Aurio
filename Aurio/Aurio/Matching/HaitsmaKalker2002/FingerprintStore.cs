@@ -282,7 +282,7 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
                     // Calculate the bit error rate between both fingerprints
                     float bitErrorRate = Fingerprint.CalculateBER(externalFingerprint, internalFingerprint);
 
-                    Console.WriteLine(String.Format("{0} <> {1} => {2}", externalFingerprint.Index, internalFingerprint.Index, bitErrorRate));
+                    Console.WriteLine(String.Format("{0} <> {1} => {2}", externalIndex, internalIndex, bitErrorRate));
 
                     if (bitErrorRate < threshold) {
                         matches.Add(new Match {
