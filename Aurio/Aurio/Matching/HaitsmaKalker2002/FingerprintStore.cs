@@ -275,7 +275,7 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
 
                     // Take the fingerprints that we want to compare
                     Fingerprint externalFingerprint = new Fingerprint(externalHashes, externalIndex, this.fingerprintSize);
-                    // We don't use GetFingerprint here because that functions shifts the fingerprint left for an unknown offset
+                    // We don't use GetFingerprint here because that function shifts the fingerprint left for an unknown offset
                     // if taken at the right border
                     Fingerprint internalFingerprint = new Fingerprint(internalHashes, internalIndex, this.fingerprintSize);
 
