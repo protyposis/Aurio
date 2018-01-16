@@ -78,6 +78,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.Test.FingerprintingBe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.FFT", "Aurio.FFT\Aurio.FFT.csproj", "{87B62E89-2714-4CE9-948B-82FDEEB39ED1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.Exocortex", "Aurio.Exocortex\Aurio.Exocortex.csproj", "{07E29736-D056-4F4A-BCDA-FC12709AFAFA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -324,6 +326,18 @@ Global
 		{87B62E89-2714-4CE9-948B-82FDEEB39ED1}.Release|x64.Build.0 = Release|Any CPU
 		{87B62E89-2714-4CE9-948B-82FDEEB39ED1}.Release|x86.ActiveCfg = Release|Any CPU
 		{87B62E89-2714-4CE9-948B-82FDEEB39ED1}.Release|x86.Build.0 = Release|Any CPU
+		{07E29736-D056-4F4A-BCDA-FC12709AFAFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07E29736-D056-4F4A-BCDA-FC12709AFAFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07E29736-D056-4F4A-BCDA-FC12709AFAFA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{07E29736-D056-4F4A-BCDA-FC12709AFAFA}.Debug|x64.Build.0 = Debug|Any CPU
+		{07E29736-D056-4F4A-BCDA-FC12709AFAFA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{07E29736-D056-4F4A-BCDA-FC12709AFAFA}.Debug|x86.Build.0 = Debug|Any CPU
+		{07E29736-D056-4F4A-BCDA-FC12709AFAFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07E29736-D056-4F4A-BCDA-FC12709AFAFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07E29736-D056-4F4A-BCDA-FC12709AFAFA}.Release|x64.ActiveCfg = Release|Any CPU
+		{07E29736-D056-4F4A-BCDA-FC12709AFAFA}.Release|x64.Build.0 = Release|Any CPU
+		{07E29736-D056-4F4A-BCDA-FC12709AFAFA}.Release|x86.ActiveCfg = Release|Any CPU
+		{07E29736-D056-4F4A-BCDA-FC12709AFAFA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
