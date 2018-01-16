@@ -275,9 +275,9 @@
       <Project>{8a1a603c-7005-4cc0-9ab7-e6fd3f58f621}</Project>
       <Name>Aurio.FFmpeg</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Aurio.PFFFT\Aurio.PFFFT.csproj">
-      <Project>{3960f81d-5aea-4f36-a26c-f295dff3fcb6}</Project>
-      <Name>Aurio.PFFFT</Name>
+    <ProjectReference Include="..\Aurio.FFT\Aurio.FFT.csproj">
+      <Project>{87b62e89-2714-4ce9-948b-82fdeeb39ed1}</Project>
+      <Name>Aurio.FFT</Name>
     </ProjectReference>
     <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj">
       <Project>{24228071-5e72-4ba8-90e3-89de331a718c}</Project>
