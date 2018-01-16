@@ -24,6 +24,7 @@ using Aurio.Project;
 using Aurio.Streams;
 using Aurio;
 using System.IO;
+using Aurio.Resampler;
 
 namespace Aurio.Features.ContinuousFrequencyActivation {
     /// <summary>

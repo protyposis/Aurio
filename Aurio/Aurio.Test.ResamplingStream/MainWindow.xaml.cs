@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Aurio.Resampler;
 using Aurio.Streams;
 using NAudio.Wave;
 
@@ -12,6 +13,7 @@ namespace Aurio.Test.ResamplingStream {
         WasapiOut audioOutput;
 
         public MainWindow() {
+            ResamplerFactory.Factory = new Soxr.ResamplerFactory();
             InitializeComponent();
         }
 

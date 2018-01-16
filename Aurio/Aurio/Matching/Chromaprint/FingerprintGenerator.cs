@@ -19,6 +19,7 @@
 using Aurio.DataStructures;
 using Aurio.Features;
 using Aurio.Project;
+using Aurio.Resampler;
 using Aurio.Streams;
 using System;
 using System.Collections.Generic;

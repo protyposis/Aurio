@@ -26,6 +26,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Aurio.Features;
+using Aurio.Resampler;
 
 namespace Aurio.Matching.HaitsmaKalker2002 {
     /// <summary>
