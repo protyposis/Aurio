@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Aurio.FFT;
 using Aurio.Streams;
 
 namespace Aurio.Features {
@@ -30,7 +31,7 @@ namespace Aurio.Features {
     public class InverseSTFT : OLA {
 
         private float[] frameBuffer;
-        private PFFFT.PFFFT fft;
+        private IFFT fft;
         private WindowFunction synthesisWindow;
 
         public InverseSTFT(IAudioWriterStream stream, int windowSize, int hopSize, int fftSize, WindowType windowType, float windowNormalizationFactor) 
@@ -39,7 +40,7 @@ namespace Aurio.Features {
                 throw new ArgumentOutOfRangeException("fftSize must be >= windowSize");
             }
             frameBuffer = new float[fftSize];
-            fft = new PFFFT.PFFFT(fftSize, PFFFT.Transform.Real);
+            fft = FFTFactory.CreateInstance(fftSize);
             synthesisWindow = WindowUtil.GetFunction(windowType, windowSize, windowNormalizationFactor);
         }
 

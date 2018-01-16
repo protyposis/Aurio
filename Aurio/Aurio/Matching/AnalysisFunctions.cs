@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using Aurio.FFT;
 
 namespace Aurio.Matching {
     public class AnalysisFunctions {
@@ -110,7 +111,7 @@ namespace Aurio.Matching {
                 windowFunction = WindowUtil.GetFunction(WindowType.Hann, fftSize);
             }
 
-            var fft = new PFFFT.PFFFT(fftSize, PFFFT.Transform.Real);
+            var fft = FFTFactory.CreateInstance(fftSize);
 
             int blocks = (samples - fftSize) / hopSize;
             for (int block = 0; block < blocks; block++) {
@@ -138,7 +139,7 @@ namespace Aurio.Matching {
             return 1 - result;
         }
 
-        private static void FrequencyDistributionBlockProcess(float[] buffer, double[] target, PFFFT.PFFFT fft) {
+        private static void FrequencyDistributionBlockProcess(float[] buffer, double[] target, IFFT fft) {
             windowFunction.Apply(buffer);
             fft.Forward(buffer);
             for (int i = 0; i < buffer.Length; i += 2) {

@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Aurio.FFT;
 using Aurio.Streams;
 
 namespace Aurio.Features {
@@ -56,7 +57,7 @@ namespace Aurio.Features {
 
         private float[] frameBuffer;
         private float[] fftBuffer;
-        private PFFFT.PFFFT fft;
+        private IFFT fft;
         private OutputFormat outputFormat;
 
         /// <summary>
@@ -77,7 +78,7 @@ namespace Aurio.Features {
                 frameBuffer = new float[fftSize];
                 fftBuffer = new float[fftSize];
                 Array.Clear(frameBuffer, 0, frameBuffer.Length); // init with zeros (assure zero padding)
-                fft = new PFFFT.PFFFT(fftSize, PFFFT.Transform.Real);
+                fft = FFTFactory.CreateInstance(fftSize);
                 this.outputFormat = outputFormat;
         }
 

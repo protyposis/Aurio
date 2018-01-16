@@ -22,6 +22,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using Aurio.Streams;
+using Aurio.FFT;
 
 namespace Aurio {
     public class FFTAnalyzer {
@@ -34,12 +35,12 @@ namespace Aurio {
         private int inputBufferFillLevel;
         private float[] outputBuffer;
         private WindowFunction windowFunction;
-        private PFFFT.PFFFT fft;
+        private IFFT fft;
         private float windowFunctionNormalizationDecibelOffset;
 
         public FFTAnalyzer(int windowSize) {
             WindowSize = windowSize;
-            fft = new PFFFT.PFFFT(windowSize, PFFFT.Transform.Real);
+            fft = FFTFactory.CreateInstance(windowSize);
             windowFunctionNormalizationDecibelOffset = 0;
         }
 
