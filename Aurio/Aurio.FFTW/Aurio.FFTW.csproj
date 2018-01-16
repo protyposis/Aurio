@@ -106,6 +106,8 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="FFT.cs" />
+    <Compile Include="FFTFactory.cs" />
     <Compile Include="Interop64Wrapper.cs" />
     <Compile Include="Interop64.cs" />
     <Compile Include="FFTW.cs" />
@@ -128,6 +130,12 @@
     <None Include="..\Aurio.licenseheader">
       <Link>Aurio.licenseheader</Link>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aurio.FFT\Aurio.FFT.csproj">
+      <Project>{87b62e89-2714-4ce9-948b-82fdeeb39ed1}</Project>
+      <Name>Aurio.FFT</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
