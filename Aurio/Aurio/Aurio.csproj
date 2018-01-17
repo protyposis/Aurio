@@ -213,6 +213,7 @@
     <Compile Include="Project\VideoTrack.cs" />
     <Compile Include="Resampler\NAudioWdlResampler.cs" />
     <Compile Include="Resampler\NAudioWdlResamplerFactory.cs" />
+    <Compile Include="Resampler\NAudioWdlResamplerWrapper.cs" />
     <Compile Include="Streams\AbstractAudioStreamWrapper.cs" />
     <Compile Include="Streams\AudioFormat.cs" />
     <Compile Include="Streams\AudioProperties.cs" />
