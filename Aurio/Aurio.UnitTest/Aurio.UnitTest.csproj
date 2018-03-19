@@ -143,6 +143,10 @@
     <Compile Include="VolumeUtilTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Aurio.Resampler\Aurio.Resampler.csproj">
+      <Project>{90745e89-6c81-4372-8369-73269a168a83}</Project>
+      <Name>Aurio.Resampler</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Aurio\Aurio.csproj">
       <Project>{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}</Project>
       <Name>Aurio</Name>
