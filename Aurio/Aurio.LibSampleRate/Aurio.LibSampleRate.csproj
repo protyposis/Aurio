@@ -124,6 +124,8 @@
     <Compile Include="Interop32.cs" />
     <Compile Include="Interop64Wrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resampler.cs" />
+    <Compile Include="ResamplerFactory.cs" />
     <Compile Include="SampleRateConverter.cs" />
     <Compile Include="SrcData.cs" />
   </ItemGroup>
@@ -141,6 +143,12 @@
     <None Include="..\Aurio.licenseheader">
       <Link>Aurio.licenseheader</Link>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aurio.Resampler\Aurio.Resampler.csproj">
+      <Project>{90745e89-6c81-4372-8369-73269a168a83}</Project>
+      <Name>Aurio.Resampler</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
