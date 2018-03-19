@@ -21,14 +21,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-using Aurio.Soxr;
+using Aurio.Resampler;
 using Aurio.DataStructures;
+using System.Runtime.CompilerServices;
 
 namespace Aurio.Streams {
     public class ResamplingStream : AbstractAudioStreamWrapper {
 
         private ResamplingQuality quality;
-        private SoxResampler soxr;
+        private IResampler resampler;
         private AudioProperties properties;
         private ByteBuffer sourceBuffer;
         private double targetSampleRate;
@@ -45,10 +46,10 @@ namespace Aurio.Streams {
                 sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
 
             this.quality = quality;
-            SetupResampler();
 
             sourceBuffer = new ByteBuffer();
 
+            // This implicitly calls SetupResampler
             TargetSampleRate = properties.SampleRate;
 
             position = 0;
@@ -65,38 +66,11 @@ namespace Aurio.Streams {
         }
 
         private void SetupResampler() {
-            if (soxr != null) {
-                soxr.Dispose(); // delete previous resampler instance
+            if (resampler != null) {
+                resampler.Dispose(); // delete previous resampler instance
             }
 
-            Soxr.QualityRecipe qr = QualityRecipe.SOXR_HQ;
-            Soxr.QualityFlags qf = QualityFlags.SOXR_ROLLOFF_SMALL;
-
-            switch (quality) {
-                case ResamplingQuality.VeryLow:
-                    qr = QualityRecipe.SOXR_QQ; break;
-                case ResamplingQuality.Low:
-                    qr = QualityRecipe.SOXR_LQ; break;
-                case ResamplingQuality.Medium:
-                    qr = QualityRecipe.SOXR_MQ; break;
-                case ResamplingQuality.High:
-                    qr = QualityRecipe.SOXR_HQ; break;
-                case ResamplingQuality.VeryHigh:
-                    qr = QualityRecipe.SOXR_VHQ; break;
-                case ResamplingQuality.VariableRate:
-                    qr = QualityRecipe.SOXR_HQ; qf = QualityFlags.SOXR_VR; break;
-            }
-
-            double inputRate = sourceStream.Properties.SampleRate;
-            double outputRate = properties.SampleRate;
-
-            if (qf == QualityFlags.SOXR_VR) {
-                // set max variable rate
-                inputRate = 10.0;
-                outputRate = 1.0;
-            }
-
-            soxr = new SoxResampler(inputRate, outputRate, properties.Channels, qr, qf);
+            resampler = ResamplerFactory.CreateInstance(quality, properties.Channels, SampleRateRatio);
         }
 
         public double TargetSampleRate {
@@ -106,8 +80,8 @@ namespace Aurio.Streams {
                 sampleRateRatio = value / sourceStream.Properties.SampleRate;
                 properties.SampleRate = (int)targetSampleRate;
 
-                if (soxr.VariableRate) {
-                    soxr.SetRatio(sampleRateRatio, 0);
+                if (resampler != null && resampler.VariableRate) {
+                    resampler.SetRatio(sampleRateRatio, 0);
                 }
                 else {
                     SetupResampler();
@@ -121,7 +95,7 @@ namespace Aurio.Streams {
         }
 
         public int BufferedBytes {
-            get { return (int)soxr.GetOutputDelay(); }
+            get { return (int)resampler.GetOutputDelay(); }
         }
 
         public override AudioProperties Properties {
@@ -142,9 +116,9 @@ namespace Aurio.Streams {
                 long pos = (long)Math.Ceiling(value / sampleRateRatio);
                 pos -= pos % sourceStream.SampleBlockSize;
                 sourceStream.Position = pos;
-                if (soxr.VariableRate) {
-                    soxr.Clear(); // clear buffered data in soxr
-                    soxr.SetRatio(sampleRateRatio, 0); // re-init soxr instance
+                if (resampler.VariableRate) {
+                    resampler.Clear(); // clear buffered data in soxr
+                    resampler.SetRatio(sampleRateRatio, 0); // re-init soxr instance
                 }
                 else {
                     SetupResampler();
@@ -185,7 +159,7 @@ namespace Aurio.Streams {
                 // this is also the reason why the source stream's Read() method may be called multiple times although
                 // it already signalled that it has reached the end of the stream
                 endOfStream = sourceStream.Position >= sourceStream.Length && sourceBuffer.Empty;
-                soxr.Process(sourceBuffer.Data, sourceBuffer.Offset, sourceBuffer.Count,
+                resampler.Process(sourceBuffer.Data, sourceBuffer.Offset, sourceBuffer.Count,
                     buffer, offset, count, endOfStream, out inputLengthUsed, out outputLengthGenerated);
                 sourceBuffer.Read(inputLengthUsed);
             } 
@@ -226,7 +200,7 @@ namespace Aurio.Streams {
         }
 
         public override void Close() {
-            soxr.Dispose();
+            resampler.Dispose();
             base.Close();
         }
 
@@ -235,7 +209,7 @@ namespace Aurio.Streams {
         }
 
         public static bool CheckSampleRateRatio(double ratio) {
-            return SoxResampler.CheckRatio(ratio);
+            return ResamplerFactory.CheckRatio(ratio);
         }
     }
 }

@@ -211,6 +211,9 @@
     <Compile Include="Matching\Wang2003\Profile.cs" />
     <Compile Include="MultitrackPlayer.cs" />
     <Compile Include="Project\VideoTrack.cs" />
+    <Compile Include="Resampler\NAudioWdlResampler.cs" />
+    <Compile Include="Resampler\NAudioWdlResamplerFactory.cs" />
+    <Compile Include="Resampler\NAudioWdlResamplerWrapper.cs" />
     <Compile Include="Streams\AbstractAudioStreamWrapper.cs" />
     <Compile Include="Streams\AudioFormat.cs" />
     <Compile Include="Streams\AudioProperties.cs" />
@@ -240,7 +243,6 @@
     <Compile Include="Streams\NullStream.cs" />
     <Compile Include="Streams\OffsetStream.cs" />
     <Compile Include="Streams\PhaseInversionStream.cs" />
-    <Compile Include="Streams\ResamplingQuality.cs" />
     <Compile Include="Streams\ResamplingStream.cs" />
     <Compile Include="Streams\TolerantStream.cs" />
     <Compile Include="Streams\VisualizingStream.cs" />
@@ -279,9 +281,9 @@
       <Project>{87b62e89-2714-4ce9-948b-82fdeeb39ed1}</Project>
       <Name>Aurio.FFT</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj">
-      <Project>{24228071-5e72-4ba8-90e3-89de331a718c}</Project>
-      <Name>Aurio.Soxr</Name>
+    <ProjectReference Include="..\Aurio.Resampler\Aurio.Resampler.csproj">
+      <Project>{90745e89-6c81-4372-8369-73269a168a83}</Project>
+      <Name>Aurio.Resampler</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -2,10 +2,17 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Aurio.Streams;
 using System.Collections.Generic;
+using Aurio.Resampler;
 
 namespace Aurio.UnitTest {
     [TestClass]
     public class CommonStreamTest {
+        [ClassInitialize()]
+        public static void MyClassInitialize(TestContext testContext)
+        {
+            ResamplerFactory.Factory = new Soxr.ResamplerFactory();
+        }
+
         [TestMethod]
         public void TestReadOverEnd() {
             var streams = GetStreams();
