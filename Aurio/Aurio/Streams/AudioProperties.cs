@@ -54,8 +54,38 @@ namespace Aurio.Streams {
             get { return SampleByteSize * Channels; }
         }
 
+        public override bool Equals(object obj)
+        {
+            var properties = obj as AudioProperties;
+            return properties != null &&
+                   Channels == properties.Channels &&
+                   SampleRate == properties.SampleRate &&
+                   BitDepth == properties.BitDepth &&
+                   Format == properties.Format;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 1490243033;
+            hashCode = hashCode * -1521134295 + Channels.GetHashCode();
+            hashCode = hashCode * -1521134295 + SampleRate.GetHashCode();
+            hashCode = hashCode * -1521134295 + BitDepth.GetHashCode();
+            hashCode = hashCode * -1521134295 + Format.GetHashCode();
+            return hashCode;
+        }
+
         public override string ToString() {
             return String.Format("{0}bit {1}Hz {2}ch {3}", BitDepth, SampleRate, Channels, Format);
+        }
+
+        public static bool operator ==(AudioProperties properties1, AudioProperties properties2)
+        {
+            return EqualityComparer<AudioProperties>.Default.Equals(properties1, properties2);
+        }
+
+        public static bool operator !=(AudioProperties properties1, AudioProperties properties2)
+        {
+            return !(properties1 == properties2);
         }
     }
 }

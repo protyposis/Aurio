@@ -126,6 +126,7 @@
     <Compile Include="AudioStreamFactory.cs" />
     <Compile Include="AudioUtil.cs" />
     <Compile Include="Complex.cs" />
+    <Compile Include="DataStructures\MinMaxAverage.cs" />
     <Compile Include="Features\InverseSTFT.cs" />
     <Compile Include="Features\OLA.cs" />
     <Compile Include="License.cs" />
