@@ -129,6 +129,7 @@
     <Compile Include="AudioUtilTest.cs" />
     <Compile Include="AudioBufferTest.cs" />
     <Compile Include="MonoStreamTest.cs" />
+    <Compile Include="NAudioWdlResamplerTest.cs" />
     <Compile Include="TimeWarpCollectionTest.cs" />
     <Compile Include="TimeWarpStreamTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
