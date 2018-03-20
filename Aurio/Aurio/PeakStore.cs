@@ -123,7 +123,7 @@ namespace Aurio {
             var date = br.ReadInt64();
 
             if (!magicNumber.SequenceEqual(MAGICNUMBER) || fileFormat != FILEFORMAT) {
-                throw new FileFormatException("invalid peak file");
+                throw new Exception("invalid peak file");
             }
             if (date != modifiedDate.Ticks) {
                 throw new Exception("peakfile date does not match audio file modification date");

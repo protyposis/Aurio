@@ -33,7 +33,7 @@ namespace Aurio.LibSampleRate
 
         public bool CheckRatio(double sampleRateRatio)
         {
-            return SoxResampler.CheckRatio(sampleRateRatio);
+            return sampleRateRatio > 0.0;
         }
     }
 }
