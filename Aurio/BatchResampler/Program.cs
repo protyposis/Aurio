@@ -1,5 +1,6 @@
 ﻿using Aurio;
 using Aurio.Streams;
+using Aurio.Resampler;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
