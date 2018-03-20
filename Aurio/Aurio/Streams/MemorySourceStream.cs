@@ -41,11 +41,11 @@ namespace Aurio.Streams {
             get { return properties; }
         }
 
-        public long Length {
+        public virtual long Length {
             get { return source.Length; }
         }
 
-        public long Position {
+        public virtual long Position {
             get { return source.Position; }
             set { source.Position = value; }
         }
@@ -54,7 +54,7 @@ namespace Aurio.Streams {
             get { return properties.SampleBlockByteSize; }
         }
 
-        public int Read(byte[] buffer, int offset, int count) {
+        public virtual int Read(byte[] buffer, int offset, int count) {
             return source.Read(buffer, offset, count);
         }
 
