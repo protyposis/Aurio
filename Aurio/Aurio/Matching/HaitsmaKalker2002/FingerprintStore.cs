@@ -37,14 +37,13 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
         private IFingerprintCollisionMap collisionMap;
         private string matchSourceName;
 
-        protected FingerprintStore(IProfile profile, string matchSourceName) {
+        protected FingerprintStore(IProfile profile, IFingerprintCollisionMap collisionMap, string matchSourceName) {
             FingerprintSize = DEFAULT_FINGERPRINT_SIZE;
             Threshold = DEFAULT_THRESHOLD;
             this.profile = profile;
             store = new Dictionary<AudioTrack, List<SubFingerprintHash>>();
 
-            // Dictionary is faster, SQLite needs less memory
-            collisionMap = new DictionaryCollisionMap(); // new SQLiteCollisionMap();
+            this.collisionMap = collisionMap;
 
             /*
              * TODO to support processing of huge datasets (or machines with low memory),
@@ -56,7 +55,11 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
             this.matchSourceName = matchSourceName;
         }
 
-        public FingerprintStore(IProfile profile) : this(profile, "FP-HK02") {
+        public FingerprintStore(IProfile profile, IFingerprintCollisionMap collisionMap) : this(profile, collisionMap, "FP-HK02") {
+            //
+        }
+
+        public FingerprintStore(IProfile profile) : this(profile, new DictionaryCollisionMap(), "FP-HK02") {
             //
         }
 

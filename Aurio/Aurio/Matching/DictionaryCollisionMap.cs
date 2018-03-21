@@ -22,7 +22,7 @@ using System.Linq;
 using System.Text;
 
 namespace Aurio.Matching {
-    class DictionaryCollisionMap : IFingerprintCollisionMap {
+    public class DictionaryCollisionMap : IFingerprintCollisionMap {
 
         private Dictionary<SubFingerprintHash, List<SubFingerprintLookupEntry>> lookupTable;
 
