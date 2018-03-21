@@ -41,6 +41,7 @@ What's new
 ### develop
 * Converted all Aurio library packages to .NET Standard 2.0 for .NET Core 2.0 compatibility
   * Updated WPF GUI apps from NET Framework 4.0 to 4.6.2 for .NET Standard 2.0 compatibility
+  * Requires Visual Studio 2017
 * Added support for realtime (live) stream processing
   * `CircularMemoryWriterStream` with read and write support of audio data into a circular buffer
   * `BlockingFixedLengthFifoStream` with blocking read and write support of audio data into a fixed-length FIFO buffer (converts pull-based stream processing into a push-based approach suitable for realtime applications)
@@ -114,8 +115,8 @@ Requirements
 ------------
 
 * Windows
-* Visual Studio 2013 or 2015
-* .NET Framework 4.0
+* Visual Studio 2017
+* .NET Standard 2.0 / .NET Core 2.0 (.NET Framework 4.6.2 for WPF apps)
 
 Aurio has been developed for Windows but since only a small part depends on the OS, it should be portable to the Mono platform and other OS'.
 
