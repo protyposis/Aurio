@@ -33,6 +33,16 @@ namespace Aurio.Streams
         {
         }
 
+        public override long Length
+        {
+            get { return _bufferFillLevel; }
+        }
+
+        public long Capacity
+        {
+            get { return source.Length; }
+        }
+
         public override long Position
         {
             get { return _position; }
@@ -43,7 +53,7 @@ namespace Aurio.Streams
                     throw new ArgumentOutOfRangeException("Cannot set a position outside the circular memory");
                 }
                 _position = value;
-                source.Position = ((_bufferHead - _bufferFillLevel) + _position + Length) % Length;
+                source.Position = ((_bufferHead - _bufferFillLevel) + _position + source.Length) % source.Length;
             }
         }
 
@@ -122,7 +132,7 @@ namespace Aurio.Streams
             {
                 var delta = _position - _bufferFillLevel;
                 _bufferFillLevel = _position;
-                _bufferHead = (_bufferHead + delta) % Length;
+                _bufferHead = (_bufferHead + delta) % source.Length;
                 source.Position = _bufferHead;
             }
 
@@ -145,9 +155,9 @@ namespace Aurio.Streams
                 //_bufferPosition = (int)((_bufferPosition + count) % Length);
             }
 
-            _bufferFillLevel = Math.Min(Length, _bufferFillLevel + addedBytes);
-            _bufferHead = (_bufferHead + addedBytes) % Length;
-            _position = Math.Min(Length, _position + count);
+            _bufferFillLevel = Math.Min(source.Length, _bufferFillLevel + addedBytes);
+            _bufferHead = (_bufferHead + addedBytes) % source.Length;
+            _position = Math.Min(source.Length, _position + count);
         }
     }
 }

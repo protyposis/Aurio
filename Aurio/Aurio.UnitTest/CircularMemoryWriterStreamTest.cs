@@ -15,7 +15,8 @@ namespace Aurio.UnitTest
         {
             var s = new CircularMemoryWriterStream(_properties, 10);
 
-            Assert.AreEqual(10, s.Length);
+            Assert.AreEqual(0, s.Length);
+            Assert.AreEqual(10, s.Capacity);
             Assert.AreEqual(0, s.Position);
         }
 
@@ -24,7 +25,8 @@ namespace Aurio.UnitTest
         {
             var s = new CircularMemoryWriterStream(_properties, new MemoryStream(new byte[10]));
 
-            Assert.AreEqual(10, s.Length);
+            Assert.AreEqual(0, s.Length);
+            Assert.AreEqual(10, s.Capacity);
             Assert.AreEqual(0, s.Position);
         }
 
@@ -44,7 +46,8 @@ namespace Aurio.UnitTest
 
             s.Write(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
 
-            Assert.AreEqual(10, s.Length);
+            Assert.AreEqual(5, s.Length);
+            Assert.AreEqual(10, s.Capacity);
             Assert.AreEqual(5, s.Position);
 
             CollectionAssert.AreEqual(new byte[] { 1, 2, 3, 4, 5, 0, 0, 0, 0, 0 }, b);
@@ -60,7 +63,8 @@ namespace Aurio.UnitTest
             s.Position = 1;
             s.Write(new byte[] { 1, 2, 3, 4, 5 }, 0, 5);
 
-            Assert.AreEqual(10, s.Length);
+            Assert.AreEqual(6, s.Length);
+            Assert.AreEqual(10, s.Capacity);
             Assert.AreEqual(6, s.Position);
 
             CollectionAssert.AreEqual(new byte[] { 0, 1, 2, 3, 4, 5, 0, 0, 0, 0 }, b);
