@@ -16,20 +16,24 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-// General Information about an assembly is controlled through the following 
-// set of attributes. Change these attribute values to modify the information
-// associated with an assembly.
-[assembly: AssemblyTitle("Aurio FFmpeg Interface")]
-[assembly: AssemblyCopyright("Copyright © 2015-2016 Mario Guggenberger")]
-
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
-// COM, set the ComVisible attribute to true on that type.
-[assembly: ComVisible(false)]
-
-// The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("bba36d21-654c-4e06-80b1-be989365b961")]
+namespace Aurio.Resampler {
+    /// <summary>
+    /// Resampler quality settings.
+    /// 
+    /// Introduced to eliminate direct dependencies to the used resampler library in Aurio. 
+    /// The ResamplingStream maps the quality setting to the according resampling library quality settings.
+    /// </summary>
+    public enum ResamplingQuality {
+        VeryHigh,
+        High,
+        Medium,
+        VeryLow,
+        Low,
+        VariableRate
+    }
+}

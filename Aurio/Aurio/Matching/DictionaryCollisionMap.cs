@@ -22,7 +22,7 @@ using System.Linq;
 using System.Text;
 
 namespace Aurio.Matching {
-    class DictionaryCollisionMap : IFingerprintCollisionMap {
+    public class DictionaryCollisionMap : IFingerprintCollisionMap {
 
         private Dictionary<SubFingerprintHash, List<SubFingerprintLookupEntry>> lookupTable;
 
@@ -48,7 +48,12 @@ namespace Aurio.Matching {
         }
 
         public List<SubFingerprintLookupEntry> GetValues(SubFingerprintHash hash) {
-            return lookupTable[hash];
+            List<SubFingerprintLookupEntry> returnValue;
+            if (lookupTable.TryGetValue(hash, out returnValue)) {
+                return returnValue;
+            } else {
+                return new List<SubFingerprintLookupEntry>();
+            }
         }
     }
 }

@@ -31,9 +31,11 @@ namespace Aurio {
     public class AudioBuffer {
         [FieldOffset(0)]
         private int numberOfBytes;
-        [FieldOffset(4)]
+        // Arrays must be DWORD aligned so a field offset of 4 (because int is 4 bytes) does not work here
+        // https://stackoverflow.com/a/1190114/370252
+        [FieldOffset(8)]
         private byte[] byteBuffer;
-        [FieldOffset(4)]
+        [FieldOffset(8)]
         private float[] floatBuffer;
 
         public AudioBuffer(int byteCapacity) {

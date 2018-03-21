@@ -25,6 +25,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Aurio.TaskMonitor;
 using Aurio.Streams;
+using Aurio.Resampler;
 
 namespace Aurio.Matching {
     public class CrossCorrelation {

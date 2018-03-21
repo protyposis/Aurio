@@ -25,7 +25,11 @@ using Aurio.Project;
 using System.Diagnostics;
 
 namespace Aurio.Matching {
-    class SQLiteCollisionMap : IFingerprintCollisionMap {
+    /// <summary>
+    /// In-memory SQLite-based fingerprint hash collision map.
+    /// Needs less memory than the <see cref="DictionaryCollisionMap"/> but is slower.
+    /// </summary>
+    public class SQLiteCollisionMap : IFingerprintCollisionMap {
 
         private class DTO {
             public UInt32 Hash { get; set; }

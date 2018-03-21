@@ -23,7 +23,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 
 namespace Aurio.FFTW {
-    public class FFTW {
+    public class FFTW: IDisposable {
 
         private static IInteropWrapper interop;
 
@@ -51,13 +51,6 @@ namespace Aurio.FFTW {
             }
         }
 
-        ~FFTW() {
-            if (plan != IntPtr.Zero) {
-                interop.destroy_plan(plan);
-            }
-            bufferHandle.Free();
-        }
-
         public void Execute(float[] bufferInPlace) {
             Array.Copy(bufferInPlace, this.buffer, bufferInPlace.Length);
             interop.execute(plan);
@@ -68,6 +61,17 @@ namespace Aurio.FFTW {
             Array.Copy(bufferIn, this.buffer, bufferIn.Length);
             interop.execute(plan);
             Array.Copy(this.buffer, bufferOut, bufferOut.Length);
+        }
+
+        public void Dispose() {
+            if (plan != IntPtr.Zero) {
+                interop.destroy_plan(plan);
+                bufferHandle.Free();
+            }
+        }
+
+        ~FFTW() {
+            Dispose();
         }
     }
 }

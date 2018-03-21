@@ -26,6 +26,7 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Aurio.Features;
+using Aurio.Resampler;
 
 namespace Aurio.Matching.HaitsmaKalker2002 {
     /// <summary>
@@ -40,14 +41,18 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
         private Profile profile;
 
         private int flipWeakestBits;
+        private readonly int eventInterval;
+        private readonly int bufferSize;
 
         public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
         public event EventHandler Completed;
 
-        public FingerprintGenerator(Profile profile, AudioTrack track) {
+        public FingerprintGenerator(Profile profile, AudioTrack track, int eventInterval = 512, int bufferSize = StreamWindower.DEFAULT_STREAM_INPUT_BUFFER_SIZE) {
             this.inputTrack = track;
             this.profile = profile;
             this.flipWeakestBits = profile.FlipWeakestBits;
+            this.eventInterval = eventInterval;
+            this.bufferSize = bufferSize;
         }
 
         private int index;
@@ -57,11 +62,14 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
         private float[] bandsPrev = new float[33];
 
         public void Generate() {
-            IAudioStream audioStream = new ResamplingStream(
-                new MonoStream(AudioStreamFactory.FromFileInfoIeee32(inputTrack.FileInfo)),
-                ResamplingQuality.Medium, profile.SampleRate);
+            IAudioStream audioStream = inputTrack.File ? 
+                AudioStreamFactory.FromFileInfoIeee32(inputTrack.FileInfo) : 
+                inputTrack.Stream;
 
-            STFT stft = new STFT(audioStream, profile.FrameSize, profile.FrameStep, WindowType.Hann, STFT.OutputFormat.Decibel);
+            audioStream = new MonoStream(audioStream);
+            audioStream = new ResamplingStream(audioStream, ResamplingQuality.Medium, profile.SampleRate);
+
+            STFT stft = new STFT(audioStream, profile.FrameSize, profile.FrameStep, WindowType.Hann, STFT.OutputFormat.Decibel, this.bufferSize);
             index = 0;
             indices = stft.WindowCount;
 
@@ -81,7 +89,7 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
                 index++;
 
                 // Output subfingerprints every once in a while
-                if (index % 512 == 0 && SubFingerprintsGenerated != null) {
+                if (index % this.eventInterval == 0 && SubFingerprintsGenerated != null) {
                     SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, subFingerprints, index, indices));
                     subFingerprints.Clear();
                 }

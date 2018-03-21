@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <Authors>Mario Guggenberger</Authors>
+    <Company>Mario Guggenberger / protyposis.net</Company>
+    <Product>Aurio Audio Processing, Analysis and Retrieval Library</Product>
+    <Copyright>Copyright © 2010-2018 Mario Guggenberger</Copyright>
+  </PropertyGroup>
+</Project>

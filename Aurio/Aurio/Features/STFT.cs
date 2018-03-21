@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Aurio.FFT;
 using Aurio.Streams;
 
 namespace Aurio.Features {
@@ -56,7 +57,7 @@ namespace Aurio.Features {
 
         private float[] frameBuffer;
         private float[] fftBuffer;
-        private PFFFT.PFFFT fft;
+        private IFFT fft;
         private OutputFormat outputFormat;
 
         /// <summary>
@@ -69,15 +70,15 @@ namespace Aurio.Features {
         /// <param name="fftSize">the FFT size, must be >= windowSize</param>
         /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="outputFormat">format of the output data, e.g. raw FFT complex numbers or dB spectrum</param>
-        public STFT(IAudioStream stream, int windowSize, int hopSize, int fftSize, WindowType windowType, OutputFormat outputFormat)
-            : base(stream, windowSize, hopSize, windowType) {
+        public STFT(IAudioStream stream, int windowSize, int hopSize, int fftSize, WindowType windowType, OutputFormat outputFormat, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
+            : base(stream, windowSize, hopSize, windowType, bufferSize) {
                 if(fftSize < windowSize) {
                     throw new ArgumentOutOfRangeException("fftSize must be >= windowSize");
                 }
                 frameBuffer = new float[fftSize];
                 fftBuffer = new float[fftSize];
                 Array.Clear(frameBuffer, 0, frameBuffer.Length); // init with zeros (assure zero padding)
-                fft = new PFFFT.PFFFT(fftSize, PFFFT.Transform.Real);
+                fft = FFTFactory.CreateInstance(fftSize);
                 this.outputFormat = outputFormat;
         }
 
@@ -89,8 +90,8 @@ namespace Aurio.Features {
         /// <param name="hopSize">the hop size in the dimension of samples</param>
         /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="outputFormat">format of the output data, e.g. raw FFT complex numbers or dB spectrum</param>
-        public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, OutputFormat outputFormat)
-            : this(stream, windowSize, hopSize, windowSize, windowType, outputFormat) {
+        public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, OutputFormat outputFormat, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
+            : this(stream, windowSize, hopSize, windowSize, windowType, outputFormat, bufferSize) {
         }
 
         public override void ReadFrame(float[] fftResult) {

@@ -28,6 +28,7 @@ using Aurio.Streams;
 using NAudio.CoreAudioApi;
 using Aurio.TaskMonitor;
 using System.ComponentModel;
+using Aurio.Resampler;
 
 namespace Aurio {
     public class MultitrackPlayer : IDisposable, INotifyPropertyChanged {

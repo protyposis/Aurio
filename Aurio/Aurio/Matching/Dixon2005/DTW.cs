@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
 using Aurio.DataStructures.Matrix;
+using Aurio.Resampler;
 
 namespace Aurio.Matching.Dixon2005 {
     public class DTW {

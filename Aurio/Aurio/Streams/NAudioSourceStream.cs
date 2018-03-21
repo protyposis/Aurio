@@ -29,25 +29,19 @@ namespace Aurio.Streams {
         private AudioProperties properties;
 
         public NAudioSourceStream(WaveStream sourceStream) {
-            WaveFormat sourceFormat = sourceStream.WaveFormat;
-            AudioFormat format;
+            AudioProperties sourceProperties = GetAudioProperties(sourceStream.WaveFormat);
+
             // check for supported formats:
-            if(sourceFormat.Encoding == WaveFormatEncoding.Pcm && sourceFormat.BitsPerSample == 16) {
-                format = AudioFormat.LPCM;
-            }
-            else if (sourceFormat.Encoding == WaveFormatEncoding.Pcm && sourceFormat.BitsPerSample == 24) {
-                format = AudioFormat.LPCM;
-            }
-            else if(sourceFormat.Encoding == WaveFormatEncoding.IeeeFloat && sourceFormat.BitsPerSample == 32) {
-                format = AudioFormat.IEEE;
-            }
+            if (sourceProperties.Format == AudioFormat.LPCM && sourceProperties.BitDepth == 16) { }
+            else if (sourceProperties.Format == AudioFormat.LPCM && sourceProperties.BitDepth == 24) { }
+            else if (sourceProperties.Format == AudioFormat.IEEE && sourceProperties.BitDepth == 32) { }
             else {
                 throw new ArgumentException(String.Format("unsupported source format: {0}bit {1}Hz {2}ch {3}",
-                    sourceFormat.BitsPerSample, sourceFormat.SampleRate, sourceFormat.Channels, sourceFormat.Encoding));
+                    sourceProperties.BitDepth, sourceProperties.SampleRate, sourceProperties.Channels, sourceProperties.Format));
             }
 
             this.sourceStream = sourceStream;
-            this.properties = new AudioProperties(sourceFormat.Channels, sourceFormat.SampleRate, sourceFormat.BitsPerSample, format);
+            this.properties = sourceProperties;
         }
 
         public AudioProperties Properties {
@@ -59,8 +53,8 @@ namespace Aurio.Streams {
         }
 
         public long Position {
-            get { 
-                return sourceStream.Position; 
+            get {
+                return sourceStream.Position;
             }
             set {
                 if (value % SampleBlockSize == 0) {
@@ -94,6 +88,22 @@ namespace Aurio.Streams {
 
         public void Close() {
             sourceStream.Close();
+        }
+
+        public static AudioProperties GetAudioProperties(WaveFormat sourceFormat) {
+            AudioFormat format;
+
+            if (sourceFormat.Encoding == WaveFormatEncoding.Pcm) {
+                format = AudioFormat.LPCM;
+            }
+            else if (sourceFormat.Encoding == WaveFormatEncoding.IeeeFloat) {
+                format = AudioFormat.IEEE;
+            }
+            else {
+                throw new ArgumentException(String.Format("unsupported source encoding: {0}", sourceFormat.Encoding));
+            }
+
+            return new AudioProperties(sourceFormat.Channels, sourceFormat.SampleRate, sourceFormat.BitsPerSample, format);
         }
 
         #region IDisposable Support

@@ -1,4 +1,5 @@
-﻿using Aurio.Streams;
+﻿using Aurio.Resampler;
+using Aurio.Streams;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
@@ -29,36 +30,17 @@ namespace Aurio.UnitTest
             }
         }
 
-        #region Additional test attributes
-        // 
-        //You can use the following additional attributes as you write your tests:
-        //
-        //Use ClassInitialize to run code before running the first test in the class
-        //[ClassInitialize()]
-        //public static void MyClassInitialize(TestContext testContext) {
-        //}
-        //
-        //Use ClassCleanup to run code after all tests in a class have run
-        //[ClassCleanup()]
-        //public static void MyClassCleanup()
-        //{
-        //}
-        //
-        //Use TestInitialize to run code before running each test
+        [ClassInitialize()]
+        public static void MyClassInitialize(TestContext testContext) {
+            ResamplerFactory.Factory = new Soxr.ResamplerFactory();
+        }
+
         [TestInitialize()]
         public void MyTestInitialize() {
             stream = new ResamplingStream(
                 new NullStream(new AudioProperties(1, 44100, 32, AudioFormat.IEEE), 1000),
                 ResamplingQuality.VeryHigh);
         }
-        
-        //Use TestCleanup to run code after each test has run
-        //[TestCleanup()]
-        //public void MyTestCleanup()
-        //{
-        //}
-        //
-        #endregion
 
         [TestMethod()]
         public void TargetSampleRate() {

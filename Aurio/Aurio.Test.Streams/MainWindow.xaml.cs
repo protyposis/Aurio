@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NAudio.Wave;
 using Aurio.Streams;
+using Aurio.Resampler;
 
 namespace Aurio.Test.Streams {
     /// <summary>
