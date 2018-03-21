@@ -52,7 +52,7 @@ What's new
 * Removed FFT dependency from core
   * Added `Aurio.FFT.FFTFactory` that can be configured with various FFT implementations
   * Implemented `FFTFactory` for Exocortex.DSP (managed code, recommended for .NET Core cross-plattform deployment), FFTW, and PFFFT (recommended for quality and speed) 
-* Moved SQLite dependency (`SQLiteCollisionMap`) from core to optional `Aurio:matching.SQLite` package 
+* Moved SQLite dependency (`SQLiteCollisionMap`) from core to optional `Aurio.Matching.SQLite` package 
 * Added `FingerprintStore.FindMatchesFromExternalSubFingerprints` to match external fingerprints with the contents of a store
 * Parameterized `StreamWindower`/`STFT`/`FingerprintGenerator` buffer size (to minimize processing latency)
 * Parameterized `FingerprintGenerator` update event interval
