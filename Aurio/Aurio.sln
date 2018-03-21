@@ -83,7 +83,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aurio.Exocortex", "Aurio.Ex
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aurio.Resampler", "Aurio.Resampler\Aurio.Resampler.csproj", "{90745E89-6C81-4372-8369-73269A168A83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.Test.NetCore", "Aurio.Test.NetCore\Aurio.Test.NetCore.csproj", "{9608092D-D9B7-4109-B1F0-DC597D879000}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aurio.Test.NetCore", "Aurio.Test.NetCore\Aurio.Test.NetCore.csproj", "{9608092D-D9B7-4109-B1F0-DC597D879000}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.Test.RealtimeFingerprinting", "Aurio.Test.RealtimeFingerprinting\Aurio.Test.RealtimeFingerprinting.csproj", "{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -367,6 +369,18 @@ Global
 		{9608092D-D9B7-4109-B1F0-DC597D879000}.Release|x64.Build.0 = Release|Any CPU
 		{9608092D-D9B7-4109-B1F0-DC597D879000}.Release|x86.ActiveCfg = Release|Any CPU
 		{9608092D-D9B7-4109-B1F0-DC597D879000}.Release|x86.Build.0 = Release|Any CPU
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}.Debug|x64.Build.0 = Debug|Any CPU
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}.Debug|x86.Build.0 = Debug|Any CPU
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}.Release|x64.ActiveCfg = Release|Any CPU
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}.Release|x64.Build.0 = Release|Any CPU
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}.Release|x86.ActiveCfg = Release|Any CPU
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -391,6 +405,7 @@ Global
 		{FF2B695C-7567-4DDD-A8F4-E16BE2E49A65} = {33AD9CF5-1CD7-4393-A5A8-42A64760C229}
 		{84A2C4C9-874C-47E7-8397-47D5ED8C00D4} = {33AD9CF5-1CD7-4393-A5A8-42A64760C229}
 		{9608092D-D9B7-4109-B1F0-DC597D879000} = {33AD9CF5-1CD7-4393-A5A8-42A64760C229}
+		{9E5A86DE-6CE3-4D6F-BD98-B5A299999EAA} = {33AD9CF5-1CD7-4393-A5A8-42A64760C229}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1858D4D1-62D5-495E-8181-605341B24DF6}

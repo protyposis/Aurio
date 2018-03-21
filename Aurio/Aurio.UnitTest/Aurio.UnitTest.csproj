@@ -148,6 +148,8 @@
     <Compile Include="MemoryWriterStreamTest.cs" />
     <Compile Include="OLATest.cs" />
     <Compile Include="StreamWindowerTest.cs" />
+    <Compile Include="CircularMemoryWriterStreamTest.cs" />
+    <Compile Include="BlockingFixedLengthFifoStreamTest.cs" />
     <Compile Include="VolumeUtilTest.cs" />
   </ItemGroup>
   <ItemGroup>
