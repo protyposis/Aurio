@@ -63,7 +63,7 @@ namespace Aurio.Streams
             }
 
             // Clamp read count to the number of remaining bytes from the current position until the end
-            count = (int)Math.Min(count, Length - source.Position);
+            count = (int)Math.Min(count, _bufferFillLevel - _position);
 
             var bytesBeforeWrap = (int)(source.Length - source.Position);
             var bytesAfterWrap = count - bytesBeforeWrap;

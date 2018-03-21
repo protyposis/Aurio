@@ -100,9 +100,9 @@ namespace Aurio.UnitTest
         [TestMethod]
         public void ReadBelowCapacity()
         {
-            var b = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-            var m = new MemoryStream(b);
-            var s = new CircularMemoryWriterStream(_properties, m);
+            var s = new CircularMemoryWriterStream(_properties, 10);
+            s.Write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, 0, 10);
+            s.Position = 0;
 
             var readBuffer = new byte[5];
             var bytesRead = s.Read(readBuffer, 0, 5);
@@ -116,9 +116,9 @@ namespace Aurio.UnitTest
         [TestMethod]
         public void ReadBelowCapacityAtPositionWithoutWrap()
         {
-            var b = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-            var m = new MemoryStream(b);
-            var s = new CircularMemoryWriterStream(_properties, m);
+            var s = new CircularMemoryWriterStream(_properties, 10);
+            s.Write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, 0, 10);
+            s.Position = 0;
 
             s.Position = 1;
             var readBuffer = new byte[5];
@@ -133,9 +133,9 @@ namespace Aurio.UnitTest
         [TestMethod]
         public void ReadAboveCapacity()
         {
-            var b = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-            var m = new MemoryStream(b);
-            var s = new CircularMemoryWriterStream(_properties, m);
+            var s = new CircularMemoryWriterStream(_properties, 10);
+            s.Write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, 0, 10);
+            s.Position = 0;
 
             var readBuffer = new byte[15];
             var bytesRead = s.Read(readBuffer, 0, 15);
@@ -147,9 +147,9 @@ namespace Aurio.UnitTest
         [TestMethod]
         public void ReadAboveCapacityAtPositionWithoutWrap()
         {
-            var b = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-            var m = new MemoryStream(b);
-            var s = new CircularMemoryWriterStream(_properties, m);
+            var s = new CircularMemoryWriterStream(_properties, 10);
+            s.Write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, 0, 10);
+            s.Position = 0;
 
             s.Position = 9;
             var readBuffer = new byte[5];
@@ -192,6 +192,22 @@ namespace Aurio.UnitTest
             s.Read(readBuffer, 0, 1);
 
             CollectionAssert.AreEqual(new byte[] { 1 }, readBuffer);
+        }
+
+        [TestMethod]
+        public void ReadOnlyAsMuchAsWritten()
+        {
+            var s = new CircularMemoryWriterStream(_properties, 10);
+
+            s.Write(new byte[] { 1 }, 0, 1);
+
+            s.Position = 0;
+            var readBuffer = new byte[5];
+            var bytesRead = s.Read(readBuffer, 0, 5);
+
+            // make sure that the stream does not read more data as has been written, 
+            // i.e. in this case there is only one byte to read
+            Assert.AreEqual(1, bytesRead);
         }
     }
 }
