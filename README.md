@@ -38,6 +38,25 @@ Aurio.WaveControls provides WPF widgets for user interfaces:
 What's new
 ----------
 
+### develop
+* Converted all Aurio library packages to .NET Standard 2.0 for .NET Core 2.0 compatibility
+  * Updated WPF GUI apps from NET Framework 4.0 to 4.6.2 for .NET Standard 2.0 compatibility
+* Added support for realtime (live) stream processing
+  * `CircularMemoryWriterStream` with read and write support of audio data into a circular buffer
+  * `BlockingFixedLengthFifoStream` with blocking read and write support of audio data into a fixed-length FIFO buffer (converts pull-based stream processing into a push-based approach suitable for realtime applications)
+  * `Aurio.Test.RealtimeFingerprinting`: .NET Core realtime audio fingerprinting example/demo app  
+* Removed resampler dependency from core
+  * Added `Aurio.Resampler.ResamplerFactory` that can be configured with various resampler implementations
+  * Implemented `ResamplerFactory` for NAudio WdlResampler (managed code, recommended for .NET Core cross-plattform deployment), LibSampleRate, and Soxr (recommended for quality and speed)
+* Removed FFT dependency from core
+  * Added `Aurio.FFT.FFTFactory` that can be configured with various FFT implementations
+  * Implemented `FFTFactory` for Exocortex.DSP (managed code, recommended for .NET Core cross-plattform deployment), FFTW, and PFFFT (recommended for quality and speed) 
+* Moved SQLite dependency (`SQLiteCollisionMap`) from core to optional `Aurio:matching.SQLite` package 
+* Added `FingerprintStore.FindMatchesFromExternalSubFingerprints` to match external fingerprints with the contents of a store
+* Parameterized `StreamWindower`/`STFT`/`FingerprintGenerator` buffer size (to minimize processing latency)
+* Parameterized `FingerprintGenerator` update event interval
+* Fixed FFmpeg postbuild library copy command 
+
 ### 2017-10-15 14c7c92
 * FFmpeg updated to 3.3.3
 * `SurroundDownmixStream` for 4.0/5.1/7.1 to stereo downmixing
