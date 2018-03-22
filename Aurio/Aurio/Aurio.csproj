@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Aurio.FFmpeg\Aurio.FFmpeg.csproj" />
-    <ProjectReference Include="..\Aurio.FFT\Aurio.FFT.csproj" />
   </ItemGroup>
 
   <ItemGroup>

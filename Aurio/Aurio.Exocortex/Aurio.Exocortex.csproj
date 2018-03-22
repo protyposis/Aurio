@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ExocortexDSP\Exocortex.DSP.csproj" />
-    <ProjectReference Include="..\Aurio.FFT\Aurio.FFT.csproj" />
+    <ProjectReference Include="..\Aurio\Aurio.csproj" />
   </ItemGroup>
 
 </Project>
