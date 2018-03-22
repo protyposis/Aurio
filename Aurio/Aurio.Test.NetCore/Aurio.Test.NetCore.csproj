@@ -8,7 +8,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Aurio.Exocortex\Aurio.Exocortex.csproj" />
     <ProjectReference Include="..\Aurio.FFT\Aurio.FFT.csproj" />
-    <ProjectReference Include="..\Aurio.Resampler\Aurio.Resampler.csproj" />
     <ProjectReference Include="..\Aurio\Aurio.csproj" />
   </ItemGroup>
 

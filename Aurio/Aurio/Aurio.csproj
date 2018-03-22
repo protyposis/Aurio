@@ -20,7 +20,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Aurio.FFmpeg\Aurio.FFmpeg.csproj" />
     <ProjectReference Include="..\Aurio.FFT\Aurio.FFT.csproj" />
-    <ProjectReference Include="..\Aurio.Resampler\Aurio.Resampler.csproj" />
   </ItemGroup>
 
   <ItemGroup>
