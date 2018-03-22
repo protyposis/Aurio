@@ -242,15 +242,19 @@ Example Applications
 
 Aurio comes with a few tools and test applications that can be taken as a reference:
 
-* **Aurio.FFmpeg.Test** decodes audio to wav files or video to frame images
-* **Aurio.Test.FingerprintingBenchmark** runs a file through all fingerprinting algorithms and measures the required time.
-* **Aurio.Test.FingerprintingHaitsmaKalker** fingerprints files and builds a hash store to match the fingerprinted files. The matches can be browsed and fingerprints inspected.
-* **Aurio.Test.FingerprintingWang2003** display the spectrogram and constellation map while fingerprinting a file.
-* **Aurio.Test.WaveViewControl** is a test bed for the WaveView WPF control.
-* **Aurio.Test.MultitrackPlayback** is a multitrack audio player with a simple user interface.
-* **BatchResampler** resamples wave files according to a configuration file.
-* **MusicDetector** analyzes audio files for music content.
-* **WaveCutter** cuts a number of concatenated files into slices of random length.
+* Tests
+  * **Aurio.FFmpeg.Test** decodes audio to wav files or video to frame images
+  * **Aurio.Test.FingerprintingBenchmark** runs a file through all fingerprinting algorithms and measures the required time.
+  * **Aurio.Test.FingerprintingHaitsmaKalker2002** fingerprints files and builds a hash store to match the fingerprinted files. The matches can be browsed and fingerprints inspected.
+  * **Aurio.Test.FingerprintingWang2003** display the spectrogram and constellation map while fingerprinting a file.
+  * **Aurio.Test.MultitrackPlayback** is a multitrack audio player with a simple user interface.
+  * **Aurio.Test.RealtimeFingerprinting** fingerprints a realtime live audio stream.
+  * **Aurio.Test.ResamlingStream** is a test bed for dynamic resampling.
+  * **Aurio.Test.WaveViewControl** is a test bed for the WaveView WPF control.
+* Tools
+  * **BatchResampler** resamples wave files according to a configuration file.
+  * **MusicDetector** analyzes audio files for music content.
+  * **WaveCutter** cuts a number of concatenated files into slices of random length.
 
 Aurio has originally been developed for [AudioAlign](https://github.com/protyposis/AudioAlign), a tool to automatically synchronize overlapping audio and video recordings, which uses almost all functionality of Aurio. Its sources are also available and can be used as a implementation reference.
 
