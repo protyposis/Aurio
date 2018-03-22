@@ -35,6 +35,8 @@ namespace Aurio.WaveControls {
         public static readonly DependencyProperty TextAlignmentProperty;
         public static readonly DependencyProperty FillProperty;
 
+        private double _pixelsPerDip;
+
         static ExtendedTickBar() {
             MinimumProperty = DependencyProperty.Register("Minimum", typeof(double), typeof(ExtendedTickBar),
                 new FrameworkPropertyMetadata(-60.0d) { AffectsRender = true });
@@ -56,6 +58,7 @@ namespace Aurio.WaveControls {
         }
 
         public ExtendedTickBar() {
+            _pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
         }
 
         public double Minimum {
@@ -109,7 +112,7 @@ namespace Aurio.WaveControls {
                     double y = CalculateY(value);
 
                     FormattedText text = new FormattedText(value.ToString(), CultureInfo.CurrentUICulture,
-                        FlowDirection.LeftToRight, new Typeface("Tahoma"), 8.0d, Fill) {
+                        FlowDirection.LeftToRight, new Typeface("Tahoma"), 8.0d, Fill, _pixelsPerDip) {
                             TextAlignment = TextAlignment
                         };
                     drawingContext.DrawText(text, new Point(textX, y - text.Height / 2));

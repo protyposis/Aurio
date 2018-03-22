@@ -24,9 +24,12 @@ using System.Windows.Controls;
 using System.Windows;
 using Aurio;
 using System.Diagnostics;
+using System.Windows.Media;
 
 namespace Aurio.WaveControls {
     public class VirtualViewBase: Control, VirtualView {
+
+        protected double _pixelsPerDip;
 
         public static readonly DependencyProperty VirtualViewportOffsetProperty = DependencyProperty.Register(
             "VirtualViewportOffset", typeof(long), typeof(VirtualViewBase),
@@ -120,6 +123,11 @@ namespace Aurio.WaveControls {
         }
 
         private static void OnViewportMaxWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        }
+
+        public VirtualViewBase() : base()
+        {
+            _pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
         }
 
         public long VirtualViewportOffset {

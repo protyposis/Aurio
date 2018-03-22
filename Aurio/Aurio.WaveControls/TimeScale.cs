@@ -105,17 +105,17 @@ namespace Aurio.WaveControls {
             FormattedText formattedStartText = new FormattedText(
                         new TimeSpan(viewportInterval.From).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor) { TextAlignment = TextAlignment.Left };
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor, _pixelsPerDip) { TextAlignment = TextAlignment.Left };
             drawingContext.DrawText(formattedStartText, new Point(1, 0));
             FormattedText formattedLengthText = new FormattedText(
                         new TimeSpan(viewportInterval.Length).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor) { TextAlignment = TextAlignment.Center };
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor, _pixelsPerDip) { TextAlignment = TextAlignment.Center };
             drawingContext.DrawText(formattedLengthText, new Point(actualWidth / 2, 0));
             FormattedText formattedEndText = new FormattedText(
                         new TimeSpan(viewportInterval.To).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor) { TextAlignment = TextAlignment.Right };
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor, _pixelsPerDip) { TextAlignment = TextAlignment.Right };
             drawingContext.DrawText(formattedEndText, new Point(actualWidth - 1, 0));
 
             // draw markers and time
@@ -131,7 +131,7 @@ namespace Aurio.WaveControls {
                     FormattedText formattedText = new FormattedText(
                         new TimeSpan(viewportIntervalAligned.From + i).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), SCALE_FONT_SIZE, Foreground) { TextAlignment = TextAlignment.Center };
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, Foreground, _pixelsPerDip) { TextAlignment = TextAlignment.Center };
                     drawingContext.DrawText(formattedText, new Point(x, actualHeight - SCALE_HEIGHT - SCALE_FONT_SIZE * 1.2));
                 }
 
