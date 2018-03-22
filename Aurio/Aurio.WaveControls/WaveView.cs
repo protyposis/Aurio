@@ -220,7 +220,7 @@ namespace Aurio.WaveControls {
 
                 // draw track name
                 if (DrawTrackName) {
-                    FormattedText formattedTrackName = new FormattedText(AudioTrack.FileInfo.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface("Segoe UI"), 10f, Brushes.White);
+                    FormattedText formattedTrackName = new FormattedText(AudioTrack.FileInfo.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface("Segoe UI"), 10f, Brushes.White, _pixelsPerDip);
                     drawingContext.DrawRectangle(Brushes.Black, null, new Rect(4 + drawingOffset, 5, formattedTrackName.Width + 4, formattedTrackName.Height + 2));
                     drawingContext.DrawText(formattedTrackName, new Point(6 + drawingOffset, 6));
                 }
@@ -249,7 +249,7 @@ namespace Aurio.WaveControls {
 
         private FormattedText DebugText(string text) {
             return new FormattedText(text, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
-                new Typeface("Tahoma"), 8, Brushes.Black);
+                new Typeface("Tahoma"), 8, Brushes.Black, _pixelsPerDip);
         }
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e) {

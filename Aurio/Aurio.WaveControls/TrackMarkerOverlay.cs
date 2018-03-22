@@ -47,6 +47,7 @@ namespace Aurio.WaveControls {
             Pen pen = new Pen(foregroundBrush, 1.0);
             Interval visibleInterval = VirtualViewportInterval;
             double textPadding = 3;
+            double pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
 
             foreach (var marker in Markers) {
                 if(visibleInterval.Contains(marker.Position.Ticks)) {
@@ -59,7 +60,7 @@ namespace Aurio.WaveControls {
                     // Draw text label
                     FormattedText formattedText = new FormattedText(marker.Text,
                         CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), 8, foregroundBrush) { TextAlignment = TextAlignment.Left };
+                        new Typeface("Tahoma"), 8, foregroundBrush, pixelsPerDip) { TextAlignment = TextAlignment.Left };
 
                     var textBgSize = new Size(formattedText.Width + 2 * textPadding, formattedText.Height + 2 * textPadding);
                     var textBgPosition = new Point(renderOffset + 2, RenderSize.Height - textBgSize.Height - 5);
