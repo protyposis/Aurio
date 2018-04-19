@@ -22,7 +22,7 @@ using System.IO;
 using System.Text;
 using Aurio.Streams;
 
-namespace Aurio
+namespace Aurio.FFmpeg
 {
     public class FFmpegAudioStreamFactory : IAudioStreamFactory
     {

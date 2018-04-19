@@ -41,10 +41,9 @@ namespace Aurio {
         static AudioStreamFactory()
         {
             AddFactory(new NAudioStreamFactory());
-            AddFactory(new FFmpegAudioStreamFactory());
         }
 
-        private static void AddFactory(IAudioStreamFactory factory)
+        public static void AddFactory(IAudioStreamFactory factory)
         {
             if (!factories.Contains(factory))
             {
