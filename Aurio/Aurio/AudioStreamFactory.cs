@@ -36,6 +36,21 @@ namespace Aurio {
 
         private static BlockingCollection<Action> peakStoreQueue = new BlockingCollection<Action>();
         private static volatile int peakStoreQueueThreads = 0;
+        private static readonly List<IAudioStreamFactory> factories = new List<IAudioStreamFactory>();
+
+        static AudioStreamFactory()
+        {
+            AddFactory(new NAudioStreamFactory());
+            AddFactory(new FFmpegAudioStreamFactory());
+        }
+
+        private static void AddFactory(IAudioStreamFactory factory)
+        {
+            if (!factories.Contains(factory))
+            {
+                factories.Add(factory);
+            }
+        }
 
         private static WaveStream OpenFile(FileInfo fileInfo) {
             if (fileInfo.Extension.Equals(".wav")) {
@@ -48,46 +63,28 @@ namespace Aurio {
         }
 
         private static IAudioStream TryOpenSourceStream(FileInfo fileInfo) {
-            WaveStream waveStream;
-            if ((waveStream = OpenFile(fileInfo)) != null) {
-                return new NAudioSourceStream(waveStream);
+            if (factories.Count == 0)
+            {
+                throw new NotSupportedException("Cannot open file " + fileInfo.FullName);
             }
-            else if (FFmpegSourceStream.WaveProxySuggested(fileInfo)) {
-                Console.WriteLine("File format with known seek problems, creating proxy file...");
-                return TryOpenSourceStream(FFmpegSourceStream.CreateWaveProxy(fileInfo));
-            }
-            else {
-                try {
-                    FFmpegSourceStream stream = new FFmpegSourceStream(fileInfo);
 
-                    // Make a seek to test if it works or if it throws an exception
-                    stream.Position = 0;
+            var factoryEnumerator = factories.GetEnumerator();
+            factoryEnumerator.MoveNext();
 
+            while (true)
+            {
+                try
+                {
+                    var stream = factoryEnumerator.Current.OpenFile(fileInfo);
                     return stream;
                 }
-                catch (FFmpegSourceStream.FileNotSeekableException) {
-                    /* 
-                     * This exception gets thrown if a file is not seekable and therefore cannot
-                     * provide all the functionality that is needed for an IAudioStream, although
-                     * the problem could be solved by creating a seek index. See FFmpegSourceStream
-                     * for further information.
-                     * 
-                     * For now, we create a WAV proxy file, because it is easier (consumes 
-                     * additional space though).
-                     */
-                    Console.WriteLine("File not seekable, creating proxy file...");
-                    return TryOpenSourceStream(FFmpegSourceStream.CreateWaveProxy(fileInfo));
-                }
-                catch (FFmpegSourceStream.FileSeekException) {
-                    /* 
-                     * This exception gets thrown if a file should be seekable but seeking still does 
-                     * not work correctly. We also create a proxy in this case.
-                     */
-                    Console.WriteLine("File test seek failed, creating proxy file...");
-                    return TryOpenSourceStream(FFmpegSourceStream.CreateWaveProxy(fileInfo));
-                }
-                catch (DllNotFoundException e) {
-                    throw new DllNotFoundException("Cannot open file through FFmpeg: DLL missing", e);
+                catch (Exception e)
+                {
+                    if (!factoryEnumerator.MoveNext())
+                    {
+                        // Throw last exception if there is no more factory to try
+                        throw e;
+                    }
                 }
             }
         }
