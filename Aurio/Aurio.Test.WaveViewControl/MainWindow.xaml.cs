@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Aurio;
+using Aurio.Resampler;
 
 namespace Aurio {
     /// <summary>
@@ -20,6 +21,9 @@ namespace Aurio {
     public partial class MainWindow : Window {
         public MainWindow() {
             InitializeComponent();
+
+            // Use Soxr as resampler implementation
+            ResamplerFactory.Factory = new Aurio.Soxr.ResamplerFactory();
         }
 
         private void button1_Click(object sender, RoutedEventArgs e) {

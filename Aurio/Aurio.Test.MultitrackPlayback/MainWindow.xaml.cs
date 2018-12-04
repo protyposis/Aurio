@@ -19,6 +19,8 @@ using System.Timers;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using Aurio;
+using Aurio.FFT;
+using Aurio.Resampler;
 
 namespace Aurio.Test.MultitrackPlayback {
     /// <summary>
@@ -35,6 +37,11 @@ namespace Aurio.Test.MultitrackPlayback {
 
         public MainWindow() {
             InitializeComponent();
+
+            // Use PFFFT as FFT implementation
+            FFTFactory.Factory = new Aurio.PFFFT.FFTFactory();
+            // Use Soxr as resampler implementation
+            ResamplerFactory.Factory = new Aurio.Soxr.ResamplerFactory();
         }
 
         private void btnAddFile_Click(object sender, RoutedEventArgs e) {

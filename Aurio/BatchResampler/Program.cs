@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Aurio.FFT;
+using Aurio.FFmpeg;
 
 namespace BatchResampler
 {
@@ -15,6 +17,13 @@ namespace BatchResampler
     {
         private static void Main(string[] args)
         {
+            // Use PFFFT as FFT implementation
+            FFTFactory.Factory = new Aurio.PFFFT.FFTFactory();
+            // Use Soxr as resampler implementation
+            ResamplerFactory.Factory = new Aurio.Soxr.ResamplerFactory();
+            // Use FFmpeg for file reading/decoding
+            AudioStreamFactory.AddFactory(new FFmpegAudioStreamFactory());
+
             try
             {
                 // read config file

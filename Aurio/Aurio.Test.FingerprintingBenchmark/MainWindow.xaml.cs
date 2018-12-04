@@ -1,6 +1,8 @@
 ﻿using Aurio;
+using Aurio.FFT;
 using Aurio.Matching;
 using Aurio.Project;
+using Aurio.Resampler;
 using Aurio.TaskMonitor;
 using System;
 using System.Collections.Generic;
@@ -33,6 +35,11 @@ namespace Aurio.Test.FingerprintingBenchmark {
             progressMonitor = ProgressMonitor.GlobalInstance;
             benchmarkResults = new ObservableCollection<BenchmarkEntry>();
             dataGrid1.ItemsSource = benchmarkResults;
+
+            // Use PFFFT as FFT implementation
+            FFTFactory.Factory = new Aurio.PFFFT.FFTFactory();
+            // Use Soxr as resampler implementation
+            ResamplerFactory.Factory = new Aurio.Soxr.ResamplerFactory();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
