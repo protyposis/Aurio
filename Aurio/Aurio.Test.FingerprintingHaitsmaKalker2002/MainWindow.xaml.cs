@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Aurio;
+using Aurio.FFmpeg;
+using Aurio.FFT;
 using Aurio.Matching;
 using Aurio.Matching.HaitsmaKalker2002;
 using Aurio.Project;
+using Aurio.Resampler;
 using Aurio.TaskMonitor;
 
 namespace Aurio.Test.FingerprintingHaitsmaKalker2002 {
@@ -22,6 +25,13 @@ namespace Aurio.Test.FingerprintingHaitsmaKalker2002 {
 
         public MainWindow() {
             InitializeComponent();
+
+            // Use PFFFT as FFT implementation
+            FFTFactory.Factory = new Aurio.PFFFT.FFTFactory();
+            // Use Soxr as resampler implementation
+            ResamplerFactory.Factory = new Aurio.Soxr.ResamplerFactory();
+            // Use FFmpeg for file reading/decoding
+            AudioStreamFactory.AddFactory(new FFmpegAudioStreamFactory());
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {

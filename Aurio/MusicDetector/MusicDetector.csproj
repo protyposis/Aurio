@@ -95,6 +95,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Aurio.FFmpeg\Aurio.FFmpeg.csproj">
+      <Project>{8a1a603c-7005-4cc0-9ab7-e6fd3f58f621}</Project>
+      <Name>Aurio.FFmpeg</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Aurio\Aurio.csproj">
       <Project>{E868D91E-C5CF-46E4-BE2F-F95353ACB5E2}</Project>
       <Name>Aurio</Name>

@@ -5,6 +5,10 @@ using System.Text;
 using System.IO;
 using Aurio.Project;
 using Aurio.Features.ContinuousFrequencyActivation;
+using Aurio.FFT;
+using Aurio.Resampler;
+using Aurio;
+using Aurio.FFmpeg;
 
 namespace MusicDetector {
     class Program {
@@ -21,6 +25,13 @@ namespace MusicDetector {
                                   "to a seperate error.log text file.");
                 return;
             }
+
+            // Use PFFFT as FFT implementation
+            FFTFactory.Factory = new Aurio.PFFFT.FFTFactory();
+            // Use Soxr as resampler implementation
+            ResamplerFactory.Factory = new Aurio.Soxr.ResamplerFactory();
+            // Use FFmpeg for file reading/decoding
+            AudioStreamFactory.AddFactory(new FFmpegAudioStreamFactory());
 
             Queue<FileInfo> scanQueue = new Queue<FileInfo>();
 

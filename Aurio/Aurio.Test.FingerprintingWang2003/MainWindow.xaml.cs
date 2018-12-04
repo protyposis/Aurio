@@ -1,6 +1,8 @@
-﻿using Aurio.Matching;
+﻿using Aurio.FFT;
+using Aurio.Matching;
 using Aurio.Matching.Wang2003;
 using Aurio.Project;
+using Aurio.Resampler;
 using Aurio.Streams;
 using Aurio.TaskMonitor;
 using Aurio.WaveControls;
@@ -29,6 +31,11 @@ namespace Aurio.Test.FingerprintingWang2003 {
     public partial class MainWindow : Window {
         public MainWindow() {
             InitializeComponent();
+
+            // Use PFFFT as FFT implementation
+            FFTFactory.Factory = new Aurio.PFFFT.FFTFactory();
+            // Use Soxr as resampler implementation
+            ResamplerFactory.Factory = new Aurio.Soxr.ResamplerFactory();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {

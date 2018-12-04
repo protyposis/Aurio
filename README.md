@@ -38,6 +38,13 @@ Aurio.WaveControls provides WPF widgets for user interfaces:
 What's new
 ----------
 
+### 2018-12-04
+* Introduced `IAudioStreamFactory` pattern that allows to register external audio stream factories in `AudioStreamFactory` to read streams
+* Removed FFmpeg dependency from core
+  * Moved `FFmpegSourceStream` to `Aurio.FFmpeg`
+  * Added `FFmpegAudioStreamFactory` to `Aurio.FFmpeg`
+* Updated test apps and tools with factory initializations
+
 ### 2018-03-22 5af5339
 * Converted all Aurio library packages to .NET Standard 2.0 for .NET Core 2.0 compatibility
   * Updated WPF GUI apps from NET Framework 4.0 to 4.6.2 for .NET Standard 2.0 compatibility

@@ -17,7 +17,7 @@
 //
 
 using Aurio.FFmpeg;
-using NAudio.Wave;
+using Aurio.Streams;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,7 +26,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Aurio.Streams {
+namespace Aurio.FFmpeg {
     public class FFmpegSourceStream : IAudioStream {
 
         private Stream sourceStream;
@@ -263,18 +263,13 @@ namespace Aurio.Streams {
 
             var reader = new FFmpegReader(fileInfo, FFmpeg.Type.Audio);
 
-            // workaround to get NAudio WaveFormat (instead of creating it manually here)
-            var mss = new MemorySourceStream(null, new AudioProperties(
+            var writer = new MemoryWriterStream(new AudioProperties(
                 reader.AudioOutputConfig.format.channels, 
                 reader.AudioOutputConfig.format.sample_rate, 
                 reader.AudioOutputConfig.format.sample_size * 8, 
                 reader.AudioOutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM));
-            var nass = new NAudioSinkStream(mss);
-            var waveFormat = nass.WaveFormat;
 
-            var writer = new WaveFileWriter(outputFileInfo.FullName, waveFormat);
-
-            int output_buffer_size = reader.AudioOutputConfig.frame_size * mss.SampleBlockSize;
+            int output_buffer_size = reader.AudioOutputConfig.frame_size * writer.SampleBlockSize;
             byte[] output_buffer = new byte[output_buffer_size];
 
             int samplesRead;
@@ -283,11 +278,16 @@ namespace Aurio.Streams {
 
             // sequentially read samples from decoder and write it to wav file
             while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0) {
-                int bytesRead = samplesRead * mss.SampleBlockSize;
+                int bytesRead = samplesRead * writer.SampleBlockSize;
                 writer.Write(output_buffer, 0, bytesRead);
             }
 
             reader.Dispose();
+
+            writer.Position = 0;
+
+            AudioStreamFactory.WriteToFile(writer, outputFileInfo.FullName);
+
             writer.Close();
 
             return outputFileInfo;

@@ -22,6 +22,9 @@ namespace Aurio.Test.Streams {
     public partial class MainWindow : Window {
         public MainWindow() {
             InitializeComponent();
+
+            // Use Soxr as resampler implementation
+            ResamplerFactory.Factory = new Aurio.Soxr.ResamplerFactory();
         }
 
         private void button1_Click(object sender, RoutedEventArgs e) {

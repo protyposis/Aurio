@@ -301,11 +301,15 @@ namespace Aurio.WaveControls {
         }
 
         private void ApplyLineBrushToRenderers() {
-            foreach (var renderer in waveformBitmapRenderers) {
-                renderer.WaveformLine = _lineBrush;
+            if (waveformBitmapRenderers != null) {
+                foreach (var renderer in waveformBitmapRenderers) {
+                    renderer.WaveformLine = _lineBrush;
+                }
             }
-            foreach (var renderer in waveformGeometryRenderers) {
-                renderer.WaveformLine = _lineBrush;
+            if (waveformGeometryRenderers != null) {
+                foreach (var renderer in waveformGeometryRenderers) {
+                    renderer.WaveformLine = _lineBrush;
+                }
             }
         }
 
