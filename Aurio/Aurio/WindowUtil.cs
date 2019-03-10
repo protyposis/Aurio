@@ -95,7 +95,10 @@ namespace Aurio {
         /// </summary>
         public static void HannPeriodic(float[] samples, int offset, int length) {
             float[] hann = GetArray(WindowType.Hann, length + 1);
-            Buffer.BlockCopy(hann, 0, samples, offset, length * sizeof(float));
+
+            for (int x = offset; x < offset + length; x++) {
+                samples[x] *= hann[x];
+            }
         }
 
         public static void Hamming(float[] samples, int offset, int length) {
