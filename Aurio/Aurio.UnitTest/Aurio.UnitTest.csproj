@@ -150,6 +150,7 @@
     <Compile Include="StreamWindowerTest.cs" />
     <Compile Include="CircularMemoryWriterStreamTest.cs" />
     <Compile Include="BlockingFixedLengthFifoStreamTest.cs" />
+    <Compile Include="WindowTest.cs" />
     <Compile Include="VolumeUtilTest.cs" />
   </ItemGroup>
   <ItemGroup>
