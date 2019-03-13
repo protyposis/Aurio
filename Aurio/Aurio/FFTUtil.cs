@@ -151,7 +151,7 @@ namespace Aurio {
             int y = 0;
             for (int x = 0; x < fftOutput.Length; x += 2) {
                 // calculate magnitude of a FFT bin (L2 norm)
-                // divide magnitudes by FFT input length (so that they aren't dependent in the input length)
+                // divide magnitudes by FFT input length (so that they aren't dependent on the input length)
                 // multiply by 2 since the FFT result only contains half of the energy (the second half are the negative frequencies of the "full" FFT result)
                 // calculate dB scale value
                 // http://www.mathworks.de/support/tech-notes/1700/1702.html
