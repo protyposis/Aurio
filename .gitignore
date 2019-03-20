@@ -4,6 +4,10 @@ obj/
 *.sdf
 *.opensdf
 .vs
+*.vcxproj.user
+*.DotSettings.user
+*.VC.db
+.idea/
 
 # NuGet
 **/packages/*
