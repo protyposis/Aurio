@@ -197,5 +197,13 @@ namespace Aurio {
             }
             return freqs;
         }
+
+        public static int CalculateFrequencyBinIndex(int sampleRate, float frequency, int binCount)
+        {
+            float floatBinIndex = (float)binCount / sampleRate * frequency;
+
+            // Round to the nearest bin index, that's where most of the energy of the frequency will be
+            return (int) Math.Min(Math.Round(floatBinIndex), binCount - 1);
+        }
     }
 }
