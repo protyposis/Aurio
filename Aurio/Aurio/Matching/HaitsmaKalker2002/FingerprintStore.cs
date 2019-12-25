@@ -95,20 +95,20 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
             get { return store; }
         }
 
-        public void Add(SubFingerprintsGeneratedEventArgs e, bool suppressSilentCollisions = false) {
-            if (e.SubFingerprints.Count == 0) {
+        public void Add(AudioTrack audioTrack, List<SubFingerprint> subFingerprints, bool suppressSilentCollisions = false) {
+            if (subFingerprints.Count == 0) {
                 return;
             }
 
             lock (this) {
-                if (!store.ContainsKey(e.AudioTrack)) {
-                    store.Add(e.AudioTrack, new List<SubFingerprintHash>());
+                if (!store.ContainsKey(audioTrack)) {
+                    store.Add(audioTrack, new List<SubFingerprintHash>());
                 }
 
-                foreach (var sfp in e.SubFingerprints) {
+                foreach (var sfp in subFingerprints) {
                     if (!sfp.IsVariation) {
                         // store the sub-fingerprint in the sequential list of the audio track
-                        store[e.AudioTrack].Add(sfp.Hash);
+                        store[audioTrack].Add(sfp.Hash);
                     }
 
                     if (suppressSilentCollisions && sfp.Hash.Value == 0)
@@ -118,9 +118,14 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
                     }
 
                     // insert a track/index lookup entry for the sub-fingerprint
-                    collisionMap.Add(sfp.Hash, new SubFingerprintLookupEntry(e.AudioTrack, sfp.Index));
+                    collisionMap.Add(sfp.Hash, new SubFingerprintLookupEntry(audioTrack, sfp.Index));
                 }
             }
+        }
+
+        public void Add(SubFingerprintsGeneratedEventArgs e, bool suppressSilentCollisions = false)
+        {
+            Add(e.AudioTrack, e.SubFingerprints, suppressSilentCollisions);
         }
 
         public List<Match> FindMatches(SubFingerprintHash hash) {
