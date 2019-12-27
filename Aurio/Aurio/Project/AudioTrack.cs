@@ -85,6 +85,8 @@ namespace Aurio.Project {
             sourceProperties = stream.Properties;
         }
 
+        protected AudioTrack() { }
+
         public override MediaType MediaType {
             get { return MediaType.Audio; }
         }

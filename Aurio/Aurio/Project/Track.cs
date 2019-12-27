@@ -58,6 +58,8 @@ namespace Aurio.Project {
             this.Name = name;
         }
 
+        protected Track() { }
+
         protected string GenerateName() {
             string name = FileInfo.Name;
             if(MultiFile) {
