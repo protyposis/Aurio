@@ -190,7 +190,7 @@ namespace Aurio.Matching {
         /// each window according to the specified filter mode.
         /// </summary>
         /// <returns>a list of matches containing at least one match</returns>
-        public static List<Match> WindowFilter(List<Match> matches, MatchFilterMode mode, TimeSpan windowSize) {
+        public static List<Match> WindowFilter(List<Match> matches, MatchFilterMode mode, TimeSpan windowSize, Action<double> progressCallback = null) {
             if (matches.Count == 0) {
                 throw new ArgumentException("no matches to filter");
             }
@@ -217,6 +217,8 @@ namespace Aurio.Matching {
             TimeSpan filterWindowEnd = windowSize;
             List<Match> filterWindowMatches = new List<Match>();
             List<Match> filteredWindowMatches = new List<Match>();
+            long windowCount = matches.Last().Track1Time.Ticks / windowSize.Ticks;
+            long currentWindowIndex = 0;
 
             while (filterWindowStart < matches.Last().Track1Time) {
                 // get matches belonging to the current window
@@ -232,6 +234,8 @@ namespace Aurio.Matching {
                 }
                 filterWindowStart += filterWindow;
                 filterWindowEnd += filterWindow;
+                currentWindowIndex++;
+                progressCallback?.Invoke(100d / windowCount * currentWindowIndex);
             }
 
             return filteredWindowMatches;
