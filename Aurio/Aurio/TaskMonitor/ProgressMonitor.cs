@@ -170,11 +170,11 @@ namespace Aurio.TaskMonitor {
                 reporters.Add(reporter);
             }
 
-            if(started) {
+            OnTaskBegun(reporter);
+
+            if (started) {
                 OnProcessingStarted();
             }
-
-            OnTaskBegun(reporter);
 
             return reporter;
         }
