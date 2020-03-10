@@ -63,7 +63,7 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
 
         public void Generate() {
             IAudioStream audioStream = inputTrack.File ? 
-                AudioStreamFactory.FromFileInfoIeee32(inputTrack.FileInfo) : 
+                inputTrack.CreateAudioStream(false) : 
                 inputTrack.Stream;
 
             audioStream = new MonoStream(audioStream);

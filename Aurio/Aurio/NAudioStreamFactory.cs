@@ -27,7 +27,7 @@ namespace Aurio
 {
     class NAudioStreamFactory : IAudioStreamFactory
     {
-        public IAudioStream OpenFile(FileInfo fileInfo)
+        public IAudioStream OpenFile(FileInfo fileInfo, FileInfo proxyFileInfo = null)
         {
             if (fileInfo.Extension.Equals(".wav"))
             {
