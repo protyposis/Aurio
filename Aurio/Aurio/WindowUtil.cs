@@ -90,7 +90,7 @@ namespace Aurio {
         }
 
         /// <summary>
-        /// Hann window with COLA property when length is even hop size is length/2, useful for FFT and overlap-add.
+        /// Hann window with COLA property when length is even and hop size is length/2, useful for FFT and overlap-add.
         /// For uneven lengths, COLA can be achieved by using the normal Hann window with a hop size of (length-1)/2.
         /// </summary>
         public static void HannPeriodic(float[] samples, int offset, int length) {
