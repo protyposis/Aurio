@@ -45,11 +45,12 @@ namespace Aurio.Project {
         private bool monoDownmix = false;
         private TimeWarpCollection timeWarps;
 
-        public AudioTrack(FileInfo[] fileInfos, bool initialize)
+        public AudioTrack(FileInfo[] fileInfos, bool initialize, FileInfo[] proxyFileInfos = null)
             : base(fileInfos) {
                 this.TimeWarps = new TimeWarpCollection();
+                ProxyFileInfos = proxyFileInfos;
                 if (initialize) {
-                    using (IAudioStream stream = AudioStreamFactory.FromFileInfo(FileInfo)) {
+                    using (IAudioStream stream = AudioStreamFactory.FromFileInfo(FileInfo, ProxyFileInfos.Length > 0 ? ProxyFileInfo : null)) {
                         sourceProperties = stream.Properties;
                         if (MultiFile) {
                             // For multi-file tracks, we need to get a concatenated stream of all files for the length
@@ -75,6 +76,11 @@ namespace Aurio.Project {
             : this(new FileInfo[] { fileInfo }, true) {
         }
 
+        public AudioTrack(FileInfo fileInfo, FileInfo proxyFileInfo)
+            : this(new FileInfo[] { fileInfo }, true, new FileInfo[] { proxyFileInfo })
+        {
+        }
+
         public AudioTrack(IAudioStream stream, string name) : base(stream, name) {
             sourceProperties = stream.Properties;
         }
@@ -89,14 +95,28 @@ namespace Aurio.Project {
             }
         }
 
-        public IAudioStream CreateAudioStream() {
+        public IAudioStream CreateAudioStream(bool warp = true) {
             IAudioStream stream = null;
             if(MultiFile) {
-                stream = new ConcatenationStream(FileInfos.Select(fi => AudioStreamFactory.FromFileInfoIeee32(fi)).ToArray());
+                var fileInfos = ProxyFileInfos.Select(fi => fi.Exists).Count() < ProxyFileInfos.Length ? FileInfos : ProxyFileInfos;
+                stream = new ConcatenationStream(fileInfos.Select(fi => AudioStreamFactory.FromFileInfoIeee32(fi)).ToArray());
             } else {
-                stream = AudioStreamFactory.FromFileInfoIeee32(FileInfo);
+                if (HasProxyFile)
+                {
+                    stream = AudioStreamFactory.FromFileInfoIeee32(ProxyFileInfo);
+                }
+                else
+                {
+                    stream = AudioStreamFactory.FromFileInfoIeee32(FileInfo, ProxyFileInfo);
+                }
             }
-            return new TimeWarpStream(stream, timeWarps);
+
+            if (warp)
+            {
+                return new TimeWarpStream(stream, timeWarps);
+            }
+
+            return stream;
         }
 
         protected string GeneratePeakFileName() {
@@ -131,6 +151,21 @@ namespace Aurio.Project {
 
         public AudioProperties SourceProperties {
             get { return sourceProperties; }
+        }
+
+        public FileInfo ProxyFileInfo
+        {
+            get { return ProxyFileInfos.Length > 0 ? ProxyFileInfos[0] : null; }
+        }
+
+        public FileInfo[] ProxyFileInfos { get; private set; }
+
+        public bool HasProxyFile
+        {
+            get
+            {
+                return ProxyFileInfo.Exists;
+            }
         }
 
         /// <summary>

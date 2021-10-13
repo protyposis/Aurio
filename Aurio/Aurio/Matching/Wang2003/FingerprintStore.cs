@@ -73,35 +73,35 @@ namespace Aurio.Matching.Wang2003 {
             get { return collisionMap; }
         }
 
-        public void Add(SubFingerprintsGeneratedEventArgs e) {
-            if (e.SubFingerprints.Count == 0) {
+        public void Add(AudioTrack audioTrack, List<SubFingerprint> subFingerprints) {
+            if (subFingerprints.Count == 0) {
                 return;
             }
 
             lock (this) {
                 // Make sure there's a store for the track and get it
-                if (!store.ContainsKey(e.AudioTrack)) {
-                    store.Add(e.AudioTrack, new TrackStore());
+                if (!store.ContainsKey(audioTrack)) {
+                    store.Add(audioTrack, new TrackStore());
                 }
-                var trackStore = store[e.AudioTrack];
+                var trackStore = store[audioTrack];
 
                 int hashListIndex = 0;
                 SubFingerprint hash;
 
                 // Iterate through the sequence of input hashes and add them to the store (in batches of the same frame index)
-                while (e.SubFingerprints.Count > hashListIndex) {
+                while (subFingerprints.Count > hashListIndex) {
                     int storeHashIndex = trackStore.hashes.Count;
-                    int storeIndex = e.SubFingerprints[hashListIndex].Index;
+                    int storeIndex = subFingerprints[hashListIndex].Index;
                     int hashCount = 0;
 
                     // Count all sequential input hashes with the same frame index (i.e. batch) and add them to the store
-                    while (e.SubFingerprints.Count > hashListIndex + hashCount
-                        && (hash = e.SubFingerprints[hashListIndex + hashCount]).Index == storeIndex) {
+                    while (subFingerprints.Count > hashListIndex + hashCount
+                        && (hash = subFingerprints[hashListIndex + hashCount]).Index == storeIndex) {
                         // Insert hash into the sequential store
                         trackStore.hashes.Add(hash.Hash);
 
                         // Insert a track/index lookup entry for the fingerprint hash
-                        collisionMap.Add(hash.Hash, new SubFingerprintLookupEntry(e.AudioTrack, hash.Index));
+                        collisionMap.Add(hash.Hash, new SubFingerprintLookupEntry(audioTrack, hash.Index));
 
                         hashCount++;
                     }
@@ -125,6 +125,11 @@ namespace Aurio.Matching.Wang2003 {
                     hashListIndex += hashCount;
                 }
             }
+        }
+
+        public void Add(SubFingerprintsGeneratedEventArgs e)
+        {
+            Add(e.AudioTrack, e.SubFingerprints);
         }
 
         public List<Match> FindMatches(SubFingerprintHash hash) {

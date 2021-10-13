@@ -26,6 +26,6 @@ namespace Aurio
 {
     public interface IAudioStreamFactory
     {
-        IAudioStream OpenFile(FileInfo fileInfo);
+        IAudioStream OpenFile(FileInfo fileInfo, FileInfo proxyFileInfo = null);
     }
 }

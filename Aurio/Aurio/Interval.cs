@@ -32,6 +32,12 @@ namespace Aurio {
             this.to = to;
         }
 
+        public Interval(TimeSpan from, TimeSpan to)
+        {
+            this.from = from.Ticks;
+            this.to = to.Ticks;
+        }
+
         public long From {
             get { return from; }
             set { from = value; }

@@ -170,11 +170,11 @@ namespace Aurio.TaskMonitor {
                 reporters.Add(reporter);
             }
 
-            if(started) {
+            OnTaskBegun(reporter);
+
+            if (started) {
                 OnProcessingStarted();
             }
-
-            OnTaskBegun(reporter);
 
             return reporter;
         }
@@ -236,17 +236,22 @@ namespace Aurio.TaskMonitor {
 
         private void OnProcessingProgressChanged() {
             float progress = 0;
+            int progressValueReporterCount = 0;
 
             lock (lockObject) {
                 if (reporters.Count > 0) {
                     foreach (ProgressReporter reporter in reporters) {
-                        progress += (float)reporter.Progress;
+                        if (reporter.IsProgressReporting)
+                        {
+                            progress += (float)reporter.Progress;
+                            progressValueReporterCount++;
+                        }
                     }
-                    progress /= reporters.Count;
+                    progress /= progressValueReporterCount;
                 }
             }
 
-            if (ProcessingProgressChanged != null) {
+            if (progressValueReporterCount > 0 && ProcessingProgressChanged != null) {
                 ProcessingProgressChanged(this, new ValueEventArgs<float>(progress));
             }
 

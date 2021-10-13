@@ -61,7 +61,7 @@ namespace Aurio {
             return null;
         }
 
-        private static IAudioStream TryOpenSourceStream(FileInfo fileInfo) {
+        private static IAudioStream TryOpenSourceStream(FileInfo fileInfo, FileInfo proxyFileInfo = null) {
             if (factories.Count == 0)
             {
                 throw new NotSupportedException("Cannot open file " + fileInfo.FullName);
@@ -74,7 +74,7 @@ namespace Aurio {
             {
                 try
                 {
-                    var stream = factoryEnumerator.Current.OpenFile(fileInfo);
+                    var stream = factoryEnumerator.Current.OpenFile(fileInfo, proxyFileInfo);
                     return stream;
                 }
                 catch (Exception e)
@@ -88,12 +88,12 @@ namespace Aurio {
             }
         }
 
-        public static IAudioStream FromFileInfo(FileInfo fileInfo) {
-            return TryOpenSourceStream(fileInfo);
+        public static IAudioStream FromFileInfo(FileInfo fileInfo, FileInfo proxyFileInfo = null) {
+            return TryOpenSourceStream(fileInfo, proxyFileInfo);
         }
 
-        public static IAudioStream FromFileInfoIeee32(FileInfo fileInfo) {
-            return new IeeeStream(TryOpenSourceStream(fileInfo));
+        public static IAudioStream FromFileInfoIeee32(FileInfo fileInfo, FileInfo proxyFileInfo = null) {
+            return new IeeeStream(TryOpenSourceStream(fileInfo, proxyFileInfo));
         }
 
         public static VisualizingStream FromAudioTrackForGUI(AudioTrack audioTrack) {

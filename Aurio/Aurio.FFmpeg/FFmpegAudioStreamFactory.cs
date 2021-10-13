@@ -26,12 +26,12 @@ namespace Aurio.FFmpeg
 {
     public class FFmpegAudioStreamFactory : IAudioStreamFactory
     {
-        public IAudioStream OpenFile(FileInfo fileInfo)
+        public IAudioStream OpenFile(FileInfo fileInfo, FileInfo proxyFileInfo = null)
         {
             if (FFmpegSourceStream.WaveProxySuggested(fileInfo))
             {
                 Console.WriteLine("File format with known seek problems, creating proxy file...");
-                return AudioStreamFactory.FromFileInfo(FFmpegSourceStream.CreateWaveProxy(fileInfo));
+                return AudioStreamFactory.FromFileInfo(FFmpegSourceStream.CreateWaveProxy(fileInfo, proxyFileInfo));
             }
             else
             {
@@ -56,7 +56,7 @@ namespace Aurio.FFmpeg
                      * additional space though).
                      */
                     Console.WriteLine("File not seekable, creating proxy file...");
-                    return AudioStreamFactory.FromFileInfo(FFmpegSourceStream.CreateWaveProxy(fileInfo));
+                    return AudioStreamFactory.FromFileInfo(FFmpegSourceStream.CreateWaveProxy(fileInfo, proxyFileInfo));
                 }
                 catch (FFmpegSourceStream.FileSeekException)
                 {
@@ -65,7 +65,7 @@ namespace Aurio.FFmpeg
                      * not work correctly. We also create a proxy in this case.
                      */
                     Console.WriteLine("File test seek failed, creating proxy file...");
-                    return AudioStreamFactory.FromFileInfo(FFmpegSourceStream.CreateWaveProxy(fileInfo));
+                    return AudioStreamFactory.FromFileInfo(FFmpegSourceStream.CreateWaveProxy(fileInfo, proxyFileInfo));
                 }
                 catch (DllNotFoundException e)
                 {
