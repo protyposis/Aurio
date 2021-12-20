@@ -205,7 +205,9 @@ namespace Aurio.Project {
             return null;
         }
 
-        public static Project Load(FileInfo sourceFile) {
+        public static Project Load(FileInfo sourceFile, Func<string, Exception, bool> skipErrorCb = null) {
+            skipErrorCb = skipErrorCb ?? ((string fileName, Exception e) => { return false; });
+
             Project project = new Project();
             Stream stream = sourceFile.OpenRead();
             XmlTextReader xml = new XmlTextReader(stream);
@@ -238,18 +240,34 @@ namespace Aurio.Project {
                     while (xml.IsStartElement("track")) {
                         xml.MoveToAttribute("file");
                         string file = xml.Value;
-                        AudioTrack track = new AudioTrack(GetFileInfo(sourceFile, file));
+                        AudioTrack track = null;
 
                         xml.MoveToAttribute("name");
-                        track.Name = xml.Value;
+                        string name = xml.Value;
+
+                        xml.MoveToAttribute("length");
+                        TimeSpan length = TimeSpan.Parse(xml.Value);
+
+                        try
+                        {
+                            track = new AudioTrack(GetFileInfo(sourceFile, file));
+                        }
+                        catch (Exception e)
+                        {
+                            if (skipErrorCb(file, e))
+                            {
+                                track = new DummyAudioTrack("(OFFLINE) " + name, length);
+                            }
+                            else
+                            {
+                                throw e;
+                            }
+                        }
 
                         string color = xml.GetAttribute("color");
                         if (color != null) {
                             track.Color = color;
                         }
-
-                        xml.MoveToAttribute("length");
-                        track.Length = TimeSpan.Parse(xml.Value);
 
                         xml.MoveToAttribute("offset");
                         track.Offset = TimeSpan.Parse(xml.Value);
@@ -300,7 +318,7 @@ namespace Aurio.Project {
 
                         xml.ReadEndElement(); // track
                         project.AudioTracks.Add(track);
-                    }
+                        }
                     xml.ReadEndElement(); // audiotracks
                 }
             }
