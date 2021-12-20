@@ -48,7 +48,7 @@ namespace Aurio.Project {
         public AudioTrack(FileInfo[] fileInfos, bool initialize, FileInfo[] proxyFileInfos = null)
             : base(fileInfos) {
                 this.TimeWarps = new TimeWarpCollection();
-                ProxyFileInfos = proxyFileInfos;
+                ProxyFileInfos = proxyFileInfos ?? new FileInfo[] { };
                 if (initialize) {
                     using (IAudioStream stream = AudioStreamFactory.FromFileInfo(FileInfo, ProxyFileInfos.Length > 0 ? ProxyFileInfo : null)) {
                         sourceProperties = stream.Properties;
@@ -166,7 +166,7 @@ namespace Aurio.Project {
         {
             get
             {
-                return ProxyFileInfo.Exists;
+                return ProxyFileInfo != null && ProxyFileInfo.Exists;
             }
         }
 
