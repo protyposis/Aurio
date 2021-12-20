@@ -99,7 +99,7 @@ namespace Aurio {
         public static VisualizingStream FromAudioTrackForGUI(AudioTrack audioTrack) {
             VisualizingStream visualizingStream = 
                 new VisualizingStream(audioTrack.CreateAudioStream(),
-                    CreatePeakStore(audioTrack, audioTrack.TimeWarps.Count == 0));
+                    CreatePeakStore(audioTrack, !audioTrack.Offline && audioTrack.TimeWarps.Count == 0));
 
             // TODO if timewarps are added but total length stays the same, the peakstore still has to be refreshed
             audioTrack.LengthChanged += delegate(object sender, ValueEventArgs<TimeSpan> e) {

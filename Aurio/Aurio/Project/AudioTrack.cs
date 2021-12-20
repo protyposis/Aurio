@@ -85,7 +85,13 @@ namespace Aurio.Project {
             sourceProperties = stream.Properties;
         }
 
-        protected AudioTrack() { }
+        protected AudioTrack(AudioProperties sourceProperties) {
+            this.sourceProperties = sourceProperties;
+            this.TimeWarps = new TimeWarpCollection();
+            FileInfos = new FileInfo[] { };
+            ProxyFileInfos = new FileInfo[] { };
+            Offline = true;
+        }
 
         public override MediaType MediaType {
             get { return MediaType.Audio; }
@@ -97,7 +103,7 @@ namespace Aurio.Project {
             }
         }
 
-        public IAudioStream CreateAudioStream(bool warp = true) {
+        public virtual IAudioStream CreateAudioStream(bool warp = true) {
             IAudioStream stream = null;
             if(MultiFile) {
                 var fileInfos = ProxyFileInfos.Select(fi => fi.Exists).Count() < ProxyFileInfos.Length ? FileInfos : ProxyFileInfos;
@@ -147,7 +153,7 @@ namespace Aurio.Project {
 
         public bool HasPeakFile {
             get {
-                return PeakFile.Exists;
+                return !Offline && PeakFile.Exists;
             }
         }
 
@@ -202,6 +208,11 @@ namespace Aurio.Project {
         /// Gets or sets a value telling if this track's audio channels should be downmixed to a mono signal.
         /// </summary>
         public bool MonoDownmix { get { return monoDownmix; } set { monoDownmix = value; OnMonoDownmixChanged(); } }
+
+        /// <summary>
+        /// Determines if the file(s) of this track are physically available.
+        /// </summary>
+        public bool Offline { get; protected set; }
 
         public TimeWarpCollection TimeWarps {
             get { return timeWarps; }

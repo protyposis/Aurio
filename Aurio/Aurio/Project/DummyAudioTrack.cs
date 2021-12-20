@@ -10,10 +10,22 @@ namespace Aurio.Project
     /// </summary>
     public class DummyAudioTrack : AudioTrack
     {
-        public DummyAudioTrack(string name, TimeSpan length)
+        public DummyAudioTrack(string name, TimeSpan length): base(new AudioProperties(1, 44100, 32, AudioFormat.IEEE))
         {
             Name = name;
             Length = length;
+        }
+
+        public override IAudioStream CreateAudioStream(bool warp = true)
+        {
+            IAudioStream stream = new SineGeneratorStream(SourceProperties.SampleRate, 0f, Length);
+
+            if (warp)
+            {
+                return new TimeWarpStream(stream, TimeWarps);
+            }
+
+            return stream;
         }
     }
 }

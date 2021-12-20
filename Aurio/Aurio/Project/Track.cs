@@ -87,7 +87,7 @@ namespace Aurio.Project {
             get { return FileInfos[0]; }
         }
 
-        public FileInfo[] FileInfos { get; private set; }
+        public FileInfo[] FileInfos { get; protected set; }
 
         public IAudioStream Stream { get; private set; }
 
