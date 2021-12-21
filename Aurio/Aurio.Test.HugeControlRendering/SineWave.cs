@@ -97,7 +97,8 @@ namespace Aurio.Test.HugeControlRendering
                     System.Windows.FlowDirection.LeftToRight,
                     new Typeface("Tahoma"),
                     8,
-                    Brushes.Black),
+                    Brushes.Black,
+                    VisualTreeHelper.GetDpi(this).PixelsPerDip),
                 new Point(ViewportHorizontalOffset, ActualHeight) + new Vector(0, -10));
 
             // generate samples
