@@ -77,12 +77,12 @@ namespace Aurio {
                     var stream = factoryEnumerator.Current.OpenFile(fileInfo, proxyFileInfo);
                     return stream;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     if (!factoryEnumerator.MoveNext())
                     {
                         // Throw last exception if there is no more factory to try
-                        throw e;
+                        throw;
                     }
                 }
             }

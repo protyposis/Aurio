@@ -260,7 +260,7 @@ namespace Aurio.Project {
                             }
                             else
                             {
-                                throw e;
+                                throw;
                             }
                         }
 
