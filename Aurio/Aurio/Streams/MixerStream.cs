@@ -23,8 +23,10 @@ using System.Text;
 using System.Diagnostics;
 using Aurio.DataStructures;
 
-namespace Aurio.Streams {
-    public class MixerStream : IAudioStream {
+namespace Aurio.Streams
+{
+    public class MixerStream : IAudioStream
+    {
 
         private AudioProperties properties;
         private List<IAudioStream> sourceStreams;
@@ -32,7 +34,8 @@ namespace Aurio.Streams {
         private long position;
         private ByteBuffer sourceBuffer;
 
-        public MixerStream(int channels, int sampleRate) {
+        public MixerStream(int channels, int sampleRate)
+        {
             properties = new AudioProperties(channels, sampleRate, 32, AudioFormat.IEEE);
             sourceStreams = new List<IAudioStream>();
             length = 0;
@@ -40,63 +43,81 @@ namespace Aurio.Streams {
             sourceBuffer = new ByteBuffer();
         }
 
-        public void Add(IAudioStream sourceStream) {
-            lock (this) {
+        public void Add(IAudioStream sourceStream)
+        {
+            lock (this)
+            {
                 sourceStreams.Add(sourceStream);
                 UpdateLength();
                 sourceStream.Position = position;
             }
         }
 
-        public void Remove(IAudioStream sourceStream) {
-            lock (this) {
+        public void Remove(IAudioStream sourceStream)
+        {
+            lock (this)
+            {
                 sourceStreams.Remove(sourceStream);
                 UpdateLength();
             }
         }
 
-        public void Clear() {
-            lock (this) {
+        public void Clear()
+        {
+            lock (this)
+            {
                 sourceStreams.Clear();
                 UpdateLength();
             }
         }
 
-        public AudioProperties Properties {
+        public AudioProperties Properties
+        {
             get { return properties; }
         }
 
-        public long Length {
+        public long Length
+        {
             get { return length; }
         }
 
-        public long Position {
-            get {
+        public long Position
+        {
+            get
+            {
                 return position;
             }
-            set {
-                lock (this) {
+            set
+            {
+                lock (this)
+                {
                     position = value;
-                    foreach (IAudioStream s in sourceStreams) {
+                    foreach (IAudioStream s in sourceStreams)
+                    {
                         s.Position = position;
                     }
                 }
             }
         }
 
-        public int SampleBlockSize {
+        public int SampleBlockSize
+        {
             get { return properties.SampleByteSize * properties.Channels; }
         }
 
-        public int SampleRate {
+        public int SampleRate
+        {
             get { return properties.SampleRate; }
             set { properties.SampleRate = value; }
         }
 
-        public int Read(byte[] buffer, int offset, int count) {
-            lock (this) {
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            lock (this)
+            {
                 // check for end of stream
-                if (position > length) {
+                if (position > length)
+                {
                     return 0;
                 }
 
@@ -106,12 +127,16 @@ namespace Aurio.Streams {
                 // clear output buffer (because data won't be overwritten, but summed up)
                 Array.Clear(buffer, offset, count);
                 int maxBytesRead = 0;
-                unsafe {
-                    fixed (byte* outputByteBuffer = &buffer[offset], inputByteBuffer = &sourceBuffer.Data[0]) {
+                unsafe
+                {
+                    fixed (byte* outputByteBuffer = &buffer[offset], inputByteBuffer = &sourceBuffer.Data[0])
+                    {
                         float* outputFloatBuffer = (float*)outputByteBuffer;
                         float* inputFloatBuffer = (float*)inputByteBuffer;
-                        foreach (IAudioStream sourceStream in sourceStreams) {
-                            if (sourceStream.Length <= position) {
+                        foreach (IAudioStream sourceStream in sourceStreams)
+                        {
+                            if (sourceStream.Length <= position)
+                            {
                                 continue;
                             }
 
@@ -120,11 +145,13 @@ namespace Aurio.Streams {
                             int bytesRead = sourceBuffer.ForceFill(sourceStream, count);
 
                             // add stream data to output buffer
-                            for (int x = 0; x < bytesRead / sizeof(float); x++) {
+                            for (int x = 0; x < bytesRead / sizeof(float); x++)
+                            {
                                 outputFloatBuffer[x] += inputFloatBuffer[x];
                             }
 
-                            if (bytesRead > maxBytesRead) {
+                            if (bytesRead > maxBytesRead)
+                            {
                                 maxBytesRead = bytesRead;
                             }
                         }
@@ -135,16 +162,21 @@ namespace Aurio.Streams {
             }
         }
 
-        public void Close() {
-            foreach (IAudioStream s in sourceStreams) {
+        public void Close()
+        {
+            foreach (IAudioStream s in sourceStreams)
+            {
                 s.Close();
             }
         }
 
-        public void UpdateLength() {
-            lock (this) {
+        public void UpdateLength()
+        {
+            lock (this)
+            {
                 long length = 0;
-                foreach (IAudioStream s in sourceStreams) {
+                foreach (IAudioStream s in sourceStreams)
+                {
                     length = Math.Max(length, s.Length);
                 }
                 this.length = length;
@@ -154,9 +186,12 @@ namespace Aurio.Streams {
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     Close();
                 }
 
@@ -164,7 +199,8 @@ namespace Aurio.Streams {
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
         }
         #endregion

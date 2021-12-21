@@ -21,8 +21,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Streams {
-    public enum AudioFormat {
+namespace Aurio.Streams
+{
+    public enum AudioFormat
+    {
         /// <summary>
         /// 16 bit signed short
         /// </summary>

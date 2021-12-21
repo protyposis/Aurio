@@ -22,17 +22,20 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Aurio.FFmpeg {
+namespace Aurio.FFmpeg
+{
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct AudioOutputFormat {
+    public struct AudioOutputFormat
+    {
         public int sample_rate { get; internal set; }
         public int sample_size { get; internal set; }
         public int channels { get; internal set; }
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct AudioOutputConfig {
+    public struct AudioOutputConfig
+    {
         public AudioOutputFormat format { get; internal set; }
         public long length { get; internal set; }
         public int frame_size { get; internal set; }

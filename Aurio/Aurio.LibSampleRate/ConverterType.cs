@@ -21,13 +21,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.LibSampleRate {
+namespace Aurio.LibSampleRate
+{
     /// <summary>
     /// Secret Rabbit Code has a number of different converters which can be selected using the converter_type parameter when calling 
     /// src_simple or src_new. Currently, the five converters available are: 
     /// http://www.mega-nerd.com/SRC/api_misc.html#Converters
     /// </summary>
-    public enum ConverterType : int {
+    public enum ConverterType : int
+    {
         /// <summary>
         /// This is a bandlimited interpolator derived from the mathematical sinc function and this is the highest quality 
         /// sinc based converter, providing a worst case Signal-to-Noise Ratio (SNR) of 97 decibels (dB) at a bandwidth of 97%. 

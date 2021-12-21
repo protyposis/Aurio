@@ -24,12 +24,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Aurio.Test.FingerprintingWang2003 {
+namespace Aurio.Test.FingerprintingWang2003
+{
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window {
-        public MainWindow() {
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
             InitializeComponent();
 
             // Use PFFFT as FFT implementation
@@ -38,32 +41,39 @@ namespace Aurio.Test.FingerprintingWang2003 {
             ResamplerFactory.Factory = new Aurio.Soxr.ResamplerFactory();
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e) {
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
             ProgressMonitor.GlobalInstance.ProcessingProgressChanged += Instance_ProcessingProgressChanged;
             ProgressMonitor.GlobalInstance.ProcessingFinished += GlobalInstance_ProcessingFinished;
         }
 
-        
 
-        private void Instance_ProcessingProgressChanged(object sender, ValueEventArgs<float> e) {
-            progressBar1.Dispatcher.BeginInvoke((Action)delegate {
+
+        private void Instance_ProcessingProgressChanged(object sender, ValueEventArgs<float> e)
+        {
+            progressBar1.Dispatcher.BeginInvoke((Action)delegate
+            {
                 progressBar1.Value = e.Value;
             });
         }
 
-        private void GlobalInstance_ProcessingFinished(object sender, EventArgs e) {
-            progressBar1.Dispatcher.BeginInvoke((Action)delegate {
+        private void GlobalInstance_ProcessingFinished(object sender, EventArgs e)
+        {
+            progressBar1.Dispatcher.BeginInvoke((Action)delegate
+            {
                 progressBar1.Value = 0;
             });
         }
 
-        private void button1_Click(object sender, RoutedEventArgs e) {
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.DefaultExt = ".wav";
             dlg.Multiselect = true;
             dlg.Filter = "Wave files|*.wav";
 
-            if (dlg.ShowDialog() == true) {
+            if (dlg.ShowDialog() == true)
+            {
                 var profile = FingerprintGenerator.GetProfiles()[0];
 
                 spectrogram1.SpectrogramSize = profile.WindowSize / 2;
@@ -81,24 +91,29 @@ namespace Aurio.Test.FingerprintingWang2003 {
 
                 var store = new FingerprintStore(profile);
 
-                Task.Factory.StartNew(() => {
-                    foreach (string file in dlg.FileNames) {
+                Task.Factory.StartNew(() =>
+                {
+                    foreach (string file in dlg.FileNames)
+                    {
                         AudioTrack audioTrack = new AudioTrack(new FileInfo(file));
                         IAudioStream audioStream = audioTrack.CreateAudioStream();
                         IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating fingerprints for " + audioTrack.FileInfo.Name, true);
                         int hashCount = 0;
 
                         FingerprintGenerator fpg = new FingerprintGenerator(profile);
-                        fpg.FrameProcessed += delegate(object sender2, FrameProcessedEventArgs e2) {
+                        fpg.FrameProcessed += delegate (object sender2, FrameProcessedEventArgs e2)
+                        {
                             var spectrum = (float[])e2.Spectrum.Clone();
                             var spectrumResidual = (float[])e2.SpectrumResidual.Clone();
-                            Dispatcher.BeginInvoke((Action)delegate {
+                            Dispatcher.BeginInvoke((Action)delegate
+                            {
                                 spectrogram1.AddSpectrogramColumn(spectrum);
                                 spectrogram2.AddSpectrogramColumn(spectrumResidual);
                                 progressReporter.ReportProgress((double)e2.Index / e2.Indices * 100);
                             });
                         };
-                        fpg.SubFingerprintsGenerated += delegate(object sender2, SubFingerprintsGeneratedEventArgs e2) {
+                        fpg.SubFingerprintsGenerated += delegate (object sender2, SubFingerprintsGeneratedEventArgs e2)
+                        {
                             hashCount += e2.SubFingerprints.Count;
                             store.Add(e2);
                         };

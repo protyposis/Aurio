@@ -23,16 +23,21 @@ using System.Text;
 using System.Diagnostics;
 using Aurio.FFT;
 
-namespace Aurio.Matching {
-    public class AnalysisFunctions {
+namespace Aurio.Matching
+{
+    public class AnalysisFunctions
+    {
 
         private static WindowFunction windowFunction = null;
 
-        public static unsafe double CrossCorrelationOffset(byte[] x, byte[] y) {
-            if (x.Length != y.Length) {
+        public static unsafe double CrossCorrelationOffset(byte[] x, byte[] y)
+        {
+            if (x.Length != y.Length)
+            {
                 throw new ArgumentException("interval lengths do not match");
             }
-            fixed (byte* xB = &x[0], yB = &y[0]) {
+            fixed (byte* xB = &x[0], yB = &y[0])
+            {
                 float* xF = (float*)xB;
                 float* yF = (float*)yB;
                 int n = x.Length / sizeof(float);
@@ -49,11 +54,14 @@ namespace Aurio.Matching {
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns>a number between 0 and 1, where 0 means 0% similarity, and 1 means 100% similarity</returns>
-        public unsafe static double DestructiveInterference(byte[] x, byte[] y) {
-            if (x.Length != y.Length) {
+        public unsafe static double DestructiveInterference(byte[] x, byte[] y)
+        {
+            if (x.Length != y.Length)
+            {
                 throw new ArgumentException("interval lengths do not match");
             }
-            fixed (byte* xB = &x[0], yB = &y[0]) {
+            fixed (byte* xB = &x[0], yB = &y[0])
+            {
                 float* xF = (float*)xB;
                 float* yF = (float*)yB;
                 int n = x.Length / sizeof(float);
@@ -61,7 +69,8 @@ namespace Aurio.Matching {
                 /* Calculate the mean of the two series x[], y[] */
                 double mx = 0;
                 double my = 0;
-                for (int i = 0; i < n; i++) {
+                for (int i = 0; i < n; i++)
+                {
                     mx += xF[i];
                     my += yF[i];
                 }
@@ -70,7 +79,8 @@ namespace Aurio.Matching {
 
                 double diff;
                 double result = 0;
-                for (int i = 0; i < n; i++) {
+                for (int i = 0; i < n; i++)
+                {
                     // remove an eventually existing offset by subtracting the mean
                     diff = ((xF[i] - mx) - (yF[i] - my));
                     result += diff > 0 ? diff : -diff;
@@ -80,8 +90,10 @@ namespace Aurio.Matching {
             }
         }
 
-        public static double FrequencyDistribution(byte[] x, byte[] y) {
-            if (x.Length != y.Length) {
+        public static double FrequencyDistribution(byte[] x, byte[] y)
+        {
+            if (x.Length != y.Length)
+            {
                 throw new ArgumentException("interval lengths do not match");
             }
 
@@ -94,12 +106,14 @@ namespace Aurio.Matching {
 
             int fftSize = 2048; // max FFT size
             // if there are less samples to analyze, find a fitting FFT size
-            while (fftSize > samples) {
+            while (fftSize > samples)
+            {
                 fftSize /= 2;
             }
             int hopSize = fftSize / 8;
 
-            if (fftSize < 64) {
+            if (fftSize < 64)
+            {
                 throw new Exception("FFT might be too small to get a meaningful result");
             }
 
@@ -107,14 +121,16 @@ namespace Aurio.Matching {
             double[] ySum = new double[fftSize / 2];
             float[] buffer = new float[fftSize];
 
-            if (windowFunction == null || windowFunction.Size != fftSize) {
+            if (windowFunction == null || windowFunction.Size != fftSize)
+            {
                 windowFunction = WindowUtil.GetFunction(WindowType.Hann, fftSize);
             }
 
             var fft = FFTFactory.CreateInstance(fftSize);
 
             int blocks = (samples - fftSize) / hopSize;
-            for (int block = 0; block < blocks; block++) {
+            for (int block = 0; block < blocks; block++)
+            {
                 Array.Copy(xF, block * hopSize, buffer, 0, buffer.Length);
                 FrequencyDistributionBlockProcess(buffer, xSum, fft);
 
@@ -132,20 +148,24 @@ namespace Aurio.Matching {
             double yScalarSum = ySum.Sum();
 
             double result = 0;
-            for (int i = 0; i < fftSize / 2; i++) {
+            for (int i = 0; i < fftSize / 2; i++)
+            {
                 result += Math.Abs(xSum[i] / xScalarSum - ySum[i] / yScalarSum);
             }
 
             return 1 - result;
         }
 
-        private static void FrequencyDistributionBlockProcess(float[] buffer, double[] target, IFFT fft) {
+        private static void FrequencyDistributionBlockProcess(float[] buffer, double[] target, IFFT fft)
+        {
             windowFunction.Apply(buffer);
             fft.Forward(buffer);
-            for (int i = 0; i < buffer.Length; i += 2) {
+            for (int i = 0; i < buffer.Length; i += 2)
+            {
                 buffer[i / 2] = FFTUtil.CalculateMagnitude(buffer[i], buffer[i + 1]) / buffer.Length * 2;
             }
-            for (int i = 0; i < target.Length; i++) {
+            for (int i = 0; i < target.Length; i++)
+            {
                 target[i] += buffer[i];
             }
         }

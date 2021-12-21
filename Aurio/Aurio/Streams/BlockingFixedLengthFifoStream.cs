@@ -44,7 +44,8 @@ namespace Aurio.Streams
                     // to allow consumers real all contents by comparing the the length with the 
                     // position (the usual pattern for stream reading).
                     return base.Length;
-                } else
+                }
+                else
                 {
                     // Without the EOI signal, we return the maximum possible length (meaning
                     // infinity) to tell a consumer that the stream is potentially infinite and

@@ -24,8 +24,10 @@ using System.Diagnostics;
 using Aurio.Streams;
 using Aurio.FFT;
 
-namespace Aurio {
-    public class FFTAnalyzer {
+namespace Aurio
+{
+    public class FFTAnalyzer
+    {
 
         public event EventHandler<ValueEventArgs<float[]>> WindowAnalyzed;
 
@@ -38,7 +40,8 @@ namespace Aurio {
         private IFFT fft;
         private float windowFunctionNormalizationDecibelOffset;
 
-        public FFTAnalyzer(int windowSize) {
+        public FFTAnalyzer(int windowSize)
+        {
             WindowSize = windowSize;
             fft = FFTFactory.CreateInstance(windowSize);
             windowFunctionNormalizationDecibelOffset = 0;
@@ -47,10 +50,14 @@ namespace Aurio {
         /// <summary>
         /// Gets or sets the size of the FFT window. Must be a power of 2.
         /// </summary>
-        public int WindowSize {
-            set {
-                lock (lockObject) {
-                    if (Math.Log(value, 2) % 1 != 0) {
+        public int WindowSize
+        {
+            set
+            {
+                lock (lockObject)
+                {
+                    if (Math.Log(value, 2) % 1 != 0)
+                    {
                         throw new Exception("size not a power of 2: " + value);
                     }
                     inputBuffer = new float[value];
@@ -61,9 +68,11 @@ namespace Aurio {
             get { return inputBuffer.Length; }
         }
 
-        public WindowFunction WindowFunction {
+        public WindowFunction WindowFunction
+        {
             get { return windowFunction; }
-            set {
+            set
+            {
                 windowFunction = value;
                 CalculateWindowFunctionNormalizationOffset();
             }
@@ -74,16 +83,19 @@ namespace Aurio {
         /// a different FFT result peak value, and since the peak value of each windowed FFT means 0dB, this
         /// offset can be used to adjust the calculated dB values.
         /// </summary>
-        private void CalculateWindowFunctionNormalizationOffset() {
-            if (windowFunction == null) {
+        private void CalculateWindowFunctionNormalizationOffset()
+        {
+            if (windowFunction == null)
+            {
                 windowFunctionNormalizationDecibelOffset = 0;
             }
-            else {
+            else
+            {
                 SineGeneratorStream sine = new SineGeneratorStream(1024, 16, new TimeSpan(0, 0, 1));
                 float[] input = new float[WindowSize];
                 float[] output = new float[input.Length / 2];
                 WindowFunction wf = WindowUtil.GetFunction(windowFunction.Type, input.Length);
-                
+
                 sine.Read(input, 0, input.Length);
                 wf.Apply(input);
                 fft.Forward(input);
@@ -93,13 +105,16 @@ namespace Aurio {
             }
         }
 
-        public void PutSamples(float[] samples) {
+        public void PutSamples(float[] samples)
+        {
             //Debug.WriteLine("PutSamples: input samples: " + samples.Length);
 
-            lock (lockObject) {
+            lock (lockObject)
+            {
                 int inputSamplesPosition = 0;
 
-                while (inputSamplesPosition < samples.Length) {
+                while (inputSamplesPosition < samples.Length)
+                {
                     int length = Math.Min(WindowSize - inputBufferFillLevel, samples.Length - inputSamplesPosition);
                     Array.Copy(samples, inputSamplesPosition, inputBuffer, inputBufferFillLevel, length);
                     inputSamplesPosition += length;
@@ -107,7 +122,8 @@ namespace Aurio {
 
                     //Debug.WriteLine("PutSamples: copied " + length + "samples, bufferlevel: " + windowBufferFillLevel + ", inputpos: " + inputSamplesPosition);
 
-                    if (inputBufferFillLevel == WindowSize) {
+                    if (inputBufferFillLevel == WindowSize)
+                    {
                         CalculateFFT();
                         inputBufferFillLevel = 0;
                         //Debug.WriteLine("PutSamples: buffer full -> FFT performed");
@@ -118,13 +134,16 @@ namespace Aurio {
             //Debug.WriteLine("PutSamples finished");
         }
 
-        public void Reset() {
+        public void Reset()
+        {
             // recreate buffer (new buffer is all zeroed)
             WindowSize = WindowSize;
         }
 
-        private void CalculateFFT() {
-            if (WindowFunction != null) {
+        private void CalculateFFT()
+        {
+            if (WindowFunction != null)
+            {
                 WindowFunction.Apply(inputBuffer);
             }
             fft.Forward(inputBuffer);
@@ -132,8 +151,10 @@ namespace Aurio {
             OnWindowAnalyzed();
         }
 
-        private void OnWindowAnalyzed() {
-            if (WindowAnalyzed != null) {
+        private void OnWindowAnalyzed()
+        {
+            if (WindowAnalyzed != null)
+            {
                 WindowAnalyzed(this, new ValueEventArgs<float[]>((float[])outputBuffer.Clone()));
             }
         }

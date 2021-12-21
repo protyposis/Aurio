@@ -22,12 +22,16 @@ using System.Linq;
 using System.Text;
 using NAudio.Wave;
 
-namespace Aurio.Streams {
-    public class PhaseInversionStream : AbstractAudioStreamWrapper {
+namespace Aurio.Streams
+{
+    public class PhaseInversionStream : AbstractAudioStreamWrapper
+    {
 
         public PhaseInversionStream(IAudioStream sourceStream)
-            : base(sourceStream) {
-            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32)) {
+            : base(sourceStream)
+        {
+            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32))
+            {
                 throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
             }
             Invert = false;
@@ -38,14 +42,19 @@ namespace Aurio.Streams {
         /// </summary>
         public bool Invert { get; set; }
 
-        public override int Read(byte[] buffer, int offset, int count) {
+        public override int Read(byte[] buffer, int offset, int count)
+        {
             int bytesRead = sourceStream.Read(buffer, offset, count);
 
-            if (Invert && bytesRead > 0) {
-                unsafe {
-                    fixed (byte* sampleBuffer = &buffer[offset]) {
+            if (Invert && bytesRead > 0)
+            {
+                unsafe
+                {
+                    fixed (byte* sampleBuffer = &buffer[offset])
+                    {
                         float* samples = (float*)sampleBuffer;
-                        for (int x = 0; x < bytesRead / 4; x++) {
+                        for (int x = 0; x < bytesRead / 4; x++)
+                        {
                             samples[x] *= -1;
                         }
                     }

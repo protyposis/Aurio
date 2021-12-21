@@ -23,8 +23,10 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace Aurio.LibSampleRate {
-    internal class Interop64 {
+namespace Aurio.LibSampleRate
+{
+    internal class Interop64
+    {
 
         private const string LIBSAMPLERATE = "libsamplerate-0.x64.dll";
         private const CallingConvention CALLINGCONVENTION = CallingConvention.Cdecl;

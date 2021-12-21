@@ -21,12 +21,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.DataStructures {
+namespace Aurio.DataStructures
+{
     /// <summary>
     /// An exponential moving average calculator.
     /// http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
     /// </summary>
-    class ExponentialMovingAverage : IAverage {
+    class ExponentialMovingAverage : IAverage
+    {
 
         private float alpha;
         private long count;
@@ -36,7 +38,8 @@ namespace Aurio.DataStructures {
         /// Creates a new exponential moving average calculator with the supplied weighting coefficient.
         /// </summary>
         /// <param name="alpha">the weighting coefficient</param>
-        public ExponentialMovingAverage(float alpha) {
+        public ExponentialMovingAverage(float alpha)
+        {
             this.alpha = alpha;
         }
 
@@ -45,11 +48,14 @@ namespace Aurio.DataStructures {
         /// </summary>
         /// <param name="value">the new value to add to the average</param>
         /// <returns>the updated average</returns>
-        public float Add(float value) {
-            if (count++ == 0) { // The first value initializes the average
+        public float Add(float value)
+        {
+            if (count++ == 0)
+            { // The first value initializes the average
                 average = value;
             }
-            else { // All subsequent values trigger the recursive weighting function
+            else
+            { // All subsequent values trigger the recursive weighting function
                 average = UpdateMovingAverage(average, alpha, value);
             }
             return Average;
@@ -58,14 +64,16 @@ namespace Aurio.DataStructures {
         /// <summary>
         /// Gets the current average value.
         /// </summary>
-        public float Average {
+        public float Average
+        {
             get { return count == 0 ? 0 : average; }
         }
 
         /// <summary>
         /// Clears the average calculator.
         /// </summary>
-        public void Clear() {
+        public void Clear()
+        {
             count = 0;
         }
 
@@ -76,7 +84,8 @@ namespace Aurio.DataStructures {
         /// <param name="alpha">the weighting coefficient</param>
         /// <param name="value">the new value to add to the average</param>
         /// <returns>the updated moving average value</returns>
-        public static float UpdateMovingAverage(float average, float alpha, float value) {
+        public static float UpdateMovingAverage(float average, float alpha, float value)
+        {
             return alpha * value + (1 - alpha) * average;
         }
     }

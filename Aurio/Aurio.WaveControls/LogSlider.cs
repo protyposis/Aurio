@@ -24,10 +24,13 @@ using System.Windows.Controls;
 using System.Windows;
 using System.Diagnostics;
 
-namespace Aurio.WaveControls {
-    public class LogSlider: Slider {
+namespace Aurio.WaveControls
+{
+    public class LogSlider : Slider
+    {
 
-        static LogSlider() {
+        static LogSlider()
+        {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(LogSlider), new FrameworkPropertyMetadata(typeof(LogSlider)));
             MinimumProperty.OverrideMetadata(typeof(LogSlider), new FrameworkPropertyMetadata(1.0d));
         }
@@ -38,44 +41,51 @@ namespace Aurio.WaveControls {
                         typeof(double),
                         typeof(LogSlider),
                         new FrameworkPropertyMetadata(
-                            1.0d, 
+                            1.0d,
                             new PropertyChangedCallback(OnLogValueChanged),
                             new CoerceValueCallback(CoerceLogValue)));
 
-        private static void OnLogValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        private static void OnLogValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
             LogSlider ctrl = (LogSlider)d;
             ctrl.OnLogValueChanged((double)e.OldValue, (double)e.NewValue);
         }
 
-        private static object CoerceLogValue(DependencyObject d, object baseValue) {
+        private static object CoerceLogValue(DependencyObject d, object baseValue)
+        {
             LogSlider ctrl = (LogSlider)d;
             double value = (double)baseValue;
 
             double min = ctrl.Minimum;
-            if (value < min) {
+            if (value < min)
+            {
                 return min;
             }
 
             double max = ctrl.Maximum;
-            if (value > max) {
+            if (value > max)
+            {
                 return max;
             }
 
             return value;
         }
 
-        protected virtual void OnLogValueChanged(double oldValue, double newValue) {
+        protected virtual void OnLogValueChanged(double oldValue, double newValue)
+        {
             //Debug.WriteLine("OnLogValueChanged: " + oldValue + " -> " + newValue);
             Value = CalculateLogInv(newValue, Minimum, Maximum);
             //Debug.WriteLine("LogSlider LogValue/Value: " + LogValue + "/" + Value);
         }
 
-        public double LogValue {
+        public double LogValue
+        {
             get { return (double)GetValue(LogValueProperty); }
             set { SetValue(LogValueProperty, value); }
         }
 
-        protected override void OnValueChanged(double oldValue, double newValue) {
+        protected override void OnValueChanged(double oldValue, double newValue)
+        {
             //Debug.WriteLine("OnValueChanged: " + oldValue + " -> " + newValue);
             base.OnValueChanged(oldValue, newValue);
             LogValue = CalculateLog(newValue, Minimum, Maximum);
@@ -85,8 +95,10 @@ namespace Aurio.WaveControls {
         /// <summary>
         /// Idea taken from: http://stackoverflow.com/questions/846221/logarithmic-slider
         /// </summary>
-        private double CalculateLog(double value, double min, double max) {
-            if (min == max) {
+        private double CalculateLog(double value, double min, double max)
+        {
+            if (min == max)
+            {
                 return min;
             }
 
@@ -99,8 +111,10 @@ namespace Aurio.WaveControls {
             return Math.Exp(minv + scale * (value - min));
         }
 
-        private double CalculateLogInv(double value, double min, double max) {
-            if (min == max) {
+        private double CalculateLogInv(double value, double min, double max)
+        {
+            if (min == max)
+            {
                 return min;
             }
 

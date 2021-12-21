@@ -21,7 +21,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.DataStructures.Matrix {
+namespace Aurio.DataStructures.Matrix
+{
     /// <summary>
     /// Implements a sparse matrix supporting densely filled regions with minimal memory overhead.
     /// 
@@ -29,9 +30,11 @@ namespace Aurio.DataStructures.Matrix {
     /// The sparse "global" matrix is implemented through an instance of the <see cref="SparseMatrix"/>,
     /// the "local" patches are matrix arrays.
     /// </summary>
-    class PatchMatrix<T> : IMatrix<T> {
+    class PatchMatrix<T> : IMatrix<T>
+    {
 
-        private struct Mapping {
+        private struct Mapping
+        {
             public int x, y, xOffset, yOffset;
         }
 
@@ -48,7 +51,8 @@ namespace Aurio.DataStructures.Matrix {
         /// Creates a new matrix and initializes it with the given default value.
         /// The patches of the matrix will be sized according to the supplied square size.
         /// </summary>
-        public PatchMatrix(T defaultValue, int patchSizeX, int patchSizeY) {
+        public PatchMatrix(T defaultValue, int patchSizeX, int patchSizeY)
+        {
             this.defaultValue = defaultValue;
             this.patchSizeX = patchSizeX;
             this.patchSizeY = patchSizeY;
@@ -60,42 +64,52 @@ namespace Aurio.DataStructures.Matrix {
         /// The patches of the matrix will be sized according to the supplied square size.
         /// </summary>
         public PatchMatrix(T defaultValue, int patchSize)
-            : this(defaultValue, patchSize, patchSize) {
+            : this(defaultValue, patchSize, patchSize)
+        {
             //
         }
 
         public PatchMatrix(T defaultValue)
-            : this(defaultValue, 50) {
+            : this(defaultValue, 50)
+        {
             //
         }
 
-        public T this[int x, int y] {
-            get {
+        public T this[int x, int y]
+        {
+            get
+            {
                 Mapping m = CalculateMapping(x, y);
                 T[,] patch = GetPatch(m, false);
-                if (patch == null) {
+                if (patch == null)
+                {
                     return defaultValue;
                 }
                 return patch[m.xOffset, m.yOffset];
             }
-            set {
+            set
+            {
                 Mapping m = CalculateMapping(x, y);
                 T[,] patch = GetPatch(m, true);
                 patch[m.xOffset, m.yOffset] = value;
-                if (x > lengthX) {
+                if (x > lengthX)
+                {
                     lengthX = x;
                 }
-                if (y > lengthY) {
+                if (y > lengthY)
+                {
                     lengthY = y;
                 }
             }
         }
 
-        public int LengthX {
+        public int LengthX
+        {
             get { return lengthX + 1; }
         }
 
-        public int LengthY {
+        public int LengthY
+        {
             get { return lengthY + 1; }
         }
 
@@ -104,7 +118,8 @@ namespace Aurio.DataStructures.Matrix {
         /// the root coordinates of the patch that this coordinate belongs
         /// to, and the offsets inside this patch.
         /// </summary>
-        private Mapping CalculateMapping(int x, int y) {
+        private Mapping CalculateMapping(int x, int y)
+        {
             Mapping m = new Mapping();
             m.xOffset = x % patchSizeX;
             m.yOffset = y % patchSizeY;
@@ -117,19 +132,25 @@ namespace Aurio.DataStructures.Matrix {
         /// Gets a patch for a given mapping, and optionally creates and initializes
         /// it if not existing yet.
         /// </summary>
-        private T[,] GetPatch(Mapping m, bool createMissing) {
+        private T[,] GetPatch(Mapping m, bool createMissing)
+        {
             T[,] patch = matrix[m.x, m.y];
-            if (patch == null) {
-                if (createMissing) {
+            if (patch == null)
+            {
+                if (createMissing)
+                {
                     patch = new T[patchSizeX, patchSizeY];
-                    for (int i = 0; i < patchSizeX; i++) {
-                        for (int j = 0; j < patchSizeY; j++) {
+                    for (int i = 0; i < patchSizeX; i++)
+                    {
+                        for (int j = 0; j < patchSizeY; j++)
+                        {
                             patch[i, j] = defaultValue;
                         }
                     }
                     matrix[m.x, m.y] = patch;
                 }
-                else {
+                else
+                {
                     return null;
                 }
             }

@@ -22,12 +22,16 @@ using System.Linq;
 using System.Text;
 using System.Windows.Data;
 
-namespace Aurio.WaveControls {
-    public class MultiplicationConverter : IValueConverter {
+namespace Aurio.WaveControls
+{
+    public class MultiplicationConverter : IValueConverter
+    {
         #region IValueConverter Members
 
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-            if (value is double && parameter is string) {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value is double && parameter is string)
+            {
                 double inputValue = (double)value;
                 double factor = double.Parse(parameter.ToString(), culture);
                 return inputValue * factor;
@@ -35,7 +39,8 @@ namespace Aurio.WaveControls {
             return null;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
             throw new NotImplementedException();
         }
 

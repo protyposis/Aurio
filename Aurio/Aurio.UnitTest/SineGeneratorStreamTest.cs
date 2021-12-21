@@ -2,11 +2,14 @@
 using Aurio.Streams;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Aurio.UnitTest {
+namespace Aurio.UnitTest
+{
     [TestClass]
-    public class SineGeneratorStreamTest {
+    public class SineGeneratorStreamTest
+    {
         [TestMethod]
-        public void CheckLength() {
+        public void CheckLength()
+        {
             int sampleRate = 44100;
             int seconds = 1;
             long expectedLength = sampleRate * seconds * 4; // 4 bytes per 32bit ieee sample
@@ -20,7 +23,8 @@ namespace Aurio.UnitTest {
         }
 
         [TestMethod]
-        public void CheckSeek() {
+        public void CheckSeek()
+        {
             var sine = new SineGeneratorStream(44100, 440, new TimeSpan(0, 0, 1));
 
             int seek = 100 * 4;

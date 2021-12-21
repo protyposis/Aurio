@@ -23,10 +23,13 @@ using System.Text;
 using System.Windows.Media;
 using System.Windows;
 
-namespace Aurio.WaveControls {
-    class WaveformGeometryRenderer : IWaveformRenderer {
+namespace Aurio.WaveControls
+{
+    class WaveformGeometryRenderer : IWaveformRenderer
+    {
 
-        public WaveformGeometryRenderer() {
+        public WaveformGeometryRenderer()
+        {
             WaveformFill = Brushes.LightBlue;
             WaveformLine = Brushes.CornflowerBlue;
             WaveformSamplePoint = Brushes.RoyalBlue;
@@ -38,7 +41,8 @@ namespace Aurio.WaveControls {
 
         #region IWaveformRenderer Members
 
-        public Drawing Render(float[] sampleData, int sampleCount, int width, int height, float volume) {
+        public Drawing Render(float[] sampleData, int sampleCount, int width, int height, float volume)
+        {
             bool peaks = sampleCount >= width;
             DrawingGroup waveformDrawing = new DrawingGroup();
 
@@ -51,13 +55,16 @@ namespace Aurio.WaveControls {
 
             waveformDrawing.Children.Add(new GeometryDrawing(WaveformFill, new Pen(WaveformLine, 1), audioform));
 
-            if (!peaks) {
+            if (!peaks)
+            {
                 // draw sample dots on high zoom factors
                 float zoomFactor = (float)(width / sampleCount);
-                if (zoomFactor > 0.05) {
+                if (zoomFactor > 0.05)
+                {
                     float sampleDotSize = zoomFactor < 30 ? zoomFactor / 10 : 3;
                     GeometryGroup geometryGroup = new GeometryGroup();
-                    for(int x = 0; x < sampleCount; x++) {
+                    for (int x = 0; x < sampleCount; x++)
+                    {
                         EllipseGeometry sampleDot = new EllipseGeometry(audioform.Transform.Transform(new Point(x, sampleData[x])), sampleDotSize, sampleDotSize);
                         geometryGroup.Children.Add(sampleDot);
                     }
@@ -72,17 +79,21 @@ namespace Aurio.WaveControls {
 
         #endregion
 
-        private Geometry CreateWaveform(float[] sampleData, int sampleCount) {
-            if (sampleData.Length < 2) { // cannot draw a line if I have just one point
+        private Geometry CreateWaveform(float[] sampleData, int sampleCount)
+        {
+            if (sampleData.Length < 2)
+            { // cannot draw a line if I have just one point
                 return Geometry.Empty;
             }
-            else {
+            else
+            {
                 PathGeometry waveformGeometry = new PathGeometry();
                 PathFigure pathFigure = new PathFigure();
                 pathFigure.IsClosed = false;
                 pathFigure.IsFilled = false;
                 pathFigure.StartPoint = new Point(0, sampleData[0]);
-                for (int x = 1; x < sampleCount; x++) {
+                for (int x = 1; x < sampleCount; x++)
+                {
                     pathFigure.Segments.Add(new LineSegment(new Point(x, sampleData[x]), true));
                 }
                 waveformGeometry.Figures.Add(pathFigure);
@@ -90,16 +101,19 @@ namespace Aurio.WaveControls {
             }
         }
 
-        private Geometry CreatePeakform(float[] sampleData, int sampleCount) {
+        private Geometry CreatePeakform(float[] sampleData, int sampleCount)
+        {
             PathGeometry peakformGeometry = new PathGeometry();
             PathFigure pathFigure = new PathFigure();
             pathFigure.IsClosed = true;
             pathFigure.IsFilled = true;
             pathFigure.StartPoint = new Point(0, sampleData[0]);
-            for (int x = 1; x < sampleData.Length / 2; x++) {
+            for (int x = 1; x < sampleData.Length / 2; x++)
+            {
                 pathFigure.Segments.Add(new LineSegment(new Point(x, sampleData[x * 2]), true));
             }
-            for (int x = sampleData.Length / 2 - 1; x >= 0; x--) {
+            for (int x = sampleData.Length / 2 - 1; x >= 0; x--)
+            {
                 pathFigure.Segments.Add(new LineSegment(new Point(x, sampleData[x * 2 + 1]), true));
             }
             peakformGeometry.Figures.Add(pathFigure);

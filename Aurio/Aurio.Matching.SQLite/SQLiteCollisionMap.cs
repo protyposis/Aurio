@@ -24,14 +24,17 @@ using SQLite;
 using Aurio.Project;
 using System.Diagnostics;
 
-namespace Aurio.Matching {
+namespace Aurio.Matching
+{
     /// <summary>
     /// In-memory SQLite-based fingerprint hash collision map.
     /// Needs less memory than the <see cref="DictionaryCollisionMap"/> but is slower.
     /// </summary>
-    public class SQLiteCollisionMap : IFingerprintCollisionMap {
+    public class SQLiteCollisionMap : IFingerprintCollisionMap
+    {
 
-        private class DTO {
+        private class DTO
+        {
             public UInt32 Hash { get; set; }
             public int TrackNumber { get; set; }
             public int TrackPositionIndex { get; set; }
@@ -42,7 +45,8 @@ namespace Aurio.Matching {
         private Dictionary<int, AudioTrack> numberToTrack;
         private List<DTO> insertBuffer;
 
-        public SQLiteCollisionMap() {
+        public SQLiteCollisionMap()
+        {
             db = new SQLiteConnection(":memory:");
             db.CreateTable<DTO>();
 
@@ -51,20 +55,24 @@ namespace Aurio.Matching {
             insertBuffer = new List<DTO>(1000);
         }
 
-        public void Add(SubFingerprintHash hash, SubFingerprintLookupEntry lookupEntry) {
+        public void Add(SubFingerprintHash hash, SubFingerprintLookupEntry lookupEntry)
+        {
             int index = -1;
 
-            if(!trackToNumber.TryGetValue(lookupEntry.AudioTrack, out index)) {
+            if (!trackToNumber.TryGetValue(lookupEntry.AudioTrack, out index))
+            {
                 index = trackToNumber.Count;
                 trackToNumber.Add(lookupEntry.AudioTrack, index);
                 numberToTrack.Add(index, lookupEntry.AudioTrack);
             }
 
-            if(index == -1) {
+            if (index == -1)
+            {
                 throw new Exception("something's wrong - this should not happen!!");
             }
 
-            var dto = new DTO {
+            var dto = new DTO
+            {
                 Hash = hash.Value,
                 TrackNumber = index,
                 TrackPositionIndex = lookupEntry.Index
@@ -72,26 +80,30 @@ namespace Aurio.Matching {
 
             insertBuffer.Add(dto);
 
-            if (insertBuffer.Count == 1000) {
+            if (insertBuffer.Count == 1000)
+            {
                 InsertBuffered();
             }
 
             //db.Insert();
         }
 
-        private void InsertBuffered() {
+        private void InsertBuffered()
+        {
             db.InsertAll(insertBuffer);
             insertBuffer.Clear();
         }
 
-        public void CreateLookupIndex() {
+        public void CreateLookupIndex()
+        {
             InsertBuffered();
             var start = DateTime.Now;
             db.Execute("create index if not exists DTO_Hash on DTO(Hash)");
             Debug.WriteLine("CreateLookupIndex duration: " + (DateTime.Now - start));
         }
 
-        public void Cleanup() {
+        public void Cleanup()
+        {
             InsertBuffered();
 
             int count = db.ExecuteScalar<int>("select count(*) from DTO");
@@ -103,29 +115,34 @@ namespace Aurio.Matching {
             Debug.WriteLine("Cleanup count after: " + count);
         }
 
-        public List<SubFingerprintHash> GetCollidingKeys() {
+        public List<SubFingerprintHash> GetCollidingKeys()
+        {
             InsertBuffered();
             CreateLookupIndex();
 
             var start = DateTime.Now;
             IEnumerable<DTO> result = db.Query<DTO>("select * from (select Hash As Hash, COUNT(*) As Count from DTO group by Hash) where Count > 1");
             List<SubFingerprintHash> hashes = new List<SubFingerprintHash>();
-            foreach (DTO dto in result) {
+            foreach (DTO dto in result)
+            {
                 hashes.Add(new SubFingerprintHash(dto.Hash));
             }
             Debug.WriteLine("GetCollidingHashes duration: " + (DateTime.Now - start));
             return hashes;
         }
 
-        public List<SubFingerprintLookupEntry> GetValues(SubFingerprintHash hash) {
-            if (insertBuffer.Count > 0) {
+        public List<SubFingerprintLookupEntry> GetValues(SubFingerprintHash hash)
+        {
+            if (insertBuffer.Count > 0)
+            {
                 InsertBuffered();
             }
 
             //var start = DateTime.Now;
             IEnumerable<DTO> result = db.Query<DTO>("select * from DTO where Hash = ?", hash.Value);
             List<SubFingerprintLookupEntry> lookupEntries = new List<SubFingerprintLookupEntry>();
-            foreach (DTO dto in result) {
+            foreach (DTO dto in result)
+            {
                 lookupEntries.Add(new SubFingerprintLookupEntry(numberToTrack[dto.TrackNumber], dto.TrackPositionIndex));
             }
             //Debug.WriteLine("GetLookupEntries duration: " + (DateTime.Now - start));

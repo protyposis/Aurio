@@ -22,11 +22,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Streams {
+namespace Aurio.Streams
+{
     /// <summary>
     /// Combines/concatenates multiple files or streams into a single stream.
     /// </summary>
-    public class MultiStream : Stream {
+    public class MultiStream : Stream
+    {
 
         private readonly Stream[] subStreams;
 
@@ -36,18 +38,23 @@ namespace Aurio.Streams {
         private bool canWrite;
         private bool canSeek;
 
-        public MultiStream(params Stream[] subStreams) {
+        public MultiStream(params Stream[] subStreams)
+        {
             this.subStreams = subStreams;
 
             canRead = canWrite = canSeek = true;
-            foreach (Stream stream in subStreams) {
-                if (!stream.CanRead) {
+            foreach (Stream stream in subStreams)
+            {
+                if (!stream.CanRead)
+                {
                     canRead = false;
                 }
-                if (!stream.CanWrite) {
+                if (!stream.CanWrite)
+                {
                     canWrite = false;
                 }
-                if (!stream.CanSeek) {
+                if (!stream.CanSeek)
+                {
                     canSeek = false;
                 }
             }
@@ -56,10 +63,12 @@ namespace Aurio.Streams {
             CurrentSubStreamIndex = 0;
         }
 
-        public static MultiStream FromFileInfos(params FileInfo[] files) {
+        public static MultiStream FromFileInfos(params FileInfo[] files)
+        {
             Stream[] subStreams = new FileStream[files.Length];
 
-            for (int x = 0; x < files.Length; x++) {
+            for (int x = 0; x < files.Length; x++)
+            {
                 Console.WriteLine("multifile stream #" + x + ": " + files[x].FullName);
                 subStreams[x] = files[x].OpenRead();
             }
@@ -67,53 +76,67 @@ namespace Aurio.Streams {
             return new MultiStream(subStreams);
         }
 
-        public override bool CanRead {
+        public override bool CanRead
+        {
             get { return canRead; }
         }
 
-        public override bool CanSeek {
+        public override bool CanSeek
+        {
             get { return canSeek; }
         }
 
-        public override bool CanWrite {
+        public override bool CanWrite
+        {
             get { return canWrite; }
         }
 
-        public override void Flush() {
+        public override void Flush()
+        {
             CurrentSubStream.Flush();
         }
 
-        public override long Length {
-            get {
+        public override long Length
+        {
+            get
+            {
                 long length = 0;
-                foreach (Stream fs in subStreams) {
+                foreach (Stream fs in subStreams)
+                {
                     length += fs.Length;
                 }
                 return length;
             }
         }
 
-        public override long Position {
-            get {
+        public override long Position
+        {
+            get
+            {
                 long pos = 0;
-                for (int x = 0; x < currentSubStreamIndex; x++) {
+                for (int x = 0; x < currentSubStreamIndex; x++)
+                {
                     pos += subStreams[x].Length;
                 }
                 return pos + subStreams[currentSubStreamIndex].Position;
             }
-            set {
+            set
+            {
                 Seek(value, SeekOrigin.Begin);
             }
         }
 
-        public override int Read(byte[] buffer, int offset, int count) {
+        public override int Read(byte[] buffer, int offset, int count)
+        {
             int bytesRead = CurrentSubStream.Read(buffer, offset, count);
 
-            if (bytesRead == 0 && count > 0) {
+            if (bytesRead == 0 && count > 0)
+            {
                 // we reached the EOF
                 Console.WriteLine("end of substream " + currentSubStreamIndex + " reached");
 
-                if (LastSubStream) {
+                if (LastSubStream)
+                {
                     // we reached not only EOF, but EOF of the last stream (so we're at the very end)
                     Console.WriteLine("end of stream reached");
                     return bytesRead;
@@ -128,8 +151,10 @@ namespace Aurio.Streams {
             return bytesRead;
         }
 
-        public override long Seek(long offset, SeekOrigin origin) {
-            if (!CanSeek) {
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            if (!CanSeek)
+            {
                 throw new NotSupportedException();
             }
 
@@ -137,7 +162,8 @@ namespace Aurio.Streams {
 
             long newPos = 0;
 
-            switch (origin) {
+            switch (origin)
+            {
                 case SeekOrigin.Begin:
                     newPos = offset;
                     break;
@@ -152,12 +178,14 @@ namespace Aurio.Streams {
             long streamLengthSum = 0;
             int streamIndex = 0;
 
-            while (streamLengthSum + subStreams[streamIndex].Length < newPos) {
+            while (streamLengthSum + subStreams[streamIndex].Length < newPos)
+            {
                 streamLengthSum += subStreams[streamIndex].Length;
                 streamIndex++;
             }
 
-            if (CurrentSubStreamIndex != streamIndex) {
+            if (CurrentSubStreamIndex != streamIndex)
+            {
                 CurrentSubStreamIndex = streamIndex;
             }
             CurrentSubStream.Seek(newPos - streamLengthSum, SeekOrigin.Begin);
@@ -165,37 +193,47 @@ namespace Aurio.Streams {
             return Position;
         }
 
-        public override void SetLength(long value) {
+        public override void SetLength(long value)
+        {
             throw new NotSupportedException();
         }
 
-        public override void Write(byte[] buffer, int offset, int count) {
+        public override void Write(byte[] buffer, int offset, int count)
+        {
             throw new NotSupportedException();
         }
 
-        public override void Close() {
+        public override void Close()
+        {
             new List<Stream>(subStreams).ForEach(s => s.Close());
         }
 
-        private bool FirstSubStream {
+        private bool FirstSubStream
+        {
             get { return currentSubStreamIndex == 0; }
         }
 
-        private bool LastSubStream {
+        private bool LastSubStream
+        {
             get { return currentSubStreamIndex == subStreams.Length - 1; }
         }
 
-        private Stream CurrentSubStream {
+        private Stream CurrentSubStream
+        {
             get { return subStreams[currentSubStreamIndex]; }
         }
 
-        private int CurrentSubStreamIndex {
-            get {
+        private int CurrentSubStreamIndex
+        {
+            get
+            {
                 return currentSubStreamIndex;
             }
-            set {
+            set
+            {
                 Console.WriteLine("substream index change: " + currentSubStreamIndex + " -> " + value);
-                if (CurrentSubStream != null) {
+                if (CurrentSubStream != null)
+                {
                     CurrentSubStream.Flush();
                 }
                 currentSubStreamIndex = value;

@@ -21,7 +21,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.DataStructures.Matrix {
+namespace Aurio.DataStructures.Matrix
+{
     /// <summary>
     /// Implementation of a sparse matrix by using dictionaries.
     /// taken from: http://www.blackbeltcoder.com/Articles/algorithms/creating-a-sparse-matrix-in-net
@@ -29,7 +30,8 @@ namespace Aurio.DataStructures.Matrix {
     /// This matrix has a relatively high memory overhead. When storing lots of values that are locally
     /// aggregated in the sparse space, it is recommended to use a <see cref="PatchMatrix"/>.
     /// </summary>
-    class SparseMatrix<T> : IMatrix<T> {
+    class SparseMatrix<T> : IMatrix<T>
+    {
         // Master dictionary hold rows of column dictionary
         protected Dictionary<int, Dictionary<int, T>> _rows;
 
@@ -39,7 +41,8 @@ namespace Aurio.DataStructures.Matrix {
         /// <summary>
         /// Constructs a SparseMatrix instance.
         /// </summary>
-        public SparseMatrix() {
+        public SparseMatrix()
+        {
             _rows = new Dictionary<int, Dictionary<int, T>>();
             numRows = 0;
             numCols = 0;
@@ -50,11 +53,14 @@ namespace Aurio.DataStructures.Matrix {
         /// </summary>
         /// <param name="row">Matrix row</param>
         /// <param name="col">Matrix column</param>
-        public T this[int row, int col] {
-            get {
+        public T this[int row, int col]
+        {
+            get
+            {
                 return GetAt(row, col);
             }
-            set {
+            set
+            {
                 SetAt(row, col, value);
             }
         }
@@ -65,9 +71,11 @@ namespace Aurio.DataStructures.Matrix {
         /// <param name="row">Matrix row</param>
         /// <param name="col">Matrix column</param>
         /// <returns>Value at the specified position</returns>
-        private T GetAt(int row, int col) {
+        private T GetAt(int row, int col)
+        {
             Dictionary<int, T> cols;
-            if (_rows.TryGetValue(row, out cols)) {
+            if (_rows.TryGetValue(row, out cols))
+            {
                 T value = default(T);
                 if (cols.TryGetValue(col, out value))
                     return value;
@@ -81,21 +89,27 @@ namespace Aurio.DataStructures.Matrix {
         /// <param name="row">Matrix row</param>
         /// <param name="col">Matrix column</param>
         /// <param name="value">New value</param>
-        private void SetAt(int row, int col, T value) {
-            if (EqualityComparer<T>.Default.Equals(value, default(T))) {
+        private void SetAt(int row, int col, T value)
+        {
+            if (EqualityComparer<T>.Default.Equals(value, default(T)))
+            {
                 // Remove any existing object if value is default(T)
                 RemoveAt(row, col);
             }
-            else {
+            else
+            {
                 // Set value
                 Dictionary<int, T> cols;
-                if (!_rows.TryGetValue(row, out cols)) {
+                if (!_rows.TryGetValue(row, out cols))
+                {
                     cols = new Dictionary<int, T>();
                     _rows.Add(row, cols);
-                    if (numRows < row) {
+                    if (numRows < row)
+                    {
                         numRows = row;
                     }
-                    if (numCols < col) {
+                    if (numCols < col)
+                    {
                         numCols = col;
                     }
                 }
@@ -108,9 +122,11 @@ namespace Aurio.DataStructures.Matrix {
         /// </summary>
         /// <param name="row">Matrix row</param>
         /// <param name="col">Matrix column</param>
-        public void RemoveAt(int row, int col) {
+        public void RemoveAt(int row, int col)
+        {
             Dictionary<int, T> cols;
-            if (_rows.TryGetValue(row, out cols)) {
+            if (_rows.TryGetValue(row, out cols))
+            {
                 // Remove column from this row
                 cols.Remove(col);
                 // Remove entire row if empty
@@ -123,10 +139,13 @@ namespace Aurio.DataStructures.Matrix {
         /// Returns all items in the specified row.
         /// </summary>
         /// <param name="row">Matrix row</param>
-        public IEnumerable<T> GetRowData(int row) {
+        public IEnumerable<T> GetRowData(int row)
+        {
             Dictionary<int, T> cols;
-            if (_rows.TryGetValue(row, out cols)) {
-                foreach (KeyValuePair<int, T> pair in cols) {
+            if (_rows.TryGetValue(row, out cols))
+            {
+                foreach (KeyValuePair<int, T> pair in cols)
+                {
                     yield return pair.Value;
                 }
             }
@@ -136,9 +155,11 @@ namespace Aurio.DataStructures.Matrix {
         /// Returns the number of items in the specified row.
         /// </summary>
         /// <param name="row">Matrix row</param>
-        public int GetRowDataCount(int row) {
+        public int GetRowDataCount(int row)
+        {
             Dictionary<int, T> cols;
-            if (_rows.TryGetValue(row, out cols)) {
+            if (_rows.TryGetValue(row, out cols))
+            {
                 return cols.Count;
             }
             return 0;
@@ -150,8 +171,10 @@ namespace Aurio.DataStructures.Matrix {
         /// </summary>
         /// <param name="col">Matrix column</param>
         /// <returns></returns>
-        public IEnumerable<T> GetColumnData(int col) {
-            foreach (KeyValuePair<int, Dictionary<int, T>> rowdata in _rows) {
+        public IEnumerable<T> GetColumnData(int col)
+        {
+            foreach (KeyValuePair<int, Dictionary<int, T>> rowdata in _rows)
+            {
                 T result;
                 if (rowdata.Value.TryGetValue(col, out result))
                     yield return result;
@@ -163,21 +186,25 @@ namespace Aurio.DataStructures.Matrix {
         /// This method is less efficent than GetRowDataCount().
         /// </summary>
         /// <param name="col">Matrix column</param>
-        public int GetColumnDataCount(int col) {
+        public int GetColumnDataCount(int col)
+        {
             int result = 0;
 
-            foreach (KeyValuePair<int, Dictionary<int, T>> cols in _rows) {
+            foreach (KeyValuePair<int, Dictionary<int, T>> cols in _rows)
+            {
                 if (cols.Value.ContainsKey(col))
                     result++;
             }
             return result;
         }
 
-        public int LengthX {
+        public int LengthX
+        {
             get { return numRows; }
         }
 
-        public int LengthY {
+        public int LengthY
+        {
             get { return numCols; }
         }
     }

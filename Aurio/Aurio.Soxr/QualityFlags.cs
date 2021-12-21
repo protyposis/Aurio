@@ -21,9 +21,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Soxr {
+namespace Aurio.Soxr
+{
     [Flags]
-    public enum QualityFlags : uint {
+    public enum QualityFlags : uint
+    {
         /// <summary>
         /// <= 0.01 dB
         /// </summary>

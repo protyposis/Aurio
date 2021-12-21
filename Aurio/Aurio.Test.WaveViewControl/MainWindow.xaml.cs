@@ -14,19 +14,23 @@ using System.Windows.Shapes;
 using Aurio;
 using Aurio.Resampler;
 
-namespace Aurio {
+namespace Aurio
+{
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window {
-        public MainWindow() {
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
             InitializeComponent();
 
             // Use Soxr as resampler implementation
             ResamplerFactory.Factory = new Aurio.Soxr.ResamplerFactory();
         }
 
-        private void button1_Click(object sender, RoutedEventArgs e) {
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
             // http://msdn.microsoft.com/en-us/library/aa969773.aspx
             // Configure open file dialog box
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
@@ -38,7 +42,8 @@ namespace Aurio {
             Nullable<bool> result = dlg.ShowDialog();
 
             // Process open file dialog box results
-            if (result == true) {
+            if (result == true)
+            {
                 // Open document
                 string filename = dlg.FileName;
                 waveView.AudioTrack = new Project.AudioTrack(new System.IO.FileInfo(filename));

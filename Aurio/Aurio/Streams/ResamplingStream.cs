@@ -25,8 +25,10 @@ using Aurio.Resampler;
 using Aurio.DataStructures;
 using System.Runtime.CompilerServices;
 
-namespace Aurio.Streams {
-    public class ResamplingStream : AbstractAudioStreamWrapper {
+namespace Aurio.Streams
+{
+    public class ResamplingStream : AbstractAudioStreamWrapper
+    {
 
         private ResamplingQuality quality;
         private IResampler resampler;
@@ -37,12 +39,14 @@ namespace Aurio.Streams {
         private long position;
 
         public ResamplingStream(IAudioStream sourceStream, ResamplingQuality quality)
-            : base(sourceStream) {
-            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32)) {
+            : base(sourceStream)
+        {
+            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32))
+            {
                 throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
             }
 
-            properties = new AudioProperties(sourceStream.Properties.Channels, sourceStream.Properties.SampleRate, 
+            properties = new AudioProperties(sourceStream.Properties.Channels, sourceStream.Properties.SampleRate,
                 sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
 
             this.quality = quality;
@@ -56,71 +60,88 @@ namespace Aurio.Streams {
         }
 
         public ResamplingStream(IAudioStream sourceStream, ResamplingQuality quality, int outputSampleRate)
-            : this(sourceStream, quality) {
-                TargetSampleRate = outputSampleRate;
+            : this(sourceStream, quality)
+        {
+            TargetSampleRate = outputSampleRate;
         }
 
         public ResamplingStream(IAudioStream sourceStream, ResamplingQuality quality, double sampleRateRatio)
-            : this(sourceStream, quality) {
-                SampleRateRatio = sampleRateRatio;
+            : this(sourceStream, quality)
+        {
+            SampleRateRatio = sampleRateRatio;
         }
 
-        private void SetupResampler() {
-            if (resampler != null) {
+        private void SetupResampler()
+        {
+            if (resampler != null)
+            {
                 resampler.Dispose(); // delete previous resampler instance
             }
 
             resampler = ResamplerFactory.CreateInstance(quality, properties.Channels, SampleRateRatio);
         }
 
-        public double TargetSampleRate {
+        public double TargetSampleRate
+        {
             get { return targetSampleRate; }
-            set {
+            set
+            {
                 targetSampleRate = value;
                 sampleRateRatio = value / sourceStream.Properties.SampleRate;
                 properties.SampleRate = (int)targetSampleRate;
 
-                if (resampler != null && resampler.VariableRate) {
+                if (resampler != null && resampler.VariableRate)
+                {
                     resampler.SetRatio(sampleRateRatio, 0);
                 }
-                else {
+                else
+                {
                     SetupResampler();
                 }
             }
         }
 
-        public double SampleRateRatio {
+        public double SampleRateRatio
+        {
             get { return sampleRateRatio; }
             set { TargetSampleRate = sourceStream.Properties.SampleRate * value; }
         }
 
-        public int BufferedBytes {
+        public int BufferedBytes
+        {
             get { return (int)resampler.GetOutputDelay(); }
         }
 
-        public override AudioProperties Properties {
+        public override AudioProperties Properties
+        {
             get { return properties; }
         }
 
-        public override long Length {
-            get { 
+        public override long Length
+        {
+            get
+            {
                 return StreamUtil.AlignToBlockSize(
                     (long)Math.Ceiling(sourceStream.Length * sampleRateRatio), SampleBlockSize);
             }
         }
 
-        public override long Position {
+        public override long Position
+        {
             get { return position; }
-            set {
+            set
+            {
                 position = value;
                 long pos = (long)Math.Ceiling(value / sampleRateRatio);
                 pos -= pos % sourceStream.SampleBlockSize;
                 sourceStream.Position = pos;
-                if (resampler.VariableRate) {
+                if (resampler.VariableRate)
+                {
                     resampler.Clear(); // clear buffered data in soxr
                     resampler.SetRatio(sampleRateRatio, 0); // re-init soxr instance
                 }
-                else {
+                else
+                {
                     SetupResampler();
                 }
                 sourceBuffer.Clear(); // clear locally buffered data
@@ -137,11 +158,13 @@ namespace Aurio.Streams {
         /// <param name="offset"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        public override int Read(byte[] buffer, int offset, int count) {
+        public override int Read(byte[] buffer, int offset, int count)
+        {
             // TODO debug this block (it might give problems if the sampling rate of the stream is changed
             //      dynamically - there might be source stream position issues (because of the SRC prereading,
             //      and there might be local buffering issues in terms of the buffer containing unfitting samples)
-            if (properties.SampleRate == sourceStream.Properties.SampleRate) {
+            if (properties.SampleRate == sourceStream.Properties.SampleRate)
+            {
                 int bytesRead = sourceStream.Read(buffer, offset, count);
                 position += bytesRead;
                 return bytesRead;
@@ -151,7 +174,8 @@ namespace Aurio.Streams {
             bool endOfStream = false;
 
             // loop while the sample rate converter consumes samples until it produces an output
-            do {
+            do
+            {
                 sourceBuffer.FillIfEmpty(sourceStream, count);
                 // if the sourceBufferFillLevel is 0 at this position, the end of the source stream has been reached,
                 // and endOfInput needs to be set to true in order to retrieve eventually buffered samples from
@@ -162,7 +186,7 @@ namespace Aurio.Streams {
                 resampler.Process(sourceBuffer.Data, sourceBuffer.Offset, sourceBuffer.Count,
                     buffer, offset, count, endOfStream, out inputLengthUsed, out outputLengthGenerated);
                 sourceBuffer.Read(inputLengthUsed);
-            } 
+            }
             while (inputLengthUsed > 0 && outputLengthGenerated == 0);
 
             position += outputLengthGenerated;
@@ -171,13 +195,15 @@ namespace Aurio.Streams {
             // this data is cut off here to avoid a stream position that is greater than the stream's length.
             // NOTE max observed overflow: 8 bytes (1 2ch 32bit sample)
             long length = Length;
-            if (length == 0) {
+            if (length == 0)
+            {
                 // This is a special case in which the length suddenly drops to zero, which can happen when reading
                 // from a dynamic source (e.g. a mixer). In this case no valid overflow can be calculated, so just
                 // return the read bytes.
                 return outputLengthGenerated;
             }
-            else if (position > length) {
+            else if (position > length)
+            {
                 int overflow = (int)(position - length);
                 // The resampler is expected to return a few samples too much, and they can just be thrown away
                 // http://comments.gmane.org/gmane.comp.audio.src.general/168
@@ -185,9 +211,11 @@ namespace Aurio.Streams {
                 position -= overflow;
                 return outputLengthGenerated - overflow;
             }
-            else if (position < length && inputLengthUsed == 0 && outputLengthGenerated == 0 && endOfStream) {
+            else if (position < length && inputLengthUsed == 0 && outputLengthGenerated == 0 && endOfStream)
+            {
                 int underflow = (int)(length - position);
-                if (count < underflow) {
+                if (count < underflow)
+                {
                     underflow = count;
                 }
                 Debug.WriteLine("ResamplingStream UNDERFLOW WARNING: {0} bytes added", underflow);
@@ -199,16 +227,19 @@ namespace Aurio.Streams {
             return outputLengthGenerated;
         }
 
-        public override void Close() {
+        public override void Close()
+        {
             resampler.Dispose();
             base.Close();
         }
 
-        public bool CheckTargetSampleRate(double sampleRate) {
+        public bool CheckTargetSampleRate(double sampleRate)
+        {
             return CheckSampleRateRatio(sampleRate / sourceStream.Properties.SampleRate);
         }
 
-        public static bool CheckSampleRateRatio(double ratio) {
+        public static bool CheckSampleRateRatio(double ratio)
+        {
             return ResamplerFactory.CheckRatio(ratio);
         }
     }

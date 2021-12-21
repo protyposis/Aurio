@@ -21,10 +21,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.HaitsmaKalker2002 {
-    class VoiceProfile : DefaultProfile {
+namespace Aurio.Matching.HaitsmaKalker2002
+{
+    class VoiceProfile : DefaultProfile
+    {
 
-        public VoiceProfile() : base() {
+        public VoiceProfile() : base()
+        {
             Name = "Voice";
 
             // vocal range 80 - 1100 Hz: http://en.wikipedia.org/wiki/Vocal_range

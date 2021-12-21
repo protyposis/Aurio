@@ -22,15 +22,18 @@ using System.Linq;
 using System.Text;
 using Aurio.Streams;
 
-namespace Aurio {
-    public static class AudioUtil {
+namespace Aurio
+{
+    public static class AudioUtil
+    {
         /// <summary>
         /// Calculates the length of a sample in units of ticks. Results is a floating point number as it
         /// most probably won't be a whole number.
         /// </summary>
         /// <param name="audioProperties">the audio properties of an audio stream containing the sample rate</param>
         /// <returns>the length of a sample in floating point ticks</returns>
-        public static double CalculateSampleTicks(AudioProperties audioProperties) {
+        public static double CalculateSampleTicks(AudioProperties audioProperties)
+        {
             return (double)TimeUtil.SECS_TO_TICKS / audioProperties.SampleRate;
         }
 
@@ -40,7 +43,8 @@ namespace Aurio {
         /// <param name="audioProperties">the audio properties of an audio stream containing the sample rate</param>
         /// <param name="timeSpan">the time span for which the number of samples should be calculated</param>
         /// <returns>the number of samples that the given time span contains in an audio stream with the given properties</returns>
-        public static int CalculateSamples(AudioProperties audioProperties, TimeSpan timeSpan) {
+        public static int CalculateSamples(AudioProperties audioProperties, TimeSpan timeSpan)
+        {
             return (int)Math.Round(timeSpan.Ticks / CalculateSampleTicks(audioProperties));
         }
 
@@ -59,7 +63,8 @@ namespace Aurio {
         /// <param name="intervalToAlign">the interval that should be sample-aligned</param>
         /// <param name="audioProperties">the audio properties containing the sample rate</param>
         /// <returns>the sample aligned interval</returns>
-        public static Interval AlignToSamples(Interval intervalToAlign, AudioProperties audioProperties) {
+        public static Interval AlignToSamples(Interval intervalToAlign, AudioProperties audioProperties)
+        {
             double sampleLength = CalculateSampleTicks(audioProperties);
             return new Interval(
                     (long)(intervalToAlign.From - ((double)intervalToAlign.From % sampleLength)),
@@ -72,9 +77,11 @@ namespace Aurio {
         /// <param name="channels">the number of channels the buffer should be capable</param>
         /// <param name="size">the size of each channel's buffer</param>
         /// <returns>the multichannel buffer</returns>
-        public static T[][] CreateArray<T>(int channels, int size) {
+        public static T[][] CreateArray<T>(int channels, int size)
+        {
             T[][] buffer = new T[channels][];
-            for (int channel = 0; channel < channels; channel++) {
+            for (int channel = 0; channel < channels; channel++)
+            {
                 buffer[channel] = new T[size];
             }
             return buffer;
@@ -86,32 +93,40 @@ namespace Aurio {
         /// <param name="channels">the number of channels the list should be created for</param>
         /// <param name="size">the size of each channel's list</param>
         /// <returns>the multichannel list</returns>
-        public static List<T>[] CreateList<T>(int channels, int size) {
+        public static List<T>[] CreateList<T>(int channels, int size)
+        {
             List<T>[] list = new List<T>[channels];
-            for (int channel = 0; channel < channels; channel++) {
+            for (int channel = 0; channel < channels; channel++)
+            {
                 list[channel] = new List<T>(size);
             }
             return list;
         }
 
-        public static float[][] Uninterleave(AudioProperties audioProperties, byte[] buffer, int offset, int count, bool downmix) {
+        public static float[][] Uninterleave(AudioProperties audioProperties, byte[] buffer, int offset, int count, bool downmix)
+        {
             int channels = audioProperties.Channels;
             int downmixChannel = downmix ? 1 : 0;
             float[][] uninterleavedSamples = CreateArray<float>(channels + downmixChannel,
                 count / (audioProperties.BitDepth / 8) / audioProperties.Channels);
 
-            unsafe {
-                fixed (byte* sampleBuffer = &buffer[offset]) {
+            unsafe
+            {
+                fixed (byte* sampleBuffer = &buffer[offset])
+                {
                     float* samples = (float*)sampleBuffer;
                     int sampleCount = 0;
-                    
-                    for (int x = 0; x < count / 4; x += channels) {
+
+                    for (int x = 0; x < count / 4; x += channels)
+                    {
                         float sum = 0;
-                        for (int channel = 0; channel < channels; channel++) {
+                        for (int channel = 0; channel < channels; channel++)
+                        {
                             sum += samples[x + channel];
                             uninterleavedSamples[channel + downmixChannel][sampleCount] = samples[x + channel];
                         }
-                        if(downmix) {
+                        if (downmix)
+                        {
                             uninterleavedSamples[0][sampleCount] = sum / channels;
                         }
                         sampleCount++;
@@ -122,10 +137,12 @@ namespace Aurio {
             return uninterleavedSamples;
         }
 
-        public static double CalculateRMS(float[] samples) {
+        public static double CalculateRMS(float[] samples)
+        {
             float sampleValue = 0;
             double frameRMS = 0;
-            for (int i = 0; i < samples.Length; i++) {
+            for (int i = 0; i < samples.Length; i++)
+            {
                 sampleValue = samples[i];
                 frameRMS += sampleValue * sampleValue;
             }

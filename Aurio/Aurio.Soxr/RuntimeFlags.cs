@@ -21,9 +21,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Soxr {
+namespace Aurio.Soxr
+{
     [Flags]
-    public enum RuntimeFlags : uint {
+    public enum RuntimeFlags : uint
+    {
         /// <summary>
         /// Auto select coef. interpolation.
         /// </summary>

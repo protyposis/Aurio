@@ -23,13 +23,16 @@ using System.Text;
 using Aurio.FFT;
 using Aurio.Streams;
 
-namespace Aurio.Features {
+namespace Aurio.Features
+{
     /// <summary>
     /// Short-Time Fourier Tranformation
     /// </summary>
-    public class STFT: StreamWindower {
+    public class STFT : StreamWindower
+    {
 
-        public enum OutputFormat {
+        public enum OutputFormat
+        {
             /// <summary>
             /// Raw FFT output, a sequency of complex numbers.
             /// </summary>
@@ -71,15 +74,17 @@ namespace Aurio.Features {
         /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="outputFormat">format of the output data, e.g. raw FFT complex numbers or dB spectrum</param>
         public STFT(IAudioStream stream, int windowSize, int hopSize, int fftSize, WindowType windowType, OutputFormat outputFormat, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
-            : base(stream, windowSize, hopSize, windowType, bufferSize) {
-                if(fftSize < windowSize) {
-                    throw new ArgumentOutOfRangeException("fftSize must be >= windowSize");
-                }
-                frameBuffer = new float[fftSize];
-                fftBuffer = new float[fftSize];
-                Array.Clear(frameBuffer, 0, frameBuffer.Length); // init with zeros (assure zero padding)
-                fft = FFTFactory.CreateInstance(fftSize);
-                this.outputFormat = outputFormat;
+            : base(stream, windowSize, hopSize, windowType, bufferSize)
+        {
+            if (fftSize < windowSize)
+            {
+                throw new ArgumentOutOfRangeException("fftSize must be >= windowSize");
+            }
+            frameBuffer = new float[fftSize];
+            fftBuffer = new float[fftSize];
+            Array.Clear(frameBuffer, 0, frameBuffer.Length); // init with zeros (assure zero padding)
+            fft = FFTFactory.CreateInstance(fftSize);
+            this.outputFormat = outputFormat;
         }
 
         /// <summary>
@@ -91,21 +96,26 @@ namespace Aurio.Features {
         /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="outputFormat">format of the output data, e.g. raw FFT complex numbers or dB spectrum</param>
         public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, OutputFormat outputFormat, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
-            : this(stream, windowSize, hopSize, windowSize, windowType, outputFormat, bufferSize) {
+            : this(stream, windowSize, hopSize, windowSize, windowType, outputFormat, bufferSize)
+        {
         }
 
-        public override void ReadFrame(float[] fftResult) {
+        public override void ReadFrame(float[] fftResult)
+        {
             // Check output array size
-            switch (outputFormat) {
+            switch (outputFormat)
+            {
                 case OutputFormat.Decibel:
                 case OutputFormat.Magnitudes:
                 case OutputFormat.MagnitudesSquared:
-                    if (fftResult.Length != fft.Size / 2) {
+                    if (fftResult.Length != fft.Size / 2)
+                    {
                         throw new ArgumentException("the provided FFT result array has an invalid size");
                     }
                     break;
                 default:
-                    if (fftResult.Length != fft.Size) {
+                    if (fftResult.Length != fft.Size)
+                    {
                         throw new ArgumentException("the provided FFT result array has an invalid size");
                     }
                     break;
@@ -117,7 +127,8 @@ namespace Aurio.Features {
             fft.Forward(frameBuffer, fftBuffer);
 
             // normalize fourier results
-            switch (outputFormat) {
+            switch (outputFormat)
+            {
                 case OutputFormat.Decibel:
                     // TODO check if calculation corresponds to Haitsma & Kalker paper
                     FFTUtil.Results(fftBuffer, fftResult);
@@ -148,7 +159,8 @@ namespace Aurio.Features {
         //    // to be overridden
         //}
 
-        protected virtual void OnFrameReadSTFT(float[] frame) {
+        protected virtual void OnFrameReadSTFT(float[] frame)
+        {
             // to be overridden
         }
     }

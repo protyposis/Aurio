@@ -22,7 +22,8 @@ using System.Linq;
 using System.Text;
 using Aurio.Project;
 
-namespace Aurio.Matching {
+namespace Aurio.Matching
+{
 
     /// <summary>
     /// Struct consumes a little bit less memory than object (~5%) and results in a faster fingerprint
@@ -30,9 +31,11 @@ namespace Aurio.Matching {
     /// 
     /// 
     /// </summary>
-    public struct SubFingerprintLookupEntry {
+    public struct SubFingerprintLookupEntry
+    {
 
-        public SubFingerprintLookupEntry(AudioTrack audioTrack, int index) {
+        public SubFingerprintLookupEntry(AudioTrack audioTrack, int index)
+        {
             AudioTrack = audioTrack;
             Index = index;
         }
@@ -41,7 +44,8 @@ namespace Aurio.Matching {
         public AudioTrack AudioTrack;
         public int Index;
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return "SubFingerprintLookupEntry {" + AudioTrack.GetHashCode() + " / " + Index + "}";
         }
     }

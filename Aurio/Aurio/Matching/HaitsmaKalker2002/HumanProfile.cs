@@ -21,10 +21,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.HaitsmaKalker2002 {
-    class HumanProfile : DefaultProfile {
+namespace Aurio.Matching.HaitsmaKalker2002
+{
+    class HumanProfile : DefaultProfile
+    {
 
-        public HumanProfile() : base() {
+        public HumanProfile() : base()
+        {
             Name = "Human (slow!)";
 
             FrameSize = 16384;

@@ -23,13 +23,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.Echoprint {
+namespace Aurio.Matching.Echoprint
+{
     /// <summary>
     /// Divides a source signal into 8 bands by converting every 8 samples of a source signal into a vector 
     /// of 8 values containing the total energy of each band. The series of result vectors form a spectrogram-like
     /// matrix of subband energies.
     /// </summary>
-    class SubbandAnalyzer : StreamWindower {
+    class SubbandAnalyzer : StreamWindower
+    {
 
         /// <summary>
         /// The 128 point subband filter analysis window coefficients for the decomposition into 8 frequency bands.
@@ -68,9 +70,11 @@ namespace Aurio.Matching.Echoprint {
         private float[,] mIm;
 
         public SubbandAnalyzer(IAudioStream stream)
-            : base(stream, C.Length, SubBands) {
+            : base(stream, C.Length, SubBands)
+        {
 
-            if (stream.Properties.SampleRate != 11025) {
+            if (stream.Properties.SampleRate != 11025)
+            {
                 throw new ArgumentException("stream sample rate must be 11025");
             }
 
@@ -82,8 +86,10 @@ namespace Aurio.Matching.Echoprint {
             mIm = new float[SubBands, subbandFrameSize];
 
             // Precalculate the analysis filter bank coefficients
-            for (int i = 0; i < SubBands; i++) {
-                for (int j = 0; j < subbandFrameSize; j++) {
+            for (int i = 0; i < SubBands; i++)
+            {
+                for (int j = 0; j < subbandFrameSize; j++)
+                {
                     mRe[i, j] = (float)Math.Cos((2 * i + 1) * (j - 4) * (Math.PI / 16.0)); // from the ISO standard
                     mIm[i, j] = (float)Math.Sin((2 * i + 1) * (j - 4) * (Math.PI / 16.0)); // added for DFT
                 }
@@ -100,8 +106,10 @@ namespace Aurio.Matching.Echoprint {
         ///  - Pan Davis, A Tutorial on MPEG/Audio Compression
         /// </summary>
         /// <param name="subbandEnergies">the output</param>
-        public override void ReadFrame(float[] subbandEnergies) {
-            if (subbandEnergies.Length != SubBands) {
+        public override void ReadFrame(float[] subbandEnergies)
+        {
+            if (subbandEnergies.Length != SubBands)
+            {
                 throw new ArgumentOutOfRangeException("wrong subband array size");
             }
 
@@ -111,24 +119,30 @@ namespace Aurio.Matching.Echoprint {
             // NOTE in the standard, the most recent sample is at index 0, while here it is at length-1
 
             // Multiply frame X with the analysis window coefficients C to get Z, ...
-            for (int i = 0; i < C.Length; i++) {
+            for (int i = 0; i < C.Length; i++)
+            {
                 frameBuffer[i] = frameBuffer[i] * C[i];
             }
 
             // ...do the partial calculation to get Yi, ...
-            for (int i = 0; i < subbandFrameSize; i++) {
+            for (int i = 0; i < subbandFrameSize; i++)
+            {
                 subbandBuffer[i] = frameBuffer[i];
             }
-            for (int i = 0; i < subbandFrameSize; i++) {
-                for (int j = 1; j < SubBands; j++) {
+            for (int i = 0; i < subbandFrameSize; i++)
+            {
+                for (int j = 1; j < SubBands; j++)
+                {
                     subbandBuffer[i] += frameBuffer[i + subbandFrameSize * j];
                 }
             }
 
             // ...and finally compute the output by matrixing
-            for (int i = 0; i < SubBands; i++) {
+            for (int i = 0; i < SubBands; i++)
+            {
                 float Dr = 0, Di = 0;
-                for (int j = 0; j < subbandFrameSize; j++) {
+                for (int j = 0; j < subbandFrameSize; j++)
+                {
                     Dr += mRe[i, j] * subbandBuffer[j]; // calculate output sample of subband i
                     Di -= mIm[i, j] * subbandBuffer[j];
                 }

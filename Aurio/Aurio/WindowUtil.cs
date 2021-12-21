@@ -21,8 +21,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio {
-    public enum WindowType {
+namespace Aurio
+{
+    public enum WindowType
+    {
         Rectangle,
         Triangle,
         /// <summary>
@@ -46,21 +48,25 @@ namespace Aurio {
     /// See: Windowing Functions Improve FFT Results, Part I (http://www.tmworld.com/article/322450-Windowing_Functions_Improve_FFT_Results_Part_I.php)
     /// See: http://en.wikipedia.org/wiki/Window_function
     /// </summary>
-    public static class WindowUtil {
+    public static class WindowUtil
+    {
 
         /// <summary>
         /// (No weighting)
         /// </summary>
-        public static void Rectangle(float[] samples, int offset, int length) {
+        public static void Rectangle(float[] samples, int offset, int length)
+        {
             // zero all samples before the desired window interval (as it is the same as a multiplication by 0)
-            for (int x = 0; x < offset; x++) {
+            for (int x = 0; x < offset; x++)
+            {
                 samples[x] = 0;
             }
-            
+
             // do nothing for samples in the desired rectangle interval as it is the same as multiplying all samples by 1
 
             // zero all samples after the desired window interval (as it is the same as a multiplication by 0)
-            for (int x = offset + length; x < samples.Length; x++) {
+            for (int x = offset + length; x < samples.Length; x++)
+            {
                 samples[x] = 0;
             }
         }
@@ -68,10 +74,12 @@ namespace Aurio {
         /// <summary>
         /// (Bartlett-Window)
         /// </summary>
-        public static void Triangle(float[] samples, int offset, int length) {
+        public static void Triangle(float[] samples, int offset, int length)
+        {
             float index = -(length - 1) / 2f;
             float N = length / 2f;
-            for (int x = offset; x < offset + length; x++) {
+            for (int x = offset; x < offset + length; x++)
+            {
                 samples[x] *= 1 - Math.Abs(index) / N;
                 index += 1;
             }
@@ -80,10 +88,12 @@ namespace Aurio {
         /// <summary>
         /// (Cosinus-Glockenfenster; (von) Hann; Hanning [sic])
         /// </summary>
-        public static void Hann(float[] samples, int offset, int length) {
+        public static void Hann(float[] samples, int offset, int length)
+        {
             int index = 0;
             int N = length - 1;
-            for (int x = offset; x < offset + length; x++) {
+            for (int x = offset; x < offset + length; x++)
+            {
                 samples[x] *= (float)(0.5 * (1f - Math.Cos(2 * Math.PI * index / N)));
                 index++;
             }
@@ -93,50 +103,60 @@ namespace Aurio {
         /// Hann window with COLA property when length is even and hop size is length/2, useful for FFT and overlap-add.
         /// For uneven lengths, COLA can be achieved by using the normal Hann window with a hop size of (length-1)/2.
         /// </summary>
-        public static void HannPeriodic(float[] samples, int offset, int length) {
+        public static void HannPeriodic(float[] samples, int offset, int length)
+        {
             float[] hann = GetArray(WindowType.Hann, length + 1);
 
-            for (int x = offset; x < offset + length; x++) {
+            for (int x = offset; x < offset + length; x++)
+            {
                 samples[x] *= hann[x];
             }
         }
 
-        public static void Hamming(float[] samples, int offset, int length) {
+        public static void Hamming(float[] samples, int offset, int length)
+        {
             int index = 0;
             int N = length - 1;
-            for (int x = offset; x < offset + length; x++) {
+            for (int x = offset; x < offset + length; x++)
+            {
                 samples[x] *= (float)(0.54 - 0.46 * Math.Cos(2 * Math.PI * index / N));
                 index++;
             }
         }
 
-        public static void Blackman(float[] samples, int offset, int length) {
+        public static void Blackman(float[] samples, int offset, int length)
+        {
             int index = 0;
             int N = length - 1;
-            for (int x = offset; x < offset + length; x++) {
-                samples[x] *= (float)(0.42 
-                    - 0.50 * Math.Cos(2 * Math.PI * index / N) 
+            for (int x = offset; x < offset + length; x++)
+            {
+                samples[x] *= (float)(0.42
+                    - 0.50 * Math.Cos(2 * Math.PI * index / N)
                     + 0.08 * Math.Cos(4 * Math.PI * index / N));
                 index++;
             }
         }
 
-        public static void BlackmanHarris(float[] samples, int offset, int length) {
+        public static void BlackmanHarris(float[] samples, int offset, int length)
+        {
             int index = 0;
             int N = length - 1;
-            for (int x = offset; x < offset + length; x++) {
-                samples[x] *= (float)(0.35875 
-                    - 0.48829 * Math.Cos(2 * Math.PI * index / N) 
-                    + 0.14128 * Math.Cos(4 * Math.PI * index / N) 
+            for (int x = offset; x < offset + length; x++)
+            {
+                samples[x] *= (float)(0.35875
+                    - 0.48829 * Math.Cos(2 * Math.PI * index / N)
+                    + 0.14128 * Math.Cos(4 * Math.PI * index / N)
                     - 0.01168 * Math.Cos(6 * Math.PI * index / N));
                 index++;
             }
         }
 
-        public static void BlackmanNuttall(float[] samples, int offset, int length) {
+        public static void BlackmanNuttall(float[] samples, int offset, int length)
+        {
             int index = 0;
             int N = length - 1;
-            for (int x = offset; x < offset + length; x++) {
+            for (int x = offset; x < offset + length; x++)
+            {
                 samples[x] *= (float)(0.3635819
                     - 0.4891775 * Math.Cos(2 * Math.PI * index / N)
                     + 0.1365995 * Math.Cos(4 * Math.PI * index / N)
@@ -145,10 +165,12 @@ namespace Aurio {
             }
         }
 
-        public static void Nuttall(float[] samples, int offset, int length) {
+        public static void Nuttall(float[] samples, int offset, int length)
+        {
             int index = 0;
             int N = length - 1;
-            for (int x = offset; x < offset + length; x++) {
+            for (int x = offset; x < offset + length; x++)
+            {
                 samples[x] *= (float)(0.355768
                     - 0.487396 * Math.Cos(2 * Math.PI * index / N)
                     + 0.144232 * Math.Cos(4 * Math.PI * index / N)
@@ -157,13 +179,16 @@ namespace Aurio {
             }
         }
 
-        public static float[] GetArray(WindowType windowType, int windowSize, float normalizationFactor) {
+        public static float[] GetArray(WindowType windowType, int windowSize, float normalizationFactor)
+        {
             float[] window = new float[windowSize];
-            for (int x = 0; x < window.Length; x++) {
+            for (int x = 0; x < window.Length; x++)
+            {
                 window[x] = normalizationFactor;
             }
 
-            switch (windowType) {
+            switch (windowType)
+            {
                 case WindowType.Rectangle:
                     Rectangle(window, 0, window.Length);
                     break;
@@ -198,24 +223,30 @@ namespace Aurio {
             return window;
         }
 
-        public static float[] GetArray(WindowType windowType, int windowSize) {
+        public static float[] GetArray(WindowType windowType, int windowSize)
+        {
             return GetArray(windowType, windowSize, 1.0f);
         }
 
-        public static WindowFunction GetFunction(WindowType windowType, int windowSize, float normalizationFactor) {
+        public static WindowFunction GetFunction(WindowType windowType, int windowSize, float normalizationFactor)
+        {
             return new WindowFunction(GetArray(windowType, windowSize, normalizationFactor), windowType);
         }
 
-        public static WindowFunction GetFunction(WindowType windowType, int windowSize) {
+        public static WindowFunction GetFunction(WindowType windowType, int windowSize)
+        {
             return new WindowFunction(GetArray(windowType, windowSize), windowType);
         }
 
-        public static void Apply(float[] values, int valuesOffset, float[] window) {
-            if (values.Length - valuesOffset < window.Length) {
+        public static void Apply(float[] values, int valuesOffset, float[] window)
+        {
+            if (values.Length - valuesOffset < window.Length)
+            {
                 throw new ArgumentException("lengths of input arrays don't match");
             }
 
-            for (int x = 0; x < window.Length; x++) {
+            for (int x = 0; x < window.Length; x++)
+            {
                 values[x + valuesOffset] *= window[x];
             }
         }

@@ -21,17 +21,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Streams {
+namespace Aurio.Streams
+{
     /// <summary>
     /// An audio stream that returns no data. Useful for testing purposes.
     /// </summary>
-    public class NullStream : IAudioStream {
+    public class NullStream : IAudioStream
+    {
 
         private AudioProperties audioProperties;
         private long length;
         private long position;
 
-        public NullStream(AudioProperties audioProperties, long length) {
+        public NullStream(AudioProperties audioProperties, long length)
+        {
             this.audioProperties = audioProperties;
             this.length = length;
             this.position = 0;
@@ -39,30 +42,37 @@ namespace Aurio.Streams {
 
         #region IAudioStream Members
 
-        public AudioProperties Properties {
+        public AudioProperties Properties
+        {
             get { return audioProperties; }
         }
 
-        public long Length {
+        public long Length
+        {
             get { return length; }
         }
 
-        public long Position {
+        public long Position
+        {
             get { return position; }
             set { position = value; }
         }
 
-        public int SampleBlockSize {
+        public int SampleBlockSize
+        {
             get { return audioProperties.SampleBlockByteSize; }
         }
 
-        public int Read(byte[] buffer, int offset, int count) {
+        public int Read(byte[] buffer, int offset, int count)
+        {
             int bytesRead;
 
-            if (position + count < length) {
+            if (position + count < length)
+            {
                 bytesRead = count;
             }
-            else {
+            else
+            {
                 bytesRead = (int)(length - position);
             }
 
@@ -70,7 +80,8 @@ namespace Aurio.Streams {
             return bytesRead;
         }
 
-        public void Close() {
+        public void Close()
+        {
             // nothing to release
         }
 
@@ -79,9 +90,12 @@ namespace Aurio.Streams {
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     Close();
                 }
 
@@ -89,7 +103,8 @@ namespace Aurio.Streams {
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
         }
         #endregion

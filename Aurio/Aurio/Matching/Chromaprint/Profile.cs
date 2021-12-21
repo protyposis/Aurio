@@ -22,8 +22,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.Chromaprint {
-    public abstract class Profile : IProfile {
+namespace Aurio.Matching.Chromaprint
+{
+    public abstract class Profile : IProfile
+    {
 
         /// <summary>
         /// The name of this profile.
@@ -38,7 +40,7 @@ namespace Aurio.Matching.Chromaprint {
         /// <summary>
         /// The STFT window size in samples, which is the double of the spectral frame resolution.
         /// </summary>
-        public int WindowSize {  get; set;}
+        public int WindowSize { get; set; }
 
         /// <summary>
         /// The distance in samples from one STFT window to the next. Can be overlapping.

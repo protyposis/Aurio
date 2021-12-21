@@ -21,18 +21,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio {
+namespace Aurio
+{
     /// <summary>
     /// Volume calculations.
     /// </summary>
     /// <seealso cref="NAudio.Utils.Decibels"/>
     /// <seealso cref="http://stackoverflow.com/questions/6627288/audio-spectrum-analysis-using-fft-algorithm-in-java"/>
-    public static class VolumeUtil {
+    public static class VolumeUtil
+    {
 
         private static readonly double LOG_2_DB;
         private static readonly double DB_2_LOG;
 
-        static VolumeUtil() {
+        static VolumeUtil()
+        {
             // precalculate factors to speed up calculations
             LOG_2_DB = 20 / Math.Log(10);
             DB_2_LOG = Math.Log(10) / 20;
@@ -44,7 +47,8 @@ namespace Aurio {
         /// </summary>
         /// <param name="linear">linear value</param>
         /// <returns>decibel value</returns>
-        public static double LinearToDecibel(double linear) {
+        public static double LinearToDecibel(double linear)
+        {
             //return 20 * Math.Log10(linear);
             return Math.Log(linear) * LOG_2_DB;
         }
@@ -54,7 +58,8 @@ namespace Aurio {
         /// </summary>
         /// <param name="decibel">decibel value</param>
         /// <returns>linear value</returns>
-        public static double DecibelToLinear(double decibel) {
+        public static double DecibelToLinear(double decibel)
+        {
             return Math.Exp(decibel * DB_2_LOG);
         }
 
@@ -65,7 +70,8 @@ namespace Aurio {
         /// <param name="minDecibel">lower bound os the decibel range (0%)</param>
         /// <param name="maxDecibel">upper bound of the decibel range (100%)</param>
         /// <returns>the percentage of a decibel value between two bounding decibel values</returns>
-        public static double DecibelToPercentage(double decibel, double minDecibel, double maxDecibel) {
+        public static double DecibelToPercentage(double decibel, double minDecibel, double maxDecibel)
+        {
             return (decibel - minDecibel) / (maxDecibel - minDecibel);
         }
     }

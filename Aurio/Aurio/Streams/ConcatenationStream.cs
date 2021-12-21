@@ -21,11 +21,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Streams {
+namespace Aurio.Streams
+{
     /// <summary>
     /// A stream to concatenate multiple source streams sequentially into a single longer stream.
     /// </summary>
-    public class ConcatenationStream : IAudioStream {
+    public class ConcatenationStream : IAudioStream
+    {
 
         private IAudioStream[] sourceStreams;
 
@@ -38,14 +40,16 @@ namespace Aurio.Streams {
         /// Creates a concatenated stream from the supplied source streams in the order of specification.
         /// </summary>
         /// <param name="sourceStreams">the source streams to concatenate in their given order</param>
-        public ConcatenationStream(params IAudioStream[] sourceStreams) {
+        public ConcatenationStream(params IAudioStream[] sourceStreams)
+        {
             this.sourceStreams = sourceStreams;
 
             currentStreamIndex = 0;
             currentStream = sourceStreams[currentStreamIndex];
 
             // Check for same format
-            foreach (var stream in sourceStreams) {
+            foreach (var stream in sourceStreams)
+            {
                 if (stream.Properties.SampleRate != currentStream.Properties.SampleRate ||
                     stream.Properties.BitDepth != currentStream.Properties.BitDepth ||
                     stream.Properties.Channels != currentStream.Properties.Channels ||
@@ -59,31 +63,40 @@ namespace Aurio.Streams {
             positionOffset = 0;
         }
 
-        public AudioProperties Properties {
+        public AudioProperties Properties
+        {
             get { return currentStream.Properties; }
         }
 
-        public long Length {
+        public long Length
+        {
             get { return length; }
         }
 
-        public long Position {
-            get {
+        public long Position
+        {
+            get
+            {
                 return positionOffset + currentStream.Position;
             }
-            set {
-                if (value < positionOffset || value >= positionOffset + currentStream.Length) {
+            set
+            {
+                if (value < positionOffset || value >= positionOffset + currentStream.Length)
+                {
                     // We need to switch to a different source stream
                     positionOffset = 0;
-                    for (int i = 0; i < sourceStreams.Length; i++) {
-                        if (value < positionOffset + sourceStreams[i].Length) {
+                    for (int i = 0; i < sourceStreams.Length; i++)
+                    {
+                        if (value < positionOffset + sourceStreams[i].Length)
+                        {
                             currentStreamIndex = i;
                             currentStream = sourceStreams[i];
                             break;
                         }
                         positionOffset += sourceStreams[i].Length;
                     }
-                    if (positionOffset == length) {
+                    if (positionOffset == length)
+                    {
                         // A seek to the end of the stream or beyond... 
                         // ...we set the position to the end of the last stream instead of after the last stream
                         currentStreamIndex = sourceStreams.Length - 1;
@@ -97,13 +110,17 @@ namespace Aurio.Streams {
             }
         }
 
-        public int SampleBlockSize {
+        public int SampleBlockSize
+        {
             get { return currentStream.SampleBlockSize; }
         }
 
-        public int Read(byte[] buffer, int offset, int count) {
-            if (currentStream.Position == currentStream.Length) {
-                if (currentStreamIndex == sourceStreams.Length - 1) {
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            if (currentStream.Position == currentStream.Length)
+            {
+                if (currentStreamIndex == sourceStreams.Length - 1)
+                {
                     // End of last stream
                     return 0;
                 }
@@ -117,8 +134,10 @@ namespace Aurio.Streams {
             return currentStream.Read(buffer, offset, count);
         }
 
-        public void Close() {
-            foreach(IAudioStream sourceStream in sourceStreams) {
+        public void Close()
+        {
+            foreach (IAudioStream sourceStream in sourceStreams)
+            {
                 sourceStream.Close();
             }
         }
@@ -126,9 +145,12 @@ namespace Aurio.Streams {
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     Close();
                 }
 
@@ -136,7 +158,8 @@ namespace Aurio.Streams {
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
         }
         #endregion

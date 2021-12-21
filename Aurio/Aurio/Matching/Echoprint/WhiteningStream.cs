@@ -23,13 +23,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.Echoprint {
+namespace Aurio.Matching.Echoprint
+{
     /// <summary>
     /// Whitens a stream by calculating an LPC filter block by block from the autocorrelation, 
     /// effectively removing stationary frequencies from the stream. This can be used to analyze
     /// nonstationary spectral changes.
     /// </summary>
-    class WhiteningStream : AbstractAudioStreamWrapper {
+    class WhiteningStream : AbstractAudioStreamWrapper
+    {
 
         // config variables
         private int numPoles;
@@ -47,19 +49,22 @@ namespace Aurio.Matching.Echoprint {
         private float[] _ai; // predictor coefficients
 
         public WhiteningStream(IAudioStream sourceStream, int numPoles, float decaySecs, int blockLength)
-            : base(sourceStream) {
-                if (sourceStream.Properties.Channels != 1) {
-                    throw new ArgumentException("source stream must be mono");
-                }
+            : base(sourceStream)
+        {
+            if (sourceStream.Properties.Channels != 1)
+            {
+                throw new ArgumentException("source stream must be mono");
+            }
 
-                this.numPoles = numPoles;
-                this.decaySecs = decaySecs;
-                this.blockLength = blockLength;
+            this.numPoles = numPoles;
+            this.decaySecs = decaySecs;
+            this.blockLength = blockLength;
 
-                Init();
+            Init();
         }
 
-        private void Init() {
+        private void Init()
+        {
             blockInputBuffer = new ByteBuffer(sourceStream.SampleBlockSize * blockLength);
             blockOutputBuffer = new ByteBuffer(blockInputBuffer.Capacity);
 
@@ -82,12 +87,16 @@ namespace Aurio.Matching.Echoprint {
         /// value compared to when read after a seek to 0 < t < x because the whitening filter 
         /// will not be exactly the same.
         /// </remarks>
-        public override long Position {
-            get {
+        public override long Position
+        {
+            get
+            {
                 return base.Position - blockOutputBuffer.Count;
             }
-            set {
-                if (value == base.Position) {
+            set
+            {
+                if (value == base.Position)
+                {
                     return;
                 }
 
@@ -98,27 +107,34 @@ namespace Aurio.Matching.Echoprint {
             }
         }
 
-        public override int Read(byte[] buffer, int offset, int count) {
+        public override int Read(byte[] buffer, int offset, int count)
+        {
             // Process a block if output buffer is empty
-            if (blockOutputBuffer.Empty) {
+            if (blockOutputBuffer.Empty)
+            {
                 blockInputBuffer.Clear();
                 blockOutputBuffer.Clear();
 
                 // Read a sample block
                 int bytesRead = blockInputBuffer.ForceFill(sourceStream);
-                if (bytesRead == 0) {
+                if (bytesRead == 0)
+                {
                     return 0; // EOS
                 }
 
-                if (bytesRead / sourceStream.SampleBlockSize > numPoles) {
+                if (bytesRead / sourceStream.SampleBlockSize > numPoles)
+                {
                     // Whiten the sample block
-                    unsafe {
-                        fixed (byte* byteInBuffer = blockInputBuffer.Data, byteOutBuffer = blockOutputBuffer.Data) {
+                    unsafe
+                    {
+                        fixed (byte* byteInBuffer = blockInputBuffer.Data, byteOutBuffer = blockOutputBuffer.Data)
+                        {
                             ProcessBlock((float*)byteInBuffer, (float*)byteOutBuffer, blockInputBuffer.Length / sourceStream.SampleBlockSize);
                         }
                     }
                 }
-                else {
+                else
+                {
                     // When there is not enough sample data left for whitening, just set output to zero
                     Array.Clear(blockOutputBuffer.Data, 0, blockOutputBuffer.Capacity);
                 }
@@ -152,11 +168,14 @@ namespace Aurio.Matching.Echoprint {
         /// <param name="samples">the input sample block</param>
         /// <param name="whitened">the output sample block</param>
         /// <param name="count">the size of the input and output sample blocks</param>
-        private unsafe void ProcessBlock(float* samples, float* whitened, int count) {
+        private unsafe void ProcessBlock(float* samples, float* whitened, int count)
+        {
             // calculate autocorrelation of current block
-            for (int i = 0; i <= numPoles; i++) {
+            for (int i = 0; i <= numPoles; i++)
+            {
                 float acc = 0;
-                for (int j = i; j < count; j++) {
+                for (int j = i; j < count; j++)
+                {
                     acc += samples[j] * samples[j - i];
                 }
                 // smoothed update (exponential moving average)
@@ -166,14 +185,17 @@ namespace Aurio.Matching.Echoprint {
             // calculate new filter coefficients
             // Durbin's recursion, per p. 411 of Rabiner & Schafer 1978
             float E = _R[0]; // prediction error
-            for (int i = 1; i <= numPoles; i++) {
+            for (int i = 1; i <= numPoles; i++)
+            {
                 float sumalphaR = 0;
-                for (int j = 1; j < i; j++) {
+                for (int j = 1; j < i; j++)
+                {
                     sumalphaR += _ai[j] * _R[i - j];
                 }
                 float ki = (_R[i] - sumalphaR) / E;
                 _ai[i] = ki;
-                for (int j = 1; j <= i / 2; j++) {
+                for (int j = 1; j <= i / 2; j++)
+                {
                     float aj = _ai[j];
                     float aimj = _ai[i - j];
                     _ai[j] = aj - ki * aimj;
@@ -183,19 +205,23 @@ namespace Aurio.Matching.Echoprint {
             }
 
             // calculate new output
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 // Calculate predicted value of each sample
                 float acc = 0;
                 int minip = i;
-                if (numPoles < minip) {
+                if (numPoles < minip)
+                {
                     minip = numPoles;
                 }
                 // Because past samples need to be used to predict a sample, prediction of 
                 // the first k samples requires samples from the end of the previous block.
-                for (int j = i + 1; j <= numPoles; j++) {
+                for (int j = i + 1; j <= numPoles; j++)
+                {
                     acc += _ai[j] * _Xo[numPoles + i - j]; // preceding samples from previous block
                 }
-                for (int j = 1; j <= minip; j++) {
+                for (int j = 1; j <= minip; j++)
+                {
                     acc += _ai[j] * samples[i - j]; // preceding samples from current block
                 }
 
@@ -204,7 +230,8 @@ namespace Aurio.Matching.Echoprint {
             }
 
             // save last few samples of input which are needed to estimate the first few samples of the next block
-            for (int i = 0; i <= numPoles; i++) {
+            for (int i = 0; i <= numPoles; i++)
+            {
                 _Xo[i] = samples[count - 1 - numPoles + i];
             }
         }

@@ -22,8 +22,10 @@ using System.Linq;
 using System.Text;
 using Aurio.Project;
 
-namespace Aurio.Matching {
-    public class Match {
+namespace Aurio.Matching
+{
+    public class Match
+    {
         public AudioTrack Track1 { get; set; }
         public AudioTrack Track2 { get; set; }
         public TimeSpan Track1Time { get; set; }
@@ -31,9 +33,10 @@ namespace Aurio.Matching {
         public float Similarity { get; set; }
         public string Source { get; set; }
 
-        public Match() {}
+        public Match() { }
 
-        public Match(Match m) {
+        public Match(Match m)
+        {
             Track1 = m.Track1;
             Track2 = m.Track2;
             Track1Time = m.Track1Time;
@@ -42,17 +45,21 @@ namespace Aurio.Matching {
             Source = m.Source;
         }
 
-        public TimeSpan Offset {
-            get {
+        public TimeSpan Offset
+        {
+            get
+            {
                 return (Track1.Offset + Track1Time) - (Track2.Offset + Track2Time);
             }
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return "Match {" + Track1.Name + "@" + Track1Time + "<->" + Track2.Name + "@" + Track2Time + ":" + Similarity + " (" + Source + ")}";
         }
 
-        public void SwapTracks() {
+        public void SwapTracks()
+        {
             AudioTrack tempTrack = Track1;
             Track1 = Track2;
             Track2 = tempTrack;

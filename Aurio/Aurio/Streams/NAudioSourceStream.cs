@@ -22,20 +22,24 @@ using System.Linq;
 using System.Text;
 using NAudio.Wave;
 
-namespace Aurio.Streams {
-    public class NAudioSourceStream : IAudioStream {
+namespace Aurio.Streams
+{
+    public class NAudioSourceStream : IAudioStream
+    {
 
         private WaveStream sourceStream;
         private AudioProperties properties;
 
-        public NAudioSourceStream(WaveStream sourceStream) {
+        public NAudioSourceStream(WaveStream sourceStream)
+        {
             AudioProperties sourceProperties = GetAudioProperties(sourceStream.WaveFormat);
 
             // check for supported formats:
             if (sourceProperties.Format == AudioFormat.LPCM && sourceProperties.BitDepth == 16) { }
             else if (sourceProperties.Format == AudioFormat.LPCM && sourceProperties.BitDepth == 24) { }
             else if (sourceProperties.Format == AudioFormat.IEEE && sourceProperties.BitDepth == 32) { }
-            else {
+            else
+            {
                 throw new ArgumentException(String.Format("unsupported source format: {0}bit {1}Hz {2}ch {3}",
                     sourceProperties.BitDepth, sourceProperties.SampleRate, sourceProperties.Channels, sourceProperties.Format));
             }
@@ -44,41 +48,52 @@ namespace Aurio.Streams {
             this.properties = sourceProperties;
         }
 
-        public AudioProperties Properties {
+        public AudioProperties Properties
+        {
             get { return properties; }
         }
 
-        public long Length {
+        public long Length
+        {
             get { return sourceStream.Length; }
         }
 
-        public long Position {
-            get {
+        public long Position
+        {
+            get
+            {
                 return sourceStream.Position;
             }
-            set {
-                if (value % SampleBlockSize == 0) {
+            set
+            {
+                if (value % SampleBlockSize == 0)
+                {
                     sourceStream.Position = value;
                 }
-                else {
+                else
+                {
                     throw new Exception("position must be aligned to the sample block size");
                 }
             }
         }
 
-        public int SampleBlockSize {
+        public int SampleBlockSize
+        {
             get { return sourceStream.BlockAlign; }
         }
 
-        public int Read(byte[] buffer, int offset, int count) {
-            if (count % SampleBlockSize != 0) {
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            if (count % SampleBlockSize != 0)
+            {
                 // an unaligned read length would lead to an illegal unaligned position in the stream
                 throw new Exception("read length must be a multiple of the sample block size");
             }
 
             int bytesRead = sourceStream.Read(buffer, offset, count);
 
-            if (bytesRead % SampleBlockSize != 0) {
+            if (bytesRead % SampleBlockSize != 0)
+            {
                 // an unaligned number of read bytes leads to an illegal unaligned position in the stream
                 throw new Exception("the number of read bytes is not a multiple of the sample block size");
             }
@@ -86,20 +101,25 @@ namespace Aurio.Streams {
             return bytesRead;
         }
 
-        public void Close() {
+        public void Close()
+        {
             sourceStream.Close();
         }
 
-        public static AudioProperties GetAudioProperties(WaveFormat sourceFormat) {
+        public static AudioProperties GetAudioProperties(WaveFormat sourceFormat)
+        {
             AudioFormat format;
 
-            if (sourceFormat.Encoding == WaveFormatEncoding.Pcm) {
+            if (sourceFormat.Encoding == WaveFormatEncoding.Pcm)
+            {
                 format = AudioFormat.LPCM;
             }
-            else if (sourceFormat.Encoding == WaveFormatEncoding.IeeeFloat) {
+            else if (sourceFormat.Encoding == WaveFormatEncoding.IeeeFloat)
+            {
                 format = AudioFormat.IEEE;
             }
-            else {
+            else
+            {
                 throw new ArgumentException(String.Format("unsupported source encoding: {0}", sourceFormat.Encoding));
             }
 
@@ -109,9 +129,12 @@ namespace Aurio.Streams {
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     Close();
                 }
 
@@ -119,7 +142,8 @@ namespace Aurio.Streams {
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
         }
         #endregion

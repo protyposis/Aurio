@@ -23,10 +23,13 @@ using System.Text;
 using Aurio.Project;
 using System.Collections.Specialized;
 
-namespace Aurio.Matching {
-    public class SubFingerprintsGeneratedEventArgs : EventArgs {
+namespace Aurio.Matching
+{
+    public class SubFingerprintsGeneratedEventArgs : EventArgs
+    {
 
-        public SubFingerprintsGeneratedEventArgs(AudioTrack audioTrack, List<SubFingerprint> subFingerprints, int index, int indices) {
+        public SubFingerprintsGeneratedEventArgs(AudioTrack audioTrack, List<SubFingerprint> subFingerprints, int index, int indices)
+        {
             AudioTrack = audioTrack;
             SubFingerprints = subFingerprints;
             Index = index;

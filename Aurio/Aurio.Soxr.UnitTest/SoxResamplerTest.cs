@@ -1,18 +1,22 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Aurio.Soxr.UnitTest {
+namespace Aurio.Soxr.UnitTest
+{
     [TestClass]
-    public class SoxResamplerTest {
+    public class SoxResamplerTest
+    {
 
         [TestMethod]
-        public void CreateInstance() {
+        public void CreateInstance()
+        {
             var r = new SoxResampler(44100, 96000, 2);
             Assert.IsNotNull(r);
         }
 
         [TestMethod]
-        public void CreateAndDestroyLotsOfInstancesAndProcess() {
+        public void CreateAndDestroyLotsOfInstancesAndProcess()
+        {
             var r = new SoxResampler(44100, 96000, 2);
             int count = 1000;
             var instances = new SoxResampler[count];
@@ -21,19 +25,22 @@ namespace Aurio.Soxr.UnitTest {
             var dataOut = new byte[80000];
             int readIn = 0, readOut = 0;
 
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 instances[i] = new SoxResampler(5.0, 1.0, 2, QualityRecipe.SOXR_HQ, QualityFlags.SOXR_VR);
                 instances[i].Process(dataIn, 0, dataIn.Length, dataOut, 0, dataOut.Length, false, out readIn, out readOut);
             }
 
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 instances[i].Dispose();
             }
         }
 
         [TestMethod]
         [ExpectedException(typeof(SoxrException), "Invalid instantiation parameter didn't raise exception")]
-        public void CreateInvalidInstance() {
+        public void CreateInvalidInstance()
+        {
             /* A negative input rate is invalid and should return in an error that triggers an exception.
              * Other invalid parameters should also trigger an exception, but we do not test them all. This test
              * only assures that the error reading works correctly. */
@@ -41,18 +48,21 @@ namespace Aurio.Soxr.UnitTest {
         }
 
         [TestMethod]
-        public void CreateVariableRateInstance() {
+        public void CreateVariableRateInstance()
+        {
             var r = new SoxResampler(2.0, 1.0, 1, QualityRecipe.SOXR_HQ, QualityFlags.SOXR_VR);
         }
 
         [TestMethod]
         [ExpectedException(typeof(SoxrException), "Invalid instantiation parameter didn't raise exception")]
-        public void CreateInvalidVariableRateInstance() {
+        public void CreateInvalidVariableRateInstance()
+        {
             var r = new SoxResampler(2.0, 1.0, 1, QualityRecipe.SOXR_LQ, QualityFlags.SOXR_VR);
         }
 
         [TestMethod]
-        public void VersionReturnsString() {
+        public void VersionReturnsString()
+        {
             var r = new SoxResampler(44100, 96000, 2);
             string v = r.Version;
 
@@ -62,7 +72,8 @@ namespace Aurio.Soxr.UnitTest {
         }
 
         [TestMethod]
-        public void EngineReturnsString() {
+        public void EngineReturnsString()
+        {
             var r = new SoxResampler(44100, 96000, 2);
             string e = r.Engine;
 
@@ -72,13 +83,15 @@ namespace Aurio.Soxr.UnitTest {
         }
 
         [TestMethod]
-        public void ClearInternalState() {
+        public void ClearInternalState()
+        {
             var r = new SoxResampler(44100, 96000, 2);
             r.Clear();
         }
 
         [TestMethod]
-        public void CheckDelay() {
+        public void CheckDelay()
+        {
             var r = new SoxResampler(44100, 96000, 2);
 
             // When no samples have been fed to the resampler, there can't be an output delay
@@ -86,7 +99,8 @@ namespace Aurio.Soxr.UnitTest {
         }
 
         [TestMethod]
-        public void ProcessWithoutResampling() {
+        public void ProcessWithoutResampling()
+        {
             var r = new SoxResampler(1.0d, 1.0d, 1);
 
             int inSize = 12;
@@ -100,8 +114,9 @@ namespace Aurio.Soxr.UnitTest {
             int remainingIn = inSize;
             int totalIn = 0, totalOut = 0;
 
-            do {
-                r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize, 
+            do
+            {
+                r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize,
                     remainingIn == 0, out inputLengthUsed, out outputLengthGenerated);
                 totalIn += inputLengthUsed;
                 totalOut += outputLengthGenerated;
@@ -114,7 +129,8 @@ namespace Aurio.Soxr.UnitTest {
         }
 
         [TestMethod]
-        public void ProcessHugeBlock() {
+        public void ProcessHugeBlock()
+        {
             var r = new SoxResampler(1.0d, 1.0d, 1);
 
             int inSize = 15360;
@@ -128,7 +144,8 @@ namespace Aurio.Soxr.UnitTest {
             int remainingIn = inSize;
             int totalIn = 0, totalOut = 0;
 
-            do {
+            do
+            {
                 r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize,
                     remainingIn == 0, out inputLengthUsed, out outputLengthGenerated);
                 totalIn += inputLengthUsed;
@@ -142,7 +159,8 @@ namespace Aurio.Soxr.UnitTest {
         }
 
         [TestMethod]
-        public void ProcessRateDouble() {
+        public void ProcessRateDouble()
+        {
             var r = new SoxResampler(48000, 96000, 1);
 
             int inSize = 12;
@@ -156,7 +174,8 @@ namespace Aurio.Soxr.UnitTest {
             int remainingIn = inSize;
             int totalIn = 0, totalOut = 0;
 
-            do {
+            do
+            {
                 r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize,
                     remainingIn == 0, out inputLengthUsed, out outputLengthGenerated);
                 totalIn += inputLengthUsed;
@@ -170,7 +189,8 @@ namespace Aurio.Soxr.UnitTest {
         }
 
         [TestMethod]
-        public void ProcessRateHalf() {
+        public void ProcessRateHalf()
+        {
             var r = new SoxResampler(1.0d, 0.5d, 1);
 
             int inSize = 4 * 10;
@@ -184,7 +204,8 @@ namespace Aurio.Soxr.UnitTest {
             int remainingIn = inSize;
             int totalIn = 0, totalOut = 0;
 
-            do {
+            do
+            {
                 r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize,
                     remainingIn == 0, out inputLengthUsed, out outputLengthGenerated);
                 totalIn += inputLengthUsed;
@@ -199,7 +220,8 @@ namespace Aurio.Soxr.UnitTest {
 
         [TestMethod]
         [ExpectedException(typeof(SoxrException), "Illegal call didn't raise exception")]
-        public void IllegalRateChange() {
+        public void IllegalRateChange()
+        {
             var r = new SoxResampler(1.0, 1.0, 1);
 
             // This call is illegal because a fixed-rate resampler was instantiated
@@ -208,7 +230,8 @@ namespace Aurio.Soxr.UnitTest {
 
         [TestMethod]
         [ExpectedException(typeof(SoxrException), "Invalid rate change didn't raise exception")]
-        public void InvalidRateChangeAboveMax() {
+        public void InvalidRateChangeAboveMax()
+        {
             var r = new SoxResampler(2.0, 1.0, 1, QualityRecipe.SOXR_HQ, QualityFlags.SOXR_VR);
 
             // This ratio is invalid because it is higher than the max ratio specified in the constructor
@@ -217,7 +240,8 @@ namespace Aurio.Soxr.UnitTest {
 
         [TestMethod]
         [ExpectedException(typeof(SoxrException), "Invalid rate change didn't raise exception")]
-        public void InvalidRateChangeNegative() {
+        public void InvalidRateChangeNegative()
+        {
             var r = new SoxResampler(2.0, 1.0, 1, QualityRecipe.SOXR_HQ, QualityFlags.SOXR_VR);
 
             // A negative ratio is impossible
@@ -225,16 +249,18 @@ namespace Aurio.Soxr.UnitTest {
         }
 
         [TestMethod]
-        public void RateChange() {
+        public void RateChange()
+        {
             var r = new SoxResampler(2.0, 1.0, 1, QualityRecipe.SOXR_HQ, QualityFlags.SOXR_VR);
 
             r.SetRatio(1.5, 0);
         }
 
         [TestMethod]
-        public void DisposeTest() {
+        public void DisposeTest()
+        {
             var r = new SoxResampler(1.0, 1.0, 1);
-            
+
             r.Dispose();
             r.Dispose(); // call a second time to check for repeated calls working
         }

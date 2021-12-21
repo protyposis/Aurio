@@ -22,9 +22,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.Chromaprint {
-    class DefaultProfile : Profile {
-        public DefaultProfile() {
+namespace Aurio.Matching.Chromaprint
+{
+    class DefaultProfile : Profile
+    {
+        public DefaultProfile()
+        {
             Name = "Chromaprint default";
 
             SamplingRate = 11025;

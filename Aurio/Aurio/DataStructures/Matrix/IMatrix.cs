@@ -21,11 +21,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.DataStructures.Matrix {
+namespace Aurio.DataStructures.Matrix
+{
     /// <summary>
     /// Common interface for (sparse) matrix implementations.
     /// </summary>
-    public interface IMatrix<T> {
+    public interface IMatrix<T>
+    {
 
         /// <summary>
         /// Gets or sets a value at the supplied coordinates.

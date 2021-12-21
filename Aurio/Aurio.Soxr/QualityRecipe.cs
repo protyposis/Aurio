@@ -21,8 +21,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Soxr {
-    public enum QualityRecipe : uint {
+namespace Aurio.Soxr
+{
+    public enum QualityRecipe : uint
+    {
         /// <summary>
         /// 'Quick' cubic interpolation
         /// </summary>

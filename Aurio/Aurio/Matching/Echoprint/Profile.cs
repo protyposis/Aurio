@@ -21,9 +21,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.Echoprint {
-    public abstract class Profile : IProfile {
-        public interface IThreshold {
+namespace Aurio.Matching.Echoprint
+{
+    public abstract class Profile : IProfile
+    {
+        public interface IThreshold
+        {
             /// <summary>
             /// Returns, for a given x (time), a threshold value in the range of [0,1].
             /// </summary>
@@ -35,12 +38,14 @@ namespace Aurio.Matching.Echoprint {
         /// <summary>
         /// An exponentially decaying threshold in the form of y=b^x.
         /// </summary>
-        public class ExponentialDecayThreshold : IThreshold {
+        public class ExponentialDecayThreshold : IThreshold
+        {
             public double Base { get; set; }
             public double WidthScale { get; set; }
             public double Height { get; set; }
 
-            public double Calculate(double x) {
+            public double Calculate(double x)
+            {
                 return Math.Pow(Base, x / WidthScale) * Height;
             }
         }
@@ -135,7 +140,8 @@ namespace Aurio.Matching.Echoprint {
         /// <summary>
         /// The factor to convert the input sample time scale into the output hash time scale.
         /// </summary>
-        public double SampleToHashQuantizationFactor {
+        public double SampleToHashQuantizationFactor
+        {
             get { return SubBands * OnsetRmsHopSize * HashTimeQuantizationFactor; }
         }
 

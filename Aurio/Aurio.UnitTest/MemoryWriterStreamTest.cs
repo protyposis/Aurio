@@ -3,11 +3,14 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 
-namespace Aurio.UnitTest {
+namespace Aurio.UnitTest
+{
     [TestClass]
-    public class MemoryWriterStreamTest {
+    public class MemoryWriterStreamTest
+    {
         [TestMethod]
-        public void Write() {
+        public void Write()
+        {
             var stream = new MemoryStream();
             var properties = new AudioProperties(2, 44100, 16, AudioFormat.IEEE);
             var writer = new MemoryWriterStream(stream, properties);
@@ -22,7 +25,8 @@ namespace Aurio.UnitTest {
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException), "block alignment must be invalid")]
-        public void WriteInvalidAligment() {
+        public void WriteInvalidAligment()
+        {
             var stream = new MemoryStream();
             var properties = new AudioProperties(2, 44100, 16, AudioFormat.IEEE);
             var writer = new MemoryWriterStream(stream, properties);

@@ -22,23 +22,28 @@ using System.Linq;
 using System.Text;
 using Aurio.Streams;
 
-namespace Aurio {
-    public static class StreamUtil {
+namespace Aurio
+{
+    public static class StreamUtil
+    {
 
         public const float FLOAT_EPSILON = 0.0000001f;
 
-        public static int ForceRead(IAudioStream audioStream, byte[] buffer, int offset, int count) {
+        public static int ForceRead(IAudioStream audioStream, byte[] buffer, int offset, int count)
+        {
             int totalBytesRead = 0;
             int bytesRead = 0;
 
-            while (count - totalBytesRead > 0 && (bytesRead = audioStream.Read(buffer, offset + totalBytesRead, count - totalBytesRead)) > 0) {
+            while (count - totalBytesRead > 0 && (bytesRead = audioStream.Read(buffer, offset + totalBytesRead, count - totalBytesRead)) > 0)
+            {
                 totalBytesRead += bytesRead;
             }
 
             return totalBytesRead;
         }
 
-        public static int ForceReadIntervalSamples(IAudioStream s, Interval i, float[] array) {
+        public static int ForceReadIntervalSamples(IAudioStream s, Interval i, float[] array)
+        {
             s.Position = TimeUtil.TimeSpanToBytes(i.TimeFrom, s.Properties);
             long bytesRead = 0;
             long samplesToRead = TimeUtil.TimeSpanToBytes(i.TimeLength, s.Properties) / s.Properties.SampleByteSize;
@@ -46,19 +51,24 @@ namespace Aurio {
             int channels = s.Properties.Channels;
             byte[] temp = new byte[1024 * 32 * channels];
 
-            if (samplesToRead > array.Length) {
+            if (samplesToRead > array.Length)
+            {
                 throw new ArgumentException("cannot read the requested interval (" + samplesToRead
                     + ") - the target array is too small (" + array.Length + ")");
             }
 
-            while ((bytesRead = s.Read(temp, 0, temp.Length)) > 0) {
+            while ((bytesRead = s.Read(temp, 0, temp.Length)) > 0)
+            {
                 unsafe
                 {
-                    fixed (byte* sampleBuffer = &temp[0]) {
+                    fixed (byte* sampleBuffer = &temp[0])
+                    {
                         float* samples = (float*)sampleBuffer;
-                        for (int x = 0; x < bytesRead / 4; x++) {
+                        for (int x = 0; x < bytesRead / 4; x++)
+                        {
                             array[totalSamplesRead++] = samples[x];
-                            if (samplesToRead == totalSamplesRead) {
+                            if (samplesToRead == totalSamplesRead)
+                            {
                                 return totalSamplesRead;
                             }
                         }
@@ -69,8 +79,10 @@ namespace Aurio {
             return totalSamplesRead;
         }
 
-        public static long AlignToBlockSize(long value, int blockSize) {
-            if (value % blockSize != blockSize) {
+        public static long AlignToBlockSize(long value, int blockSize)
+        {
+            if (value % blockSize != blockSize)
+            {
                 return value - (value % blockSize);
             }
             return value;
@@ -82,12 +94,14 @@ namespace Aurio {
         /// <remarks>
         /// This method is intended for testing and debugging.
         /// </remarks>
-        public static long ReadAllAndCount(IAudioStream s) {
+        public static long ReadAllAndCount(IAudioStream s)
+        {
             var temp = new byte[1024 * 1024];
             long totalBytesRead = 0;
             int bytesRead;
 
-            while ((bytesRead = s.Read(temp, 0, temp.Length)) > 0) {
+            while ((bytesRead = s.Read(temp, 0, temp.Length)) > 0)
+            {
                 totalBytesRead += bytesRead;
             }
 
@@ -100,7 +114,8 @@ namespace Aurio {
         /// <param name="stream1">the first stream to compare</param>
         /// <param name="stream2">the second stream to compare</param>
         /// <returns>the number of similar bytes</returns>
-        public static long CompareBytes(IAudioStream stream1, IAudioStream stream2) {
+        public static long CompareBytes(IAudioStream stream1, IAudioStream stream2)
+        {
             byte[] buffer1 = new byte[10000 * stream1.SampleBlockSize];
             byte[] buffer2 = new byte[10000 * stream2.SampleBlockSize];
 
@@ -113,25 +128,31 @@ namespace Aurio {
 
             long similarBytes = 0;
 
-            while ((s1BytesRead = ForceRead(stream1, buffer1, 0, bytesToRead)) > 0 && (s2BytesRead = ForceRead(stream2, buffer2, 0, bytesToRead)) > 0) {
-                if (s1BytesRead != s2BytesRead) {
+            while ((s1BytesRead = ForceRead(stream1, buffer1, 0, bytesToRead)) > 0 && (s2BytesRead = ForceRead(stream2, buffer2, 0, bytesToRead)) > 0)
+            {
+                if (s1BytesRead != s2BytesRead)
+                {
                     // Because of the calculation of bytesToRead, which is the minimum that can be read from both streams, this should never happen
                     throw new Exception("invalid state, shall not happen");
                 }
 
                 bool abortComparison = false;
-                for (int i = 0; i < s1BytesRead; i++) {
-                    if (buffer1[i] == buffer2[i]) {
+                for (int i = 0; i < s1BytesRead; i++)
+                {
+                    if (buffer1[i] == buffer2[i])
+                    {
                         similarBytes++;
                     }
-                    else {
+                    else
+                    {
                         // When one byte is different, do not compare any following bytes
                         abortComparison = true;
                         break;
                     }
                 }
 
-                if (abortComparison) {
+                if (abortComparison)
+                {
                     break;
                 }
             }
@@ -146,8 +167,10 @@ namespace Aurio {
         /// <param name="stream2">the second stream to compare</param>
         /// <param name="epsilon">the allowed variance with which two floats are still considered equal (accounts for floating point inccuracy)</param>
         /// <returns>the number of similar floats</returns>
-        public static long CompareFloats(IAudioStream stream1, IAudioStream stream2, float epsilon) {
-            if (stream1.Properties.Format != AudioFormat.IEEE || stream1.Properties.Format != AudioFormat.IEEE) {
+        public static long CompareFloats(IAudioStream stream1, IAudioStream stream2, float epsilon)
+        {
+            if (stream1.Properties.Format != AudioFormat.IEEE || stream1.Properties.Format != AudioFormat.IEEE)
+            {
                 throw new ArgumentException("streams must be in 32bit float format");
             }
 
@@ -163,8 +186,10 @@ namespace Aurio {
 
             long similarFloats = 0;
 
-            while ((s1BytesRead = ForceRead(stream1, buffer1, 0, bytesToRead)) > 0 && (s2BytesRead = ForceRead(stream2, buffer2, 0, bytesToRead)) > 0) {
-                if (s1BytesRead != s2BytesRead) {
+            while ((s1BytesRead = ForceRead(stream1, buffer1, 0, bytesToRead)) > 0 && (s2BytesRead = ForceRead(stream2, buffer2, 0, bytesToRead)) > 0)
+            {
+                if (s1BytesRead != s2BytesRead)
+                {
                     // Because of the calculation of bytesToRead, which is the minimum that can be read from both streams, this should never happen
                     throw new Exception("invalid state, shall not happen");
                 }
@@ -172,15 +197,19 @@ namespace Aurio {
                 bool abortComparison = false;
                 unsafe
                 {
-                    fixed (byte* pBuffer1 = &buffer1[0], pBuffer2 = &buffer2[0]) {
+                    fixed (byte* pBuffer1 = &buffer1[0], pBuffer2 = &buffer2[0])
+                    {
                         float* fBuffer1 = (float*)pBuffer1;
                         float* fBuffer2 = (float*)pBuffer2;
 
-                        for (int i = 0; i < s1BytesRead / stream1.SampleBlockSize; i++) {
-                            if (Math.Abs(fBuffer1[i] - fBuffer2[i]) < epsilon) {
+                        for (int i = 0; i < s1BytesRead / stream1.SampleBlockSize; i++)
+                        {
+                            if (Math.Abs(fBuffer1[i] - fBuffer2[i]) < epsilon)
+                            {
                                 similarFloats++;
                             }
-                            else {
+                            else
+                            {
                                 // When one float is different, do not compare any following floats
                                 abortComparison = true;
                                 break;
@@ -190,7 +219,8 @@ namespace Aurio {
                 }
 
 
-                if (abortComparison) {
+                if (abortComparison)
+                {
                     break;
                 }
             }
@@ -204,7 +234,8 @@ namespace Aurio {
         /// <param name="stream1">the first stream to compare</param>
         /// <param name="stream2">the second stream to compare</param>
         /// <returns>the number of similar floats</returns>
-        public static long CompareFloats(IAudioStream stream1, IAudioStream stream2) {
+        public static long CompareFloats(IAudioStream stream1, IAudioStream stream2)
+        {
             return CompareFloats(stream1, stream2, FLOAT_EPSILON);
         }
     }

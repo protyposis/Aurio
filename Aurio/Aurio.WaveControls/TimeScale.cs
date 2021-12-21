@@ -27,8 +27,10 @@ using System.Globalization;
 using System.ComponentModel;
 using Aurio;
 
-namespace Aurio.WaveControls {
-    public class TimeScale: VirtualViewBase {
+namespace Aurio.WaveControls
+{
+    public class TimeScale : VirtualViewBase
+    {
 
         public static readonly DependencyProperty IntervalTextColorProperty;
 
@@ -36,7 +38,7 @@ namespace Aurio.WaveControls {
         private const int SCALE_FONT_SIZE = 8;
         private const string SCALE_TEXT_FORMAT = @"hh\:mm\:ss\.fff"; // leave out day (d\.) for now - won't be a problem for timelines < 24h
 
-        private readonly long[] TICK_LEVELS = { 
+        private readonly long[] TICK_LEVELS = {
                                             10L * 1000,                         // MS
                                             10L * 1000 * 10,                    // 10MS
                                             10L * 1000 * 20,                    // 20MS
@@ -61,7 +63,8 @@ namespace Aurio.WaveControls {
                                             10L * 1000 * 1000 * 60 * 60 * 5     // 5H
                                         };
 
-        static TimeScale() {
+        static TimeScale()
+        {
             WidthProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(Double.NaN));
             HeightProperty.OverrideMetadata(typeof(TimeScale), new FrameworkPropertyMetadata(30d));
 
@@ -77,12 +80,14 @@ namespace Aurio.WaveControls {
         }
 
         [Bindable(true), Category("Brushes")]
-        public Brush IntervalTextColor {
+        public Brush IntervalTextColor
+        {
             get { return (Brush)GetValue(IntervalTextColorProperty); }
             set { SetValue(IntervalTextColorProperty, value); }
         }
 
-        protected override void OnRender(System.Windows.Media.DrawingContext drawingContext) {
+        protected override void OnRender(System.Windows.Media.DrawingContext drawingContext)
+        {
             base.OnRender(drawingContext);
             double actualWidth = ActualWidth;
             double actualHeight = ActualHeight;
@@ -94,7 +99,7 @@ namespace Aurio.WaveControls {
             double scale = actualWidth / viewportInterval.Length;
             long ticks = FindTicks(viewportInterval.Length, (int)(Math.Round(actualWidth / 20)));
             Interval viewportIntervalAligned = new Interval(
-                viewportInterval.From - (viewportInterval.From % ticks), 
+                viewportInterval.From - (viewportInterval.From % ticks),
                 viewportInterval.To + (viewportInterval.To % ticks));
             double drawingOffset = (viewportIntervalAligned.From - viewportInterval.From) * scale;
 
@@ -105,33 +110,39 @@ namespace Aurio.WaveControls {
             FormattedText formattedStartText = new FormattedText(
                         new TimeSpan(viewportInterval.From).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor, _pixelsPerDip) { TextAlignment = TextAlignment.Left };
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor, _pixelsPerDip)
+            { TextAlignment = TextAlignment.Left };
             drawingContext.DrawText(formattedStartText, new Point(1, 0));
             FormattedText formattedLengthText = new FormattedText(
                         new TimeSpan(viewportInterval.Length).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor, _pixelsPerDip) { TextAlignment = TextAlignment.Center };
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor, _pixelsPerDip)
+            { TextAlignment = TextAlignment.Center };
             drawingContext.DrawText(formattedLengthText, new Point(actualWidth / 2, 0));
             FormattedText formattedEndText = new FormattedText(
                         new TimeSpan(viewportInterval.To).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor, _pixelsPerDip) { TextAlignment = TextAlignment.Right };
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, IntervalTextColor, _pixelsPerDip)
+            { TextAlignment = TextAlignment.Right };
             drawingContext.DrawText(formattedEndText, new Point(actualWidth - 1, 0));
 
             // draw markers and time
             int timeDrawingRate = 5;
             long markerCount = (viewportIntervalAligned.From / ticks) % timeDrawingRate;
-            for (long i = 0; i < viewportIntervalAligned.Length; i += ticks) {
+            for (long i = 0; i < viewportIntervalAligned.Length; i += ticks)
+            {
                 double markerHeight = actualHeight - (SCALE_HEIGHT / 2 * 1.5);
                 double x = i * scale + drawingOffset;
 
                 // draw time
-                if (markerCount++ % timeDrawingRate == 0) {
+                if (markerCount++ % timeDrawingRate == 0)
+                {
                     markerHeight = actualHeight - SCALE_HEIGHT;
                     FormattedText formattedText = new FormattedText(
                         new TimeSpan(viewportIntervalAligned.From + i).ToString(SCALE_TEXT_FORMAT),
                         CultureInfo.CurrentUICulture, System.Windows.FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), SCALE_FONT_SIZE, Foreground, _pixelsPerDip) { TextAlignment = TextAlignment.Center };
+                        new Typeface("Tahoma"), SCALE_FONT_SIZE, Foreground, _pixelsPerDip)
+                    { TextAlignment = TextAlignment.Center };
                     drawingContext.DrawText(formattedText, new Point(x, actualHeight - SCALE_HEIGHT - SCALE_FONT_SIZE * 1.2));
                 }
 
@@ -149,9 +160,12 @@ namespace Aurio.WaveControls {
             drawingContext.Pop();
         }
 
-        private long FindTicks(long interval, long markers) {
-            for (int x = 0; x < TICK_LEVELS.Length; x++) {
-                if (interval / TICK_LEVELS[x] > markers) {
+        private long FindTicks(long interval, long markers)
+        {
+            for (int x = 0; x < TICK_LEVELS.Length; x++)
+            {
+                if (interval / TICK_LEVELS[x] > markers)
+                {
                     continue;
                 }
                 return TICK_LEVELS[x];

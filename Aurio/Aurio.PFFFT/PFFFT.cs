@@ -22,16 +22,20 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Aurio.PFFFT {
-    public unsafe class PFFFT : IDisposable {
+namespace Aurio.PFFFT
+{
+    public unsafe class PFFFT : IDisposable
+    {
 
         private int size;
         private IntPtr setup;
         private IntPtr alignedBuffer1;
         private IntPtr alignedBuffer2;
 
-        public PFFFT(int size, Transform transform) {
-            if ((size * 4) % 16 != 0) {
+        public PFFFT(int size, Transform transform)
+        {
+            if ((size * 4) % 16 != 0)
+            {
                 // For more info see pffft.h
                 throw new Exception("invalid size, must be aligned to a 16-byte boundary");
             }
@@ -39,7 +43,8 @@ namespace Aurio.PFFFT {
             this.size = size;
             setup = InteropWrapper.pffft_new_setup(size, transform);
 
-            if (size >= 16384) {
+            if (size >= 16384)
+            {
                 Console.WriteLine("WARNING: size too large, might result in low performance");
                 // TODO if this ever gets a problem, implement a "work" area, see pffft.h @ pffft_transform
             }
@@ -49,30 +54,37 @@ namespace Aurio.PFFFT {
             alignedBuffer2 = InteropWrapper.pffft_aligned_malloc(new UIntPtr(bufferByteSize));
         }
 
-        public int Size {
+        public int Size
+        {
             get { return size; }
         }
 
-        private void Transform(float* input, float* output, Direction direction) {
+        private void Transform(float* input, float* output, Direction direction)
+        {
             // The non-ordered transform pffft_transform may be faster, 
             // but all Aurio algorithms expect the canonical ordered form
             InteropWrapper.pffft_transform_ordered(setup, input, output, null, direction);
 
             // Scale backward transform by 1/N (according to docs)
-            if(direction == Direction.Backward) {
-                for(int x = 0; x < size; x++) {
+            if (direction == Direction.Backward)
+            {
+                for (int x = 0; x < size; x++)
+                {
                     output[x] /= size;
                 }
             }
         }
 
-        private void CheckSize(float[] array) {
-            if (array.Length != size) {
+        private void CheckSize(float[] array)
+        {
+            if (array.Length != size)
+            {
                 throw new Exception("invalid size (expected " + size + ", given " + array.Length + ")");
             }
         }
 
-        public void Forward(float[] inPlaceBuffer) {
+        public void Forward(float[] inPlaceBuffer)
+        {
             CheckSize(inPlaceBuffer);
 
             Marshal.Copy(inPlaceBuffer, 0, alignedBuffer1, inPlaceBuffer.Length);
@@ -80,7 +92,8 @@ namespace Aurio.PFFFT {
             Marshal.Copy(alignedBuffer1, inPlaceBuffer, 0, inPlaceBuffer.Length);
         }
 
-        public void Forward(float[] input, float[] output) {
+        public void Forward(float[] input, float[] output)
+        {
             CheckSize(input);
             CheckSize(output);
 
@@ -89,7 +102,8 @@ namespace Aurio.PFFFT {
             Marshal.Copy(alignedBuffer2, output, 0, output.Length);
         }
 
-        public void Backward(float[] inPlaceBuffer) {
+        public void Backward(float[] inPlaceBuffer)
+        {
             CheckSize(inPlaceBuffer);
 
             Marshal.Copy(inPlaceBuffer, 0, alignedBuffer1, inPlaceBuffer.Length);
@@ -97,7 +111,8 @@ namespace Aurio.PFFFT {
             Marshal.Copy(alignedBuffer1, inPlaceBuffer, 0, inPlaceBuffer.Length);
         }
 
-        public void Backward(float[] input, float[] output) {
+        public void Backward(float[] input, float[] output)
+        {
             CheckSize(input);
             CheckSize(output);
 
@@ -106,12 +121,15 @@ namespace Aurio.PFFFT {
             Marshal.Copy(alignedBuffer2, output, 0, output.Length);
         }
 
-        public static int SimdSize {
+        public static int SimdSize
+        {
             get { return InteropWrapper.pffft_simd_size(); }
         }
 
-        public void Dispose() {
-            if (setup != IntPtr.Zero) {
+        public void Dispose()
+        {
+            if (setup != IntPtr.Zero)
+            {
                 InteropWrapper.pffft_destroy_setup(setup);
                 setup = IntPtr.Zero;
                 InteropWrapper.pffft_aligned_free(alignedBuffer1);
@@ -119,7 +137,8 @@ namespace Aurio.PFFFT {
             }
         }
 
-        ~PFFFT() {
+        ~PFFFT()
+        {
             Dispose();
         }
     }

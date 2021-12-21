@@ -24,8 +24,10 @@ using System.Diagnostics;
 using System.Collections;
 using Aurio.Resampler;
 
-namespace Aurio.Streams {
-    public class TimeWarpStream : AbstractAudioStreamWrapper {
+namespace Aurio.Streams
+{
+    public class TimeWarpStream : AbstractAudioStreamWrapper
+    {
 
         private TimeWarpCollection mappings;
         private ByteTimeWarpCollection byteMappings;
@@ -35,83 +37,100 @@ namespace Aurio.Streams {
         private ResamplingStream resamplingStream;
 
         public TimeWarpStream(IAudioStream sourceStream)
-            : base(sourceStream) {
-                byteMappings = new ByteTimeWarpCollection(0);
-                Mappings = null;
-                length = sourceStream.Length;
-                position = sourceStream.Position;
+            : base(sourceStream)
+        {
+            byteMappings = new ByteTimeWarpCollection(0);
+            Mappings = null;
+            length = sourceStream.Length;
+            position = sourceStream.Position;
 
-                ResetStream();
+            ResetStream();
         }
 
         public TimeWarpStream(IAudioStream sourceStream, TimeWarpCollection mappings)
-            : this(sourceStream) {
-                Mappings = mappings;
+            : this(sourceStream)
+        {
+            Mappings = mappings;
         }
 
-        public TimeWarpCollection Mappings {
+        public TimeWarpCollection Mappings
+        {
             get { return mappings; }
-            set {
+            set
+            {
                 // Unsubscribe from previous mappings
-                if (mappings != null) {
+                if (mappings != null)
+                {
                     mappings.CollectionChanged -= mappings_CollectionChanged;
                 }
 
-                if (value != null) {
+                if (value != null)
+                {
                     // Assign new mappings
                     mappings = value;
-                } else {
+                }
+                else
+                {
                     // If no mappings were passed in, it was either for the intention to get rid of the
                     // reference to the previous mappings or to clear the mappings to an empty list,
                     // so we create a new empty list.
                     mappings = new TimeWarpCollection();
                 }
-      
+
                 // Subscribe to changes in the new mappings
                 mappings.CollectionChanged += mappings_CollectionChanged;
                 mappings_CollectionChanged(null, null);
             }
         }
 
-        private void mappings_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+        private void mappings_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
             var alpha = new ByteTimeWarp { From = 0, To = 0 };
             var omega = new ByteTimeWarp { From = sourceStream.Length, To = sourceStream.Length };
 
-            if (mappings.Count > 0) {
+            if (mappings.Count > 0)
+            {
                 // Convert time mappings to byte mappings
                 // This is the place where the TimeWarps and ByteTimeWarps are kept in sync!!
                 byteMappings = new ByteTimeWarpCollection(mappings.Count);
-                foreach (TimeWarp mapping in mappings) {
+                foreach (TimeWarp mapping in mappings)
+                {
                     byteMappings.Add(ByteTimeWarp.Convert(mapping, Properties));
                 }
 
                 var first = byteMappings.Alpha;
-                if (first.From > alpha.From) {
+                if (first.From > alpha.From)
+                {
                     // The first mapping is not at the start of the stream, insert start of stream alpha
                     byteMappings.Insert(0, alpha);
                 }
 
                 var last = byteMappings.Omega;
-                if (last.From < omega.From) {
+                if (last.From < omega.From)
+                {
                     // The last mapping is not at the end of the stream, insert EOS omega
                     omega.To += last.Offset;
                     byteMappings.Insert(byteMappings.Count, omega);
                 }
             }
-            else {
+            else
+            {
                 byteMappings.Add(alpha);
                 byteMappings.Add(omega);
             }
 
-            if (position > byteMappings.Omega.To) {
+            if (position > byteMappings.Omega.To)
+            {
                 Position = byteMappings.Omega.To;
             }
 
             ResetStream();
         }
 
-        private void ResetStream(bool hardReset) {
-            if (position > byteMappings.Omega.To) {
+        private void ResetStream(bool hardReset)
+        {
+            if (position > byteMappings.Omega.To)
+            {
                 throw new Exception("position beyond length");
             }
 
@@ -122,9 +141,11 @@ namespace Aurio.Streams {
             ByteTimeWarp mH = byteMappings.Upper;
 
 
-            if (cropStream == null || cropStream.Begin != mL.From || cropStream.End != mH.From || resamplingStream.Length != byteMappings.Omega.To) {
+            if (cropStream == null || cropStream.Begin != mL.From || cropStream.End != mH.From || resamplingStream.Length != byteMappings.Omega.To)
+            {
                 // mapping has changed, stream subsection must be renewed
-                if (hardReset) {
+                if (hardReset)
+                {
                     // Each internal stream for each warped/resampled section works on the same underlying source stream, so
                     // we add the SourceClosePreventionStream to avoid the source being closed when an internally used stream
                     // of a section is disposed or closed (as in the call below). The source stream continues to get closed
@@ -132,7 +153,8 @@ namespace Aurio.Streams {
                     cropStream = new CropStream(new SourceClosePreventionStream(sourceStream), mL.From, mH.From);
 
                     // Get rid of stream for previous section
-                    if(resamplingStream != null) {
+                    if (resamplingStream != null)
+                    {
                         resamplingStream.Close();
                     }
 
@@ -140,7 +162,8 @@ namespace Aurio.Streams {
                     resamplingStream = new ResamplingStream(cropStream, ResamplingQuality.VariableRate, ByteTimeWarp.CalculateSampleRateRatio(mL, mH));
                     resamplingStream.Position = position - mL.To;
                 }
-                else {
+                else
+                {
                     // Reset the streams to the new conditions without creating new instances as the hard reset does
                     // NOTE always hard resetting works too, but this mode has been added to keep the sample resampler throughout playback
 
@@ -159,41 +182,50 @@ namespace Aurio.Streams {
                     resamplingStream.Position = position - mL.To;
                 }
             }
-            
+
         }
-        private void ResetStream() {
+        private void ResetStream()
+        {
             ResetStream(true);
         }
 
-        public override long Length {
+        public override long Length
+        {
             get { return length; }
         }
 
-        public override long Position {
+        public override long Position
+        {
             get { return position; }
-            set {
-                if (value < 0 || value > length) {
+            set
+            {
+                if (value < 0 || value > length)
+                {
                     throw new ArgumentException("invalid position");
                 }
 
                 byteMappings.SetWarpedPosition(value);
 
-                if (position < byteMappings.Lower.To || position >= byteMappings.Upper.To) {
+                if (position < byteMappings.Lower.To || position >= byteMappings.Upper.To)
+                {
                     // new stream subsection required
                     position = value;
                     ResetStream(false);
                 }
-                else {
+                else
+                {
                     position = value;
                     resamplingStream.Position = position - byteMappings.Lower.To;
                 }
             }
         }
 
-        public override int Read(byte[] buffer, int offset, int count) {
+        public override int Read(byte[] buffer, int offset, int count)
+        {
             int bytesRead = resamplingStream.Read(buffer, offset, count);
 
-            if (bytesRead == 0 && cropStream.End != sourceStream.Length) {
+            if (bytesRead == 0 && cropStream.End != sourceStream.Length)
+            {
                 //PrintDebugStatus();
                 ResetStream(false); // switch to next subsection
                 return this.Read(buffer, offset, count);
@@ -203,12 +235,14 @@ namespace Aurio.Streams {
             return bytesRead;
         }
 
-        public override void Close() {
+        public override void Close()
+        {
             // Unreference the mappings which may be passed in from outside
             Mappings = null;
 
             // Close stream of current section
-            if(resamplingStream != null) {
+            if (resamplingStream != null)
+            {
                 resamplingStream.Close();
             }
 
@@ -216,7 +250,8 @@ namespace Aurio.Streams {
             base.Close();
         }
 
-        private void PrintDebugStatus() {
+        private void PrintDebugStatus()
+        {
             Debug.WriteLine("TimeWarpStream len {0,10}, pos {1,10}", length, position);
             Debug.WriteLine("     resampler len {0,10}, pos {1,10} src buffer {2,4}", resamplingStream.Length, resamplingStream.Position, resamplingStream.BufferedBytes);
             Debug.WriteLine("          crop len {0,10}, pos {1,10}, beg {2,10}, end {3,10}", cropStream.Length, cropStream.Position, cropStream.Begin, cropStream.End);
@@ -236,21 +271,26 @@ namespace Aurio.Streams {
         /// it is not possible to create a common base class, because long and TimeSpan do not share a 
         /// common interface which makes generic computations impossible.
         /// </summary>
-        private class ByteTimeWarp {
+        private class ByteTimeWarp
+        {
 
             public long From { get; set; }
             public long To { get; set; }
 
-            public long Offset {
+            public long Offset
+            {
                 get { return To - From; }
             }
 
-            public static double CalculateSampleRateRatio(ByteTimeWarp mL, ByteTimeWarp mH) {
+            public static double CalculateSampleRateRatio(ByteTimeWarp mL, ByteTimeWarp mH)
+            {
                 return (mH.To - mL.To) / (double)(mH.From - mL.From);
             }
 
-            public static ByteTimeWarp Convert(TimeWarp timeWarp, AudioProperties properties) {
-                return new ByteTimeWarp {
+            public static ByteTimeWarp Convert(TimeWarp timeWarp, AudioProperties properties)
+            {
+                return new ByteTimeWarp
+                {
                     From = TimeUtil.TimeSpanToBytes(timeWarp.From, properties),
                     To = TimeUtil.TimeSpanToBytes(timeWarp.To, properties)
                 };
@@ -262,35 +302,43 @@ namespace Aurio.Streams {
         /// is a list and not an ObservableCollection, which isn't needed here.
         /// It mirrors important computation functions that need to stay in sync with their sources.
         /// </summary>
-        private class ByteTimeWarpCollection : List<ByteTimeWarp> {
+        private class ByteTimeWarpCollection : List<ByteTimeWarp>
+        {
 
             private int currentIndex = 0;
 
             public ByteTimeWarpCollection(int size) : base(size) { }
 
-            public ByteTimeWarp Alpha {
+            public ByteTimeWarp Alpha
+            {
                 get { return this.First(); }
             }
 
-            public ByteTimeWarp Omega {
+            public ByteTimeWarp Omega
+            {
                 get { return this.Last(); }
             }
 
-            public int CurrentIndex {
+            public int CurrentIndex
+            {
                 get { return currentIndex; }
                 set { currentIndex = value; }
             }
 
-            public ByteTimeWarp Lower {
+            public ByteTimeWarp Lower
+            {
                 get { return this[currentIndex]; }
             }
 
-            public ByteTimeWarp Upper {
+            public ByteTimeWarp Upper
+            {
                 get { return this[currentIndex + 1]; }
             }
 
-            public bool Next() {
-                if (currentIndex < Count - 2) {
+            public bool Next()
+            {
+                if (currentIndex < Count - 2)
+                {
                     currentIndex++;
                     return true;
                 }
@@ -298,14 +346,18 @@ namespace Aurio.Streams {
                 return false;
             }
 
-            public void SetWarpedPosition(long warpedPosition) {
-                if (warpedPosition < Alpha.To || warpedPosition > Omega.To) {
+            public void SetWarpedPosition(long warpedPosition)
+            {
+                if (warpedPosition < Alpha.To || warpedPosition > Omega.To)
+                {
                     throw new ArgumentOutOfRangeException("invalid warped position " + warpedPosition);
                 }
 
                 // Either the warpedPosition falls into an interval
-                for (currentIndex = 0; currentIndex < Count - 1; currentIndex++) {
-                    if (warpedPosition >= Lower.To && warpedPosition < Upper.To) {
+                for (currentIndex = 0; currentIndex < Count - 1; currentIndex++)
+                {
+                    if (warpedPosition >= Lower.To && warpedPosition < Upper.To)
+                    {
                         return;
                     }
                 }
@@ -321,11 +373,14 @@ namespace Aurio.Streams {
         /// This stream prevents closing of its source stream. When Close() is called, it thus does not hand the 
         /// call to its source, and closing of the stream stops here.
         /// </summary>
-        private class SourceClosePreventionStream : AbstractAudioStreamWrapper {
-            public SourceClosePreventionStream(IAudioStream sourceStream) : base(sourceStream) {
+        private class SourceClosePreventionStream : AbstractAudioStreamWrapper
+        {
+            public SourceClosePreventionStream(IAudioStream sourceStream) : base(sourceStream)
+            {
             }
 
-            public override void Close() {
+            public override void Close()
+            {
                 Debug.WriteLine("Inhibiting Close");
                 // Don't close base stream
             }

@@ -22,8 +22,10 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 
-namespace Aurio.Streams {
-    public class VisualizingStream : AbstractAudioStreamWrapper {
+namespace Aurio.Streams
+{
+    public class VisualizingStream : AbstractAudioStreamWrapper
+    {
 
         public event EventHandler WaveformChanged;
 
@@ -32,8 +34,10 @@ namespace Aurio.Streams {
         private long bufferLength; // the length of the currently buffered data
         private PeakStore peakStore;
 
-        public VisualizingStream(IAudioStream sourceStream) : base(sourceStream) {
-            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32)) {
+        public VisualizingStream(IAudioStream sourceStream) : base(sourceStream)
+        {
+            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32))
+            {
                 throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
             }
 
@@ -41,56 +45,71 @@ namespace Aurio.Streams {
         }
 
         public VisualizingStream(IAudioStream sourceStream, PeakStore peakStore)
-            : this(sourceStream) {
-                PeakStore = peakStore;
+            : this(sourceStream)
+        {
+            PeakStore = peakStore;
         }
 
-        public PeakStore PeakStore {
+        public PeakStore PeakStore
+        {
             get { return peakStore; }
-            set {
-                if (peakStore != null) {
+            set
+            {
+                if (peakStore != null)
+                {
                     peakStore.PeaksChanged -= peakStore_PeaksChanged;
                 }
                 peakStore = value;
-                if (peakStore != null) {
+                if (peakStore != null)
+                {
                     peakStore.PeaksChanged += peakStore_PeaksChanged;
                 }
             }
         }
 
-        public TimeSpan TimeLength {
+        public TimeSpan TimeLength
+        {
             get { return TimeUtil.BytesToTimeSpan(this.Length, this.Properties); }
         }
 
-        public TimeSpan TimePosition {
+        public TimeSpan TimePosition
+        {
             get { return TimeUtil.BytesToTimeSpan(this.Position, this.Properties); }
             set { this.Position = TimeUtil.TimeSpanToBytes(value, this.Properties); }
         }
 
-        public int ReadSamples(float[][] samples, int count) {
+        public int ReadSamples(float[][] samples, int count)
+        {
             int requiredBytes = count * Properties.SampleBlockByteSize;
             ResizeBuffer(requiredBytes);
             int bytesRead = StreamUtil.ForceRead(sourceStream, buffer, 0, requiredBytes);
 
-            if (bytesRead % Properties.SampleBlockByteSize != 0) {
+            if (bytesRead % Properties.SampleBlockByteSize != 0)
+            {
                 throw new Exception();
             }
-            if(samples.Length < Properties.Channels) {
+            if (samples.Length < Properties.Channels)
+            {
                 throw new Exception();
             }
-            if(samples[0].Length < count) {
+            if (samples[0].Length < count)
+            {
                 throw new Exception();
             }
 
             int samplesRead = bytesRead / Properties.SampleBlockByteSize;
 
-            unsafe {
-                fixed (byte* bufferB = &buffer[0]) {
+            unsafe
+            {
+                fixed (byte* bufferB = &buffer[0])
+                {
                     float* bufferF = (float*)bufferB;
 
-                    for (int channel = 0; channel < Properties.Channels; channel++) {
+                    for (int channel = 0; channel < Properties.Channels; channel++)
+                    {
                         int index = channel;
-                        for (int i = 0; i < count; i++) {
+                        for (int i = 0; i < count; i++)
+                        {
                             samples[channel][i] = bufferF[index];
                             index += Properties.Channels;
                         }
@@ -101,28 +120,36 @@ namespace Aurio.Streams {
             return samplesRead;
         }
 
-        public int ReadPeaks(float[][] peaks, int sampleCount, int peakCount) {
+        public int ReadPeaks(float[][] peaks, int sampleCount, int peakCount)
+        {
             long streamPosition = sourceStream.Position;
 
             int samplesPerPeak = (int)Math.Ceiling((float)sampleCount / peakCount);
-            unsafe {
+            unsafe
+            {
                 // if the samplesPerPeak count is beyond the PeakStore threshold, load the peaks from there
-                if (samplesPerPeak > peakStore.SamplesPerPeak) {
+                if (samplesPerPeak > peakStore.SamplesPerPeak)
+                {
                     byte[][] peakData = peakStore.GetData(samplesPerPeak, out samplesPerPeak);
                     int positionOffset = (int)(streamPosition / SampleBlockSize / samplesPerPeak) * sizeof(Peak);
                     int sourcePeakCount = (int)Math.Round((float)sampleCount / samplesPerPeak);
                     float sourceToTargetIndex = 1 / ((float)sourcePeakCount / peakCount);
 
-                    for (int channel = 0; channel < Properties.Channels; channel++) {
-                        fixed (byte* peakChannelDataB = &peakData[channel][positionOffset]) {
+                    for (int channel = 0; channel < Properties.Channels; channel++)
+                    {
+                        fixed (byte* peakChannelDataB = &peakData[channel][positionOffset])
+                        {
                             Peak* peakChannelDataP = (Peak*)peakChannelDataB;
 
-                            fixed (float* peakChannelF = &peaks[channel][0]) {
+                            fixed (float* peakChannelF = &peaks[channel][0])
+                            {
                                 Peak* peakChannelP = (Peak*)peakChannelF;
                                 int peak = 0;
                                 peakChannelP[0] = new Peak(float.MaxValue, float.MinValue);
-                                for (int p = 0; p < sourcePeakCount; p++) {
-                                    if ((int)(p * sourceToTargetIndex) > peak) {
+                                for (int p = 0; p < sourcePeakCount; p++)
+                                {
+                                    if ((int)(p * sourceToTargetIndex) > peak)
+                                    {
                                         peak++;
                                         peakChannelP[peak] = new Peak(float.MaxValue, float.MinValue);
                                     }
@@ -140,12 +167,14 @@ namespace Aurio.Streams {
                 int bufferOffset = 0;
                 int bytesRead = 0;
 
-                if (bufferPosition <= sourceStream.Position && sourceStream.Position + requiredBytes <= bufferPosition + bufferLength) {
+                if (bufferPosition <= sourceStream.Position && sourceStream.Position + requiredBytes <= bufferPosition + bufferLength)
+                {
                     // the requested data can be read directly from the buffer, no need to read from the stream
                     bufferOffset = (int)(sourceStream.Position - bufferPosition);
                     bytesRead = requiredBytes;
                 }
-                else {
+                else
+                {
                     // resize buffer and read data from stream
                     ResizeBuffer(requiredBytes);
                     bufferPosition = sourceStream.Position;
@@ -153,29 +182,35 @@ namespace Aurio.Streams {
                     bufferLength = bytesRead;
                 }
 
-                if (bytesRead % Properties.SampleBlockByteSize != 0) {
+                if (bytesRead % Properties.SampleBlockByteSize != 0)
+                {
                     throw new Exception();
                 }
                 int samplesRead = bytesRead / Properties.SampleBlockByteSize;
 
                 float sampleIndexToPeakIndex = 1 / ((float)samplesRead / peakCount);
-                fixed (byte* bufferB = &buffer[bufferOffset]) {
+                fixed (byte* bufferB = &buffer[bufferOffset])
+                {
                     float* bufferF = (float*)bufferB;
 
-                    for (int channel = 0; channel < Properties.Channels; channel++) {
-                        fixed (float* peakChannelF = &peaks[channel][0]) {
+                    for (int channel = 0; channel < Properties.Channels; channel++)
+                    {
+                        fixed (float* peakChannelF = &peaks[channel][0])
+                        {
                             Peak* peakChannelP = (Peak*)peakChannelF;
                             int index = channel;
                             int peakIndex = 0;
                             peakChannelP[peakIndex] = new Peak(float.MaxValue, float.MinValue);
 
-                            for (int i = 0; i < samplesRead; i++) {
+                            for (int i = 0; i < samplesRead; i++)
+                            {
                                 float sampleValue = bufferF[index];
                                 index += Properties.Channels;
 
                                 peakChannelP[peakIndex].Merge(sampleValue, sampleValue);
 
-                                if ((int)(i * sampleIndexToPeakIndex) > peakIndex) {
+                                if ((int)(i * sampleIndexToPeakIndex) > peakIndex)
+                                {
                                     peakChannelP[++peakIndex] = new Peak(sampleValue, sampleValue);
                                 }
                             }
@@ -187,20 +222,25 @@ namespace Aurio.Streams {
             return peakCount;
         }
 
-        private void ResizeBuffer(int requiredSize) {
-            if (requiredSize > buffer.Length) {
+        private void ResizeBuffer(int requiredSize)
+        {
+            if (requiredSize > buffer.Length)
+            {
                 Debug.WriteLine("VisualizingStream buffer resize: " + buffer.Length + " -> " + requiredSize);
                 buffer = new byte[requiredSize];
             }
         }
 
-        private void OnWaveformChanged() {
-            if(WaveformChanged != null) {
+        private void OnWaveformChanged()
+        {
+            if (WaveformChanged != null)
+            {
                 WaveformChanged(this, EventArgs.Empty);
             }
         }
 
-        private void peakStore_PeaksChanged(object sender, EventArgs e) {
+        private void peakStore_PeaksChanged(object sender, EventArgs e)
+        {
             OnWaveformChanged();
         }
     }

@@ -26,8 +26,10 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Aurio.FFmpeg {
-    public class FFmpegSourceStream : IAudioStream {
+namespace Aurio.FFmpeg
+{
+    public class FFmpegSourceStream : IAudioStream
+    {
 
         private Stream sourceStream;
         private FFmpegReader reader;
@@ -45,7 +47,8 @@ namespace Aurio.FFmpeg {
         /// Decodes an audio stream through FFmpeg from an encoded file.
         /// </summary>
         /// <param name="fileInfo">the file to decode</param>
-        public FFmpegSourceStream(FileInfo fileInfo) : this(fileInfo.OpenRead(), fileInfo.Name) {
+        public FFmpegSourceStream(FileInfo fileInfo) : this(fileInfo.OpenRead(), fileInfo.Name)
+        {
             //reader = new FFmpegReader(fileInfo); // use filesystem IO
             //reader = new FFmpegReader(fileInfo.OpenRead()); // use buffered IO with stream
         }
@@ -57,11 +60,13 @@ namespace Aurio.FFmpeg {
         /// </summary>
         /// <param name="stream">the stream to decode</param>
         /// <param name="fileName">optional file name hint for FFmpeg</param>
-        public FFmpegSourceStream(Stream stream, string fileName) {
+        public FFmpegSourceStream(Stream stream, string fileName)
+        {
             sourceStream = stream;
             reader = new FFmpegReader(stream, FFmpeg.Type.Audio, fileName);
 
-            if (reader.AudioOutputConfig.length == long.MinValue) {
+            if (reader.AudioOutputConfig.length == long.MinValue)
+            {
                 /* 
                  * length == FFmpeg AV_NOPTS_VALUE
                  * 
@@ -83,17 +88,19 @@ namespace Aurio.FFmpeg {
                 reader.AudioOutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM);
 
             readerPosition = 0;
-            sourceBuffer = new byte[reader.AudioOutputConfig.frame_size * 
-                reader.AudioOutputConfig.format.channels * 
+            sourceBuffer = new byte[reader.AudioOutputConfig.frame_size *
+                reader.AudioOutputConfig.format.channels *
                 reader.AudioOutputConfig.format.sample_size];
             sourceBufferPosition = 0;
             sourceBufferLength = -1; // -1 means buffer empty, >= 0 means valid buffer data
 
             // determine first PTS to handle cases where it is > 0
-            try {
+            try
+            {
                 Position = 0;
             }
-            catch(InvalidOperationException) {
+            catch (InvalidOperationException)
+            {
                 readerFirstPTS = readerPosition;
                 readerPosition = 0;
                 Console.WriteLine("first PTS = " + readerFirstPTS);
@@ -108,23 +115,29 @@ namespace Aurio.FFmpeg {
         /// <param name="stream">the stream to decode</param>
         public FFmpegSourceStream(Stream stream) : this(stream, null) { }
 
-        public AudioProperties Properties {
+        public AudioProperties Properties
+        {
             get { return properties; }
         }
 
-        public long Length {
+        public long Length
+        {
             get { return reader.AudioOutputConfig.length * properties.SampleBlockByteSize; }
         }
 
-        private long SamplePosition {
+        private long SamplePosition
+        {
             get { return readerPosition + sourceBufferPosition; }
         }
 
-        public long Position {
-            get {
+        public long Position
+        {
+            get
+            {
                 return SamplePosition * SampleBlockSize;
             }
-            set {
+            set
+            {
                 long seekTarget = (value / SampleBlockSize) + readerFirstPTS;
 
                 // seek to target position
@@ -136,22 +149,27 @@ namespace Aurio.FFmpeg {
 
                 // check if seek ended up at seek target (or earlier because of frame size, depends on file format and stream codec)
                 // TODO handle seek offset with bufferPosition
-                if (seekTarget == readerPosition) {
+                if (seekTarget == readerPosition)
+                {
                     // perfect case
                     sourceBufferPosition = 0;
                 }
-                else if(seekTarget > readerPosition && seekTarget <= (readerPosition + sourceBufferLength)) {
+                else if (seekTarget > readerPosition && seekTarget <= (readerPosition + sourceBufferLength))
+                {
                     sourceBufferPosition = (int)(seekTarget - readerPosition);
                 }
-                else if (seekTarget < readerPosition) {
+                else if (seekTarget < readerPosition)
+                {
                     throw new InvalidOperationException("illegal state");
                 }
 
-                if(Position != value) {
+                if (Position != value)
+                {
                     // When seeking fails by ending up at another position than the requested position, we create a seek index
                     // to support the seeking process which takes some time but hopefully solves the problem. If this does not
                     // solve the problem and it happens again, we throw an exception because we cannot count on this stream.
-                    if (!seekIndexCreated) {
+                    if (!seekIndexCreated)
+                    {
                         reader.CreateSeekIndex(FFmpeg.Type.Audio);
                         seekIndexCreated = true;
                         Console.WriteLine("seek index created");
@@ -160,7 +178,8 @@ namespace Aurio.FFmpeg {
                         // This does not result in an endless recursion because of the seekIndexCreated flag.
                         Position = value;
                     }
-                    else {
+                    else
+                    {
                         throw new FileSeekException(String.Format("seeking did not work correctly: expected {0}, result {1}", value, Position));
                     }
                 }
@@ -171,17 +190,21 @@ namespace Aurio.FFmpeg {
             }
         }
 
-        public int SampleBlockSize {
+        public int SampleBlockSize
+        {
             get { return properties.SampleBlockByteSize; }
         }
 
-        public int Read(byte[] buffer, int offset, int count) {
-            if (sourceBufferLength == -1) {
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            if (sourceBufferLength == -1)
+            {
                 long newPosition;
                 FFmpeg.Type type;
                 sourceBufferLength = reader.ReadFrame(out newPosition, sourceBuffer, sourceBuffer.Length, out type);
 
-                if (newPosition == -1 || sourceBufferLength == -1) {
+                if (newPosition == -1 || sourceBufferLength == -1)
+                {
                     return 0; // end of stream
                 }
 
@@ -192,10 +215,12 @@ namespace Aurio.FFmpeg {
             int bytesToCopy = Math.Min(count, (sourceBufferLength - sourceBufferPosition) * SampleBlockSize);
             Array.Copy(sourceBuffer, sourceBufferPosition * SampleBlockSize, buffer, offset, bytesToCopy);
             sourceBufferPosition += (bytesToCopy / SampleBlockSize);
-            if (sourceBufferPosition > sourceBufferLength) {
+            if (sourceBufferPosition > sourceBufferLength)
+            {
                 throw new InvalidOperationException("overflow");
             }
-            else if (sourceBufferPosition == sourceBufferLength) {
+            else if (sourceBufferPosition == sourceBufferLength)
+            {
                 // buffer read completely, need to read next frame
                 sourceBufferLength = -1;
             }
@@ -203,9 +228,11 @@ namespace Aurio.FFmpeg {
             return bytesToCopy;
         }
 
-        public void Close() {
+        public void Close()
+        {
             reader.Dispose();
-            if(sourceStream != null) {
+            if (sourceStream != null)
+            {
                 sourceStream.Close();
                 sourceStream = null;
             }
@@ -214,9 +241,12 @@ namespace Aurio.FFmpeg {
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     Close();
                 }
 
@@ -224,13 +254,16 @@ namespace Aurio.FFmpeg {
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
         }
         #endregion
 
-        public static FileInfo CreateWaveProxy(FileInfo fileInfo, FileInfo proxyFileInfo) {
-            if (proxyFileInfo.Exists) {
+        public static FileInfo CreateWaveProxy(FileInfo fileInfo, FileInfo proxyFileInfo)
+        {
+            if (proxyFileInfo.Exists)
+            {
                 Console.WriteLine("Proxy already existing, using " + proxyFileInfo.Name);
                 return proxyFileInfo;
             }
@@ -238,9 +271,9 @@ namespace Aurio.FFmpeg {
             var reader = new FFmpegReader(fileInfo, FFmpeg.Type.Audio);
 
             var writer = new MemoryWriterStream(new AudioProperties(
-                reader.AudioOutputConfig.format.channels, 
-                reader.AudioOutputConfig.format.sample_rate, 
-                reader.AudioOutputConfig.format.sample_size * 8, 
+                reader.AudioOutputConfig.format.channels,
+                reader.AudioOutputConfig.format.sample_rate,
+                reader.AudioOutputConfig.format.sample_size * 8,
                 reader.AudioOutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM));
 
             int output_buffer_size = reader.AudioOutputConfig.frame_size * writer.SampleBlockSize;
@@ -251,7 +284,8 @@ namespace Aurio.FFmpeg {
             FFmpeg.Type type;
 
             // sequentially read samples from decoder and write it to wav file
-            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0) {
+            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0)
+            {
                 int bytesRead = samplesRead * writer.SampleBlockSize;
                 writer.Write(output_buffer, 0, bytesRead);
             }
@@ -303,7 +337,8 @@ namespace Aurio.FFmpeg {
         /// </summary>
         /// <param name="fileInfo">the file for which a proxy file will be created</param>
         /// <returns>the FileInfo of the proxy file</returns>
-        public static FileInfo CreateWaveProxy(FileInfo fileInfo) {
+        public static FileInfo CreateWaveProxy(FileInfo fileInfo)
+        {
             return CreateWaveProxy(fileInfo, (DirectoryInfo)null);
         }
 
@@ -314,18 +349,21 @@ namespace Aurio.FFmpeg {
         /// </summary>
         /// <param name="fileInfo">the file for which to check if a proxy is recommended</param>
         /// <returns>true is a proxy is recommended, else false</returns>
-        public static bool WaveProxySuggested(FileInfo fileInfo) {
+        public static bool WaveProxySuggested(FileInfo fileInfo)
+        {
             // Suggest wave proxy for file formats with known seek issues
             return new List<string>() { ".shn", ".ape" }.Exists(ext => fileInfo.Extension.ToLowerInvariant().Equals(ext));
         }
 
-        public class FileNotSeekableException : Exception {
+        public class FileNotSeekableException : Exception
+        {
             public FileNotSeekableException() : base() { }
             public FileNotSeekableException(string message) : base(message) { }
             public FileNotSeekableException(string message, Exception innerException) : base(message, innerException) { }
         }
 
-        public class FileSeekException : Exception {
+        public class FileSeekException : Exception
+        {
             public FileSeekException() : base() { }
             public FileSeekException(string message) : base(message) { }
             public FileSeekException(string message, Exception innerException) : base(message, innerException) { }

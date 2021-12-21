@@ -26,8 +26,10 @@ using System.Diagnostics;
 using Aurio.TaskMonitor;
 using System.Threading.Tasks;
 
-namespace Aurio.Matching {
-    public class Analysis {
+namespace Aurio.Matching
+{
+    public class Analysis
+    {
 
         private AnalysisMode type;
         private TrackList<AudioTrack> audioTracks;
@@ -42,12 +44,15 @@ namespace Aurio.Matching {
         public event EventHandler<AnalysisEventArgs> WindowAnalysed;
         public event EventHandler<AnalysisEventArgs> Finished;
 
-        public Analysis(AnalysisMode type, TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, int sampleRate) {
-            if (audioTracks.Count < 2) {
+        public Analysis(AnalysisMode type, TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, int sampleRate)
+        {
+            if (audioTracks.Count < 2)
+            {
                 // there must be at least 2 tracks, otherwise there's nothing to compare
                 throw new Exception("there must be at least 2 audio tracks");
             }
-            if (intervalLength < windowLength) {
+            if (intervalLength < windowLength)
+            {
                 throw new ArgumentException("intervalLength must be at least as long as the windowLength");
             }
 
@@ -58,7 +63,8 @@ namespace Aurio.Matching {
             this.sampleRate = sampleRate;
             this.progressMonitor = ProgressMonitor.GlobalInstance;
 
-            switch (type) {
+            switch (type)
+            {
                 case AnalysisMode.CrossCorrelationOffset:
                     analyzeSection = AnalysisFunctions.CrossCorrelationOffset;
                     break;
@@ -78,24 +84,28 @@ namespace Aurio.Matching {
 
         public Analysis(AnalysisMode type, TrackList<AudioTrack> audioTracks, TimeSpan windowLength, TimeSpan intervalLength, int sampleRate,
             ProgressMonitor progressMonitor)
-            : this(type, audioTracks, windowLength, intervalLength, sampleRate) {
-                this.progressMonitor = progressMonitor;
+            : this(type, audioTracks, windowLength, intervalLength, sampleRate)
+        {
+            this.progressMonitor = progressMonitor;
         }
 
-        public void Execute() {
-            Debug.WriteLine("window length: {0}s, interval length: {1}s, sample rate: {2}", 
+        public void Execute()
+        {
+            Debug.WriteLine("window length: {0}s, interval length: {1}s, sample rate: {2}",
                 windowLength.TotalSeconds, intervalLength.TotalSeconds, sampleRate);
             IProgressReporter reporter = progressMonitor.BeginTask("Analyzing alignment...", true);
 
             List<IAudioStream> streams = new List<IAudioStream>(audioTracks.Count);
             TimeSpan start = audioTracks.Start;
             TimeSpan end = audioTracks.End;
-            foreach (AudioTrack audioTrack in audioTracks) {
+            foreach (AudioTrack audioTrack in audioTracks)
+            {
                 streams.Add(CrossCorrelation.PrepareStream(audioTrack.CreateAudioStream(), sampleRate));
             }
 
             long[] streamOffsets = new long[audioTracks.Count];
-            for (int i = 0; i < audioTracks.Count; i++) {
+            for (int i = 0; i < audioTracks.Count; i++)
+            {
                 streamOffsets[i] = TimeUtil.TimeSpanToBytes(audioTracks[i].Offset - start, streams[0].Properties);
             }
 
@@ -117,7 +127,8 @@ namespace Aurio.Matching {
             double min = 0;
             double max = 0;
 
-            for (long position = 0; position < analysisIntervalLength; position += intervalLengthInBytes) {
+            for (long position = 0; position < analysisIntervalLength; position += intervalLengthInBytes)
+            {
                 double windowSumNegative = 0;
                 double windowSumPositive = 0;
                 int windowCountNegative = 0;
@@ -127,30 +138,38 @@ namespace Aurio.Matching {
 
                 Debug.WriteLine("Analyzing {0} @ {1} / {2}", intervalLengthInBytes, position, analysisIntervalLength);
                 // at each position in the analysis interval, compare each stream with each other
-                for (int i = 0; i < streams.Count; i++) {
+                for (int i = 0; i < streams.Count; i++)
+                {
                     positionX = position - streamOffsets[i];
-                    if (positionX >= 0 && positionX < streams[i].Length) {
+                    if (positionX >= 0 && positionX < streams[i].Length)
+                    {
                         streams[i].Position = positionX;
                         StreamUtil.ForceRead(streams[i], x, 0, windowLengthInBytes);
-                        for (int j = i + 1; j < streams.Count; j++) {
+                        for (int j = i + 1; j < streams.Count; j++)
+                        {
                             positionY = position - streamOffsets[j];
-                            if (positionY >= 0 && positionY < streams[j].Length) {
+                            if (positionY >= 0 && positionY < streams[j].Length)
+                            {
                                 streams[j].Position = positionY;
                                 StreamUtil.ForceRead(streams[j], y, 0, windowLengthInBytes);
 
                                 double val = analyzeSection(x, y);
-                                if (val > 0) {
+                                if (val > 0)
+                                {
                                     windowSumPositive += val;
                                     windowCountPositive++;
                                 }
-                                else {
+                                else
+                                {
                                     windowSumNegative += val;
                                     windowCountNegative++;
                                 }
-                                if (windowMin > val) {
+                                if (windowMin > val)
+                                {
                                     windowMin = val;
                                 }
-                                if (windowMax < val) {
+                                if (windowMax < val)
+                                {
                                     windowMax = val;
                                 }
                                 Debug.WriteLine("{0,2}->{1,2}: {2}", i, j, val);
@@ -162,22 +181,24 @@ namespace Aurio.Matching {
                 countPositive += windowCountPositive;
                 sumNegative += windowSumNegative;
                 countNegative += windowCountNegative;
-                if (min > windowMin) {
+                if (min > windowMin)
+                {
                     min = windowMin;
                 }
-                if (max < windowMax) {
+                if (max < windowMax)
+                {
                     max = windowMax;
                 }
                 reporter.ReportProgress((double)position / analysisIntervalLength * 100);
                 OnWindowAnalyzed(start + TimeUtil.BytesToTimeSpan(position, streams[0].Properties),
-                    windowCountPositive, windowCountNegative, 
-                    windowMin, windowMax, 
+                    windowCountPositive, windowCountNegative,
+                    windowMin, windowMax,
                     windowSumPositive, windowSumNegative);
             }
 
             reporter.Finish();
-            Debug.WriteLine("Finished. sum: {0}, sum+: {1}, sum-: {2}, sumAbs: {3}, avg: {4}, avg+: {5}, avg-: {6}, avgAbs: {7}, min: {8}, max: {9}, points: {10}", 
-                sumPositive + sumNegative, sumPositive, sumNegative, sumPositive + (sumNegative * -1), 
+            Debug.WriteLine("Finished. sum: {0}, sum+: {1}, sum-: {2}, sumAbs: {3}, avg: {4}, avg+: {5}, avg-: {6}, avgAbs: {7}, min: {8}, max: {9}, points: {10}",
+                sumPositive + sumNegative, sumPositive, sumNegative, sumPositive + (sumNegative * -1),
                 (sumPositive + sumNegative) / (countPositive + countNegative), sumPositive / countPositive,
                 sumNegative / countNegative, (sumPositive + (sumNegative * -1)) / (countPositive + countNegative),
                 min, max, countPositive + countNegative);
@@ -189,35 +210,47 @@ namespace Aurio.Matching {
             streams.ForEach(s => s.Close());
         }
 
-        public void ExecuteAsync() {
-            Task.Factory.StartNew(() => {
+        public void ExecuteAsync()
+        {
+            Task.Factory.StartNew(() =>
+            {
                 Execute();
             });
         }
 
-        private void OnStarted() {
-            if (Started != null) {
+        private void OnStarted()
+        {
+            if (Started != null)
+            {
                 Started(this, EventArgs.Empty);
             }
         }
 
         private void OnWindowAnalyzed(TimeSpan time, int measurementPointsPositive, int measurementPointsNegative,
-            double min, double max, double sumPositive, double sumNegative) {
-            if (WindowAnalysed != null) {
-                WindowAnalysed(this, new AnalysisEventArgs() {
-                    Time = time, 
-                    MeasurementPointsPositive = measurementPointsPositive, 
-                    MeasurementPointsNegative = measurementPointsNegative, 
-                    Min = min, Max = max, 
-                    SumPositive = sumPositive, SumNegative = sumNegative
+            double min, double max, double sumPositive, double sumNegative)
+        {
+            if (WindowAnalysed != null)
+            {
+                WindowAnalysed(this, new AnalysisEventArgs()
+                {
+                    Time = time,
+                    MeasurementPointsPositive = measurementPointsPositive,
+                    MeasurementPointsNegative = measurementPointsNegative,
+                    Min = min,
+                    Max = max,
+                    SumPositive = sumPositive,
+                    SumNegative = sumNegative
                 });
             }
         }
 
         private void OnFinished(int measurementPointsPositive, int measurementPointsNegative,
-            double min, double max, double sumPositive, double sumNegative) {
-            if (Finished != null) {
-                Finished(this, new AnalysisEventArgs() {
+            double min, double max, double sumPositive, double sumNegative)
+        {
+            if (Finished != null)
+            {
+                Finished(this, new AnalysisEventArgs()
+                {
                     MeasurementPointsPositive = measurementPointsPositive,
                     MeasurementPointsNegative = measurementPointsNegative,
                     Min = min,
@@ -229,7 +262,8 @@ namespace Aurio.Matching {
         }
     }
 
-    public class AnalysisEventArgs : EventArgs {
+    public class AnalysisEventArgs : EventArgs
+    {
         public TimeSpan Time { get; set; }
         public int MeasurementPointsPositive { get; set; }
         public int MeasurementPointsNegative { get; set; }

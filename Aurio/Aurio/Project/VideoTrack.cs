@@ -22,18 +22,23 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Aurio.Project {
-    public class VideoTrack : Track {
+namespace Aurio.Project
+{
+    public class VideoTrack : Track
+    {
 
         public VideoTrack(FileInfo fileInfo)
-            : base(fileInfo) {
+            : base(fileInfo)
+        {
         }
 
-        public override MediaType MediaType {
+        public override MediaType MediaType
+        {
             get { return MediaType.Video; }
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return "Video" + base.ToString();
         }
     }

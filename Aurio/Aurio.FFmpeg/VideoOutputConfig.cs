@@ -25,14 +25,16 @@ using System.Text;
 namespace Aurio.FFmpeg
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct VideoOutputFormat {
+    public struct VideoOutputFormat
+    {
         public int width { get; internal set; }
         public int height { get; internal set; }
         public double frame_rate { get; internal set; }
         public double aspect_ratio { get; internal set; }
     }
 
-    public enum AVPictureType : int {
+    public enum AVPictureType : int
+    {
         AV_PICTURE_TYPE_NONE = 0,
         AV_PICTURE_TYPE_I,
         AV_PICTURE_TYPE_P,
@@ -44,7 +46,8 @@ namespace Aurio.FFmpeg
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct VideoFrameProperties {
+    public struct VideoFrameProperties
+    {
         public bool keyframe { get; internal set; }
         public AVPictureType pict_type { get; internal set; }
         public bool interlaced { get; internal set; }
@@ -52,7 +55,8 @@ namespace Aurio.FFmpeg
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct VideoOutputConfig {
+    public struct VideoOutputConfig
+    {
         public VideoOutputFormat format { get; internal set; }
         public long length { get; internal set; }
         public int frame_size { get; internal set; }

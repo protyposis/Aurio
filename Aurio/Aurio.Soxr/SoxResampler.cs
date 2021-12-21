@@ -25,8 +25,10 @@ using SoxrInstance = System.IntPtr;
 using SoxrError = System.IntPtr;
 using System.Runtime.InteropServices;
 
-namespace Aurio.Soxr {
-    public class SoxResampler : IDisposable {
+namespace Aurio.Soxr
+{
+    public class SoxResampler : IDisposable
+    {
 
         private SoxrInstance soxr;
         private bool variableRate;
@@ -47,10 +49,12 @@ namespace Aurio.Soxr {
         /// <param name="qualityRecipe"></param>
         /// <param name="qualityFlags"></param>
         /// <exception cref="SoxrException">when parameters are incorrect; see error message for details</exception>
-        public SoxResampler(double inputRate, double outputRate, int channels, 
-            QualityRecipe qualityRecipe, QualityFlags qualityFlags) {
+        public SoxResampler(double inputRate, double outputRate, int channels,
+            QualityRecipe qualityRecipe, QualityFlags qualityFlags)
+        {
 
-            if (inputRate <= 0 || outputRate <= 0 || channels <= 0) {
+            if (inputRate <= 0 || outputRate <= 0 || channels <= 0)
+            {
                 throw new SoxrException("one or more parameters are invalid (zero or negative)");
             }
 
@@ -61,18 +65,21 @@ namespace Aurio.Soxr {
             InteropWrapper.SoxrQualitySpec qSpec = InteropWrapper.soxr_quality_spec(qualityRecipe, qualityFlags);
             InteropWrapper.SoxrRuntimeSpec rtSpec = InteropWrapper.soxr_runtime_spec(1);
 
-            if (qualityFlags == QualityFlags.SOXR_VR) {
-                if (qualityRecipe != QualityRecipe.SOXR_HQ) {
+            if (qualityFlags == QualityFlags.SOXR_VR)
+            {
+                if (qualityRecipe != QualityRecipe.SOXR_HQ)
+                {
                     throw new SoxrException("Invalid parameters: variable rate resampling only works with the HQ recipe");
                 }
                 variableRate = true;
                 maxRatio = inputRate / outputRate;
             }
-            
+
             soxr = InteropWrapper.soxr_create(inputRate, outputRate, (uint)channels,
                 out error, ref ioSpec, ref qSpec, ref rtSpec);
-            
-            if (error != SoxrError.Zero) {
+
+            if (error != SoxrError.Zero)
+            {
                 throw new SoxrException(GetError(error));
             }
 
@@ -88,7 +95,8 @@ namespace Aurio.Soxr {
         /// <exception cref="SoxrException">when parameters are incorrect; see error message for details</exception>
         public SoxResampler(double inputRate, double outputRate, int channels, QualityRecipe qualityRecipe) :
             this(inputRate, outputRate, channels,
-            qualityRecipe, QualityFlags.SOXR_ROLLOFF_SMALL) { }
+            qualityRecipe, QualityFlags.SOXR_ROLLOFF_SMALL)
+        { }
 
         /// <summary>
         /// Creates a new resampler instance with the default configuration.
@@ -99,13 +107,16 @@ namespace Aurio.Soxr {
         /// <exception cref="SoxrException">when parameters are incorrect; see error message for details</exception>
         public SoxResampler(double inputRate, double outputRate, int channels) :
             this(inputRate, outputRate, channels,
-            QualityRecipe.SOXR_HQ, QualityFlags.SOXR_ROLLOFF_SMALL) { }
+            QualityRecipe.SOXR_HQ, QualityFlags.SOXR_ROLLOFF_SMALL)
+        { }
 
         /// <summary>
         /// Returns the libsoxr version.
         /// </summary>
-        public string Version {
-            get { 
+        public string Version
+        {
+            get
+            {
                 StringPtr ptr = InteropWrapper.soxr_version();
                 return Marshal.PtrToStringAnsi(ptr);
             }
@@ -114,18 +125,22 @@ namespace Aurio.Soxr {
         /// <summary>
         /// Returns the name of the active resampling engine.
         /// </summary>
-        public string Engine {
-            get {
+        public string Engine
+        {
+            get
+            {
                 StringPtr ptr = InteropWrapper.soxr_engine(soxr);
                 return Marshal.PtrToStringAnsi(ptr);
             }
         }
 
-        public double GetOutputDelay() {
+        public double GetOutputDelay()
+        {
             return InteropWrapper.soxr_delay(soxr);
         }
 
-        public bool VariableRate {
+        public bool VariableRate
+        {
             get { return variableRate; }
         }
 
@@ -151,7 +166,8 @@ namespace Aurio.Soxr {
         /// <exception cref="SoxrException">if an error happens during processing, see error message for details</exception>
         public void Process(byte[] input, int inputOffset, int inputLength,
             byte[] output, int outputOffset, int outputLength,
-            bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated) {
+            bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated)
+        {
 
             // Only 32-bit float samples are supported
             int sampleBlockByteSize = 4 * channels;
@@ -161,17 +177,21 @@ namespace Aurio.Soxr {
             UIntPtr idone = UIntPtr.Zero;
             UIntPtr odone = UIntPtr.Zero;
 
-            if (outputLength == 0 && output.Length == 0) {
+            if (outputLength == 0 && output.Length == 0)
+            {
                 output = new byte[1];
             }
-            
-            unsafe {
-                fixed (byte* inputBytes = &input[inputOffset], outputBytes = &output[outputOffset]) {
+
+            unsafe
+            {
+                fixed (byte* inputBytes = &input[inputOffset], outputBytes = &output[outputOffset])
+                {
                     SoxrError error = InteropWrapper.soxr_process(soxr,
                         endOfInput ? null : inputBytes, ilen, out idone,
                         outputBytes, olen, out odone);
 
-                    if (error != SoxrError.Zero) {
+                    if (error != SoxrError.Zero)
+                    {
                         throw new SoxrException("Processing failed: " + GetError(error));
                     }
                 }
@@ -189,17 +209,21 @@ namespace Aurio.Soxr {
         /// <param name="ratio">the new resampling ratio</param>
         /// <param name="transitionLength">the length over which to linearly transition to the new ratio</param>
         /// <exception cref="SoxrException">when the resampler is not configured for variable-rate resampling</exception>
-        public void SetRatio(double ratio, int transitionLength) {
-            if (!variableRate) {
+        public void SetRatio(double ratio, int transitionLength)
+        {
+            if (!variableRate)
+            {
                 throw new SoxrException("Illegal call: set_io_ratio only works in variable-rate resampling mode");
             }
-            else if (ratio > maxRatio) {
+            else if (ratio > maxRatio)
+            {
                 throw new SoxrException("Ratio exceeds max bound specified in constructor");
             }
 
             SoxrError error = InteropWrapper.soxr_set_io_ratio(soxr, 1.0 / ratio, new UIntPtr((uint)transitionLength));
 
-            if (error != SoxrError.Zero) {
+            if (error != SoxrError.Zero)
+            {
                 throw new SoxrException("Error changing IO ratio: " + GetError(error));
             }
         }
@@ -209,11 +233,14 @@ namespace Aurio.Soxr {
         /// </summary>
         /// <param name="error">the error pointer to convert to the error message</param>
         /// <returns>An error message, or null if no error reported</returns>
-        private string GetError(SoxrError error) {
-            if (error == SoxrError.Zero) {
+        private string GetError(SoxrError error)
+        {
+            if (error == SoxrError.Zero)
+            {
                 return null;
             }
-            else {
+            else
+            {
                 return Marshal.PtrToStringAnsi(error);
             }
         }
@@ -221,7 +248,8 @@ namespace Aurio.Soxr {
         /// <summary>
         /// Returns the most recent error message.
         /// </summary>
-        public string GetError() {
+        public string GetError()
+        {
             SoxrError ptr = InteropWrapper.soxr_error(soxr);
             return GetError(ptr);
         }
@@ -238,15 +266,18 @@ namespace Aurio.Soxr {
         /// because this class does not permit setting the ratio in fixed mode.
         /// </summary>
         /// <exception cref="SoxrException">when clearing fails, see error message for details</exception>
-        public void Clear() {
+        public void Clear()
+        {
             SoxrError error = InteropWrapper.soxr_clear(soxr);
 
-            if (error != SoxrError.Zero) {
+            if (error != SoxrError.Zero)
+            {
                 throw new SoxrException("Cannot clear state: " + GetError(error));
             }
         }
 
-        public static bool CheckRatio(double ratio) {
+        public static bool CheckRatio(double ratio)
+        {
             return ratio > 0.0;
         }
 
@@ -254,20 +285,24 @@ namespace Aurio.Soxr {
         /// Deletes the current resampler instance and frees its memory. 
         /// To be called on destruction.
         /// </summary>
-        private void Delete() {
+        private void Delete()
+        {
             // Check if an instance is existing and only delete it if this is the case, avoiding
             // an exception if called multiple times (i.e. by Dispose and the destructor).
-            if (soxr != SoxrInstance.Zero) {
+            if (soxr != SoxrInstance.Zero)
+            {
                 InteropWrapper.soxr_delete(soxr);
                 soxr = SoxrInstance.Zero;
             }
         }
 
-        ~SoxResampler() {
+        ~SoxResampler()
+        {
             Delete();
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Delete();
         }
     }

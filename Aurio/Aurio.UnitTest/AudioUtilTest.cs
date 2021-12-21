@@ -5,14 +5,15 @@ using Aurio.Streams;
 
 namespace Aurio.UnitTest
 {
-    
-    
+
+
     /// <summary>
     ///This is a test class for AudioUtilTest and is intended
     ///to contain all AudioUtilTest Unit Tests
     ///</summary>
     [TestClass()]
-    public class AudioUtilTest {
+    public class AudioUtilTest
+    {
 
 
         private TestContext testContextInstance;
@@ -21,11 +22,14 @@ namespace Aurio.UnitTest
         ///Gets or sets the test context which provides
         ///information about and functionality for the current test run.
         ///</summary>
-        public TestContext TestContext {
-            get {
+        public TestContext TestContext
+        {
+            get
+            {
                 return testContextInstance;
             }
-            set {
+            set
+            {
                 testContextInstance = value;
             }
         }
@@ -65,7 +69,8 @@ namespace Aurio.UnitTest
         ///A test for AlignToSamples
         ///</summary>
         [TestMethod()]
-        public void AlignToSamplesTest() {
+        public void AlignToSamplesTest()
+        {
             Interval intervalToAlign = new Interval(1000, 10000);
             AudioProperties audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             double sampleTicks = AudioUtil.CalculateSampleTicks(audioProperties);
@@ -80,7 +85,8 @@ namespace Aurio.UnitTest
         ///A test for CalculateSampleTicks
         ///</summary>
         [TestMethod()]
-        public void CalculateSampleTicksTest() {
+        public void CalculateSampleTicksTest()
+        {
             AudioProperties audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             double expected = TimeUtil.SECS_TO_TICKS / (double)audioProperties.SampleRate;
             double actual;
@@ -92,11 +98,13 @@ namespace Aurio.UnitTest
         ///A test for CalculateSamples
         ///</summary>
         [TestMethod()]
-        public void CalculateSamplesTest() {
+        public void CalculateSamplesTest()
+        {
             AudioProperties audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             double sampleTicks = AudioUtil.CalculateSampleTicks(audioProperties);
 
-            for (int x = 0; x < audioProperties.SampleRate * 60; x++) {
+            for (int x = 0; x < audioProperties.SampleRate * 60; x++)
+            {
                 TimeSpan timeSpan = new TimeSpan((long)Math.Ceiling(x * sampleTicks));
                 int expected = x;
                 int actual;

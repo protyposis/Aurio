@@ -22,9 +22,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching {
+namespace Aurio.Matching
+{
     [DebuggerDisplay("{Index}/{Hash}")]
-    public struct SubFingerprint {
+    public struct SubFingerprint
+    {
 
         public int Index;
         public SubFingerprintHash Hash;
@@ -34,7 +36,8 @@ namespace Aurio.Matching {
         /// </summary>
         public bool IsVariation;
 
-        public SubFingerprint(int index, SubFingerprintHash hash, bool variation) {
+        public SubFingerprint(int index, SubFingerprintHash hash, bool variation)
+        {
             Index = index;
             Hash = hash;
             IsVariation = variation;

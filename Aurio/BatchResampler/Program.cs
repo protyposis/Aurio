@@ -74,7 +74,8 @@ namespace BatchResampler
                 }
             }
 
-            Parallel.ForEach<FileInfo>(fileMapping.Keys, (fileInfo) => {
+            Parallel.ForEach<FileInfo>(fileMapping.Keys, (fileInfo) =>
+            {
                 double factor = fileMapping[fileInfo];
                 FileInfo outputFileInfo = new FileInfo(Path.Combine(outdir.FullName, fileInfo.Name));
 
@@ -96,7 +97,7 @@ namespace BatchResampler
 
                     AudioStreamFactory.WriteToFile(outputStream, outputFileInfo.FullName);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine("Error processing " + fileInfo.Name + ": " + e.Message);
                 }
@@ -113,7 +114,8 @@ namespace BatchResampler
             using (StreamReader reader = File.OpenText(filename))
             {
                 string line;
-                while((line = reader.ReadLine()) != null) {
+                while ((line = reader.ReadLine()) != null)
+                {
                     string[] parts = line.Split(';');
                     mapping.Add(parts[0], Double.Parse(parts[1], CultureInfo.InvariantCulture.NumberFormat));
                 }

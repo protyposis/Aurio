@@ -26,9 +26,11 @@ using StringPtr = System.IntPtr;
 using SoxrInstance = System.IntPtr;
 using SoxrError = System.IntPtr;
 
-namespace Aurio.Soxr {
+namespace Aurio.Soxr
+{
     //[SuppressUnmanagedCodeSecurity]
-    internal unsafe class Interop32 {
+    internal unsafe class Interop32
+    {
 
         private const string SOXRLIB = "soxr.x86.dll";
         private const CallingConvention CC = CallingConvention.Cdecl;

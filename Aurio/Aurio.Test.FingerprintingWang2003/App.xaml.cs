@@ -5,10 +5,12 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 
-namespace Aurio.Test.FingerprintingWang2003 {
+namespace Aurio.Test.FingerprintingWang2003
+{
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application {
+    public partial class App : Application
+    {
     }
 }

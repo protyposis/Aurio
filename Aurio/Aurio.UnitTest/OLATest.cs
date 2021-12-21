@@ -5,7 +5,8 @@ using Aurio.Streams;
 using System.Linq;
 using System.IO;
 
-namespace Aurio.UnitTest {
+namespace Aurio.UnitTest
+{
     [TestClass]
     public class OLATest
     {
@@ -169,7 +170,7 @@ namespace Aurio.UnitTest {
 
             // Ignore samples at begin and end which are rolling off due to windowing start/end
             CollectionAssert.AreEqual(
-                inputFloats.Skip(windowSize).Take(inputFloats.Length - windowSize * 2).ToArray(), 
+                inputFloats.Skip(windowSize).Take(inputFloats.Length - windowSize * 2).ToArray(),
                 outputFloats.Skip(windowSize).Take(inputFloats.Length - windowSize * 2).ToArray());
         }
     }

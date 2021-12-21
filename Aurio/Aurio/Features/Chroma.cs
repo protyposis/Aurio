@@ -23,15 +23,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Features {
+namespace Aurio.Features
+{
     /// <summary>
     /// Generates a chromagram from an input audio stream as described in section III.B. of
     /// - Bartsch, Mark A., and Gregory H. Wakefield. "Audio thumbnailing of popular music 
     ///   using chroma-based representations." Multimedia, IEEE Transactions on 7.1 (2005): 96-104.
     /// </summary>
-    public class Chroma : STFT {
+    public class Chroma : STFT
+    {
 
-        public enum MappingMode {
+        public enum MappingMode
+        {
             /// <summary>
             /// The type of frequency bin to chroma mapping described in
             /// - Bartsch, Mark A., and Gregory H. Wakefield. "Audio thumbnailing of popular music 
@@ -54,7 +57,8 @@ namespace Aurio.Features {
         private bool normalize;
 
         public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, float minFreq, float maxFreq, bool normalize, MappingMode mappingMode)
-            : base(stream, windowSize, hopSize, windowType, OutputFormat.MagnitudesSquared) {
+            : base(stream, windowSize, hopSize, windowType, OutputFormat.MagnitudesSquared)
+        {
             fftFrameBuffer = new float[windowSize / 2];
 
             // Precompute FFT bin to Chroma bin mapping
@@ -68,8 +72,10 @@ namespace Aurio.Features {
             fftToChromaBinMappingOffset = minBin;
             fftToChromaBinCount = new int[Bins];
 
-            if (mappingMode == MappingMode.Paper) {
-                for (int i = minBin; i < maxBin; i++) {
+            if (mappingMode == MappingMode.Paper)
+            {
+                for (int i = minBin; i < maxBin; i++)
+                {
                     double fftBinCenterFreq = i * freqToBinRatio;
                     double c = Math.Log(fftBinCenterFreq, 2) - Math.Floor(Math.Log(fftBinCenterFreq, 2)); // paper formula (3)
                     // c ∈ [0, 1) must be mapped to chroma bins {0...11}
@@ -81,9 +87,11 @@ namespace Aurio.Features {
                     fftToChromaBinCount[chromaBin]++; // needed to take the arithmetic mean in formula (6)
                 }
             }
-            else if (mappingMode == MappingMode.Chromaprint) {
+            else if (mappingMode == MappingMode.Chromaprint)
+            {
                 double A0 = 440.0 / 16.0; // Hz
-                for (int i = minBin; i < maxBin; i++) {
+                for (int i = minBin; i < maxBin; i++)
+                {
                     double fftBinCenterFreq = i * freqToBinRatio;
                     double c = Math.Log(fftBinCenterFreq / A0, 2) - Math.Floor(Math.Log(fftBinCenterFreq / A0, 2)); // Chromaprint additionally divides by A0 - WHY?
                     int chromaBin = (int)(c * Bins); // Chromaprint does the mapping more bluntly
@@ -91,7 +99,8 @@ namespace Aurio.Features {
                     fftToChromaBinCount[chromaBin]++; // needed to take the arithmetic mean in formula (6)
                 }
             }
-            else {
+            else
+            {
                 throw new ArgumentException("unknown chroma mapping mode " + mappingMode);
             }
 
@@ -99,17 +108,21 @@ namespace Aurio.Features {
         }
 
         public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, float minFreq, float maxFreq)
-            : this(stream, windowSize, hopSize, windowType, minFreq, maxFreq, true, Chroma.MappingMode.Paper) {
+            : this(stream, windowSize, hopSize, windowType, minFreq, maxFreq, true, Chroma.MappingMode.Paper)
+        {
             //
         }
 
         public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType)
-            : this(stream, windowSize, hopSize, windowType, 0, stream.Properties.SampleRate / 2, true, Chroma.MappingMode.Paper) {
+            : this(stream, windowSize, hopSize, windowType, 0, stream.Properties.SampleRate / 2, true, Chroma.MappingMode.Paper)
+        {
             //
         }
 
-        public override void ReadFrame(float[] chromaFrame) {
-            if (chromaFrame.Length != Bins) {
+        public override void ReadFrame(float[] chromaFrame)
+        {
+            if (chromaFrame.Length != Bins)
+            {
                 throw new ArgumentException("expected chroma frame length is 12");
             }
 
@@ -117,23 +130,27 @@ namespace Aurio.Features {
             base.ReadFrame(fftFrameBuffer);
 
             // Convert to chroma frame
-            
+
             // Sum log magnitude DFT bins in the chroma bins
             Array.Clear(chromaFrame, 0, chromaFrame.Length);
-            for (int i = 0; i < fftToChromaBinMapping.Length; i++) {
+            for (int i = 0; i < fftToChromaBinMapping.Length; i++)
+            {
                 int bin = fftToChromaBinMapping[i];
                 chromaFrame[bin] += fftFrameBuffer[i + fftToChromaBinMappingOffset];
             }
 
-            if (normalize) {
+            if (normalize)
+            {
                 // Take the arithmetic mean
-                for (int i = 0; i < chromaFrame.Length; i++) {
+                for (int i = 0; i < chromaFrame.Length; i++)
+                {
                     chromaFrame[i] /= fftToChromaBinCount[i];
                 }
 
                 // Normalize feature vector by subtracting the scalar mean
                 float mean = chromaFrame.Sum() / Bins;
-                for (int i = 0; i < chromaFrame.Length; i++) {
+                for (int i = 0; i < chromaFrame.Length; i++)
+                {
                     chromaFrame[i] -= mean;
                 }
             }

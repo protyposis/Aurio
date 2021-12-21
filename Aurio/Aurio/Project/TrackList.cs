@@ -24,13 +24,17 @@ using System.Collections;
 using System.ComponentModel;
 using System.Collections.Specialized;
 
-namespace Aurio.Project {
-    public class TrackList<T> : IEnumerable<T>, INotifyPropertyChanged, INotifyCollectionChanged where T : Track {
+namespace Aurio.Project
+{
+    public class TrackList<T> : IEnumerable<T>, INotifyPropertyChanged, INotifyCollectionChanged where T : Track
+    {
         private readonly List<T> list;
 
-        public class TrackListEventArgs : EventArgs {
+        public class TrackListEventArgs : EventArgs
+        {
 
-            public TrackListEventArgs(T track, int index) {
+            public TrackListEventArgs(T track, int index)
+            {
                 this.Track = track;
                 this.Index = index;
             }
@@ -43,29 +47,36 @@ namespace Aurio.Project {
         public event TrackListChangedEventHandler TrackAdded;
         public event TrackListChangedEventHandler TrackRemoved;
 
-        public TrackList() {
+        public TrackList()
+        {
             list = new List<T>();
         }
 
-        public TrackList(IEnumerable<T> collection) {
+        public TrackList(IEnumerable<T> collection)
+        {
             list = new List<T>(collection);
         }
 
-        private void OnTrackAdded(TrackListEventArgs e) {
-            if (TrackAdded != null) {
+        private void OnTrackAdded(TrackListEventArgs e)
+        {
+            if (TrackAdded != null)
+            {
                 TrackAdded(this, e);
             }
             OnTrackListChanged();
         }
 
-        private void OnTrackRemoved(TrackListEventArgs e) {
-            if (TrackRemoved != null) {
+        private void OnTrackRemoved(TrackListEventArgs e)
+        {
+            if (TrackRemoved != null)
+            {
                 TrackRemoved(this, e);
             }
             OnTrackListChanged();
         }
 
-        public void Add(T track) {
+        public void Add(T track)
+        {
             list.Add(track);
             OnTrackAdded(new TrackListEventArgs(track, list.IndexOf(track)));
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, track, list.IndexOf(track)));
@@ -73,31 +84,39 @@ namespace Aurio.Project {
             track.OffsetChanged += Track_LengthOrOffsetChanged;
         }
 
-        public void Add(IEnumerable<T> tracks) {
+        public void Add(IEnumerable<T> tracks)
+        {
             int startIndex = list.Count;
-            foreach (T track in tracks) {
+            foreach (T track in tracks)
+            {
                 list.Add(track);
                 OnTrackAdded(new TrackListEventArgs(track, list.IndexOf(track)));
             }
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<T>(tracks), startIndex));
         }
 
-        public bool Contains(T item) {
+        public bool Contains(T item)
+        {
             return list.Contains(item);
         }
 
-        public int Count {
+        public int Count
+        {
             get { return list.Count; }
         }
 
-        private bool Remove(T track, bool suppressCollectionChangedEvent) {
-            if (list.Contains(track)) {
+        private bool Remove(T track, bool suppressCollectionChangedEvent)
+        {
+            if (list.Contains(track))
+            {
                 int index = list.IndexOf(track);
-                if (list.Remove(track)) {
+                if (list.Remove(track))
+                {
                     track.LengthChanged -= Track_LengthOrOffsetChanged;
                     track.OffsetChanged -= Track_LengthOrOffsetChanged;
                     OnTrackRemoved(new TrackListEventArgs(track, index));
-                    if (!suppressCollectionChangedEvent) {
+                    if (!suppressCollectionChangedEvent)
+                    {
                         OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, track, index));
                     }
                     return true;
@@ -106,37 +125,46 @@ namespace Aurio.Project {
             return false;
         }
 
-        public bool Remove(T track) {
+        public bool Remove(T track)
+        {
             return Remove(track, false);
         }
 
-        public T this[int index] {
+        public T this[int index]
+        {
             get { return list[index]; }
         }
 
-        public int IndexOf(T element) {
-            for(int i = 0; i < list.Count; i++) {
-                if (list[i] == element) {
+        public int IndexOf(T element)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] == element)
+                {
                     return i;
                 }
             }
             return -1;
         }
 
-        public void Clear() {
+        public void Clear()
+        {
             List<T> copy = new List<T>(list);
-            foreach (T track in copy) {
+            foreach (T track in copy)
+            {
                 Remove(track, true);
             }
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
-        public void Sort(IComparer<T> comparer) {
+        public void Sort(IComparer<T> comparer)
+        {
             list.Sort(comparer);
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
-        public void Move(int oldIndex, int newIndex) {
+        public void Move(int oldIndex, int newIndex)
+        {
             var item = list[oldIndex];
             list.RemoveAt(oldIndex);
             list.Insert(newIndex, item);
@@ -147,14 +175,19 @@ namespace Aurio.Project {
         /// <summary>
         /// Gets the time at which the earliest track in the tracklist starts.
         /// </summary>
-        public TimeSpan Start {
-            get {
-                if (Count == 0) {
+        public TimeSpan Start
+        {
+            get
+            {
+                if (Count == 0)
+                {
                     return TimeSpan.Zero;
                 }
                 TimeSpan start = TimeSpan.MaxValue;
-                foreach (T track in this) {
-                    if (track.Offset < start) {
+                foreach (T track in this)
+                {
+                    if (track.Offset < start)
+                    {
                         start = track.Offset;
                     }
                 }
@@ -165,14 +198,19 @@ namespace Aurio.Project {
         /// <summary>
         /// Gets the time at which the latest track in the tracklist ends.
         /// </summary>
-        public TimeSpan End {
-            get {
-                if (Count == 0) {
+        public TimeSpan End
+        {
+            get
+            {
+                if (Count == 0)
+                {
                     return TimeSpan.Zero;
                 }
                 TimeSpan end = TimeSpan.MinValue;
-                foreach (T track in this) {
-                    if (track.Offset + track.Length > end) {
+                foreach (T track in this)
+                {
+                    if (track.Offset + track.Length > end)
+                    {
                         end = track.Offset + track.Length;
                     }
                 }
@@ -183,17 +221,21 @@ namespace Aurio.Project {
         /// <summary>
         /// Gets the total length of all tracks added together.
         /// </summary>
-        public TimeSpan TotalLength {
-            get {
+        public TimeSpan TotalLength
+        {
+            get
+            {
                 TimeSpan total = new TimeSpan();
-                foreach (T track in this) {
+                foreach (T track in this)
+                {
                     total += track.Length;
                 }
                 return total;
             }
         }
 
-        private void Track_LengthOrOffsetChanged(object sender, ValueEventArgs<TimeSpan> e) {
+        private void Track_LengthOrOffsetChanged(object sender, ValueEventArgs<TimeSpan> e)
+        {
             // if a track length or offset changes, it might affect the whole tracklist
             // TODO check if tracklist properties are affected and only fire event in these cases
             OnTrackListChanged();
@@ -201,19 +243,24 @@ namespace Aurio.Project {
 
         #region IEnumerable<T> Members
 
-        IEnumerator IEnumerable.GetEnumerator() {
+        IEnumerator IEnumerable.GetEnumerator()
+        {
             return ((IEnumerable)list).GetEnumerator();
         }
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() {
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
             return list.GetEnumerator();
         }
 
         #endregion
 
-        public IEnumerable<T> EnumerateAtPosition(TimeSpan position) {
-            foreach (T track in this) {
-                if (track.Offset <= position && track.Offset + track.Length >= position) {
+        public IEnumerable<T> EnumerateAtPosition(TimeSpan position)
+        {
+            foreach (T track in this)
+            {
+                if (track.Offset <= position && track.Offset + track.Length >= position)
+                {
                     yield return track;
                 }
             }
@@ -223,15 +270,18 @@ namespace Aurio.Project {
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged(string name) {
-            if (PropertyChanged != null) {
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
             }
         }
 
         #endregion
 
-        protected void OnTrackListChanged() {
+        protected void OnTrackListChanged()
+        {
             OnPropertyChanged("TotalLength");
             OnPropertyChanged("Start");
             OnPropertyChanged("End");
@@ -242,8 +292,10 @@ namespace Aurio.Project {
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        protected void OnCollectionChanged(NotifyCollectionChangedEventArgs args) {
-            if (CollectionChanged != null) {
+        protected void OnCollectionChanged(NotifyCollectionChangedEventArgs args)
+        {
+            if (CollectionChanged != null)
+            {
                 CollectionChanged(this, args);
             }
         }

@@ -23,8 +23,10 @@ using System.Text;
 using System.Diagnostics;
 using Aurio.DataStructures;
 
-namespace Aurio.Streams {
-    public class IeeeStream : AbstractAudioStreamWrapper {
+namespace Aurio.Streams
+{
+    public class IeeeStream : AbstractAudioStreamWrapper
+    {
 
         private AudioProperties properties;
         private bool passthrough;
@@ -35,64 +37,79 @@ namespace Aurio.Streams {
 
 
         public IeeeStream(IAudioStream sourceStream)
-            : base(sourceStream) {
-            if (sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32) {
+            : base(sourceStream)
+        {
+            if (sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32)
+            {
                 passthrough = true;
                 properties = sourceStream.Properties;
             }
-            else if (sourceStream.Properties.Format == AudioFormat.LPCM && sourceStream.Properties.BitDepth == 16) {
+            else if (sourceStream.Properties.Format == AudioFormat.LPCM && sourceStream.Properties.BitDepth == 16)
+            {
                 ReadAndConvert = ReadPCM16;
                 properties = new AudioProperties(sourceStream.Properties.Channels,
                     sourceStream.Properties.SampleRate, 32, AudioFormat.IEEE);
             }
-            else if (sourceStream.Properties.Format == AudioFormat.LPCM && sourceStream.Properties.BitDepth == 24) {
+            else if (sourceStream.Properties.Format == AudioFormat.LPCM && sourceStream.Properties.BitDepth == 24)
+            {
                 ReadAndConvert = ReadPCM24;
-                properties = new AudioProperties(sourceStream.Properties.Channels, 
+                properties = new AudioProperties(sourceStream.Properties.Channels,
                     sourceStream.Properties.SampleRate, 32, AudioFormat.IEEE);
             }
-            else {
+            else
+            {
                 throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
             }
 
             sourceBuffer = new ByteBuffer();
         }
 
-        public override AudioProperties Properties {
+        public override AudioProperties Properties
+        {
             get { return properties; }
         }
 
-        public override long Length {
+        public override long Length
+        {
             get { return sourceStream.Length / sourceStream.SampleBlockSize * SampleBlockSize; }
         }
 
-        public override long Position {
+        public override long Position
+        {
             get { return sourceStream.Position / sourceStream.SampleBlockSize * SampleBlockSize; }
             set { sourceStream.Position = value / SampleBlockSize * sourceStream.SampleBlockSize; }
         }
 
-        public override int SampleBlockSize {
+        public override int SampleBlockSize
+        {
             get { return properties.SampleBlockByteSize; }
         }
 
-        public override int Read(byte[] buffer, int offset, int count) {
-            if (passthrough) {
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            if (passthrough)
+            {
                 return sourceStream.Read(buffer, offset, count);
             }
 
             return ReadAndConvert(buffer, offset, count);
         }
 
-        private int ReadPCM16(byte[] buffer, int offset, int count) {
+        private int ReadPCM16(byte[] buffer, int offset, int count)
+        {
             int sourceBytesToRead = count / SampleBlockSize * sourceStream.SampleBlockSize;
             sourceBuffer.FillIfEmpty(sourceStream, sourceBytesToRead);
             int samples = sourceBuffer.Count / 2; // #bytes / 2 = #shorts
 
-            unsafe {
-                fixed (byte* sourceByteBuffer = &sourceBuffer.Data[0], targetByteBuffer = &buffer[offset]) {
+            unsafe
+            {
+                fixed (byte* sourceByteBuffer = &sourceBuffer.Data[0], targetByteBuffer = &buffer[offset])
+                {
                     short* sourceShortBuffer = (short*)sourceByteBuffer;
                     float* targetFloatBuffer = (float*)targetByteBuffer;
 
-                    for (int x = 0; x < samples; x++) {
+                    for (int x = 0; x < samples; x++)
+                    {
                         targetFloatBuffer[x] = (float)sourceShortBuffer[x] / short.MaxValue;
                     }
                 }
@@ -103,15 +120,19 @@ namespace Aurio.Streams {
             return samples * 4;
         }
 
-        private int ReadPCM24(byte[] buffer, int offset, int count) {
+        private int ReadPCM24(byte[] buffer, int offset, int count)
+        {
             int sourceBytesToRead = count / SampleBlockSize * sourceStream.SampleBlockSize;
             sourceBuffer.FillIfEmpty(sourceStream, sourceBytesToRead);
             int samples = sourceBuffer.Count / 3; // #bytes / 3 = #24bitsamples
 
-            unsafe {
-                fixed (byte* targetByteBuffer = &buffer[offset]) {
+            unsafe
+            {
+                fixed (byte* targetByteBuffer = &buffer[offset])
+                {
                     float* targetFloatBuffer = (float*)targetByteBuffer;
-                    for (int x = 0; x < sourceBuffer.Count; x += 3) {
+                    for (int x = 0; x < sourceBuffer.Count; x += 3)
+                    {
                         targetFloatBuffer[x / 3] = (sourceBuffer.Data[x] << 8 | sourceBuffer.Data[x + 1] << 16 | sourceBuffer.Data[x + 2] << 24) / 2147483648f;
                     }
                 }

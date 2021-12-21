@@ -28,7 +28,8 @@ using Aurio.Project;
 
 namespace Aurio.WaveControls
 {
-    public partial class WaveView {
+    public partial class WaveView
+    {
 
         public static readonly DependencyProperty AudioTrackProperty;
         public static readonly DependencyProperty RenderModeProperty;
@@ -49,13 +50,18 @@ namespace Aurio.WaveControls
 
         public static readonly RoutedEvent TrackOffsetChangedEvent;
 
-        static WaveView() {
+        static WaveView()
+        {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(WaveView),
                 new FrameworkPropertyMetadata(typeof(WaveView)));
 
             AudioTrackProperty = DependencyProperty.Register("AudioTrack", typeof(AudioTrack), typeof(WaveView),
-                new FrameworkPropertyMetadata { DefaultValue = null, AffectsRender = true, 
-                    PropertyChangedCallback = OnAudioTrackChanged });
+                new FrameworkPropertyMetadata
+                {
+                    DefaultValue = null,
+                    AffectsRender = true,
+                    PropertyChangedCallback = OnAudioTrackChanged
+                });
 
             RenderModeProperty = DependencyProperty.Register("RenderMode", typeof(WaveViewRenderMode), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = WaveViewRenderMode.Bitmap, AffectsRender = true });
@@ -63,13 +69,21 @@ namespace Aurio.WaveControls
             DrawTrackNameProperty = DependencyProperty.Register("DrawTrackName", typeof(bool), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = false, AffectsRender = true });
 
-            WaveformBackgroundProperty = DependencyProperty.Register("WaveformBackground", typeof(SolidColorBrush), typeof(WaveView), 
-                new FrameworkPropertyMetadata { DefaultValue = Brushes.White, AffectsRender = true,
-                PropertyChangedCallback = OnWaveformBackgroundChanged });
+            WaveformBackgroundProperty = DependencyProperty.Register("WaveformBackground", typeof(SolidColorBrush), typeof(WaveView),
+                new FrameworkPropertyMetadata
+                {
+                    DefaultValue = Brushes.White,
+                    AffectsRender = true,
+                    PropertyChangedCallback = OnWaveformBackgroundChanged
+                });
 
             WaveformLineProperty = DependencyProperty.Register("WaveformLine", typeof(SolidColorBrush), typeof(WaveView),
-                new FrameworkPropertyMetadata { DefaultValue = Brushes.CornflowerBlue, AffectsRender = true, 
-                    PropertyChangedCallback = OnWaveformLineChanged });
+                new FrameworkPropertyMetadata
+                {
+                    DefaultValue = Brushes.CornflowerBlue,
+                    AffectsRender = true,
+                    PropertyChangedCallback = OnWaveformLineChanged
+                });
 
             WaveformFillProperty = DependencyProperty.Register("WaveformFill", typeof(SolidColorBrush), typeof(WaveView),
                 new FrameworkPropertyMetadata { DefaultValue = Brushes.LightBlue, AffectsRender = true });
@@ -78,12 +92,18 @@ namespace Aurio.WaveControls
                 new FrameworkPropertyMetadata { DefaultValue = Brushes.RoyalBlue, AffectsRender = true });
 
             TrackLengthProperty = DependencyProperty.Register("TrackLength", typeof(long), typeof(WaveView),
-                new FrameworkPropertyMetadata { AffectsRender = true, 
-                    PropertyChangedCallback = OnTrackLengthChanged });
+                new FrameworkPropertyMetadata
+                {
+                    AffectsRender = true,
+                    PropertyChangedCallback = OnTrackLengthChanged
+                });
 
             TrackOffsetProperty = DependencyProperty.Register("TrackOffset", typeof(long), typeof(WaveView),
-                new FrameworkPropertyMetadata { AffectsRender = true,
-                PropertyChangedCallback = OnTrackOffsetChanged });
+                new FrameworkPropertyMetadata
+                {
+                    AffectsRender = true,
+                    PropertyChangedCallback = OnTrackOffsetChanged
+                });
 
             TrackScrollLengthPropertyKey = DependencyProperty.RegisterReadOnly("TrackScrollLength", typeof(long), typeof(WaveView),
                 new FrameworkPropertyMetadata());
@@ -97,122 +117,146 @@ namespace Aurio.WaveControls
                 typeof(RoutedEventHandler), typeof(WaveView));
         }
 
-        private static void OnAudioTrackChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        private static void OnAudioTrackChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
             WaveView waveView = d as WaveView;
             AudioTrack audioTrack = e.NewValue as AudioTrack;
-            if (waveView != null && audioTrack != null) {
+            if (waveView != null && audioTrack != null)
+            {
                 waveView.SetAudioTrack(audioTrack);
             }
         }
 
-        private static void audioStream_WaveformChanged(object sender, EventArgs e) {
+        private static void audioStream_WaveformChanged(object sender, EventArgs e)
+        {
             throw new NotImplementedException();
         }
 
-        private static void OnWaveformLineChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        private static void OnWaveformLineChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
             WaveView waveView = (WaveView)d;
             waveView._lineBrush = e.NewValue as SolidColorBrush;
             waveView.ApplyLineBrushToRenderers();
         }
 
-        private static void OnWaveformBackgroundChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        private static void OnWaveformBackgroundChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
             WaveView waveView = (WaveView)d;
             waveView._backgroundBrush = e.NewValue as SolidColorBrush;
         }
 
-        private static void OnTrackLengthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        private static void OnTrackLengthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
             UpdateTrackScrollLength(d);
         }
 
-        private static void OnTrackOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        private static void OnTrackOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
             WaveView waveView = d as WaveView;
             waveView.RaiseEvent(new RoutedEventArgs(TrackOffsetChangedEvent, waveView));
         }
 
-        private static object CoerceTrackLength(DependencyObject d, object value) {
+        private static object CoerceTrackLength(DependencyObject d, object value)
+        {
             long trackLength = (long)value;
             // avoid negative length
             return trackLength >= 0 ? trackLength : 0;
         }
 
-        private static void UpdateTrackScrollLength(DependencyObject d) {
+        private static void UpdateTrackScrollLength(DependencyObject d)
+        {
             long trackLength = (long)d.GetValue(TrackLengthProperty);
             long viewportWidth = (long)d.GetValue(VirtualViewportWidthProperty);
             d.SetValue(TrackScrollLengthPropertyKey, trackLength - viewportWidth);
         }
 
-        private static void UpdateViewportZoom(DependencyObject d) {
+        private static void UpdateViewportZoom(DependencyObject d)
+        {
             long viewportWidth = (long)d.GetValue(VirtualViewportWidthProperty);
             double actualWidth = (double)d.GetValue(ActualWidthProperty);
             d.SetValue(ViewportZoomPropertyKey, (float)(actualWidth / viewportWidth));
         }
 
-        public AudioTrack AudioTrack {
+        public AudioTrack AudioTrack
+        {
             get { return (AudioTrack)GetValue(AudioTrackProperty); }
             set { SetValue(AudioTrackProperty, value); }
         }
 
-        public WaveViewRenderMode RenderMode {
+        public WaveViewRenderMode RenderMode
+        {
             get { return (WaveViewRenderMode)GetValue(RenderModeProperty); }
             set { SetValue(RenderModeProperty, value); }
         }
 
-        public bool DrawTrackName {
+        public bool DrawTrackName
+        {
             get { return (bool)GetValue(DrawTrackNameProperty); }
             set { SetValue(DrawTrackNameProperty, value); }
         }
 
         [Bindable(true), Category("Brushes")]
-        public SolidColorBrush WaveformBackground {
+        public SolidColorBrush WaveformBackground
+        {
             get { return (SolidColorBrush)GetValue(WaveformBackgroundProperty); }
             set { SetValue(WaveformBackgroundProperty, value); }
         }
 
         [Bindable(true), Category("Brushes")]
-        public SolidColorBrush WaveformLine {
+        public SolidColorBrush WaveformLine
+        {
             get { return (SolidColorBrush)GetValue(WaveformLineProperty); }
             set { SetValue(WaveformLineProperty, value); }
         }
 
         [Bindable(true), Category("Brushes")]
-        public SolidColorBrush WaveformFill {
+        public SolidColorBrush WaveformFill
+        {
             get { return (SolidColorBrush)GetValue(WaveformFillProperty); }
             set { SetValue(WaveformFillProperty, value); }
         }
 
         [Bindable(true), Category("Brushes")]
-        public SolidColorBrush WaveformSamplePoint {
+        public SolidColorBrush WaveformSamplePoint
+        {
             get { return (SolidColorBrush)GetValue(WaveformSamplePointProperty); }
             set { SetValue(WaveformSamplePointProperty, value); }
         }
 
-        public long TrackLength {
+        public long TrackLength
+        {
             get { return (long)GetValue(TrackLengthProperty); }
             set { SetValue(TrackLengthProperty, value); }
         }
 
-        public long TrackOffset {
+        public long TrackOffset
+        {
             get { return (long)GetValue(TrackOffsetProperty); }
             set { SetValue(TrackOffsetProperty, value); }
         }
 
-        public long TrackScrollLength {
+        public long TrackScrollLength
+        {
             get { return (long)GetValue(TrackScrollLengthProperty); }
         }
 
-        public float ViewportZoom {
+        public float ViewportZoom
+        {
             get { return (float)GetValue(ViewportZoomProperty); }
         }
 
-        private void WaveView_SizeChanged(object sender, SizeChangedEventArgs e) {
-            if (e.WidthChanged && e.PreviousSize.Width > 0) {
+        private void WaveView_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.WidthChanged && e.PreviousSize.Width > 0)
+            {
                 //ViewportWidth = (long)(ViewportWidth * e.NewSize.Width / e.PreviousSize.Width);
             }
             UpdateViewportZoom(this);
             //InvalidateVisual();
         }
 
-        protected override void OnViewportWidthChanged(long oldValue, long newValue) {
+        protected override void OnViewportWidthChanged(long oldValue, long newValue)
+        {
             UpdateTrackScrollLength(this);
             UpdateViewportZoom(this);
         }

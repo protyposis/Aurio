@@ -4,9 +4,11 @@ using Aurio.Streams;
 using System.Collections.Generic;
 using Aurio.Resampler;
 
-namespace Aurio.UnitTest {
+namespace Aurio.UnitTest
+{
     [TestClass]
-    public class CommonStreamTest {
+    public class CommonStreamTest
+    {
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
@@ -14,11 +16,13 @@ namespace Aurio.UnitTest {
         }
 
         [TestMethod]
-        public void TestReadOverEnd() {
+        public void TestReadOverEnd()
+        {
             var streams = GetStreams();
             var buffer = new byte[32768];
 
-            foreach(var stream in streams) {
+            foreach (var stream in streams)
+            {
                 long length = stream.Length;
                 int frameSize = stream.SampleBlockSize;
                 Assert.AreEqual(0, stream.Position);
@@ -34,7 +38,8 @@ namespace Aurio.UnitTest {
             }
         }
 
-        private List<IAudioStream> GetStreams() {
+        private List<IAudioStream> GetStreams()
+        {
             return new List<IAudioStream> {
                 new BufferedStream(GetSourceStream(), 1024, true),
                 new BufferedStream(GetSourceStream(), 1024, false),
@@ -59,7 +64,8 @@ namespace Aurio.UnitTest {
         };
         }
 
-        private IAudioStream GetSourceStream() {
+        private IAudioStream GetSourceStream()
+        {
             return new SineGeneratorStream(44100, 440, new TimeSpan(0, 1, 0));
         }
     }

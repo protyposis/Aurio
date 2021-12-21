@@ -27,7 +27,7 @@ namespace Aurio.FFTW
     public class FFT : IFFT
     {
         private readonly FFTW _instance;
-        
+
         public FFT(int size)
         {
             Size = size;

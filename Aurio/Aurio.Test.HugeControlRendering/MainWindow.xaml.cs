@@ -26,7 +26,8 @@ namespace Aurio.Test.HugeControlRendering
             InitializeComponent();
         }
 
-        private void softwareRender_Checked(object sender, RoutedEventArgs e) {
+        private void softwareRender_Checked(object sender, RoutedEventArgs e)
+        {
             RenderOptions.ProcessRenderMode = (bool)((CheckBox)e.Source).IsChecked ? RenderMode.SoftwareOnly : RenderMode.Default;
             InvalidateVisual();
         }

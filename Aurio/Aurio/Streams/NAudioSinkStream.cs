@@ -22,25 +22,30 @@ using System.Linq;
 using System.Text;
 using NAudio.Wave;
 
-namespace Aurio.Streams {
-    public class NAudioSinkStream : WaveStream {
+namespace Aurio.Streams
+{
+    public class NAudioSinkStream : WaveStream
+    {
 
         private IAudioStream sourceStream;
 
         private WaveFormat waveFormat;
 
-        public NAudioSinkStream(IAudioStream sourceStream) {
+        public NAudioSinkStream(IAudioStream sourceStream)
+        {
             AudioProperties sourceProperties = sourceStream.Properties;
 
-            if (sourceProperties.Format == AudioFormat.LPCM) {
+            if (sourceProperties.Format == AudioFormat.LPCM)
+            {
                 waveFormat = WaveFormat.CreateCustomFormat(
-                    WaveFormatEncoding.Pcm, 
+                    WaveFormatEncoding.Pcm,
                     sourceProperties.SampleRate,
                     sourceProperties.Channels,
                     sourceProperties.SampleRate * sourceProperties.Channels * sourceProperties.SampleByteSize,
                     sourceProperties.Channels * sourceProperties.SampleByteSize, sourceProperties.BitDepth);
             }
-            else if (sourceProperties.Format == AudioFormat.IEEE) {
+            else if (sourceProperties.Format == AudioFormat.IEEE)
+            {
                 waveFormat = WaveFormat.CreateCustomFormat(
                     WaveFormatEncoding.IeeeFloat,
                     sourceProperties.SampleRate,
@@ -48,31 +53,38 @@ namespace Aurio.Streams {
                     sourceProperties.SampleRate * sourceProperties.Channels * sourceProperties.SampleByteSize,
                     sourceProperties.Channels * sourceProperties.SampleByteSize, sourceProperties.BitDepth);
             }
-            else {
+            else
+            {
                 throw new ArgumentException("unsupported source format: " + sourceProperties.ToString());
             }
 
             this.sourceStream = sourceStream;
         }
 
-        public override WaveFormat WaveFormat {
+        public override WaveFormat WaveFormat
+        {
             get { return waveFormat; }
         }
 
-        public override long Length {
+        public override long Length
+        {
             get { return sourceStream.Length; }
         }
 
-        public override long Position {
+        public override long Position
+        {
             get { return sourceStream.Position; }
             set { sourceStream.Position = value; }
         }
 
-        public override int Read(byte[] buffer, int offset, int count) {
-            if (count % BlockAlign != 0) {
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            if (count % BlockAlign != 0)
+            {
                 throw new Exception("misaligned read length!");
             }
-            if(count == 0) {
+            if (count == 0)
+            {
                 return 0;
             }
             return sourceStream.Read(buffer, offset, count);

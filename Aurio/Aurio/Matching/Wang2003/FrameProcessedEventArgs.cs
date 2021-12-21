@@ -22,8 +22,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.Wang2003 {
-    public class FrameProcessedEventArgs : EventArgs {
+namespace Aurio.Matching.Wang2003
+{
+    public class FrameProcessedEventArgs : EventArgs
+    {
         public AudioTrack AudioTrack { get; set; }
         public int Index { get; set; }
         public int Indices { get; set; }

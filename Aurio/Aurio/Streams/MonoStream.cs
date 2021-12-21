@@ -23,8 +23,10 @@ using System.Text;
 using System.Diagnostics;
 using Aurio.DataStructures;
 
-namespace Aurio.Streams {
-    public class MonoStream : AbstractAudioStreamWrapper {
+namespace Aurio.Streams
+{
+    public class MonoStream : AbstractAudioStreamWrapper
+    {
 
         private AudioProperties properties;
         private ByteBuffer sourceBuffer;
@@ -35,7 +37,8 @@ namespace Aurio.Streams {
         /// </summary>
         /// <param name="sourceStream">the stream to downmix to mono</param>
         public MonoStream(IAudioStream sourceStream)
-            : this(sourceStream, 1) {
+            : this(sourceStream, 1)
+        {
         }
 
         /// <summary>
@@ -44,46 +47,57 @@ namespace Aurio.Streams {
         /// </summary>
         /// <param name="sourceStream">the stream to downmix to mono</param>
         /// <param name="outputChannels">the number of channel into which the mono mix should be split</param>
-        public MonoStream(IAudioStream sourceStream, int outputChannels) : base(sourceStream) {
-            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32)) {
+        public MonoStream(IAudioStream sourceStream, int outputChannels) : base(sourceStream)
+        {
+            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32))
+            {
                 throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
             }
 
-            properties = new AudioProperties(outputChannels, sourceStream.Properties.SampleRate, 
+            properties = new AudioProperties(outputChannels, sourceStream.Properties.SampleRate,
                 sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
             sourceBuffer = new ByteBuffer();
             downmix = true;
         }
 
-        public override AudioProperties Properties {
+        public override AudioProperties Properties
+        {
             get { return properties; }
         }
 
-        public override long Length {
+        public override long Length
+        {
             get { return sourceStream.Length / sourceStream.SampleBlockSize * SampleBlockSize; }
         }
 
-        public override long Position {
+        public override long Position
+        {
             get { return sourceStream.Position / sourceStream.SampleBlockSize * SampleBlockSize; }
             set { sourceStream.Position = value / SampleBlockSize * sourceStream.SampleBlockSize; }
         }
 
-        public override int SampleBlockSize {
+        public override int SampleBlockSize
+        {
             get { return properties.SampleByteSize * properties.Channels; }
         }
 
-        public bool Downmix {
+        public bool Downmix
+        {
             get { return downmix; }
-            set {
-                if (value == false && sourceStream.Properties.Channels != properties.Channels) {
+            set
+            {
+                if (value == false && sourceStream.Properties.Channels != properties.Channels)
+                {
                     throw new Exception("downmixing can only be disabled if the number of input channels equals the number of output channels");
                 }
                 downmix = value;
             }
         }
 
-        public override int Read(byte[] buffer, int offset, int count) {
-            if (!downmix) {
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            if (!downmix)
+            {
                 return sourceStream.Read(buffer, offset, count);
             }
 
@@ -106,19 +120,25 @@ namespace Aurio.Streams {
             int targetIndex = 0;
             float targetSample;
 
-            unsafe {
-                fixed (byte* sourceByteBuffer = &sourceBuffer.Data[0], targetByteBuffer = &buffer[offset]) {
+            unsafe
+            {
+                fixed (byte* sourceByteBuffer = &sourceBuffer.Data[0], targetByteBuffer = &buffer[offset])
+                {
                     float* sourceFloatBuffer = (float*)sourceByteBuffer;
                     float* targetFloatBuffer = (float*)targetByteBuffer;
 
-                    while (sourceIndex < sourceFloats) {
+                    while (sourceIndex < sourceFloats)
+                    {
                         targetSample = 0;
-                        for (int ch = 0; ch < sourceChannels; ch++) {
+                        for (int ch = 0; ch < sourceChannels; ch++)
+                        {
                             targetSample += sourceFloatBuffer[sourceIndex++] / sourceChannels;
                         }
                         targetFloatBuffer[targetIndex++] = targetSample;
-                        if (targetChannels > 1) {
-                            for (int ch = 1; ch < targetChannels; ch++) {
+                        if (targetChannels > 1)
+                        {
+                            for (int ch = 1; ch < targetChannels; ch++)
+                            {
                                 targetFloatBuffer[targetIndex++] = targetSample;
                             }
                         }

@@ -74,8 +74,8 @@ namespace Aurio.Resampler
             return _resampler.GetCurrentLatency();
         }
 
-        public void Process(byte[] input, int inputOffset, int inputLength, 
-            byte[] output, int outputOffset, int outputLength, 
+        public void Process(byte[] input, int inputOffset, int inputLength,
+            byte[] output, int outputOffset, int outputLength,
             bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated)
         {
             // TODO implement endOfInput flushing

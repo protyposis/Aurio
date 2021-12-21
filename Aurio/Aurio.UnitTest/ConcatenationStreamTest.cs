@@ -2,12 +2,15 @@
 using Aurio.Streams;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Aurio.UnitTest {
+namespace Aurio.UnitTest
+{
     [TestClass]
-    public class ConcatenationStreamTest {
+    public class ConcatenationStreamTest
+    {
         [TestMethod]
-        public void CheckSingleSourceLength() {
-            var stream = new SineGeneratorStream(44100, 440, new TimeSpan(0,0,1));
+        public void CheckSingleSourceLength()
+        {
+            var stream = new SineGeneratorStream(44100, 440, new TimeSpan(0, 0, 1));
             var cc = new ConcatenationStream(stream);
 
             // Ensure that the lengths match
@@ -20,7 +23,8 @@ namespace Aurio.UnitTest {
         }
 
         [TestMethod]
-        public void CheckSingleSourceSeeking() {
+        public void CheckSingleSourceSeeking()
+        {
             var stream = new SineGeneratorStream(44100, 440, new TimeSpan(0, 0, 1));
             var cc = new ConcatenationStream(stream);
 
@@ -38,14 +42,16 @@ namespace Aurio.UnitTest {
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException), "format mismatch not detected")]
-        public void CheckMultiSourceMatchingFormat() {
+        public void CheckMultiSourceMatchingFormat()
+        {
             var stream1 = new SineGeneratorStream(44100, 440, new TimeSpan(0, 0, 1));
             var stream2 = new SineGeneratorStream(96000, 440, new TimeSpan(0, 0, 1));
             var cc = new ConcatenationStream(stream1, stream2);
         }
 
         [TestMethod]
-        public void CheckMultiSourceLength() {
+        public void CheckMultiSourceLength()
+        {
             var stream1 = new SineGeneratorStream(44100, 440, new TimeSpan(0, 0, 1));
             var stream2 = new SineGeneratorStream(44100, 440, new TimeSpan(0, 0, 1));
             var cc = new ConcatenationStream(stream1, stream2);
@@ -60,7 +66,8 @@ namespace Aurio.UnitTest {
         }
 
         [TestMethod]
-        public void CheckMultiSourceRandomSeeking() {
+        public void CheckMultiSourceRandomSeeking()
+        {
             var stream1 = new SineGeneratorStream(44100, 440, new TimeSpan(0, 0, 1));
             var stream2 = new SineGeneratorStream(44100, 440, new TimeSpan(0, 0, 1));
             var cc = new ConcatenationStream(stream1, stream2);
@@ -87,7 +94,8 @@ namespace Aurio.UnitTest {
         }
 
         [TestMethod]
-        public void CheckMultiSourceSeekToEnd() {
+        public void CheckMultiSourceSeekToEnd()
+        {
             var stream1 = new SineGeneratorStream(44100, 440, new TimeSpan(0, 0, 1));
             var stream2 = new SineGeneratorStream(44100, 440, new TimeSpan(0, 0, 1));
             var cc = new ConcatenationStream(stream1, stream2);

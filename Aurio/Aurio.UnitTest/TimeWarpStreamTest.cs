@@ -2,7 +2,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace Aurio.UnitTest {
+namespace Aurio.UnitTest
+{
 
 
     /// <summary>
@@ -10,7 +11,8 @@ namespace Aurio.UnitTest {
     ///to contain all DynamicResamplingStreamTest Unit Tests
     ///</summary>
     [TestClass()]
-    public class TimeWarpStreamTest {
+    public class TimeWarpStreamTest
+    {
 
 
         private TestContext testContextInstance;
@@ -20,11 +22,14 @@ namespace Aurio.UnitTest {
         ///Gets or sets the test context which provides
         ///information about and functionality for the current test run.
         ///</summary>
-        public TestContext TestContext {
-            get {
+        public TestContext TestContext
+        {
+            get
+            {
                 return testContextInstance;
             }
-            set {
+            set
+            {
                 testContextInstance = value;
             }
         }
@@ -124,16 +129,19 @@ namespace Aurio.UnitTest {
         //}
 
         [TestMethod()]
-        public void SetPosition01() {
+        public void SetPosition01()
+        {
             var audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             TimeWarpStream s = new TimeWarpStream(
                 new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)));
             TimeSpan length = TimeUtil.BytesToTimeSpan(s.Length, s.Properties);
-            s.Mappings.Add(new TimeWarp {
+            s.Mappings.Add(new TimeWarp
+            {
                 From = new TimeSpan(length.Ticks / 2),
                 To = new TimeSpan(length.Ticks / 4)
             });
-            s.Mappings.Add(new TimeWarp {
+            s.Mappings.Add(new TimeWarp
+            {
                 From = length,
                 To = new TimeSpan(length.Ticks / 4 * 2)
             });
@@ -144,7 +152,8 @@ namespace Aurio.UnitTest {
 
             Assert.AreEqual(0, s.Position);
             totalBytesRead = 0;
-            while ((bytesRead = s.Read(buffer, 0, buffer.Length)) > 0) {
+            while ((bytesRead = s.Read(buffer, 0, buffer.Length)) > 0)
+            {
                 totalBytesRead += bytesRead;
             }
             Assert.AreEqual(s.Length, totalBytesRead);
@@ -152,7 +161,8 @@ namespace Aurio.UnitTest {
         }
 
         [TestMethod()]
-        public void SetPosition02() {
+        public void SetPosition02()
+        {
             var audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             TimeWarpStream s = new TimeWarpStream(
                 new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)));
@@ -161,7 +171,8 @@ namespace Aurio.UnitTest {
             //    From = StreamUtil.AlignToBlockSize(length / 2, s.SampleBlockSize),
             //    To = StreamUtil.AlignToBlockSize(length / 4, s.SampleBlockSize)
             //});
-            s.Mappings.Add(new TimeWarp {
+            s.Mappings.Add(new TimeWarp
+            {
                 From = length,
                 To = new TimeSpan(length.Ticks / 4 * 2)
             });
@@ -175,7 +186,8 @@ namespace Aurio.UnitTest {
             s.Position = 11104;
             Assert.AreEqual(11104, s.Position);
             //Assert.AreEqual(0, s.BufferedBytes);
-            while ((bytesRead = s.Read(buffer, 0, buffer.Length)) > 0) {
+            while ((bytesRead = s.Read(buffer, 0, buffer.Length)) > 0)
+            {
                 totalBytesRead += bytesRead;
             }
             Assert.AreEqual(totalBytesRead, s.Position - 11104);
@@ -183,16 +195,19 @@ namespace Aurio.UnitTest {
         }
 
         [TestMethod()]
-        public void SetPosition03() {
+        public void SetPosition03()
+        {
             var audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             TimeWarpStream s = new TimeWarpStream(
                 new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)));
             TimeSpan length = TimeUtil.BytesToTimeSpan(s.Length, s.Properties);
-            s.Mappings.Add(new TimeWarp {
+            s.Mappings.Add(new TimeWarp
+            {
                 From = new TimeSpan(length.Ticks / 2),
                 To = new TimeSpan(length.Ticks / 4)
             });
-            s.Mappings.Add(new TimeWarp {
+            s.Mappings.Add(new TimeWarp
+            {
                 From = length,
                 To = new TimeSpan(length.Ticks / 4 * 2)
             });
@@ -207,16 +222,19 @@ namespace Aurio.UnitTest {
         }
 
         [TestMethod()]
-        public void SetPosition04() {
+        public void SetPosition04()
+        {
             var audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             TimeWarpStream s = new TimeWarpStream(
                 new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)));
             TimeSpan length = TimeUtil.BytesToTimeSpan(s.Length, s.Properties);
-            s.Mappings.Add(new TimeWarp {
+            s.Mappings.Add(new TimeWarp
+            {
                 From = new TimeSpan(length.Ticks / 2),
                 To = new TimeSpan(length.Ticks / 4)
             });
-            s.Mappings.Add(new TimeWarp {
+            s.Mappings.Add(new TimeWarp
+            {
                 From = length,
                 To = new TimeSpan(length.Ticks / 4 * 2)
             });
@@ -226,8 +244,10 @@ namespace Aurio.UnitTest {
             Assert.AreEqual(0, s.Position);
             bool positionSet = false;
             int count = 0;
-            while (s.Read(buffer, 0, buffer.Length) > 0) {
-                if (++count == 5) {
+            while (s.Read(buffer, 0, buffer.Length) > 0)
+            {
+                if (++count == 5)
+                {
                     positionSet = true;
                     long posBefore = s.Position;
                     //long sourcePosBefore = s.SourceStream.Position - s.BufferedBytes;

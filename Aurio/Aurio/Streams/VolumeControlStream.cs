@@ -22,15 +22,19 @@ using System.Linq;
 using System.Text;
 using NAudio.Wave;
 
-namespace Aurio.Streams {
-    public class VolumeControlStream : AbstractAudioStreamWrapper {
+namespace Aurio.Streams
+{
+    public class VolumeControlStream : AbstractAudioStreamWrapper
+    {
 
         public const float DefaultVolume = 1.0f;
         public const float DefaultBalance = 0.0f;
 
         public VolumeControlStream(IAudioStream sourceStream)
-            : base(sourceStream) {
-            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32)) {
+            : base(sourceStream)
+        {
+            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32))
+            {
                 throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
             }
 
@@ -54,32 +58,42 @@ namespace Aurio.Streams {
         /// </summary>
         public bool Mute { get; set; }
 
-        public override int Read(byte[] buffer, int offset, int count) {
+        public override int Read(byte[] buffer, int offset, int count)
+        {
             int bytesRead = sourceStream.Read(buffer, offset, count);
 
-            if (bytesRead > 0) {
+            if (bytesRead > 0)
+            {
                 bool mute = Mute;
                 float balance = Balance;
                 float volume = Volume;
 
-                if (mute) {
+                if (mute)
+                {
                     // in mute mode, just set the samples to zero (-inf dB).
                     Array.Clear(buffer, offset, bytesRead);
                 }
-                else if (volume != DefaultVolume || balance != DefaultBalance) {
-                    unsafe {
-                        fixed (byte* sampleBuffer = &buffer[offset]) {
+                else if (volume != DefaultVolume || balance != DefaultBalance)
+                {
+                    unsafe
+                    {
+                        fixed (byte* sampleBuffer = &buffer[offset])
+                        {
                             float* samples = (float*)sampleBuffer;
 
-                            for (int x = 0; x < bytesRead / 4; x += 2) {
+                            for (int x = 0; x < bytesRead / 4; x += 2)
+                            {
                                 // adjust balance
-                                if (balance != 0) {
+                                if (balance != 0)
+                                {
                                     // left channel
-                                    if (balance > 0) {
+                                    if (balance > 0)
+                                    {
                                         samples[x] *= 1 - balance;
                                     }
                                     // right channel
-                                    else {
+                                    else
+                                    {
                                         samples[x + 1] *= 1 + balance;
                                     }
                                 }

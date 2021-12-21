@@ -22,7 +22,8 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace Aurio.FFTW {
+namespace Aurio.FFTW
+{
     // taken from: http://www.sdss.jhu.edu/~tamas/bytes/fftwcsharp.html (no license applied)
 
     // FFTW Interop Classes
@@ -30,7 +31,8 @@ namespace Aurio.FFTW {
     /// <summary>
     /// Contains the Basic Interface FFTW functions for single-precision (float) operations
     /// </summary>
-    public class fftwf64 {
+    public class fftwf64
+    {
 
         private const string FFTWLIB = "libfftw3f-3.x64.dll";
         private const CallingConvention CALLINGCONVENTION = CallingConvention.Cdecl;

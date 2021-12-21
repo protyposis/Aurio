@@ -22,52 +22,64 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Streams {
+namespace Aurio.Streams
+{
 
     /// <summary>
     /// A stream sourced from a <see cref="System.IO.MemoryStream"/>, which can also wrap a raw byte buffer.
     /// </summary>
-    public class MemorySourceStream : IAudioStream {
+    public class MemorySourceStream : IAudioStream
+    {
 
         protected MemoryStream source;
         protected AudioProperties properties;
 
-        public MemorySourceStream(MemoryStream source, AudioProperties properties) {
+        public MemorySourceStream(MemoryStream source, AudioProperties properties)
+        {
             this.source = source;
             this.properties = properties;
         }
 
-        public AudioProperties Properties {
+        public AudioProperties Properties
+        {
             get { return properties; }
         }
 
-        public virtual long Length {
+        public virtual long Length
+        {
             get { return source.Length; }
         }
 
-        public virtual long Position {
+        public virtual long Position
+        {
             get { return source.Position; }
             set { source.Position = value; }
         }
 
-        public int SampleBlockSize {
+        public int SampleBlockSize
+        {
             get { return properties.SampleBlockByteSize; }
         }
 
-        public virtual int Read(byte[] buffer, int offset, int count) {
+        public virtual int Read(byte[] buffer, int offset, int count)
+        {
             return source.Read(buffer, offset, count);
         }
 
-        public void Close() {
+        public void Close()
+        {
             source.Close();
         }
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     Close();
                 }
 
@@ -75,7 +87,8 @@ namespace Aurio.Streams {
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
         }
         #endregion

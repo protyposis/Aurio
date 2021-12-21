@@ -21,9 +21,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.Wang2003 {
-    class DefaultProfile : Profile {
-        public DefaultProfile() {
+namespace Aurio.Matching.Wang2003
+{
+    class DefaultProfile : Profile
+    {
+        public DefaultProfile()
+        {
             Name = "Wang03 guessed default";
 
             SamplingRate = 11025;
@@ -41,13 +44,15 @@ namespace Aurio.Matching.Wang2003 {
             MatchingMinFrames = 10;
             MatchingMaxFrames = (int)(framesPerSecond * 30);
 
-            var threshold = new ExponentialDecayThreshold {
+            var threshold = new ExponentialDecayThreshold
+            {
                 Base = 0.5,
                 WidthScale = 2,
                 Height = 0.3
             };
             ThresholdAccept = threshold;
-            ThresholdReject = new ExponentialDecayThreshold {
+            ThresholdReject = new ExponentialDecayThreshold
+            {
                 Base = threshold.Base,
                 WidthScale = threshold.WidthScale,
                 Height = threshold.Height / 6

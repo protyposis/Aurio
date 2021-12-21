@@ -21,16 +21,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.Wang2003 {
+namespace Aurio.Matching.Wang2003
+{
     /// <summary>
     ///  The basic configuration profile for the Wang fingerprinting algorithm.
     ///  
     ///  This profile contains settings for configuring fingerprint generation
     ///  and lookup.
     /// </summary>
-    public abstract class Profile : IProfile {
+    public abstract class Profile : IProfile
+    {
 
-        public interface IThreshold {
+        public interface IThreshold
+        {
             /// <summary>
             /// Returns, for a given x (time), a threshold value in the range of [0,1].
             /// </summary>
@@ -42,12 +45,14 @@ namespace Aurio.Matching.Wang2003 {
         /// <summary>
         /// An exponentially decaying threshold in the form of y=b^x.
         /// </summary>
-        public class ExponentialDecayThreshold : IThreshold {
+        public class ExponentialDecayThreshold : IThreshold
+        {
             public double Base { get; set; }
             public double WidthScale { get; set; }
             public double Height { get; set; }
 
-            public double Calculate(double x) {
+            public double Calculate(double x)
+            {
                 return Math.Pow(Base, x / WidthScale) * Height;
             }
         }

@@ -29,17 +29,20 @@ using System.Threading;
 using Aurio.DataStructures;
 using Aurio.DataStructures.Matrix;
 
-namespace Aurio.Matching.Dixon2005 {
+namespace Aurio.Matching.Dixon2005
+{
     /// <summary>
     /// On-line Time Warping
     /// - Dixon, Simon. "An On-Line Time Warping Algorithm for Tracking Musical Performances." IJCAI. 2005.
     /// - Dixon, Simon, and Gerhard Widmer. "MATCH: A Music Alignment Tool Chest." ISMIR. 2005.
     /// </summary>
-    public class OLTW : DTW {
+    public class OLTW : DTW
+    {
 
         private const int MAX_RUN_COUNT = 3; // MaxRunCount
 
-        private enum GetIncResult {
+        private enum GetIncResult
+        {
             None = 0,
             Row,
             Column,
@@ -61,15 +64,18 @@ namespace Aurio.Matching.Dixon2005 {
         private int c;
 
         public OLTW(TimeSpan searchWidth, ProgressMonitor progressMonitor)
-            : base(searchWidth, progressMonitor) {
+            : base(searchWidth, progressMonitor)
+        {
         }
 
         public OLTW(ProgressMonitor progressMonitor)
-            : this(new TimeSpan(0, 0, 10), progressMonitor) {
+            : this(new TimeSpan(0, 0, 10), progressMonitor)
+        {
             // default contructor with default search width (500) like specified in the paper
         }
 
-        public override List<Tuple<TimeSpan, TimeSpan>> Execute(IAudioStream s1, IAudioStream s2) {
+        public override List<Tuple<TimeSpan, TimeSpan>> Execute(IAudioStream s1, IAudioStream s2)
+        {
             s1 = PrepareStream(s1);
             s2 = PrepareStream(s2);
 
@@ -83,8 +89,10 @@ namespace Aurio.Matching.Dixon2005 {
 
             stream1FrameQueue = new BlockingCollection<float[]>(20);
             FrameReader stream1FrameReader = new FrameReader(s1);
-            Task.Factory.StartNew(() => {
-                while (stream1FrameReader.HasNext()) {
+            Task.Factory.StartNew(() =>
+            {
+                while (stream1FrameReader.HasNext())
+                {
                     float[] frame = new float[FrameReader.FRAME_SIZE];
                     stream1FrameReader.ReadFrame(frame);
                     Thread.Sleep(20);
@@ -95,8 +103,10 @@ namespace Aurio.Matching.Dixon2005 {
 
             stream2FrameQueue = new BlockingCollection<float[]>(20);
             FrameReader stream2FrameReader = new FrameReader(s2);
-            Task.Factory.StartNew(() => {
-                while (stream2FrameReader.HasNext()) {
+            Task.Factory.StartNew(() =>
+            {
+                while (stream2FrameReader.HasNext())
+                {
                     float[] frame = new float[FrameReader.FRAME_SIZE];
                     stream2FrameReader.ReadFrame(frame);
                     Thread.Sleep(20);
@@ -125,31 +135,41 @@ namespace Aurio.Matching.Dixon2005 {
 
             FireOltwInit(c, cellCostMatrix, totalCostMatrix);
 
-            while (rb1FrameCount + rb2FrameCount < totalFrames) {
+            while (rb1FrameCount + rb2FrameCount < totalFrames)
+            {
                 GetIncResult getInc = GetInc(t, j);
-                if (t < stream1FrameReader.WindowCount && getInc != GetIncResult.Column) {
+                if (t < stream1FrameReader.WindowCount && getInc != GetIncResult.Column)
+                {
                     t++;
-                    for (int k = j - c + 1; k <= j; k++) {
-                        if (k > 0) {
+                    for (int k = j - c + 1; k <= j; k++)
+                    {
+                        if (k > 0)
+                        {
                             EvaluatePathCost(t, k);
                         }
                     }
                 }
-                if (j < stream2FrameReader.WindowCount && getInc != GetIncResult.Row) {
+                if (j < stream2FrameReader.WindowCount && getInc != GetIncResult.Row)
+                {
                     j++;
-                    for (int k = t - c + 1; k <= t; k++) {
-                        if (k > 0) {
+                    for (int k = t - c + 1; k <= t; k++)
+                    {
+                        if (k > 0)
+                        {
                             EvaluatePathCost(k, j);
                         }
                     }
                 }
-                if (getInc == previous) {
+                if (getInc == previous)
+                {
                     runCount++;
                 }
-                else {
+                else
+                {
                     runCount = 1;
                 }
-                if (getInc != GetIncResult.Both) {
+                if (getInc != GetIncResult.Both)
+                {
                     previous = getInc;
                 }
 
@@ -175,11 +195,13 @@ namespace Aurio.Matching.Dixon2005 {
             path.Reverse();
 
             List<Tuple<TimeSpan, TimeSpan>> pathTimes = new List<Tuple<TimeSpan, TimeSpan>>();
-            foreach (Pair pair in path) {
+            foreach (Pair pair in path)
+            {
                 Tuple<TimeSpan, TimeSpan> timePair = new Tuple<TimeSpan, TimeSpan>(
                     PositionToTimeSpan(pair.i1 * FrameReader.WINDOW_HOP_SIZE),
                     PositionToTimeSpan(pair.i2 * FrameReader.WINDOW_HOP_SIZE));
-                if (timePair.Item1 >= TimeSpan.Zero && timePair.Item2 >= TimeSpan.Zero) {
+                if (timePair.Item1 >= TimeSpan.Zero && timePair.Item2 >= TimeSpan.Zero)
+                {
                     pathTimes.Add(timePair);
                 }
             }
@@ -187,11 +209,15 @@ namespace Aurio.Matching.Dixon2005 {
             return pathTimes;
         }
 
-        private void EvaluatePathCost(int t1, int t2) {
-            if (rb1FrameCount < t1) {
+        private void EvaluatePathCost(int t1, int t2)
+        {
+            if (rb1FrameCount < t1)
+            {
                 // read frames until position t
-                for (; rb1FrameCount < t1; rb1FrameCount++) {
-                    if (stream1FrameQueue.IsCompleted) {
+                for (; rb1FrameCount < t1; rb1FrameCount++)
+                {
+                    if (stream1FrameQueue.IsCompleted)
+                    {
                         rb1FrameCount--;
                         break;
                     }
@@ -199,10 +225,13 @@ namespace Aurio.Matching.Dixon2005 {
                 }
             }
 
-            if (rb2FrameCount < t2) {
+            if (rb2FrameCount < t2)
+            {
                 // read frames until position k
-                for (; rb2FrameCount < t2; rb2FrameCount++) {
-                    if (stream2FrameQueue.IsCompleted) {
+                for (; rb2FrameCount < t2; rb2FrameCount++)
+                {
+                    if (stream2FrameQueue.IsCompleted)
+                    {
                         rb2FrameCount--;
                         break;
                     }
@@ -210,10 +239,12 @@ namespace Aurio.Matching.Dixon2005 {
                 }
             }
 
-            if (t1 < rb1FrameCount - rb1.Count) {
+            if (t1 < rb1FrameCount - rb1.Count)
+            {
                 throw new Exception("required frame is not in the buffer any more");
             }
-            if (t2 < rb2FrameCount - rb2.Count) {
+            if (t2 < rb2FrameCount - rb2.Count)
+            {
                 throw new Exception("required frame is not in the buffer any more");
             }
 
@@ -229,17 +260,22 @@ namespace Aurio.Matching.Dixon2005 {
             //Debug.WriteLine("cost " + t1 + "/" + t2 + ": " + matrix[t1, t2]);
         }
 
-        private GetIncResult GetInc(int t, int j) {
+        private GetIncResult GetInc(int t, int j)
+        {
             // for the first c steps just proceed diagonally and build a square matrix
-            if (t < c) {
+            if (t < c)
+            {
                 return GetIncResult.Both;
             }
 
-            if (runCount >= MAX_RUN_COUNT) { // ERROR in paper: ">" results in 4 similar runs in a row instead of 3
-                if (previous == GetIncResult.Row) {
+            if (runCount >= MAX_RUN_COUNT)
+            { // ERROR in paper: ">" results in 4 similar runs in a row instead of 3
+                if (previous == GetIncResult.Row)
+                {
                     return GetIncResult.Column;
                 }
-                else if(previous == GetIncResult.Column) {
+                else if (previous == GetIncResult.Column)
+                {
                     return GetIncResult.Row;
                 }
             }
@@ -252,23 +288,29 @@ namespace Aurio.Matching.Dixon2005 {
 
             // NOTE the following block is taken from: Dixon / Live Tracking of Musical...
             //      and has been enhanced with the minVal* comparisons since since it would otherwise wrongly prefer columns
-            if (minValX < minValY && x < t) {
+            if (minValX < minValY && x < t)
+            {
                 return GetIncResult.Column;
             }
-            else if (minValY < minValX && y < j) {
+            else if (minValY < minValX && y < j)
+            {
                 return GetIncResult.Row;
             }
-            else {
+            else
+            {
                 return GetIncResult.Both;
             }
         }
 
-        private int ArgminRow(int row, int col, out double minVal) {
+        private int ArgminRow(int row, int col, out double minVal)
+        {
             minVal = double.MaxValue;
             int minIndex = 0;
-            for (int i = Math.Max(row - c, 1); i <= row; i++) {
+            for (int i = Math.Max(row - c, 1); i <= row; i++)
+            {
                 double val = totalCostMatrix[i, col];
-                if (val < minVal) {
+                if (val < minVal)
+                {
                     minVal = val;
                     minIndex = i;
                 }
@@ -276,12 +318,15 @@ namespace Aurio.Matching.Dixon2005 {
             return minIndex;
         }
 
-        private int ArgminCol(int row, int col, out double minVal) {
+        private int ArgminCol(int row, int col, out double minVal)
+        {
             minVal = double.MaxValue;
             int minIndex = 0;
-            for (int i = Math.Max(col - c, 1); i <= col; i++) {
+            for (int i = Math.Max(col - c, 1); i <= col; i++)
+            {
                 double val = totalCostMatrix[row, i];
-                if (val < minVal) {
+                if (val < minVal)
+                {
                     minVal = val;
                     minIndex = i;
                 }
@@ -289,9 +334,12 @@ namespace Aurio.Matching.Dixon2005 {
             return minIndex;
         }
 
-        private void DebugPrintMatrix(int size) {
-            for (int i = 0; i < Math.Min(size, totalCostMatrix.LengthX); i++) {
-                for (int j = 0; j < Math.Min(size, totalCostMatrix.LengthY); j++) {
+        private void DebugPrintMatrix(int size)
+        {
+            for (int i = 0; i < Math.Min(size, totalCostMatrix.LengthX); i++)
+            {
+                for (int j = 0; j < Math.Min(size, totalCostMatrix.LengthY); j++)
+                {
                     Debug.Write(String.Format("{0:00000.00} ", totalCostMatrix[i, j]));
                 }
                 Debug.WriteLine("");

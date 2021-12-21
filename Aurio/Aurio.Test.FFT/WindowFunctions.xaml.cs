@@ -13,28 +13,35 @@ using System.Windows.Shapes;
 using Aurio;
 using System.Diagnostics;
 
-namespace Aurio.Test.FFT {
+namespace Aurio.Test.FFT
+{
     /// <summary>
     /// Interaction logic for WindowFunctions.xaml
     /// </summary>
-    public partial class WindowFunctions : Window {
-        public WindowFunctions() {
+    public partial class WindowFunctions : Window
+    {
+        public WindowFunctions()
+        {
             InitializeComponent();
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e) {
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
             sampleCountSlider.Value = 256;
         }
 
-        private void PrintArrayToDebugOutput(float[] array) {
+        private void PrintArrayToDebugOutput(float[] array)
+        {
             string s = "";
-            for (int x = 0; x < array.Length; x++) {
+            for (int x = 0; x < array.Length; x++)
+            {
                 s += array[x] + " ";
             }
             Debug.WriteLine(s);
         }
 
-        private void Refresh(int sampleCount) {
+        private void Refresh(int sampleCount)
+        {
             float[] samples = new float[sampleCount];
             samples = samples.Select(sample => 1f).ToArray();
 
@@ -82,7 +89,8 @@ namespace Aurio.Test.FFT {
             //PrintArrayToDebugOutput(samplesBlackmanNuttall);
         }
 
-        private void sampleCountSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+        private void sampleCountSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
             if (!IsLoaded)
                 return;
 

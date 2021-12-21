@@ -21,8 +21,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.TaskMonitor {
-    public interface IProgressReporter {
+namespace Aurio.TaskMonitor
+{
+    public interface IProgressReporter
+    {
         string Name { get; }
         bool IsProgressReporting { get; }
         double Progress { get; }

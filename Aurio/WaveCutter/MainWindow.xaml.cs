@@ -18,16 +18,20 @@ using Aurio;
 using System.Diagnostics;
 using System.IO;
 
-namespace WaveCutter {
+namespace WaveCutter
+{
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window {
+    public partial class MainWindow : Window
+    {
 
         private BackgroundWorker bw;
 
-        public MainWindow() {
-            Parameters = new Parameters {
+        public MainWindow()
+        {
+            Parameters = new Parameters
+            {
                 MinLength = 180,
                 MaxLength = 600,
                 SourceFiles = new ObservableCollection<FileInfo>()
@@ -38,19 +42,23 @@ namespace WaveCutter {
 
         public Parameters Parameters { get; set; }
 
-        private void openFileButton_Click(object sender, RoutedEventArgs e) {
+        private void openFileButton_Click(object sender, RoutedEventArgs e)
+        {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.DefaultExt = ".wav";
             dlg.Filter = "Wave files|*.wav";
             dlg.Multiselect = true;
 
-            if (dlg.ShowDialog() == true) {
+            if (dlg.ShowDialog() == true)
+            {
                 dlg.FileNames.ToList().ForEach(f => Parameters.SourceFiles.Add(new FileInfo(f)));
             }
         }
 
-        private void executeButton_Click(object sender, RoutedEventArgs e) {
-            if (Parameters.SourceFiles.Count > 0) {
+        private void executeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (Parameters.SourceFiles.Count > 0)
+            {
                 bw = new BackgroundWorker();
                 bw.WorkerReportsProgress = true;
                 bw.WorkerSupportsCancellation = true;
@@ -65,7 +73,8 @@ namespace WaveCutter {
             }
         }
 
-        private void bw_DoWork(object sender, DoWorkEventArgs e) {
+        private void bw_DoWork(object sender, DoWorkEventArgs e)
+        {
             BackgroundWorker worker = sender as BackgroundWorker;
             Parameters parameters = (Parameters)e.Argument;
 
@@ -81,7 +90,8 @@ namespace WaveCutter {
             int partCount = 0;
             Random random = new Random();
             CropStream cropStream = new CropStream(sourceStream, 0, 0);
-            while(sourceStream.Position < sourceStream.Length) {
+            while (sourceStream.Position < sourceStream.Length)
+            {
                 partCount++;
                 int length = random.Next(parameters.MinLength, parameters.MaxLength); // length in seconds of the current part to write
                 long byteLength = TimeUtil.TimeSpanToBytes(new TimeSpan(TimeUtil.SECS_TO_TICKS * length), cropStream.Properties);
@@ -94,7 +104,8 @@ namespace WaveCutter {
                 Debug.WriteLine("after : " + cropStream.Begin + " / " + cropStream.End + " / " + cropStream.Position + " / " + sourceStream.Position);
                 AudioStreamFactory.WriteToFile(cropStream, String.Format("{0}.part{1:000}{2}", targetFileNamePrefix, partCount, targetFileNameSuffix));
 
-                if (worker.CancellationPending) {
+                if (worker.CancellationPending)
+                {
                     e.Cancel = true;
                     Debug.WriteLine("canceled");
                     return;
@@ -104,18 +115,21 @@ namespace WaveCutter {
             Debug.WriteLine("finished");
         }
 
-        private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+        private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
             openFileButton.IsEnabled = true;
             cancelButton.IsEnabled = false;
             progressBar1.Value = 0;
             Parameters.SourceFiles.Clear();
         }
 
-        private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e) {
+        private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
             progressBar1.Value = e.ProgressPercentage;
         }
 
-        private void cancelButton_Click(object sender, RoutedEventArgs e) {
+        private void cancelButton_Click(object sender, RoutedEventArgs e)
+        {
             bw.CancelAsync();
         }
     }

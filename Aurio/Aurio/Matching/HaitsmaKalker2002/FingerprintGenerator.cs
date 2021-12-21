@@ -28,12 +28,14 @@ using System.Runtime.InteropServices;
 using Aurio.Features;
 using Aurio.Resampler;
 
-namespace Aurio.Matching.HaitsmaKalker2002 {
+namespace Aurio.Matching.HaitsmaKalker2002
+{
     /// <summary>
     /// Generates fingerprints according to what is described in:
     /// - Haitsma, Jaap, and Ton Kalker. "A highly robust audio fingerprinting system." ISMIR. 2002.
     /// </summary>
-    public class FingerprintGenerator {
+    public class FingerprintGenerator
+    {
 
         private const int STREAM_INPUT_BUFFER_SIZE = 32768;
 
@@ -47,7 +49,8 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
         public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
         public event EventHandler Completed;
 
-        public FingerprintGenerator(Profile profile, AudioTrack track, int eventInterval = 512, int bufferSize = StreamWindower.DEFAULT_STREAM_INPUT_BUFFER_SIZE) {
+        public FingerprintGenerator(Profile profile, AudioTrack track, int eventInterval = 512, int bufferSize = StreamWindower.DEFAULT_STREAM_INPUT_BUFFER_SIZE)
+        {
             this.inputTrack = track;
             this.profile = profile;
             this.flipWeakestBits = profile.FlipWeakestBits;
@@ -61,9 +64,10 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
         private float[] bands = new float[33];
         private float[] bandsPrev = new float[33];
 
-        public void Generate() {
-            IAudioStream audioStream = inputTrack.File ? 
-                inputTrack.CreateAudioStream(false) : 
+        public void Generate()
+        {
+            IAudioStream audioStream = inputTrack.File ?
+                inputTrack.CreateAudioStream(false) :
                 inputTrack.Stream;
 
             audioStream = new MonoStream(audioStream);
@@ -76,7 +80,8 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
             frameBuffer = new float[profile.FrameSize / 2];
             List<SubFingerprint> subFingerprints = new List<SubFingerprint>();
 
-            while (stft.HasNext()) {
+            while (stft.HasNext())
+            {
                 // Get FFT spectrum
                 stft.ReadFrame(frameBuffer);
 
@@ -89,30 +94,35 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
                 index++;
 
                 // Output subfingerprints every once in a while
-                if (index % this.eventInterval == 0 && SubFingerprintsGenerated != null) {
+                if (index % this.eventInterval == 0 && SubFingerprintsGenerated != null)
+                {
                     SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, subFingerprints, index, indices));
                     subFingerprints.Clear();
                 }
             }
 
             // Output remaining subfingerprints
-            if (SubFingerprintsGenerated != null) {
+            if (SubFingerprintsGenerated != null)
+            {
                 SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, subFingerprints, index, indices));
             }
 
-            if (Completed != null) {
+            if (Completed != null)
+            {
                 Completed(this, EventArgs.Empty);
             }
 
             audioStream.Close();
         }
 
-        private void CalculateSubFingerprint(float[] energyBands, float[] previousEnergyBands, List<SubFingerprint> list) {
+        private void CalculateSubFingerprint(float[] energyBands, float[] previousEnergyBands, List<SubFingerprint> list)
+        {
             SubFingerprintHash hash = new SubFingerprintHash();
             Dictionary<int, float> bitReliability = new Dictionary<int, float>();
             List<SubFingerprint> subFingerprints = new List<SubFingerprint>(1 + flipWeakestBits);
 
-            for (int m = 0; m < 32; m++) {
+            for (int m = 0; m < 32; m++)
+            {
                 float difference = energyBands[m] - energyBands[m + 1] - (previousEnergyBands[m] - previousEnergyBands[m + 1]);
                 hash[m] = difference > 0;
                 bitReliability.Add(m, difference > 0 ? difference : -difference); // take absolute value as reliability weight
@@ -120,15 +130,19 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
 
             list.Add(new SubFingerprint(index, hash, false));
 
-            if (flipWeakestBits > 0) {
+            if (flipWeakestBits > 0)
+            {
                 // calculate probable hashes by flipping the most unreliable bits (the bits with the least energy differences)
                 List<int> weakestBits = new List<int>(bitReliability.Keys.OrderBy(key => bitReliability[key]));
                 // generate hashes with all possible bit combinations flipped
                 int variations = 1 << flipWeakestBits;
-                for (int i = 1; i < variations; i++) { // start at 1 since i0 equals to the original hash
+                for (int i = 1; i < variations; i++)
+                { // start at 1 since i0 equals to the original hash
                     SubFingerprintHash flippedHash = new SubFingerprintHash(hash.Value);
-                    for (int j = 0; j < flipWeakestBits; j++) {
-                        if (((i >> j) & 1) == 1) {
+                    for (int j = 0; j < flipWeakestBits; j++)
+                    {
+                        if (((i >> j) & 1) == 1)
+                        {
                             flippedHash[weakestBits[j]] = !flippedHash[weakestBits[j]];
                         }
                     }
@@ -137,7 +151,8 @@ namespace Aurio.Matching.HaitsmaKalker2002 {
             }
         }
 
-        public static Profile[] GetProfiles() {
+        public static Profile[] GetProfiles()
+        {
             return new Profile[] { new DefaultProfile(), new BugProfile(), new VoiceProfile(), new BassProfile(), new HumanProfile() };
         }
     }

@@ -21,8 +21,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.Chromaprint {
-    class Filter {
+namespace Aurio.Matching.Chromaprint
+{
+    class Filter
+    {
 
         private delegate double FilterFunctionDelegate(IntegralImage i, int x, int y, int w, int h);
 
@@ -31,8 +33,10 @@ namespace Aurio.Matching.Chromaprint {
         private int width;
         private int height;
 
-        public Filter(int type, int y, int width, int height) {
-            switch (type) {
+        public Filter(int type, int y, int width, int height)
+        {
+            switch (type)
+            {
                 case 0: FilterFunction = Filter0; break;
                 case 1: FilterFunction = Filter1; break;
                 case 2: FilterFunction = Filter2; break;
@@ -48,19 +52,23 @@ namespace Aurio.Matching.Chromaprint {
             this.height = height;
         }
 
-        public int Width {
+        public int Width
+        {
             get { return width; }
         }
 
-        public int Height {
+        public int Height
+        {
             get { return height; }
         }
 
-        public double Apply(IntegralImage image, int x) {
+        public double Apply(IntegralImage image, int x)
+        {
             return FilterFunction(image, x, y, width, height);
         }
 
-        private double Subtract(double a, double b) {
+        private double Subtract(double a, double b)
+        {
             return Math.Log(1.0 + a) - Math.Log(1.0 + b);
         }
 
@@ -70,7 +78,8 @@ namespace Aurio.Matching.Chromaprint {
         /// xxxxxxxx
         /// xxxxxxxx
         /// </summary>
-        private double Filter0(IntegralImage i, int x, int y, int w, int h) {
+        private double Filter0(IntegralImage i, int x, int y, int w, int h)
+        {
             double a = i.CalculateArea(x, y, x + w - 1, y + h - 1);
             double b = 0;
             return Subtract(a, b);
@@ -82,7 +91,8 @@ namespace Aurio.Matching.Chromaprint {
         /// xxxxxxxx
         /// xxxxxxxx
         /// </summary>
-        private double Filter1(IntegralImage i, int x, int y, int w, int h) {
+        private double Filter1(IntegralImage i, int x, int y, int w, int h)
+        {
             int halfH = h / 2;
             double a = i.CalculateArea(x, y + halfH, x + w - 1, y + h - 1);
             double b = i.CalculateArea(x, y, x + w - 1, y + halfH - 1);
@@ -95,7 +105,8 @@ namespace Aurio.Matching.Chromaprint {
         /// ....xxxx
         /// ....xxxx
         /// </summary>
-        private double Filter2(IntegralImage i, int x, int y, int w, int h) {
+        private double Filter2(IntegralImage i, int x, int y, int w, int h)
+        {
             int halfW = w / 2;
             double a = i.CalculateArea(x + halfW, y, x + w - 1, y + h - 1);
             double b = i.CalculateArea(x, y, x + halfW - 1, y + h - 1);
@@ -108,12 +119,13 @@ namespace Aurio.Matching.Chromaprint {
         /// xxxx....
         /// xxxx....
         /// </summary>
-        private double Filter3(IntegralImage i, int x, int y, int w, int h) {
+        private double Filter3(IntegralImage i, int x, int y, int w, int h)
+        {
             int halfW = w / 2;
             int halfH = h / 2;
-            double a = i.CalculateArea(x, y + halfH, x + halfW - 1, y + h - 1) + 
+            double a = i.CalculateArea(x, y + halfH, x + halfW - 1, y + h - 1) +
                 i.CalculateArea(x + halfW, y, x + w - 1, y + halfH - 1);
-            double b = i.CalculateArea(x, y, x + halfW - 1, y + halfH - 1) + 
+            double b = i.CalculateArea(x, y, x + halfW - 1, y + halfH - 1) +
                 i.CalculateArea(x + halfW, y + halfH, x + w - 1, y + h - 1);
             return Subtract(a, b);
         }
@@ -123,10 +135,11 @@ namespace Aurio.Matching.Chromaprint {
         /// xxxxxxxx
         /// ........
         /// </summary>
-        private double Filter4(IntegralImage i, int x, int y, int w, int h) {
+        private double Filter4(IntegralImage i, int x, int y, int w, int h)
+        {
             int thirdH = h / 3;
             double a = i.CalculateArea(x, y + thirdH, x + w - 1, y + 2 * thirdH - 1);
-            double b = i.CalculateArea(x, y, x + w - 1, y + thirdH - 1) + 
+            double b = i.CalculateArea(x, y, x + w - 1, y + thirdH - 1) +
                 i.CalculateArea(x, y + 2 * thirdH, x + w - 1, y + h - 1);
             return Subtract(a, b);
         }
@@ -136,10 +149,11 @@ namespace Aurio.Matching.Chromaprint {
         /// ...xxx...
         /// ...xxx...
         /// <summary>
-        private double Filter5(IntegralImage i, int x, int y, int w, int h) {
+        private double Filter5(IntegralImage i, int x, int y, int w, int h)
+        {
             int thirdW = w / 3;
             double a = i.CalculateArea(x + thirdW, y, x + 2 * thirdW - 1, y + h - 1);
-            double b = i.CalculateArea(x, y, x + thirdW - 1, y + h - 1) + 
+            double b = i.CalculateArea(x, y, x + thirdW - 1, y + h - 1) +
                 i.CalculateArea(x + 2 * thirdW, y, x + w - 1, y + h - 1);
             return Subtract(a, b);
         }

@@ -22,28 +22,35 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 
-namespace Aurio.WaveControls {
-    public class ColorGradient {
+namespace Aurio.WaveControls
+{
+    public class ColorGradient
+    {
 
-        public class Stop {
+        public class Stop
+        {
 
             private Color color;
             private double offset;
 
-            public Stop(Color color, double offset) {
+            public Stop(Color color, double offset)
+            {
                 this.color = color;
                 this.offset = offset;
             }
 
-            public Color Color {
+            public Color Color
+            {
                 get { return color; }
             }
 
-            public double Offset {
+            public double Offset
+            {
                 get { return offset; }
             }
 
-            public override string ToString() {
+            public override string ToString()
+            {
                 return "GradientStop{color=" + color + ";offset=" + offset + "}";
             }
         }
@@ -52,8 +59,10 @@ namespace Aurio.WaveControls {
         private double end;
         private List<Stop> stops;
 
-        public ColorGradient(double start, double end) {
-            if (start > end) {
+        public ColorGradient(double start, double end)
+        {
+            if (start > end)
+            {
                 throw new ArgumentException("start must be <= end");
             }
             this.start = start;
@@ -61,46 +70,58 @@ namespace Aurio.WaveControls {
             this.stops = new List<Stop>();
         }
 
-        public double Start {
+        public double Start
+        {
             get { return start; }
         }
 
-        public double End {
+        public double End
+        {
             get { return end; }
         }
 
-        public void AddStop(Color color, double offset) {
+        public void AddStop(Color color, double offset)
+        {
             stops.Add(new Stop(color, offset));
             stops.Sort((s1, s2) => s1.Offset == s2.Offset ? 0 : (s1.Offset > s2.Offset ? 1 : -1));
         }
 
-        public Color GetColor(double offset) {
-            if (offset < start || offset > end) {
+        public Color GetColor(double offset)
+        {
+            if (offset < start || offset > end)
+            {
                 throw new ArgumentException("offset is not within the gradient's bounds");
             }
-            if (stops.Count == 0) {
+            if (stops.Count == 0)
+            {
                 throw new Exception("no stops defined");
             }
 
             Stop s1 = null;
             Stop s2 = null;
 
-            for (int x = 0; x < stops.Count; x++) {
-                if (x == 0) {
+            for (int x = 0; x < stops.Count; x++)
+            {
+                if (x == 0)
+                {
                     s1 = stops[x];
                     s2 = stops[x];
-                    if (offset <= s2.Offset) {
+                    if (offset <= s2.Offset)
+                    {
                         break;
                     }
                 }
-                else if (x == stops.Count - 1) {
+                else if (x == stops.Count - 1)
+                {
                     s1 = stops[x];
                     s2 = stops[x];
-                    if (offset >= s1.Offset) {
+                    if (offset >= s1.Offset)
+                    {
                         break;
                     }
                 }
-                if (offset >= stops[x].Offset && offset < stops[x + 1].Offset) {
+                if (offset >= stops[x].Offset && offset < stops[x + 1].Offset)
+                {
                     s1 = stops[x];
                     s2 = stops[x + 1];
                     break;
@@ -110,14 +131,17 @@ namespace Aurio.WaveControls {
             return Interpolate(s1.Color, s2.Color, s2.Offset == s1.Offset ? 0 : (offset - s1.Offset) / (s2.Offset - s1.Offset));
         }
 
-        public IEnumerable<Color> GetGradient(int steps) {
+        public IEnumerable<Color> GetGradient(int steps)
+        {
             double factor = (end - start) / (steps - 1);
-            for (int x = 0; x < steps; x++) {
+            for (int x = 0; x < steps; x++)
+            {
                 yield return GetColor(factor * x);
             }
         }
 
-        public int[] GetGradientArgbArray(int steps) {
+        public int[] GetGradientArgbArray(int steps)
+        {
             return GetGradient(steps).Select(c => ColorGradient.ColorToArgb(c)).ToArray();
         }
 
@@ -131,8 +155,10 @@ namespace Aurio.WaveControls {
         /// <param name="c2">the second color</param>
         /// <param name="ratio">the mixing ration</param>
         /// <returns>a color mixed of both input colors according to the ratio</returns>
-        public static Color Interpolate(Color c1, Color c2, double ratio) {
-            if(ratio < 0 || ratio > 1) {
+        public static Color Interpolate(Color c1, Color c2, double ratio)
+        {
+            if (ratio < 0 || ratio > 1)
+            {
                 throw new ArgumentException("ratio must be between 0 and 1");
             }
             double r1 = 1 - ratio;
@@ -144,11 +170,13 @@ namespace Aurio.WaveControls {
                 (byte)Math.Round(c1.B * r1 + c2.B * r2));
         }
 
-        public static int ColorToArgb(Color c) {
+        public static int ColorToArgb(Color c)
+        {
             return c.A << 24 | c.R << 16 | c.G << 8 | c.B;
         }
 
-        public static Color SetAlpha(Color c, byte alpha) {
+        public static Color SetAlpha(Color c, byte alpha)
+        {
             c.A = alpha;
             return c;
         }

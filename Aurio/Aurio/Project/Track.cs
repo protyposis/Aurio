@@ -24,8 +24,10 @@ using System.IO;
 using System.ComponentModel;
 using Aurio.Streams;
 
-namespace Aurio.Project {
-    public abstract class Track : INotifyPropertyChanged {
+namespace Aurio.Project
+{
+    public abstract class Track : INotifyPropertyChanged
+    {
 
         public static readonly string DEFAULT_COLOR = "#FF6495ED";
 
@@ -41,28 +43,34 @@ namespace Aurio.Project {
         private string color = DEFAULT_COLOR;
         private bool locked = false;
 
-        public Track(FileInfo[] fileInfos) {
-            if (fileInfos == null || fileInfos.Length == 0) {
+        public Track(FileInfo[] fileInfos)
+        {
+            if (fileInfos == null || fileInfos.Length == 0)
+            {
                 throw new ArgumentException("no file(s) specified");
             }
-            if (!fileInfos.All(fi => fi.Exists)) {
+            if (!fileInfos.All(fi => fi.Exists))
+            {
                 throw new ArgumentException("one or more files do not exist");
             }
-            
+
             this.FileInfos = fileInfos;
             this.Name = GenerateName();
         }
 
-        public Track(IAudioStream stream, string name) {
+        public Track(IAudioStream stream, string name)
+        {
             this.Stream = stream;
             this.Name = name;
         }
 
         protected Track() { }
 
-        protected string GenerateName() {
+        protected string GenerateName()
+        {
             string name = FileInfo.Name;
-            if(MultiFile) {
+            if (MultiFile)
+            {
                 // Add "+X" suffix to signal that this track consists of multiple concatenated files
                 name += "+" + (FileInfos.Length - 1);
             }
@@ -73,17 +81,20 @@ namespace Aurio.Project {
 
         public abstract MediaType MediaType { get; }
 
-        public TimeSpan Length {
+        public TimeSpan Length
+        {
             get { return length; }
             set { length = value; OnLengthChanged(); }
         }
 
-        public TimeSpan Offset {
+        public TimeSpan Offset
+        {
             get { return offset; }
             set { offset = value; OnOffsetChanged(); }
         }
 
-        public FileInfo FileInfo {
+        public FileInfo FileInfo
+        {
             get { return FileInfos[0]; }
         }
 
@@ -91,20 +102,24 @@ namespace Aurio.Project {
 
         public IAudioStream Stream { get; private set; }
 
-        public bool MultiFile {
+        public bool MultiFile
+        {
             get { return FileInfos.Length > 1; }
         }
 
-        public bool File {
+        public bool File
+        {
             get { return FileInfos != null && FileInfos.Length > 0; }
         }
 
-        public string Name {
+        public string Name
+        {
             get { return name; }
             set { name = value; OnNameChanged(); }
         }
 
-        public string Color {
+        public string Color
+        {
             get { return color; }
             set { color = value; OnColorChanged(); }
         }
@@ -112,8 +127,9 @@ namespace Aurio.Project {
         /// <summary>
         /// Gets or sets a value telling if this track is locked, which means it cannot be manipulated in the timeline (position change, etc...).
         /// </summary>
-        public bool Locked {
-            get { return locked; } 
+        public bool Locked
+        {
+            get { return locked; }
             set { locked = value; OnLockedChanged(); }
         }
 
@@ -121,50 +137,63 @@ namespace Aurio.Project {
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged(string name) {
-            if (PropertyChanged != null) {
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
             }
         }
 
         #endregion
 
-        private void OnLengthChanged() {
-            if (LengthChanged != null) {
+        private void OnLengthChanged()
+        {
+            if (LengthChanged != null)
+            {
                 LengthChanged(this, new ValueEventArgs<TimeSpan>(length));
             }
             OnPropertyChanged("Length");
         }
 
-        private void OnOffsetChanged() {
-            if (OffsetChanged != null) {
+        private void OnOffsetChanged()
+        {
+            if (OffsetChanged != null)
+            {
                 OffsetChanged(this, new ValueEventArgs<TimeSpan>(offset));
             }
             OnPropertyChanged("Offset");
         }
 
-        private void OnNameChanged() {
-            if (NameChanged != null) {
+        private void OnNameChanged()
+        {
+            if (NameChanged != null)
+            {
                 NameChanged(this, new ValueEventArgs<string>(name));
             }
             OnPropertyChanged("Name");
         }
 
-        private void OnColorChanged() {
-            if (ColorChanged != null) {
+        private void OnColorChanged()
+        {
+            if (ColorChanged != null)
+            {
                 ColorChanged(this, new ValueEventArgs<string>(color));
             }
             OnPropertyChanged("Color");
         }
 
-        private void OnLockedChanged() {
-            if (LockedChanged != null) {
+        private void OnLockedChanged()
+        {
+            if (LockedChanged != null)
+            {
                 LockedChanged(this, new ValueEventArgs<bool>(locked));
             }
             OnPropertyChanged("Locked");
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return "Track {" + GetHashCode() + " / " + name + " / " + length + " / " + offset + "}";
         }
     }

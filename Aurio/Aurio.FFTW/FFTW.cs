@@ -22,16 +22,21 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace Aurio.FFTW {
-    public class FFTW: IDisposable {
+namespace Aurio.FFTW
+{
+    public class FFTW : IDisposable
+    {
 
         private static IInteropWrapper interop;
 
-        static FFTW() {
-            if (Environment.Is64BitProcess) {
+        static FFTW()
+        {
+            if (Environment.Is64BitProcess)
+            {
                 interop = new Interop64Wrapper();
             }
-            else {
+            else
+            {
                 interop = new Interop32Wrapper();
             }
         }
@@ -41,36 +46,43 @@ namespace Aurio.FFTW {
         private GCHandle bufferHandle;
         private IntPtr plan;
 
-        public FFTW(int size) {
+        public FFTW(int size)
+        {
             this.size = size;
             buffer = new float[2 * (size / 2 + 1)]; // http://fftw.org/fftw3_doc/One_002dDimensional-DFTs-of-Real-Data.html
             bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
             IntPtr pBuffer = bufferHandle.AddrOfPinnedObject();
-            lock (interop) {
+            lock (interop)
+            {
                 plan = interop.dft_r2c_1d(size, pBuffer, pBuffer, fftw_flags.Estimate);
             }
         }
 
-        public void Execute(float[] bufferInPlace) {
+        public void Execute(float[] bufferInPlace)
+        {
             Array.Copy(bufferInPlace, this.buffer, bufferInPlace.Length);
             interop.execute(plan);
             Array.Copy(this.buffer, bufferInPlace, bufferInPlace.Length);
         }
 
-        public void Execute(float[] bufferIn, float[] bufferOut) {
+        public void Execute(float[] bufferIn, float[] bufferOut)
+        {
             Array.Copy(bufferIn, this.buffer, bufferIn.Length);
             interop.execute(plan);
             Array.Copy(this.buffer, bufferOut, bufferOut.Length);
         }
 
-        public void Dispose() {
-            if (plan != IntPtr.Zero) {
+        public void Dispose()
+        {
+            if (plan != IntPtr.Zero)
+            {
                 interop.destroy_plan(plan);
                 bufferHandle.Free();
             }
         }
 
-        ~FFTW() {
+        ~FFTW()
+        {
             Dispose();
         }
     }

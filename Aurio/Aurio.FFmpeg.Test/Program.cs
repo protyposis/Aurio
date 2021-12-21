@@ -9,10 +9,14 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Aurio.FFmpeg.Test {
-    class Program {
-        static void Main(string[] args) {
-            if (args.Length == 0) {
+namespace Aurio.FFmpeg.Test
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            if (args.Length == 0)
+            {
                 Console.WriteLine("usage: Aurio.FFmpeg.Test [options] filename");
                 Console.WriteLine("options:");
                 Console.WriteLine("  -a   decode audio to wav file (default setting)");
@@ -26,8 +30,10 @@ namespace Aurio.FFmpeg.Test {
             int videoFrameInterval = 1000;
             int i = 0;
 
-            for (; i < args.Length - 1; i++) {
-                switch (args[i]) {
+            for (; i < args.Length - 1; i++)
+            {
+                switch (args[i])
+                {
                     case "-a":
                         type = Type.Audio;
                         break;
@@ -42,15 +48,18 @@ namespace Aurio.FFmpeg.Test {
 
             string filename = args[i]; // last argument
 
-            if (type == Type.Audio) {
+            if (type == Type.Audio)
+            {
                 DecodeAudio(filename);
             }
-            else if(type == Type.Video) {
+            else if (type == Type.Video)
+            {
                 DecodeVideo(filename, videoFrameInterval);
             }
         }
 
-        private static void DecodeAudio(string filename) {
+        private static void DecodeAudio(string filename)
+        {
             FFmpegReader reader = new FFmpegReader(filename, Type.Audio);
 
             Console.WriteLine("length {0}, frame_size {1}, sample_rate {2}, sample_size {3}, channels {4}",
@@ -72,7 +81,8 @@ namespace Aurio.FFmpeg.Test {
             MemoryStream ms = new MemoryStream();
 
             // read full stream
-            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0) {
+            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0)
+            {
                 Console.WriteLine("read " + samplesRead + " @ " + timestamp);
 
                 // read samples into memory
@@ -84,7 +94,8 @@ namespace Aurio.FFmpeg.Test {
             reader.Seek(0, Type.Audio);
 
             // read again (output should be the same as above)
-            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0) {
+            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0)
+            {
                 Console.WriteLine("read " + samplesRead + " @ " + timestamp);
             }
 
@@ -102,7 +113,8 @@ namespace Aurio.FFmpeg.Test {
             WaveFileWriter.CreateWaveFile(filename + ".ffmpeg.wav", nAudioSink);
         }
 
-        private static void DecodeVideo(string filename, int videoFrameInterval) {
+        private static void DecodeVideo(string filename, int videoFrameInterval)
+        {
             FFmpegReader reader = new FFmpegReader(filename, Type.Video);
 
             Console.WriteLine("length {0}, frame_size {1}x{2}, frame_rate {3}, aspect_ratio {4}",
@@ -123,11 +135,13 @@ namespace Aurio.FFmpeg.Test {
             Bitmap rgbFrame = new Bitmap(reader.VideoOutputConfig.format.width, reader.VideoOutputConfig.format.height);
 
             // read full stream
-            while ((frameRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0) {
+            while ((frameRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0)
+            {
                 Console.WriteLine("read frame " + frameCount + " @ " + timestamp);
 
-                if(frameCount % videoFrameInterval == 0) {
-                    BitmapData rgbFrameData = rgbFrame.LockBits(new Rectangle(0, 0, rgbFrame.Width, rgbFrame.Height), 
+                if (frameCount % videoFrameInterval == 0)
+                {
+                    BitmapData rgbFrameData = rgbFrame.LockBits(new Rectangle(0, 0, rgbFrame.Width, rgbFrame.Height),
                         ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
                     Marshal.Copy(output_buffer, 0, rgbFrameData.Scan0, output_buffer_size);
                     rgbFrame.UnlockBits(rgbFrameData);

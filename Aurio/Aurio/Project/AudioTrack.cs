@@ -24,8 +24,10 @@ using System.IO;
 using Aurio.Streams;
 using System.Security.Cryptography;
 
-namespace Aurio.Project {
-    public class AudioTrack : Track {
+namespace Aurio.Project
+{
+    public class AudioTrack : Track
+    {
 
         public const string PEAKFILE_EXTENSION = ".aapeaks";
 
@@ -46,34 +48,42 @@ namespace Aurio.Project {
         private TimeWarpCollection timeWarps;
 
         public AudioTrack(FileInfo[] fileInfos, bool initialize, FileInfo[] proxyFileInfos = null)
-            : base(fileInfos) {
-                this.TimeWarps = new TimeWarpCollection();
-                ProxyFileInfos = proxyFileInfos ?? new FileInfo[] { };
-                if (initialize) {
-                    using (IAudioStream stream = AudioStreamFactory.FromFileInfo(FileInfo, ProxyFileInfos.Length > 0 ? ProxyFileInfo : null)) {
-                        sourceProperties = stream.Properties;
-                        if (MultiFile) {
-                            // For multi-file tracks, we need to get a concatenated stream of all files for the length
-                            InitializeLength();
-                        }
-                        else {
-                            // Single-file tracks can just reuse this stream to get the length
-                            InitializeLength(stream);
-                        }
+            : base(fileInfos)
+        {
+            this.TimeWarps = new TimeWarpCollection();
+            ProxyFileInfos = proxyFileInfos ?? new FileInfo[] { };
+            if (initialize)
+            {
+                using (IAudioStream stream = AudioStreamFactory.FromFileInfo(FileInfo, ProxyFileInfos.Length > 0 ? ProxyFileInfo : null))
+                {
+                    sourceProperties = stream.Properties;
+                    if (MultiFile)
+                    {
+                        // For multi-file tracks, we need to get a concatenated stream of all files for the length
+                        InitializeLength();
                     }
+                    else
+                    {
+                        // Single-file tracks can just reuse this stream to get the length
+                        InitializeLength(stream);
+                    }
+                }
             }
         }
 
         public AudioTrack(FileInfo fileInfo, bool initialize)
-            : this(new FileInfo[] { fileInfo }, initialize) {
+            : this(new FileInfo[] { fileInfo }, initialize)
+        {
         }
 
         public AudioTrack(FileInfo[] fileInfos)
-            : this(fileInfos, true) {
+            : this(fileInfos, true)
+        {
         }
 
         public AudioTrack(FileInfo fileInfo)
-            : this(new FileInfo[] { fileInfo }, true) {
+            : this(new FileInfo[] { fileInfo }, true)
+        {
         }
 
         public AudioTrack(FileInfo fileInfo, FileInfo proxyFileInfo)
@@ -81,11 +91,13 @@ namespace Aurio.Project {
         {
         }
 
-        public AudioTrack(IAudioStream stream, string name) : base(stream, name) {
+        public AudioTrack(IAudioStream stream, string name) : base(stream, name)
+        {
             sourceProperties = stream.Properties;
         }
 
-        protected AudioTrack(AudioProperties sourceProperties) {
+        protected AudioTrack(AudioProperties sourceProperties)
+        {
             this.sourceProperties = sourceProperties;
             this.TimeWarps = new TimeWarpCollection();
             FileInfos = new FileInfo[] { };
@@ -93,22 +105,29 @@ namespace Aurio.Project {
             Offline = true;
         }
 
-        public override MediaType MediaType {
+        public override MediaType MediaType
+        {
             get { return MediaType.Audio; }
         }
 
-        private void InitializeLength(IAudioStream audioStream = null) {
-            using (audioStream = audioStream ?? CreateAudioStream()) {
+        private void InitializeLength(IAudioStream audioStream = null)
+        {
+            using (audioStream = audioStream ?? CreateAudioStream())
+            {
                 Length = TimeUtil.BytesToTimeSpan(audioStream.Length, audioStream.Properties);
             }
         }
 
-        public virtual IAudioStream CreateAudioStream(bool warp = true) {
+        public virtual IAudioStream CreateAudioStream(bool warp = true)
+        {
             IAudioStream stream = null;
-            if(MultiFile) {
+            if (MultiFile)
+            {
                 var fileInfos = ProxyFileInfos.Select(fi => fi.Exists).Count() < ProxyFileInfos.Length ? FileInfos : ProxyFileInfos;
                 stream = new ConcatenationStream(fileInfos.Select(fi => AudioStreamFactory.FromFileInfoIeee32(fi)).ToArray());
-            } else {
+            }
+            else
+            {
                 if (HasProxyFile)
                 {
                     stream = AudioStreamFactory.FromFileInfoIeee32(ProxyFileInfo);
@@ -127,14 +146,17 @@ namespace Aurio.Project {
             return stream;
         }
 
-        protected string GeneratePeakFileName() {
+        protected string GeneratePeakFileName()
+        {
             string name = GenerateName();
-            if(MultiFile) {
+            if (MultiFile)
+            {
                 // When the track consists of multiple files, we take the default track name and append a hash
                 // value calculated from all files belonging to this track. This results in a short name while
                 // avoiding file name collisions when different sets of concatenated files start with the same file (name).
                 string concatenatedNames = FileInfos.Select(fi => fi.Name).Aggregate((s1, s2) => s1 + "+" + s2);
-                using (var sha = SHA1.Create()) {
+                using (var sha = SHA1.Create())
+                {
                     byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(concatenatedNames));
                     string hashString = BitConverter.ToString(hash).Replace("-", "").ToLower();
 
@@ -145,19 +167,24 @@ namespace Aurio.Project {
             return name;
         }
 
-        public FileInfo PeakFile {
-            get {
+        public FileInfo PeakFile
+        {
+            get
+            {
                 return new FileInfo(Path.Combine(FileInfo.DirectoryName, GeneratePeakFileName() + PEAKFILE_EXTENSION));
             }
         }
 
-        public bool HasPeakFile {
-            get {
+        public bool HasPeakFile
+        {
+            get
+            {
                 return !Offline && PeakFile.Exists;
             }
         }
 
-        public AudioProperties SourceProperties {
+        public AudioProperties SourceProperties
+        {
             get { return sourceProperties; }
         }
 
@@ -214,67 +241,85 @@ namespace Aurio.Project {
         /// </summary>
         public bool Offline { get; protected set; }
 
-        public TimeWarpCollection TimeWarps {
+        public TimeWarpCollection TimeWarps
+        {
             get { return timeWarps; }
-            set { 
+            set
+            {
                 timeWarps = value;
                 timeWarps.CollectionChanged += timeWarps_CollectionChanged;
             }
         }
 
-        private void timeWarps_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
-            if (e.NewItems != null || e.OldItems != null || e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset) {
+        private void timeWarps_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null || e.OldItems != null || e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
+            {
                 InitializeLength();
             }
         }
 
-        private void OnMuteChanged() {
-            if (MuteChanged != null) {
+        private void OnMuteChanged()
+        {
+            if (MuteChanged != null)
+            {
                 MuteChanged(this, new ValueEventArgs<bool>(mute));
             }
             OnPropertyChanged("Mute");
         }
 
-        private void OnSoloChanged() {
-            if (solo) {
+        private void OnSoloChanged()
+        {
+            if (solo)
+            {
                 Mute = false;
             }
 
-            if (SoloChanged != null) {
+            if (SoloChanged != null)
+            {
                 SoloChanged(this, new ValueEventArgs<bool>(solo));
             }
             OnPropertyChanged("Solo");
         }
 
-        private void OnVolumeChanged() {
-            if (VolumeChanged != null) {
+        private void OnVolumeChanged()
+        {
+            if (VolumeChanged != null)
+            {
                 VolumeChanged(this, new ValueEventArgs<float>(volume));
             }
             OnPropertyChanged("Volume");
         }
 
-        private void OnBalanceChanged() {
-            if (BalanceChanged != null) {
+        private void OnBalanceChanged()
+        {
+            if (BalanceChanged != null)
+            {
                 BalanceChanged(this, new ValueEventArgs<float>(balance));
             }
             OnPropertyChanged("Balance");
         }
 
-        private void OnInvertedPhaseChanged() {
-            if (InvertedPhaseChanged != null) {
+        private void OnInvertedPhaseChanged()
+        {
+            if (InvertedPhaseChanged != null)
+            {
                 InvertedPhaseChanged(this, new ValueEventArgs<bool>(invertedPhase));
             }
             OnPropertyChanged("InvertedPhase");
         }
 
-        private void OnMonoDownmixChanged() {
-            if (MonoDownmixChanged != null) {
+        private void OnMonoDownmixChanged()
+        {
+            if (MonoDownmixChanged != null)
+            {
                 MonoDownmixChanged(this, new ValueEventArgs<bool>(monoDownmix));
             }
             OnPropertyChanged("MonoDownmix");
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return "Audio" + base.ToString();
         }
     }

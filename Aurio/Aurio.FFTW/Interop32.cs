@@ -22,7 +22,8 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace Aurio.FFTW {
+namespace Aurio.FFTW
+{
     // taken from: http://www.sdss.jhu.edu/~tamas/bytes/fftwcsharp.html (no license applied)
 
     // Various Flags used by FFTW
@@ -31,7 +32,8 @@ namespace Aurio.FFTW {
     /// FFTW planner flags
     /// </summary>
     [Flags]
-    public enum fftw_flags : uint {
+    public enum fftw_flags : uint
+    {
         /// <summary>
         /// Tells FFTW to find an optimized plan by actually computing several FFTs and measuring their execution time. 
         /// Depending on your machine, this can take some time (often a few seconds). Default (0x0). 
@@ -86,7 +88,8 @@ namespace Aurio.FFTW {
     /// <summary>
     /// Defines direction of operation
     /// </summary>
-    public enum fftw_direction : int {
+    public enum fftw_direction : int
+    {
         /// <summary>
         /// Computes a regular DFT
         /// </summary>
@@ -100,7 +103,8 @@ namespace Aurio.FFTW {
     /// <summary>
     /// Kinds of real-to-real transforms
     /// </summary>
-    public enum fftw_kind : uint {
+    public enum fftw_kind : uint
+    {
         R2HC = 0,
         HC2R = 1,
         DHT = 2,
@@ -120,7 +124,8 @@ namespace Aurio.FFTW {
     /// <summary>
     /// Contains the Basic Interface FFTW functions for single-precision (float) operations
     /// </summary>
-    public class fftwf32 {
+    public class fftwf32
+    {
 
         private const string FFTWLIB = "libfftw3f-3.dll";
         private const CallingConvention CALLINGCONVENTION = CallingConvention.Cdecl;

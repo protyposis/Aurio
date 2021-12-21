@@ -24,11 +24,13 @@ using Aurio.Streams;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace Aurio.Features {
+namespace Aurio.Features
+{
     /// <summary>
     /// Reads consecutive windows from a stream, specified by the window size and hop size.
     /// </summary>
-    public class StreamWindower {
+    public class StreamWindower
+    {
 
         public const int DEFAULT_STREAM_INPUT_BUFFER_SIZE = 32768;
 
@@ -45,7 +47,8 @@ namespace Aurio.Features {
         /// <param name="windowSize">the window size in the dimension of samples</param>
         /// <param name="hopSize">the hop size in the dimension of samples</param>
         /// <param name="windowType">the type of the window function to apply</param>
-        public StreamWindower(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE) {
+        public StreamWindower(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
+        {
             this.stream = stream;
             this.windowSize = windowSize;
             this.hopSize = hopSize;
@@ -62,7 +65,8 @@ namespace Aurio.Features {
         /// <param name="windowSize">the window size in the dimension of samples</param>
         /// <param name="hopSize">the hop size in the dimension of samples</param>
         public StreamWindower(IAudioStream stream, int windowSize, int hopSize, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
-            : this(stream, windowSize, hopSize, WindowType.Rectangle, bufferSize) {
+            : this(stream, windowSize, hopSize, WindowType.Rectangle, bufferSize)
+        {
         }
 
         /// <summary>
@@ -72,7 +76,8 @@ namespace Aurio.Features {
         /// <param name="windowSize">the window size in the dimension of time</param>
         /// <param name="hopSize">the hop size in the dimension of time</param>
         /// <param name="windowType">the type of the window function to apply</param>
-        public StreamWindower(IAudioStream stream, TimeSpan windowSize, TimeSpan hopSize, WindowType windowType, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE) {
+        public StreamWindower(IAudioStream stream, TimeSpan windowSize, TimeSpan hopSize, WindowType windowType, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
+        {
             this.stream = stream;
             this.windowSize = (int)TimeUtil.TimeSpanToBytes(windowSize, stream.Properties) / stream.Properties.SampleByteSize;
             this.hopSize = (int)TimeUtil.TimeSpanToBytes(hopSize, stream.Properties) / stream.Properties.SampleByteSize;
@@ -89,7 +94,8 @@ namespace Aurio.Features {
             windowSizePower2 = (windowSizePower2 >> 8) | windowSizePower2;
             windowSizePower2 = (windowSizePower2 >> 16) | windowSizePower2;
             windowSizePower2++;
-            if (this.windowSize < windowSizePower2) {
+            if (this.windowSize < windowSizePower2)
+            {
                 Debug.WriteLine("window size enlarged to the next power of 2 as required by FFT: {0} -> {1}",
                     this.windowSize, windowSizePower2);
                 this.windowSize = windowSizePower2;
@@ -105,34 +111,39 @@ namespace Aurio.Features {
         /// <param name="windowSize">the window size in the dimension of time</param>
         /// <param name="hopSize">the hop size in the dimension of time</param>
         public StreamWindower(IAudioStream stream, TimeSpan windowSize, TimeSpan hopSize, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
-            : this(stream, windowSize, hopSize, WindowType.Rectangle, bufferSize) {
+            : this(stream, windowSize, hopSize, WindowType.Rectangle, bufferSize)
+        {
         }
 
         /// <summary>
         /// Gets the audio properties of the stream.
         /// </summary>
-        public AudioProperties StreamProperties {
+        public AudioProperties StreamProperties
+        {
             get { return stream.Properties; }
         }
 
         /// <summary>
         /// Gets the window size in samples.
         /// </summary>
-        public int WindowSize {
+        public int WindowSize
+        {
             get { return windowSize; }
         }
 
         /// <summary>
         /// Gets the hop size in samples.
         /// </summary>
-        public int HopSize {
+        public int HopSize
+        {
             get { return hopSize; }
         }
 
         /// <summary>
         /// Gets the total number of windows/frames that can be read.
         /// </summary>
-        public virtual int WindowCount {
+        public virtual int WindowCount
+        {
             get { return (int)(((stream.Length / stream.Properties.SampleBlockByteSize) - WindowSize) / HopSize) + 1; }
         }
 
@@ -143,8 +154,10 @@ namespace Aurio.Features {
         private int frameOffset;
         private int hopSizeB;
 
-        private void Initialize() {
-            if (windowSize > this.bufferSize) {
+        private void Initialize()
+        {
+            if (windowSize > this.bufferSize)
+            {
                 throw new ArgumentException("window size is too large - doesn't fit into the internal buffer");
             }
 
@@ -163,7 +176,8 @@ namespace Aurio.Features {
         /// Checks if there's another frame to read.
         /// </summary>
         /// <returns>true if there's a frame to read, false if the end of the stream has been reached</returns>
-        public bool HasNext() {
+        public bool HasNext()
+        {
             return (frameOffset + frameSize <= streamBufferLevel) || // either there's another frame in the buffer
                 FillBuffer(); // or we try to read the next frame and check if it succeeded
         }
@@ -172,10 +186,12 @@ namespace Aurio.Features {
         /// Fills the stream buffer.
         /// </summary>
         /// <returns>true if the buffer has been filled, false if the end of the stream has been reached</returns>
-        private bool FillBuffer() {
+        private bool FillBuffer()
+        {
             // first, carry over unprocessed samples from the end of the stream buffer to its beginning
             streamBufferOffset = streamBufferLevel - frameOffset;
-            if (streamBufferOffset > 0) {
+            if (streamBufferOffset > 0)
+            {
                 Buffer.BlockCopy(streamBuffer, frameOffset, streamBuffer, 0, streamBufferOffset);
             }
             frameOffset = 0;
@@ -183,7 +199,8 @@ namespace Aurio.Features {
             // second, fill the stream input buffer - if no bytes returned we have reached the end of the stream
             streamBufferLevel = StreamUtil.ForceRead(stream, streamBuffer,
                 streamBufferOffset, streamBuffer.Length - streamBufferOffset);
-            if (streamBufferLevel == 0) {
+            if (streamBufferLevel == 0)
+            {
                 Debug.WriteLine("stream windowing finished - end position {0}/{1}", stream.Position, stream.Length);
                 return false; // whole stream has been processed
             }
@@ -197,13 +214,17 @@ namespace Aurio.Features {
         /// Reads a frame from the stream.
         /// </summary>
         /// <param name="frame">the target array where the frame will be copied to</param>
-        public virtual void ReadFrame(float[] frame) {
-            if (frame.Length < windowSize) {
+        public virtual void ReadFrame(float[] frame)
+        {
+            if (frame.Length < windowSize)
+            {
                 throw new ArgumentException("the provided frame array has an invalid size");
             }
-            if (frameOffset + frameSize > streamBufferLevel) {
+            if (frameOffset + frameSize > streamBufferLevel)
+            {
                 // if there's no more frame in the stream buffer, refill it
-                if (!FillBuffer()) {
+                if (!FillBuffer())
+                {
                     // This case only happens if HasNext() is not used to check if there actually is another frame
                     throw new Exception("end of stream reached - no more frames to read");
                 }
@@ -218,7 +239,8 @@ namespace Aurio.Features {
             OnFrameRead(frame);
         }
 
-        protected virtual void OnFrameRead(float[] frame) {
+        protected virtual void OnFrameRead(float[] frame)
+        {
             // to be overridden
         }
     }

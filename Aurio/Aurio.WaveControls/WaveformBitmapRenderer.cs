@@ -26,8 +26,10 @@ using System.Windows.Media;
 using System.Diagnostics;
 using Aurio;
 
-namespace Aurio.WaveControls {
-    class WaveformBitmapRenderer : IWaveformRenderer {
+namespace Aurio.WaveControls
+{
+    class WaveformBitmapRenderer : IWaveformRenderer
+    {
 
         private WriteableBitmap wb;
         private int[] pixels;
@@ -35,7 +37,8 @@ namespace Aurio.WaveControls {
         private int pixelHeight;
         private int pixelStride;
 
-        public WaveformBitmapRenderer() {
+        public WaveformBitmapRenderer()
+        {
             WaveformFill = Brushes.LightBlue;
             WaveformLine = Brushes.CornflowerBlue;
             WaveformSamplePoint = Brushes.RoyalBlue;
@@ -47,17 +50,21 @@ namespace Aurio.WaveControls {
 
         #region IWaveformRenderer Members
 
-        public Drawing Render(float[] sampleData, int sampleCount, int width, int height, float volume) {
-            if (width > pixelWidth || height > pixelHeight) {
+        public Drawing Render(float[] sampleData, int sampleCount, int width, int height, float volume)
+        {
+            if (width > pixelWidth || height > pixelHeight)
+            {
                 AllocateBitmap(width, height);
             }
 
             bool peaks = sampleCount >= width;
-            if (!peaks) {
+            if (!peaks)
+            {
                 BitmapSource waveform = DrawWaveform(sampleData, sampleCount, width, height, volume);
                 return new ImageDrawing(waveform, new Rect(0, 0, pixelWidth, pixelHeight));
             }
-            else {
+            else
+            {
                 BitmapSource waveform = DrawPeakform(sampleData, sampleCount, width, height, volume);
                 return new ImageDrawing(waveform, new Rect(0, 0, pixelWidth, pixelHeight));
             }
@@ -65,7 +72,8 @@ namespace Aurio.WaveControls {
 
         #endregion
 
-        private void AllocateBitmap(int width, int height) {
+        private void AllocateBitmap(int width, int height)
+        {
             wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
             pixels = new int[width * height];
             pixelWidth = width;
@@ -73,7 +81,8 @@ namespace Aurio.WaveControls {
             pixelStride = width;
         }
 
-        private WriteableBitmap DrawPeakform(float[] peakData, int peakCount, int width, int height, float volume) {
+        private WriteableBitmap DrawPeakform(float[] peakData, int peakCount, int width, int height, float volume)
+        {
             Array.Clear(pixels, 0, pixels.Length);
 
             int borderColor = BrushToColorValue(WaveformLine);
@@ -82,20 +91,25 @@ namespace Aurio.WaveControls {
             int halfheight = height / 2;
             int peaks = peakCount;
             int x, y, top, bottom, prevX = 0, prevY = 0, prevTop = 0, prevBottom = height;
-            for (int peak = 0; peak < peaks * 2; peak += 2) {
+            for (int peak = 0; peak < peaks * 2; peak += 2)
+            {
                 float p1 = peakData[peak] * volume;
                 float p2 = peakData[peak + 1] * volume;
 
-                if (p1 > 1.0f) {
+                if (p1 > 1.0f)
+                {
                     p1 = 1.0f;
                 }
-                else if (p1 < -1.0f) {
+                else if (p1 < -1.0f)
+                {
                     p1 = -1.0f;
                 }
-                if (p2 > 1.0f) {
+                if (p2 > 1.0f)
+                {
                     p2 = 1.0f;
                 }
-                else if (p2 < -1.0f) {
+                else if (p2 < -1.0f)
+                {
                     p2 = -1.0f;
                 }
 
@@ -114,11 +128,13 @@ namespace Aurio.WaveControls {
                 top = halfheight - pp2;
                 bottom = halfheight - pp1;
 
-                if (bottom == height) {
+                if (bottom == height)
+                {
                     bottom--; // for even heights the last line needs to be stripped
                 }
 
-                for (y = top; y <= bottom; y++) {
+                for (y = top; y <= bottom; y++)
+                {
                     //bool useBorderColor = 
                     //    y == top // topmost peak pixel
                     //    || y == bottom // bottommost peak pixel
@@ -141,7 +157,8 @@ namespace Aurio.WaveControls {
             return wb;
         }
 
-        private WriteableBitmap DrawWaveform(float[] sampleData, int sampleCount, int width, int height, float volume) {
+        private WriteableBitmap DrawWaveform(float[] sampleData, int sampleCount, int width, int height, float volume)
+        {
             Array.Clear(pixels, 0, pixels.Length);
 
             int borderColor = BrushToColorValue(WaveformLine);
@@ -150,27 +167,33 @@ namespace Aurio.WaveControls {
             int halfheight = height / 2;
             int samples = sampleCount;
             int x, y, prevX = 0, prevY = 0;
-            for (int sample = 0; sample < samples; sample++) {
+            for (int sample = 0; sample < samples; sample++)
+            {
                 float v = sampleData[sample] * volume;
 
-                if (v > 1.0f) {
+                if (v > 1.0f)
+                {
                     v = 1.0f;
                 }
-                else if (v < -1.0f) {
+                else if (v < -1.0f)
+                {
                     v = -1.0f;
                 }
 
                 x = (int)Math.Round((float)sample / (samples - 1) * (width - 1));
                 y = halfheight - (int)(halfheight * v);
-                if (y == height) {
+                if (y == height)
+                {
                     y--; // for even heights the last line needs to be stripped
                 }
 
-                if (sample > 0) {
+                if (sample > 0)
+                {
                     DrawLine(prevX, prevY, x, y, pixels, pixelWidth, pixelHeight, borderColor);
                 }
 
-                if (width / samples > 4) {
+                if (width / samples > 4)
+                {
                     DrawPointMarker(x, y, pixels, pixelWidth, pixelHeight, sampleColor);
                 }
 
@@ -184,7 +207,8 @@ namespace Aurio.WaveControls {
             return wb;
         }
 
-        private int BrushToColorValue(SolidColorBrush brush) {
+        private int BrushToColorValue(SolidColorBrush brush)
+        {
             Color c = brush.Color;
             return c.A << 24 | c.R << 16 | c.G << 8 | c.B;
         }
@@ -193,7 +217,8 @@ namespace Aurio.WaveControls {
         /// Fast Bresenham line drawing algorithm
         /// Taken and adapted from http://www.cs.unc.edu/~mcmillan/comp136/Lecture6/Lines.html (lineFast)
         /// </summary>
-        private void DrawLine(int x0, int y0, int x1, int y1, int[] pixels, int width, int height, int color) {
+        private void DrawLine(int x0, int y0, int x1, int y1, int[] pixels, int width, int height, int color)
+        {
             int dy = y1 - y0;
             int dx = x1 - x0;
             int stepx, stepy;
@@ -206,10 +231,13 @@ namespace Aurio.WaveControls {
             y0 *= width;
             y1 *= width;
             pixels[x0 + y0] = color;
-            if (dx > dy) {
+            if (dx > dy)
+            {
                 int fraction = dy - (dx >> 1);
-                while (x0 != x1) {
-                    if (fraction >= 0) {
+                while (x0 != x1)
+                {
+                    if (fraction >= 0)
+                    {
                         y0 += stepy;
                         fraction -= dx;
                     }
@@ -218,10 +246,13 @@ namespace Aurio.WaveControls {
                     pixels[x0 + y0] = color;
                 }
             }
-            else {
+            else
+            {
                 int fraction = dx - (dy >> 1);
-                while (y0 != y1) {
-                    if (fraction >= 0) {
+                while (y0 != y1)
+                {
+                    if (fraction >= 0)
+                    {
                         x0 += stepx;
                         fraction -= dy;
                     }
@@ -235,10 +266,14 @@ namespace Aurio.WaveControls {
         /// <summary>
         /// Draw a 3x3 block at a given point (similar to SoundForge).
         /// </summary>
-        private void DrawPointMarker(int x, int y, int[] pixels, int width, int height, int color) {
-            for (int i = x - 1; i <= x + 1; i++) {
-                for (int j = y - 1; j <= y + 1; j++) {
-                    if (i < 0 || j < 0 || i >= width || j >= height) {
+        private void DrawPointMarker(int x, int y, int[] pixels, int width, int height, int color)
+        {
+            for (int i = x - 1; i <= x + 1; i++)
+            {
+                for (int j = y - 1; j <= y + 1; j++)
+                {
+                    if (i < 0 || j < 0 || i >= width || j >= height)
+                    {
                         continue; // skip pixels that don't fit the bitmap
                     }
                     int pixelOffset = (j * width + i);

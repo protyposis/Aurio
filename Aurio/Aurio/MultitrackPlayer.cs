@@ -30,8 +30,10 @@ using Aurio.TaskMonitor;
 using System.ComponentModel;
 using Aurio.Resampler;
 
-namespace Aurio {
-    public class MultitrackPlayer : IDisposable, INotifyPropertyChanged {
+namespace Aurio
+{
+    public class MultitrackPlayer : IDisposable, INotifyPropertyChanged
+    {
 
         public event EventHandler PlaybackStateChanged;
         public event EventHandler PlaybackStarted;
@@ -57,7 +59,8 @@ namespace Aurio {
 
         private const int DefaultSampleRate = 44100;
 
-        public MultitrackPlayer(TrackList<AudioTrack> trackList) {
+        public MultitrackPlayer(TrackList<AudioTrack> trackList)
+        {
             this.trackList = trackList;
             trackListStreams = new Dictionary<AudioTrack, IAudioStream>();
 
@@ -66,7 +69,8 @@ namespace Aurio {
 
             SetupAudioChain();
 
-            foreach (AudioTrack audioTrack in trackList) {
+            foreach (AudioTrack audioTrack in trackList)
+            {
                 AddTrack(audioTrack);
             }
 
@@ -74,41 +78,52 @@ namespace Aurio {
             timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
         }
 
-        public float Volume {
+        public float Volume
+        {
             get { return audioVolumeControlStream.Volume; }
             set { audioVolumeControlStream.Volume = value; }
         }
 
-        public TimeSpan TotalTime {
+        public TimeSpan TotalTime
+        {
             get { return TimeUtil.BytesToTimeSpan(audioOutputStream.Length, audioOutputStream.Properties); }
         }
 
-        public TimeSpan CurrentTime {
+        public TimeSpan CurrentTime
+        {
             get { return TimeUtil.BytesToTimeSpan(audioOutputStream.Position, audioOutputStream.Properties); }
-            set {
+            set
+            {
                 audioOutputStream.Position = TimeUtil.TimeSpanToBytes(value, audioOutputStream.Properties);
                 OnCurrentTimeChanged();
             }
         }
 
-        public bool CanPlay {
+        public bool CanPlay
+        {
             get { return audioOutput.PlaybackState != PlaybackState.Playing && trackList.Count > 0; }
         }
 
-        public bool CanPause {
+        public bool CanPause
+        {
             get { return audioOutput.PlaybackState == PlaybackState.Playing; }
         }
 
-        public bool Playing {
+        public bool Playing
+        {
             get { return audioOutput.PlaybackState == PlaybackState.Playing; }
         }
 
-        public bool Play() {
-            if (audioOutput.PlaybackState != PlaybackState.Playing) {
-                if (audioOutput.PlaybackState == PlaybackState.Stopped) {
+        public bool Play()
+        {
+            if (audioOutput.PlaybackState != PlaybackState.Playing)
+            {
+                if (audioOutput.PlaybackState == PlaybackState.Stopped)
+                {
                     audioOutput.Play();
                 }
-                else if (audioOutput.PlaybackState == PlaybackState.Paused) {
+                else if (audioOutput.PlaybackState == PlaybackState.Paused)
+                {
                     audioOutput.Play();
                 }
                 timer.Enabled = true;
@@ -118,21 +133,25 @@ namespace Aurio {
             return false;
         }
 
-        public bool Pause() {
+        public bool Pause()
+        {
             audioOutput.Stop();
             timer.Enabled = false;
             OnPlaybackPaused();
-            OnVolumeAnnounced(new StreamVolumeEventArgs() {
+            OnVolumeAnnounced(new StreamVolumeEventArgs()
+            {
                 MaxSampleValues = new float[] { float.NegativeInfinity, float.NegativeInfinity }
             });
             return true;
         }
 
-        public bool PlayPauseToggle() {
+        public bool PlayPauseToggle()
+        {
             return Playing ? Pause() : Play();
         }
 
-        private void SaveToFile(IAudioStream fileOutputStream, System.IO.FileInfo outputFile, IProgressReporter progressReporter) {
+        private void SaveToFile(IAudioStream fileOutputStream, System.IO.FileInfo outputFile, IProgressReporter progressReporter)
+        {
             Pause(); // playback and saving cannot happen in parallel
 
             Stopwatch sw = new Stopwatch();
@@ -149,18 +168,22 @@ namespace Aurio {
             NAudioSinkStream nAudioSink = new NAudioSinkStream(fileOutputStream);
             long total = nAudioSink.Length;
             long progress = 0;
-            using (WaveFileWriter writer = new WaveFileWriter(outputFile.FullName, nAudioSink.WaveFormat)) {
+            using (WaveFileWriter writer = new WaveFileWriter(outputFile.FullName, nAudioSink.WaveFormat))
+            {
                 byte[] buffer = new byte[nAudioSink.WaveFormat.AverageBytesPerSecond * 5];
-                while (true) {
+                while (true)
+                {
                     int bytesRead = nAudioSink.Read(buffer, 0, buffer.Length);
                     progress += bytesRead;
-                    if (bytesRead == 0) {
+                    if (bytesRead == 0)
+                    {
                         // end of stream reached
                         break;
                     }
                     writer.Write(buffer, 0, bytesRead);
 
-                    if (progressReporter != null) {
+                    if (progressReporter != null)
+                    {
                         progressReporter.ReportProgress((double)progress / total * 100);
                     }
                 }
@@ -175,7 +198,8 @@ namespace Aurio {
             Console.WriteLine("Export time: " + sw.Elapsed);
         }
 
-        public void SaveToFile(System.IO.FileInfo outputFile, IProgressReporter progressReporter) {
+        public void SaveToFile(System.IO.FileInfo outputFile, IProgressReporter progressReporter)
+        {
             // Get the source of the resampling stream, because this final resampler adjusts 
             // the rate to the speaker playback rate, which we do not need and also not want
             // when writing to a file. Instead, we write the file at the mixer sample rate,
@@ -186,11 +210,13 @@ namespace Aurio {
             SaveToFile(fileOutputStream, outputFile, progressReporter);
         }
 
-        public void SaveToFile(System.IO.FileInfo outputFile) {
+        public void SaveToFile(System.IO.FileInfo outputFile)
+        {
             SaveToFile(outputFile, null);
         }
 
-        public void SaveToFile(AudioTrack track, System.IO.FileInfo outputFile, IProgressReporter progressReporter) {
+        public void SaveToFile(AudioTrack track, System.IO.FileInfo outputFile, IProgressReporter progressReporter)
+        {
             // Get the stream before the resampling stream that prepares the stream for the mixer.
             // When rendering a single stream, we do not want any unnecessary resampling.
             var fileOutputStream = trackListStreams[track].FindStream<ResamplingStream>().GetSourceStream();
@@ -199,11 +225,13 @@ namespace Aurio {
             SaveToFile(fileOutputStream, outputFile, progressReporter);
         }
 
-        public void SaveToFile(AudioTrack track, System.IO.FileInfo outputFile) {
+        public void SaveToFile(AudioTrack track, System.IO.FileInfo outputFile)
+        {
             SaveToFile(track, outputFile, null);
         }
 
-        private void SetupAudioChain() {
+        private void SetupAudioChain()
+        {
             /* Obtain output device to read the rendering samplerate and initialize the mixer stream
              * with the target samplerate to avoid NAudio's internal ResamplerDmoStream for the target
              * samplerate conversion. ResamplerDmoStream works strangely and often requests zero bytes
@@ -225,12 +253,13 @@ namespace Aurio {
             VolumeClipStream volumeClipStream = new VolumeClipStream(dataMonitorStream);
 
             // resample to playback output samplerate
-            audioOutputStream = new ResamplingStream(volumeClipStream, ResamplingQuality.Medium, 
+            audioOutputStream = new ResamplingStream(volumeClipStream, ResamplingQuality.Medium,
                 mmdevice.AudioClient.MixFormat.SampleRate);
 
             audioOutput = new WasapiOut(global::NAudio.CoreAudioApi.AudioClientShareMode.Shared, true, 200);
             audioOutput.PlaybackStopped += new EventHandler<StoppedEventArgs>(
-                delegate(object sender, StoppedEventArgs e) {
+                delegate (object sender, StoppedEventArgs e)
+                {
                     OnCurrentTimeChanged();
                     Pause();
                     OnPlaybackPaused();
@@ -238,7 +267,8 @@ namespace Aurio {
             audioOutput.Init(new NAudioSinkStream(audioOutputStream));
         }
 
-        private void ChangeMixingSampleRate(int newSampleRate) {
+        private void ChangeMixingSampleRate(int newSampleRate)
+        {
             int oldSampleRate = audioMixer.SampleRate;
 
             // Set new mixer samplerate
@@ -253,8 +283,10 @@ namespace Aurio {
             Console.WriteLine("mixer rate changed from {0} to {1}", oldSampleRate, newSampleRate);
         }
 
-        private void AddTrack(AudioTrack audioTrack) {
-            if (audioTrack.SourceProperties.SampleRate > audioMixer.SampleRate) {
+        private void AddTrack(AudioTrack audioTrack)
+        {
+            if (audioTrack.SourceProperties.SampleRate > audioMixer.SampleRate)
+            {
                 // The newly added track has a higher samplerate than the current tracks, so we adjust 
                 // the processing samplerate to the highest rate
                 ChangeMixingSampleRate(audioTrack.SourceProperties.SampleRate);
@@ -262,12 +294,14 @@ namespace Aurio {
 
             IAudioStream input = audioTrack.CreateAudioStream();
             IAudioStream baseStream = new TolerantStream(new BufferedStream(input, 1024 * 256 * input.SampleBlockSize, true));
-            OffsetStream offsetStream = new OffsetStream(baseStream) {
-                Offset = TimeUtil.TimeSpanToBytes(audioTrack.Offset, baseStream.Properties) 
+            OffsetStream offsetStream = new OffsetStream(baseStream)
+            {
+                Offset = TimeUtil.TimeSpanToBytes(audioTrack.Offset, baseStream.Properties)
             };
 
             audioTrack.OffsetChanged += new EventHandler<ValueEventArgs<TimeSpan>>(
-                delegate(object sender, ValueEventArgs<TimeSpan> e) {
+                delegate (object sender, ValueEventArgs<TimeSpan> e)
+                {
                     offsetStream.Offset = TimeUtil.TimeSpanToBytes(e.Value, offsetStream.Properties);
                     audioMixer.UpdateLength();
                 });
@@ -275,23 +309,29 @@ namespace Aurio {
             // Upmix mono inputs to dual channel stereo or downmix surround to allow channel balancing
             // TODO add better multichannel stream support and allow balancing of surround
             IAudioStream mixToStereoStream = offsetStream;
-            if (mixToStereoStream.Properties.Channels == 1) {
+            if (mixToStereoStream.Properties.Channels == 1)
+            {
                 mixToStereoStream = new MonoStream(mixToStereoStream, 2);
-            } else if (mixToStereoStream.Properties.Channels > 2) {
+            }
+            else if (mixToStereoStream.Properties.Channels > 2)
+            {
                 mixToStereoStream = new SurroundDownmixStream(mixToStereoStream);
             }
 
             // control the track phase
-            PhaseInversionStream phaseInversion = new PhaseInversionStream(mixToStereoStream) {
+            PhaseInversionStream phaseInversion = new PhaseInversionStream(mixToStereoStream)
+            {
                 Invert = audioTrack.InvertedPhase
             };
 
-            MonoStream monoStream = new MonoStream(phaseInversion, phaseInversion.Properties.Channels) {
+            MonoStream monoStream = new MonoStream(phaseInversion, phaseInversion.Properties.Channels)
+            {
                 Downmix = audioTrack.MonoDownmix
             };
 
             // necessary to control each track individually
-            VolumeControlStream volumeControl = new VolumeControlStream(monoStream) {
+            VolumeControlStream volumeControl = new VolumeControlStream(monoStream)
+            {
                 Mute = audioTrack.Mute,
                 Volume = audioTrack.Volume,
                 Balance = audioTrack.Balance
@@ -299,18 +339,22 @@ namespace Aurio {
 
             // when the AudioTrack.Mute property changes, just set it accordingly on the audio stream
             audioTrack.MuteChanged += new EventHandler<ValueEventArgs<bool>>(
-                delegate(object vsender, ValueEventArgs<bool> ve) {
+                delegate (object vsender, ValueEventArgs<bool> ve)
+                {
                     volumeControl.Mute = ve.Value;
                 });
 
             // when the AudioTrack.Solo property changes, we have to react in different ways:
             audioTrack.SoloChanged += new EventHandler<ValueEventArgs<bool>>(
-                delegate(object vsender, ValueEventArgs<bool> ve) {
+                delegate (object vsender, ValueEventArgs<bool> ve)
+                {
                     AudioTrack senderTrack = (AudioTrack)vsender;
                     bool isOtherTrackSoloed = false;
 
-                    foreach (AudioTrack vaudioTrack in trackList) {
-                        if (vaudioTrack != senderTrack && vaudioTrack.Solo) {
+                    foreach (AudioTrack vaudioTrack in trackList)
+                    {
+                        if (vaudioTrack != senderTrack && vaudioTrack.Solo)
+                        {
                             isOtherTrackSoloed = true;
                             break;
                         }
@@ -321,15 +365,19 @@ namespace Aurio {
                      * - if the track is soloed, we unmute it
                      * - if the track is unsoloed, we mute it
                      */
-                    if (isOtherTrackSoloed) {
+                    if (isOtherTrackSoloed)
+                    {
                         senderTrack.Mute = !ve.Value;
                     }
                     /* if this is the only soloed track, we mute all other tracks
                      * if this track just got unsoloed, we unmute all other tracks
                      */
-                    else {
-                        foreach (AudioTrack vaudioTrack in trackList) {
-                            if (vaudioTrack != senderTrack && !vaudioTrack.Solo) {
+                    else
+                    {
+                        foreach (AudioTrack vaudioTrack in trackList)
+                        {
+                            if (vaudioTrack != senderTrack && !vaudioTrack.Solo)
+                            {
                                 vaudioTrack.Mute = ve.Value;
                             }
                         }
@@ -338,31 +386,36 @@ namespace Aurio {
 
             // when the AudioTrack.Volume property changes, just set it accordingly on the audio stream
             audioTrack.VolumeChanged += new EventHandler<ValueEventArgs<float>>(
-                delegate(object vsender, ValueEventArgs<float> ve) {
+                delegate (object vsender, ValueEventArgs<float> ve)
+                {
                     volumeControl.Volume = ve.Value;
                 });
 
             audioTrack.BalanceChanged += new EventHandler<ValueEventArgs<float>>(
-                delegate(object vsender, ValueEventArgs<float> ve) {
+                delegate (object vsender, ValueEventArgs<float> ve)
+                {
                     volumeControl.Balance = ve.Value;
                 });
 
             audioTrack.InvertedPhaseChanged += new EventHandler<ValueEventArgs<bool>>(
-                delegate(object vsender, ValueEventArgs<bool> ve) {
+                delegate (object vsender, ValueEventArgs<bool> ve)
+                {
                     phaseInversion.Invert = ve.Value;
                 });
             audioTrack.MonoDownmixChanged += new EventHandler<ValueEventArgs<bool>>(
-                delegate(object vsender, ValueEventArgs<bool> ve) {
+                delegate (object vsender, ValueEventArgs<bool> ve)
+                {
                     monoStream.Downmix = ve.Value;
                 });
 
             // adjust sample rate to mixer output rate
-            ResamplingStream resamplingStream = new ResamplingStream(volumeControl, 
+            ResamplingStream resamplingStream = new ResamplingStream(volumeControl,
                 ResamplingQuality.Medium, audioMixer.Properties.SampleRate);
 
             IAudioStream trackStream = resamplingStream;
 
-            if (trackStream.Properties.Channels == 1 && audioMixer.Properties.Channels > 1) {
+            if (trackStream.Properties.Channels == 1 && audioMixer.Properties.Channels > 1)
+            {
                 trackStream = new MonoStream(trackStream, audioMixer.Properties.Channels);
             }
 
@@ -370,53 +423,63 @@ namespace Aurio {
             trackListStreams.Add(audioTrack, trackStream);
         }
 
-        private void RemoveTrack(AudioTrack audioTrack) {
+        private void RemoveTrack(AudioTrack audioTrack)
+        {
             IAudioStream audioStream = trackListStreams[audioTrack];
             audioMixer.Remove(audioStream);
             trackListStreams.Remove(audioTrack);
 
             audioStream.Close();
 
-            if (trackListStreams.Count == 0) {
+            if (trackListStreams.Count == 0)
+            {
                 // Last track has been removed and timeline is empty, set mixer to default sample rate
                 audioMixer.SampleRate = DefaultSampleRate;
             }
-            else {
+            else
+            {
                 // Determine the maximum sample rate of the remaining tracks
                 int remainingTracksMaxSampleRate = trackListStreams.Values.Select(s =>
                     s.FindStream<ResamplingStream>().GetSourceStream().Properties.SampleRate).Max();
 
                 // Check if the new maximum is lower than the current processing rate
-                if (remainingTracksMaxSampleRate < audioMixer.SampleRate) {
+                if (remainingTracksMaxSampleRate < audioMixer.SampleRate)
+                {
                     // Decrease the processing sample rate to the new lower maximum which is the highest rate required
                     ChangeMixingSampleRate(remainingTracksMaxSampleRate);
                 }
             }
         }
 
-        private void trackList_TrackAdded(object sender, TrackList<AudioTrack>.TrackListEventArgs e) {
+        private void trackList_TrackAdded(object sender, TrackList<AudioTrack>.TrackListEventArgs e)
+        {
             AddTrack(e.Track);
             OnTotalTimeChanged();
         }
 
-        private void trackList_TrackRemoved(object sender, TrackList<AudioTrack>.TrackListEventArgs e) {
+        private void trackList_TrackRemoved(object sender, TrackList<AudioTrack>.TrackListEventArgs e)
+        {
             RemoveTrack(e.Track);
             OnTotalTimeChanged();
         }
 
-        private void dataMonitorStream_DataRead(object sender, StreamDataMonitorEventArgs e) {
+        private void dataMonitorStream_DataRead(object sender, StreamDataMonitorEventArgs e)
+        {
             OnSamplesMonitored(e);
         }
 
-        private void timer_Elapsed(object sender, ElapsedEventArgs e) {
+        private void timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
             OnCurrentTimeChanged();
             OnVolumeAnnounced(new StreamVolumeEventArgs { MaxSampleValues = audioVolumeMeteringStream.GetMaxSampleValues() });
         }
 
         #region Event firing
 
-        protected virtual void OnPlaybackStateChanged() {
-            if (PlaybackStateChanged != null) {
+        protected virtual void OnPlaybackStateChanged()
+        {
+            if (PlaybackStateChanged != null)
+            {
                 PlaybackStateChanged(this, EventArgs.Empty);
             }
             OnPropertyChanged("CanPlay");
@@ -424,49 +487,63 @@ namespace Aurio {
             OnPropertyChanged("Playing");
         }
 
-        protected virtual void OnPlaybackStarted() {
-            if (PlaybackStarted != null) {
+        protected virtual void OnPlaybackStarted()
+        {
+            if (PlaybackStarted != null)
+            {
                 PlaybackStarted(this, EventArgs.Empty);
             }
             OnPlaybackStateChanged();
         }
 
-        protected virtual void OnPlaybackPaused() {
-            if (PlaybackPaused != null) {
+        protected virtual void OnPlaybackPaused()
+        {
+            if (PlaybackPaused != null)
+            {
                 PlaybackPaused(this, EventArgs.Empty);
             }
             OnPlaybackStateChanged();
         }
 
-        protected virtual void OnPlaybackStopped() {
-            if (PlaybackStopped != null) {
+        protected virtual void OnPlaybackStopped()
+        {
+            if (PlaybackStopped != null)
+            {
                 PlaybackStopped(this, EventArgs.Empty);
             }
             OnPlaybackStateChanged();
         }
 
-        protected virtual void OnVolumeAnnounced(StreamVolumeEventArgs e) {
-            if (VolumeAnnounced != null) {
+        protected virtual void OnVolumeAnnounced(StreamVolumeEventArgs e)
+        {
+            if (VolumeAnnounced != null)
+            {
                 VolumeAnnounced(this, e);
             }
         }
 
-        protected virtual void OnTotalTimeChanged() {
-            if (TotalTimeChanged != null) {
+        protected virtual void OnTotalTimeChanged()
+        {
+            if (TotalTimeChanged != null)
+            {
                 TotalTimeChanged(this, new ValueEventArgs<TimeSpan>(TotalTime));
             }
             OnPropertyChanged("TotalTime");
         }
 
-        protected virtual void OnCurrentTimeChanged() {
-            if (CurrentTimeChanged != null) {
+        protected virtual void OnCurrentTimeChanged()
+        {
+            if (CurrentTimeChanged != null)
+            {
                 CurrentTimeChanged(this, new ValueEventArgs<TimeSpan>(CurrentTime));
             }
             OnPropertyChanged("CurrentTime");
         }
 
-        private void OnSamplesMonitored(StreamDataMonitorEventArgs e) {
-            if (SamplesMonitored != null) {
+        private void OnSamplesMonitored(StreamDataMonitorEventArgs e)
+        {
+            if (SamplesMonitored != null)
+            {
                 SamplesMonitored(this, e);
             }
         }
@@ -477,8 +554,10 @@ namespace Aurio {
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged(string name) {
-            if (PropertyChanged != null) {
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
             }
         }
@@ -487,7 +566,8 @@ namespace Aurio {
 
         #region IDisposable Members
 
-        public void Dispose() {
+        public void Dispose()
+        {
             audioOutput.Dispose();
         }
 

@@ -21,9 +21,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.Echoprint {
-    class DefaultProfile : Profile {
-        public DefaultProfile() {
+namespace Aurio.Matching.Echoprint
+{
+    class DefaultProfile : Profile
+    {
+        public DefaultProfile()
+        {
             Name = "Echoprint default";
 
             SamplingRate = 11025;
@@ -45,13 +48,15 @@ namespace Aurio.Matching.Echoprint {
             MatchingMinFrames = (int)(framesPerSecond * 3);
             MatchingMaxFrames = (int)(framesPerSecond * 60);
 
-            var threshold = new ExponentialDecayThreshold {
+            var threshold = new ExponentialDecayThreshold
+            {
                 Base = 0.5,
                 WidthScale = 2,
                 Height = 0.12
             };
             ThresholdAccept = threshold;
-            ThresholdReject = new ExponentialDecayThreshold {
+            ThresholdReject = new ExponentialDecayThreshold
+            {
                 Base = threshold.Base,
                 WidthScale = threshold.WidthScale,
                 Height = threshold.Height / 3

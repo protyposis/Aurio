@@ -22,10 +22,13 @@ using System.Linq;
 using System.Text;
 using Aurio.Streams;
 
-namespace Aurio.Features.ContinuousFrequencyActivation {
-    class StrongPeakDetector : FrequencyActivationCalculator {
+namespace Aurio.Features.ContinuousFrequencyActivation
+{
+    class StrongPeakDetector : FrequencyActivationCalculator
+    {
 
-        private enum Direction {
+        private enum Direction
+        {
             Up,
             Down
         }
@@ -34,11 +37,13 @@ namespace Aurio.Features.ContinuousFrequencyActivation {
         private Direction direction;
 
         public StrongPeakDetector(IAudioStream stream)
-            : base(stream) {
-                frequencyActivation = new float[WindowSize / 2];
+            : base(stream)
+        {
+            frequencyActivation = new float[WindowSize / 2];
         }
 
-        public override void ReadFrame(float[] strongPeakValues) {
+        public override void ReadFrame(float[] strongPeakValues)
+        {
             base.ReadFrame(frequencyActivation);
 
             // scan peak values for local min/maxima
@@ -51,19 +56,23 @@ namespace Aurio.Features.ContinuousFrequencyActivation {
 
             direction = frequencyActivation[1] >= frequencyActivation[0] ? Direction.Up : Direction.Down;
 
-            for (int i = 1; i < frequencyActivation.Length; i++) {
-                if (frequencyActivation[i] < frequencyActivation[i - 1] && direction == Direction.Up) {
+            for (int i = 1; i < frequencyActivation.Length; i++)
+            {
+                if (frequencyActivation[i] < frequencyActivation[i - 1] && direction == Direction.Up)
+                {
                     // local maximum found
                     xp = i - 1;
 
                     direction = Direction.Down;
                 }
-                else if (frequencyActivation[i] >= frequencyActivation[i - 1] && direction == Direction.Down) {
+                else if (frequencyActivation[i] >= frequencyActivation[i - 1] && direction == Direction.Down)
+                {
                     // local minimum found
                     xl = xr;
                     xr = i - 1;
 
-                    if (xl > 0 && xp > 0) {
+                    if (xl > 0 && xp > 0)
+                    {
                         // local l-min, max and r-min found, calculate peak value
                         float hl = frequencyActivation[xp] - frequencyActivation[xl];
                         float hr = frequencyActivation[xp] - frequencyActivation[xr];

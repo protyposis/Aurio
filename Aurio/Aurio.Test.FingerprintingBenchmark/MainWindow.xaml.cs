@@ -21,16 +21,19 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Aurio.Test.FingerprintingBenchmark {
+namespace Aurio.Test.FingerprintingBenchmark
+{
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window {
+    public partial class MainWindow : Window
+    {
 
         private ProgressMonitor progressMonitor;
         private ObservableCollection<BenchmarkEntry> benchmarkResults;
 
-        public MainWindow() {
+        public MainWindow()
+        {
             InitializeComponent();
             progressMonitor = ProgressMonitor.GlobalInstance;
             benchmarkResults = new ObservableCollection<BenchmarkEntry>();
@@ -42,7 +45,8 @@ namespace Aurio.Test.FingerprintingBenchmark {
             ResamplerFactory.Factory = new Aurio.Soxr.ResamplerFactory();
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e) {
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
             progressBar1.IsEnabled = false;
             progressBar1Label.Content = "";
             progressMonitor.ProcessingStarted += ProgressMonitor_ProcessingStarted;
@@ -50,46 +54,59 @@ namespace Aurio.Test.FingerprintingBenchmark {
             progressMonitor.ProcessingFinished += ProgressMonitor_ProcessingFinished;
         }
 
-        private void ProgressMonitor_ProcessingStarted(object sender, EventArgs e) {
-            progressBar1.Dispatcher.BeginInvoke((Action)delegate {
+        private void ProgressMonitor_ProcessingStarted(object sender, EventArgs e)
+        {
+            progressBar1.Dispatcher.BeginInvoke((Action)delegate
+            {
                 progressBar1.IsEnabled = true;
             });
         }
 
-        private void ProgressMonitor_ProcessingProgressChanged(object sender, ValueEventArgs<float> e) {
-            progressBar1.Dispatcher.BeginInvoke((Action)delegate {
+        private void ProgressMonitor_ProcessingProgressChanged(object sender, ValueEventArgs<float> e)
+        {
+            progressBar1.Dispatcher.BeginInvoke((Action)delegate
+            {
                 progressBar1.Value = e.Value;
                 progressBar1Label.Content = progressMonitor.StatusMessage;
             });
         }
 
-        private void ProgressMonitor_ProcessingFinished(object sender, EventArgs e) {
-            progressBar1.Dispatcher.BeginInvoke((Action)delegate {
+        private void ProgressMonitor_ProcessingFinished(object sender, EventArgs e)
+        {
+            progressBar1.Dispatcher.BeginInvoke((Action)delegate
+            {
                 progressBar1.Value = 0;
                 progressBar1.IsEnabled = false;
                 progressBar1Label.Content = "";
             });
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e) {
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.DefaultExt = ".wav";
             dlg.Filter = "Wave files|*.wav";
 
-            if (dlg.ShowDialog() == true) {
+            if (dlg.ShowDialog() == true)
+            {
                 Benchmark(new AudioTrack(new System.IO.FileInfo(dlg.FileName)), warmupCheckbox.IsChecked == true);
             }
         }
 
-        private void ReportBenchmarkResult(BenchmarkEntry e) {
-            dataGrid1.Dispatcher.BeginInvoke((Action)delegate{
+        private void ReportBenchmarkResult(BenchmarkEntry e)
+        {
+            dataGrid1.Dispatcher.BeginInvoke((Action)delegate
+            {
                 benchmarkResults.Add(e);
             });
         }
 
-        private void Benchmark(AudioTrack track, bool warmup) {
-            Task.Factory.StartNew(() => {
-                if (warmup) {
+        private void Benchmark(AudioTrack track, bool warmup)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                if (warmup)
+                {
                     // "Warmup" reads the whole stream before starting the benchmark procedures
                     // to trigger the file caching in Windows, else the first fingerprinting run
                     // on a file is always slower than the following because the file is cached
@@ -97,7 +114,8 @@ namespace Aurio.Test.FingerprintingBenchmark {
                     var stream = track.CreateAudioStream();
                     var buffer = new byte[1024 * 1024];
                     int bytesRead = 0;
-                    while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0) {
+                    while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+                    {
                         // nothing to do here
                     }
                 }
@@ -109,7 +127,8 @@ namespace Aurio.Test.FingerprintingBenchmark {
             });
         }
 
-        private void BenchmarkHaitsmaKalker(AudioTrack track) {
+        private void BenchmarkHaitsmaKalker(AudioTrack track)
+        {
             var profile = Aurio.Matching.HaitsmaKalker2002.FingerprintGenerator.GetProfiles()[0];
             var store = new Aurio.Matching.HaitsmaKalker2002.FingerprintStore(profile);
             var gen = new Aurio.Matching.HaitsmaKalker2002.FingerprintGenerator(profile, track);
@@ -117,7 +136,8 @@ namespace Aurio.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("HaitsmaKalker2002", true);
             int hashCount = 0;
 
-            gen.SubFingerprintsGenerated += delegate(object sender, SubFingerprintsGeneratedEventArgs e) {
+            gen.SubFingerprintsGenerated += delegate (object sender, SubFingerprintsGeneratedEventArgs e)
+            {
                 store.Add(e);
                 hashCount += e.SubFingerprints.Count;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
@@ -133,7 +153,8 @@ namespace Aurio.Test.FingerprintingBenchmark {
             ReportBenchmarkResult(new BenchmarkEntry { Track = track, Type = "HaitsmaKalker2002", HashCount = hashCount, Duration = sw.Elapsed });
         }
 
-        private void BenchmarkWang(AudioTrack track) {
+        private void BenchmarkWang(AudioTrack track)
+        {
             var profile = Aurio.Matching.Wang2003.FingerprintGenerator.GetProfiles()[0];
             var store = new Aurio.Matching.Wang2003.FingerprintStore(profile);
             var gen = new Aurio.Matching.Wang2003.FingerprintGenerator(profile);
@@ -141,7 +162,8 @@ namespace Aurio.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Wang2003", true);
             int hashCount = 0;
 
-            gen.SubFingerprintsGenerated += delegate(object sender, SubFingerprintsGeneratedEventArgs e) {
+            gen.SubFingerprintsGenerated += delegate (object sender, SubFingerprintsGeneratedEventArgs e)
+            {
                 store.Add(e);
                 hashCount += e.SubFingerprints.Count;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
@@ -157,7 +179,8 @@ namespace Aurio.Test.FingerprintingBenchmark {
             ReportBenchmarkResult(new BenchmarkEntry { Track = track, Type = "Wang2003", HashCount = hashCount, Duration = sw.Elapsed });
         }
 
-        private void BenchmarkEchoprint(AudioTrack track) {
+        private void BenchmarkEchoprint(AudioTrack track)
+        {
             var profile = Aurio.Matching.Echoprint.FingerprintGenerator.GetProfiles()[0];
             var store = new Aurio.Matching.Echoprint.FingerprintStore(profile);
             var gen = new Aurio.Matching.Echoprint.FingerprintGenerator(profile);
@@ -165,7 +188,8 @@ namespace Aurio.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Echoprint", true);
             int hashCount = 0;
 
-            gen.SubFingerprintsGenerated += delegate(object sender, SubFingerprintsGeneratedEventArgs e) {
+            gen.SubFingerprintsGenerated += delegate (object sender, SubFingerprintsGeneratedEventArgs e)
+            {
                 store.Add(e);
                 hashCount += e.SubFingerprints.Count;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);
@@ -181,7 +205,8 @@ namespace Aurio.Test.FingerprintingBenchmark {
             ReportBenchmarkResult(new BenchmarkEntry { Track = track, Type = "Echoprint", HashCount = hashCount, Duration = sw.Elapsed });
         }
 
-        private void BenchmarkChromaprint(AudioTrack track) {
+        private void BenchmarkChromaprint(AudioTrack track)
+        {
             var profile = Aurio.Matching.Chromaprint.FingerprintGenerator.GetProfiles()[0];
             var store = new Aurio.Matching.Chromaprint.FingerprintStore(profile);
             var gen = new Aurio.Matching.Chromaprint.FingerprintGenerator(profile);
@@ -189,7 +214,8 @@ namespace Aurio.Test.FingerprintingBenchmark {
             var reporter = ProgressMonitor.GlobalInstance.BeginTask("Chromaprint", true);
             int hashCount = 0;
 
-            gen.SubFingerprintsGenerated += delegate(object sender, SubFingerprintsGeneratedEventArgs e) {
+            gen.SubFingerprintsGenerated += delegate (object sender, SubFingerprintsGeneratedEventArgs e)
+            {
                 store.Add(e);
                 hashCount += e.SubFingerprints.Count;
                 reporter.ReportProgress((double)e.Index / e.Indices * 100);

@@ -27,7 +27,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.Wang2003 {
+namespace Aurio.Matching.Wang2003
+{
     /// <summary>
     /// Generates fingerprints according to what is described in:
     /// - Wang, Avery. "An Industrial Strength Audio Search Algorithm." ISMIR. 2003.
@@ -35,7 +36,8 @@ namespace Aurio.Matching.Wang2003 {
     ///   of community-contributed collections of concert videos." Proceedings of the 
     ///   18th international conference on World wide web. ACM, 2009.
     /// </summary>
-    public class FingerprintGenerator {
+    public class FingerprintGenerator
+    {
 
         private const float spectrumMinThreshold = -200; // dB volume
 
@@ -44,11 +46,13 @@ namespace Aurio.Matching.Wang2003 {
         public event EventHandler<FrameProcessedEventArgs> FrameProcessed;
         public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
 
-        public FingerprintGenerator(Profile profile) {
+        public FingerprintGenerator(Profile profile)
+        {
             this.profile = profile;
         }
 
-        public void Generate(AudioTrack track) {
+        public void Generate(AudioTrack track)
+        {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(track.FileInfo)),
                 ResamplingQuality.Medium, profile.SamplingRate);
@@ -69,39 +73,48 @@ namespace Aurio.Matching.Wang2003 {
 
             var subFingerprints = new List<SubFingerprint>();
 
-            while (stft.HasNext()) {
+            while (stft.HasNext())
+            {
                 // Get the FFT spectrum
                 stft.ReadFrame(spectrum);
 
                 // Skip frames whose average spectrum volume is below the threshold
                 // This skips silent frames (zero samples) that only contain very low noise from the FFT 
                 // and that would screw up the temporal spectrum average below for the following frames.
-                if (spectrum.Average() < spectrumMinThreshold) {
+                if (spectrum.Average() < spectrumMinThreshold)
+                {
                     index++;
                     continue;
                 }
 
                 // Smooth the frequency spectrum to remove small peaks
-                if (profile.SpectrumSmoothingLength > 0) {
+                if (profile.SpectrumSmoothingLength > 0)
+                {
                     spectrumSmoother.Clear();
-                    for (int i = 0; i < spectrum.Length; i++) {
+                    for (int i = 0; i < spectrum.Length; i++)
+                    {
                         var avg = spectrumSmoother.Add(spectrum[i]);
-                        if (i >= profile.SpectrumSmoothingLength) {
+                        if (i >= profile.SpectrumSmoothingLength)
+                        {
                             smoothedSpectrum[i - profile.SpectrumSmoothingLength] = avg;
                         }
                     }
                 }
 
                 // Update the temporal moving bin average
-                if (processedFrames == 0) {
+                if (processedFrames == 0)
+                {
                     // Init averages on first frame
-                    for (int i = 0; i < spectrum.Length; i++) {
+                    for (int i = 0; i < spectrum.Length; i++)
+                    {
                         spectrumTemporalAverage[i] = spectrum[i];
                     }
                 }
-                else {
+                else
+                {
                     // Update averages on all subsequent frames
-                    for (int i = 0; i < spectrum.Length; i++) {
+                    for (int i = 0; i < spectrum.Length; i++)
+                    {
                         spectrumTemporalAverage[i] = ExponentialMovingAverage.UpdateMovingAverage(
                             spectrumTemporalAverage[i], profile.SpectrumTemporalSmoothingCoefficient, spectrum[i]);
                     }
@@ -110,7 +123,8 @@ namespace Aurio.Matching.Wang2003 {
                 // Calculate the residual
                 // The residual is the difference of the current spectrum to the temporal average spectrum. The higher
                 // a bin residual is, the steeper the increase in energy in that peak.
-                for (int i = 0; i < spectrum.Length; i++) {
+                for (int i = 0; i < spectrum.Length; i++)
+                {
                     spectrumResidual[i] = spectrum[i] - spectrumTemporalAverage[i] - 90f;
                 }
 
@@ -124,46 +138,57 @@ namespace Aurio.Matching.Wang2003 {
 
                 // Pick the largest n peaks
                 int numMaxima = Math.Min(peaks.Count, profile.PeaksPerFrame);
-                if (numMaxima > 0) {
+                if (numMaxima > 0)
+                {
                     peaks.Sort((p1, p2) => p1.Value == p2.Value ? 0 : p1.Value < p2.Value ? 1 : -1); // order peaks by height
-                    if (peaks.Count > numMaxima) {
+                    if (peaks.Count > numMaxima)
+                    {
                         peaks.RemoveRange(numMaxima, peaks.Count - numMaxima); // select the n tallest peaks by deleting the rest
                     }
                     peaks.Sort((p1, p2) => p1.Index == p2.Index ? 0 : p1.Index < p2.Index ? -1 : 1); // sort peaks by index (not really necessary)
                 }
 
                 peakHistory.Add(index, peaks);
-                
-                if (FrameProcessed != null) {
+
+                if (FrameProcessed != null)
+                {
                     // Mark peaks as 0dB for spectrogram display purposes
-                    foreach (var peak in peaks) {
+                    foreach (var peak in peaks)
+                    {
                         spectrum[peak.Index] = 0;
                         spectrumResidual[peak.Index] = 0;
                     }
 
-                    FrameProcessed(this, new FrameProcessedEventArgs { 
-                        AudioTrack = track, Index = index, Indices = indices,
-                        Spectrum = spectrum, SpectrumResidual = spectrumResidual
+                    FrameProcessed(this, new FrameProcessedEventArgs
+                    {
+                        AudioTrack = track,
+                        Index = index,
+                        Indices = indices,
+                        Spectrum = spectrum,
+                        SpectrumResidual = spectrumResidual
                     });
                 }
 
                 processedFrames++;
                 index++;
 
-                if (processedFrames >= peakHistory.Length) {
+                if (processedFrames >= peakHistory.Length)
+                {
                     peakPairs.Clear();
                     FindPairsWithMaxEnergy(peakHistory, peakPairs);
                     ConvertPairsToSubFingerprints(peakPairs, subFingerprints);
                 }
 
-                if (subFingerprints.Count > 512) {
+                if (subFingerprints.Count > 512)
+                {
                     FireFingerprintHashesGenerated(track, indices, subFingerprints);
                     subFingerprints.Clear();
                 }
             }
 
             // Flush the remaining peaks of the last frames from the history to get all remaining pairs
-            for (int i = 0; i < profile.TargetZoneLength; i++) {
+            for (int i = 0; i < profile.TargetZoneLength; i++)
+            {
                 var peaks = peakHistory.List;
                 peaks.Clear();
                 peakHistory.Add(-1, peaks);
@@ -190,24 +215,30 @@ namespace Aurio.Matching.Wang2003 {
         ///  /        \_/\  /   \
         /// /             \/     \
         /// </summary>
-        private void FindLocalMaxima(float[] data, List<Peak> peakList) {
+        private void FindLocalMaxima(float[] data, List<Peak> peakList)
+        {
             float val;
             float lastVal = float.MinValue;
             int anchorIndex = -1;
-            for (int i = 0; i < data.Length; i++) {
+            for (int i = 0; i < data.Length; i++)
+            {
                 val = data[i];
 
-                if (val > lastVal) {
+                if (val > lastVal)
+                {
                     // Climbing an increasing slope to a local maximum
                     anchorIndex = i;
                 }
-                else if (val == lastVal) {
+                else if (val == lastVal)
+                {
                     // Plateau
                     // anchorIndex stays the same, as the maximum is always at the beginning of a plateau
                 }
-                else {
+                else
+                {
                     // Value is decreasing, going down the decreasing slope
-                    if (anchorIndex > -1) {
+                    if (anchorIndex > -1)
+                    {
                         // Local maximum found
                         // The first decrease always comes after a peak (or plateau), 
                         // so the last set anchorIndex is the index of the peak.
@@ -231,22 +262,29 @@ namespace Aurio.Matching.Wang2003 {
         /// </summary>
         /// <param name="peakHistory">the history structure to read the peaks from</param>
         /// <param name="peakPairs">the list to store the pairs in</param>
-        private void FindPairsNaive(PeakHistory peakHistory, List<PeakPair> peakPairs) {
+        private void FindPairsNaive(PeakHistory peakHistory, List<PeakPair> peakPairs)
+        {
             var halfWidth = profile.TargetZoneWidth / 2;
 
             var index = peakHistory.Index;
-            foreach (var peak in peakHistory.Lists[0]) {
+            foreach (var peak in peakHistory.Lists[0])
+            {
                 int count = 0;
-                for (int distance = profile.TargetZoneDistance; distance < peakHistory.Length; distance++) {
-                    foreach (var targetPeak in peakHistory.Lists[distance]) {
-                        if (peak.Index >= targetPeak.Index - halfWidth && peak.Index <= targetPeak.Index + halfWidth) {
+                for (int distance = profile.TargetZoneDistance; distance < peakHistory.Length; distance++)
+                {
+                    foreach (var targetPeak in peakHistory.Lists[distance])
+                    {
+                        if (peak.Index >= targetPeak.Index - halfWidth && peak.Index <= targetPeak.Index + halfWidth)
+                        {
                             peakPairs.Add(new PeakPair { Index = index, Peak1 = peak, Peak2 = targetPeak, Distance = distance });
-                            if (++count >= profile.PeakFanout) {
+                            if (++count >= profile.PeakFanout)
+                            {
                                 break;
                             }
                         }
                     }
-                    if (count >= profile.PeakFanout) {
+                    if (count >= profile.PeakFanout)
+                    {
                         break;
                     }
                 }
@@ -266,7 +304,8 @@ namespace Aurio.Matching.Wang2003 {
         /// </summary>
         /// <param name="peakHistory">the history structure to read the peaks from</param>
         /// <param name="peakPairs">the list to store the pairs in</param>
-        private void FindPairsWithMaxEnergy(PeakHistory peakHistory, List<PeakPair> peakPairs) {
+        private void FindPairsWithMaxEnergy(PeakHistory peakHistory, List<PeakPair> peakPairs)
+        {
             var halfWidth = profile.TargetZoneWidth / 2;
 
             // Get pairs from peaks
@@ -275,24 +314,31 @@ namespace Aurio.Matching.Wang2003 {
             // For now, this just iterates linearly through frames and their peaks and generates a pair if the
             // constraints of the target area permit, until the max number of pairs has been generated.
             var index = peakHistory.Index;
-            foreach (var peak in peakHistory.Lists[0]) {
-                for (int distance = profile.TargetZoneDistance; distance < peakHistory.Length; distance++) {
-                    foreach (var targetPeak in peakHistory.Lists[distance]) {
-                        if (peak.Index >= targetPeak.Index - halfWidth && peak.Index <= targetPeak.Index + halfWidth) {
+            foreach (var peak in peakHistory.Lists[0])
+            {
+                for (int distance = profile.TargetZoneDistance; distance < peakHistory.Length; distance++)
+                {
+                    foreach (var targetPeak in peakHistory.Lists[distance])
+                    {
+                        if (peak.Index >= targetPeak.Index - halfWidth && peak.Index <= targetPeak.Index + halfWidth)
+                        {
                             peakPairs.Add(new PeakPair { Index = index, Peak1 = peak, Peak2 = targetPeak, Distance = distance });
                         }
                     }
                 }
             }
 
-            peakPairs.Sort((pp1, pp2) => {
+            peakPairs.Sort((pp1, pp2) =>
+            {
                 var avg1 = pp1.AverageEnergy;
                 var avg2 = pp2.AverageEnergy;
 
-                if (avg1 < avg2) {
+                if (avg1 < avg2)
+                {
                     return 1;
                 }
-                else if (avg1 > avg2) {
+                else if (avg1 > avg2)
+                {
                     return -1;
                 }
 
@@ -300,12 +346,14 @@ namespace Aurio.Matching.Wang2003 {
             });
 
             int maxPeaks = Math.Min(profile.PeakFanout, peakPairs.Count);
-            if (peakPairs.Count > maxPeaks) {
+            if (peakPairs.Count > maxPeaks)
+            {
                 peakPairs.RemoveRange(maxPeaks, peakPairs.Count - maxPeaks); // select the n most prominent peak pairs
             }
         }
 
-        private void ConvertPairsToSubFingerprints(List<PeakPair> peakPairs, List<SubFingerprint> subFingerprints) {
+        private void ConvertPairsToSubFingerprints(List<PeakPair> peakPairs, List<SubFingerprint> subFingerprints)
+        {
             // This sorting step is needed for the Zipper intersection algorithm in the fingerprint 
             // store to find matching hashes, which expects them sorted by frame index. Sorting works
             // because the index is coded in the most significant bits of the hashes.
@@ -314,23 +362,28 @@ namespace Aurio.Matching.Wang2003 {
             subFingerprints.AddRange(hashes.ConvertAll(h => new SubFingerprint(peakPairs[0].Index, h, false)));
         }
 
-        private void FireFingerprintHashesGenerated(AudioTrack track, int indices, List<SubFingerprint> subFingerprints) {
-            if (SubFingerprintsGenerated != null) {
+        private void FireFingerprintHashesGenerated(AudioTrack track, int indices, List<SubFingerprint> subFingerprints)
+        {
+            if (SubFingerprintsGenerated != null)
+            {
                 SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, subFingerprints, subFingerprints[0].Index, indices));
             }
         }
 
-        public static Profile[] GetProfiles() {
+        public static Profile[] GetProfiles()
+        {
             return new Profile[] { new DefaultProfile() };
         }
 
         [DebuggerDisplay("{index}/{value}")]
-        private struct Peak {
+        private struct Peak
+        {
 
             private int index;
             private float value;
 
-            public Peak(int index, float value) {
+            public Peak(int index, float value)
+            {
                 this.index = index;
                 this.value = value;
             }
@@ -339,14 +392,16 @@ namespace Aurio.Matching.Wang2003 {
         }
 
         [DebuggerDisplay("{Index}:{Peak1.Index} --({Distance})--> {Peak2.Index}")]
-        private struct PeakPair {
+        private struct PeakPair
+        {
             public int Index { get; set; }
             public Peak Peak1 { get; set; }
             public Peak Peak2 { get; set; }
             public int Distance { get; set; }
             public float AverageEnergy { get { return (Peak1.Value + Peak2.Value) / 2; } }
 
-            public static uint PeakPairToHash(PeakPair pp) {
+            public static uint PeakPairToHash(PeakPair pp)
+            {
                 // Put frequency bins and the distance each in one byte. The actual quantization
                 // is configured through the parameters, e.g. the FFT window size determines the
                 // number of frequency bins, and the size of the target zone determines the max
@@ -355,9 +410,11 @@ namespace Aurio.Matching.Wang2003 {
                 return (uint)((byte)pp.Peak1.Index << 16 | (byte)pp.Peak2.Index << 8 | (byte)pp.Distance);
             }
 
-            public static PeakPair HashToPeakPair(uint hash, int index) {
+            public static PeakPair HashToPeakPair(uint hash, int index)
+            {
                 // The inverse operation of the function above.
-                return new PeakPair {
+                return new PeakPair
+                {
                     Index = index,
                     Peak1 = new Peak((int)(hash >> 16 & 0xFF), 0),
                     Peak2 = new Peak((int)(hash >> 8 & 0xFF), 0),
@@ -376,17 +433,20 @@ namespace Aurio.Matching.Wang2003 {
         /// which moves the second oldest entry to the first position (thus, it becomes the oldest),
         /// and the oldest entry gets reused and added as the most recent to the end.
         /// </summary>
-        private class PeakHistory {
+        private class PeakHistory
+        {
 
             private RingBuffer<int> indexHistory; // a FIFO list of peak list indices
             private RingBuffer<List<Peak>> peakHistory; // a FIFO list of peak lists
 
-            public PeakHistory(int length, int maxPeaksPerFrame) {
+            public PeakHistory(int length, int maxPeaksPerFrame)
+            {
                 indexHistory = new RingBuffer<int>(length);
                 peakHistory = new RingBuffer<List<Peak>>(length);
 
                 // Instantiate peak lists for later reuse
-                for (int i = 0; i < length; i++) {
+                for (int i = 0; i < length; i++)
+                {
                     indexHistory.Add(-1);
                     peakHistory.Add(new List<Peak>(maxPeaksPerFrame));
                 }
@@ -395,7 +455,8 @@ namespace Aurio.Matching.Wang2003 {
             /// <summary>
             /// The capacity of the history.
             /// </summary>
-            public int Length {
+            public int Length
+            {
                 get { return peakHistory.Length; }
             }
 
@@ -404,7 +465,8 @@ namespace Aurio.Matching.Wang2003 {
             /// This always equals to the Length because it gets pre-filled
             /// at construction time.
             /// </summary>
-            public int Count {
+            public int Count
+            {
                 get { return peakHistory.Count; }
             }
 
@@ -412,7 +474,8 @@ namespace Aurio.Matching.Wang2003 {
             /// The current (oldest) index.
             /// This is the index of the peak list that pairs are calculated for.
             /// </summary>
-            public int Index {
+            public int Index
+            {
                 get { return indexHistory[0]; }
             }
 
@@ -420,21 +483,24 @@ namespace Aurio.Matching.Wang2003 {
             /// The current (oldest) peak list. 
             /// This is the peak list that pairs are calculated for.
             /// </summary>
-            public List<Peak> List {
+            public List<Peak> List
+            {
                 get { return peakHistory[0]; }
             }
 
             /// <summary>
             /// Gets the FIFO queue of the indices.
             /// </summary>
-            public RingBuffer<int> Indices {
+            public RingBuffer<int> Indices
+            {
                 get { return indexHistory; }
             }
 
             /// <summary>
             /// Gets the FIFO queue of the peak lists.
             /// </summary>
-            public RingBuffer<List<Peak>> Lists {
+            public RingBuffer<List<Peak>> Lists
+            {
                 get { return peakHistory; }
             }
 
@@ -443,16 +509,20 @@ namespace Aurio.Matching.Wang2003 {
             /// </summary>
             /// <param name="index"></param>
             /// <param name="list"></param>
-            public void Add(int index, List<Peak> list) {
+            public void Add(int index, List<Peak> list)
+            {
                 indexHistory.Add(index);
                 peakHistory.Add(list);
             }
 
-            public void DebugPrint() {
+            public void DebugPrint()
+            {
                 Console.WriteLine("--------");
-                for (int i = 0; i < Length; i++) {
+                for (int i = 0; i < Length; i++)
+                {
                     Console.Write(indexHistory[i] + ": ");
-                    foreach (var peak in peakHistory[i]) {
+                    foreach (var peak in peakHistory[i])
+                    {
                         Console.Write(peak.Index + " ");
                     }
                     Console.WriteLine("");

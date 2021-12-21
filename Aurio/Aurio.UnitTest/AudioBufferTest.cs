@@ -5,11 +5,14 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Aurio;
 
-namespace Aurio.UnitTest {
+namespace Aurio.UnitTest
+{
     [TestClass]
-    public class AudioBufferTest {
+    public class AudioBufferTest
+    {
         [TestMethod]
-        public void AudioBufferConstructor1() {
+        public void AudioBufferConstructor1()
+        {
             AudioBuffer b = new AudioBuffer(64);
 
             Assert.AreEqual(64, b.ByteSize);
@@ -21,20 +24,24 @@ namespace Aurio.UnitTest {
             AudioBuffer b2 = new AudioBuffer(64);
             b2.FloatData[0] = b.FloatData[0];
 
-            for (int x = 0; x < b.ByteSize; x++) {
+            for (int x = 0; x < b.ByteSize; x++)
+            {
                 Assert.AreEqual(b.ByteData[x], b2.ByteData[x]);
             }
         }
 
         [TestMethod]
-        public void AudioBufferConstructor2() {
+        public void AudioBufferConstructor2()
+        {
             float f1 = 155.55f;
             float f2 = 765.432f;
 
             byte[] array = new byte[64];
             // inject float values into the byte array
-            unsafe {
-                fixed (byte* arrayB = &array[0]) {
+            unsafe
+            {
+                fixed (byte* arrayB = &array[0])
+                {
                     float* arrayF = (float*)arrayB;
                     arrayF[0] = f1;
                     arrayF[5] = f2;
@@ -50,7 +57,8 @@ namespace Aurio.UnitTest {
 
         [TestMethod]
         [ExpectedException(typeof(IndexOutOfRangeException), "cannot read all float bytes, as expected")]
-        public void AudioBufferConstructor3() {
+        public void AudioBufferConstructor3()
+        {
             float[] array = new float[1];
             AudioBuffer b = new AudioBuffer(array);
 
@@ -59,7 +67,8 @@ namespace Aurio.UnitTest {
              * because it has been initialized with a float array of length one and both are mapped to the 
              * same memory address)
              */
-            for (int x = 0; x < 4; x++) {
+            for (int x = 0; x < 4; x++)
+            {
                 byte floatByte = b.ByteData[x];
             }
         }

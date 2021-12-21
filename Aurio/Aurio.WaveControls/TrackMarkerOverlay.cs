@@ -25,23 +25,28 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 
-namespace Aurio.WaveControls {
-    public class TrackMarkerOverlay : ContentOverlay {
+namespace Aurio.WaveControls
+{
+    public class TrackMarkerOverlay : ContentOverlay
+    {
 
         public static readonly DependencyProperty MarkersProperty;
 
-        static TrackMarkerOverlay() {
+        static TrackMarkerOverlay()
+        {
             MarkersProperty = DependencyProperty.Register(
                 "Markers", typeof(List<TrackMarker>), typeof(TrackMarkerOverlay),
                     new FrameworkPropertyMetadata { AffectsRender = true, DefaultValue = new List<TrackMarker>() });
         }
 
-        public List<TrackMarker> Markers {
+        public List<TrackMarker> Markers
+        {
             get { return (List<TrackMarker>)GetValue(MarkersProperty); }
             set { SetValue(MarkersProperty, value); }
         }
 
-        internal override void OnRenderOverlay(DrawingContext drawingContext) {
+        internal override void OnRenderOverlay(DrawingContext drawingContext)
+        {
             Brush foregroundBrush = Foreground;
             Brush backgroundBrush = Background;
             Pen pen = new Pen(foregroundBrush, 1.0);
@@ -49,18 +54,21 @@ namespace Aurio.WaveControls {
             double textPadding = 3;
             double pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
 
-            foreach (var marker in Markers) {
-                if(visibleInterval.Contains(marker.Position.Ticks)) {
+            foreach (var marker in Markers)
+            {
+                if (visibleInterval.Contains(marker.Position.Ticks))
+                {
                     double renderOffset = VirtualToPhysicalIntervalOffset(marker.Position.Ticks);
 
                     // Draw line marker
-                    drawingContext.DrawLine(pen, new Point(renderOffset, 0), 
+                    drawingContext.DrawLine(pen, new Point(renderOffset, 0),
                         new Point(renderOffset, RenderSize.Height));
 
                     // Draw text label
                     FormattedText formattedText = new FormattedText(marker.Text,
                         CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), 8, foregroundBrush, pixelsPerDip) { TextAlignment = TextAlignment.Left };
+                        new Typeface("Tahoma"), 8, foregroundBrush, pixelsPerDip)
+                    { TextAlignment = TextAlignment.Left };
 
                     var textBgSize = new Size(formattedText.Width + 2 * textPadding, formattedText.Height + 2 * textPadding);
                     var textBgPosition = new Point(renderOffset + 2, RenderSize.Height - textBgSize.Height - 5);
@@ -82,13 +90,15 @@ namespace Aurio.WaveControls {
             }
         }
 
-        private StreamGeometry CreateTriangle(double height) {
+        private StreamGeometry CreateTriangle(double height)
+        {
             Point left = new Point(0, height / 2);
             Point top = new Point(height / 3, 0);
             Point bottom = new Point(height / 3, height);
             StreamGeometry streamGeometry = new StreamGeometry();
 
-            using (StreamGeometryContext geometryContext = streamGeometry.Open()) {
+            using (StreamGeometryContext geometryContext = streamGeometry.Open())
+            {
                 geometryContext.BeginFigure(left, true, true);
                 geometryContext.PolyLineTo(new PointCollection { top, bottom }, true, true);
             }

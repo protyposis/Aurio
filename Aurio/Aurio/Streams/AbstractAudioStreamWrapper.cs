@@ -21,45 +21,57 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Streams {
-    public abstract class AbstractAudioStreamWrapper : IAudioStream {
+namespace Aurio.Streams
+{
+    public abstract class AbstractAudioStreamWrapper : IAudioStream
+    {
 
         protected IAudioStream sourceStream;
 
-        public AbstractAudioStreamWrapper(IAudioStream sourceStream) {
+        public AbstractAudioStreamWrapper(IAudioStream sourceStream)
+        {
             this.sourceStream = sourceStream;
         }
 
-        public virtual AudioProperties Properties {
+        public virtual AudioProperties Properties
+        {
             get { return sourceStream.Properties; }
         }
 
-        public virtual long Length {
+        public virtual long Length
+        {
             get { return sourceStream.Length; }
         }
 
-        public virtual long Position {
+        public virtual long Position
+        {
             get { return sourceStream.Position; }
             set { sourceStream.Position = value; }
         }
 
-        public virtual int SampleBlockSize {
+        public virtual int SampleBlockSize
+        {
             get { return sourceStream.SampleBlockSize; }
         }
 
-        public virtual int Read(byte[] buffer, int offset, int count) {
-            if (offset < 0 || offset >= buffer.Length || count < 0 || count > buffer.Length) {
+        public virtual int Read(byte[] buffer, int offset, int count)
+        {
+            if (offset < 0 || offset >= buffer.Length || count < 0 || count > buffer.Length)
+            {
                 throw new ArgumentException("invalid parameters");
             }
             return sourceStream.Read(buffer, offset, count);
         }
 
-        public virtual void Close() {
+        public virtual void Close()
+        {
             sourceStream.Close();
         }
 
-        protected void ValidateSampleBlockAlignment(long value) {
-            if (value % SampleBlockSize != 0) {
+        protected void ValidateSampleBlockAlignment(long value)
+        {
+            if (value % SampleBlockSize != 0)
+            {
                 throw new Exception("misaligned stream position (not aligned to the sample block size");
             }
         }
@@ -67,9 +79,12 @@ namespace Aurio.Streams {
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing) {
-            if (!disposedValue) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
                     Close();
                 }
 
@@ -77,7 +92,8 @@ namespace Aurio.Streams {
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
         }
         #endregion

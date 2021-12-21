@@ -22,8 +22,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Aurio.FFmpeg {
-    internal class Interop32 {
+namespace Aurio.FFmpeg
+{
+    internal class Interop32
+    {
 
         private const string FFMPEGPROXYLIB = "ffmpeg32\\Aurio.FFmpeg.Proxy32.dll";
 

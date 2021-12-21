@@ -22,9 +22,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Matching.Chromaprint {
-    class SyncProfile : DefaultProfile {
-        public SyncProfile() : base() {
+namespace Aurio.Matching.Chromaprint
+{
+    class SyncProfile : DefaultProfile
+    {
+        public SyncProfile() : base()
+        {
             Name = "Sync optimized";
 
             // The same settings as in the Haitsma&Kalker default profile

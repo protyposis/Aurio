@@ -23,7 +23,8 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 
-namespace Aurio.WaveControls {
+namespace Aurio.WaveControls
+{
     /// <summary>
     /// Wraps an element and adds an overlay to draw above the wrapped element. 
     /// 
@@ -34,11 +35,13 @@ namespace Aurio.WaveControls {
     /// is similar to an adorner, except the adorner cannot be configures in XAML and must be added in
     /// code behind. This control can just be added IN XAML as a wrapper of a content element to draw above.
     /// </summary>
-    public abstract class ContentOverlay : VirtualContentViewBase {
+    public abstract class ContentOverlay : VirtualContentViewBase
+    {
 
         public static readonly DependencyProperty OverlayOpacityProperty;
 
-        static ContentOverlay() {
+        static ContentOverlay()
+        {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(ContentOverlay),
                 new FrameworkPropertyMetadata(typeof(ContentOverlay)));
 
@@ -48,18 +51,21 @@ namespace Aurio.WaveControls {
 
         internal ContentOverlayDrawSurface DrawSurface { get; set; }
 
-        public double OverlayOpacity {
+        public double OverlayOpacity
+        {
             get { return (double)GetValue(OverlayOpacityProperty); }
             set { SetValue(OverlayOpacityProperty, value); }
         }
 
         internal abstract void OnRenderOverlay(DrawingContext drawingContext);
 
-        protected override void OnViewportOffsetChanged(long oldValue, long newValue) {
+        protected override void OnViewportOffsetChanged(long oldValue, long newValue)
+        {
             DrawSurface?.InvalidateVisual();
         }
 
-        protected override void OnViewportWidthChanged(long oldValue, long newValue) {
+        protected override void OnViewportWidthChanged(long oldValue, long newValue)
+        {
             DrawSurface?.InvalidateVisual();
         }
     }

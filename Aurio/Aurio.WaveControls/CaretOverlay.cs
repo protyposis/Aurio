@@ -30,9 +30,11 @@ using System.Windows.Media;
 using System.ComponentModel;
 using System.Windows.Controls.Primitives;
 
-namespace Aurio.WaveControls {
+namespace Aurio.WaveControls
+{
     [TemplatePart(Name = "PART_Caret", Type = typeof(UIElement))]
-    public class CaretOverlay : VirtualContentViewBase {
+    public class CaretOverlay : VirtualContentViewBase
+    {
 
         private static readonly DependencyPropertyKey PhysicalCaretOffsetPropertyKey;
 
@@ -40,8 +42,9 @@ namespace Aurio.WaveControls {
         public static readonly DependencyProperty VirtualCaretOffsetProperty;
         public static readonly DependencyProperty SuppressEventsProperty;
         public static readonly DependencyProperty CaretVisibilityProperty;
-  
-        public class PositionEventArgs : RoutedEventArgs {
+
+        public class PositionEventArgs : RoutedEventArgs
+        {
             public PositionEventArgs() : base() { }
             public PositionEventArgs(RoutedEvent routedEvent) : base(routedEvent) { }
             public PositionEventArgs(RoutedEvent routedEvent, object source) : base(routedEvent, source) { }
@@ -50,7 +53,8 @@ namespace Aurio.WaveControls {
             public double SourceInterval { get; set; }
         }
 
-        public class IntervalEventArgs : RoutedEventArgs {
+        public class IntervalEventArgs : RoutedEventArgs
+        {
             public IntervalEventArgs() : base() { }
             public IntervalEventArgs(RoutedEvent routedEvent) : base(routedEvent) { }
             public IntervalEventArgs(RoutedEvent routedEvent, object source) : base(routedEvent, source) { }
@@ -66,8 +70,9 @@ namespace Aurio.WaveControls {
         public static readonly RoutedEvent PositionSelectedEvent;
         public static readonly RoutedEvent IntervalSelectedEvent;
 
-        static CaretOverlay() {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(CaretOverlay), 
+        static CaretOverlay()
+        {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(CaretOverlay),
                 new FrameworkPropertyMetadata(typeof(CaretOverlay)));
 
             PhysicalCaretOffsetPropertyKey = DependencyProperty.RegisterReadOnly("PhysicalCaretOffset",
@@ -77,8 +82,11 @@ namespace Aurio.WaveControls {
 
             VirtualCaretOffsetProperty = DependencyProperty.Register("VirtualCaretOffset",
                 typeof(long), typeof(CaretOverlay),
-                new FrameworkPropertyMetadata(new PropertyChangedCallback(OnVirtualCaretOffsetChanged)) { Inherits = true,
-                CoerceValueCallback = CoerceVirtualCaretOffset});
+                new FrameworkPropertyMetadata(new PropertyChangedCallback(OnVirtualCaretOffsetChanged))
+                {
+                    Inherits = true,
+                    CoerceValueCallback = CoerceVirtualCaretOffset
+                });
 
             SuppressEventsProperty = DependencyProperty.RegisterAttached("SuppressEvents", typeof(bool),
                   typeof(CaretOverlay), new FrameworkPropertyMetadata(false, OnSuppressEventsChanged));
@@ -95,150 +103,186 @@ namespace Aurio.WaveControls {
                 typeof(IntervalEventHandler), typeof(CaretOverlay));
         }
 
-        internal static object CoerceVirtualCaretOffset(DependencyObject d, object value) {
+        internal static object CoerceVirtualCaretOffset(DependencyObject d, object value)
+        {
             long newValue = (long)value;
 
             long lowerBound = 0L;
-            if (newValue < lowerBound) {
+            if (newValue < lowerBound)
+            {
                 return lowerBound;
             }
 
             long upperBound = ((VirtualView)d).VirtualViewportMaxWidth;
-            if (newValue > upperBound) {
+            if (newValue > upperBound)
+            {
                 return upperBound;
             }
 
             return newValue;
         }
 
-        private static void OnPhysicalCaretOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        private static void OnPhysicalCaretOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
             CaretOverlay caretOverlay = d as CaretOverlay;
             //Debug.WriteLine("CaretOverlay OnPhysicalCaretOffsetChanged {0} -> {1} ({2})", e.OldValue, e.NewValue, caretOverlay.Name);
         }
 
-        private static void OnVirtualCaretOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        private static void OnVirtualCaretOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
             CaretOverlay caretOverlay = d as CaretOverlay;
             //Debug.WriteLine("CaretOverlay OnVirtualCaretOffsetChanged {0} -> {1} ({2})", e.OldValue, e.NewValue, caretOverlay.Name);
             caretOverlay.PhysicalCaretOffset = caretOverlay.VirtualToPhysicalIntervalOffset((long)e.NewValue);
         }
 
-        public static void OnSuppressEventsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args) {
+        public static void OnSuppressEventsChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        {
         }
 
-        public static void SetSuppressEvents(DependencyObject element, Boolean value) {
+        public static void SetSuppressEvents(DependencyObject element, Boolean value)
+        {
             element.SetValue(SuppressEventsProperty, value);
         }
-        public static bool GetSuppressEvents(DependencyObject element) {
+        public static bool GetSuppressEvents(DependencyObject element)
+        {
             return (bool)element.GetValue(SuppressEventsProperty);
         }
 
-        public CaretOverlay() {
+        public CaretOverlay()
+        {
             Loaded += new RoutedEventHandler(CaretOverlay_Loaded);
         }
 
-        private void CaretOverlay_Loaded(object sender, RoutedEventArgs e) {
+        private void CaretOverlay_Loaded(object sender, RoutedEventArgs e)
+        {
             Thumb thumb = GetTemplateChild("PART_Caret") as Thumb;
-            if (thumb != null) {
+            if (thumb != null)
+            {
                 // if the caret is a thumb, enhance the caret overview's functionality
                 thumb.DragDelta += new DragDeltaEventHandler(thumb_DragDelta);
             }
         }
 
-        private void thumb_DragDelta(object sender, DragDeltaEventArgs e) {
-            RaiseEvent(new PositionEventArgs(PositionSelectedEvent, this) {
-                Position = PhysicalCaretOffset + e.HorizontalChange, SourceInterval = ActualWidth
+        private void thumb_DragDelta(object sender, DragDeltaEventArgs e)
+        {
+            RaiseEvent(new PositionEventArgs(PositionSelectedEvent, this)
+            {
+                Position = PhysicalCaretOffset + e.HorizontalChange,
+                SourceInterval = ActualWidth
             });
         }
 
         private Point mouseDownPosition;
 
-        public double PhysicalCaretOffset {
+        public double PhysicalCaretOffset
+        {
             get { return (double)GetValue(PhysicalCaretOffsetProperty); }
             private set { SetValue(PhysicalCaretOffsetPropertyKey, value); }
         }
 
-        public long VirtualCaretOffset {
+        public long VirtualCaretOffset
+        {
             get { return (long)GetValue(VirtualCaretOffsetProperty); }
             set { SetValue(VirtualCaretOffsetProperty, value); }
         }
 
-        public Visibility CaretVisibility {
+        public Visibility CaretVisibility
+        {
             get { return (Visibility)GetValue(CaretVisibilityProperty); }
             set { SetValue(CaretVisibilityProperty, value); }
         }
 
-        public event PositionEventHandler PointSelected {
+        public event PositionEventHandler PointSelected
+        {
             add { AddHandler(PositionSelectedEvent, value); }
             remove { RemoveHandler(PositionSelectedEvent, value); }
         }
 
-        public event IntervalEventHandler IntervalSelected {
+        public event IntervalEventHandler IntervalSelected
+        {
             add { AddHandler(IntervalSelectedEvent, value); }
             remove { RemoveHandler(IntervalSelectedEvent, value); }
         }
 
-        protected override void OnPreviewMouseDown(System.Windows.Input.MouseButtonEventArgs e) {
+        protected override void OnPreviewMouseDown(System.Windows.Input.MouseButtonEventArgs e)
+        {
             base.OnPreviewMouseDown(e);
             //Debug.WriteLine("CaretOverlay OnPreviewMouseDown @ " + Mouse.GetPosition(this));
             mouseDownPosition = Mouse.GetPosition(this);
 
             bool suppressEvent = false;
             VisualTreeHelper.HitTest(this,
-                new HitTestFilterCallback(delegate(DependencyObject target) {
+                new HitTestFilterCallback(delegate (DependencyObject target)
+                {
                     //Debug.WriteLine("HitTestFilter: " + target.GetType());
-                    return HitTestFilterBehavior.Continue; 
+                    return HitTestFilterBehavior.Continue;
                 }),
-                new HitTestResultCallback(delegate(HitTestResult target) {
+                new HitTestResultCallback(delegate (HitTestResult target)
+                {
                     //Debug.WriteLine("HitTestResult: " + target.VisualHit + " / " 
                     //    + target.VisualHit.GetValue(SuppressEventsProperty));
-                    if ((bool)target.VisualHit.GetValue(SuppressEventsProperty) == true) {
+                    if ((bool)target.VisualHit.GetValue(SuppressEventsProperty) == true)
+                    {
                         suppressEvent = true;
                         return HitTestResultBehavior.Stop;
                     }
-                    return HitTestResultBehavior.Continue; 
-                }), 
+                    return HitTestResultBehavior.Continue;
+                }),
                 new PointHitTestParameters(mouseDownPosition));
-            if (suppressEvent) {
+            if (suppressEvent)
+            {
                 mouseDownPosition = new Point(-1, -1);
             }
         }
 
-        protected override void OnPreviewMouseUp(System.Windows.Input.MouseButtonEventArgs e) {
+        protected override void OnPreviewMouseUp(System.Windows.Input.MouseButtonEventArgs e)
+        {
             base.OnPreviewMouseUp(e);
             //Debug.WriteLine("CaretOverlay OnPreviewMouseUp @ " + Mouse.GetPosition(this));
 
-            if (mouseDownPosition == new Point(-1, -1)) {
+            if (mouseDownPosition == new Point(-1, -1))
+            {
                 return;
             }
 
             Point mouseUpPosition = Mouse.GetPosition(this);
-            if (mouseUpPosition == mouseDownPosition) {
+            if (mouseUpPosition == mouseDownPosition)
+            {
                 // pseudo click event
                 //Debug.WriteLine("CaretOverlay PseudoClick @ " + mouseDownPosition);
-                RaiseEvent(new PositionEventArgs(PositionSelectedEvent, this) {
-                    Position = mouseDownPosition.X, SourceInterval = ActualWidth
+                RaiseEvent(new PositionEventArgs(PositionSelectedEvent, this)
+                {
+                    Position = mouseDownPosition.X,
+                    SourceInterval = ActualWidth
                 });
                 Keyboard.Focus(this);
             }
-            else {
+            else
+            {
                 // interval selection event
-                RaiseEvent(new IntervalEventArgs(IntervalSelectedEvent, this) {
-                    From = mouseDownPosition.X, To = mouseUpPosition.X, SourceInterval = ActualWidth
+                RaiseEvent(new IntervalEventArgs(IntervalSelectedEvent, this)
+                {
+                    From = mouseDownPosition.X,
+                    To = mouseUpPosition.X,
+                    SourceInterval = ActualWidth
                 });
             }
         }
 
-        protected override void OnViewportWidthChanged(long oldValue, long newValue) {
+        protected override void OnViewportWidthChanged(long oldValue, long newValue)
+        {
             base.OnViewportWidthChanged(oldValue, newValue);
             PhysicalCaretOffset = VirtualToPhysicalIntervalOffset(VirtualCaretOffset);
         }
 
-        protected override void OnViewportOffsetChanged(long oldValue, long newValue) {
+        protected override void OnViewportOffsetChanged(long oldValue, long newValue)
+        {
             base.OnViewportOffsetChanged(oldValue, newValue);
             PhysicalCaretOffset = VirtualToPhysicalIntervalOffset(VirtualCaretOffset);
         }
 
-        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) {
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
             base.OnRenderSizeChanged(sizeInfo);
             OnViewportWidthChanged(VirtualViewportWidth, VirtualViewportWidth);
         }

@@ -4,11 +4,14 @@ using Aurio.Features;
 using Aurio.Streams;
 using System.Linq;
 
-namespace Aurio.UnitTest {
+namespace Aurio.UnitTest
+{
     [TestClass]
-    public class StreamWindowerTest {
+    public class StreamWindowerTest
+    {
         [TestMethod]
-        public void TestWindowing() {
+        public void TestWindowing()
+        {
             float[] samples = new float[] {
                 1,1,1,1,1,1,1,1,1,1,
                 0,0,0,0,0,0,0,0,0,0,

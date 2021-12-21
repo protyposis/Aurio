@@ -21,8 +21,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.PFFFT {
-    internal unsafe class InteropWrapper {
+namespace Aurio.PFFFT
+{
+    internal unsafe class InteropWrapper
+    {
 
         public delegate IntPtr d_pffft_new_setup(int size, Transform transform);
         public delegate void d_pffft_destroy_setup(IntPtr setup);
@@ -44,8 +46,10 @@ namespace Aurio.PFFFT {
         public static d_pffft_aligned_free pffft_aligned_free;
         public static d_pffft_simd_size pffft_simd_size;
 
-        static InteropWrapper() {
-            if (Environment.Is64BitProcess) {
+        static InteropWrapper()
+        {
+            if (Environment.Is64BitProcess)
+            {
                 pffft_new_setup = Interop64.pffft_new_setup;
                 pffft_destroy_setup = Interop64.pffft_destroy_setup;
                 pffft_transform = Interop64.pffft_transform;
@@ -56,7 +60,8 @@ namespace Aurio.PFFFT {
                 pffft_aligned_free = Interop64.pffft_aligned_free;
                 pffft_simd_size = Interop64.pffft_simd_size;
             }
-            else {
+            else
+            {
                 pffft_new_setup = Interop32.pffft_new_setup;
                 pffft_destroy_setup = Interop32.pffft_destroy_setup;
                 pffft_transform = Interop32.pffft_transform;

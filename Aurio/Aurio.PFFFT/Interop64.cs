@@ -22,8 +22,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Aurio.PFFFT {
-    internal unsafe class Interop64 {
+namespace Aurio.PFFFT
+{
+    internal unsafe class Interop64
+    {
 
         private const string PFFFTLIB = "pffft.x64.dll";
         private const CallingConvention CC = CallingConvention.Cdecl;

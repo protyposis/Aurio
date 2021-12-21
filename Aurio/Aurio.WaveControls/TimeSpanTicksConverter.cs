@@ -22,15 +22,19 @@ using System.Linq;
 using System.Text;
 using System.Windows.Data;
 
-namespace Aurio.WaveControls {
+namespace Aurio.WaveControls
+{
     /// <summary>
     /// Converts between TimeSpan structs and long integers (represented by TimeSpan.Ticks).
     /// </summary>
-    public class TimeSpanTicksConverter : IValueConverter {
+    public class TimeSpanTicksConverter : IValueConverter
+    {
         #region IValueConverter Members
 
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-            if (value is TimeSpan) {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value is TimeSpan)
+            {
                 long returnValue = ((TimeSpan)value).Ticks;
 
                 if (targetType == typeof(double))
@@ -38,14 +42,16 @@ namespace Aurio.WaveControls {
 
                 return returnValue;
             }
-            else if (value is long || value is double) {
+            else if (value is long || value is double)
+            {
                 return new TimeSpan(System.Convert.ToInt64(value));
             }
 
             return null;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
             return Convert(value, targetType, parameter, culture);
         }
 

@@ -22,30 +22,38 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 
-namespace Aurio.Streams {
-    public class DebugStreamController {
+namespace Aurio.Streams
+{
+    public class DebugStreamController
+    {
 
         private List<DebugStream> streams;
 
-        public DebugStreamController() {
+        public DebugStreamController()
+        {
             streams = new List<DebugStream>();
         }
 
-        public void Add(DebugStream stream) {
+        public void Add(DebugStream stream)
+        {
             streams.Add(stream);
         }
 
-        public bool Remove(DebugStream stream) {
+        public bool Remove(DebugStream stream)
+        {
             return streams.Remove(stream);
         }
 
-        public void PrintPositions() {
+        public void PrintPositions()
+        {
             PrintPositions("--------------------");
         }
 
-        public void PrintPositions(string tag) {
+        public void PrintPositions(string tag)
+        {
             Debug.WriteLine("--------- {0,-20} ---------", (object)tag);
-            foreach (DebugStream stream in streams) {
+            foreach (DebugStream stream in streams)
+            {
                 Debug.WriteLine("{0,-40} pos {1}", stream.Name, stream.Position);
             }
             Debug.WriteLine("----------------------------------------");

@@ -23,8 +23,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Aurio.FFmpeg {
-    public class FFmpegReader : IDisposable {
+namespace Aurio.FFmpeg
+{
+    public class FFmpegReader : IDisposable
+    {
 
         private string filename; // store source filename for debugging
         private bool disposed = false;
@@ -45,7 +47,8 @@ namespace Aurio.FFmpeg {
         /// </summary>
         /// <param name="filename">the name of the file to read</param>
         /// <param name="mode">the types of data to read</param>
-        public FFmpegReader(string filename, Type mode) {
+        public FFmpegReader(string filename, Type mode)
+        {
             this.filename = filename;
             this.mode = mode;
 
@@ -73,17 +76,20 @@ namespace Aurio.FFmpeg {
         /// <param name="stream">the stream to decode</param>
         /// <param name="mode">the types of data to read</param>
         /// <param name="fileName">optional filename as a hint for FFmpeg to determine the data format</param>
-        public FFmpegReader(Stream stream, Type mode, string fileName) {
+        public FFmpegReader(Stream stream, Type mode, string fileName)
+        {
             this.filename = fileName ?? "bufferedIO_stream";
             this.mode = mode;
 
             var transferBuffer = new byte[0];
-            readPacketDelegate = delegate (IntPtr opaque, IntPtr buffer, int bufferSize) {
+            readPacketDelegate = delegate (IntPtr opaque, IntPtr buffer, int bufferSize)
+            {
                 /* NOTE there's no way to cast the IntPtr to a byte array which is required 
                  * for stream reading, so we need to add an intermediary transfer buffer.
                  */
                 // Increase transfer buffer's size if too small
-                if (transferBuffer.Length < bufferSize) {
+                if (transferBuffer.Length < bufferSize)
+                {
                     transferBuffer = new byte[bufferSize];
                 }
                 // Read data into transfer buffer
@@ -95,8 +101,10 @@ namespace Aurio.FFmpeg {
                 // Return number of bytes read
                 return bytesRead;
             };
-            seekDelegate = delegate (IntPtr opaque, long offset, int whence) {
-                if (whence == 0x10000 /* AVSEEK_SIZE */) {
+            seekDelegate = delegate (IntPtr opaque, long offset, int whence)
+            {
+                if (whence == 0x10000 /* AVSEEK_SIZE */)
+                {
                     return stream.Length;
                 }
                 return stream.Seek(offset, (SeekOrigin)whence);
@@ -117,40 +125,50 @@ namespace Aurio.FFmpeg {
         /// <param name="mode">the types of data to read</param>
         public FFmpegReader(Stream stream, Type mode) : this(stream, mode, null) { }
 
-        private void CheckAndHandleOpeningError() {
-            if (InteropWrapper.stream_has_error(instance)) {
+        private void CheckAndHandleOpeningError()
+        {
+            if (InteropWrapper.stream_has_error(instance))
+            {
                 string errorMessage = Marshal.PtrToStringAnsi(InteropWrapper.stream_get_error(instance));
                 throw new IOException("Error opening the FFmpeg stream: " + errorMessage);
             }
         }
 
-        private void CheckAndHandleActiveInstance() {
-            if (disposed) {
+        private void CheckAndHandleActiveInstance()
+        {
+            if (disposed)
+            {
                 throw new IOException("Cannot operate on a disposed stream");
             }
         }
 
-        private void ReadOutputConfig() {
-            if ((mode & Type.Audio) != 0) {
+        private void ReadOutputConfig()
+        {
+            if ((mode & Type.Audio) != 0)
+            {
                 IntPtr ocp = InteropWrapper.stream_get_output_config(instance, Type.Audio);
                 audioOutputConfig = (AudioOutputConfig)Marshal.PtrToStructure(ocp, typeof(AudioOutputConfig));
             }
 
-            if ((mode & Type.Video) != 0) {
+            if ((mode & Type.Video) != 0)
+            {
                 IntPtr ocp = InteropWrapper.stream_get_output_config(instance, Type.Video);
                 videoOutputConfig = (VideoOutputConfig)Marshal.PtrToStructure(ocp, typeof(VideoOutputConfig));
             }
         }
 
-        public AudioOutputConfig AudioOutputConfig {
+        public AudioOutputConfig AudioOutputConfig
+        {
             get { return audioOutputConfig; }
         }
 
-        public VideoOutputConfig VideoOutputConfig {
+        public VideoOutputConfig VideoOutputConfig
+        {
             get { return videoOutputConfig; }
         }
 
-        public int ReadFrame(out long timestamp, byte[] output_buffer, int output_buffer_size, out Type frameType) {
+        public int ReadFrame(out long timestamp, byte[] output_buffer, int output_buffer_size, out Type frameType)
+        {
             int type;
 
             CheckAndHandleActiveInstance();
@@ -161,24 +179,28 @@ namespace Aurio.FFmpeg {
             return ret;
         }
 
-        public void Seek(long timestamp, Type type) {
+        public void Seek(long timestamp, Type type)
+        {
             CheckAndHandleActiveInstance();
             InteropWrapper.stream_seek(instance, timestamp, type);
         }
 
-        public void CreateSeekIndex(Type type) {
+        public void CreateSeekIndex(Type type)
+        {
             CheckAndHandleActiveInstance();
             InteropWrapper.stream_seekindex_create(instance, type);
         }
 
-        public void RemoveSeekIndex(Type type) {
+        public void RemoveSeekIndex(Type type)
+        {
             CheckAndHandleActiveInstance();
             InteropWrapper.stream_seekindex_remove(instance, type);
         }
 
         #region IDisposable & destructor
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -186,15 +208,19 @@ namespace Aurio.FFmpeg {
         /// <summary>
         /// http://www.codeproject.com/KB/cs/idisposable.aspx
         /// </summary>
-        protected virtual void Dispose(bool disposing) {
-            if (!disposed) {
-                if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
                     // Dispose managed resources.
                 }
 
                 // There are no unmanaged resources to release, but
                 // if we add them, they need to be released here.
-                if (instance != IntPtr.Zero) {
+                if (instance != IntPtr.Zero)
+                {
                     InteropWrapper.stream_close(instance);
                     instance = IntPtr.Zero;
                     readPacketDelegate = null;
@@ -208,7 +234,8 @@ namespace Aurio.FFmpeg {
             //base.Dispose(disposing);
         }
 
-        ~FFmpegReader() {
+        ~FFmpegReader()
+        {
             Dispose(false);
         }
 

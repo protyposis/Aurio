@@ -22,12 +22,14 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace Aurio.LibSampleRate {
+namespace Aurio.LibSampleRate
+{
     /// <summary>
     /// SRC_DATA is used to pass data to src_simple() and src_process().
     /// </summary>
     [StructLayoutAttribute(LayoutKind.Sequential)]
-    internal unsafe struct SRC_DATA {
+    internal unsafe struct SRC_DATA
+    {
 
         /// <summary>
         /// float*

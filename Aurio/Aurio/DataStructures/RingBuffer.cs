@@ -21,11 +21,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.DataStructures {
+namespace Aurio.DataStructures
+{
     /// <summary>
     /// A generic ring buffer with a fixed size.
     /// </summary>
-    class RingBuffer<T> {
+    class RingBuffer<T>
+    {
 
         private T[] buffer;
         private int bufferSize;
@@ -35,7 +37,8 @@ namespace Aurio.DataStructures {
         /// <summary>
         /// Instantiates a new ring buffer with the given size.
         /// </summary>
-        public RingBuffer(int size) {
+        public RingBuffer(int size)
+        {
             this.buffer = new T[size];
             this.bufferSize = size;
             Clear();
@@ -44,14 +47,16 @@ namespace Aurio.DataStructures {
         /// <summary>
         /// Returns the capacity of the ring buffer.
         /// </summary>
-        public int Length {
+        public int Length
+        {
             get { return bufferSize; }
         }
 
         /// <summary>
         /// Returns the fill level of the ring buffer.
         /// </summary>
-        public int Count {
+        public int Count
+        {
             get { return bufferFillLevel; }
         }
 
@@ -59,10 +64,12 @@ namespace Aurio.DataStructures {
         /// Adds a new element ot the ring buffer. When the buffer is already
         /// filled up to its capacity, the oldest element gets thrown away (FIFO style).
         /// </summary>
-        public void Add(T data) {
+        public void Add(T data)
+        {
             buffer[bufferStart] = data;
             bufferStart = (bufferStart + 1) % bufferSize;
-            if (bufferFillLevel < bufferSize) {
+            if (bufferFillLevel < bufferSize)
+            {
                 bufferFillLevel++;
             }
         }
@@ -70,10 +77,12 @@ namespace Aurio.DataStructures {
         /// <summary>
         /// Removes the most recent addition from the ring buffer.
         /// </summary>
-        public void RemoveHead() {
+        public void RemoveHead()
+        {
             bufferStart = Mod(bufferStart - 1, bufferSize);
             buffer[bufferStart] = default(T);
-            if (bufferFillLevel > 0) {
+            if (bufferFillLevel > 0)
+            {
                 bufferFillLevel--;
             }
         }
@@ -81,8 +90,10 @@ namespace Aurio.DataStructures {
         /// <summary>
         /// Removes the oldest addition from the ring buffer.
         /// </summary>
-        public void RemoveTail() {
-            if (bufferFillLevel > 0) {
+        public void RemoveTail()
+        {
+            if (bufferFillLevel > 0)
+            {
                 bufferFillLevel--;
             }
         }
@@ -92,9 +103,12 @@ namespace Aurio.DataStructures {
         /// is always at index 0, the newest at Count-1.
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">when the given size exceeds the fill level or the capacity</exception>
-        public T this[int index] {
-            get {
-                if(index < 0 || index >= bufferFillLevel) {
+        public T this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= bufferFillLevel)
+                {
                     throw new IndexOutOfRangeException();
                 }
                 int realIndex = (index + bufferStart + (bufferSize - bufferFillLevel)) % bufferSize;
@@ -105,12 +119,14 @@ namespace Aurio.DataStructures {
         /// <summary>
         /// Clears the contents of the ring buffer.
         /// </summary>
-        public void Clear() {
+        public void Clear()
+        {
             bufferStart = 0;
             bufferFillLevel = 0;
         }
 
-        private static int Mod(int i, int n) {
+        private static int Mod(int i, int n)
+        {
             return ((i %= n) < 0) ? i + n : i;
         }
     }

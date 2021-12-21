@@ -25,10 +25,13 @@ using System.Runtime.CompilerServices;
 using System.Timers;
 using System.ComponentModel;
 
-namespace Aurio.TaskMonitor {
-    public sealed class ProgressMonitor {
+namespace Aurio.TaskMonitor
+{
+    public sealed class ProgressMonitor
+    {
 
-        private class ProgressReporter : IProgressReporter {
+        private class ProgressReporter : IProgressReporter
+        {
 
             private ProgressMonitor monitor;
             private string name;
@@ -40,7 +43,8 @@ namespace Aurio.TaskMonitor {
 
             public event PropertyChangedEventHandler PropertyChanged;
 
-            public ProgressReporter(ProgressMonitor monitor) {
+            public ProgressReporter(ProgressMonitor monitor)
+            {
                 this.monitor = monitor;
                 this.isProgressReporting = false;
                 this.isFinished = false;
@@ -49,62 +53,76 @@ namespace Aurio.TaskMonitor {
             }
 
             public ProgressReporter(ProgressMonitor monitor, string name)
-                : this(monitor) {
+                : this(monitor)
+            {
                 this.name = name;
             }
 
             public ProgressReporter(ProgressMonitor monitor, string name, bool reportProgress)
-                : this(monitor, name) {
+                : this(monitor, name)
+            {
                 this.isProgressReporting = reportProgress;
             }
 
-            public string Name {
+            public string Name
+            {
                 get { return name; }
             }
 
-            public bool IsProgressReporting {
+            public bool IsProgressReporting
+            {
                 get { return isProgressReporting; }
             }
 
-            public double Progress {
+            public double Progress
+            {
                 get { return progress; }
             }
 
-            public void ReportProgress(double progress) {
-                if (!isProgressReporting) {
+            public void ReportProgress(double progress)
+            {
+                if (!isProgressReporting)
+                {
                     throw new ArgumentException("this task doesn't support progress reporting");
                 }
 
-                if (progress < 0) {
+                if (progress < 0)
+                {
                     progress = 0;
                 }
-                else if (progress > 100) {
+                else if (progress > 100)
+                {
                     progress = 100;
                 }
 
                 this.progress = progress;
                 OnPropertyChanged("Progress");
 
-                if (prevProgress != (int)progress) {
+                if (prevProgress != (int)progress)
+                {
                     prevProgress = (int)progress;
                     //Debug.WriteLine("ProgressReporter::" + Name + ": " + prevProgress + "%"); // this immensely slows down debugging performance
                 }
             }
 
-            public void Finish() {
+            public void Finish()
+            {
                 monitor.EndTask(this);
                 monitor = null;
                 isFinished = true;
                 Debug.WriteLine("ProgressReporter::" + name + " duration: " + (DateTime.Now - startTime));
             }
 
-            public bool IsFinished {
+            public bool IsFinished
+            {
                 get { return isFinished; }
             }
 
-            private void OnPropertyChanged(string propertyName) {
+            private void OnPropertyChanged(string propertyName)
+            {
                 PropertyChangedEventHandler handler = PropertyChanged;
-                if (handler != null) {
+                if (handler != null)
+                {
                     handler(this, new PropertyChangedEventArgs(propertyName));
                 }
             }
@@ -136,35 +154,44 @@ namespace Aurio.TaskMonitor {
 
         #endregion
 
-        public ProgressMonitor() {
+        public ProgressMonitor()
+        {
             reporters = new List<ProgressReporter>();
             timer = new Timer(100) { Enabled = false };
             timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
             childMonitors = new List<ProgressMonitor>();
         }
 
-        public static ProgressMonitor GlobalInstance {
-            get {
-                if (singletonInstance == null) {
+        public static ProgressMonitor GlobalInstance
+        {
+            get
+            {
+                if (singletonInstance == null)
+                {
                     singletonInstance = new ProgressMonitor();
                 }
                 return singletonInstance;
             }
         }
 
-        public IProgressReporter BeginTask(string taskName) {
+        public IProgressReporter BeginTask(string taskName)
+        {
             return BeginTask(new ProgressReporter(this, taskName));
         }
 
-        public IProgressReporter BeginTask(string taskName, bool reportProgress) {
+        public IProgressReporter BeginTask(string taskName, bool reportProgress)
+        {
             return BeginTask(new ProgressReporter(this, taskName, reportProgress));
         }
 
-        private ProgressReporter BeginTask(ProgressReporter reporter) {
+        private ProgressReporter BeginTask(ProgressReporter reporter)
+        {
             bool started = false;
 
-            lock (lockObject) {
-                if (reporters.Count == 0) {
+            lock (lockObject)
+            {
+                if (reporters.Count == 0)
+                {
                     started = true;
                 }
                 reporters.Add(reporter);
@@ -172,50 +199,63 @@ namespace Aurio.TaskMonitor {
 
             OnTaskBegun(reporter);
 
-            if (started) {
+            if (started)
+            {
                 OnProcessingStarted();
             }
 
             return reporter;
         }
 
-        private void EndTask(ProgressReporter reporter) {
+        private void EndTask(ProgressReporter reporter)
+        {
             bool finished = false;
 
             OnTaskEnded(reporter);
 
-            lock (lockObject) {
+            lock (lockObject)
+            {
                 reporters.Remove(reporter);
-                if (reporters.Count == 0) {
+                if (reporters.Count == 0)
+                {
                     finished = true;
                 }
             }
 
-            if (finished) {
+            if (finished)
+            {
                 OnProcessingFinished();
             }
         }
 
-        public string StatusMessage {
+        public string StatusMessage
+        {
             get { return statusMessage; }
         }
 
-        public bool Active {
+        public bool Active
+        {
             get { return reporters.Count > 0; }
         }
 
-        private void UpdateStatusMessage() {
+        private void UpdateStatusMessage()
+        {
             string message = "";
 
-            lock (lockObject) {
-                if (reporters.Count == 1) {
+            lock (lockObject)
+            {
+                if (reporters.Count == 1)
+                {
                     message += reporters[0].Name;
                 }
-                else if (reporters.Count > 1) {
+                else if (reporters.Count > 1)
+                {
                     message += "(" + reporters.Count + " tasks) ";
-                    for (int x = 0; x < reporters.Count; x++) {
+                    for (int x = 0; x < reporters.Count; x++)
+                    {
                         message += reporters[x].Name;
-                        if (x + 1 != reporters.Count) {
+                        if (x + 1 != reporters.Count)
+                        {
                             message += "; ";
                         }
                     }
@@ -225,22 +265,29 @@ namespace Aurio.TaskMonitor {
             statusMessage = message;
         }
 
-        private void OnProcessingStarted() {
-            if (TaskBegun == null) {
+        private void OnProcessingStarted()
+        {
+            if (TaskBegun == null)
+            {
                 timer.Enabled = true;
             }
-            if(ProcessingStarted != null) {
+            if (ProcessingStarted != null)
+            {
                 ProcessingStarted(this, EventArgs.Empty);
             }
         }
 
-        private void OnProcessingProgressChanged() {
+        private void OnProcessingProgressChanged()
+        {
             float progress = 0;
             int progressValueReporterCount = 0;
 
-            lock (lockObject) {
-                if (reporters.Count > 0) {
-                    foreach (ProgressReporter reporter in reporters) {
+            lock (lockObject)
+            {
+                if (reporters.Count > 0)
+                {
+                    foreach (ProgressReporter reporter in reporters)
+                    {
                         if (reporter.IsProgressReporting)
                         {
                             progress += (float)reporter.Progress;
@@ -251,42 +298,53 @@ namespace Aurio.TaskMonitor {
                 }
             }
 
-            if (progressValueReporterCount > 0 && ProcessingProgressChanged != null) {
+            if (progressValueReporterCount > 0 && ProcessingProgressChanged != null)
+            {
                 ProcessingProgressChanged(this, new ValueEventArgs<float>(progress));
             }
 
-            if (childMonitors.Count > 0) {
-                foreach (ProgressMonitor childMonitor in childMonitors) {
-                    if (childMonitor.Active) {
+            if (childMonitors.Count > 0)
+            {
+                foreach (ProgressMonitor childMonitor in childMonitors)
+                {
+                    if (childMonitor.Active)
+                    {
                         childMonitor.OnProcessingProgressChanged();
                     }
                 }
             }
         }
 
-        private void OnProcessingFinished() {
-            if (TaskEnded == null) {
+        private void OnProcessingFinished()
+        {
+            if (TaskEnded == null)
+            {
                 timer.Enabled = false;
             }
-            if (ProcessingFinished != null) {
+            if (ProcessingFinished != null)
+            {
                 ProcessingFinished(this, EventArgs.Empty);
             }
         }
 
-        private void timer_Elapsed(object sender, ElapsedEventArgs e) {
+        private void timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
             OnProcessingProgressChanged();
         }
 
         #region Child Monitor handling
 
-        public void AddChild(ProgressMonitor childMonitor) {
+        public void AddChild(ProgressMonitor childMonitor)
+        {
             childMonitors.Add(childMonitor);
             childMonitor.TaskBegun += childMonitor_TaskBegun;
             childMonitor.TaskEnded += childMonitor_TaskEnded;
         }
 
-        public bool RemoveChild(ProgressMonitor childMonitor) {
-            if (childMonitors.Remove(childMonitor)) {
+        public bool RemoveChild(ProgressMonitor childMonitor)
+        {
+            if (childMonitors.Remove(childMonitor))
+            {
                 childMonitor.TaskBegun -= childMonitor_TaskBegun;
                 childMonitor.TaskEnded -= childMonitor_TaskEnded;
                 return true;
@@ -294,24 +352,30 @@ namespace Aurio.TaskMonitor {
             return false;
         }
 
-        private void childMonitor_TaskBegun(object sender, ValueEventArgs<ProgressReporter> e) {
+        private void childMonitor_TaskBegun(object sender, ValueEventArgs<ProgressReporter> e)
+        {
             BeginTask(e.Value);
         }
 
-        private void childMonitor_TaskEnded(object sender, ValueEventArgs<ProgressReporter> e) {
+        private void childMonitor_TaskEnded(object sender, ValueEventArgs<ProgressReporter> e)
+        {
             EndTask(e.Value);
         }
 
-        private void OnTaskBegun(ProgressReporter reporter) {
+        private void OnTaskBegun(ProgressReporter reporter)
+        {
             UpdateStatusMessage();
-            if (TaskBegun != null) {
+            if (TaskBegun != null)
+            {
                 TaskBegun(this, new ValueEventArgs<ProgressReporter>(reporter));
             }
         }
 
-        private void OnTaskEnded(ProgressReporter reporter) {
+        private void OnTaskEnded(ProgressReporter reporter)
+        {
             UpdateStatusMessage();
-            if (TaskEnded != null) {
+            if (TaskEnded != null)
+            {
                 TaskEnded(this, new ValueEventArgs<ProgressReporter>(reporter));
             }
         }

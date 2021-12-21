@@ -21,8 +21,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Soxr {
-    public class SoxrException : Exception {
+namespace Aurio.Soxr
+{
+    public class SoxrException : Exception
+    {
         public SoxrException() : base() { }
         public SoxrException(string message) : base(message) { }
         public SoxrException(string message, Exception innerException) : base(message, innerException) { }

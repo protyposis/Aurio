@@ -24,7 +24,8 @@ using System.Text;
 namespace Aurio.FFmpeg
 {
     [Flags]
-    public enum Type : int {
+    public enum Type : int
+    {
         None,
         Audio,
         Video

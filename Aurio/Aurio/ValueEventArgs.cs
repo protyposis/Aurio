@@ -21,10 +21,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio {
-    public class ValueEventArgs<T> : EventArgs {
+namespace Aurio
+{
+    public class ValueEventArgs<T> : EventArgs
+    {
 
-        public ValueEventArgs(T value) {
+        public ValueEventArgs(T value)
+        {
             this.Value = value;
         }
 

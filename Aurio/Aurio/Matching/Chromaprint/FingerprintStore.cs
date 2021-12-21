@@ -24,14 +24,18 @@ using Aurio.Project;
 using System.Diagnostics;
 using Aurio.Streams;
 
-namespace Aurio.Matching.Chromaprint {
-    public class FingerprintStore : HaitsmaKalker2002.FingerprintStore {
+namespace Aurio.Matching.Chromaprint
+{
+    public class FingerprintStore : HaitsmaKalker2002.FingerprintStore
+    {
 
-        public FingerprintStore(IProfile profile, IFingerprintCollisionMap collisionMap) : base(profile, collisionMap, "FP-CP") {
+        public FingerprintStore(IProfile profile, IFingerprintCollisionMap collisionMap) : base(profile, collisionMap, "FP-CP")
+        {
             //
         }
 
-        public FingerprintStore(IProfile profile) : base(profile, new DictionaryCollisionMap(), "FP-CP") {
+        public FingerprintStore(IProfile profile) : base(profile, new DictionaryCollisionMap(), "FP-CP")
+        {
             //
         }
     }

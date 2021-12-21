@@ -6,14 +6,15 @@ using System.Collections.Specialized;
 
 namespace Aurio.UnitTest
 {
-    
-    
+
+
     /// <summary>
     ///This is a test class for TimeWarpCollectionTest and is intended
     ///to contain all TimeWarpCollectionTest Unit Tests
     ///</summary>
     [TestClass()]
-    public class TimeWarpCollectionTest {
+    public class TimeWarpCollectionTest
+    {
 
 
         private TestContext testContextInstance;
@@ -22,11 +23,14 @@ namespace Aurio.UnitTest
         ///Gets or sets the test context which provides
         ///information about and functionality for the current test run.
         ///</summary>
-        public TestContext TestContext {
-            get {
+        public TestContext TestContext
+        {
+            get
+            {
                 return testContextInstance;
             }
-            set {
+            set
+            {
                 testContextInstance = value;
             }
         }
@@ -61,7 +65,8 @@ namespace Aurio.UnitTest
         #endregion
 
         [TestMethod()]
-        public void TWC1() {
+        public void TWC1()
+        {
             TimeWarpCollection collection = new TimeWarpCollection();
             collection.Add(new TimeWarp() { From = new TimeSpan(0, 0, 5), To = new TimeSpan(0, 0, 0) });
             collection.Add(new TimeWarp() { From = new TimeSpan(0, 0, 15), To = new TimeSpan(0, 0, 15) });
@@ -74,14 +79,16 @@ namespace Aurio.UnitTest
         }
 
         [TestMethod()]
-        public void TranslationRangeTest() {
+        public void TranslationRangeTest()
+        {
             TimeWarpCollection collection = new TimeWarpCollection();
             collection.Add(new TimeWarp() { From = new TimeSpan(0, 0, -5), To = new TimeSpan(0, 0, -5) });
             collection.Add(new TimeWarp() { From = new TimeSpan(0, 0, 10), To = new TimeSpan(0, 0, 10) });
             collection.Add(new TimeWarp() { From = new TimeSpan(0, 0, 20), To = new TimeSpan(0, 0, 20) });
             collection.Add(new TimeWarp() { From = new TimeSpan(0, 0, 40), To = new TimeSpan(0, 0, 40) });
 
-            for (int x = -10; x <= 50; x++) {
+            for (int x = -10; x <= 50; x++)
+            {
                 Assert.AreEqual(new TimeSpan(0, 0, x), collection.TranslateSourceToWarpedPosition(new TimeSpan(0, 0, x)));
             }
         }

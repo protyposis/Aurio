@@ -17,50 +17,61 @@ using Exocortex.DSP;
 using System.Diagnostics;
 using System.IO;
 
-namespace Aurio.Test.FFT {
+namespace Aurio.Test.FFT
+{
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window {
-        public MainWindow() {
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
             InitializeComponent();
         }
 
-        private void button1_Click(object sender, RoutedEventArgs e) {
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
             WindowFunctions wf = new WindowFunctions();
             wf.Show();
         }
 
-        private void button2_Click(object sender, RoutedEventArgs e) {
+        private void button2_Click(object sender, RoutedEventArgs e)
+        {
             Exception missingLibraryException = null;
             FFTLibrary fftLib = (FFTLibrary)fftLibComboBox.SelectedValue;
 
-            try {
+            try
+            {
                 Generate(fftLib);
             }
-            catch (DllNotFoundException ex) {
+            catch (DllNotFoundException ex)
+            {
                 // Account for native DLLs
                 missingLibraryException = ex;
             }
-            catch (FileNotFoundException ex) {
+            catch (FileNotFoundException ex)
+            {
                 // Account for .NET assemblies
                 missingLibraryException = ex;
             }
-            catch (BadImageFormatException ex) {
+            catch (BadImageFormatException ex)
+            {
                 // Account for invalid files (e.g. dummy files)
                 missingLibraryException = ex;
             }
 
-            if (missingLibraryException != null) {
+            if (missingLibraryException != null)
+            {
                 fftOutputGraph.Reset();
                 fftNormalizedOutputGraph.Reset();
                 fftdBOutputGraph.Reset();
-                MessageBox.Show(this, missingLibraryException.Message, fftLib + ": Library not found!", 
+                MessageBox.Show(this, missingLibraryException.Message, fftLib + ": Library not found!",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void Generate(FFTLibrary fftLib) {
+        private void Generate(FFTLibrary fftLib)
+        {
             // FFT resources:
             // http://www.mathworks.de/support/tech-notes/1700/1702.html
             // http://stackoverflow.com/questions/6627288/audio-spectrum-analysis-using-fft-algorithm-in-java
@@ -88,7 +99,7 @@ namespace Aurio.Test.FFT {
 
             float[] input = new float[ws];
             sine.Read(input, 0, ws);
-            
+
             //// add second frequency
             //SineGeneratorStream sine2 = new SineGeneratorStream(44100, 700, new TimeSpan(0, 0, 1));
             //float[] input2 = new float[ws];
@@ -113,16 +124,19 @@ namespace Aurio.Test.FFT {
 
             float[] fftIO = (float[])window.Clone();
 
-            if (fftLib == FFTLibrary.ExocortexDSP) {
+            if (fftLib == FFTLibrary.ExocortexDSP)
+            {
                 // This function call indirection is needed to allow this method execute even when the
                 // Exocortex FFT assembly is missing.
                 ApplyExocortexDSP(fftIO);
             }
-            else if (fftLib == FFTLibrary.FFTW) {
+            else if (fftLib == FFTLibrary.FFTW)
+            {
                 FFTW.FFTW fftw = new FFTW.FFTW(fftIO.Length);
                 fftw.Execute(fftIO);
             }
-            else if (fftLib == FFTLibrary.PFFFT) {
+            else if (fftLib == FFTLibrary.PFFFT)
+            {
                 PFFFT.PFFFT pffft = new PFFFT.PFFFT(fftIO.Length, PFFFT.Transform.Real);
                 pffft.Forward(fftIO, fftIO);
             }
@@ -145,7 +159,8 @@ namespace Aurio.Test.FFT {
             // transform complex output to magnitudes
             float sum = 0;
             int y = 0;
-            for (int x = 0; x < fftIO.Length; x += 2) { //  / 2
+            for (int x = 0; x < fftIO.Length; x += 2)
+            { //  / 2
                 fftResult[y] = FFTUtil.CalculateMagnitude(fftIO[x], fftIO[x + 1]) / ws * 2;
                 sum += fftResult[y++];
             }
@@ -178,11 +193,13 @@ namespace Aurio.Test.FFT {
                 fftResultdB.Min(), fftResultdB.Max());
         }
 
-        private void ApplyExocortexDSP(float[] samples) {
+        private void ApplyExocortexDSP(float[] samples)
+        {
             Fourier.RFFT(samples, FourierDirection.Forward);
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e) {
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
         }
     }
 }

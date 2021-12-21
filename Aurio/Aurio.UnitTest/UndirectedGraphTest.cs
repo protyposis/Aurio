@@ -4,14 +4,15 @@ using System;
 
 namespace Aurio.UnitTest
 {
-    
-    
+
+
     /// <summary>
     ///This is a test class for UndirectedGraphTest and is intended
     ///to contain all UndirectedGraphTest Unit Tests
     ///</summary>
     [TestClass()]
-    public class UndirectedGraphTest {
+    public class UndirectedGraphTest
+    {
 
 
         private TestContext testContextInstance;
@@ -20,11 +21,14 @@ namespace Aurio.UnitTest
         ///Gets or sets the test context which provides
         ///information about and functionality for the current test run.
         ///</summary>
-        public TestContext TestContext {
-            get {
+        public TestContext TestContext
+        {
+            get
+            {
                 return testContextInstance;
             }
-            set {
+            set
+            {
                 testContextInstance = value;
             }
         }
@@ -60,7 +64,8 @@ namespace Aurio.UnitTest
         #endregion
 
         [TestMethod()]
-        public void AddEdge() {
+        public void AddEdge()
+        {
             UndirectedGraph<object, int> g = new UndirectedGraph<object, int>();
             g.Add(new Edge<object, int>(new Object(), new Object(), 0));
             Assert.AreEqual(1, g.Edges.Count);
@@ -68,7 +73,8 @@ namespace Aurio.UnitTest
         }
 
         [TestMethod()]
-        public void AddEdges2() {
+        public void AddEdges2()
+        {
             UndirectedGraph<object, int> g = new UndirectedGraph<object, int>();
 
             object o1 = new Object();
@@ -82,7 +88,8 @@ namespace Aurio.UnitTest
         }
 
         [TestMethod()]
-        public void GetEdges() {
+        public void GetEdges()
+        {
             UndirectedGraph<object, int> g = new UndirectedGraph<object, int>();
 
             object o1 = new Object();
@@ -96,7 +103,8 @@ namespace Aurio.UnitTest
         }
 
         [TestMethod()]
-        public void IsConnected() {
+        public void IsConnected()
+        {
             UndirectedGraph<object, int> g = new UndirectedGraph<object, int>();
 
             object o1 = new Object();
@@ -112,7 +120,8 @@ namespace Aurio.UnitTest
         }
 
         [TestMethod()]
-        public void IsDisconnected() {
+        public void IsDisconnected()
+        {
             UndirectedGraph<object, int> g = new UndirectedGraph<object, int>();
 
             // component 1
@@ -134,7 +143,8 @@ namespace Aurio.UnitTest
         }
 
         [TestMethod()]
-        public void ConnectedComponents() {
+        public void ConnectedComponents()
+        {
             UndirectedGraph<object, int> g = new UndirectedGraph<object, int>();
 
             // component 1

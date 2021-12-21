@@ -25,8 +25,10 @@ using SoxrInstance = System.IntPtr;
 using SoxrError = System.IntPtr;
 using System.Runtime.InteropServices;
 
-namespace Aurio.Soxr {
-    internal unsafe class InteropWrapper {
+namespace Aurio.Soxr
+{
+    internal unsafe class InteropWrapper
+    {
 
         /* 
          * The following structs must be structs and cannot be nullable classes, because the corresponding
@@ -39,7 +41,8 @@ namespace Aurio.Soxr {
          */
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct SoxrIoSpec {
+        public struct SoxrIoSpec
+        {
             public Datatype itype;
             public Datatype otype;
             public double scale;
@@ -48,7 +51,8 @@ namespace Aurio.Soxr {
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct SoxrQualitySpec {
+        public struct SoxrQualitySpec
+        {
             public double precision;
             public double phase_response;
             public double passband_end;
@@ -58,7 +62,8 @@ namespace Aurio.Soxr {
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct SoxrRuntimeSpec {
+        public struct SoxrRuntimeSpec
+        {
             public uint log2_min_dft_size;
             public uint log2_large_dft_size;
             public uint coef_size_kbytes;
@@ -102,8 +107,10 @@ namespace Aurio.Soxr {
         public static d_soxr_runtime_spec soxr_runtime_spec;
         public static d_soxr_io_spec soxr_io_spec;
 
-        static InteropWrapper() {
-            if (Environment.Is64BitProcess) {
+        static InteropWrapper()
+        {
+            if (Environment.Is64BitProcess)
+            {
                 soxr_version = Interop64.soxr_version;
                 soxr_create = Interop64.soxr_create;
                 soxr_process = Interop64.soxr_process;
@@ -117,7 +124,8 @@ namespace Aurio.Soxr {
                 soxr_runtime_spec = Interop64.soxr_runtime_spec;
                 soxr_io_spec = Interop64.soxr_io_spec;
             }
-            else {
+            else
+            {
                 soxr_version = Interop32.soxr_version;
                 soxr_create = Interop32.soxr_create;
                 soxr_process = Interop32.soxr_process;

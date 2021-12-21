@@ -28,8 +28,10 @@ using Aurio.Streams;
 using System.Globalization;
 using System.Collections.ObjectModel;
 
-namespace Aurio.Project {
-    public class Project {
+namespace Aurio.Project
+{
+    public class Project
+    {
 
         public const int FormatVersion = 2;
         private delegate Project UpgradeDelegate(Project project);
@@ -37,32 +39,37 @@ namespace Aurio.Project {
         private readonly TrackList<AudioTrack> audioTrackList;
         private readonly List<Match> matches;
 
-        public Project() {
+        public Project()
+        {
             audioTrackList = new TrackList<AudioTrack>();
             matches = new List<Match>();
             MasterVolume = 1;
         }
 
-        public TrackList<AudioTrack> AudioTracks {
+        public TrackList<AudioTrack> AudioTracks
+        {
             get { return audioTrackList; }
         }
 
-        public List<Match> Matches {
+        public List<Match> Matches
+        {
             get { return matches; }
         }
 
         public float MasterVolume { get; set; }
         public FileInfo File { get; set; }
 
-        public static void Save(Project project, FileInfo targetFile) {
-            if (targetFile.Exists) {
+        public static void Save(Project project, FileInfo targetFile)
+        {
+            if (targetFile.Exists)
+            {
                 //targetFile.Delete();
             }
             Stream stream = targetFile.Create();
 
             XmlTextWriter xml = new XmlTextWriter(stream, null);
             xml.WriteStartElement("project");
-            
+
             // project format version
             xml.WriteStartElement("format");
             xml.WriteValue(FormatVersion);
@@ -70,7 +77,8 @@ namespace Aurio.Project {
 
             // audio tracks
             xml.WriteStartElement("audiotracks");
-            foreach (AudioTrack track in project.AudioTracks) {
+            foreach (AudioTrack track in project.AudioTracks)
+            {
                 xml.WriteStartElement("track");
 
                 xml.WriteStartAttribute("file");
@@ -81,7 +89,8 @@ namespace Aurio.Project {
                 xml.WriteString(track.Name);
                 xml.WriteEndAttribute();
 
-                if (track.Color != Track.DEFAULT_COLOR) {
+                if (track.Color != Track.DEFAULT_COLOR)
+                {
                     xml.WriteStartAttribute("color");
                     xml.WriteString(track.Color);
                     xml.WriteEndAttribute();
@@ -120,7 +129,8 @@ namespace Aurio.Project {
                 xml.WriteEndAttribute();
 
                 xml.WriteStartElement("timewarps");
-                foreach (TimeWarp warp in track.TimeWarps) {
+                foreach (TimeWarp warp in track.TimeWarps)
+                {
                     xml.WriteStartElement("timewarp");
 
                     xml.WriteStartAttribute("from");
@@ -141,7 +151,8 @@ namespace Aurio.Project {
 
             // matches
             xml.WriteStartElement("matches");
-            foreach (Match match in project.Matches) {
+            foreach (Match match in project.Matches)
+            {
                 xml.WriteStartElement("match");
 
                 xml.WriteStartAttribute("track1");
@@ -184,13 +195,18 @@ namespace Aurio.Project {
             project.File = targetFile;
         }
 
-        private static UpgradeDelegate ProjectFormatUpgrade(int format) {
-            if (FormatVersion == 2 && format == 1) {
+        private static UpgradeDelegate ProjectFormatUpgrade(int format)
+        {
+            if (FormatVersion == 2 && format == 1)
+            {
                 // Version 2 changed the time warp representation from byte positions (long) to time positions (TimeSpan, internally a long)
                 // -> Conversion possible
-                return project => {
-                    foreach (AudioTrack track in project.AudioTracks) {
-                        foreach (TimeWarp tw in track.TimeWarps) {
+                return project =>
+                {
+                    foreach (AudioTrack track in project.AudioTracks)
+                    {
+                        foreach (TimeWarp tw in track.TimeWarps)
+                        {
                             // The byte positions are stored in the Ticks property and we convert them to real ticks as time units
                             tw.From = TimeUtil.BytesToTimeSpan(tw.From.Ticks, track.SourceProperties);
                             tw.To = TimeUtil.BytesToTimeSpan(tw.To.Ticks, track.SourceProperties);
@@ -205,7 +221,8 @@ namespace Aurio.Project {
             return null;
         }
 
-        public static Project Load(FileInfo sourceFile, Func<string, Exception, bool> skipErrorCb = null) {
+        public static Project Load(FileInfo sourceFile, Func<string, Exception, bool> skipErrorCb = null)
+        {
             skipErrorCb = skipErrorCb ?? ((string fileName, Exception e) => { return false; });
 
             Project project = new Project();
@@ -221,23 +238,29 @@ namespace Aurio.Project {
 
             // check project format and upgrade support
             UpgradeDelegate projectUpgradeFunction = null;
-            if (formatVersion != FormatVersion) {
+            if (formatVersion != FormatVersion)
+            {
                 projectUpgradeFunction = ProjectFormatUpgrade(formatVersion);
-                if (projectUpgradeFunction == null) {
+                if (projectUpgradeFunction == null)
+                {
                     throw new Exception(String.Format("invalid project file format (found {0}, expected {1}, upgrade unsupported)", formatVersion, FormatVersion));
                 }
-                else {
+                else
+                {
                     Console.WriteLine("old format detected, upgrade supported ({0} -> {1})", formatVersion, FormatVersion);
                 }
             }
-            
+
 
             // audio tracks
-            if (xml.IsStartElement("audiotracks")) {
+            if (xml.IsStartElement("audiotracks"))
+            {
                 bool empty = xml.IsEmptyElement;
                 xml.ReadStartElement("audiotracks");
-                if (!empty) {
-                    while (xml.IsStartElement("track")) {
+                if (!empty)
+                {
+                    while (xml.IsStartElement("track"))
+                    {
                         xml.MoveToAttribute("file");
                         string file = xml.Value;
                         AudioTrack track = null;
@@ -265,7 +288,8 @@ namespace Aurio.Project {
                         }
 
                         string color = xml.GetAttribute("color");
-                        if (color != null) {
+                        if (color != null)
+                        {
                             track.Color = color;
                         }
 
@@ -287,17 +311,21 @@ namespace Aurio.Project {
                         xml.MoveToAttribute("invertedphase");
                         track.InvertedPhase = xml.ReadContentAsBoolean();
 
-                        if (xml.MoveToAttribute("locked")) {
+                        if (xml.MoveToAttribute("locked"))
+                        {
                             track.Locked = xml.ReadContentAsBoolean();
                         }
 
                         xml.ReadStartElement("track");
-                        if (xml.IsStartElement("timewarps")) {
+                        if (xml.IsStartElement("timewarps"))
+                        {
                             empty = xml.IsEmptyElement;
                             xml.ReadStartElement("timewarps");
-                            if (!empty) {
+                            if (!empty)
+                            {
                                 var timeWarps = new List<TimeWarp>();
-                                while (xml.IsStartElement("timewarp")) {
+                                while (xml.IsStartElement("timewarp"))
+                                {
                                     TimeWarp warp = new TimeWarp();
 
                                     xml.MoveToAttribute("from");
@@ -318,18 +346,21 @@ namespace Aurio.Project {
 
                         xml.ReadEndElement(); // track
                         project.AudioTracks.Add(track);
-                        }
+                    }
                     xml.ReadEndElement(); // audiotracks
                 }
             }
 
             // matches
-            if (xml.IsStartElement("matches")) {
+            if (xml.IsStartElement("matches"))
+            {
                 bool empty = xml.IsEmptyElement;
                 xml.ReadStartElement("matches");
-                if (!empty) {
-                    while (xml.IsStartElement("match")) {
-                        
+                if (!empty)
+                {
+                    while (xml.IsStartElement("match"))
+                    {
+
                         Match match = new Match();
 
                         xml.MoveToAttribute("track1");
@@ -347,7 +378,8 @@ namespace Aurio.Project {
                         xml.MoveToAttribute("similarity");
                         match.Similarity = xml.ReadContentAsFloat();
 
-                        if (xml.MoveToAttribute("source")) {
+                        if (xml.MoveToAttribute("source"))
+                        {
                             match.Source = xml.ReadContentAsString();
                         }
 
@@ -369,7 +401,8 @@ namespace Aurio.Project {
             project.File = sourceFile;
 
             // project format upgrade execution
-            if (projectUpgradeFunction != null) {
+            if (projectUpgradeFunction != null)
+            {
                 // there's an upgrade function we need to call
                 project = projectUpgradeFunction(project);
             }
@@ -380,7 +413,8 @@ namespace Aurio.Project {
         /// <summary>
         /// Exports a project timeline to Sony Vegas' proprietary EDL text file format.
         /// </summary>
-        public static void ExportEDL(TrackList<AudioTrack> tracks, FileInfo targetFile) {
+        public static void ExportEDL(TrackList<AudioTrack> tracks, FileInfo targetFile)
+        {
             string[] videoExtensions = { ".m2ts", ".mp4", ".mpg", ".avi", ".webm", ".ts", ".mkv", ".mov" };
 
             string[] edlFields = {
@@ -422,49 +456,61 @@ namespace Aurio.Project {
             Dictionary<Track, int> tracklist = new Dictionary<Track, int>();
             int audioTrackNumber = 0;
             int videoTrackNumber = 1;
-            foreach (AudioTrack track in tracks) {
-                if (track.Volume == 0.0f) {
+            foreach (AudioTrack track in tracks)
+            {
+                if (track.Volume == 0.0f)
+                {
                     // skip tracks whose volume is muted (alignment sets track volumes to zero if a track has no matches)
                     continue;
                 }
 
                 FileInfo videoFileInfo = null;
-                foreach (FileInfo fileInfo in track.FileInfo.Directory.EnumerateFiles(track.FileInfo.Name.Replace(".wav", ".*"))) {
-                    foreach (string videoExtension in videoExtensions) {
-                        if (fileInfo.Extension.Equals(videoExtension)) {
+                foreach (FileInfo fileInfo in track.FileInfo.Directory.EnumerateFiles(track.FileInfo.Name.Replace(".wav", ".*")))
+                {
+                    foreach (string videoExtension in videoExtensions)
+                    {
+                        if (fileInfo.Extension.Equals(videoExtension))
+                        {
                             videoFileInfo = new FileInfo(fileInfo.FullName.Replace(fileInfo.Extension, videoExtension));
                             break;
                         }
                     }
-                    if (videoFileInfo != null) {
+                    if (videoFileInfo != null)
+                    {
                         break;
                     }
                 }
 
-                if (videoFileInfo != null) {
-                    VideoTrack videoTrack = new VideoTrack(videoFileInfo) {
+                if (videoFileInfo != null)
+                {
+                    VideoTrack videoTrack = new VideoTrack(videoFileInfo)
+                    {
                         Length = track.Length,
                         Offset = track.Offset
                     };
-                    AudioTrack audioTrack = new AudioTrack(videoFileInfo, false) {
+                    AudioTrack audioTrack = new AudioTrack(videoFileInfo, false)
+                    {
                         Length = track.Length,
                         Offset = track.Offset
                     };
                     tracklist.Add(videoTrack, videoTrackNumber++);
                     tracklist.Add(audioTrack, audioTrackNumber++);
                 }
-                else {
+                else
+                {
                     tracklist.Add(track, audioTrackNumber++);
                 }
             }
 
             StringBuilder sb = new StringBuilder();
             CultureInfo ci = new CultureInfo("en-US");
-            
+
             // write headers
-            for (int i = 0; i < edlFields.Length; i++) {
+            for (int i = 0; i < edlFields.Length; i++)
+            {
                 sb.AppendFormat("\"{0}\"", edlFields[i]);
-                if (i < edlFields.Length - 1) {
+                if (i < edlFields.Length - 1)
+                {
                     sb.Append(";");
                 }
             }
@@ -472,7 +518,8 @@ namespace Aurio.Project {
 
             // write tracks
             int trackID = 1;
-            foreach(Track track in tracklist.Keys) {
+            foreach (Track track in tracklist.Keys)
+            {
                 sb.AppendFormat(ci, "{0}; ", trackID++);
                 sb.AppendFormat(ci, "{0}; ", tracklist[track]);
                 sb.AppendFormat(ci, "{0:0.0000}; ", track.Offset.TotalMilliseconds);
@@ -513,7 +560,8 @@ namespace Aurio.Project {
             writer.Close();
         }
 
-        public static void ExportSyncXML(Project project, FileInfo targetFile) {
+        public static void ExportSyncXML(Project project, FileInfo targetFile)
+        {
             Stream stream = targetFile.Create();
 
             string timeFormat = "G";
@@ -526,8 +574,10 @@ namespace Aurio.Project {
 
             // audio tracks
             xml.WriteStartElement("recordings");
-            foreach (AudioTrack track in project.AudioTracks) {
-                if (track.Volume == 0.0f) {
+            foreach (AudioTrack track in project.AudioTracks)
+            {
+                if (track.Volume == 0.0f)
+                {
                     // skip tracks whose volume is muted
                     continue;
                 }
@@ -548,7 +598,8 @@ namespace Aurio.Project {
 
             // matches
             xml.WriteStartElement("syncpoints");
-            foreach (Match match in project.Matches) {
+            foreach (Match match in project.Matches)
+            {
                 xml.WriteStartElement("syncpoint");
 
                 xml.WriteStartElement("recording1");
@@ -585,7 +636,8 @@ namespace Aurio.Project {
             xml.Close();
         }
 
-        public static void ExportMatchesCSV(Collection<Match> matches, FileInfo targetFile) {
+        public static void ExportMatchesCSV(Collection<Match> matches, FileInfo targetFile)
+        {
             Stream stream = targetFile.Create();
 
             string timeFormat = "G";
@@ -597,9 +649,10 @@ namespace Aurio.Project {
             text.WriteLine("Track A;Track B;Track A Position;Track B Position;Similarity;Offset;Source;Track A Position (ms);Track B Position (ms);Offset (ms)");
 
             // write matches
-            foreach (Match m in matches) {
-                text.WriteLine(String.Format("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9}", m.Track1.Name, m.Track2.Name, 
-                    m.Track1Time.ToString(timeFormat, numberFormat), m.Track2Time.ToString(timeFormat, numberFormat), 
+            foreach (Match m in matches)
+            {
+                text.WriteLine(String.Format("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9}", m.Track1.Name, m.Track2.Name,
+                    m.Track1Time.ToString(timeFormat, numberFormat), m.Track2Time.ToString(timeFormat, numberFormat),
                     m.Similarity, m.Offset.ToString(timeFormat, numberFormat), m.Source,
                     (long)m.Track1Time.TotalMilliseconds, (long)m.Track2Time.TotalMilliseconds, (long)m.Offset.TotalMilliseconds));
             }
@@ -608,27 +661,34 @@ namespace Aurio.Project {
             text.Close();
         }
 
-        private static string GetFullOrRelativeFileName(FileInfo referenceFile, FileInfo targetFile) {
+        private static string GetFullOrRelativeFileName(FileInfo referenceFile, FileInfo targetFile)
+        {
             Uri uri1 = new Uri(targetFile.FullName);
             Uri uri2 = new Uri(referenceFile.DirectoryName + Path.DirectorySeparatorChar);
-            try {
+            try
+            {
                 return uri2.MakeRelativeUri(uri1).LocalPath;
             }
-            catch {
+            catch
+            {
                 return Uri.UnescapeDataString(uri2.MakeRelativeUri(uri1).ToString())
                     .Replace('/', Path.DirectorySeparatorChar);
 
             }
         }
 
-        private static FileInfo GetFileInfo(FileInfo referenceFile, string fullOrRelativeFileName) {
-            try {
+        private static FileInfo GetFileInfo(FileInfo referenceFile, string fullOrRelativeFileName)
+        {
+            try
+            {
                 // try it as relative file
                 var fi = new FileInfo(referenceFile.DirectoryName + Path.DirectorySeparatorChar + fullOrRelativeFileName);
-                if (fi.Exists) {
+                if (fi.Exists)
+                {
                     return fi;
                 }
-            } catch (Exception) {}
+            }
+            catch (Exception) { }
             // if the relative try fails, try as absolute path - if it still fails, the file doesn't exist
             return new FileInfo(fullOrRelativeFileName);
         }

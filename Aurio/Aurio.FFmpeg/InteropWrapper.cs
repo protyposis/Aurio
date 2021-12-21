@@ -22,11 +22,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Aurio.FFmpeg {
+namespace Aurio.FFmpeg
+{
     /// <summary>
     /// Wraps the x86 and x64 interop functions and provides the correct ones depending on the execution platform.
     /// </summary>
-    internal class InteropWrapper {
+    internal class InteropWrapper
+    {
 
         public const CallingConvention CC = CallingConvention.Cdecl;
 
@@ -62,8 +64,10 @@ namespace Aurio.FFmpeg {
         public static d_stream_has_error stream_has_error;
         public static d_stream_get_error stream_get_error;
 
-        static InteropWrapper() {
-            if (Environment.Is64BitProcess) {
+        static InteropWrapper()
+        {
+            if (Environment.Is64BitProcess)
+            {
                 stream_open_file = Interop64.stream_open_file;
                 stream_open_bufferedio = Interop64.stream_open_bufferedio;
                 stream_get_output_config = Interop64.stream_get_output_config;
@@ -75,7 +79,8 @@ namespace Aurio.FFmpeg {
                 stream_has_error = Interop64.stream_has_error;
                 stream_get_error = Interop64.stream_get_error;
             }
-            else {
+            else
+            {
                 stream_open_file = Interop32.stream_open_file;
                 stream_open_bufferedio = Interop32.stream_open_bufferedio;
                 stream_get_output_config = Interop32.stream_get_output_config;

@@ -25,8 +25,10 @@ using System.Windows.Media;
 using System.Globalization;
 using System.Windows.Controls;
 
-namespace Aurio.WaveControls {
-    public class ExtendedTickBar : FrameworkElement {
+namespace Aurio.WaveControls
+{
+    public class ExtendedTickBar : FrameworkElement
+    {
 
         public static readonly DependencyProperty MinimumProperty;
         public static readonly DependencyProperty MaximumProperty;
@@ -37,7 +39,8 @@ namespace Aurio.WaveControls {
 
         private double _pixelsPerDip;
 
-        static ExtendedTickBar() {
+        static ExtendedTickBar()
+        {
             MinimumProperty = DependencyProperty.Register("Minimum", typeof(double), typeof(ExtendedTickBar),
                 new FrameworkPropertyMetadata(-60.0d) { AffectsRender = true });
 
@@ -50,52 +53,61 @@ namespace Aurio.WaveControls {
             TickRenderModeProperty = DependencyProperty.Register("TickRenderMode", typeof(TickRenderMode), typeof(ExtendedTickBar),
                 new FrameworkPropertyMetadata(TickRenderMode.Both) { AffectsRender = true });
 
-            TextAlignmentProperty = DependencyProperty.Register("TextAlignment", typeof(TextAlignment), typeof(ExtendedTickBar), 
+            TextAlignmentProperty = DependencyProperty.Register("TextAlignment", typeof(TextAlignment), typeof(ExtendedTickBar),
                 new FrameworkPropertyMetadata(TextAlignment.Right) { AffectsRender = true });
 
             FillProperty = DependencyProperty.Register("Fill", typeof(Brush), typeof(ExtendedTickBar),
-                new FrameworkPropertyMetadata((Brush)null) {  AffectsRender = true });
+                new FrameworkPropertyMetadata((Brush)null) { AffectsRender = true });
         }
 
-        public ExtendedTickBar() {
+        public ExtendedTickBar()
+        {
             _pixelsPerDip = VisualTreeHelper.GetDpi(this).PixelsPerDip;
         }
 
-        public double Minimum {
+        public double Minimum
+        {
             get { return (double)GetValue(MinimumProperty); }
             set { SetValue(MinimumProperty, value); }
         }
 
-        public double Maximum {
+        public double Maximum
+        {
             get { return (double)GetValue(MaximumProperty); }
             set { SetValue(MaximumProperty, value); }
         }
 
-        public DoubleCollection Ticks {
+        public DoubleCollection Ticks
+        {
             get { return (DoubleCollection)GetValue(TicksProperty); }
             set { SetValue(TicksProperty, value); }
         }
 
-        public TickRenderMode TickRenderMode {
+        public TickRenderMode TickRenderMode
+        {
             get { return (TickRenderMode)GetValue(TickRenderModeProperty); }
             set { SetValue(TickRenderModeProperty, value); }
         }
 
-        public TextAlignment TextAlignment {
+        public TextAlignment TextAlignment
+        {
             get { return (TextAlignment)GetValue(TextAlignmentProperty); }
             set { SetValue(TextAlignmentProperty, value); }
         }
 
-        public Brush Fill {
+        public Brush Fill
+        {
             get { return (Brush)GetValue(FillProperty); }
             set { SetValue(FillProperty, value); }
         }
 
-        protected override void OnRender(System.Windows.Media.DrawingContext drawingContext) {
+        protected override void OnRender(System.Windows.Media.DrawingContext drawingContext)
+        {
             double textMaxWidth = 0;
             double textX = ActualWidth;
 
-            switch (TextAlignment) {
+            switch (TextAlignment)
+            {
                 case TextAlignment.Left:
                     textX = 0;
                     break;
@@ -107,14 +119,17 @@ namespace Aurio.WaveControls {
                     break;
             }
 
-            if (TickRenderMode == TickRenderMode.Text || TickRenderMode == TickRenderMode.Both) {
-                foreach (double value in Ticks) {
+            if (TickRenderMode == TickRenderMode.Text || TickRenderMode == TickRenderMode.Both)
+            {
+                foreach (double value in Ticks)
+                {
                     double y = CalculateY(value);
 
                     FormattedText text = new FormattedText(value.ToString(), CultureInfo.CurrentUICulture,
-                        FlowDirection.LeftToRight, new Typeface("Tahoma"), 8.0d, Fill, _pixelsPerDip) {
-                            TextAlignment = TextAlignment
-                        };
+                        FlowDirection.LeftToRight, new Typeface("Tahoma"), 8.0d, Fill, _pixelsPerDip)
+                    {
+                        TextAlignment = TextAlignment
+                    };
                     drawingContext.DrawText(text, new Point(textX, y - text.Height / 2));
                     textMaxWidth = Math.Max(textMaxWidth, text.Width);
                 }
@@ -122,13 +137,15 @@ namespace Aurio.WaveControls {
                 textMaxWidth += 3;
             }
 
-            if (TickRenderMode == TickRenderMode.Tick || TickRenderMode == TickRenderMode.Both) {
+            if (TickRenderMode == TickRenderMode.Tick || TickRenderMode == TickRenderMode.Both)
+            {
                 Pen pen = new Pen(Fill, 1.0d);
 
                 GuidelineSet guidelineSet = new GuidelineSet();
                 drawingContext.PushGuidelineSet(guidelineSet);
 
-                foreach (double value in Ticks) {
+                foreach (double value in Ticks)
+                {
                     double y = CalculateY(value) + 1;
                     drawingContext.DrawLine(pen, new Point(0, y), new Point(ActualWidth - textMaxWidth, y));
                     guidelineSet.GuidelinesY.Add(y - 0.5);
@@ -138,13 +155,15 @@ namespace Aurio.WaveControls {
             }
         }
 
-        private double CalculateY(double value) {
+        private double CalculateY(double value)
+        {
             double actualHeight = ActualHeight - 2;
             return actualHeight - actualHeight * ((value - Minimum) / (Maximum - Minimum));
         }
     }
 
-    public enum TickRenderMode {
+    public enum TickRenderMode
+    {
         Tick,
         Text,
         Both

@@ -21,12 +21,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio {
-    public class WindowFunction {
+namespace Aurio
+{
+    public class WindowFunction
+    {
 
         private float[] window;
 
-        internal WindowFunction(float[] window, WindowType type) {
+        internal WindowFunction(float[] window, WindowType type)
+        {
             this.window = window;
             this.Type = type;
         }
@@ -34,11 +37,13 @@ namespace Aurio {
         public WindowType Type { get; private set; }
         public int Size { get { return window.Length; } }
 
-        public void Apply(float[] values, int valuesOffset) {
+        public void Apply(float[] values, int valuesOffset)
+        {
             WindowUtil.Apply(values, valuesOffset, window);
         }
 
-        public void Apply(float[] values) {
+        public void Apply(float[] values)
+        {
             Apply(values, 0);
         }
     }

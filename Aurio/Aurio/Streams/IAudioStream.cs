@@ -21,11 +21,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.Streams {
+namespace Aurio.Streams
+{
     /// <summary>
     /// An audio stream.
     /// </summary>
-    public interface IAudioStream : IDisposable {
+    public interface IAudioStream : IDisposable
+    {
         /// <summary>
         /// Returns the properties of the audio stream (e.g. sample rate, bit rate, number of channels).
         /// </summary>
@@ -46,7 +48,7 @@ namespace Aurio.Streams {
         /// one time instant.
         /// </summary>
         int SampleBlockSize { get; }
-        
+
         ///// <summary>
         ///// Gets the total length of the audio stream in units of sample blocks.
         ///// </summary>

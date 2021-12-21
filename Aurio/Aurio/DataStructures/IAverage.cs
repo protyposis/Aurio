@@ -21,11 +21,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aurio.DataStructures {
+namespace Aurio.DataStructures
+{
     /// <summary>
     /// Base interface for average calculator implementations.
     /// </summary>
-    interface IAverage {
+    interface IAverage
+    {
 
         /// <summary>
         /// Adds a new value to the average calculator and returns the updated average.

@@ -101,7 +101,7 @@ namespace Aurio.Soxr
             bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated)
         {
             _soxr.Process(input, inputOffset, inputLength,
-                    output, outputOffset, outputLength, 
+                    output, outputOffset, outputLength,
                     endOfInput, out inputLengthUsed, out outputLengthGenerated);
         }
 

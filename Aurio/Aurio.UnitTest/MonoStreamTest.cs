@@ -4,14 +4,15 @@ using System;
 
 namespace Aurio.UnitTest
 {
-    
-    
+
+
     /// <summary>
     ///This is a test class for MonoStreamTest and is intended
     ///to contain all MonoStreamTest Unit Tests
     ///</summary>
     [TestClass()]
-    public class MonoStreamTest {
+    public class MonoStreamTest
+    {
 
 
         private TestContext testContextInstance;
@@ -20,11 +21,14 @@ namespace Aurio.UnitTest
         ///Gets or sets the test context which provides
         ///information about and functionality for the current test run.
         ///</summary>
-        public TestContext TestContext {
-            get {
+        public TestContext TestContext
+        {
+            get
+            {
                 return testContextInstance;
             }
-            set {
+            set
+            {
                 testContextInstance = value;
             }
         }
@@ -60,7 +64,8 @@ namespace Aurio.UnitTest
         #endregion
 
         [TestMethod()]
-        public void StereoToMono() {
+        public void StereoToMono()
+        {
             IAudioStream sourceStream;
             MonoStream monoStream;
             CreateStream(2, 1, 100, out sourceStream, out monoStream);
@@ -69,7 +74,8 @@ namespace Aurio.UnitTest
         }
 
         [TestMethod()]
-        public void QuadroToMono() {
+        public void QuadroToMono()
+        {
             IAudioStream sourceStream;
             MonoStream monoStream;
             CreateStream(4, 1, 100, out sourceStream, out monoStream);
@@ -78,7 +84,8 @@ namespace Aurio.UnitTest
         }
 
         [TestMethod()]
-        public void QuadroToStereo() {
+        public void QuadroToStereo()
+        {
             IAudioStream sourceStream;
             MonoStream monoStream;
             CreateStream(4, 2, 100, out sourceStream, out monoStream);
@@ -87,7 +94,8 @@ namespace Aurio.UnitTest
         }
 
         [TestMethod()]
-        public void MonoToMono() {
+        public void MonoToMono()
+        {
             IAudioStream sourceStream;
             MonoStream monoStream;
             CreateStream(1, 1, 100, out sourceStream, out monoStream);
@@ -96,7 +104,8 @@ namespace Aurio.UnitTest
         }
 
         [TestMethod()]
-        public void MonoToStereo() {
+        public void MonoToStereo()
+        {
             IAudioStream sourceStream;
             MonoStream monoStream;
             CreateStream(1, 2, 100, out sourceStream, out monoStream);
@@ -105,7 +114,8 @@ namespace Aurio.UnitTest
         }
 
         [TestMethod()]
-        public void MonoToQuadro() {
+        public void MonoToQuadro()
+        {
             IAudioStream sourceStream;
             MonoStream monoStream;
             CreateStream(1, 4, 100, out sourceStream, out monoStream);
@@ -113,10 +123,11 @@ namespace Aurio.UnitTest
             Assert.AreEqual(monoStream.Length, (double)sourceStream.Length * 4);
         }
 
-        private void CreateStream(int inputChannels, int outputChannels, int lengthInSeconds, 
-            out IAudioStream sourceStream, out MonoStream monoStream) {
+        private void CreateStream(int inputChannels, int outputChannels, int lengthInSeconds,
+            out IAudioStream sourceStream, out MonoStream monoStream)
+        {
             sourceStream = new NullStream(
-                    new AudioProperties(inputChannels, 44100, 32, AudioFormat.IEEE), 
+                    new AudioProperties(inputChannels, 44100, 32, AudioFormat.IEEE),
                     44100 * inputChannels * 4 /*bytesPerSample*/ * lengthInSeconds);
             monoStream = new MonoStream(sourceStream, outputChannels);
         }
