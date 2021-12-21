@@ -64,10 +64,16 @@ namespace Aurio.WaveControls
             _lineBrush = WaveformLine;
             _backgroundBrush = WaveformBackground;
 
-            // Free all references to the audio track and stream when the control gets unloaded
-            Unloaded += delegate (object o, RoutedEventArgs e)
+            Loaded += (_, _) =>
             {
-                UnsetAudioTrack();
+                if (audioTrack != null)
+                {
+                    LoadAudioTrack();
+                }
+            };
+            Unloaded += (_, _) =>
+            {
+                UnloadAudioTrack();
             };
         }
 
@@ -384,9 +390,14 @@ namespace Aurio.WaveControls
             });
         }
 
-        private void SetAudioTrack(AudioTrack audioTrack)
+        private void LoadAudioTrack()
         {
-            UnsetAudioTrack();
+            UnloadAudioTrack();
+
+            if (audioTrack == null)
+            {
+                throw new Exception("Audio track not set");
+            }
 
             // init renderers
             waveformBitmapRenderers = new WaveformBitmapRenderer[audioTrack.SourceProperties.Channels];
@@ -400,25 +411,28 @@ namespace Aurio.WaveControls
                 waveformGeometryRenderers[i] = new WaveformGeometryRenderer();
             }
 
-            this.audioTrack = audioTrack;
             audioStream = AudioStreamFactory.FromAudioTrackForGUI(audioTrack);
             audioStream.WaveformChanged += OnAudioStreamWaveformChanged;
+
             audioTrack.LengthChanged += OnAudioTrackLengthChanged;
             audioTrack.VolumeChanged += OnAudioTrackVolumeChanged;
             audioTrack.BalanceChanged += OnAudioTrackBalanceChanged;
         }
 
-        private void UnsetAudioTrack()
+        private void UnloadAudioTrack()
         {
             if (audioTrack != null)
             {
                 audioTrack.BalanceChanged -= OnAudioTrackBalanceChanged;
                 audioTrack.VolumeChanged -= OnAudioTrackVolumeChanged;
                 audioTrack.LengthChanged -= OnAudioTrackLengthChanged;
+            }
+
+            if (audioStream != null)
+            {
                 audioStream.WaveformChanged -= OnAudioStreamWaveformChanged;
                 audioStream.Close();
                 audioStream = null;
-                audioTrack = null;
             }
         }
     }

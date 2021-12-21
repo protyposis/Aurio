@@ -123,7 +123,14 @@ namespace Aurio.WaveControls
             AudioTrack audioTrack = e.NewValue as AudioTrack;
             if (waveView != null && audioTrack != null)
             {
-                waveView.SetAudioTrack(audioTrack);
+                waveView.audioTrack = audioTrack;
+
+                if (waveView.IsLoaded)
+                {
+                    // If element is already loaded this must be explicitly triggered,
+                    // else it will be done by the Loaded event
+                    waveView.LoadAudioTrack();
+                }
             }
         }
 
