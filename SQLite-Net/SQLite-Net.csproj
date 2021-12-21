@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <Copyright>Copyright © 2009-2014 Krueger Systems, Inc.</Copyright>
     <AssemblyTitle>SQLite-net PCL</AssemblyTitle>
     <Company>Krueger Systems, Inc.</Company>
