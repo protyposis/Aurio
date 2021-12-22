@@ -83,8 +83,6 @@ namespace Aurio.Test.FingerprintingWang2003
                 gradient.AddStop(Colors.Black, 0);
                 gradient.AddStop(Colors.White, 1);
                 var palette = gradient.GetGradientArgbArray(1024);
-                // Set zero dB to red, and then set all found peaks to zero dB to make them visible in the spectrogram
-                palette[palette.Length - 1] = ColorGradient.ColorToArgb(Colors.Red);
 
                 spectrogram1.ColorPalette = palette;
                 spectrogram2.ColorPalette = palette;
@@ -105,10 +103,16 @@ namespace Aurio.Test.FingerprintingWang2003
                         {
                             var spectrum = (float[])e2.Spectrum.Clone();
                             var spectrumResidual = (float[])e2.SpectrumResidual.Clone();
+                            var peaks = new List<Aurio.Matching.Wang2003.Peak>(e2.Peaks);
                             Dispatcher.BeginInvoke((Action)delegate
                             {
                                 spectrogram1.AddSpectrogramColumn(spectrum);
                                 spectrogram2.AddSpectrogramColumn(spectrumResidual);
+                                peaks.ForEach(peak =>
+                                {
+                                    spectrogram1.AddPointMarker(e2.Index, peak.Index, Colors.Red);
+                                    spectrogram2.AddPointMarker(e2.Index, peak.Index, Colors.Red);
+                                });
                                 progressReporter.ReportProgress((double)e2.Index / e2.Indices * 100);
                             });
                         };

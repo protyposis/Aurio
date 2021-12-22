@@ -31,5 +31,6 @@ namespace Aurio.Matching.Wang2003
         public int Indices { get; set; }
         public float[] Spectrum { get; set; }
         public float[] SpectrumResidual { get; set; }
+        public List<Peak> Peaks { get; set; }
     }
 }

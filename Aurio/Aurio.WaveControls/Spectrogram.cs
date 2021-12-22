@@ -25,6 +25,7 @@ using System.Windows.Media.Imaging;
 using System.Drawing.Imaging;
 using System.Windows.Media;
 using System.Windows;
+using System.Diagnostics;
 
 namespace Aurio.WaveControls
 {
@@ -45,6 +46,7 @@ namespace Aurio.WaveControls
         private int[] colorPalette;
         private bool paletteDemo = false;
         private int paletteDemoIndex = 0;
+        private long columnCount = 0;
 
         public SpectrogramMode Mode
         {
@@ -209,6 +211,29 @@ namespace Aurio.WaveControls
             }
 
             InvalidateVisual();
+            columnCount++;
+        }
+
+        public void AddPointMarker(long columnIndex, int rowIndex, Color color)
+        {
+            if (columnIndex >= columnCount)
+            {
+                throw new Exception($"Column index is larger than the number of drawn columns ({columnIndex} > ´{columnCount})");
+            }
+            
+            var columnOffset = columnCount - columnIndex;
+
+            if (position - columnOffset < 0)
+            {
+                Debug.WriteLine($"Ignoring marker at column {columnIndex} because it is too far behind " +
+                    $"and outside the drawing range ({columnCount - columnOffset} - {columnCount})");
+            }
+
+            int pixelColor = ColorGradient.ColorToArgb(color);
+            int pixelColumnPosition = (int)(position - columnOffset);
+
+            // alternatively use GetBitmapContext() + SetPixel() but WritePixel() may just do that internally
+            writeableBitmap.WritePixels(new Int32Rect(pixelColumnPosition, pixelColumn.Length - 1 - rowIndex, 1, 1), new [] { pixelColor }, 4, 0);
         }
 
         public void Reset()
