@@ -98,6 +98,8 @@ namespace Aurio.Test.FingerprintingWang2003
                         IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating fingerprints for " + audioTrack.FileInfo.Name, true);
                         int hashCount = 0;
                         long columnOffset = spectrogram1.ColumnCount;
+                        int lastFrameIndex = 0;
+                        float[] silentSpectrum = null;
 
                         FingerprintGenerator fpg = new FingerprintGenerator(profile);
                         fpg.FrameProcessed += delegate (object sender2, FrameProcessedEventArgs e2)
@@ -105,8 +107,24 @@ namespace Aurio.Test.FingerprintingWang2003
                             var spectrum = (float[])e2.Spectrum.Clone();
                             var spectrumResidual = (float[])e2.SpectrumResidual.Clone();
                             var peaks = new List<Aurio.Matching.Wang2003.Peak>(e2.Peaks);
+                            var skippedFrames = e2.Index - lastFrameIndex - 1;
+                            lastFrameIndex = e2.Index;
+                            silentSpectrum ??= Enumerable.Repeat(float.MinValue, e2.Spectrum.Length).ToArray();
+                            
                             Dispatcher.BeginInvoke((Action)delegate
                             {
+                                if (skippedFrames > 0)
+                                {
+                                    // Draw spectrogram frames that were skipped by the fingerprint generator because
+                                    // their power was below the profile's threshold.
+                                    Debug.WriteLine($"filling {skippedFrames} skipped frames");
+                                    for (var f = 1; f <= skippedFrames; f++)
+                                    {
+                                        spectrogram1.AddSpectrogramColumn(silentSpectrum);
+                                        spectrogram2.AddSpectrogramColumn(silentSpectrum);
+                                    }
+                                }
+                                
                                 spectrogram1.AddSpectrogramColumn(spectrum);
                                 spectrogram2.AddSpectrogramColumn(spectrumResidual);
                                 peaks.ForEach(peak =>
