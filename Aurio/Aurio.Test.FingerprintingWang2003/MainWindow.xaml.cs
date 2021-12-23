@@ -97,6 +97,7 @@ namespace Aurio.Test.FingerprintingWang2003
                         IAudioStream audioStream = audioTrack.CreateAudioStream();
                         IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating fingerprints for " + audioTrack.FileInfo.Name, true);
                         int hashCount = 0;
+                        long columnOffset = spectrogram1.ColumnCount;
 
                         FingerprintGenerator fpg = new FingerprintGenerator(profile);
                         fpg.FrameProcessed += delegate (object sender2, FrameProcessedEventArgs e2)
@@ -110,10 +111,24 @@ namespace Aurio.Test.FingerprintingWang2003
                                 spectrogram2.AddSpectrogramColumn(spectrumResidual);
                                 peaks.ForEach(peak =>
                                 {
-                                    spectrogram1.AddPointMarker(e2.Index, peak.Index, Colors.Red);
-                                    spectrogram2.AddPointMarker(e2.Index, peak.Index, Colors.Red);
+                                    spectrogram1.AddPointMarker(columnOffset + e2.Index, peak.Index, Colors.Red);
+                                    spectrogram2.AddPointMarker(columnOffset + e2.Index, peak.Index, Colors.Red);
                                 });
                                 progressReporter.ReportProgress((double)e2.Index / e2.Indices * 100);
+                            });
+                        };
+                        fpg.PeakPairsGenerated += (_, e2) =>
+                        {
+                            var peakPairs = new List<PeakPair>(e2.PeakPairs);
+                            Dispatcher.BeginInvoke(() =>
+                            {
+                                peakPairs.ForEach(pair =>
+                                {
+                                    spectrogram1.AddLineMarker(columnOffset + pair.Index, pair.Peak1.Index, 
+                                        columnOffset + pair.Index + pair.Distance, pair.Peak2.Index, Colors.Green);
+                                    spectrogram2.AddLineMarker(columnOffset + pair.Index, pair.Peak1.Index, 
+                                        columnOffset + pair.Index + pair.Distance, pair.Peak2.Index, Colors.Green);
+                                });
                             });
                         };
                         fpg.SubFingerprintsGenerated += delegate (object sender2, SubFingerprintsGeneratedEventArgs e2)

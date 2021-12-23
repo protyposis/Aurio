@@ -44,6 +44,7 @@ namespace Aurio.Matching.Wang2003
         private Profile profile;
 
         public event EventHandler<FrameProcessedEventArgs> FrameProcessed;
+        public event EventHandler<PeakPairsGeneratedEventArgs> PeakPairsGenerated; 
         public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
 
         public FingerprintGenerator(Profile profile)
@@ -171,6 +172,12 @@ namespace Aurio.Matching.Wang2003
                     peakPairs.Clear();
                     FindPairsWithMaxEnergy(peakHistory, peakPairs);
                     ConvertPairsToSubFingerprints(peakPairs, subFingerprints);
+
+                    PeakPairsGenerated?.Invoke(this, new PeakPairsGeneratedEventArgs
+                    {
+                        AudioTrack = track,
+                        PeakPairs = peakPairs
+                    });
                 }
 
                 if (subFingerprints.Count > 512)

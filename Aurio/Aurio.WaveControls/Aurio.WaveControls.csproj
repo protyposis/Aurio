@@ -5,6 +5,7 @@
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
 	<AssemblyTitle>Aurio WPF Audio Controls Library</AssemblyTitle>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\Aurio.licenseheader">

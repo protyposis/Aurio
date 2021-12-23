@@ -46,7 +46,6 @@ namespace Aurio.WaveControls
         private int[] colorPalette;
         private bool paletteDemo = false;
         private int paletteDemoIndex = 0;
-        private long columnCount = 0;
 
         public SpectrogramMode Mode
         {
@@ -127,6 +126,8 @@ namespace Aurio.WaveControls
             get { return colorPalette; }
             set { colorPalette = value; }
         }
+
+        public long ColumnCount { get; private set; }
 
         protected override void OnRender(System.Windows.Media.DrawingContext drawingContext)
         {
@@ -211,22 +212,22 @@ namespace Aurio.WaveControls
             }
 
             InvalidateVisual();
-            columnCount++;
+            ColumnCount++;
         }
 
         public void AddPointMarker(long columnIndex, int rowIndex, Color color)
         {
-            if (columnIndex >= columnCount)
+            if (columnIndex >= ColumnCount)
             {
-                throw new Exception($"Column index is larger than the number of drawn columns ({columnIndex} > ´{columnCount})");
+                throw new Exception($"Column index is larger than the number of drawn columns ({columnIndex} > ´{ColumnCount})");
             }
             
-            var columnOffset = columnCount - columnIndex;
+            var columnOffset = ColumnCount - columnIndex;
 
             if (position - columnOffset < 0)
             {
-                Debug.WriteLine($"Ignoring marker at column {columnIndex} because it is too far behind " +
-                    $"and outside the drawing range ({columnCount - columnOffset} - {columnCount})");
+                Debug.WriteLine($"Ignoring point marker at column {columnIndex} because it is too far behind " +
+                    $"and outside the drawing range ({ColumnCount - columnOffset} - {ColumnCount})");
             }
 
             int pixelColor = ColorGradient.ColorToArgb(color);
@@ -234,6 +235,56 @@ namespace Aurio.WaveControls
 
             // alternatively use GetBitmapContext() + SetPixel() but WritePixel() may just do that internally
             writeableBitmap.WritePixels(new Int32Rect(pixelColumnPosition, pixelColumn.Length - 1 - rowIndex, 1, 1), new [] { pixelColor }, 4, 0);
+        }
+
+        public void AddLineMarker(long columnIndexFrom, int rowIndexFrom, long columnIndexTo, int rowIndexTo, Color color)
+        {
+            var maxColumnIndex = Math.Max(columnIndexFrom, columnIndexTo);
+
+            if (maxColumnIndex >= ColumnCount)
+            {
+                throw new Exception($"Column index is larger than the number of drawn columns ({maxColumnIndex} > ´{ColumnCount})");
+            }
+
+            var columnOffset = ColumnCount - position;
+
+            if (columnIndexFrom - columnOffset < 0)
+            {
+                Debug.WriteLine($"Ignoring line marker at column {columnIndexFrom} because it is too far behind " +
+                                $"and outside the drawing range ({ColumnCount - columnOffset} - {ColumnCount})");
+            }
+
+
+            var bitmapColumnPositionFrom = (int)(columnIndexFrom - columnOffset);
+            var bitmapColumnPositionTo = (int)(columnIndexTo - columnOffset);
+            var pixelColor = ColorGradient.ColorToArgb(color);
+
+            try
+            {
+                writeableBitmap.Lock();
+
+                unsafe
+                {
+                    var pBackBuffer = writeableBitmap.BackBuffer;
+                    BitmapUtils.DrawLine(
+                        bitmapColumnPositionFrom, pixelColumn.Length - 1 - rowIndexFrom, 
+                        bitmapColumnPositionTo, pixelColumn.Length - 1 - rowIndexTo, 
+                        (int*)pBackBuffer, writeableBitmap.BackBufferStride / 4, writeableBitmap.PixelHeight, 
+                        pixelColor);
+                }
+
+                var rect = new Int32Rect(
+                    Math.Min(bitmapColumnPositionFrom, bitmapColumnPositionTo), 
+                    Math.Min(rowIndexFrom, rowIndexTo), 
+                    Math.Abs(bitmapColumnPositionTo - bitmapColumnPositionFrom), 
+                    Math.Abs(rowIndexTo - rowIndexFrom));
+                
+                writeableBitmap.AddDirtyRect(rect);
+            }
+            finally
+            {
+                writeableBitmap.Unlock();
+            }
         }
 
         public void Reset()

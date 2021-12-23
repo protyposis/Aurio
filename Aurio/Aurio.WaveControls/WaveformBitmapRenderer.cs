@@ -189,12 +189,12 @@ namespace Aurio.WaveControls
 
                 if (sample > 0)
                 {
-                    DrawLine(prevX, prevY, x, y, pixels, pixelWidth, pixelHeight, borderColor);
+                    BitmapUtils.DrawLine(prevX, prevY, x, y, pixels, pixelWidth, pixelHeight, borderColor);
                 }
 
                 if (width / samples > 4)
                 {
-                    DrawPointMarker(x, y, pixels, pixelWidth, pixelHeight, sampleColor);
+                    BitmapUtils.DrawPointMarker(x, y, pixels, pixelWidth, pixelHeight, sampleColor);
                 }
 
                 prevX = x;
@@ -211,77 +211,6 @@ namespace Aurio.WaveControls
         {
             Color c = brush.Color;
             return c.A << 24 | c.R << 16 | c.G << 8 | c.B;
-        }
-
-        /// <summary>
-        /// Fast Bresenham line drawing algorithm
-        /// Taken and adapted from http://www.cs.unc.edu/~mcmillan/comp136/Lecture6/Lines.html (lineFast)
-        /// </summary>
-        private void DrawLine(int x0, int y0, int x1, int y1, int[] pixels, int width, int height, int color)
-        {
-            int dy = y1 - y0;
-            int dx = x1 - x0;
-            int stepx, stepy;
-
-            if (dy < 0) { dy = -dy; stepy = -width; } else { stepy = width; }
-            if (dx < 0) { dx = -dx; stepx = -1; } else { stepx = 1; }
-            dy <<= 1;
-            dx <<= 1;
-
-            y0 *= width;
-            y1 *= width;
-            pixels[x0 + y0] = color;
-            if (dx > dy)
-            {
-                int fraction = dy - (dx >> 1);
-                while (x0 != x1)
-                {
-                    if (fraction >= 0)
-                    {
-                        y0 += stepy;
-                        fraction -= dx;
-                    }
-                    x0 += stepx;
-                    fraction += dy;
-                    pixels[x0 + y0] = color;
-                }
-            }
-            else
-            {
-                int fraction = dx - (dy >> 1);
-                while (y0 != y1)
-                {
-                    if (fraction >= 0)
-                    {
-                        x0 += stepx;
-                        fraction -= dy;
-                    }
-                    y0 += stepy;
-                    fraction += dx;
-                    pixels[x0 + y0] = color;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Draw a 3x3 block at a given point (similar to SoundForge).
-        /// </summary>
-        private void DrawPointMarker(int x, int y, int[] pixels, int width, int height, int color)
-        {
-            for (int i = x - 1; i <= x + 1; i++)
-            {
-                for (int j = y - 1; j <= y + 1; j++)
-                {
-                    if (i < 0 || j < 0 || i >= width || j >= height)
-                    {
-                        continue; // skip pixels that don't fit the bitmap
-                    }
-                    int pixelOffset = (j * width + i);
-                    pixels[pixelOffset] = color;
-                }
-            }
-
-
         }
     }
 }
