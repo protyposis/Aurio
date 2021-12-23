@@ -31,6 +31,9 @@ namespace Aurio.Test.FingerprintingWang2003
     /// </summary>
     public partial class MainWindow : Window
     {
+        private Profile profile;
+        private FingerprintStore store;
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -45,6 +48,9 @@ namespace Aurio.Test.FingerprintingWang2003
         {
             ProgressMonitor.GlobalInstance.ProcessingProgressChanged += Instance_ProcessingProgressChanged;
             ProgressMonitor.GlobalInstance.ProcessingFinished += GlobalInstance_ProcessingFinished;
+            
+            profile = FingerprintGenerator.GetProfiles()[0];
+            store = new FingerprintStore(profile);
         }
 
 
@@ -74,8 +80,6 @@ namespace Aurio.Test.FingerprintingWang2003
 
             if (dlg.ShowDialog() == true)
             {
-                var profile = FingerprintGenerator.GetProfiles()[0];
-
                 spectrogram1.SpectrogramSize = profile.WindowSize / 2;
                 spectrogram2.SpectrogramSize = profile.WindowSize / 2;
 
@@ -86,8 +90,6 @@ namespace Aurio.Test.FingerprintingWang2003
 
                 spectrogram1.ColorPalette = palette;
                 spectrogram2.ColorPalette = palette;
-
-                var store = new FingerprintStore(profile);
 
                 Task.Factory.StartNew(() =>
                 {
