@@ -192,7 +192,8 @@ namespace Aurio
                 // load peakfile from disk
                 try
                 {
-                    peakStore.ReadFrom(File.OpenRead(audioTrack.PeakFile.FullName), audioTrack.FileInfo.LastWriteTimeUtc);
+                    using var peakFileReadStream = File.OpenRead(audioTrack.PeakFile.FullName);
+                    peakStore.ReadFrom(peakFileReadStream, audioTrack.FileInfo.LastWriteTimeUtc);
                     peakStore.CalculateScaledData(8, 6);
                     peakFileLoaded = true;
                 }
