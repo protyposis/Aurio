@@ -122,20 +122,17 @@ namespace Aurio.Matching.Wang2003
                     // Add an index entry which tells where a hash with a specific frame index can be found in the store
                     if (hashCount > 0)
                     {
-                        TrackStore.IndexEntry ie;
                         // If there is already an entry for the frame index, take it and update its length, ...
                         if (trackStore.index.ContainsKey(storeIndex))
                         {
-                            ie = trackStore.index[storeIndex];
+                            var ie = trackStore.index[storeIndex];
                             ie.length += hashCount;
-                            trackStore.index.Remove(storeIndex);
                         }
                         else
                         { // ... else create a new entry
-                            ie = new TrackStore.IndexEntry(storeHashIndex, hashCount);
+                            // Add the current length of the hash list as start pointer for all hashes belonging to the current index
+                            trackStore.index.Add(storeIndex, new TrackStore.IndexEntry(storeHashIndex, hashCount));
                         }
-                        // Add the current length of the hash list as start pointer for all hashes belonging to the current index
-                        trackStore.index.Add(storeIndex, ie);
                     }
 
                     hashListIndex += hashCount;
@@ -175,11 +172,10 @@ namespace Aurio.Matching.Wang2003
                         bool matchFound = false;
 
                         // Iterate through sequential frames
-                        TrackStore.IndexEntry indexEntryNone = new TrackStore.IndexEntry();
                         while (true)
                         {
-                            indexEntry1 = store1.index.ContainsKey(index1) ? store1.index[index1] : indexEntryNone;
-                            indexEntry2 = store2.index.ContainsKey(index2) ? store2.index[index2] : indexEntryNone;
+                            indexEntry1 = store1.index[index1];
+                            indexEntry2 = store2.index[index2];
 
                             // Hash collision
                             // The union of the two ranges is the total number of distinct hashes
@@ -201,11 +197,14 @@ namespace Aurio.Matching.Wang2003
                             // Count intersecting hashes of a frame with the Zipper algorithm
                             while (i < i_e && j < j_e)
                             {
-                                if (hashes1[i] < hashes2[j])
+                                var h1 = hashes1[i];
+                                var h2 = hashes2[j];
+                                
+                                if (h1 < h2)
                                 {
                                     i++;
                                 }
-                                else if (hashes2[j] < hashes1[i])
+                                else if (h2 < h1)
                                 {
                                     j++;
                                 }
@@ -339,13 +338,56 @@ namespace Aurio.Matching.Wang2003
             }
 
             public List<SubFingerprintHash> hashes;
-            public Dictionary<int, IndexEntry> index;
+            public Index index;
 
             public TrackStore()
             {
                 hashes = new List<SubFingerprintHash>();
-                index = new Dictionary<int, IndexEntry>();
+                index = new Index();
             }
+        }
+
+        private class Index
+        {
+            private TrackStore.IndexEntry[] array = Array.Empty<TrackStore.IndexEntry>();
+            private int fillLevel;
+            private readonly int blockIncrease;
+
+            public Index(int blockIncrease = 10000)
+            {
+                this.blockIncrease = blockIncrease;
+                IncreaseSize();
+            }
+
+            private void IncreaseSize()
+            {
+                var newArray = new TrackStore.IndexEntry[array.Length + blockIncrease];
+                Array.Copy(array, newArray, fillLevel);
+                array = newArray;
+            } 
+            
+            public void Add(int storeIndex, TrackStore.IndexEntry ie)
+            {
+                while (storeIndex >= array.Length)
+                {
+                    IncreaseSize();
+                }
+
+                array[storeIndex] = ie;
+                fillLevel = storeIndex + 1;
+            }
+
+            public void Remove(int storeIndex)
+            {
+                array[storeIndex] = new TrackStore.IndexEntry();
+            }
+            
+            public bool ContainsKey(int storeIndex)
+            {
+                return fillLevel > storeIndex;
+            }
+            
+            public TrackStore.IndexEntry this[int storeIndex] => array[storeIndex];
         }
     }
 }
