@@ -178,8 +178,14 @@ namespace Aurio.Features
         /// <returns>true if there's a frame to read, false if the end of the stream has been reached</returns>
         public bool HasNext()
         {
-            return (frameOffset + frameSize <= streamBufferLevel) || // either there's another frame in the buffer
-                FillBuffer(); // or we try to read the next frame and check if it succeeded
+            // Either there's another frame in the buffer or we try fill it and check again if there's a frame
+            // in the buffer. If there still isn't, the end of the stream has been reached.
+            return HasNextInBuffer() || FillBuffer() && HasNextInBuffer();
+        }
+
+        private bool HasNextInBuffer()
+        {
+            return frameOffset + frameSize <= streamBufferLevel;
         }
 
         /// <summary>
