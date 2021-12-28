@@ -128,12 +128,12 @@ namespace Aurio.Matching.Wang2003
         public int MatchingMaxFrames { get; set; }
 
         /// <summary>
-        /// The threshold that a match candidate's rate needs to exceed to be classified as a match.
+        /// The threshold that a match candidates rate needs to exceed to be classified as a match.
         /// </summary>
         public IThreshold ThresholdAccept { get; set; }
 
         /// <summary>
-        /// The threshold that rejects a match candidate and stops the matching process if it's matching rate drops below.
+        /// The threshold that rejects a match candidate and stops the matching process if its matching rate drops below.
         /// </summary>
         public IThreshold ThresholdReject { get; set; }
 

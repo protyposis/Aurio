@@ -184,7 +184,7 @@ namespace Aurio.Matching.Wang2003
                             //      of the two hash lists with the Zipper intersection algorithm and relies
                             //      on the hash list sorting in the fingerprint generator.
                             //      Other approaches tried which are slower:
-                            //      - n*m element by element comparison (seven though the amount of elements is reasonably small)
+                            //      - n*m element by element comparison (even though the amount of elements is reasonably small)
                             //      - concatenating the two ranges (LINQ), sorting them, and linearly iterating over, counting the duplicates (sort is slow)
                             //      - using a hash set for collision detection (hash set insertion and lookup are costly)
 
@@ -248,7 +248,7 @@ namespace Aurio.Matching.Wang2003
                             // rate after a long time. The difficulty is to to parameterize it in such a way, that a 
                             // match is detected as fast as possible, while detecting a no-match isn't delayed too far 
                             // as it takes a lot of processing time.
-                            // NOTE The current parameters are just eyeballed, there's a lot of influence on processing speed and matching rate here
+                            // NOTE The current parameters are just estimated, there's a lot of influence on processing speed and matching rate here
                             double rate = 1d / numTried * numMatched;
 
                             if (frameCount >= matchingMaxFrames || rate < thresholdReject[frameCount])
