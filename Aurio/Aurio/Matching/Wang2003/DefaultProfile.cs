@@ -27,7 +27,7 @@ namespace Aurio.Matching.Wang2003
     {
         public DefaultProfile()
         {
-            Name = "Wang03 guessed default";
+            Name = "Default";
 
             SamplingRate = 11025;
             WindowSize = 512;
@@ -57,8 +57,6 @@ namespace Aurio.Matching.Wang2003
                 WidthScale = threshold.WidthScale,
                 Height = threshold.Height / 6
             };
-
-            HashTimeScale = 1d / SamplingRate * HopSize;
         }
     }
 }

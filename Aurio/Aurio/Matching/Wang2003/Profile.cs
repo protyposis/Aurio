@@ -137,6 +137,6 @@ namespace Aurio.Matching.Wang2003
         /// </summary>
         public IThreshold ThresholdReject { get; set; }
 
-        public double HashTimeScale { get; protected set; }
+        public double HashTimeScale => 1d / SamplingRate * HopSize;
     }
 }

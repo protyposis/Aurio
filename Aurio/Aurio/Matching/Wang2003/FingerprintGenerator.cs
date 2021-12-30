@@ -58,6 +58,7 @@ namespace Aurio.Matching.Wang2003
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(track.FileInfo)),
                 ResamplingQuality.Medium, profile.SamplingRate);
 
+            // "Hanning-windowed", see quote in default profile
             STFT stft = new STFT(audioStream, profile.WindowSize, profile.HopSize, WindowType.Hann, STFT.OutputFormat.Decibel);
             int index = 0;
             int indices = stft.WindowCount;
@@ -373,7 +374,7 @@ namespace Aurio.Matching.Wang2003
 
         public static Profile[] GetProfiles()
         {
-            return new Profile[] { new DefaultProfile() };
+            return new Profile[] { new DefaultProfile(), new WangProfile() };
         }
 
         /// <summary>
