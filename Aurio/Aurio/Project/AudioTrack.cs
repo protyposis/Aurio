@@ -56,7 +56,7 @@ namespace Aurio.Project
                 using (
                     IAudioStream stream = AudioStreamFactory.FromFileInfo(
                         FileInfo,
-                        ProxyFileInfos.Length > 0 ? ProxyFileInfo : null
+                        HasProxyFile ? ProxyFileInfo : null
                     )
                 )
                 {
@@ -120,10 +120,7 @@ namespace Aurio.Project
             IAudioStream stream = null;
             if (MultiFile)
             {
-                var fileInfos =
-                    ProxyFileInfos.Select(fi => fi.Exists).Count() < ProxyFileInfos.Length
-                        ? FileInfos
-                        : ProxyFileInfos;
+                var fileInfos = ProxyFileInfos ?? FileInfos;
                 stream = new ConcatenationStream(
                     fileInfos.Select(fi => AudioStreamFactory.FromFileInfoIeee32(fi)).ToArray()
                 );
@@ -196,7 +193,12 @@ namespace Aurio.Project
 
         public FileInfo ProxyFileInfo
         {
-            get { return ProxyFileInfos.Length > 0 ? ProxyFileInfos[0] : null; }
+            get
+            {
+                return ProxyFileInfos != null && ProxyFileInfos.Length > 0
+                    ? ProxyFileInfos[0]
+                    : null;
+            }
         }
 
         public FileInfo[] ProxyFileInfos { get; private set; }
