@@ -50,7 +50,7 @@ namespace Aurio.Project
             : base(fileInfos)
         {
             this.TimeWarps = new TimeWarpCollection();
-            ProxyFileInfos = proxyFileInfos ?? new FileInfo[] { };
+            ProxyFileInfos = proxyFileInfos;
             if (initialize)
             {
                 using (
