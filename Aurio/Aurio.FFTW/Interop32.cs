@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -35,52 +35,59 @@ namespace Aurio.FFTW
     public enum fftw_flags : uint
     {
         /// <summary>
-        /// Tells FFTW to find an optimized plan by actually computing several FFTs and measuring their execution time. 
-        /// Depending on your machine, this can take some time (often a few seconds). Default (0x0). 
+        /// Tells FFTW to find an optimized plan by actually computing several FFTs and measuring their execution time.
+        /// Depending on your machine, this can take some time (often a few seconds). Default (0x0).
         /// </summary>
         Measure = 0,
+
         /// <summary>
-        /// Specifies that an out-of-place transform is allowed to overwrite its 
+        /// Specifies that an out-of-place transform is allowed to overwrite its
         /// input array with arbitrary data; this can sometimes allow more efficient algorithms to be employed.
         /// </summary>
         DestroyInput = 1,
+
         /// <summary>
-        /// Rarely used. Specifies that the algorithm may not impose any unusual alignment requirements on the input/output 
-        /// arrays (i.e. no SIMD). This flag is normally not necessary, since the planner automatically detects 
-        /// misaligned arrays. The only use for this flag is if you want to use the guru interface to execute a given 
-        /// plan on a different array that may not be aligned like the original. 
+        /// Rarely used. Specifies that the algorithm may not impose any unusual alignment requirements on the input/output
+        /// arrays (i.e. no SIMD). This flag is normally not necessary, since the planner automatically detects
+        /// misaligned arrays. The only use for this flag is if you want to use the guru interface to execute a given
+        /// plan on a different array that may not be aligned like the original.
         /// </summary>
         Unaligned = 2,
+
         /// <summary>
         /// Not used.
         /// </summary>
         ConserveMemory = 4,
+
         /// <summary>
-        /// Like Patient, but considers an even wider range of algorithms, including many that we think are 
-        /// unlikely to be fast, to produce the most optimal plan but with a substantially increased planning time. 
+        /// Like Patient, but considers an even wider range of algorithms, including many that we think are
+        /// unlikely to be fast, to produce the most optimal plan but with a substantially increased planning time.
         /// </summary>
         Exhaustive = 8,
+
         /// <summary>
-        /// Specifies that an out-of-place transform must not change its input array. 
+        /// Specifies that an out-of-place transform must not change its input array.
         /// </summary>
         /// <remarks>
-        /// This is ordinarily the default, 
-        /// except for c2r and hc2r (i.e. complex-to-real) transforms for which DestroyInput is the default. 
-        /// In the latter cases, passing PreserveInput will attempt to use algorithms that do not destroy the 
-        /// input, at the expense of worse performance; for multi-dimensional c2r transforms, however, no 
+        /// This is ordinarily the default,
+        /// except for c2r and hc2r (i.e. complex-to-real) transforms for which DestroyInput is the default.
+        /// In the latter cases, passing PreserveInput will attempt to use algorithms that do not destroy the
+        /// input, at the expense of worse performance; for multi-dimensional c2r transforms, however, no
         /// input-preserving algorithms are implemented and the planner will return null if one is requested.
         /// </remarks>
         PreserveInput = 16,
+
         /// <summary>
-        /// Like Measure, but considers a wider range of algorithms and often produces a “more optimal” plan 
-        /// (especially for large transforms), but at the expense of several times longer planning time 
+        /// Like Measure, but considers a wider range of algorithms and often produces a “more optimal” plan
+        /// (especially for large transforms), but at the expense of several times longer planning time
         /// (especially for large transforms).
         /// </summary>
         Patient = 32,
+
         /// <summary>
-        /// Specifies that, instead of actual measurements of different algorithms, a simple heuristic is 
-        /// used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays 
-        /// are not overwritten during planning. 
+        /// Specifies that, instead of actual measurements of different algorithms, a simple heuristic is
+        /// used to pick a (probably sub-optimal) plan quickly. With this flag, the input/output arrays
+        /// are not overwritten during planning.
         /// </summary>
         Estimate = 64
     }
@@ -94,6 +101,7 @@ namespace Aurio.FFTW
         /// Computes a regular DFT
         /// </summary>
         Forward = -1,
+
         /// <summary>
         /// Computes the inverse DFT
         /// </summary>
@@ -126,7 +134,6 @@ namespace Aurio.FFTW
     /// </summary>
     public class fftwf32
     {
-
         private const string FFTWLIB = "libfftw3f-3.dll";
         private const CallingConvention CALLINGCONVENTION = CallingConvention.Cdecl;
 
@@ -134,10 +141,12 @@ namespace Aurio.FFTW
         /// Deallocates an FFTW plan and all associated resources
         /// </summary>
         /// <param name="plan">Pointer to the plan to release</param>
-        [DllImport(FFTWLIB,
-             EntryPoint = "fftwf_destroy_plan",
-             ExactSpelling = true,
-             CallingConvention = CALLINGCONVENTION)]
+        [DllImport(
+            FFTWLIB,
+            EntryPoint = "fftwf_destroy_plan",
+            ExactSpelling = true,
+            CallingConvention = CALLINGCONVENTION
+        )]
         public static extern void destroy_plan(IntPtr plan);
 
         /// <summary>
@@ -145,10 +154,12 @@ namespace Aurio.FFTW
         /// </summary>
         /// <param name="plan">Pointer to the plan to execute</param>
         /// <remarks>execute (and equivalents) is the only function in FFTW guaranteed to be thread-safe.</remarks>
-        [DllImport(FFTWLIB,
-             EntryPoint = "fftwf_execute",
-             ExactSpelling = true,
-             CallingConvention = CALLINGCONVENTION)]
+        [DllImport(
+            FFTWLIB,
+            EntryPoint = "fftwf_execute",
+            ExactSpelling = true,
+            CallingConvention = CALLINGCONVENTION
+        )]
         public static extern void execute(IntPtr plan);
 
         /// <summary>
@@ -158,12 +169,18 @@ namespace Aurio.FFTW
         /// <param name="input">Pointer to an array of 4-byte real numbers</param>
         /// <param name="output">Pointer to an array of 8-byte complex numbers</param>
         /// <param name="flags">Flags that specify the behavior of the planner</param>
-        [DllImport(FFTWLIB,
-             EntryPoint = "fftwf_plan_dft_r2c_1d",
-             ExactSpelling = true,
-             CallingConvention = CALLINGCONVENTION)]
-        public static extern IntPtr dft_r2c_1d(int n, IntPtr input, IntPtr output, fftw_flags flags);
-
+        [DllImport(
+            FFTWLIB,
+            EntryPoint = "fftwf_plan_dft_r2c_1d",
+            ExactSpelling = true,
+            CallingConvention = CALLINGCONVENTION
+        )]
+        public static extern IntPtr dft_r2c_1d(
+            int n,
+            IntPtr input,
+            IntPtr output,
+            fftw_flags flags
+        );
     }
     #endregion
 }

@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -25,13 +25,35 @@ namespace Aurio.PFFFT
 {
     internal unsafe class InteropWrapper
     {
-
         public delegate IntPtr d_pffft_new_setup(int size, Transform transform);
         public delegate void d_pffft_destroy_setup(IntPtr setup);
-        public delegate void d_pffft_transform(IntPtr setup, float* input, float* output, float* work, Direction direction);
-        public delegate void d_pffft_transform_ordered(IntPtr setup, float* input, float* output, float* work, Direction direction);
-        public delegate void d_pffft_zreorder(IntPtr setup, float* input, float* output, Direction direction);
-        public delegate void d_pffft_zconvolve_accumulate(IntPtr setup, float* dft_a, float* dft_b, float* dft_ab, float scaling);
+        public delegate void d_pffft_transform(
+            IntPtr setup,
+            float* input,
+            float* output,
+            float* work,
+            Direction direction
+        );
+        public delegate void d_pffft_transform_ordered(
+            IntPtr setup,
+            float* input,
+            float* output,
+            float* work,
+            Direction direction
+        );
+        public delegate void d_pffft_zreorder(
+            IntPtr setup,
+            float* input,
+            float* output,
+            Direction direction
+        );
+        public delegate void d_pffft_zconvolve_accumulate(
+            IntPtr setup,
+            float* dft_a,
+            float* dft_b,
+            float* dft_ab,
+            float scaling
+        );
         public delegate IntPtr d_pffft_aligned_malloc(UIntPtr nb_bytes);
         public delegate void d_pffft_aligned_free(IntPtr p);
         public delegate int d_pffft_simd_size();

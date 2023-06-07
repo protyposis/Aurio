@@ -8,7 +8,7 @@ namespace Aurio.Streams
 {
     /// <summary>
     /// A stream with a fixed length operating on a circular memory buffer. Arbitrary many data can be written to this stream,
-    /// but only the most recent data that fits the length of this stream is retained. Writes at the end of the stream discard 
+    /// but only the most recent data that fits the length of this stream is retained. Writes at the end of the stream discard
     /// the same amount of bytes at the beginning of the stream. Writes within the stream overwrite existing data.
     /// </summary>
     public class CircularMemoryWriterStream : MemorySourceStream, IAudioWriterStream
@@ -17,7 +17,8 @@ namespace Aurio.Streams
         private long _bufferHead;
         private long _position;
 
-        public CircularMemoryWriterStream(AudioProperties properties, MemoryStream target) : base(target, properties)
+        public CircularMemoryWriterStream(AudioProperties properties, MemoryStream target)
+            : base(target, properties)
         {
             if (target.Capacity == 0)
             {
@@ -29,9 +30,8 @@ namespace Aurio.Streams
             _position = 0;
         }
 
-        public CircularMemoryWriterStream(AudioProperties properties, int capacity) : this(properties, new MemoryStream(new byte[capacity]))
-        {
-        }
+        public CircularMemoryWriterStream(AudioProperties properties, int capacity)
+            : this(properties, new MemoryStream(new byte[capacity])) { }
 
         public override long Length
         {
@@ -50,10 +50,13 @@ namespace Aurio.Streams
             {
                 if (value < 0 || value > source.Capacity)
                 {
-                    throw new ArgumentOutOfRangeException("Cannot set a position outside the circular memory");
+                    throw new ArgumentOutOfRangeException(
+                        "Cannot set a position outside the circular memory"
+                    );
                 }
                 _position = value;
-                source.Position = ((_bufferHead - _bufferFillLevel) + _position + source.Length) % source.Length;
+                source.Position =
+                    ((_bufferHead - _bufferFillLevel) + _position + source.Length) % source.Length;
             }
         }
 
@@ -119,8 +122,11 @@ namespace Aurio.Streams
             if (count > source.Capacity)
             {
                 int overflow = count - source.Capacity;
-                Debug.WriteLine("Writing more data ({0,10}) than the stream can hold ({1,10}), some data will be lost ({1,10})",
-                    count, source.Capacity);
+                Debug.WriteLine(
+                    "Writing more data ({0,10}) than the stream can hold ({1,10}), some data will be lost ({1,10})",
+                    count,
+                    source.Capacity
+                );
 
                 // Skip data that's going to be overwritten instantly if we were to write all data circularly
                 // E.g. when writing 15 bytes to a 10-byte circular buffer, the first 5 can be skipped because they would be overwritten

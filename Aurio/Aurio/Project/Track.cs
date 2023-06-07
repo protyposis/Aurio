@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -28,7 +28,6 @@ namespace Aurio.Project
 {
     public abstract class Track : INotifyPropertyChanged
     {
-
         public static readonly string DEFAULT_COLOR = "#FF6495ED";
 
         public event EventHandler<ValueEventArgs<TimeSpan>> LengthChanged;
@@ -77,20 +76,29 @@ namespace Aurio.Project
             return name;
         }
 
-        public Track(FileInfo fileInfo) : this(new FileInfo[] { fileInfo }) { }
+        public Track(FileInfo fileInfo)
+            : this(new FileInfo[] { fileInfo }) { }
 
         public abstract MediaType MediaType { get; }
 
         public TimeSpan Length
         {
             get { return length; }
-            set { length = value; OnLengthChanged(); }
+            set
+            {
+                length = value;
+                OnLengthChanged();
+            }
         }
 
         public TimeSpan Offset
         {
             get { return offset; }
-            set { offset = value; OnOffsetChanged(); }
+            set
+            {
+                offset = value;
+                OnOffsetChanged();
+            }
         }
 
         public FileInfo FileInfo
@@ -115,13 +123,21 @@ namespace Aurio.Project
         public string Name
         {
             get { return name; }
-            set { name = value; OnNameChanged(); }
+            set
+            {
+                name = value;
+                OnNameChanged();
+            }
         }
 
         public string Color
         {
             get { return color; }
-            set { color = value; OnColorChanged(); }
+            set
+            {
+                color = value;
+                OnColorChanged();
+            }
         }
 
         /// <summary>
@@ -130,7 +146,11 @@ namespace Aurio.Project
         public bool Locked
         {
             get { return locked; }
-            set { locked = value; OnLockedChanged(); }
+            set
+            {
+                locked = value;
+                OnLockedChanged();
+            }
         }
 
         #region INotifyPropertyChanged Members

@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -30,28 +30,31 @@ namespace Aurio.Features
     /// </summary>
     public class STFT : StreamWindower
     {
-
         public enum OutputFormat
         {
             /// <summary>
             /// Raw FFT output, a sequency of complex numbers.
             /// </summary>
             Raw,
+
             /// <summary>
             /// Magnitudes calculated from the FFT result.
             /// </summary>
             Magnitudes,
+
             /// <summary>
             /// Squared magnitudes from the FFT result.
-            /// Saves the sqrt() operation of the squared result and can be useful where processing 
+            /// Saves the sqrt() operation of the squared result and can be useful where processing
             /// time is important and only relative differences are required.
             /// </summary>
             MagnitudesSquared,
+
             /// <summary>
-            /// Magnitudes and phases calculated from the FFT result. 
+            /// Magnitudes and phases calculated from the FFT result.
             /// The first half of the output contains the magnitudes, the second half the phases.
             /// </summary>
             MagnitudesAndPhases,
+
             /// <summary>
             /// Spectrum in Decibel, calculated from the magnitudes.
             /// </summary>
@@ -73,7 +76,15 @@ namespace Aurio.Features
         /// <param name="fftSize">the FFT size, must be >= windowSize</param>
         /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="outputFormat">format of the output data, e.g. raw FFT complex numbers or dB spectrum</param>
-        public STFT(IAudioStream stream, int windowSize, int hopSize, int fftSize, WindowType windowType, OutputFormat outputFormat, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
+        public STFT(
+            IAudioStream stream,
+            int windowSize,
+            int hopSize,
+            int fftSize,
+            WindowType windowType,
+            OutputFormat outputFormat,
+            int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE
+        )
             : base(stream, windowSize, hopSize, windowType, bufferSize)
         {
             if (fftSize < windowSize)
@@ -95,10 +106,16 @@ namespace Aurio.Features
         /// <param name="hopSize">the hop size in the dimension of samples</param>
         /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="outputFormat">format of the output data, e.g. raw FFT complex numbers or dB spectrum</param>
-        public STFT(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, OutputFormat outputFormat, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
+        public STFT(
+            IAudioStream stream,
+            int windowSize,
+            int hopSize,
+            WindowType windowType,
+            OutputFormat outputFormat,
+            int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE
+        )
             : this(stream, windowSize, hopSize, windowSize, windowType, outputFormat, bufferSize)
-        {
-        }
+        { }
 
         public override void ReadFrame(float[] fftResult)
         {
@@ -110,13 +127,17 @@ namespace Aurio.Features
                 case OutputFormat.MagnitudesSquared:
                     if (fftResult.Length != fft.Size / 2)
                     {
-                        throw new ArgumentException("the provided FFT result array has an invalid size");
+                        throw new ArgumentException(
+                            "the provided FFT result array has an invalid size"
+                        );
                     }
                     break;
                 default:
                     if (fftResult.Length != fft.Size)
                     {
-                        throw new ArgumentException("the provided FFT result array has an invalid size");
+                        throw new ArgumentException(
+                            "the provided FFT result array has an invalid size"
+                        );
                     }
                     break;
             }
@@ -137,8 +158,8 @@ namespace Aurio.Features
                     FFTUtil.CalculateMagnitudes(fftBuffer, fftResult);
                     break;
                 case OutputFormat.MagnitudesSquared:
-                    // TODO check if consumers of this mode really want it or if they want unsquared magnitudes instead 
-                    // (e.g. OLTW; this code path returns CalculateMagnitudesSquared for some time, as a temp test for OLTW, 
+                    // TODO check if consumers of this mode really want it or if they want unsquared magnitudes instead
+                    // (e.g. OLTW; this code path returns CalculateMagnitudesSquared for some time, as a temp test for OLTW,
                     // but originally returned CalculateMagnitudes)
                     FFTUtil.CalculateMagnitudesSquared(fftBuffer, fftResult);
                     break;

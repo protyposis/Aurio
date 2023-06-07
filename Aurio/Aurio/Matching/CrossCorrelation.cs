@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -31,10 +31,8 @@ namespace Aurio.Matching
 {
     public class CrossCorrelation
     {
-
         public class Result
         {
-
             public float[] Correlations { get; set; }
             public int MaxIndex { get; set; }
 
@@ -59,7 +57,13 @@ namespace Aurio.Matching
             }
         }
 
-        private static unsafe int Calculate(float* x, float* y, int length, IProgressReporter reporter, out Result result)
+        private static unsafe int Calculate(
+            float* x,
+            float* y,
+            int length,
+            IProgressReporter reporter,
+            out Result result
+        )
         {
             int n = length;
             int maxdelay = length / 2;
@@ -136,23 +140,32 @@ namespace Aurio.Matching
                 }
             }
 
-            result = new Result()
-            {
-                Correlations = r,
-                MaxIndex = maxindex
-            };
+            result = new Result() { Correlations = r, MaxIndex = maxindex };
 
-            Debug.WriteLine("max val: {0} index: {1} adjusted index: {2}", maxval, maxindex, maxindex - maxdelay);
+            Debug.WriteLine(
+                "max val: {0} index: {1} adjusted index: {2}",
+                maxval,
+                maxindex,
+                maxindex - maxdelay
+            );
             return maxindex - maxdelay;
         }
 
-        private static unsafe int Calculate(float[] x, float[] y, IProgressReporter reporter, out Result result)
+        private static unsafe int Calculate(
+            float[] x,
+            float[] y,
+            IProgressReporter reporter,
+            out Result result
+        )
         {
             if (x.Length != y.Length)
             {
                 throw new ArgumentException("interval lengths do not match");
             }
-            fixed (float* xF = &x[0], yF = &y[0])
+            fixed (
+                float* xF = &x[0],
+                    yF = &y[0]
+            )
             {
                 return Calculate(xF, yF, x.Length, reporter, out result);
             }
@@ -181,7 +194,14 @@ namespace Aurio.Matching
             return Calculate(x, y, length, null, out result);
         }
 
-        public static TimeSpan Calculate(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor, out Result result)
+        public static TimeSpan Calculate(
+            IAudioStream s1,
+            Interval i1,
+            IAudioStream s2,
+            Interval i2,
+            ProgressMonitor progressMonitor,
+            out Result result
+        )
         {
             if (i1.Length != i2.Length)
             {
@@ -191,7 +211,10 @@ namespace Aurio.Matching
             s1 = PrepareStream(s1, 11050);
             s2 = PrepareStream(s2, 11050);
 
-            IProgressReporter progress = progressMonitor.BeginTask("calculating cross-correlation", true);
+            IProgressReporter progress = progressMonitor.BeginTask(
+                "calculating cross-correlation",
+                true
+            );
 
             float seconds = (float)(i1.Length / 10d / 1000 / 1000);
             int sampleRate = s1.Properties.SampleRate;
@@ -214,13 +237,21 @@ namespace Aurio.Matching
 
             int indexOffset = Calculate(x, y, progress, out result);
 
-            TimeSpan offset = new TimeSpan((long)(indexOffset / (float)sampleRate * TimeUtil.SECS_TO_TICKS));
+            TimeSpan offset = new TimeSpan(
+                (long)(indexOffset / (float)sampleRate * TimeUtil.SECS_TO_TICKS)
+            );
             Debug.WriteLine("peak offset @ " + offset);
             progress.Finish();
             return offset;
         }
 
-        public static void CalculateAsync(IAudioStream s1, Interval i1, IAudioStream s2, Interval i2, ProgressMonitor progressMonitor)
+        public static void CalculateAsync(
+            IAudioStream s1,
+            Interval i1,
+            IAudioStream s2,
+            Interval i2,
+            ProgressMonitor progressMonitor
+        )
         {
             Task.Factory.StartNew(() =>
             {
@@ -237,8 +268,14 @@ namespace Aurio.Matching
                 sw.Start();
                 long intervalLength = TimeUtil.SECS_TO_TICKS * 1;
 
-                Interval iT1 = new Interval(match.Track1Time.Ticks, match.Track1Time.Ticks + intervalLength);
-                Interval iT2 = new Interval(match.Track2Time.Ticks, match.Track2Time.Ticks + intervalLength);
+                Interval iT1 = new Interval(
+                    match.Track1Time.Ticks,
+                    match.Track1Time.Ticks + intervalLength
+                );
+                Interval iT2 = new Interval(
+                    match.Track2Time.Ticks,
+                    match.Track2Time.Ticks + intervalLength
+                );
 
                 long iT1overflow = match.Track1.Length.Ticks - iT1.To;
                 long iT2overflow = match.Track2.Length.Ticks - iT2.To;
@@ -260,7 +297,20 @@ namespace Aurio.Matching
                 s1.Close();
                 s2.Close();
                 Debug.WriteLine("CC: " + match + ": " + offset + " (" + sw.Elapsed + ")");
-                Debug.WriteLine("CCEV;" + match + ";" + offset.TotalMilliseconds + ";" + result.MaxValue + ";" + result.AbsoluteMaxValue + ";" + result.Correlations.Average() + ";" + result.Correlations.Average(f => Math.Abs(f)));
+                Debug.WriteLine(
+                    "CCEV;"
+                        + match
+                        + ";"
+                        + offset.TotalMilliseconds
+                        + ";"
+                        + result.MaxValue
+                        + ";"
+                        + result.AbsoluteMaxValue
+                        + ";"
+                        + result.Correlations.Average()
+                        + ";"
+                        + result.Correlations.Average(f => Math.Abs(f))
+                );
 
                 return new Match(match)
                 {
@@ -328,7 +378,10 @@ namespace Aurio.Matching
             {
                 throw new ArgumentException("interval lengths do not match");
             }
-            fixed (float* xF = &x[0], yF = &y[0])
+            fixed (
+                float* xF = &x[0],
+                    yF = &y[0]
+            )
             {
                 return Correlate(xF, yF, x.Length);
             }
@@ -340,7 +393,10 @@ namespace Aurio.Matching
             {
                 throw new ArgumentException("interval lengths do not match");
             }
-            fixed (byte* xB = &x[0], yB = &y[0])
+            fixed (
+                byte* xB = &x[0],
+                    yB = &y[0]
+            )
             {
                 return Correlate((float*)xB, (float*)yB, x.Length / sizeof(float));
             }

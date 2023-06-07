@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -31,7 +31,6 @@ namespace Aurio.WaveControls
 {
     public class Spectrogram : Control
     {
-
         /// <summary>
         /// Specified how much times the scroll mode bitmap should be larger than the actual control's width.
         /// The bigger it is, the more memory is consumed, but the less bitmap copy operations need to be executed.
@@ -53,9 +52,12 @@ namespace Aurio.WaveControls
             set { SetValue(ModeProperty, value); }
         }
 
-        public static readonly DependencyProperty ModeProperty =
-            DependencyProperty.Register("Mode", typeof(SpectrogramMode), typeof(Spectrogram),
-            new UIPropertyMetadata(SpectrogramMode.Scroll, OnModeChanged));
+        public static readonly DependencyProperty ModeProperty = DependencyProperty.Register(
+            "Mode",
+            typeof(SpectrogramMode),
+            typeof(Spectrogram),
+            new UIPropertyMetadata(SpectrogramMode.Scroll, OnModeChanged)
+        );
 
         private static void OnModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -70,12 +72,16 @@ namespace Aurio.WaveControls
         }
 
         public static readonly DependencyProperty SpectrogramSizeProperty =
-            DependencyProperty.Register("SpectrogramSize", typeof(int), typeof(Spectrogram),
-            new UIPropertyMetadata(1024)
-            {
-                CoerceValueCallback = CoerceSpectrogramSize,
-                PropertyChangedCallback = OnSpectrogramSizeChanged
-            });
+            DependencyProperty.Register(
+                "SpectrogramSize",
+                typeof(int),
+                typeof(Spectrogram),
+                new UIPropertyMetadata(1024)
+                {
+                    CoerceValueCallback = CoerceSpectrogramSize,
+                    PropertyChangedCallback = OnSpectrogramSizeChanged
+                }
+            );
 
         private static object CoerceSpectrogramSize(DependencyObject d, object value)
         {
@@ -83,7 +89,10 @@ namespace Aurio.WaveControls
             return i < 1 ? 1 : i;
         }
 
-        private static void OnSpectrogramSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnSpectrogramSizeChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             Spectrogram spectrogram = d as Spectrogram;
             spectrogram.InitializeSpectrogramBitmap(true);
@@ -95,8 +104,12 @@ namespace Aurio.WaveControls
             set { SetValue(MinimumProperty, value); }
         }
 
-        public static readonly DependencyProperty MinimumProperty =
-            DependencyProperty.Register("Minimum", typeof(float), typeof(Spectrogram), new UIPropertyMetadata(-100f));
+        public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register(
+            "Minimum",
+            typeof(float),
+            typeof(Spectrogram),
+            new UIPropertyMetadata(-100f)
+        );
 
         public float Maximum
         {
@@ -104,8 +117,12 @@ namespace Aurio.WaveControls
             set { SetValue(MaximumProperty, value); }
         }
 
-        public static readonly DependencyProperty MaximumProperty =
-            DependencyProperty.Register("Maximum", typeof(float), typeof(Spectrogram), new UIPropertyMetadata(0f));
+        public static readonly DependencyProperty MaximumProperty = DependencyProperty.Register(
+            "Maximum",
+            typeof(float),
+            typeof(Spectrogram),
+            new UIPropertyMetadata(0f)
+        );
 
         public Spectrogram()
         {
@@ -132,17 +149,26 @@ namespace Aurio.WaveControls
         protected override void OnRender(System.Windows.Media.DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
-            drawingContext.DrawRectangle(Background, null, new Rect(0, 0, ActualWidth, ActualHeight));
+            drawingContext.DrawRectangle(
+                Background,
+                null,
+                new Rect(0, 0, ActualWidth, ActualHeight)
+            );
 
             if (mode == SpectrogramMode.Scroll)
             {
-                drawingContext.DrawDrawing(new ImageDrawing(
-                    writeableBitmap, new Rect(ActualWidth - position, 0, ActualWidth * 3, ActualHeight)));
+                drawingContext.DrawDrawing(
+                    new ImageDrawing(
+                        writeableBitmap,
+                        new Rect(ActualWidth - position, 0, ActualWidth * 3, ActualHeight)
+                    )
+                );
             }
             else
             {
-                drawingContext.DrawDrawing(new ImageDrawing(
-                    writeableBitmap, new Rect(0, 0, ActualWidth, ActualHeight)));
+                drawingContext.DrawDrawing(
+                    new ImageDrawing(writeableBitmap, new Rect(0, 0, ActualWidth, ActualHeight))
+                );
             }
         }
 
@@ -158,8 +184,12 @@ namespace Aurio.WaveControls
         {
             if (values.Length != pixelColumn.Length)
             {
-                throw new Exception("illegal values array - length should be " + pixelColumn.Length
-                    + " but is " + values.Length);
+                throw new Exception(
+                    "illegal values array - length should be "
+                        + pixelColumn.Length
+                        + " but is "
+                        + values.Length
+                );
             }
 
             if (paletteDemo)
@@ -196,7 +226,12 @@ namespace Aurio.WaveControls
                 }
             }
 
-            writeableBitmap.WritePixels(new Int32Rect(position, 0, 1, values.Length), pixelColumn, 4, 0);
+            writeableBitmap.WritePixels(
+                new Int32Rect(position, 0, 1, values.Length),
+                pixelColumn,
+                4,
+                0
+            );
 
             if (++position >= writeableBitmap.PixelWidth)
             {
@@ -219,41 +254,59 @@ namespace Aurio.WaveControls
         {
             if (columnIndex >= ColumnCount)
             {
-                throw new Exception($"Column index is larger than the number of drawn columns ({columnIndex} > ´{ColumnCount})");
+                throw new Exception(
+                    $"Column index is larger than the number of drawn columns ({columnIndex} > ´{ColumnCount})"
+                );
             }
-            
+
             var columnOffset = ColumnCount - columnIndex;
 
             if (position - columnOffset < 0)
             {
-                Debug.WriteLine($"Ignoring point marker at column {columnIndex} because it is too far behind " +
-                    $"and outside the drawing range ({ColumnCount - columnOffset} - {ColumnCount})");
+                Debug.WriteLine(
+                    $"Ignoring point marker at column {columnIndex} because it is too far behind "
+                        + $"and outside the drawing range ({ColumnCount - columnOffset} - {ColumnCount})"
+                );
             }
 
             int pixelColor = ColorGradient.ColorToArgb(color);
             int pixelColumnPosition = (int)(position - columnOffset);
 
             // alternatively use GetBitmapContext() + SetPixel() but WritePixel() may just do that internally
-            writeableBitmap.WritePixels(new Int32Rect(pixelColumnPosition, pixelColumn.Length - 1 - rowIndex, 1, 1), new [] { pixelColor }, 4, 0);
+            writeableBitmap.WritePixels(
+                new Int32Rect(pixelColumnPosition, pixelColumn.Length - 1 - rowIndex, 1, 1),
+                new[] { pixelColor },
+                4,
+                0
+            );
         }
 
-        public void AddLineMarker(long columnIndexFrom, int rowIndexFrom, long columnIndexTo, int rowIndexTo, Color color)
+        public void AddLineMarker(
+            long columnIndexFrom,
+            int rowIndexFrom,
+            long columnIndexTo,
+            int rowIndexTo,
+            Color color
+        )
         {
             var maxColumnIndex = Math.Max(columnIndexFrom, columnIndexTo);
 
             if (maxColumnIndex >= ColumnCount)
             {
-                throw new Exception($"Column index is larger than the number of drawn columns ({maxColumnIndex} > ´{ColumnCount})");
+                throw new Exception(
+                    $"Column index is larger than the number of drawn columns ({maxColumnIndex} > ´{ColumnCount})"
+                );
             }
 
             var columnOffset = ColumnCount - position;
 
             if (columnIndexFrom - columnOffset < 0)
             {
-                Debug.WriteLine($"Ignoring line marker at column {columnIndexFrom} because it is too far behind " +
-                                $"and outside the drawing range ({ColumnCount - columnOffset} - {ColumnCount})");
+                Debug.WriteLine(
+                    $"Ignoring line marker at column {columnIndexFrom} because it is too far behind "
+                        + $"and outside the drawing range ({ColumnCount - columnOffset} - {ColumnCount})"
+                );
             }
-
 
             var bitmapColumnPositionFrom = (int)(columnIndexFrom - columnOffset);
             var bitmapColumnPositionTo = (int)(columnIndexTo - columnOffset);
@@ -262,23 +315,28 @@ namespace Aurio.WaveControls
             try
             {
                 writeableBitmap.Lock();
-
                 unsafe
                 {
                     var pBackBuffer = writeableBitmap.BackBuffer;
                     BitmapUtils.DrawLine(
-                        bitmapColumnPositionFrom, pixelColumn.Length - 1 - rowIndexFrom, 
-                        bitmapColumnPositionTo, pixelColumn.Length - 1 - rowIndexTo, 
-                        (int*)pBackBuffer, writeableBitmap.BackBufferStride / 4, writeableBitmap.PixelHeight, 
-                        pixelColor);
+                        bitmapColumnPositionFrom,
+                        pixelColumn.Length - 1 - rowIndexFrom,
+                        bitmapColumnPositionTo,
+                        pixelColumn.Length - 1 - rowIndexTo,
+                        (int*)pBackBuffer,
+                        writeableBitmap.BackBufferStride / 4,
+                        writeableBitmap.PixelHeight,
+                        pixelColor
+                    );
                 }
 
                 var rect = new Int32Rect(
-                    Math.Min(bitmapColumnPositionFrom, bitmapColumnPositionTo), 
-                    Math.Min(rowIndexFrom, rowIndexTo), 
-                    Math.Abs(bitmapColumnPositionTo - bitmapColumnPositionFrom), 
-                    Math.Abs(rowIndexTo - rowIndexFrom));
-                
+                    Math.Min(bitmapColumnPositionFrom, bitmapColumnPositionTo),
+                    Math.Min(rowIndexFrom, rowIndexTo),
+                    Math.Abs(bitmapColumnPositionTo - bitmapColumnPositionFrom),
+                    Math.Abs(rowIndexTo - rowIndexFrom)
+                );
+
                 writeableBitmap.AddDirtyRect(rect);
             }
             finally
@@ -297,8 +355,15 @@ namespace Aurio.WaveControls
             if (writeableBitmap == null)
             { // first time initialization
                 writeableBitmap = new WriteableBitmap(
-                    mode == SpectrogramMode.Scroll ? (int)ActualWidth * SCROLL_WIDTH_FACTOR : (int)ActualWidth,
-                    SpectrogramSize, 96, 96, PixelFormats.Bgra32, null);
+                    mode == SpectrogramMode.Scroll
+                        ? (int)ActualWidth * SCROLL_WIDTH_FACTOR
+                        : (int)ActualWidth,
+                    SpectrogramSize,
+                    96,
+                    96,
+                    PixelFormats.Bgra32,
+                    null
+                );
                 pixelColumn = new int[SpectrogramSize];
             }
             else
@@ -311,8 +376,14 @@ namespace Aurio.WaveControls
                 {
                     if (sizeChanged)
                     {
-                        writeableBitmap = new WriteableBitmap((int)ActualWidth * SCROLL_WIDTH_FACTOR,
-                            SpectrogramSize, 96, 96, PixelFormats.Bgra32, null);
+                        writeableBitmap = new WriteableBitmap(
+                            (int)ActualWidth * SCROLL_WIDTH_FACTOR,
+                            SpectrogramSize,
+                            96,
+                            96,
+                            PixelFormats.Bgra32,
+                            null
+                        );
                     }
                     else
                     {
@@ -324,8 +395,14 @@ namespace Aurio.WaveControls
                 {
                     if (sizeChanged)
                     {
-                        writeableBitmap = new WriteableBitmap((int)ActualWidth,
-                                SpectrogramSize, 96, 96, PixelFormats.Bgra32, null);
+                        writeableBitmap = new WriteableBitmap(
+                            (int)ActualWidth,
+                            SpectrogramSize,
+                            96,
+                            96,
+                            PixelFormats.Bgra32,
+                            null
+                        );
                     }
                     position = 0;
                 }
@@ -348,8 +425,14 @@ namespace Aurio.WaveControls
             //dest.WritePixels(destRect, buffer, third * 4, 0);
 
             // direct pixel copy
-            dest.WritePixels(srcRect, src.BackBuffer, src.BackBufferStride * src.PixelHeight,
-                src.BackBufferStride, destRect.X, destRect.Y);
+            dest.WritePixels(
+                srcRect,
+                src.BackBuffer,
+                src.BackBufferStride * src.PixelHeight,
+                src.BackBufferStride,
+                destRect.X,
+                destRect.Y
+            );
         }
     }
 }

@@ -6,7 +6,6 @@ namespace Aurio.Soxr.UnitTest
     [TestClass]
     public class SoxResamplerTest
     {
-
         [TestMethod]
         public void CreateInstance()
         {
@@ -23,12 +22,29 @@ namespace Aurio.Soxr.UnitTest
 
             var dataIn = new byte[80000];
             var dataOut = new byte[80000];
-            int readIn = 0, readOut = 0;
+            int readIn = 0,
+                readOut = 0;
 
             for (int i = 0; i < count; i++)
             {
-                instances[i] = new SoxResampler(5.0, 1.0, 2, QualityRecipe.SOXR_HQ, QualityFlags.SOXR_VR);
-                instances[i].Process(dataIn, 0, dataIn.Length, dataOut, 0, dataOut.Length, false, out readIn, out readOut);
+                instances[i] = new SoxResampler(
+                    5.0,
+                    1.0,
+                    2,
+                    QualityRecipe.SOXR_HQ,
+                    QualityFlags.SOXR_VR
+                );
+                instances[i].Process(
+                    dataIn,
+                    0,
+                    dataIn.Length,
+                    dataOut,
+                    0,
+                    dataOut.Length,
+                    false,
+                    out readIn,
+                    out readOut
+                );
             }
 
             for (int i = 0; i < count; i++)
@@ -38,7 +54,10 @@ namespace Aurio.Soxr.UnitTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(SoxrException), "Invalid instantiation parameter didn't raise exception")]
+        [ExpectedException(
+            typeof(SoxrException),
+            "Invalid instantiation parameter didn't raise exception"
+        )]
         public void CreateInvalidInstance()
         {
             /* A negative input rate is invalid and should return in an error that triggers an exception.
@@ -54,7 +73,10 @@ namespace Aurio.Soxr.UnitTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(SoxrException), "Invalid instantiation parameter didn't raise exception")]
+        [ExpectedException(
+            typeof(SoxrException),
+            "Invalid instantiation parameter didn't raise exception"
+        )]
         public void CreateInvalidVariableRateInstance()
         {
             var r = new SoxResampler(2.0, 1.0, 1, QualityRecipe.SOXR_LQ, QualityFlags.SOXR_VR);
@@ -112,17 +134,26 @@ namespace Aurio.Soxr.UnitTest
             int outputLengthGenerated = 0;
 
             int remainingIn = inSize;
-            int totalIn = 0, totalOut = 0;
+            int totalIn = 0,
+                totalOut = 0;
 
             do
             {
-                r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize,
-                    remainingIn == 0, out inputLengthUsed, out outputLengthGenerated);
+                r.Process(
+                    sampleDataIn,
+                    0,
+                    remainingIn,
+                    sampleDataOut,
+                    0,
+                    outSize,
+                    remainingIn == 0,
+                    out inputLengthUsed,
+                    out outputLengthGenerated
+                );
                 totalIn += inputLengthUsed;
                 totalOut += outputLengthGenerated;
                 remainingIn -= inputLengthUsed;
-            }
-            while (inputLengthUsed > 0 || outputLengthGenerated > 0);
+            } while (inputLengthUsed > 0 || outputLengthGenerated > 0);
 
             Assert.AreEqual(inSize, totalIn, "not all data has been read");
             Assert.AreEqual(outSize, totalOut, "not all data has been put out");
@@ -142,17 +173,26 @@ namespace Aurio.Soxr.UnitTest
             int outputLengthGenerated = 0;
 
             int remainingIn = inSize;
-            int totalIn = 0, totalOut = 0;
+            int totalIn = 0,
+                totalOut = 0;
 
             do
             {
-                r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize,
-                    remainingIn == 0, out inputLengthUsed, out outputLengthGenerated);
+                r.Process(
+                    sampleDataIn,
+                    0,
+                    remainingIn,
+                    sampleDataOut,
+                    0,
+                    outSize,
+                    remainingIn == 0,
+                    out inputLengthUsed,
+                    out outputLengthGenerated
+                );
                 totalIn += inputLengthUsed;
                 totalOut += outputLengthGenerated;
                 remainingIn -= inputLengthUsed;
-            }
-            while (inputLengthUsed > 0 || outputLengthGenerated > 0);
+            } while (inputLengthUsed > 0 || outputLengthGenerated > 0);
 
             Assert.AreEqual(inSize, totalIn, "not all data has been read");
             Assert.AreEqual(outSize, totalOut, "not all data has been put out");
@@ -172,17 +212,26 @@ namespace Aurio.Soxr.UnitTest
             int outputLengthGenerated = 0;
 
             int remainingIn = inSize;
-            int totalIn = 0, totalOut = 0;
+            int totalIn = 0,
+                totalOut = 0;
 
             do
             {
-                r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize,
-                    remainingIn == 0, out inputLengthUsed, out outputLengthGenerated);
+                r.Process(
+                    sampleDataIn,
+                    0,
+                    remainingIn,
+                    sampleDataOut,
+                    0,
+                    outSize,
+                    remainingIn == 0,
+                    out inputLengthUsed,
+                    out outputLengthGenerated
+                );
                 totalIn += inputLengthUsed;
                 totalOut += outputLengthGenerated;
                 remainingIn -= inputLengthUsed;
-            }
-            while (inputLengthUsed > 0 || outputLengthGenerated > 0);
+            } while (inputLengthUsed > 0 || outputLengthGenerated > 0);
 
             Assert.AreEqual(inSize, totalIn, "not all data has been read");
             Assert.AreEqual(inSize * 2, totalOut, "not all data has been put out");
@@ -202,17 +251,26 @@ namespace Aurio.Soxr.UnitTest
             int outputLengthGenerated = 0;
 
             int remainingIn = inSize;
-            int totalIn = 0, totalOut = 0;
+            int totalIn = 0,
+                totalOut = 0;
 
             do
             {
-                r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize,
-                    remainingIn == 0, out inputLengthUsed, out outputLengthGenerated);
+                r.Process(
+                    sampleDataIn,
+                    0,
+                    remainingIn,
+                    sampleDataOut,
+                    0,
+                    outSize,
+                    remainingIn == 0,
+                    out inputLengthUsed,
+                    out outputLengthGenerated
+                );
                 totalIn += inputLengthUsed;
                 totalOut += outputLengthGenerated;
                 remainingIn -= inputLengthUsed;
-            }
-            while (inputLengthUsed > 0 || outputLengthGenerated > 0);
+            } while (inputLengthUsed > 0 || outputLengthGenerated > 0);
 
             Assert.AreEqual(inSize, totalIn, "not all data has been read");
             Assert.AreEqual(inSize / 2, totalOut, "not all data has been put out");

@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -27,7 +27,6 @@ namespace Aurio.Streams
 {
     public class MonoStream : AbstractAudioStreamWrapper
     {
-
         private AudioProperties properties;
         private ByteBuffer sourceBuffer;
         private bool downmix;
@@ -37,9 +36,7 @@ namespace Aurio.Streams
         /// </summary>
         /// <param name="sourceStream">the stream to downmix to mono</param>
         public MonoStream(IAudioStream sourceStream)
-            : this(sourceStream, 1)
-        {
-        }
+            : this(sourceStream, 1) { }
 
         /// <summary>
         /// Creates a MonoStream that downmixes all channels of the source stream into a single mono channel
@@ -47,15 +44,27 @@ namespace Aurio.Streams
         /// </summary>
         /// <param name="sourceStream">the stream to downmix to mono</param>
         /// <param name="outputChannels">the number of channel into which the mono mix should be split</param>
-        public MonoStream(IAudioStream sourceStream, int outputChannels) : base(sourceStream)
+        public MonoStream(IAudioStream sourceStream, int outputChannels)
+            : base(sourceStream)
         {
-            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32))
+            if (
+                !(
+                    sourceStream.Properties.Format == AudioFormat.IEEE
+                    && sourceStream.Properties.BitDepth == 32
+                )
+            )
             {
-                throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
+                throw new ArgumentException(
+                    "unsupported source format: " + sourceStream.Properties
+                );
             }
 
-            properties = new AudioProperties(outputChannels, sourceStream.Properties.SampleRate,
-                sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
+            properties = new AudioProperties(
+                outputChannels,
+                sourceStream.Properties.SampleRate,
+                sourceStream.Properties.BitDepth,
+                sourceStream.Properties.Format
+            );
             sourceBuffer = new ByteBuffer();
             downmix = true;
         }
@@ -88,7 +97,9 @@ namespace Aurio.Streams
             {
                 if (value == false && sourceStream.Properties.Channels != properties.Channels)
                 {
-                    throw new Exception("downmixing can only be disabled if the number of input channels equals the number of output channels");
+                    throw new Exception(
+                        "downmixing can only be disabled if the number of input channels equals the number of output channels"
+                    );
                 }
                 downmix = value;
             }
@@ -119,10 +130,12 @@ namespace Aurio.Streams
             int sourceIndex = 0;
             int targetIndex = 0;
             float targetSample;
-
             unsafe
             {
-                fixed (byte* sourceByteBuffer = &sourceBuffer.Data[0], targetByteBuffer = &buffer[offset])
+                fixed (
+                    byte* sourceByteBuffer = &sourceBuffer.Data[0],
+                        targetByteBuffer = &buffer[offset]
+                )
                 {
                     float* sourceFloatBuffer = (float*)sourceByteBuffer;
                     float* targetFloatBuffer = (float*)targetByteBuffer;

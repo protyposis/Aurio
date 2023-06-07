@@ -1,17 +1,17 @@
-// 
+//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -37,7 +37,6 @@ namespace Aurio.Matching.Dixon2005
     /// </summary>
     public class OLTW2 : DTW
     {
-
         private const int MAX_RUN_COUNT = 3;
         private const int DIAG_COST_FACTOR = 1;
 
@@ -49,15 +48,15 @@ namespace Aurio.Matching.Dixon2005
             Both
         }
 
-        private List<float[]> s1Frames, s2Frames;
+        private List<float[]> s1Frames,
+            s2Frames;
         private IMatrix<double> totalCostMatrix;
         private IMatrix<double> cellCostMatrix;
-        private int[] pathLengthRow, pathLengthCol;
+        private int[] pathLengthRow,
+            pathLengthCol;
 
         public OLTW2(TimeSpan searchWidth, ProgressMonitor progressMonitor)
-            : base(searchWidth, progressMonitor)
-        {
-        }
+            : base(searchWidth, progressMonitor) { }
 
         public OLTW2(ProgressMonitor progressMonitor)
             : this(new TimeSpan(0, 0, 10), progressMonitor)
@@ -98,14 +97,19 @@ namespace Aurio.Matching.Dixon2005
             }
             progressReporter.Finish();
 
-            int c = (int)(this.searchWidth.TotalSeconds * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE));
+            int c = (int)(
+                this.searchWidth.TotalSeconds
+                * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE)
+            );
             c = Math.Min(c, Math.Min(s1FrameCount, s2FrameCount)); // reduce c to the shortest stream if necessary
 
             totalCostMatrix = new PatchMatrix<double>(double.PositiveInfinity, 100);
             cellCostMatrix = new PatchMatrix<double>(double.PositiveInfinity, 100);
 
-            int i = 0, j = 0; // position of the "head" in each step
-            int minI, minJ; // position of the cell with the min path cost in each step
+            int i = 0,
+                j = 0; // position of the "head" in each step
+            int minI,
+                minJ; // position of the cell with the min path cost in each step
             Direction r = Direction.None;
             Direction previous = Direction.None;
             int runCount = 0;
@@ -218,12 +222,15 @@ namespace Aurio.Matching.Dixon2005
                             totalCostMatrix[x, j] = Min(
                                 totalCostMatrix[x - 1, j - 1] + DIAG_COST_FACTOR * cellCost,
                                 totalCostMatrix[x - 1, j] + cellCost,
-                                totalCostMatrix[x, j - 1] + cellCost);
+                                totalCostMatrix[x, j - 1] + cellCost
+                            );
                         }
                         cellCostMatrix[x, j] = cellCost;
                         pathLengthRow[x % pathLengthRow.Length] = GetPathLength(x, j);
                     }
-                    pathLengthCol[j % pathLengthCol.Length] = pathLengthRow[i % pathLengthRow.Length];
+                    pathLengthCol[j % pathLengthCol.Length] = pathLengthRow[
+                        i % pathLengthRow.Length
+                    ];
                 }
 
                 // add column
@@ -243,12 +250,15 @@ namespace Aurio.Matching.Dixon2005
                             totalCostMatrix[i, y] = Min(
                                 totalCostMatrix[i - 1, y - 1] + DIAG_COST_FACTOR * cellCost,
                                 totalCostMatrix[i - 1, y] + cellCost,
-                                totalCostMatrix[i, y - 1] + cellCost);
+                                totalCostMatrix[i, y - 1] + cellCost
+                            );
                         }
                         cellCostMatrix[i, y] = cellCost;
                         pathLengthCol[y % pathLengthCol.Length] = GetPathLength(i, y);
                     }
-                    pathLengthRow[i % pathLengthRow.Length] = pathLengthCol[j % pathLengthCol.Length];
+                    pathLengthRow[i % pathLengthRow.Length] = pathLengthCol[
+                        j % pathLengthCol.Length
+                    ];
                 }
 
                 previous = r;
@@ -284,15 +294,17 @@ namespace Aurio.Matching.Dixon2005
         private static double Min(double diag, double row, double col, out Direction direction)
         {
             double min = Math.Min(diag, Math.Min(row, col));
-            if (min == diag) direction = Direction.Both;
-            else if (min == row) direction = Direction.Row;
-            else direction = Direction.Column;
+            if (min == diag)
+                direction = Direction.Both;
+            else if (min == row)
+                direction = Direction.Row;
+            else
+                direction = Direction.Column;
             return min;
         }
 
         protected void DebugPrintMatrixHeadInfo(IMatrix<double> matrix, int i, int j, int c)
         {
-
             int xI = -1;
             double xV = double.PositiveInfinity;
             Debug.Write("ROW:  ");
@@ -309,17 +321,23 @@ namespace Aurio.Matching.Dixon2005
             Debug.Write("COST: ");
             for (int x = Math.Max(i - c, 0); x <= i; x++)
             {
-                Debug.Write(String.Format("{0:000000.00} ", pathLengthRow[x % pathLengthRow.Length]));
+                Debug.Write(
+                    String.Format("{0:000000.00} ", pathLengthRow[x % pathLengthRow.Length])
+                );
             }
             Debug.WriteLine("");
             Debug.Write("TOT:  ");
             for (int x = Math.Max(i - c, 0); x <= i; x++)
             {
-                Debug.Write(String.Format("{0:000000.00} ", (int)(matrix[x, j] / (double)pathLengthRow[x % pathLengthRow.Length])));
+                Debug.Write(
+                    String.Format(
+                        "{0:000000.00} ",
+                        (int)(matrix[x, j] / (double)pathLengthRow[x % pathLengthRow.Length])
+                    )
+                );
             }
             Debug.WriteLine("");
             Debug.WriteLine("ROW min index {0} val {1}", xI, xV);
-
 
             int yI = -1;
             double yV = double.PositiveInfinity;
@@ -337,13 +355,20 @@ namespace Aurio.Matching.Dixon2005
             Debug.Write("COST: ");
             for (int y = Math.Max(j - c, 0); y <= j; y++)
             {
-                Debug.Write(String.Format("{0:000000.00} ", pathLengthCol[y % pathLengthCol.Length]));
+                Debug.Write(
+                    String.Format("{0:000000.00} ", pathLengthCol[y % pathLengthCol.Length])
+                );
             }
             Debug.WriteLine("");
             Debug.Write("TOT:  ");
             for (int y = Math.Max(j - c, 0); y <= j; y++)
             {
-                Debug.Write(String.Format("{0:000000.00} ", (int)(matrix[i, y] / (double)pathLengthCol[y % pathLengthCol.Length])));
+                Debug.Write(
+                    String.Format(
+                        "{0:000000.00} ",
+                        (int)(matrix[i, y] / (double)pathLengthCol[y % pathLengthCol.Length])
+                    )
+                );
             }
             Debug.WriteLine("");
             Debug.WriteLine("COL min index {0} val {1}", yI, yV);

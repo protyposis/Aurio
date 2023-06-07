@@ -8,12 +8,12 @@ using System.Threading;
 namespace Aurio.Streams
 {
     /// <summary>
-    /// A stream with a fixed maximum capacity that can be written to and read from, basically working 
+    /// A stream with a fixed maximum capacity that can be written to and read from, basically working
     /// as an audio data FIFO queue. Reads are blocking until data becomes available by writes to the stream.
-    /// 
-    /// This stream can be used to convert the pull-based stream processing into a push-based approach, 
+    ///
+    /// This stream can be used to convert the pull-based stream processing into a push-based approach,
     /// helpful when input data becomes available more slowly than the output data processing speed, e.g.
-    /// in realtime / live stream processing. It also allows for constant memory usage with infinitely long 
+    /// in realtime / live stream processing. It also allows for constant memory usage with infinitely long
     /// streams.
     /// </summary>
     public class BlockingFixedLengthFifoStream : CircularMemoryWriterStream
@@ -21,7 +21,8 @@ namespace Aurio.Streams
         private long _readPosition;
         private bool _endOfInput;
 
-        public BlockingFixedLengthFifoStream(AudioProperties properties, int capacity) : base(properties, capacity)
+        public BlockingFixedLengthFifoStream(AudioProperties properties, int capacity)
+            : base(properties, capacity)
         {
             _readPosition = 0;
             _endOfInput = false;
@@ -41,7 +42,7 @@ namespace Aurio.Streams
                 if (_endOfInput)
                 {
                     // When EOI has been signalled, we return the actual length of this stream
-                    // to allow consumers real all contents by comparing the the length with the 
+                    // to allow consumers real all contents by comparing the the length with the
                     // position (the usual pattern for stream reading).
                     return base.Length;
                 }
@@ -59,12 +60,12 @@ namespace Aurio.Streams
         /// <summary>
         /// By convention of the stream interface, there is normally only one position which is both
         /// the read and write position. This stream exposes read and write positions separately because
-        /// writes are appended at the end fo the stream while reads are done from the beginning of 
+        /// writes are appended at the end fo the stream while reads are done from the beginning of
         /// the stream (FIFO approach).
-        /// 
-        /// This property exposes the read position, because this is the interesting position that must 
+        ///
+        /// This property exposes the read position, because this is the interesting position that must
         /// be used to calculate the amount of remaining data by comparing the position with the length.
-        /// 
+        ///
         /// Comparing the read with the write position allows to determine the buffer level, i.e. the amount
         /// of data that has not been consumed yet, independently from how much data the buffer holds in total.
         /// </summary>
@@ -110,14 +111,14 @@ namespace Aurio.Streams
         /// until additional data is written to the stream and becomes available, or the end of input
         /// has been signalled.
         /// </summary>
-        /// <see cref="EndOfInputSignalled"/> 
+        /// <see cref="EndOfInputSignalled"/>
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override int Read(byte[] buffer, int offset, int count)
         {
             // Block until data is available
-            // By convention, when a read returns 0, it means the end of the stream has been 
-            // reached. Because we're potentially processing realtime audio data and audio processing 
-            // usually consumes data much faster than it comes in, we would instantly run into an EOS 
+            // By convention, when a read returns 0, it means the end of the stream has been
+            // reached. Because we're potentially processing realtime audio data and audio processing
+            // usually consumes data much faster than it comes in, we would instantly run into an EOS
             // so we need to block reading until new data has been written.
             long bytesAvailable;
             while ((bytesAvailable = base.Position - _readPosition) <= 0)
@@ -156,7 +157,7 @@ namespace Aurio.Streams
             }
 
             // Write data
-            // The read method makes sure that the stream is always at the write position when 
+            // The read method makes sure that the stream is always at the write position when
             // writing so we don't need to take care of that here
             // Debug.WriteLine("Writing {0} bytes @ position {1}", count, base.Position);
             var writePosition = base.Position;

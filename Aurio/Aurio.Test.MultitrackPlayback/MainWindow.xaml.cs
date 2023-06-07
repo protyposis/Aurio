@@ -29,7 +29,6 @@ namespace Aurio.Test.MultitrackPlayback
     /// </summary>
     public partial class MainWindow : Window
     {
-
         private const ulong SEEKER_PROGRAMMATIC_VALUECHANGED_TAG = 0xDEADC0DEDEADC0DE;
 
         private Timer timer;
@@ -88,16 +87,22 @@ namespace Aurio.Test.MultitrackPlayback
             foreach (AudioTrack audioTrack in trackListBox.Items)
             {
                 WaveFileReader reader = new WaveFileReader(audioTrack.FileInfo.FullName);
-                IeeeStream channel = new IeeeStream(new DebugStream(new NAudioSourceStream(reader), debugStreamController));
+                IeeeStream channel = new IeeeStream(
+                    new DebugStream(new NAudioSourceStream(reader), debugStreamController)
+                );
                 //ResamplingStream res = new ResamplingStream(new DebugStream(channel, debugStreamController), ResamplingQuality.SincBest, 22050);
 
-                TimeWarpStream warp = new TimeWarpStream(new DebugStream(channel, debugStreamController));
+                TimeWarpStream warp = new TimeWarpStream(
+                    new DebugStream(channel, debugStreamController)
+                );
                 //warp.Mappings.Add(new TimeWarp { From = new TimeSpan(audioTrack.Length.Ticks / 10 * 4), To = new TimeSpan(audioTrack.Length.Ticks / 9) });
                 //warp.Mappings.Add(new TimeWarp { From = new TimeSpan(audioTrack.Length.Ticks / 10 * 5), To = new TimeSpan(audioTrack.Length.Ticks / 9 * 2) });
                 //warp.Mappings.Add(new TimeWarp { From = new TimeSpan(audioTrack.Length.Ticks / 10 * 10), To = new TimeSpan(audioTrack.Length.Ticks / 9 * 3) });
 
                 // necessary to control each track individually
-                VolumeControlStream volumeControl = new VolumeControlStream(new DebugStream(warp, debugStreamController))
+                VolumeControlStream volumeControl = new VolumeControlStream(
+                    new DebugStream(warp, debugStreamController)
+                )
                 {
                     Mute = audioTrack.Mute,
                     Volume = audioTrack.Volume
@@ -105,14 +110,15 @@ namespace Aurio.Test.MultitrackPlayback
 
                 // when the AudioTrack.Mute property changes, just set it accordingly on the audio stream
                 audioTrack.MuteChanged += new EventHandler<ValueEventArgs<bool>>(
-                    delegate (object vsender, ValueEventArgs<bool> ve)
+                    delegate(object vsender, ValueEventArgs<bool> ve)
                     {
                         volumeControl.Mute = ve.Value;
-                    });
+                    }
+                );
 
                 // when the AudioTrack.Solo property changes, we have to react in different ways:
                 audioTrack.SoloChanged += new EventHandler<ValueEventArgs<bool>>(
-                    delegate (object vsender, ValueEventArgs<bool> ve)
+                    delegate(object vsender, ValueEventArgs<bool> ve)
                     {
                         AudioTrack senderTrack = (AudioTrack)vsender;
                         bool isOtherTrackSoloed = false;
@@ -126,7 +132,7 @@ namespace Aurio.Test.MultitrackPlayback
                             }
                         }
 
-                        /* if there's at least one other track that is soloed, we set the mute property of 
+                        /* if there's at least one other track that is soloed, we set the mute property of
                          * the current track to the opposite of the solo property:
                          * - if the track is soloed, we unmute it
                          * - if the track is unsoloed, we mute it
@@ -148,41 +154,60 @@ namespace Aurio.Test.MultitrackPlayback
                                 }
                             }
                         }
-                    });
+                    }
+                );
 
                 // when the AudioTrack.Volume property changes, just set it accordingly on the audio stream
                 audioTrack.VolumeChanged += new EventHandler<ValueEventArgs<float>>(
-                    delegate (object vsender, ValueEventArgs<float> ve)
+                    delegate(object vsender, ValueEventArgs<float> ve)
                     {
                         volumeControl.Volume = ve.Value;
-                    });
+                    }
+                );
 
                 mixer.Add(new DebugStream(volumeControl));
             }
 
-            VolumeControlStream volumeControlStream = new VolumeControlStream(new DebugStream(mixer, debugStreamController))
+            VolumeControlStream volumeControlStream = new VolumeControlStream(
+                new DebugStream(mixer, debugStreamController)
+            )
             {
                 Volume = (float)volumeSlider.Value
             };
-            VolumeMeteringStream volumeMeteringStream = new VolumeMeteringStream(new DebugStream(volumeControlStream, debugStreamController), 5000);
-            volumeMeteringStream.StreamVolume += new EventHandler<StreamVolumeEventArgs>(meteringStream_StreamVolume);
-            VolumeClipStream volumeClipStream = new VolumeClipStream(new DebugStream(volumeMeteringStream, debugStreamController));
+            VolumeMeteringStream volumeMeteringStream = new VolumeMeteringStream(
+                new DebugStream(volumeControlStream, debugStreamController),
+                5000
+            );
+            volumeMeteringStream.StreamVolume += new EventHandler<StreamVolumeEventArgs>(
+                meteringStream_StreamVolume
+            );
+            VolumeClipStream volumeClipStream = new VolumeClipStream(
+                new DebugStream(volumeMeteringStream, debugStreamController)
+            );
 
             playbackStream = volumeClipStream;
 
             wavePlayer = new WaveOut();
             wavePlayer.DesiredLatency = 250;
-            wavePlayer.Init(new NAudioSinkStream(new DebugStream(playbackStream, debugStreamController)));
+            wavePlayer.Init(
+                new NAudioSinkStream(new DebugStream(playbackStream, debugStreamController))
+            );
 
             // master volume setting
             volumeSlider.ValueChanged += new RoutedPropertyChangedEventHandler<double>(
-                delegate (object vsender, RoutedPropertyChangedEventArgs<double> ve)
+                delegate(object vsender, RoutedPropertyChangedEventArgs<double> ve)
                 {
                     volumeControlStream.Volume = (float)ve.NewValue;
-                });
+                }
+            );
 
-            lblTotalPlaybackTime.Content = TimeUtil.BytesToTimeSpan(playbackStream.Length, playbackStream.Properties);
-            playbackSeeker.Maximum = TimeUtil.BytesToTimeSpan(playbackStream.Length, playbackStream.Properties).TotalSeconds;
+            lblTotalPlaybackTime.Content = TimeUtil.BytesToTimeSpan(
+                playbackStream.Length,
+                playbackStream.Properties
+            );
+            playbackSeeker.Maximum = TimeUtil
+                .BytesToTimeSpan(playbackStream.Length, playbackStream.Properties)
+                .TotalSeconds;
 
             wavePlayer.Play();
         }
@@ -234,16 +259,26 @@ namespace Aurio.Test.MultitrackPlayback
         {
             if (wavePlayer != null)
             {
-                lblCurrentPlaybackTime.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
-                    new DispatcherOperationCallback(delegate
-                    {
-                        lblCurrentPlaybackTime.Content = TimeUtil.BytesToTimeSpan(playbackStream.Position, playbackStream.Properties);
+                lblCurrentPlaybackTime.Dispatcher.BeginInvoke(
+                    DispatcherPriority.Normal,
+                    new DispatcherOperationCallback(
+                        delegate
+                        {
+                            lblCurrentPlaybackTime.Content = TimeUtil.BytesToTimeSpan(
+                                playbackStream.Position,
+                                playbackStream.Properties
+                            );
 
-                        playbackSeeker.Tag = SEEKER_PROGRAMMATIC_VALUECHANGED_TAG;
-                        playbackSeeker.Value = TimeUtil.BytesToTimeSpan(playbackStream.Position, playbackStream.Properties).TotalSeconds;
+                            playbackSeeker.Tag = SEEKER_PROGRAMMATIC_VALUECHANGED_TAG;
+                            playbackSeeker.Value = TimeUtil
+                                .BytesToTimeSpan(playbackStream.Position, playbackStream.Properties)
+                                .TotalSeconds;
 
-                        return null;
-                    }), null);
+                            return null;
+                        }
+                    ),
+                    null
+                );
             }
         }
 
@@ -256,9 +291,15 @@ namespace Aurio.Test.MultitrackPlayback
             }
         }
 
-        private void playbackSeeker_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void playbackSeeker_ValueChanged(
+            object sender,
+            RoutedPropertyChangedEventArgs<double> e
+        )
         {
-            if (playbackSeeker.Tag != null && (ulong)playbackSeeker.Tag == SEEKER_PROGRAMMATIC_VALUECHANGED_TAG)
+            if (
+                playbackSeeker.Tag != null
+                && (ulong)playbackSeeker.Tag == SEEKER_PROGRAMMATIC_VALUECHANGED_TAG
+            )
             {
                 playbackSeeker.Tag = null;
                 return;
@@ -268,8 +309,12 @@ namespace Aurio.Test.MultitrackPlayback
             {
                 debugStreamController.PrintPositions("before");
                 playbackStream.Position = Math.Min(
-                    TimeUtil.TimeSpanToBytes(TimeSpan.FromSeconds(playbackSeeker.Value), playbackStream.Properties),
-                    playbackStream.Length);
+                    TimeUtil.TimeSpanToBytes(
+                        TimeSpan.FromSeconds(playbackSeeker.Value),
+                        playbackStream.Properties
+                    ),
+                    playbackStream.Length
+                );
                 debugStreamController.PrintPositions("after");
             }
         }

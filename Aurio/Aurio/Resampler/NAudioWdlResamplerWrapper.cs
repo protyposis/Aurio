@@ -25,8 +25,19 @@ namespace Aurio.Resampler
 
         // Create delegates for the most frequently called methods because it's much faster than Invoke calls
         // We need a delegate for ResamplePrepare to nicely handle the out parameters
-        private delegate int ResamplePrepareDelegate(int out_samples, int nch, out float[] inbuffer, out int inbufferOffset);
-        private delegate int ResampleOutDelegate(float[] outBuffer, int outBufferIndex, int nsamples_in, int nsamples_out, int nch);
+        private delegate int ResamplePrepareDelegate(
+            int out_samples,
+            int nch,
+            out float[] inbuffer,
+            out int inbufferOffset
+        );
+        private delegate int ResampleOutDelegate(
+            float[] outBuffer,
+            int outBufferIndex,
+            int nsamples_in,
+            int nsamples_out,
+            int nch
+        );
 
         private readonly ResamplePrepareDelegate _resamplePrepareDelegate;
         private readonly ResampleOutDelegate _resampleOutDelegate;
@@ -53,16 +64,29 @@ namespace Aurio.Resampler
         {
             _instance = Activator.CreateInstance(_type);
 
-            _resamplePrepareDelegate = (ResamplePrepareDelegate)Delegate.CreateDelegate(
-                typeof(ResamplePrepareDelegate), _instance, _resamplePrepare);
+            _resamplePrepareDelegate = (ResamplePrepareDelegate)
+                Delegate.CreateDelegate(
+                    typeof(ResamplePrepareDelegate),
+                    _instance,
+                    _resamplePrepare
+                );
 
-            _resampleOutDelegate = (ResampleOutDelegate)Delegate.CreateDelegate(
-                typeof(ResampleOutDelegate), _instance, _resampleOut);
+            _resampleOutDelegate = (ResampleOutDelegate)
+                Delegate.CreateDelegate(typeof(ResampleOutDelegate), _instance, _resampleOut);
         }
 
-        public void SetMode(bool interp, int filtercnt, bool sinc, int sinc_size = 64, int sinc_interpsize = 32)
+        public void SetMode(
+            bool interp,
+            int filtercnt,
+            bool sinc,
+            int sinc_size = 64,
+            int sinc_interpsize = 32
+        )
         {
-            _setMode.Invoke(_instance, new object[] { interp, filtercnt, sinc, sinc_size, sinc_interpsize });
+            _setMode.Invoke(
+                _instance,
+                new object[] { interp, filtercnt, sinc, sinc_size, sinc_interpsize }
+            );
         }
 
         public void SetFilterParms(float filterpos = 0.693f, float filterq = 0.707f)
@@ -90,12 +114,23 @@ namespace Aurio.Resampler
             return (double)_getCurrentLatency.Invoke(_instance, new object[0]);
         }
 
-        public int ResamplePrepare(int out_samples, int nch, out float[] inbuffer, out int inbufferOffset)
+        public int ResamplePrepare(
+            int out_samples,
+            int nch,
+            out float[] inbuffer,
+            out int inbufferOffset
+        )
         {
             return _resamplePrepareDelegate(out_samples, nch, out inbuffer, out inbufferOffset);
         }
 
-        public int ResampleOut(float[] outBuffer, int outBufferIndex, int nsamples_in, int nsamples_out, int nch)
+        public int ResampleOut(
+            float[] outBuffer,
+            int outBufferIndex,
+            int nsamples_in,
+            int nsamples_out,
+            int nch
+        )
         {
             return _resampleOutDelegate(outBuffer, outBufferIndex, nsamples_in, nsamples_out, nch);
         }

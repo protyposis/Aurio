@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -26,7 +26,6 @@ namespace Aurio
 {
     public static class StreamUtil
     {
-
         public const float FLOAT_EPSILON = 0.0000001f;
 
         public static int ForceRead(IAudioStream audioStream, byte[] buffer, int offset, int count)
@@ -34,7 +33,16 @@ namespace Aurio
             int totalBytesRead = 0;
             int bytesRead = 0;
 
-            while (count - totalBytesRead > 0 && (bytesRead = audioStream.Read(buffer, offset + totalBytesRead, count - totalBytesRead)) > 0)
+            while (
+                count - totalBytesRead > 0
+                && (
+                    bytesRead = audioStream.Read(
+                        buffer,
+                        offset + totalBytesRead,
+                        count - totalBytesRead
+                    )
+                ) > 0
+            )
             {
                 totalBytesRead += bytesRead;
             }
@@ -46,15 +54,21 @@ namespace Aurio
         {
             s.Position = TimeUtil.TimeSpanToBytes(i.TimeFrom, s.Properties);
             long bytesRead = 0;
-            long samplesToRead = TimeUtil.TimeSpanToBytes(i.TimeLength, s.Properties) / s.Properties.SampleByteSize;
+            long samplesToRead =
+                TimeUtil.TimeSpanToBytes(i.TimeLength, s.Properties) / s.Properties.SampleByteSize;
             int totalSamplesRead = 0;
             int channels = s.Properties.Channels;
             byte[] temp = new byte[1024 * 32 * channels];
 
             if (samplesToRead > array.Length)
             {
-                throw new ArgumentException("cannot read the requested interval (" + samplesToRead
-                    + ") - the target array is too small (" + array.Length + ")");
+                throw new ArgumentException(
+                    "cannot read the requested interval ("
+                        + samplesToRead
+                        + ") - the target array is too small ("
+                        + array.Length
+                        + ")"
+                );
             }
 
             while ((bytesRead = s.Read(temp, 0, temp.Length)) > 0)
@@ -122,13 +136,18 @@ namespace Aurio
             int s1BytesRead = 0;
             int s2BytesRead = 0;
 
-            int bytesToRead = (int)Math.Min(
-                Math.Min(buffer1.Length, stream1.Length - stream1.Position),
-                Math.Min(buffer2.Length, stream2.Length - stream2.Position));
+            int bytesToRead = (int)
+                Math.Min(
+                    Math.Min(buffer1.Length, stream1.Length - stream1.Position),
+                    Math.Min(buffer2.Length, stream2.Length - stream2.Position)
+                );
 
             long similarBytes = 0;
 
-            while ((s1BytesRead = ForceRead(stream1, buffer1, 0, bytesToRead)) > 0 && (s2BytesRead = ForceRead(stream2, buffer2, 0, bytesToRead)) > 0)
+            while (
+                (s1BytesRead = ForceRead(stream1, buffer1, 0, bytesToRead)) > 0
+                && (s2BytesRead = ForceRead(stream2, buffer2, 0, bytesToRead)) > 0
+            )
             {
                 if (s1BytesRead != s2BytesRead)
                 {
@@ -169,7 +188,10 @@ namespace Aurio
         /// <returns>the number of similar floats</returns>
         public static long CompareFloats(IAudioStream stream1, IAudioStream stream2, float epsilon)
         {
-            if (stream1.Properties.Format != AudioFormat.IEEE || stream1.Properties.Format != AudioFormat.IEEE)
+            if (
+                stream1.Properties.Format != AudioFormat.IEEE
+                || stream1.Properties.Format != AudioFormat.IEEE
+            )
             {
                 throw new ArgumentException("streams must be in 32bit float format");
             }
@@ -180,13 +202,18 @@ namespace Aurio
             int s1BytesRead = 0;
             int s2BytesRead = 0;
 
-            int bytesToRead = (int)Math.Min(
-                Math.Min(buffer1.Length, stream1.Length - stream1.Position),
-                Math.Min(buffer2.Length, stream2.Length - stream2.Position));
+            int bytesToRead = (int)
+                Math.Min(
+                    Math.Min(buffer1.Length, stream1.Length - stream1.Position),
+                    Math.Min(buffer2.Length, stream2.Length - stream2.Position)
+                );
 
             long similarFloats = 0;
 
-            while ((s1BytesRead = ForceRead(stream1, buffer1, 0, bytesToRead)) > 0 && (s2BytesRead = ForceRead(stream2, buffer2, 0, bytesToRead)) > 0)
+            while (
+                (s1BytesRead = ForceRead(stream1, buffer1, 0, bytesToRead)) > 0
+                && (s2BytesRead = ForceRead(stream2, buffer2, 0, bytesToRead)) > 0
+            )
             {
                 if (s1BytesRead != s2BytesRead)
                 {
@@ -197,7 +224,10 @@ namespace Aurio
                 bool abortComparison = false;
                 unsafe
                 {
-                    fixed (byte* pBuffer1 = &buffer1[0], pBuffer2 = &buffer2[0])
+                    fixed (
+                        byte* pBuffer1 = &buffer1[0],
+                            pBuffer2 = &buffer2[0]
+                    )
                     {
                         float* fBuffer1 = (float*)pBuffer1;
                         float* fBuffer2 = (float*)pBuffer2;
@@ -217,7 +247,6 @@ namespace Aurio
                         }
                     }
                 }
-
 
                 if (abortComparison)
                 {

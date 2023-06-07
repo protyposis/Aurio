@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -26,10 +26,8 @@ namespace Aurio.WaveControls
 {
     public class ColorGradient
     {
-
         public class Stop
         {
-
             private Color color;
             private double offset;
 
@@ -128,7 +126,11 @@ namespace Aurio.WaveControls
                 }
             }
 
-            return Interpolate(s1.Color, s2.Color, s2.Offset == s1.Offset ? 0 : (offset - s1.Offset) / (s2.Offset - s1.Offset));
+            return Interpolate(
+                s1.Color,
+                s2.Color,
+                s2.Offset == s1.Offset ? 0 : (offset - s1.Offset) / (s2.Offset - s1.Offset)
+            );
         }
 
         public IEnumerable<Color> GetGradient(int steps)
@@ -146,7 +148,7 @@ namespace Aurio.WaveControls
         }
 
         /// <summary>
-        /// Returns a linearly interpolated color between the two given colors. The ratio can be between 0 
+        /// Returns a linearly interpolated color between the two given colors. The ratio can be between 0
         /// and 1 and specifies how much of each color will be taken into the new color. A ratio of 0 means
         /// that the first color will be returned, a ratio of 1 means that the second color will be returned.
         /// All other ratios result in a mixed color.
@@ -167,7 +169,8 @@ namespace Aurio.WaveControls
                 (byte)Math.Round(c1.A * r1 + c2.A * r2),
                 (byte)Math.Round(c1.R * r1 + c2.R * r2),
                 (byte)Math.Round(c1.G * r1 + c2.G * r2),
-                (byte)Math.Round(c1.B * r1 + c2.B * r2));
+                (byte)Math.Round(c1.B * r1 + c2.B * r2)
+            );
         }
 
         public static int ColorToArgb(Color c)

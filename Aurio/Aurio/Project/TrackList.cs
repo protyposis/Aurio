@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -26,13 +26,13 @@ using System.Collections.Specialized;
 
 namespace Aurio.Project
 {
-    public class TrackList<T> : IEnumerable<T>, INotifyPropertyChanged, INotifyCollectionChanged where T : Track
+    public class TrackList<T> : IEnumerable<T>, INotifyPropertyChanged, INotifyCollectionChanged
+        where T : Track
     {
         private readonly List<T> list;
 
         public class TrackListEventArgs : EventArgs
         {
-
             public TrackListEventArgs(T track, int index)
             {
                 this.Track = track;
@@ -79,7 +79,13 @@ namespace Aurio.Project
         {
             list.Add(track);
             OnTrackAdded(new TrackListEventArgs(track, list.IndexOf(track)));
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, track, list.IndexOf(track)));
+            OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(
+                    NotifyCollectionChangedAction.Add,
+                    track,
+                    list.IndexOf(track)
+                )
+            );
             track.LengthChanged += Track_LengthOrOffsetChanged;
             track.OffsetChanged += Track_LengthOrOffsetChanged;
         }
@@ -92,7 +98,13 @@ namespace Aurio.Project
                 list.Add(track);
                 OnTrackAdded(new TrackListEventArgs(track, list.IndexOf(track)));
             }
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<T>(tracks), startIndex));
+            OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(
+                    NotifyCollectionChangedAction.Add,
+                    new List<T>(tracks),
+                    startIndex
+                )
+            );
         }
 
         public bool Contains(T item)
@@ -117,7 +129,13 @@ namespace Aurio.Project
                     OnTrackRemoved(new TrackListEventArgs(track, index));
                     if (!suppressCollectionChangedEvent)
                     {
-                        OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, track, index));
+                        OnCollectionChanged(
+                            new NotifyCollectionChangedEventArgs(
+                                NotifyCollectionChangedAction.Remove,
+                                track,
+                                index
+                            )
+                        );
                     }
                     return true;
                 }
@@ -154,13 +172,17 @@ namespace Aurio.Project
             {
                 Remove(track, true);
             }
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)
+            );
         }
 
         public void Sort(IComparer<T> comparer)
         {
             list.Sort(comparer);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)
+            );
         }
 
         public void Move(int oldIndex, int newIndex)
@@ -168,8 +190,14 @@ namespace Aurio.Project
             var item = list[oldIndex];
             list.RemoveAt(oldIndex);
             list.Insert(newIndex, item);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(
-                NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
+            OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(
+                    NotifyCollectionChangedAction.Move,
+                    item,
+                    newIndex,
+                    oldIndex
+                )
+            );
         }
 
         /// <summary>

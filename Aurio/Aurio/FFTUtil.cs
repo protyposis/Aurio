@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -25,10 +25,9 @@ namespace Aurio
 {
     public static class FFTUtil
     {
-
         /// <summary>
         /// Removes the DC offset of a set of samples by subtracting the average value of all samples
-        /// from each sample. 
+        /// from each sample.
         /// Use it to preprocess FFT input to eliminate high-level 0Hz components in FFT results.
         /// See: Windowing Functions Improve FFT Results, Part II (http://www.tmworld.com/article/325630-Windowing_Functions_Improve_FFT_Results_Part_II.php)
         /// </summary>
@@ -51,12 +50,19 @@ namespace Aurio
             return (float)new Complex(re, im).Magnitude;
         }
 
-        public static void CalculateMagnitudes(float[] complexFFTOutput, float[] resultMagnitudes, int resultMagnitudesOffset)
+        public static void CalculateMagnitudes(
+            float[] complexFFTOutput,
+            float[] resultMagnitudes,
+            int resultMagnitudesOffset
+        )
         {
             int y = 0;
             for (int x = 0; x < complexFFTOutput.Length; x += 2)
             {
-                resultMagnitudes[resultMagnitudesOffset + y] = CalculateMagnitude(complexFFTOutput[x], complexFFTOutput[x + 1]);
+                resultMagnitudes[resultMagnitudesOffset + y] = CalculateMagnitude(
+                    complexFFTOutput[x],
+                    complexFFTOutput[x + 1]
+                );
                 y++;
             }
         }
@@ -71,12 +77,19 @@ namespace Aurio
             return (float)new Complex(re, im).Phase;
         }
 
-        public static void CalculatePhases(float[] complexFFTOutput, float[] resultPhases, int resultPhasesOffset)
+        public static void CalculatePhases(
+            float[] complexFFTOutput,
+            float[] resultPhases,
+            int resultPhasesOffset
+        )
         {
             int y = 0;
             for (int x = 0; x < complexFFTOutput.Length; x += 2)
             {
-                resultPhases[resultPhasesOffset + y] = CalculatePhase(complexFFTOutput[x], complexFFTOutput[x + 1]);
+                resultPhases[resultPhasesOffset + y] = CalculatePhase(
+                    complexFFTOutput[x],
+                    complexFFTOutput[x + 1]
+                );
                 y++;
             }
         }
@@ -86,7 +99,15 @@ namespace Aurio
             CalculatePhases(complexFFTOutput, resultPhases, 0);
         }
 
-        public static void MagnitudesAndPhasesToFFT(float[] magnitudes, int magnitudesOffset, float[] phases, int phasesOffset, float[] fftResult, int fftResultOffset, int count)
+        public static void MagnitudesAndPhasesToFFT(
+            float[] magnitudes,
+            int magnitudesOffset,
+            float[] phases,
+            int phasesOffset,
+            float[] fftResult,
+            int fftResultOffset,
+            int count
+        )
         {
             if (magnitudes.Length < magnitudesOffset + count)
             {
@@ -103,7 +124,10 @@ namespace Aurio
 
             for (int i = 0; i < count; i++)
             {
-                var c = Complex.FromMagnitudeAndPhase(magnitudes[magnitudesOffset + i], phases[phasesOffset + i]);
+                var c = Complex.FromMagnitudeAndPhase(
+                    magnitudes[magnitudesOffset + i],
+                    phases[phasesOffset + i]
+                );
                 fftResult[fftResultOffset + 2 * i + 0] = (float)c.Real;
                 fftResult[fftResultOffset + 2 * i + 1] = (float)c.Imaginary;
             }
@@ -118,12 +142,18 @@ namespace Aurio
             return re * re + im * im;
         }
 
-        public static void CalculateMagnitudesSquared(float[] complexFFTOutput, float[] resultMagnitudes)
+        public static void CalculateMagnitudesSquared(
+            float[] complexFFTOutput,
+            float[] resultMagnitudes
+        )
         {
             int y = 0;
             for (int x = 0; x < complexFFTOutput.Length; x += 2)
             {
-                resultMagnitudes[y] = CalculateMagnitudeSquared(complexFFTOutput[x], complexFFTOutput[x + 1]);
+                resultMagnitudes[y] = CalculateMagnitudeSquared(
+                    complexFFTOutput[x],
+                    complexFFTOutput[x + 1]
+                );
                 y++;
             }
         }
@@ -159,7 +189,7 @@ namespace Aurio
         }
 
         /// <summary>
-        /// Transforms a complex FFT output to a logarithmic dB scale for better visualization, without 
+        /// Transforms a complex FFT output to a logarithmic dB scale for better visualization, without
         /// normalizing the peak to 0 dB.
         /// </summary>
         /// <param name="fftOutput">the output of a FFT function (interleaved complex numbers)</param>
@@ -182,8 +212,13 @@ namespace Aurio
                 // multiply by 2 since the FFT result only contains half of the energy (the second half are the negative frequencies of the "full" FFT result)
                 // calculate dB scale value
                 // http://www.mathworks.de/support/tech-notes/1700/1702.html
-                result[y] = (float)VolumeUtil.LinearToDecibel(
-                    CalculateMagnitude(fftOutput[x], fftOutput[x + 1]) / fftOutput.Length * 2) + decibelOffset;
+                result[y] =
+                    (float)
+                        VolumeUtil.LinearToDecibel(
+                            CalculateMagnitude(fftOutput[x], fftOutput[x + 1])
+                                / fftOutput.Length
+                                * 2
+                        ) + decibelOffset;
                 if (result[y] > max)
                 {
                     max = result[y];
@@ -206,7 +241,11 @@ namespace Aurio
         /// <param name="maxFrequency">the maximum frequency</param>
         /// <param name="numBands">the number of bands to calculate between the min and max frequency</param>
         /// <returns>an array with numBands + 1 values each representing subsequentially the lower and upper frequency of a band</returns>
-        public static double[] CalculateFrequencyBoundariesLog(int minFrequency, int maxFrequency, int numBands)
+        public static double[] CalculateFrequencyBoundariesLog(
+            int minFrequency,
+            int maxFrequency,
+            int numBands
+        )
         {
             double logRatio = Math.Log((double)(maxFrequency) / (double)(minFrequency));
             double x = Math.Exp(logRatio / numBands);
@@ -219,7 +258,11 @@ namespace Aurio
             return freqs;
         }
 
-        public static double[] CalculateFrequencyBoundariesLinear(int minFrequency, int maxFrequency, int numBands)
+        public static double[] CalculateFrequencyBoundariesLinear(
+            int minFrequency,
+            int maxFrequency,
+            int numBands
+        )
         {
             double[] freqs = new double[numBands + 1];
             double width = (maxFrequency - minFrequency) / (double)numBands;

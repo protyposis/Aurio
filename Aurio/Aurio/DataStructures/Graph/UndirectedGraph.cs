@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -23,9 +23,9 @@ using System.Text;
 
 namespace Aurio.DataStructures.Graph
 {
-    public class UndirectedGraph<TVertex, TWeight> where TWeight : IComparable<TWeight>
+    public class UndirectedGraph<TVertex, TWeight>
+        where TWeight : IComparable<TWeight>
     {
-
         private List<TVertex> vertices;
         private List<Edge<TVertex, TWeight>> edges;
 
@@ -182,7 +182,8 @@ namespace Aurio.DataStructures.Graph
         /// <returns></returns>
         public List<UndirectedGraph<TVertex, TWeight>> GetConnectedComponents()
         {
-            List<UndirectedGraph<TVertex, TWeight>> connectedComponents = new List<UndirectedGraph<TVertex, TWeight>>();
+            List<UndirectedGraph<TVertex, TWeight>> connectedComponents =
+                new List<UndirectedGraph<TVertex, TWeight>>();
             List<TVertex> visitedVertices = new List<TVertex>();
 
             foreach (TVertex v in vertices)
@@ -202,7 +203,9 @@ namespace Aurio.DataStructures.Graph
         {
             if (!IsConnected)
             {
-                throw new Exception("cannot determine the MST in a graph that isn't fully connected");
+                throw new Exception(
+                    "cannot determine the MST in a graph that isn't fully connected"
+                );
             }
 
             // http://msdn.microsoft.com/en-us/library/ms379574.aspx
@@ -217,8 +220,10 @@ namespace Aurio.DataStructures.Graph
                 Edge<TVertex, TWeight> minEdge = null;
                 foreach (Edge<TVertex, TWeight> e in edges)
                 {
-                    if ((mstVertices.Contains(e.Vertex1) && !mstVertices.Contains(e.Vertex2))
-                        || mstVertices.Contains(e.Vertex2) && !mstVertices.Contains(e.Vertex1))
+                    if (
+                        (mstVertices.Contains(e.Vertex1) && !mstVertices.Contains(e.Vertex2))
+                        || mstVertices.Contains(e.Vertex2) && !mstVertices.Contains(e.Vertex1)
+                    )
                     {
                         if (minEdge == null)
                         {
@@ -238,7 +243,9 @@ namespace Aurio.DataStructures.Graph
                 {
                     break;
                 }
-                mstVertices.Add(mstVertices.Contains(minEdge.Vertex1) ? minEdge.Vertex2 : minEdge.Vertex1);
+                mstVertices.Add(
+                    mstVertices.Contains(minEdge.Vertex1) ? minEdge.Vertex2 : minEdge.Vertex1
+                );
                 mstEdges.Add(minEdge);
             }
 

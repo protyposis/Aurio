@@ -22,8 +22,10 @@ namespace Aurio.Test.RealtimeFingerprinting
             FFTFactory.Factory = new PFFFT.FFTFactory();
 
             // Create a 10-second FIFO buffer
-            var fifoStream = new BlockingFixedLengthFifoStream(audioProperties,
-                audioProperties.SampleBlockByteSize * audioProperties.SampleRate * 10);
+            var fifoStream = new BlockingFixedLengthFifoStream(
+                audioProperties,
+                audioProperties.SampleBlockByteSize * audioProperties.SampleRate * 10
+            );
 
             // Create fingerprinter
             // Emit subfingerprints every 20 generated
@@ -31,21 +33,44 @@ namespace Aurio.Test.RealtimeFingerprinting
             var audioTrack = new AudioTrack(fifoStream, "realtime fifo stream");
             var fingerprintingProfile = FingerprintGenerator.GetProfiles()[0];
             fingerprintingProfile.FlipWeakestBits = 0; // Don't generate flipped hashes for simplicities's sake (we're not working with the result anyway)
-            var fingerprinter = new FingerprintGenerator(fingerprintingProfile, audioTrack, 20, fingerprintingProfile.FrameSize);
+            var fingerprinter = new FingerprintGenerator(
+                fingerprintingProfile,
+                audioTrack,
+                20,
+                fingerprintingProfile.FrameSize
+            );
 
             long subfingerprintsGenerated = 0;
-            fingerprinter.SubFingerprintsGenerated += (object sender, Matching.SubFingerprintsGeneratedEventArgs e) =>
+            fingerprinter.SubFingerprintsGenerated += (
+                object sender,
+                Matching.SubFingerprintsGeneratedEventArgs e
+            ) =>
             {
                 subfingerprintsGenerated += e.SubFingerprints.Count;
 
                 // Calculate some stats
                 var ingressed = TimeUtil.BytesToTimeSpan(_dataGenerated, audioProperties);
-                var buffered = TimeUtil.BytesToTimeSpan(fifoStream.WritePosition - fifoStream.Position, audioProperties);
-                var processed = new TimeSpan((long)Math.Round(subfingerprintsGenerated * fingerprintingProfile.HashTimeScale * TimeUtil.SECS_TO_TICKS));
+                var buffered = TimeUtil.BytesToTimeSpan(
+                    fifoStream.WritePosition - fifoStream.Position,
+                    audioProperties
+                );
+                var processed = new TimeSpan(
+                    (long)
+                        Math.Round(
+                            subfingerprintsGenerated
+                                * fingerprintingProfile.HashTimeScale
+                                * TimeUtil.SECS_TO_TICKS
+                        )
+                );
 
                 // print the stats
-                Console.WriteLine("{0} ingressed, {1} buffered, {2} processed, {3} subfingerprints generated",
-                    ingressed, buffered, processed, subfingerprintsGenerated);
+                Console.WriteLine(
+                    "{0} ingressed, {1} buffered, {2} processed, {3} subfingerprints generated",
+                    ingressed,
+                    buffered,
+                    processed,
+                    subfingerprintsGenerated
+                );
             };
 
             // Start stream input
@@ -58,10 +83,17 @@ namespace Aurio.Test.RealtimeFingerprinting
         /// <summary>
         /// Simulates a realtime audio stream by generating a sine wave in realtime and ingesting it into the FIFO buffer.
         /// </summary>
-        private static void StartSineWaveRealtimeGenerator(AudioProperties audioProperties, IAudioWriterStream targetStream)
+        private static void StartSineWaveRealtimeGenerator(
+            AudioProperties audioProperties,
+            IAudioWriterStream targetStream
+        )
         {
             // Create a stream that generates 1 second of a sine wave
-            var sineWaveStream = new SineGeneratorStream(audioProperties.SampleRate, 440, new TimeSpan(0, 0, 1));
+            var sineWaveStream = new SineGeneratorStream(
+                audioProperties.SampleRate,
+                440,
+                new TimeSpan(0, 0, 1)
+            );
 
             // Store the sine wave in a buffer
             // We can concatenate this buffer over and over again to create an infinitely long sine wave
@@ -74,10 +106,10 @@ namespace Aurio.Test.RealtimeFingerprinting
 
             Task.Factory.StartNew(() =>
             {
-                // Each realtime second, write the 1-second sine wave to the target stream to 
+                // Each realtime second, write the 1-second sine wave to the target stream to
                 // simulate an infinitely long realtime sine wave stream.
-                // 
-                // For low-latency processing use-cases, writes would ideally be shorter and happen 
+                //
+                // For low-latency processing use-cases, writes would ideally be shorter and happen
                 // more frequently to keep the delay between input and output of the FIFO stream
                 // as low as possible.
                 while (true)

@@ -62,17 +62,23 @@ namespace Aurio.FFmpeg.Test
         {
             FFmpegReader reader = new FFmpegReader(filename, Type.Audio);
 
-            Console.WriteLine("length {0}, frame_size {1}, sample_rate {2}, sample_size {3}, channels {4}",
+            Console.WriteLine(
+                "length {0}, frame_size {1}, sample_rate {2}, sample_size {3}, channels {4}",
                 reader.AudioOutputConfig.length,
                 reader.AudioOutputConfig.frame_size,
                 reader.AudioOutputConfig.format.sample_rate,
                 reader.AudioOutputConfig.format.sample_size,
-                reader.AudioOutputConfig.format.channels);
+                reader.AudioOutputConfig.format.channels
+            );
 
-            int sampleBlockSize = reader.AudioOutputConfig.format.channels * reader.AudioOutputConfig.format.sample_size;
+            int sampleBlockSize =
+                reader.AudioOutputConfig.format.channels
+                * reader.AudioOutputConfig.format.sample_size;
 
-            int output_buffer_size = reader.AudioOutputConfig.frame_size *
-                reader.AudioOutputConfig.format.channels * reader.AudioOutputConfig.format.sample_size;
+            int output_buffer_size =
+                reader.AudioOutputConfig.frame_size
+                * reader.AudioOutputConfig.format.channels
+                * reader.AudioOutputConfig.format.sample_size;
             byte[] output_buffer = new byte[output_buffer_size];
 
             int samplesRead;
@@ -81,7 +87,16 @@ namespace Aurio.FFmpeg.Test
             MemoryStream ms = new MemoryStream();
 
             // read full stream
-            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0)
+            while (
+                (
+                    samplesRead = reader.ReadFrame(
+                        out timestamp,
+                        output_buffer,
+                        output_buffer_size,
+                        out type
+                    )
+                ) > 0
+            )
             {
                 Console.WriteLine("read " + samplesRead + " @ " + timestamp);
 
@@ -94,7 +109,16 @@ namespace Aurio.FFmpeg.Test
             reader.Seek(0, Type.Audio);
 
             // read again (output should be the same as above)
-            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0)
+            while (
+                (
+                    samplesRead = reader.ReadFrame(
+                        out timestamp,
+                        output_buffer,
+                        output_buffer_size,
+                        out type
+                    )
+                ) > 0
+            )
             {
                 Console.WriteLine("read " + samplesRead + " @ " + timestamp);
             }
@@ -103,11 +127,17 @@ namespace Aurio.FFmpeg.Test
 
             // write memory to wav file
             ms.Position = 0;
-            MemorySourceStream mss = new MemorySourceStream(ms, new AudioProperties(
-                reader.AudioOutputConfig.format.channels,
-                reader.AudioOutputConfig.format.sample_rate,
-                reader.AudioOutputConfig.format.sample_size * 8,
-                reader.AudioOutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM));
+            MemorySourceStream mss = new MemorySourceStream(
+                ms,
+                new AudioProperties(
+                    reader.AudioOutputConfig.format.channels,
+                    reader.AudioOutputConfig.format.sample_rate,
+                    reader.AudioOutputConfig.format.sample_size * 8,
+                    reader.AudioOutputConfig.format.sample_size == 4
+                        ? AudioFormat.IEEE
+                        : AudioFormat.LPCM
+                )
+            );
             IeeeStream ieee = new IeeeStream(mss);
             NAudioSinkStream nAudioSink = new NAudioSinkStream(ieee);
             WaveFileWriter.CreateWaveFile(filename + ".ffmpeg.wav", nAudioSink);
@@ -117,14 +147,20 @@ namespace Aurio.FFmpeg.Test
         {
             FFmpegReader reader = new FFmpegReader(filename, Type.Video);
 
-            Console.WriteLine("length {0}, frame_size {1}x{2}, frame_rate {3}, aspect_ratio {4}",
+            Console.WriteLine(
+                "length {0}, frame_size {1}x{2}, frame_rate {3}, aspect_ratio {4}",
                 reader.VideoOutputConfig.length,
                 reader.VideoOutputConfig.format.width,
                 reader.VideoOutputConfig.format.height,
                 reader.VideoOutputConfig.format.frame_rate,
-                reader.VideoOutputConfig.format.aspect_ratio);
+                reader.VideoOutputConfig.format.aspect_ratio
+            );
 
-            int output_buffer_size = reader.VideoOutputConfig.format.width * reader.VideoOutputConfig.format.height * 3 /* RGB */;
+            int output_buffer_size =
+                reader.VideoOutputConfig.format.width
+                * reader.VideoOutputConfig.format.height
+                * 3 /* RGB */
+            ;
             byte[] output_buffer = new byte[output_buffer_size];
 
             int frameRead;
@@ -132,21 +168,39 @@ namespace Aurio.FFmpeg.Test
             Type type;
             int frameCount = 0;
 
-            Bitmap rgbFrame = new Bitmap(reader.VideoOutputConfig.format.width, reader.VideoOutputConfig.format.height);
+            Bitmap rgbFrame = new Bitmap(
+                reader.VideoOutputConfig.format.width,
+                reader.VideoOutputConfig.format.height
+            );
 
             // read full stream
-            while ((frameRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0)
+            while (
+                (
+                    frameRead = reader.ReadFrame(
+                        out timestamp,
+                        output_buffer,
+                        output_buffer_size,
+                        out type
+                    )
+                ) > 0
+            )
             {
                 Console.WriteLine("read frame " + frameCount + " @ " + timestamp);
 
                 if (frameCount % videoFrameInterval == 0)
                 {
-                    BitmapData rgbFrameData = rgbFrame.LockBits(new Rectangle(0, 0, rgbFrame.Width, rgbFrame.Height),
-                        ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+                    BitmapData rgbFrameData = rgbFrame.LockBits(
+                        new Rectangle(0, 0, rgbFrame.Width, rgbFrame.Height),
+                        ImageLockMode.WriteOnly,
+                        PixelFormat.Format24bppRgb
+                    );
                     Marshal.Copy(output_buffer, 0, rgbFrameData.Scan0, output_buffer_size);
                     rgbFrame.UnlockBits(rgbFrameData);
 
-                    rgbFrame.Save(String.Format("{0}.{1:00000000}.png", filename, frameCount), ImageFormat.Png);
+                    rgbFrame.Save(
+                        String.Format("{0}.{1:00000000}.png", filename, frameCount),
+                        ImageFormat.Png
+                    );
                 }
 
                 frameCount++;

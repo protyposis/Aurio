@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -36,7 +36,6 @@ namespace Aurio.Matching.Chromaprint
     /// </summary>
     public class FingerprintGenerator
     {
-
         private static readonly uint[] grayCodeMapping = { 0, 1, 3, 2 };
         private Profile profile;
 
@@ -52,10 +51,20 @@ namespace Aurio.Matching.Chromaprint
         {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(track.FileInfo)),
-                ResamplingQuality.Medium, profile.SamplingRate);
+                ResamplingQuality.Medium,
+                profile.SamplingRate
+            );
 
-            var chroma = new Chroma(audioStream, profile.WindowSize, profile.HopSize, profile.WindowType,
-                profile.ChromaMinFrequency, profile.ChromaMaxFrequency, false, profile.ChromaMappingMode);
+            var chroma = new Chroma(
+                audioStream,
+                profile.WindowSize,
+                profile.HopSize,
+                profile.WindowType,
+                profile.ChromaMinFrequency,
+                profile.ChromaMaxFrequency,
+                false,
+                profile.ChromaMappingMode
+            );
 
             float[] chromaFrame;
             var chromaBuffer = new RingBuffer<float[]>(profile.ChromaFilterCoefficients.Length);
@@ -71,7 +80,10 @@ namespace Aurio.Matching.Chromaprint
             {
                 // Get chroma frame buffer
                 // When the chroma buffer is full, we can take and reuse the oldest array
-                chromaFrame = chromaBuffer.Count == chromaBuffer.Length ? chromaBuffer[0] : new float[Chroma.Bins];
+                chromaFrame =
+                    chromaBuffer.Count == chromaBuffer.Length
+                        ? chromaBuffer[0]
+                        : new float[Chroma.Bins];
 
                 // Read chroma frame into buffer
                 chroma.ReadFrame(chromaFrame);
@@ -136,14 +148,25 @@ namespace Aurio.Matching.Chromaprint
 
                 if (index % 512 == 0 && SubFingerprintsGenerated != null)
                 {
-                    SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, subFingerprints, index, indices));
+                    SubFingerprintsGenerated(
+                        this,
+                        new SubFingerprintsGeneratedEventArgs(
+                            track,
+                            subFingerprints,
+                            index,
+                            indices
+                        )
+                    );
                     subFingerprints.Clear();
                 }
             }
 
             if (SubFingerprintsGenerated != null)
             {
-                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, subFingerprints, index, indices));
+                SubFingerprintsGenerated(
+                    this,
+                    new SubFingerprintsGeneratedEventArgs(track, subFingerprints, index, indices)
+                );
             }
 
             if (Completed != null)

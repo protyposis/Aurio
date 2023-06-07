@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -26,7 +26,6 @@ namespace Aurio.Streams
 {
     public class NAudioSourceStream : IAudioStream
     {
-
         private WaveStream sourceStream;
         private AudioProperties properties;
 
@@ -36,12 +35,21 @@ namespace Aurio.Streams
 
             // check for supported formats:
             if (sourceProperties.Format == AudioFormat.LPCM && sourceProperties.BitDepth == 16) { }
-            else if (sourceProperties.Format == AudioFormat.LPCM && sourceProperties.BitDepth == 24) { }
-            else if (sourceProperties.Format == AudioFormat.IEEE && sourceProperties.BitDepth == 32) { }
+            else if (sourceProperties.Format == AudioFormat.LPCM && sourceProperties.BitDepth == 24)
+            { }
+            else if (sourceProperties.Format == AudioFormat.IEEE && sourceProperties.BitDepth == 32)
+            { }
             else
             {
-                throw new ArgumentException(String.Format("unsupported source format: {0}bit {1}Hz {2}ch {3}",
-                    sourceProperties.BitDepth, sourceProperties.SampleRate, sourceProperties.Channels, sourceProperties.Format));
+                throw new ArgumentException(
+                    String.Format(
+                        "unsupported source format: {0}bit {1}Hz {2}ch {3}",
+                        sourceProperties.BitDepth,
+                        sourceProperties.SampleRate,
+                        sourceProperties.Channels,
+                        sourceProperties.Format
+                    )
+                );
             }
 
             this.sourceStream = sourceStream;
@@ -60,10 +68,7 @@ namespace Aurio.Streams
 
         public long Position
         {
-            get
-            {
-                return sourceStream.Position;
-            }
+            get { return sourceStream.Position; }
             set
             {
                 if (value % SampleBlockSize == 0)
@@ -95,7 +100,9 @@ namespace Aurio.Streams
             if (bytesRead % SampleBlockSize != 0)
             {
                 // an unaligned number of read bytes leads to an illegal unaligned position in the stream
-                throw new Exception("the number of read bytes is not a multiple of the sample block size");
+                throw new Exception(
+                    "the number of read bytes is not a multiple of the sample block size"
+                );
             }
 
             return bytesRead;
@@ -120,10 +127,17 @@ namespace Aurio.Streams
             }
             else
             {
-                throw new ArgumentException(String.Format("unsupported source encoding: {0}", sourceFormat.Encoding));
+                throw new ArgumentException(
+                    String.Format("unsupported source encoding: {0}", sourceFormat.Encoding)
+                );
             }
 
-            return new AudioProperties(sourceFormat.Channels, sourceFormat.SampleRate, sourceFormat.BitsPerSample, format);
+            return new AudioProperties(
+                sourceFormat.Channels,
+                sourceFormat.SampleRate,
+                sourceFormat.BitsPerSample,
+                format
+            );
         }
 
         #region IDisposable Support

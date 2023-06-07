@@ -56,15 +56,18 @@ namespace Aurio.UnitTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(IndexOutOfRangeException), "cannot read all float bytes, as expected")]
+        [ExpectedException(
+            typeof(IndexOutOfRangeException),
+            "cannot read all float bytes, as expected"
+        )]
         public void AudioBufferConstructor3()
         {
             float[] array = new float[1];
             AudioBuffer b = new AudioBuffer(array);
 
             // try to read all 4 bytes from the float
-            /* at index 1 it will fail since the CLR thinks that the byte array has a length of 1 (happens 
-             * because it has been initialized with a float array of length one and both are mapped to the 
+            /* at index 1 it will fail since the CLR thinks that the byte array has a length of 1 (happens
+             * because it has been initialized with a float array of length one and both are mapped to the
              * same memory address)
              */
             for (int x = 0; x < 4; x++)

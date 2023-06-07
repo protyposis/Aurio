@@ -6,11 +6,21 @@ public static class BitmapUtils
     /// Fast Bresenham line drawing algorithm
     /// Taken and adapted from http://www.cs.unc.edu/~mcmillan/comp136/Lecture6/Lines.html (lineFast)
     /// </summary>
-    public static unsafe void DrawLine(int x0, int y0, int x1, int y1, int* pixels, int width, int height, int color)
+    public static unsafe void DrawLine(
+        int x0,
+        int y0,
+        int x1,
+        int y1,
+        int* pixels,
+        int width,
+        int height,
+        int color
+    )
     {
         int dy = y1 - y0;
         int dx = x1 - x0;
-        int stepx, stepy;
+        int stepx,
+            stepy;
 
         if (dy < 0)
         {
@@ -76,7 +86,16 @@ public static class BitmapUtils
     /// Fast Bresenham line drawing algorithm
     /// Taken and adapted from http://www.cs.unc.edu/~mcmillan/comp136/Lecture6/Lines.html (lineFast)
     /// </summary>
-    public static unsafe void DrawLine(int x0, int y0, int x1, int y1, int[] pixels, int width, int height, int color)
+    public static unsafe void DrawLine(
+        int x0,
+        int y0,
+        int x1,
+        int y1,
+        int[] pixels,
+        int width,
+        int height,
+        int color
+    )
     {
         fixed (int* arrayPointer = &pixels[0])
         {

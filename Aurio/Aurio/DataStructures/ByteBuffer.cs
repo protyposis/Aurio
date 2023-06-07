@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -31,7 +31,6 @@ namespace Aurio.DataStructures
     /// </summary>
     class ByteBuffer
     {
-
         private byte[] data;
         private int offset;
         private int count;
@@ -108,7 +107,7 @@ namespace Aurio.DataStructures
         }
 
         /// <summary>
-        /// Fills an empty buffer with the specified amount of bytes. 
+        /// Fills an empty buffer with the specified amount of bytes.
         /// This only changes the internal buffer management state, actual writing
         /// has to be separately done on the <see cref="#Data"/> property.
         /// </summary>
@@ -131,7 +130,7 @@ namespace Aurio.DataStructures
         /// </summary>
         /// <param name="length">the number of bytes to read</param>
         /// <returns>
-        /// The number of bytes read; can be smaller than the supplied length 
+        /// The number of bytes read; can be smaller than the supplied length
         /// if the buffer contains less than the requested amount of data.
         /// </returns>
         public int Read(int length)
@@ -156,7 +155,9 @@ namespace Aurio.DataStructures
                 if (count > newSize)
                 {
                     // When there's more data remaining in the buffer than the new size can hold, retaining is not possible
-                    throw new InvalidOperationException("retain data failed - the new buffer size is too small");
+                    throw new InvalidOperationException(
+                        "retain data failed - the new buffer size is too small"
+                    );
                 }
 
                 // Move the remaining data to offset 0 of the new buffer data (count stays the same)

@@ -10,7 +10,8 @@ namespace Aurio.Project
     /// </summary>
     public class DummyAudioTrack : AudioTrack
     {
-        public DummyAudioTrack(string name, TimeSpan length) : base(new AudioProperties(1, 44100, 32, AudioFormat.IEEE))
+        public DummyAudioTrack(string name, TimeSpan length)
+            : base(new AudioProperties(1, 44100, 32, AudioFormat.IEEE))
         {
             Name = name;
             Length = length;

@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -29,9 +29,10 @@ namespace Aurio.Matching
 {
     public class MatchProcessor
     {
-
-
-        public static List<Match> FilterDuplicateMatches(List<Match> matches, Action<double> progressCallback)
+        public static List<Match> FilterDuplicateMatches(
+            List<Match> matches,
+            Action<double> progressCallback
+        )
         {
             List<Match> filteredMatches = new List<Match>();
             Dictionary<TimeSpan, List<Match>> filter = new Dictionary<TimeSpan, List<Match>>();
@@ -51,9 +52,21 @@ namespace Aurio.Matching
                     // if there are matches with the same time sum, check if they're indeed duplicates
                     foreach (Match sumMatch in filter[sum])
                     {
-                        if (((sumMatch.Track1 == match.Track1 && sumMatch.Track2 == match.Track2 && sumMatch.Track1Time == match.Track1Time)
-                            || (sumMatch.Track1 == match.Track2 && sumMatch.Track2 == match.Track1 && sumMatch.Track1Time == match.Track2Time))
-                            && sumMatch.Similarity == match.Similarity)
+                        if (
+                            (
+                                (
+                                    sumMatch.Track1 == match.Track1
+                                    && sumMatch.Track2 == match.Track2
+                                    && sumMatch.Track1Time == match.Track1Time
+                                )
+                                || (
+                                    sumMatch.Track1 == match.Track2
+                                    && sumMatch.Track2 == match.Track1
+                                    && sumMatch.Track1Time == match.Track2Time
+                                )
+                            )
+                            && sumMatch.Similarity == match.Similarity
+                        )
                         {
                             // duplicate match found
                             duplicateFound = true;
@@ -78,7 +91,7 @@ namespace Aurio.Matching
 
         /// <summary>
         /// Detects duplicate matches and returns a list without those duplicates.
-        /// A match is considered as a duplicate of another match, if both refer to the same two tracks 
+        /// A match is considered as a duplicate of another match, if both refer to the same two tracks
         /// and positions within the tracks, and the similarity is the same (which automatically results from
         /// the identical track positions).
         /// </summary>
@@ -115,8 +128,10 @@ namespace Aurio.Matching
                 List<Match> pairMatches = new List<Match>();
                 foreach (Match match in matches)
                 {
-                    if (match.Track1 == trackPair.Track1 && match.Track2 == trackPair.Track2
-                        || match.Track2 == trackPair.Track1 && match.Track1 == trackPair.Track2)
+                    if (
+                        match.Track1 == trackPair.Track1 && match.Track2 == trackPair.Track2
+                        || match.Track2 == trackPair.Track1 && match.Track1 == trackPair.Track2
+                    )
                     {
                         pairMatches.Add(match);
                     }
@@ -156,7 +171,9 @@ namespace Aurio.Matching
             List<AudioTrack> tracks = GetTracks(matches);
             if (tracks.Count != 2)
             {
-                throw new ArgumentException("the collection of matches doesn't belong to a single pair of tracks");
+                throw new ArgumentException(
+                    "the collection of matches doesn't belong to a single pair of tracks"
+                );
             }
         }
 
@@ -195,7 +212,9 @@ namespace Aurio.Matching
             }
             if (GetTracks(matches).Count != 2)
             {
-                throw new ArgumentException("matches must contain a single pair of affected tracks");
+                throw new ArgumentException(
+                    "matches must contain a single pair of affected tracks"
+                );
             }
 
             if (mode == MatchFilterMode.Best)
@@ -225,7 +244,12 @@ namespace Aurio.Matching
         /// each window according to the specified filter mode.
         /// </summary>
         /// <returns>a list of matches containing at least one match</returns>
-        public static List<Match> WindowFilter(List<Match> matches, MatchFilterMode mode, TimeSpan windowSize, Action<double> progressCallback = null)
+        public static List<Match> WindowFilter(
+            List<Match> matches,
+            MatchFilterMode mode,
+            TimeSpan windowSize,
+            Action<double> progressCallback = null
+        )
         {
             if (matches.Count == 0)
             {
@@ -233,7 +257,9 @@ namespace Aurio.Matching
             }
             if (GetTracks(matches).Count != 2)
             {
-                throw new ArgumentException("matches must contain a single pair of affected tracks");
+                throw new ArgumentException(
+                    "matches must contain a single pair of affected tracks"
+                );
             }
 
             // sort matches by time
@@ -310,7 +336,10 @@ namespace Aurio.Matching
 
         public static void Align(Match match)
         {
-            if (!match.Track1.Locked && match.Track1.Offset + match.Track1Time < match.Track2.Offset + match.Track2Time)
+            if (
+                !match.Track1.Locked
+                && match.Track1.Offset + match.Track1Time < match.Track2.Offset + match.Track2Time
+            )
             {
                 // move track 1
                 Align(match, match.Track1);
@@ -328,7 +357,10 @@ namespace Aurio.Matching
         /// The list of warps can then be used to apply warping to a track, and the dictionary serves the purpose
         /// that the matches can be updated with the warped times once warping has been applied.
         /// </summary>
-        public static Dictionary<Match, TimeWarp> GetTimeWarps(List<Match> matches, AudioTrack trackToWarp)
+        public static Dictionary<Match, TimeWarp> GetTimeWarps(
+            List<Match> matches,
+            AudioTrack trackToWarp
+        )
         {
             if (matches.Count == 0)
             {
@@ -336,7 +368,9 @@ namespace Aurio.Matching
             }
             if (GetTracks(matches).Count != 2)
             {
-                throw new ArgumentException("matches must contain a single pair of affected tracks");
+                throw new ArgumentException(
+                    "matches must contain a single pair of affected tracks"
+                );
             }
 
             var timeWarps = new Dictionary<Match, TimeWarp>();
@@ -362,20 +396,19 @@ namespace Aurio.Matching
             // calculate time warps from track's matches
             Match m1 = matches[0];
             Match m2 = null;
-            timeWarps.Add(m1, new TimeWarp()
-            { // the start of the warping section
-                From = m1.Track2Time,
-                To = m1.Track2Time
-            });
+            timeWarps.Add(
+                m1,
+                new TimeWarp()
+                { // the start of the warping section
+                    From = m1.Track2Time,
+                    To = m1.Track2Time
+                }
+            );
             for (int i = 1; i < matches.Count; i++)
             {
                 m2 = matches[i];
                 TimeSpan targetTime = m1.Track2Time + (m2.Track1Time - m1.Track1Time);
-                timeWarps.Add(m2, new TimeWarp()
-                {
-                    From = m2.Track2Time,
-                    To = targetTime
-                });
+                timeWarps.Add(m2, new TimeWarp() { From = m2.Track2Time, To = targetTime });
             }
 
             return timeWarps;
@@ -459,8 +492,9 @@ namespace Aurio.Matching
 
             foreach (MatchPair trackPair in trackPairs)
             {
-                AudioTrack trackToAlign = alignedTracks.Contains(trackPair.Track2) ?
-                    trackPair.Track1 : trackPair.Track2;
+                AudioTrack trackToAlign = alignedTracks.Contains(trackPair.Track2)
+                    ? trackPair.Track1
+                    : trackPair.Track2;
 
                 Align(trackPair.Matches[0], trackToAlign);
                 Debug.WriteLine("aligned: " + trackToAlign);
@@ -477,12 +511,18 @@ namespace Aurio.Matching
                         {
                             if (match.Track1 == trackToAlign && !match.Track1.Locked)
                             {
-                                match.Track1Time = trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(match.Track1Time);
+                                match.Track1Time =
+                                    trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(
+                                        match.Track1Time
+                                    );
                                 adjustedMatches.Add(match);
                             }
                             else if (match.Track2 == trackToAlign && !match.Track2.Locked)
                             {
-                                match.Track2Time = trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(match.Track2Time);
+                                match.Track2Time =
+                                    trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(
+                                        match.Track2Time
+                                    );
                                 adjustedMatches.Add(match);
                             }
                         }
@@ -508,8 +548,13 @@ namespace Aurio.Matching
         /// <summary>
         /// Determines all groups of tracks that are connected through one or more matches.
         /// </summary>
-        public static List<MatchGroup> DetermineMatchGroups(MatchFilterMode matchFilterMode, TrackList<AudioTrack> trackList,
-                                              List<Match> matches, bool windowed, TimeSpan windowSize)
+        public static List<MatchGroup> DetermineMatchGroups(
+            MatchFilterMode matchFilterMode,
+            TrackList<AudioTrack> trackList,
+            List<Match> matches,
+            bool windowed,
+            TimeSpan windowSize
+        )
         {
             List<MatchPair> trackPairs = MatchProcessor.GetTrackPairs(trackList);
             MatchProcessor.AssignMatches(trackPairs, matches);
@@ -530,12 +575,18 @@ namespace Aurio.Matching
                     {
                         if (windowed)
                         {
-                            filteredMatches = MatchProcessor.WindowFilter(trackPair.Matches, matchFilterMode, windowSize);
+                            filteredMatches = MatchProcessor.WindowFilter(
+                                trackPair.Matches,
+                                matchFilterMode,
+                                windowSize
+                            );
                         }
                         else
                         {
                             filteredMatches = new List<Match>();
-                            filteredMatches.Add(MatchProcessor.Filter(trackPair.Matches, matchFilterMode));
+                            filteredMatches.Add(
+                                MatchProcessor.Filter(trackPair.Matches, matchFilterMode)
+                            );
                         }
                     }
 
@@ -544,16 +595,24 @@ namespace Aurio.Matching
             }
 
             // determine connected tracks
-            UndirectedGraph<AudioTrack, double> trackGraph = new UndirectedGraph<AudioTrack, double>();
+            UndirectedGraph<AudioTrack, double> trackGraph =
+                new UndirectedGraph<AudioTrack, double>();
             foreach (MatchPair trackPair in trackPairs)
             {
-                trackGraph.Add(new Edge<AudioTrack, double>(trackPair.Track1, trackPair.Track2, 1d - trackPair.CalculateAverageSimilarity())
-                {
-                    Tag = trackPair
-                });
+                trackGraph.Add(
+                    new Edge<AudioTrack, double>(
+                        trackPair.Track1,
+                        trackPair.Track2,
+                        1d - trackPair.CalculateAverageSimilarity()
+                    )
+                    {
+                        Tag = trackPair
+                    }
+                );
             }
 
-            List<UndirectedGraph<AudioTrack, double>> trackGraphComponents = trackGraph.GetConnectedComponents();
+            List<UndirectedGraph<AudioTrack, double>> trackGraphComponents =
+                trackGraph.GetConnectedComponents();
             Debug.WriteLine("{0} connected components", trackGraphComponents.Count);
 
             List<MatchGroup> trackGroups = new List<MatchGroup>();
@@ -570,18 +629,26 @@ namespace Aurio.Matching
 
                 foreach (MatchPair filteredTrackPair in connectedTrackPairs)
                 {
-                    Debug.WriteLine("TrackPair {0} <-> {1}: {2} matches, similarity = {3}",
-                        filteredTrackPair.Track1, filteredTrackPair.Track2,
-                        filteredTrackPair.Matches.Count, filteredTrackPair.CalculateAverageSimilarity());
+                    Debug.WriteLine(
+                        "TrackPair {0} <-> {1}: {2} matches, similarity = {3}",
+                        filteredTrackPair.Track1,
+                        filteredTrackPair.Track2,
+                        filteredTrackPair.Matches.Count,
+                        filteredTrackPair.CalculateAverageSimilarity()
+                    );
                 }
 
-                TrackList<AudioTrack> componentTrackList = new TrackList<AudioTrack>(component.Vertices);
+                TrackList<AudioTrack> componentTrackList = new TrackList<AudioTrack>(
+                    component.Vertices
+                );
 
-                trackGroups.Add(new MatchGroup
-                {
-                    MatchPairs = connectedTrackPairs,
-                    TrackList = componentTrackList
-                });
+                trackGroups.Add(
+                    new MatchGroup
+                    {
+                        MatchPairs = connectedTrackPairs,
+                        TrackList = componentTrackList
+                    }
+                );
             }
 
             return trackGroups;
@@ -608,8 +675,13 @@ namespace Aurio.Matching
                 Match previousMatch = null;
                 foreach (Match match in matchPair.Matches)
                 {
-                    if (previousMatch != null &&
-                        (previousMatch.Track1Time == match.Track1Time || previousMatch.Track2Time == match.Track2Time))
+                    if (
+                        previousMatch != null
+                        && (
+                            previousMatch.Track1Time == match.Track1Time
+                            || previousMatch.Track2Time == match.Track2Time
+                        )
+                    )
                     {
                         // skip this match
                     }
@@ -635,7 +707,10 @@ namespace Aurio.Matching
         /// <param name="matches">A list of matches between two tracks</param>
         /// <param name="thresholdMillisecs">The maximum drift between consecutive matches to count for the same interval</param>
         /// <returns>A list of mapped intervals between the two tracks</returns>
-        public static List<Tuple<Interval, Interval>> ConvertToIntervals(List<Match> matches, int thresholdMillisecs = 1000)
+        public static List<Tuple<Interval, Interval>> ConvertToIntervals(
+            List<Match> matches,
+            int thresholdMillisecs = 1000
+        )
         {
             ValidatePairOrder(matches);
 
@@ -662,8 +737,14 @@ namespace Aurio.Matching
                 if (Math.Abs(previousOffset - offset) > thresholdTicks)
                 {
                     // Offset is off, a new interval probably begins
-                    var sourceInterval = new Interval(intervalStartMatch.Track1Time.Ticks, previousMatch.Track1Time.Ticks);
-                    var destinationInterval = new Interval(intervalStartMatch.Track2Time.Ticks, previousMatch.Track2Time.Ticks);
+                    var sourceInterval = new Interval(
+                        intervalStartMatch.Track1Time.Ticks,
+                        previousMatch.Track1Time.Ticks
+                    );
+                    var destinationInterval = new Interval(
+                        intervalStartMatch.Track2Time.Ticks,
+                        previousMatch.Track2Time.Ticks
+                    );
                     intervals.Add(Tuple.Create(sourceInterval, destinationInterval));
 
                     intervalStartMatch = match;
@@ -675,8 +756,14 @@ namespace Aurio.Matching
             }
 
             // Finish last interval
-            var sourceIntervalEnd = new Interval(intervalStartMatch.Track1Time.Ticks, previousMatch.Track1Time.Ticks);
-            var destinationIntervalEnd = new Interval(intervalStartMatch.Track2Time.Ticks, previousMatch.Track2Time.Ticks);
+            var sourceIntervalEnd = new Interval(
+                intervalStartMatch.Track1Time.Ticks,
+                previousMatch.Track1Time.Ticks
+            );
+            var destinationIntervalEnd = new Interval(
+                intervalStartMatch.Track2Time.Ticks,
+                previousMatch.Track2Time.Ticks
+            );
             intervals.Add(Tuple.Create(sourceIntervalEnd, destinationIntervalEnd));
 
             return intervals;

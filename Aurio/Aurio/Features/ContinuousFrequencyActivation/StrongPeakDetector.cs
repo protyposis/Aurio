@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -26,7 +26,6 @@ namespace Aurio.Features.ContinuousFrequencyActivation
 {
     class StrongPeakDetector : FrequencyActivationCalculator
     {
-
         private enum Direction
         {
             Up,
@@ -54,18 +53,24 @@ namespace Aurio.Features.ContinuousFrequencyActivation
 
             Array.Clear(strongPeakValues, 0, strongPeakValues.Length);
 
-            direction = frequencyActivation[1] >= frequencyActivation[0] ? Direction.Up : Direction.Down;
+            direction =
+                frequencyActivation[1] >= frequencyActivation[0] ? Direction.Up : Direction.Down;
 
             for (int i = 1; i < frequencyActivation.Length; i++)
             {
-                if (frequencyActivation[i] < frequencyActivation[i - 1] && direction == Direction.Up)
+                if (
+                    frequencyActivation[i] < frequencyActivation[i - 1] && direction == Direction.Up
+                )
                 {
                     // local maximum found
                     xp = i - 1;
 
                     direction = Direction.Down;
                 }
-                else if (frequencyActivation[i] >= frequencyActivation[i - 1] && direction == Direction.Down)
+                else if (
+                    frequencyActivation[i] >= frequencyActivation[i - 1]
+                    && direction == Direction.Down
+                )
                 {
                     // local minimum found
                     xl = xr;
@@ -84,9 +89,6 @@ namespace Aurio.Features.ContinuousFrequencyActivation
                     direction = Direction.Up;
                 }
             }
-
-
-
 
             //for (int i = 1; i < frequencyActivation.Length; i++) {
             //    if (frequencyActivation[i] < frequencyActivation[i - 1]) {
@@ -109,7 +111,7 @@ namespace Aurio.Features.ContinuousFrequencyActivation
             //    }
             //}
 
-            /* HACK store peak count in last array element 
+            /* HACK store peak count in last array element
              * it cannot happen that every element is a peak value so the last element will never be reached */
             strongPeakValues[strongPeakValues.Length - 1] = peakCount;
         }

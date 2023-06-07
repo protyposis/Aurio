@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -28,7 +28,6 @@ namespace Aurio.Streams
     /// </summary>
     public class ConcatenationStream : IAudioStream
     {
-
         private IAudioStream[] sourceStreams;
 
         private long length;
@@ -50,10 +49,12 @@ namespace Aurio.Streams
             // Check for same format
             foreach (var stream in sourceStreams)
             {
-                if (stream.Properties.SampleRate != currentStream.Properties.SampleRate ||
-                    stream.Properties.BitDepth != currentStream.Properties.BitDepth ||
-                    stream.Properties.Channels != currentStream.Properties.Channels ||
-                    stream.Properties.Format != currentStream.Properties.Format)
+                if (
+                    stream.Properties.SampleRate != currentStream.Properties.SampleRate
+                    || stream.Properties.BitDepth != currentStream.Properties.BitDepth
+                    || stream.Properties.Channels != currentStream.Properties.Channels
+                    || stream.Properties.Format != currentStream.Properties.Format
+                )
                 {
                     throw new ArgumentException("the formats of the supplied streams do not match");
                 }
@@ -75,10 +76,7 @@ namespace Aurio.Streams
 
         public long Position
         {
-            get
-            {
-                return positionOffset + currentStream.Position;
-            }
+            get { return positionOffset + currentStream.Position; }
             set
             {
                 if (value < positionOffset || value >= positionOffset + currentStream.Length)
@@ -97,7 +95,7 @@ namespace Aurio.Streams
                     }
                     if (positionOffset == length)
                     {
-                        // A seek to the end of the stream or beyond... 
+                        // A seek to the end of the stream or beyond...
                         // ...we set the position to the end of the last stream instead of after the last stream
                         currentStreamIndex = sourceStreams.Length - 1;
                         currentStream = sourceStreams[currentStreamIndex];

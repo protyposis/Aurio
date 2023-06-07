@@ -10,7 +10,10 @@ namespace Aurio.UnitTest
         [TestMethod]
         public void WriteReadSequenceTest()
         {
-            var s = new BlockingFixedLengthFifoStream(new AudioProperties(1, 1, 8, AudioFormat.LPCM), 10);
+            var s = new BlockingFixedLengthFifoStream(
+                new AudioProperties(1, 1, 8, AudioFormat.LPCM),
+                10
+            );
 
             Assert.AreEqual(0, s.WritePosition);
             Assert.AreEqual(0, s.Position);

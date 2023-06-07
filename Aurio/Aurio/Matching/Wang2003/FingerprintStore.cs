@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -27,7 +27,6 @@ namespace Aurio.Matching.Wang2003
 {
     public class FingerprintStore
     {
-
         private IProfile profile;
         private Dictionary<AudioTrack, TrackStore> store;
         private IFingerprintCollisionMap collisionMap;
@@ -59,10 +58,24 @@ namespace Aurio.Matching.Wang2003
             }
 
             // Setup the store
-            Initialize(profile, profile.MatchingMinFrames, profile.MatchingMaxFrames, thresholdAccept, thresholdReject, "FP-W03");
+            Initialize(
+                profile,
+                profile.MatchingMinFrames,
+                profile.MatchingMaxFrames,
+                thresholdAccept,
+                thresholdReject,
+                "FP-W03"
+            );
         }
 
-        protected void Initialize(IProfile profile, int matchingMinFrames, int matchingMaxFrames, double[] thresholdAccept, double[] thresholdReject, string matchSourceName)
+        protected void Initialize(
+            IProfile profile,
+            int matchingMinFrames,
+            int matchingMaxFrames,
+            double[] thresholdAccept,
+            double[] thresholdReject,
+            string matchSourceName
+        )
         {
             this.profile = profile;
             this.matchingMinFrames = matchingMinFrames;
@@ -107,14 +120,19 @@ namespace Aurio.Matching.Wang2003
                     int hashCount = 0;
 
                     // Count all sequential input hashes with the same frame index (i.e. batch) and add them to the store
-                    while (subFingerprints.Count > hashListIndex + hashCount
-                        && (hash = subFingerprints[hashListIndex + hashCount]).Index == storeIndex)
+                    while (
+                        subFingerprints.Count > hashListIndex + hashCount
+                        && (hash = subFingerprints[hashListIndex + hashCount]).Index == storeIndex
+                    )
                     {
                         // Insert hash into the sequential store
                         trackStore.hashes.Add(hash.Hash);
 
                         // Insert a track/index lookup entry for the fingerprint hash
-                        collisionMap.Add(hash.Hash, new SubFingerprintLookupEntry(audioTrack, hash.Index));
+                        collisionMap.Add(
+                            hash.Hash,
+                            new SubFingerprintLookupEntry(audioTrack, hash.Index)
+                        );
 
                         hashCount++;
                     }
@@ -131,7 +149,10 @@ namespace Aurio.Matching.Wang2003
                         else
                         { // ... else create a new entry
                             // Add the current length of the hash list as start pointer for all hashes belonging to the current index
-                            trackStore.index.Add(storeIndex, new TrackStore.IndexEntry(storeHashIndex, hashCount));
+                            trackStore.index.Add(
+                                storeIndex,
+                                new TrackStore.IndexEntry(storeHashIndex, hashCount)
+                            );
                         }
                     }
 
@@ -158,14 +179,14 @@ namespace Aurio.Matching.Wang2003
                     SubFingerprintLookupEntry entry2 = entries[y];
                     if (entry1.AudioTrack != entry2.AudioTrack)
                     { // don't compare tracks with themselves
-
                         var store1 = store[entry1.AudioTrack];
                         var store2 = store[entry2.AudioTrack];
                         List<SubFingerprintHash> hashes1 = store1.hashes;
                         List<SubFingerprintHash> hashes2 = store2.hashes;
                         int index1 = entry1.Index;
                         int index2 = entry2.Index;
-                        TrackStore.IndexEntry indexEntry1, indexEntry2;
+                        TrackStore.IndexEntry indexEntry1,
+                            indexEntry2;
                         int numTried = 0; // count of hashes tried to match
                         int numMatched = 0; // count of hashes matched
                         int frameCount = 0; // count over how many actual frames hashes were matched (an index in the store is the equivalent of a frame in the generator)
@@ -199,7 +220,7 @@ namespace Aurio.Matching.Wang2003
                             {
                                 var h1 = hashes1[i];
                                 var h2 = hashes2[j];
-                                
+
                                 if (h1 < h2)
                                 {
                                     i++;
@@ -211,7 +232,8 @@ namespace Aurio.Matching.Wang2003
                                 else
                                 {
                                     intersectionCount++;
-                                    i++; j++;
+                                    i++;
+                                    j++;
                                 }
                             }
 
@@ -235,7 +257,10 @@ namespace Aurio.Matching.Wang2003
                                     nextIndex2Increment++;
                                 } while (!store2.index.ContainsKey(index2 + nextIndex2Increment));
                             }
-                            int nextIndexIncrement = Math.Min(nextIndex1Increment, nextIndex2Increment);
+                            int nextIndexIncrement = Math.Min(
+                                nextIndex1Increment,
+                                nextIndex2Increment
+                            );
 
                             index1 += nextIndexIncrement;
                             index2 += nextIndexIncrement;
@@ -243,19 +268,24 @@ namespace Aurio.Matching.Wang2003
 
                             // Match detection
                             // This approach trades the hash matching rate with time, i.e. the rate required
-                            // for a match drops with time, by using an exponentially with time decaying threshold. 
-                            // The idea is that a high matching rate after a short time is equivalent to a low matching 
-                            // rate after a long time. The difficulty is to to parameterize it in such a way, that a 
-                            // match is detected as fast as possible, while detecting a no-match isn't delayed too far 
+                            // for a match drops with time, by using an exponentially with time decaying threshold.
+                            // The idea is that a high matching rate after a short time is equivalent to a low matching
+                            // rate after a long time. The difficulty is to to parameterize it in such a way, that a
+                            // match is detected as fast as possible, while detecting a no-match isn't delayed too far
                             // as it takes a lot of processing time.
                             // NOTE The current parameters are just estimated, there's a lot of influence on processing speed and matching rate here
                             double rate = 1d / numTried * numMatched;
 
-                            if (frameCount >= matchingMaxFrames || rate < thresholdReject[frameCount])
+                            if (
+                                frameCount >= matchingMaxFrames
+                                || rate < thresholdReject[frameCount]
+                            )
                             {
                                 break; // exit condition
                             }
-                            else if (frameCount > matchingMinFrames && rate > thresholdAccept[frameCount])
+                            else if (
+                                frameCount > matchingMinFrames && rate > thresholdAccept[frameCount]
+                            )
                             {
                                 matchFound = true;
                                 break;
@@ -270,15 +300,17 @@ namespace Aurio.Matching.Wang2003
 
                         if (matchFound)
                         {
-                            matches.Add(new Match
-                            {
-                                Similarity = 1f / numTried * numMatched,
-                                Track1 = entry1.AudioTrack,
-                                Track1Time = SubFingerprintIndexToTimeSpan(entry1.Index),
-                                Track2 = entry2.AudioTrack,
-                                Track2Time = SubFingerprintIndexToTimeSpan(entry2.Index),
-                                Source = matchSourceName
-                            });
+                            matches.Add(
+                                new Match
+                                {
+                                    Similarity = 1f / numTried * numMatched,
+                                    Track1 = entry1.AudioTrack,
+                                    Track1Time = SubFingerprintIndexToTimeSpan(entry1.Index),
+                                    Track2 = entry2.AudioTrack,
+                                    Track2Time = SubFingerprintIndexToTimeSpan(entry2.Index),
+                                    Source = matchSourceName
+                                }
+                            );
                         }
                     }
                 }
@@ -292,7 +324,11 @@ namespace Aurio.Matching.Wang2003
             List<Match> matches = new List<Match>();
 
             var collidingKeys = collisionMap.GetCollidingKeys();
-            Debug.WriteLine("{0} colliding keys, {1} lookup entries", collidingKeys.Count, collidingKeys.Sum(h => collisionMap.GetValues(h).Count));
+            Debug.WriteLine(
+                "{0} colliding keys, {1} lookup entries",
+                collidingKeys.Count,
+                collidingKeys.Sum(h => collisionMap.GetValues(h).Count)
+            );
 
             int collisions = collidingKeys.Count;
             int count = 0;
@@ -302,7 +338,10 @@ namespace Aurio.Matching.Wang2003
 
                 if (count++ % 4096 == 0 && MatchingProgress != null)
                 {
-                    MatchingProgress(this, new ValueEventArgs<double>((double)count / collisions * 100));
+                    MatchingProgress(
+                        this,
+                        new ValueEventArgs<double>((double)count / collisions * 100)
+                    );
                 }
             }
             Debug.WriteLine("{0} matches", matches.Count);
@@ -317,16 +356,16 @@ namespace Aurio.Matching.Wang2003
 
         private TimeSpan SubFingerprintIndexToTimeSpan(int index)
         {
-            return new TimeSpan((long)Math.Round(index * profile.HashTimeScale * TimeUtil.SECS_TO_TICKS));
+            return new TimeSpan(
+                (long)Math.Round(index * profile.HashTimeScale * TimeUtil.SECS_TO_TICKS)
+            );
         }
 
         private class TrackStore
         {
-
             [DebuggerDisplay("{index}/{length}")]
             public struct IndexEntry
             {
-
                 public int index;
                 public int length;
 
@@ -364,8 +403,8 @@ namespace Aurio.Matching.Wang2003
                 var newArray = new TrackStore.IndexEntry[array.Length + blockIncrease];
                 Array.Copy(array, newArray, fillLevel);
                 array = newArray;
-            } 
-            
+            }
+
             public void Add(int storeIndex, TrackStore.IndexEntry ie)
             {
                 while (storeIndex >= array.Length)
@@ -381,12 +420,12 @@ namespace Aurio.Matching.Wang2003
             {
                 array[storeIndex] = new TrackStore.IndexEntry();
             }
-            
+
             public bool ContainsKey(int storeIndex)
             {
                 return fillLevel > storeIndex;
             }
-            
+
             public TrackStore.IndexEntry this[int storeIndex] => array[storeIndex];
         }
     }

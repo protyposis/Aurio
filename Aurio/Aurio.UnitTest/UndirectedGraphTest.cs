@@ -4,8 +4,6 @@ using System;
 
 namespace Aurio.UnitTest
 {
-
-
     /// <summary>
     ///This is a test class for UndirectedGraphTest and is intended
     ///to contain all UndirectedGraphTest Unit Tests
@@ -13,8 +11,6 @@ namespace Aurio.UnitTest
     [TestClass()]
     public class UndirectedGraphTest
     {
-
-
         private TestContext testContextInstance;
 
         /// <summary>
@@ -23,18 +19,12 @@ namespace Aurio.UnitTest
         ///</summary>
         public TestContext TestContext
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
+            get { return testContextInstance; }
+            set { testContextInstance = value; }
         }
 
         #region Additional test attributes
-        // 
+        //
         //You can use the following additional attributes as you write your tests:
         //
         //Use ClassInitialize to run code before running the first test in the class

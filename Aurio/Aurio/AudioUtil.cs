@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -52,9 +52,9 @@ namespace Aurio
         /// Adjusts the beginning and the end of a time-interval to the sample interval length so that the
         /// adjusted input interval includes the preceding and following sample.
         /// Since audio samples can be between two integer ticks, the outputInterval.From is less or equal its
-        /// matching sample's time, and outputInterval.To is greater or equal its matching sample's time. Recursive 
+        /// matching sample's time, and outputInterval.To is greater or equal its matching sample's time. Recursive
         /// usage may therefore enlarge the output interval with every execution.
-        /// 
+        ///
         /// Example:
         /// audio stream samples:    X-----X-----X-----X-----X-----X-----X-----X-----X-----X-----
         /// input interval:                   [---------------]
@@ -63,12 +63,19 @@ namespace Aurio
         /// <param name="intervalToAlign">the interval that should be sample-aligned</param>
         /// <param name="audioProperties">the audio properties containing the sample rate</param>
         /// <returns>the sample aligned interval</returns>
-        public static Interval AlignToSamples(Interval intervalToAlign, AudioProperties audioProperties)
+        public static Interval AlignToSamples(
+            Interval intervalToAlign,
+            AudioProperties audioProperties
+        )
         {
             double sampleLength = CalculateSampleTicks(audioProperties);
             return new Interval(
-                    (long)(intervalToAlign.From - ((double)intervalToAlign.From % sampleLength)),
-                    (long)(intervalToAlign.To + (sampleLength - ((double)intervalToAlign.To % sampleLength))));
+                (long)(intervalToAlign.From - ((double)intervalToAlign.From % sampleLength)),
+                (long)(
+                    intervalToAlign.To
+                    + (sampleLength - ((double)intervalToAlign.To % sampleLength))
+                )
+            );
         }
 
         /// <summary>
@@ -103,13 +110,20 @@ namespace Aurio
             return list;
         }
 
-        public static float[][] Uninterleave(AudioProperties audioProperties, byte[] buffer, int offset, int count, bool downmix)
+        public static float[][] Uninterleave(
+            AudioProperties audioProperties,
+            byte[] buffer,
+            int offset,
+            int count,
+            bool downmix
+        )
         {
             int channels = audioProperties.Channels;
             int downmixChannel = downmix ? 1 : 0;
-            float[][] uninterleavedSamples = CreateArray<float>(channels + downmixChannel,
-                count / (audioProperties.BitDepth / 8) / audioProperties.Channels);
-
+            float[][] uninterleavedSamples = CreateArray<float>(
+                channels + downmixChannel,
+                count / (audioProperties.BitDepth / 8) / audioProperties.Channels
+            );
             unsafe
             {
                 fixed (byte* sampleBuffer = &buffer[offset])
@@ -123,7 +137,9 @@ namespace Aurio
                         for (int channel = 0; channel < channels; channel++)
                         {
                             sum += samples[x + channel];
-                            uninterleavedSamples[channel + downmixChannel][sampleCount] = samples[x + channel];
+                            uninterleavedSamples[channel + downmixChannel][sampleCount] = samples[
+                                x + channel
+                            ];
                         }
                         if (downmix)
                         {

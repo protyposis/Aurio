@@ -45,10 +45,7 @@ namespace Aurio.DataStructures
 
         public long Average
         {
-            get
-            {
-                return _values.Sum() / _values.Count;
-            }
+            get { return _values.Sum() / _values.Count; }
         }
 
         public int SampleCount

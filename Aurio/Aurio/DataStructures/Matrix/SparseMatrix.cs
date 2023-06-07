@@ -1,17 +1,17 @@
-// 
+//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -26,7 +26,7 @@ namespace Aurio.DataStructures.Matrix
     /// <summary>
     /// Implementation of a sparse matrix by using dictionaries.
     /// taken from: http://www.blackbeltcoder.com/Articles/algorithms/creating-a-sparse-matrix-in-net
-    /// 
+    ///
     /// This matrix has a relatively high memory overhead. When storing lots of values that are locally
     /// aggregated in the sparse space, it is recommended to use a <see cref="PatchMatrix"/>.
     /// </summary>
@@ -55,14 +55,8 @@ namespace Aurio.DataStructures.Matrix
         /// <param name="col">Matrix column</param>
         public T this[int row, int col]
         {
-            get
-            {
-                return GetAt(row, col);
-            }
-            set
-            {
-                SetAt(row, col, value);
-            }
+            get { return GetAt(row, col); }
+            set { SetAt(row, col, value); }
         }
 
         /// <summary>

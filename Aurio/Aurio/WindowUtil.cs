@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -27,10 +27,12 @@ namespace Aurio
     {
         Rectangle,
         Triangle,
+
         /// <summary>
         /// Symmetric Hann window. COLA with hop size at (length-1)/2.
         /// </summary>
         Hann,
+
         /// <summary>
         /// Periodic Hann window. COLA with hop size at length/2.
         /// </summary>
@@ -50,7 +52,6 @@ namespace Aurio
     /// </summary>
     public static class WindowUtil
     {
-
         /// <summary>
         /// (No weighting)
         /// </summary>
@@ -130,9 +131,11 @@ namespace Aurio
             int N = length - 1;
             for (int x = offset; x < offset + length; x++)
             {
-                samples[x] *= (float)(0.42
+                samples[x] *= (float)(
+                    0.42
                     - 0.50 * Math.Cos(2 * Math.PI * index / N)
-                    + 0.08 * Math.Cos(4 * Math.PI * index / N));
+                    + 0.08 * Math.Cos(4 * Math.PI * index / N)
+                );
                 index++;
             }
         }
@@ -143,10 +146,12 @@ namespace Aurio
             int N = length - 1;
             for (int x = offset; x < offset + length; x++)
             {
-                samples[x] *= (float)(0.35875
+                samples[x] *= (float)(
+                    0.35875
                     - 0.48829 * Math.Cos(2 * Math.PI * index / N)
                     + 0.14128 * Math.Cos(4 * Math.PI * index / N)
-                    - 0.01168 * Math.Cos(6 * Math.PI * index / N));
+                    - 0.01168 * Math.Cos(6 * Math.PI * index / N)
+                );
                 index++;
             }
         }
@@ -157,10 +162,12 @@ namespace Aurio
             int N = length - 1;
             for (int x = offset; x < offset + length; x++)
             {
-                samples[x] *= (float)(0.3635819
+                samples[x] *= (float)(
+                    0.3635819
                     - 0.4891775 * Math.Cos(2 * Math.PI * index / N)
                     + 0.1365995 * Math.Cos(4 * Math.PI * index / N)
-                    - 0.0106411 * Math.Cos(6 * Math.PI * index / N));
+                    - 0.0106411 * Math.Cos(6 * Math.PI * index / N)
+                );
                 index++;
             }
         }
@@ -171,15 +178,21 @@ namespace Aurio
             int N = length - 1;
             for (int x = offset; x < offset + length; x++)
             {
-                samples[x] *= (float)(0.355768
+                samples[x] *= (float)(
+                    0.355768
                     - 0.487396 * Math.Cos(2 * Math.PI * index / N)
                     + 0.144232 * Math.Cos(4 * Math.PI * index / N)
-                    - 0.012604 * Math.Cos(6 * Math.PI * index / N));
+                    - 0.012604 * Math.Cos(6 * Math.PI * index / N)
+                );
                 index++;
             }
         }
 
-        public static float[] GetArray(WindowType windowType, int windowSize, float normalizationFactor)
+        public static float[] GetArray(
+            WindowType windowType,
+            int windowSize,
+            float normalizationFactor
+        )
         {
             float[] window = new float[windowSize];
             for (int x = 0; x < window.Length; x++)
@@ -228,9 +241,16 @@ namespace Aurio
             return GetArray(windowType, windowSize, 1.0f);
         }
 
-        public static WindowFunction GetFunction(WindowType windowType, int windowSize, float normalizationFactor)
+        public static WindowFunction GetFunction(
+            WindowType windowType,
+            int windowSize,
+            float normalizationFactor
+        )
         {
-            return new WindowFunction(GetArray(windowType, windowSize, normalizationFactor), windowType);
+            return new WindowFunction(
+                GetArray(windowType, windowSize, normalizationFactor),
+                windowType
+            );
         }
 
         public static WindowFunction GetFunction(WindowType windowType, int windowSize)

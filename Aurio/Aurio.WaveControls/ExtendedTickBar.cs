@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -29,7 +29,6 @@ namespace Aurio.WaveControls
 {
     public class ExtendedTickBar : FrameworkElement
     {
-
         public static readonly DependencyProperty MinimumProperty;
         public static readonly DependencyProperty MaximumProperty;
         public static readonly DependencyProperty TicksProperty;
@@ -41,23 +40,47 @@ namespace Aurio.WaveControls
 
         static ExtendedTickBar()
         {
-            MinimumProperty = DependencyProperty.Register("Minimum", typeof(double), typeof(ExtendedTickBar),
-                new FrameworkPropertyMetadata(-60.0d) { AffectsRender = true });
+            MinimumProperty = DependencyProperty.Register(
+                "Minimum",
+                typeof(double),
+                typeof(ExtendedTickBar),
+                new FrameworkPropertyMetadata(-60.0d) { AffectsRender = true }
+            );
 
-            MaximumProperty = DependencyProperty.Register("Maximum", typeof(double), typeof(ExtendedTickBar),
-                new FrameworkPropertyMetadata(0.0d) { AffectsRender = true });
+            MaximumProperty = DependencyProperty.Register(
+                "Maximum",
+                typeof(double),
+                typeof(ExtendedTickBar),
+                new FrameworkPropertyMetadata(0.0d) { AffectsRender = true }
+            );
 
-            TicksProperty = DependencyProperty.Register("Ticks", typeof(DoubleCollection), typeof(ExtendedTickBar),
-                new FrameworkPropertyMetadata(new DoubleCollection()) { AffectsRender = true });
+            TicksProperty = DependencyProperty.Register(
+                "Ticks",
+                typeof(DoubleCollection),
+                typeof(ExtendedTickBar),
+                new FrameworkPropertyMetadata(new DoubleCollection()) { AffectsRender = true }
+            );
 
-            TickRenderModeProperty = DependencyProperty.Register("TickRenderMode", typeof(TickRenderMode), typeof(ExtendedTickBar),
-                new FrameworkPropertyMetadata(TickRenderMode.Both) { AffectsRender = true });
+            TickRenderModeProperty = DependencyProperty.Register(
+                "TickRenderMode",
+                typeof(TickRenderMode),
+                typeof(ExtendedTickBar),
+                new FrameworkPropertyMetadata(TickRenderMode.Both) { AffectsRender = true }
+            );
 
-            TextAlignmentProperty = DependencyProperty.Register("TextAlignment", typeof(TextAlignment), typeof(ExtendedTickBar),
-                new FrameworkPropertyMetadata(TextAlignment.Right) { AffectsRender = true });
+            TextAlignmentProperty = DependencyProperty.Register(
+                "TextAlignment",
+                typeof(TextAlignment),
+                typeof(ExtendedTickBar),
+                new FrameworkPropertyMetadata(TextAlignment.Right) { AffectsRender = true }
+            );
 
-            FillProperty = DependencyProperty.Register("Fill", typeof(Brush), typeof(ExtendedTickBar),
-                new FrameworkPropertyMetadata((Brush)null) { AffectsRender = true });
+            FillProperty = DependencyProperty.Register(
+                "Fill",
+                typeof(Brush),
+                typeof(ExtendedTickBar),
+                new FrameworkPropertyMetadata((Brush)null) { AffectsRender = true }
+            );
         }
 
         public ExtendedTickBar()
@@ -125,8 +148,15 @@ namespace Aurio.WaveControls
                 {
                     double y = CalculateY(value);
 
-                    FormattedText text = new FormattedText(value.ToString(), CultureInfo.CurrentUICulture,
-                        FlowDirection.LeftToRight, new Typeface("Tahoma"), 8.0d, Fill, _pixelsPerDip)
+                    FormattedText text = new FormattedText(
+                        value.ToString(),
+                        CultureInfo.CurrentUICulture,
+                        FlowDirection.LeftToRight,
+                        new Typeface("Tahoma"),
+                        8.0d,
+                        Fill,
+                        _pixelsPerDip
+                    )
                     {
                         TextAlignment = TextAlignment
                     };
@@ -147,7 +177,11 @@ namespace Aurio.WaveControls
                 foreach (double value in Ticks)
                 {
                     double y = CalculateY(value) + 1;
-                    drawingContext.DrawLine(pen, new Point(0, y), new Point(ActualWidth - textMaxWidth, y));
+                    drawingContext.DrawLine(
+                        pen,
+                        new Point(0, y),
+                        new Point(ActualWidth - textMaxWidth, y)
+                    );
                     guidelineSet.GuidelinesY.Add(y - 0.5);
                 }
 

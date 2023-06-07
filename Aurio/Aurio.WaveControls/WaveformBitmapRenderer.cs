@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -30,7 +30,6 @@ namespace Aurio.WaveControls
 {
     class WaveformBitmapRenderer : IWaveformRenderer
     {
-
         private WriteableBitmap wb;
         private int[] pixels;
         private int pixelWidth;
@@ -50,7 +49,13 @@ namespace Aurio.WaveControls
 
         #region IWaveformRenderer Members
 
-        public Drawing Render(float[] sampleData, int sampleCount, int width, int height, float volume)
+        public Drawing Render(
+            float[] sampleData,
+            int sampleCount,
+            int width,
+            int height,
+            float volume
+        )
         {
             if (width > pixelWidth || height > pixelHeight)
             {
@@ -60,12 +65,24 @@ namespace Aurio.WaveControls
             bool peaks = sampleCount >= width;
             if (!peaks)
             {
-                BitmapSource waveform = DrawWaveform(sampleData, sampleCount, width, height, volume);
+                BitmapSource waveform = DrawWaveform(
+                    sampleData,
+                    sampleCount,
+                    width,
+                    height,
+                    volume
+                );
                 return new ImageDrawing(waveform, new Rect(0, 0, pixelWidth, pixelHeight));
             }
             else
             {
-                BitmapSource waveform = DrawPeakform(sampleData, sampleCount, width, height, volume);
+                BitmapSource waveform = DrawPeakform(
+                    sampleData,
+                    sampleCount,
+                    width,
+                    height,
+                    volume
+                );
                 return new ImageDrawing(waveform, new Rect(0, 0, pixelWidth, pixelHeight));
             }
         }
@@ -81,7 +98,13 @@ namespace Aurio.WaveControls
             pixelStride = width;
         }
 
-        private WriteableBitmap DrawPeakform(float[] peakData, int peakCount, int width, int height, float volume)
+        private WriteableBitmap DrawPeakform(
+            float[] peakData,
+            int peakCount,
+            int width,
+            int height,
+            float volume
+        )
         {
             Array.Clear(pixels, 0, pixels.Length);
 
@@ -90,7 +113,14 @@ namespace Aurio.WaveControls
 
             int halfheight = height / 2;
             int peaks = peakCount;
-            int x, y, top, bottom, prevX = 0, prevY = 0, prevTop = 0, prevBottom = height;
+            int x,
+                y,
+                top,
+                bottom,
+                prevX = 0,
+                prevY = 0,
+                prevTop = 0,
+                prevBottom = height;
             for (int peak = 0; peak < peaks * 2; peak += 2)
             {
                 float p1 = peakData[peak] * volume;
@@ -119,7 +149,7 @@ namespace Aurio.WaveControls
                 // NOTE:
                 // The peaks are distributed among the available width. If more peaks than pixel columns are
                 // given, columns can contain multiple peaks, which could lead to drawing errors:
-                // If the two peaks 10->20 and 20->30 are merged, the resulting column has a hole 
+                // If the two peaks 10->20 and 20->30 are merged, the resulting column has a hole
                 // between 20->30. Solution would be to combine them to a single column 10->30 (if it is
                 // ever getting noticeable).
                 // TODO resolve drawing issues of combined peaks if noticeable
@@ -135,7 +165,7 @@ namespace Aurio.WaveControls
 
                 for (y = top; y <= bottom; y++)
                 {
-                    //bool useBorderColor = 
+                    //bool useBorderColor =
                     //    y == top // topmost peak pixel
                     //    || y == bottom // bottommost peak pixel
                     //    || (x > 0 && top < prevTop && y > top && y < prevTop) // upper rising lines
@@ -157,7 +187,13 @@ namespace Aurio.WaveControls
             return wb;
         }
 
-        private WriteableBitmap DrawWaveform(float[] sampleData, int sampleCount, int width, int height, float volume)
+        private WriteableBitmap DrawWaveform(
+            float[] sampleData,
+            int sampleCount,
+            int width,
+            int height,
+            float volume
+        )
         {
             Array.Clear(pixels, 0, pixels.Length);
 
@@ -166,7 +202,10 @@ namespace Aurio.WaveControls
 
             int halfheight = height / 2;
             int samples = sampleCount;
-            int x, y, prevX = 0, prevY = 0;
+            int x,
+                y,
+                prevX = 0,
+                prevY = 0;
             for (int sample = 0; sample < samples; sample++)
             {
                 float v = sampleData[sample] * volume;
@@ -189,7 +228,16 @@ namespace Aurio.WaveControls
 
                 if (sample > 0)
                 {
-                    BitmapUtils.DrawLine(prevX, prevY, x, y, pixels, pixelWidth, pixelHeight, borderColor);
+                    BitmapUtils.DrawLine(
+                        prevX,
+                        prevY,
+                        x,
+                        y,
+                        pixels,
+                        pixelWidth,
+                        pixelHeight,
+                        borderColor
+                    );
                 }
 
                 if (width / samples > 4)

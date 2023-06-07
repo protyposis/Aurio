@@ -5,8 +5,6 @@ using Aurio.Streams;
 
 namespace Aurio.UnitTest
 {
-
-
     /// <summary>
     ///This is a test class for AudioUtilTest and is intended
     ///to contain all AudioUtilTest Unit Tests
@@ -14,8 +12,6 @@ namespace Aurio.UnitTest
     [TestClass()]
     public class AudioUtilTest
     {
-
-
         private TestContext testContextInstance;
 
         /// <summary>
@@ -24,18 +20,12 @@ namespace Aurio.UnitTest
         ///</summary>
         public TestContext TestContext
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
+            get { return testContextInstance; }
+            set { testContextInstance = value; }
         }
 
         #region Additional test attributes
-        // 
+        //
         //You can use the following additional attributes as you write your tests:
         //
         //Use ClassInitialize to run code before running the first test in the class
@@ -74,8 +64,10 @@ namespace Aurio.UnitTest
             Interval intervalToAlign = new Interval(1000, 10000);
             AudioProperties audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             double sampleTicks = AudioUtil.CalculateSampleTicks(audioProperties);
-            Interval expected = new Interval((long)(intervalToAlign.From - ((double)intervalToAlign.From % sampleTicks)),
-                (long)(intervalToAlign.To + sampleTicks - (intervalToAlign.To % sampleTicks)));
+            Interval expected = new Interval(
+                (long)(intervalToAlign.From - ((double)intervalToAlign.From % sampleTicks)),
+                (long)(intervalToAlign.To + sampleTicks - (intervalToAlign.To % sampleTicks))
+            );
             Interval actual;
             actual = AudioUtil.AlignToSamples(intervalToAlign, audioProperties);
             Assert.AreEqual(expected, actual);

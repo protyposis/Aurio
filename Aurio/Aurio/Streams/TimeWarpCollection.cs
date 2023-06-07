@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -27,18 +27,17 @@ namespace Aurio.Streams
 {
     public class TimeWarpCollection : ObservableCollection<TimeWarp>
     {
-
         private bool sorting = false;
         private bool rangeAdding = false;
 
-        public TimeWarpCollection()
-        {
-        }
+        public TimeWarpCollection() { }
 
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
-            if ((sorting && e.Action == NotifyCollectionChangedAction.Move) ||
-                (rangeAdding && e.Action == NotifyCollectionChangedAction.Add))
+            if (
+                (sorting && e.Action == NotifyCollectionChangedAction.Move)
+                || (rangeAdding && e.Action == NotifyCollectionChangedAction.Add)
+            )
             {
                 // suppress change event if it is triggered by the sort method or a range add
                 return;
@@ -61,8 +60,12 @@ namespace Aurio.Streams
             Sort();
             ValidateMappings();
 
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(
-                NotifyCollectionChangedAction.Add, new List<TimeWarp>(range)));
+            OnCollectionChanged(
+                new NotifyCollectionChangedEventArgs(
+                    NotifyCollectionChangedAction.Add,
+                    new List<TimeWarp>(range)
+                )
+            );
         }
 
         /// <summary>
@@ -108,16 +111,26 @@ namespace Aurio.Streams
                     {
                         throw new Exception(this[x] + " is overlapping " + this[y]);
                     }
-                    else if (!ResamplingStream.CheckSampleRateRatio(TimeWarp.CalculateSampleRateRatio(this[x], this[y])))
+                    else if (
+                        !ResamplingStream.CheckSampleRateRatio(
+                            TimeWarp.CalculateSampleRateRatio(this[x], this[y])
+                        )
+                    )
                     {
-                        throw new Exception("invalid sample ratio: " + TimeWarp.CalculateSampleRateRatio(this[x], this[y]));
+                        throw new Exception(
+                            "invalid sample ratio: "
+                                + TimeWarp.CalculateSampleRateRatio(this[x], this[y])
+                        );
                     }
                 }
             }
         }
 
-        public void GetBoundingMappingsForSourcePosition(TimeSpan sourcePosition,
-                out TimeWarp lowerMapping, out TimeWarp upperMapping)
+        public void GetBoundingMappingsForSourcePosition(
+            TimeSpan sourcePosition,
+            out TimeWarp lowerMapping,
+            out TimeWarp upperMapping
+        )
         {
             lowerMapping = null;
             upperMapping = null;
@@ -145,8 +158,11 @@ namespace Aurio.Streams
             }
         }
 
-        public void GetBoundingMappingsForWarpedPosition(TimeSpan warpedPosition,
-                out TimeWarp lowerMapping, out TimeWarp upperMapping)
+        public void GetBoundingMappingsForWarpedPosition(
+            TimeSpan warpedPosition,
+            out TimeWarp lowerMapping,
+            out TimeWarp upperMapping
+        )
         {
             lowerMapping = null;
             upperMapping = null;
@@ -178,7 +194,11 @@ namespace Aurio.Streams
         {
             TimeWarp lowerMapping;
             TimeWarp upperMapping;
-            GetBoundingMappingsForSourcePosition(sourcePosition, out lowerMapping, out upperMapping);
+            GetBoundingMappingsForSourcePosition(
+                sourcePosition,
+                out lowerMapping,
+                out upperMapping
+            );
 
             if (lowerMapping == null)
             {
@@ -192,9 +212,13 @@ namespace Aurio.Streams
             }
             else
             {
-                return lowerMapping.To +
-                    new TimeSpan((long)((sourcePosition - lowerMapping.From).Ticks *
-                    TimeWarp.CalculateSampleRateRatio(lowerMapping, upperMapping)));
+                return lowerMapping.To
+                    + new TimeSpan(
+                        (long)(
+                            (sourcePosition - lowerMapping.From).Ticks
+                            * TimeWarp.CalculateSampleRateRatio(lowerMapping, upperMapping)
+                        )
+                    );
             }
         }
     }

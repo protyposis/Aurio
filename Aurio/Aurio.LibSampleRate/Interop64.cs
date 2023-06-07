@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -27,7 +27,6 @@ namespace Aurio.LibSampleRate
 {
     internal class Interop64
     {
-
         private const string LIBSAMPLERATE = "libsamplerate-0.x64.dll";
         private const CallingConvention CALLINGCONVENTION = CallingConvention.Cdecl;
 
@@ -41,7 +40,11 @@ namespace Aurio.LibSampleRate
         ///	Error returned in *error.
         [SuppressUnmanagedCodeSecurity]
         [DllImport(LIBSAMPLERATE, CallingConvention = CALLINGCONVENTION)]
-        public static extern IntPtr src_new(ConverterType converter_type, int channels, out int error);
+        public static extern IntPtr src_new(
+            ConverterType converter_type,
+            int channels,
+            out int error
+        );
 
         /// Return Type: SRC_STATE*
         /// state: SRC_STATE*
@@ -77,8 +80,8 @@ namespace Aurio.LibSampleRate
         /// state: SRC_STATE*
         /// new_ratio: double
         ///
-        /// The src_set_ratio function allows the modification of the conversion ratio between 
-        /// calls to src_process. This allows a step response in the conversion ratio. It returns 
+        /// The src_set_ratio function allows the modification of the conversion ratio between
+        /// calls to src_process. This allows a step response in the conversion ratio. It returns
         /// non-zero on error and the error return value can be decoded into a text string.
         [SuppressUnmanagedCodeSecurity]
         [DllImport(LIBSAMPLERATE, CallingConvention = CALLINGCONVENTION)]

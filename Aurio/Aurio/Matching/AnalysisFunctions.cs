@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -27,7 +27,6 @@ namespace Aurio.Matching
 {
     public class AnalysisFunctions
     {
-
         private static WindowFunction windowFunction = null;
 
         public static unsafe double CrossCorrelationOffset(byte[] x, byte[] y)
@@ -36,13 +35,17 @@ namespace Aurio.Matching
             {
                 throw new ArgumentException("interval lengths do not match");
             }
-            fixed (byte* xB = &x[0], yB = &y[0])
+            fixed (
+                byte* xB = &x[0],
+                    yB = &y[0]
+            )
             {
                 float* xF = (float*)xB;
                 float* yF = (float*)yB;
                 int n = x.Length / sizeof(float);
                 CrossCorrelation.Result ccr;
-                return (1 - Math.Abs(CrossCorrelation.Calculate(xF, yF, n, out ccr)) / (n / 2d)) * ccr.AbsoluteMaxValue;
+                return (1 - Math.Abs(CrossCorrelation.Calculate(xF, yF, n, out ccr)) / (n / 2d))
+                    * ccr.AbsoluteMaxValue;
             }
         }
 
@@ -60,7 +63,10 @@ namespace Aurio.Matching
             {
                 throw new ArgumentException("interval lengths do not match");
             }
-            fixed (byte* xB = &x[0], yB = &y[0])
+            fixed (
+                byte* xB = &x[0],
+                    yB = &y[0]
+            )
             {
                 float* xF = (float*)xB;
                 float* yF = (float*)yB;
@@ -156,13 +162,18 @@ namespace Aurio.Matching
             return 1 - result;
         }
 
-        private static void FrequencyDistributionBlockProcess(float[] buffer, double[] target, IFFT fft)
+        private static void FrequencyDistributionBlockProcess(
+            float[] buffer,
+            double[] target,
+            IFFT fft
+        )
         {
             windowFunction.Apply(buffer);
             fft.Forward(buffer);
             for (int i = 0; i < buffer.Length; i += 2)
             {
-                buffer[i / 2] = FFTUtil.CalculateMagnitude(buffer[i], buffer[i + 1]) / buffer.Length * 2;
+                buffer[i / 2] =
+                    FFTUtil.CalculateMagnitude(buffer[i], buffer[i + 1]) / buffer.Length * 2;
             }
             for (int i = 0; i < target.Length; i++)
             {

@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -30,7 +30,6 @@ namespace Aurio
     /// <seealso cref="http://stackoverflow.com/questions/6627288/audio-spectrum-analysis-using-fft-algorithm-in-java"/>
     public static class VolumeUtil
     {
-
         private static readonly double LOG_2_DB;
         private static readonly double DB_2_LOG;
 
@@ -70,7 +69,11 @@ namespace Aurio
         /// <param name="minDecibel">lower bound os the decibel range (0%)</param>
         /// <param name="maxDecibel">upper bound of the decibel range (100%)</param>
         /// <returns>the percentage of a decibel value between two bounding decibel values</returns>
-        public static double DecibelToPercentage(double decibel, double minDecibel, double maxDecibel)
+        public static double DecibelToPercentage(
+            double decibel,
+            double minDecibel,
+            double maxDecibel
+        )
         {
             return (decibel - minDecibel) / (maxDecibel - minDecibel);
         }

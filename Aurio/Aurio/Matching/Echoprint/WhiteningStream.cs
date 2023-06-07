@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -26,13 +26,12 @@ using System.Text;
 namespace Aurio.Matching.Echoprint
 {
     /// <summary>
-    /// Whitens a stream by calculating an LPC filter block by block from the autocorrelation, 
+    /// Whitens a stream by calculating an LPC filter block by block from the autocorrelation,
     /// effectively removing stationary frequencies from the stream. This can be used to analyze
     /// nonstationary spectral changes.
     /// </summary>
     class WhiteningStream : AbstractAudioStreamWrapper
     {
-
         // config variables
         private int numPoles;
         private float decaySecs;
@@ -48,7 +47,12 @@ namespace Aurio.Matching.Echoprint
         private float[] _Xo; // carryover samples from the end of a block
         private float[] _ai; // predictor coefficients
 
-        public WhiteningStream(IAudioStream sourceStream, int numPoles, float decaySecs, int blockLength)
+        public WhiteningStream(
+            IAudioStream sourceStream,
+            int numPoles,
+            float decaySecs,
+            int blockLength
+        )
             : base(sourceStream)
         {
             if (sourceStream.Properties.Channels != 1)
@@ -81,18 +85,15 @@ namespace Aurio.Matching.Echoprint
         /// Gets or sets the position in the stream. Setting means seeking.
         /// </summary>
         /// <remarks>
-        /// Seeking restarts the whitening filter at the seek target index and will lead to 
-        /// different sample output for the same global stream sample index. E.g., starting 
-        /// at the beginning of the stream (index 0), the sample at index x s(x) has a different 
-        /// value compared to when read after a seek to 0 < t < x because the whitening filter 
+        /// Seeking restarts the whitening filter at the seek target index and will lead to
+        /// different sample output for the same global stream sample index. E.g., starting
+        /// at the beginning of the stream (index 0), the sample at index x s(x) has a different
+        /// value compared to when read after a seek to 0 < t < x because the whitening filter
         /// will not be exactly the same.
         /// </remarks>
         public override long Position
         {
-            get
-            {
-                return base.Position - blockOutputBuffer.Count;
-            }
+            get { return base.Position - blockOutputBuffer.Count; }
             set
             {
                 if (value == base.Position)
@@ -127,9 +128,16 @@ namespace Aurio.Matching.Echoprint
                     // Whiten the sample block
                     unsafe
                     {
-                        fixed (byte* byteInBuffer = blockInputBuffer.Data, byteOutBuffer = blockOutputBuffer.Data)
+                        fixed (
+                            byte* byteInBuffer = blockInputBuffer.Data,
+                                byteOutBuffer = blockOutputBuffer.Data
+                        )
                         {
-                            ProcessBlock((float*)byteInBuffer, (float*)byteOutBuffer, blockInputBuffer.Length / sourceStream.SampleBlockSize);
+                            ProcessBlock(
+                                (float*)byteInBuffer,
+                                (float*)byteOutBuffer,
+                                blockInputBuffer.Length / sourceStream.SampleBlockSize
+                            );
                         }
                     }
                 }
@@ -148,17 +156,18 @@ namespace Aurio.Matching.Echoprint
 
             return count;
         }
+
         /// <summary>
         /// Whitens a block of samples with a k-pole LPC filter by calculating the prediction filter P(z)
-        /// from the autocorrelation of the first k samples with Durbin's recursion, then calculating 
-        /// the estimated value of each sample through linear combination of preceding samples and the filter, 
+        /// from the autocorrelation of the first k samples with Durbin's recursion, then calculating
+        /// the estimated value of each sample through linear combination of preceding samples and the filter,
         /// and subtracting the predicted sample value from the actual sample value to get the prediction error
         /// of each sample, which is the whitened signal.
-        /// 
-        /// Alternatively, the error filter A(z) that gets the whitenend signal could be calculated from the 
-        /// prediction filter A(z) = 1-P(z), which could then be applied to get the whitenend signal directly 
+        ///
+        /// Alternatively, the error filter A(z) that gets the whitenend signal could be calculated from the
+        /// prediction filter A(z) = 1-P(z), which could then be applied to get the whitenend signal directly
         /// without the subtractions.
-        /// 
+        ///
         /// Linear Prediction Coding is described in:
         /// - K. M. M. Prabhu, Window Functions and Their Applications in Signal Processing, 2013, pp. 344
         /// - James Beauchamp, Analysis, Synthesis, and Perception of Musical Sounds, 2007, pp. 190
@@ -214,7 +223,7 @@ namespace Aurio.Matching.Echoprint
                 {
                     minip = numPoles;
                 }
-                // Because past samples need to be used to predict a sample, prediction of 
+                // Because past samples need to be used to predict a sample, prediction of
                 // the first k samples requires samples from the end of the previous block.
                 for (int j = i + 1; j <= numPoles; j++)
                 {

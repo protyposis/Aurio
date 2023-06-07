@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -25,7 +25,6 @@ namespace Aurio.LibSampleRate
 {
     public class SampleRateConverter : IDisposable
     {
-
         private static IInteropWrapper interop;
 
         static SampleRateConverter()
@@ -140,38 +139,81 @@ namespace Aurio.LibSampleRate
             return interop.src_is_valid_ratio(ratio) == 1;
         }
 
-        public void Process(byte[] input, int inputOffset, int inputLength,
-            byte[] output, int outputOffset, int outputLength,
-            bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated)
+        public void Process(
+            byte[] input,
+            int inputOffset,
+            int inputLength,
+            byte[] output,
+            int outputOffset,
+            int outputLength,
+            bool endOfInput,
+            out int inputLengthUsed,
+            out int outputLengthGenerated
+        )
         {
             unsafe
             {
-                fixed (byte* inputBytes = &input[inputOffset], outputBytes = &output[outputOffset])
+                fixed (
+                    byte* inputBytes = &input[inputOffset],
+                        outputBytes = &output[outputOffset]
+                )
                 {
-                    Process((float*)inputBytes, inputLength / 4, (float*)outputBytes, outputLength / 4, endOfInput,
-                        out inputLengthUsed, out outputLengthGenerated);
+                    Process(
+                        (float*)inputBytes,
+                        inputLength / 4,
+                        (float*)outputBytes,
+                        outputLength / 4,
+                        endOfInput,
+                        out inputLengthUsed,
+                        out outputLengthGenerated
+                    );
                     inputLengthUsed *= 4;
                     outputLengthGenerated *= 4;
                 }
             }
         }
 
-        public void Process(float[] input, int inputOffset, int inputLength,
-            float[] output, int outputOffset, int outputLength,
-            bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated)
+        public void Process(
+            float[] input,
+            int inputOffset,
+            int inputLength,
+            float[] output,
+            int outputOffset,
+            int outputLength,
+            bool endOfInput,
+            out int inputLengthUsed,
+            out int outputLengthGenerated
+        )
         {
             unsafe
             {
-                fixed (float* inputFloats = &input[inputOffset], outputFloats = &output[outputOffset])
+                fixed (
+                    float* inputFloats = &input[inputOffset],
+                        outputFloats = &output[outputOffset]
+                )
                 {
-                    Process(inputFloats, inputLength, outputFloats, outputLength, endOfInput,
-                        out inputLengthUsed, out outputLengthGenerated);
+                    Process(
+                        inputFloats,
+                        inputLength,
+                        outputFloats,
+                        outputLength,
+                        endOfInput,
+                        out inputLengthUsed,
+                        out outputLengthGenerated
+                    );
                 }
             }
         }
 
-        private unsafe void Process(float* input, int inputLength, float* output, int outputLength,
-            bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated)
+        private unsafe void Process(
+            float* input,
+            int inputLength,
+            float* output,
+            int outputLength,
+            bool endOfInput,
+            out int inputLengthUsed,
+            out int outputLengthGenerated
+        )
         {
             srcData.data_in = input;
             srcData.data_out = output;

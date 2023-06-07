@@ -52,10 +52,7 @@ namespace Aurio.Resampler
 
         public bool VariableRate
         {
-            get
-            {
-                return true;
-            }
+            get { return true; }
         }
 
         public void Clear()
@@ -74,9 +71,17 @@ namespace Aurio.Resampler
             return _resampler.GetCurrentLatency();
         }
 
-        public void Process(byte[] input, int inputOffset, int inputLength,
-            byte[] output, int outputOffset, int outputLength,
-            bool endOfInput, out int inputLengthUsed, out int outputLengthGenerated)
+        public void Process(
+            byte[] input,
+            int inputOffset,
+            int inputLength,
+            byte[] output,
+            int outputOffset,
+            int outputLength,
+            bool endOfInput,
+            out int inputLengthUsed,
+            out int outputLengthGenerated
+        )
         {
             // TODO implement endOfInput flushing
 
@@ -88,7 +93,12 @@ namespace Aurio.Resampler
             int inputSamples = inputLength / 4 / Channels; // The max number of samples that we can offer the resampler
 
             // Ask the resampler how many input samples we should write into the input array
-            int inNeeded = _resampler.ResamplePrepare(inputSamples, Channels, out inBuffer, out inBufferOffset);
+            int inNeeded = _resampler.ResamplePrepare(
+                inputSamples,
+                Channels,
+                out inBuffer,
+                out inBufferOffset
+            );
             inputLengthUsed = inNeeded * Channels * 4;
 
             // Copy the requested number of samples into the input
@@ -98,7 +108,13 @@ namespace Aurio.Resampler
             // Read resampled output
             int outputSamplesRequested = outputLength / 4 / Channels;
             float[] outBuffer = new float[outputSamplesRequested * Channels]; // TODO create reuseable instance field instance
-            int outAvailable = _resampler.ResampleOut(outBuffer, 0, inNeeded, outputSamplesRequested, Channels);
+            int outAvailable = _resampler.ResampleOut(
+                outBuffer,
+                0,
+                inNeeded,
+                outputSamplesRequested,
+                Channels
+            );
             outputLengthGenerated = outAvailable * 4 * Channels;
 
             // Copy the output into the output buffer

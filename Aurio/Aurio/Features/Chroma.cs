@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -27,20 +27,20 @@ namespace Aurio.Features
 {
     /// <summary>
     /// Generates a chromagram from an input audio stream as described in section III.B. of
-    /// - Bartsch, Mark A., and Gregory H. Wakefield. "Audio thumbnailing of popular music 
+    /// - Bartsch, Mark A., and Gregory H. Wakefield. "Audio thumbnailing of popular music
     ///   using chroma-based representations." Multimedia, IEEE Transactions on 7.1 (2005): 96-104.
     /// </summary>
     public class Chroma : STFT
     {
-
         public enum MappingMode
         {
             /// <summary>
             /// The type of frequency bin to chroma mapping described in
-            /// - Bartsch, Mark A., and Gregory H. Wakefield. "Audio thumbnailing of popular music 
+            /// - Bartsch, Mark A., and Gregory H. Wakefield. "Audio thumbnailing of popular music
             ///   using chroma-based representations." Multimedia, IEEE Transactions on 7.1 (2005): 96-104.
             /// </summary>
             Paper,
+
             /// <summary>
             /// The type of frequency bin to chroma mapping applied by Chromaprint.
             /// </summary>
@@ -56,7 +56,16 @@ namespace Aurio.Features
 
         private bool normalize;
 
-        public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, float minFreq, float maxFreq, bool normalize, MappingMode mappingMode)
+        public Chroma(
+            IAudioStream stream,
+            int windowSize,
+            int hopSize,
+            WindowType windowType,
+            float minFreq,
+            float maxFreq,
+            bool normalize,
+            MappingMode mappingMode
+        )
             : base(stream, windowSize, hopSize, windowType, OutputFormat.MagnitudesSquared)
         {
             fftFrameBuffer = new float[windowSize / 2];
@@ -77,7 +86,8 @@ namespace Aurio.Features
                 for (int i = minBin; i < maxBin; i++)
                 {
                     double fftBinCenterFreq = i * freqToBinRatio;
-                    double c = Math.Log(fftBinCenterFreq, 2) - Math.Floor(Math.Log(fftBinCenterFreq, 2)); // paper formula (3)
+                    double c =
+                        Math.Log(fftBinCenterFreq, 2) - Math.Floor(Math.Log(fftBinCenterFreq, 2)); // paper formula (3)
                     // c ∈ [0, 1) must be mapped to chroma bins {0...11}
                     // The paper says that the first class is centered around 0. This means that the first class has only half the
                     // size of the others, but also that there's a 13. class (index 12) at the upper end of c. Therefore, we wrap
@@ -93,7 +103,9 @@ namespace Aurio.Features
                 for (int i = minBin; i < maxBin; i++)
                 {
                     double fftBinCenterFreq = i * freqToBinRatio;
-                    double c = Math.Log(fftBinCenterFreq / A0, 2) - Math.Floor(Math.Log(fftBinCenterFreq / A0, 2)); // Chromaprint additionally divides by A0 - WHY?
+                    double c =
+                        Math.Log(fftBinCenterFreq / A0, 2)
+                        - Math.Floor(Math.Log(fftBinCenterFreq / A0, 2)); // Chromaprint additionally divides by A0 - WHY?
                     int chromaBin = (int)(c * Bins); // Chromaprint does the mapping more bluntly
                     fftToChromaBinMapping[i - minBin] = chromaBin;
                     fftToChromaBinCount[chromaBin]++; // needed to take the arithmetic mean in formula (6)
@@ -107,14 +119,39 @@ namespace Aurio.Features
             this.normalize = normalize;
         }
 
-        public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, float minFreq, float maxFreq)
-            : this(stream, windowSize, hopSize, windowType, minFreq, maxFreq, true, Chroma.MappingMode.Paper)
+        public Chroma(
+            IAudioStream stream,
+            int windowSize,
+            int hopSize,
+            WindowType windowType,
+            float minFreq,
+            float maxFreq
+        )
+            : this(
+                stream,
+                windowSize,
+                hopSize,
+                windowType,
+                minFreq,
+                maxFreq,
+                true,
+                Chroma.MappingMode.Paper
+            )
         {
             //
         }
 
         public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType)
-            : this(stream, windowSize, hopSize, windowType, 0, stream.Properties.SampleRate / 2, true, Chroma.MappingMode.Paper)
+            : this(
+                stream,
+                windowSize,
+                hopSize,
+                windowType,
+                0,
+                stream.Properties.SampleRate / 2,
+                true,
+                Chroma.MappingMode.Paper
+            )
         {
             //
         }

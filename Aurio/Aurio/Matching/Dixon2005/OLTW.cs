@@ -1,17 +1,17 @@
-// 
+//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -38,7 +38,6 @@ namespace Aurio.Matching.Dixon2005
     /// </summary>
     public class OLTW : DTW
     {
-
         private const int MAX_RUN_COUNT = 3; // MaxRunCount
 
         private enum GetIncResult
@@ -52,7 +51,8 @@ namespace Aurio.Matching.Dixon2005
         private BlockingCollection<float[]> stream1FrameQueue;
         private BlockingCollection<float[]> stream2FrameQueue;
 
-        private IMatrix<double> totalCostMatrix, cellCostMatrix;
+        private IMatrix<double> totalCostMatrix,
+            cellCostMatrix;
         private RingBuffer<float[]> rb1;
         private int rb1FrameCount;
         private RingBuffer<float[]> rb2;
@@ -64,9 +64,7 @@ namespace Aurio.Matching.Dixon2005
         private int c;
 
         public OLTW(TimeSpan searchWidth, ProgressMonitor progressMonitor)
-            : base(searchWidth, progressMonitor)
-        {
-        }
+            : base(searchWidth, progressMonitor) { }
 
         public OLTW(ProgressMonitor progressMonitor)
             : this(new TimeSpan(0, 0, 10), progressMonitor)
@@ -79,7 +77,10 @@ namespace Aurio.Matching.Dixon2005
             s1 = PrepareStream(s1);
             s2 = PrepareStream(s2);
 
-            int searchWidth = (int)(this.searchWidth.TotalSeconds * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE));
+            int searchWidth = (int)(
+                this.searchWidth.TotalSeconds
+                * (1d * FrameReader.SAMPLERATE / FrameReader.WINDOW_HOP_SIZE)
+            );
             totalCostMatrix = new PatchMatrix<double>(double.PositiveInfinity);
             cellCostMatrix = new PatchMatrix<double>(double.PositiveInfinity);
             rb1 = new RingBuffer<float[]>(searchWidth);
@@ -116,7 +117,7 @@ namespace Aurio.Matching.Dixon2005
             });
 
             // init matrix
-            // NOTE do not explicitely init the PatchMatrix, otherwise the sparse matrix characteristic would 
+            // NOTE do not explicitely init the PatchMatrix, otherwise the sparse matrix characteristic would
             //      be gone and the matrix would take up all the space like a standard matrix does
             totalCostMatrix[0, 0] = 0;
             cellCostMatrix[0, 0] = 0;
@@ -177,17 +178,22 @@ namespace Aurio.Matching.Dixon2005
 
                 //Debug.WriteLine(t + " " + j + " " + getInc);
 
-                progressReporter.ReportProgress((rb1FrameCount + rb2FrameCount) / (double)totalFrames * 100);
+                progressReporter.ReportProgress(
+                    (rb1FrameCount + rb2FrameCount) / (double)totalFrames * 100
+                );
             }
 
             FireOltwProgress(t, j, t, j, true);
 
-            Debug.WriteLine("OLTW finished @ t={0}/{1}, j={2}/{3}",
-                t, stream1FrameReader.WindowCount,
-                j, stream2FrameReader.WindowCount);
+            Debug.WriteLine(
+                "OLTW finished @ t={0}/{1}, j={2}/{3}",
+                t,
+                stream1FrameReader.WindowCount,
+                j,
+                stream2FrameReader.WindowCount
+            );
 
             progressReporter.Finish();
-
 
             // --------- generate results -----------
 
@@ -199,7 +205,8 @@ namespace Aurio.Matching.Dixon2005
             {
                 Tuple<TimeSpan, TimeSpan> timePair = new Tuple<TimeSpan, TimeSpan>(
                     PositionToTimeSpan(pair.i1 * FrameReader.WINDOW_HOP_SIZE),
-                    PositionToTimeSpan(pair.i2 * FrameReader.WINDOW_HOP_SIZE));
+                    PositionToTimeSpan(pair.i2 * FrameReader.WINDOW_HOP_SIZE)
+                );
                 if (timePair.Item1 >= TimeSpan.Zero && timePair.Item2 >= TimeSpan.Zero)
                 {
                     pathTimes.Add(timePair);
@@ -255,7 +262,8 @@ namespace Aurio.Matching.Dixon2005
             totalCostMatrix[t1, t2] = Min(
                 totalCostMatrix[t1, t2 - 1] + cost,
                 totalCostMatrix[t1 - 1, t2] + cost,
-                totalCostMatrix[t1 - 1, t2 - 1] + 2 * cost);
+                totalCostMatrix[t1 - 1, t2 - 1] + 2 * cost
+            );
             cellCostMatrix[t1, t2] = cost;
             //Debug.WriteLine("cost " + t1 + "/" + t2 + ": " + matrix[t1, t2]);
         }
@@ -282,7 +290,8 @@ namespace Aurio.Matching.Dixon2005
 
             // x = argmin(pathCost(t,l|*))
             // y = argmin(pathCost(k|*,j))
-            double minValX, minValY;
+            double minValX,
+                minValY;
             int x = ArgminRow(t, j, out minValX);
             int y = ArgminCol(t, j, out minValY);
 

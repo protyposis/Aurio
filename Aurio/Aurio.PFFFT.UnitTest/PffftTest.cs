@@ -9,11 +9,10 @@ namespace Aurio.PFFFT.UnitTest
     [TestClass]
     public class PffftTest
     {
-
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
-            // Init the class before the tests run, so DLLs get loaded and test runtimes 
+            // Init the class before the tests run, so DLLs get loaded and test runtimes
             // of the first test are not wrong due to initialization
             new PFFFT(64, Transform.Real);
         }
@@ -129,7 +128,6 @@ namespace Aurio.PFFFT.UnitTest
 
         private class FFTComparer : IComparer, IComparer<float>
         {
-
             private const float deltaThreshold = 0.000001f;
 
             public int Compare(object x, object y)

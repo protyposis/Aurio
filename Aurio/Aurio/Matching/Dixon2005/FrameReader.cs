@@ -1,17 +1,17 @@
-// 
+//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -32,7 +32,6 @@ namespace Aurio.Matching.Dixon2005
     /// </summary>
     class FrameReader : STFT
     {
-
         public const int SAMPLERATE = 44100;
         public const int WINDOW_SIZE = 2048; // 46ms @ 44.1kHz
         public const int WINDOW_HOP_SIZE = 882; // 20ms @ 44.1kHz
@@ -42,7 +41,13 @@ namespace Aurio.Matching.Dixon2005
         private int[] frequencyMap;
 
         public FrameReader(IAudioStream stream)
-            : base(stream, WINDOW_SIZE, WINDOW_HOP_SIZE, WINDOW_TYPE, OutputFormat.MagnitudesSquared)
+            : base(
+                stream,
+                WINDOW_SIZE,
+                WINDOW_HOP_SIZE,
+                WINDOW_TYPE,
+                OutputFormat.MagnitudesSquared
+            )
         {
             if (stream.Properties.SampleRate != SAMPLERATE)
             {
@@ -128,7 +133,6 @@ namespace Aurio.Matching.Dixon2005
                 differenceSum += currentFrame[i];
                 frame[i] = Math.Max(currentFrame[i] - previousFrame[i], 0);
             }
-
 
             if (currentFrameRMS <= 0.0004D)
             {

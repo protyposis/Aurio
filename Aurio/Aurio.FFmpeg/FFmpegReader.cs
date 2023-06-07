@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -27,7 +27,6 @@ namespace Aurio.FFmpeg
 {
     public class FFmpegReader : IDisposable
     {
-
         private string filename; // store source filename for debugging
         private bool disposed = false;
         private Type mode;
@@ -65,7 +64,8 @@ namespace Aurio.FFmpeg
         /// </summary>
         /// <param name="fileInfo">a FileInfo object of the file to read</param>
         /// <param name="mode">the types of data to read</param>
-        public FFmpegReader(FileInfo fileInfo, Type mode) : this(fileInfo.FullName, mode) { }
+        public FFmpegReader(FileInfo fileInfo, Type mode)
+            : this(fileInfo.FullName, mode) { }
 
         /// <summary>
         /// Instantiates an FFmpeg reader in stream mode, where FFmpeg only gets stream reading callbacks
@@ -82,9 +82,9 @@ namespace Aurio.FFmpeg
             this.mode = mode;
 
             var transferBuffer = new byte[0];
-            readPacketDelegate = delegate (IntPtr opaque, IntPtr buffer, int bufferSize)
+            readPacketDelegate = delegate(IntPtr opaque, IntPtr buffer, int bufferSize)
             {
-                /* NOTE there's no way to cast the IntPtr to a byte array which is required 
+                /* NOTE there's no way to cast the IntPtr to a byte array which is required
                  * for stream reading, so we need to add an intermediary transfer buffer.
                  */
                 // Increase transfer buffer's size if too small
@@ -101,16 +101,24 @@ namespace Aurio.FFmpeg
                 // Return number of bytes read
                 return bytesRead;
             };
-            seekDelegate = delegate (IntPtr opaque, long offset, int whence)
+            seekDelegate = delegate(IntPtr opaque, long offset, int whence)
             {
-                if (whence == 0x10000 /* AVSEEK_SIZE */)
+                if (
+                    whence == 0x10000 /* AVSEEK_SIZE */
+                )
                 {
                     return stream.Length;
                 }
                 return stream.Seek(offset, (SeekOrigin)whence);
             };
 
-            instance = InteropWrapper.stream_open_bufferedio(mode, IntPtr.Zero, readPacketDelegate, seekDelegate, fileName);
+            instance = InteropWrapper.stream_open_bufferedio(
+                mode,
+                IntPtr.Zero,
+                readPacketDelegate,
+                seekDelegate,
+                fileName
+            );
 
             CheckAndHandleOpeningError();
 
@@ -123,13 +131,16 @@ namespace Aurio.FFmpeg
         /// </summary>
         /// <param name="stream">the stream to decode</param>
         /// <param name="mode">the types of data to read</param>
-        public FFmpegReader(Stream stream, Type mode) : this(stream, mode, null) { }
+        public FFmpegReader(Stream stream, Type mode)
+            : this(stream, mode, null) { }
 
         private void CheckAndHandleOpeningError()
         {
             if (InteropWrapper.stream_has_error(instance))
             {
-                string errorMessage = Marshal.PtrToStringAnsi(InteropWrapper.stream_get_error(instance));
+                string errorMessage = Marshal.PtrToStringAnsi(
+                    InteropWrapper.stream_get_error(instance)
+                );
                 throw new IOException("Error opening the FFmpeg stream: " + errorMessage);
             }
         }
@@ -147,13 +158,15 @@ namespace Aurio.FFmpeg
             if ((mode & Type.Audio) != 0)
             {
                 IntPtr ocp = InteropWrapper.stream_get_output_config(instance, Type.Audio);
-                audioOutputConfig = (AudioOutputConfig)Marshal.PtrToStructure(ocp, typeof(AudioOutputConfig));
+                audioOutputConfig = (AudioOutputConfig)
+                    Marshal.PtrToStructure(ocp, typeof(AudioOutputConfig));
             }
 
             if ((mode & Type.Video) != 0)
             {
                 IntPtr ocp = InteropWrapper.stream_get_output_config(instance, Type.Video);
-                videoOutputConfig = (VideoOutputConfig)Marshal.PtrToStructure(ocp, typeof(VideoOutputConfig));
+                videoOutputConfig = (VideoOutputConfig)
+                    Marshal.PtrToStructure(ocp, typeof(VideoOutputConfig));
             }
         }
 
@@ -167,13 +180,24 @@ namespace Aurio.FFmpeg
             get { return videoOutputConfig; }
         }
 
-        public int ReadFrame(out long timestamp, byte[] output_buffer, int output_buffer_size, out Type frameType)
+        public int ReadFrame(
+            out long timestamp,
+            byte[] output_buffer,
+            int output_buffer_size,
+            out Type frameType
+        )
         {
             int type;
 
             CheckAndHandleActiveInstance();
 
-            int ret = InteropWrapper.stream_read_frame(instance, out timestamp, output_buffer, output_buffer_size, out type);
+            int ret = InteropWrapper.stream_read_frame(
+                instance,
+                out timestamp,
+                output_buffer,
+                output_buffer_size,
+                out type
+            );
             frameType = (Type)type;
 
             return ret;

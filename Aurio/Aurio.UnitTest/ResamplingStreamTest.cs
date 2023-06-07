@@ -5,8 +5,6 @@ using System;
 
 namespace Aurio.UnitTest
 {
-
-
     /// <summary>
     ///This is a test class for ResamplingStreamTest and is intended
     ///to contain all ResamplingStreamTest Unit Tests
@@ -14,7 +12,6 @@ namespace Aurio.UnitTest
     [TestClass()]
     public class ResamplingStreamTest
     {
-
         private TestContext testContextInstance;
         private ResamplingStream stream;
 
@@ -24,14 +21,8 @@ namespace Aurio.UnitTest
         ///</summary>
         public TestContext TestContext
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
+            get { return testContextInstance; }
+            set { testContextInstance = value; }
         }
 
         [ClassInitialize()]
@@ -45,7 +36,8 @@ namespace Aurio.UnitTest
         {
             stream = new ResamplingStream(
                 new NullStream(new AudioProperties(1, 44100, 32, AudioFormat.IEEE), 1000),
-                ResamplingQuality.VeryHigh);
+                ResamplingQuality.VeryHigh
+            );
         }
 
         [TestMethod()]

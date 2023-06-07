@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -26,7 +26,6 @@ namespace Aurio.Streams
 {
     public class VisualizingStream : AbstractAudioStreamWrapper
     {
-
         public event EventHandler WaveformChanged;
 
         private byte[] buffer;
@@ -34,11 +33,19 @@ namespace Aurio.Streams
         private long bufferLength; // the length of the currently buffered data
         private PeakStore peakStore;
 
-        public VisualizingStream(IAudioStream sourceStream) : base(sourceStream)
+        public VisualizingStream(IAudioStream sourceStream)
+            : base(sourceStream)
         {
-            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32))
+            if (
+                !(
+                    sourceStream.Properties.Format == AudioFormat.IEEE
+                    && sourceStream.Properties.BitDepth == 32
+                )
+            )
             {
-                throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
+                throw new ArgumentException(
+                    "unsupported source format: " + sourceStream.Properties
+                );
             }
 
             buffer = new byte[0];
@@ -98,7 +105,6 @@ namespace Aurio.Streams
             }
 
             int samplesRead = bytesRead / Properties.SampleBlockByteSize;
-
             unsafe
             {
                 fixed (byte* bufferB = &buffer[0])
@@ -131,7 +137,8 @@ namespace Aurio.Streams
                 if (samplesPerPeak > peakStore.SamplesPerPeak)
                 {
                     byte[][] peakData = peakStore.GetData(samplesPerPeak, out samplesPerPeak);
-                    int positionOffset = (int)(streamPosition / SampleBlockSize / samplesPerPeak) * sizeof(Peak);
+                    int positionOffset =
+                        (int)(streamPosition / SampleBlockSize / samplesPerPeak) * sizeof(Peak);
                     int sourcePeakCount = (int)Math.Round((float)sampleCount / samplesPerPeak);
                     float sourceToTargetIndex = 1 / ((float)sourcePeakCount / peakCount);
 
@@ -151,7 +158,10 @@ namespace Aurio.Streams
                                     if ((int)(p * sourceToTargetIndex) > peak)
                                     {
                                         peak++;
-                                        peakChannelP[peak] = new Peak(float.MaxValue, float.MinValue);
+                                        peakChannelP[peak] = new Peak(
+                                            float.MaxValue,
+                                            float.MinValue
+                                        );
                                     }
                                     peakChannelP[peak].Merge(peakChannelDataP[p]);
                                 }
@@ -167,7 +177,10 @@ namespace Aurio.Streams
                 int bufferOffset = 0;
                 int bytesRead = 0;
 
-                if (bufferPosition <= sourceStream.Position && sourceStream.Position + requiredBytes <= bufferPosition + bufferLength)
+                if (
+                    bufferPosition <= sourceStream.Position
+                    && sourceStream.Position + requiredBytes <= bufferPosition + bufferLength
+                )
                 {
                     // the requested data can be read directly from the buffer, no need to read from the stream
                     bufferOffset = (int)(sourceStream.Position - bufferPosition);
@@ -226,7 +239,9 @@ namespace Aurio.Streams
         {
             if (requiredSize > buffer.Length)
             {
-                Debug.WriteLine("VisualizingStream buffer resize: " + buffer.Length + " -> " + requiredSize);
+                Debug.WriteLine(
+                    "VisualizingStream buffer resize: " + buffer.Length + " -> " + requiredSize
+                );
                 buffer = new byte[requiredSize];
             }
         }

@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -30,7 +30,6 @@ namespace Aurio.FFmpeg
 {
     public class FFmpegSourceStream : IAudioStream
     {
-
         private Stream sourceStream;
         private FFmpegReader reader;
         private AudioProperties properties;
@@ -47,7 +46,8 @@ namespace Aurio.FFmpeg
         /// Decodes an audio stream through FFmpeg from an encoded file.
         /// </summary>
         /// <param name="fileInfo">the file to decode</param>
-        public FFmpegSourceStream(FileInfo fileInfo) : this(fileInfo.OpenRead(), fileInfo.Name)
+        public FFmpegSourceStream(FileInfo fileInfo)
+            : this(fileInfo.OpenRead(), fileInfo.Name)
         {
             //reader = new FFmpegReader(fileInfo); // use filesystem IO
             //reader = new FFmpegReader(fileInfo.OpenRead()); // use buffered IO with stream
@@ -67,14 +67,14 @@ namespace Aurio.FFmpeg
 
             if (reader.AudioOutputConfig.length == long.MinValue)
             {
-                /* 
+                /*
                  * length == FFmpeg AV_NOPTS_VALUE
-                 * 
-                 * This means that for the opened file/format, there is no length/PTS data 
+                 *
+                 * This means that for the opened file/format, there is no length/PTS data
                  * available, which also makes seeking more or less impossible.
-                 * 
+                 *
                  * As a workaround, an index could be created to map the frames to the file
-                 * position, and then seek by file position. The index could be created by 
+                 * position, and then seek by file position. The index could be created by
                  * linearly reading through the file (decoding not necessary), and creating
                  * a mapping of AVPacket.pos to the frame time.
                  */
@@ -85,12 +85,17 @@ namespace Aurio.FFmpeg
                 reader.AudioOutputConfig.format.channels,
                 reader.AudioOutputConfig.format.sample_rate,
                 reader.AudioOutputConfig.format.sample_size * 8,
-                reader.AudioOutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM);
+                reader.AudioOutputConfig.format.sample_size == 4
+                    ? AudioFormat.IEEE
+                    : AudioFormat.LPCM
+            );
 
             readerPosition = 0;
-            sourceBuffer = new byte[reader.AudioOutputConfig.frame_size *
-                reader.AudioOutputConfig.format.channels *
-                reader.AudioOutputConfig.format.sample_size];
+            sourceBuffer = new byte[
+                reader.AudioOutputConfig.frame_size
+                    * reader.AudioOutputConfig.format.channels
+                    * reader.AudioOutputConfig.format.sample_size
+            ];
             sourceBufferPosition = 0;
             sourceBufferLength = -1; // -1 means buffer empty, >= 0 means valid buffer data
 
@@ -113,7 +118,8 @@ namespace Aurio.FFmpeg
         /// Decodes an audio stream through FFmpeg from an encoded file stream.
         /// </summary>
         /// <param name="stream">the stream to decode</param>
-        public FFmpegSourceStream(Stream stream) : this(stream, null) { }
+        public FFmpegSourceStream(Stream stream)
+            : this(stream, null) { }
 
         public AudioProperties Properties
         {
@@ -132,10 +138,7 @@ namespace Aurio.FFmpeg
 
         public long Position
         {
-            get
-            {
-                return SamplePosition * SampleBlockSize;
-            }
+            get { return SamplePosition * SampleBlockSize; }
             set
             {
                 long seekTarget = (value / SampleBlockSize) + readerFirstPTS;
@@ -145,7 +148,12 @@ namespace Aurio.FFmpeg
 
                 // get target position
                 FFmpeg.Type type;
-                sourceBufferLength = reader.ReadFrame(out readerPosition, sourceBuffer, sourceBuffer.Length, out type);
+                sourceBufferLength = reader.ReadFrame(
+                    out readerPosition,
+                    sourceBuffer,
+                    sourceBuffer.Length,
+                    out type
+                );
 
                 // check if seek ended up at seek target (or earlier because of frame size, depends on file format and stream codec)
                 // TODO handle seek offset with bufferPosition
@@ -154,7 +162,10 @@ namespace Aurio.FFmpeg
                     // perfect case
                     sourceBufferPosition = 0;
                 }
-                else if (seekTarget > readerPosition && seekTarget <= (readerPosition + sourceBufferLength))
+                else if (
+                    seekTarget > readerPosition
+                    && seekTarget <= (readerPosition + sourceBufferLength)
+                )
                 {
                     sourceBufferPosition = (int)(seekTarget - readerPosition);
                 }
@@ -174,13 +185,19 @@ namespace Aurio.FFmpeg
                         seekIndexCreated = true;
                         Console.WriteLine("seek index created");
 
-                        // With the seek index, try seeking again. 
+                        // With the seek index, try seeking again.
                         // This does not result in an endless recursion because of the seekIndexCreated flag.
                         Position = value;
                     }
                     else
                     {
-                        throw new FileSeekException(String.Format("seeking did not work correctly: expected {0}, result {1}", value, Position));
+                        throw new FileSeekException(
+                            String.Format(
+                                "seeking did not work correctly: expected {0}, result {1}",
+                                value,
+                                Position
+                            )
+                        );
                     }
                 }
 
@@ -201,7 +218,12 @@ namespace Aurio.FFmpeg
             {
                 long newPosition;
                 FFmpeg.Type type;
-                sourceBufferLength = reader.ReadFrame(out newPosition, sourceBuffer, sourceBuffer.Length, out type);
+                sourceBufferLength = reader.ReadFrame(
+                    out newPosition,
+                    sourceBuffer,
+                    sourceBuffer.Length,
+                    out type
+                );
 
                 if (newPosition == -1 || sourceBufferLength == -1)
                 {
@@ -212,8 +234,17 @@ namespace Aurio.FFmpeg
                 sourceBufferPosition = 0;
             }
 
-            int bytesToCopy = Math.Min(count, (sourceBufferLength - sourceBufferPosition) * SampleBlockSize);
-            Array.Copy(sourceBuffer, sourceBufferPosition * SampleBlockSize, buffer, offset, bytesToCopy);
+            int bytesToCopy = Math.Min(
+                count,
+                (sourceBufferLength - sourceBufferPosition) * SampleBlockSize
+            );
+            Array.Copy(
+                sourceBuffer,
+                sourceBufferPosition * SampleBlockSize,
+                buffer,
+                offset,
+                bytesToCopy
+            );
             sourceBufferPosition += (bytesToCopy / SampleBlockSize);
             if (sourceBufferPosition > sourceBufferLength)
             {
@@ -270,11 +301,16 @@ namespace Aurio.FFmpeg
 
             var reader = new FFmpegReader(fileInfo, FFmpeg.Type.Audio);
 
-            var writer = new MemoryWriterStream(new AudioProperties(
-                reader.AudioOutputConfig.format.channels,
-                reader.AudioOutputConfig.format.sample_rate,
-                reader.AudioOutputConfig.format.sample_size * 8,
-                reader.AudioOutputConfig.format.sample_size == 4 ? AudioFormat.IEEE : AudioFormat.LPCM));
+            var writer = new MemoryWriterStream(
+                new AudioProperties(
+                    reader.AudioOutputConfig.format.channels,
+                    reader.AudioOutputConfig.format.sample_rate,
+                    reader.AudioOutputConfig.format.sample_size * 8,
+                    reader.AudioOutputConfig.format.sample_size == 4
+                        ? AudioFormat.IEEE
+                        : AudioFormat.LPCM
+                )
+            );
 
             int output_buffer_size = reader.AudioOutputConfig.frame_size * writer.SampleBlockSize;
             byte[] output_buffer = new byte[output_buffer_size];
@@ -284,7 +320,16 @@ namespace Aurio.FFmpeg
             FFmpeg.Type type;
 
             // sequentially read samples from decoder and write it to wav file
-            while ((samplesRead = reader.ReadFrame(out timestamp, output_buffer, output_buffer_size, out type)) > 0)
+            while (
+                (
+                    samplesRead = reader.ReadFrame(
+                        out timestamp,
+                        output_buffer,
+                        output_buffer_size,
+                        out type
+                    )
+                ) > 0
+            )
             {
                 int bytesRead = samplesRead * writer.SampleBlockSize;
                 writer.Write(output_buffer, 0, bytesRead);
@@ -320,13 +365,18 @@ namespace Aurio.FFmpeg
             }
             else
             {
-                // With a storage directory specified, store the proxy file with a hashed name 
+                // With a storage directory specified, store the proxy file with a hashed name
                 // (to avoid name collision / overwrites) in the target directory (e.g. a temp or working directory)
                 using (var sha256 = SHA256.Create())
                 {
                     byte[] hash = sha256.ComputeHash(Encoding.Unicode.GetBytes(fileInfo.FullName));
-                    string hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                    var proxyFileInfo = new FileInfo(Path.Combine(storageDirectory.FullName, hashString + ".ffproxy.wav"));
+                    string hashString = BitConverter
+                        .ToString(hash)
+                        .Replace("-", "")
+                        .ToLowerInvariant();
+                    var proxyFileInfo = new FileInfo(
+                        Path.Combine(storageDirectory.FullName, hashString + ".ffproxy.wav")
+                    );
                     return CreateWaveProxy(fileInfo, proxyFileInfo);
                 }
             }
@@ -352,21 +402,33 @@ namespace Aurio.FFmpeg
         public static bool WaveProxySuggested(FileInfo fileInfo)
         {
             // Suggest wave proxy for file formats with known seek issues
-            return new List<string>() { ".shn", ".ape" }.Exists(ext => fileInfo.Extension.ToLowerInvariant().Equals(ext));
+            return new List<string>() { ".shn", ".ape" }.Exists(
+                ext => fileInfo.Extension.ToLowerInvariant().Equals(ext)
+            );
         }
 
         public class FileNotSeekableException : Exception
         {
-            public FileNotSeekableException() : base() { }
-            public FileNotSeekableException(string message) : base(message) { }
-            public FileNotSeekableException(string message, Exception innerException) : base(message, innerException) { }
+            public FileNotSeekableException()
+                : base() { }
+
+            public FileNotSeekableException(string message)
+                : base(message) { }
+
+            public FileNotSeekableException(string message, Exception innerException)
+                : base(message, innerException) { }
         }
 
         public class FileSeekException : Exception
         {
-            public FileSeekException() : base() { }
-            public FileSeekException(string message) : base(message) { }
-            public FileSeekException(string message, Exception innerException) : base(message, innerException) { }
+            public FileSeekException()
+                : base() { }
+
+            public FileSeekException(string message)
+                : base(message) { }
+
+            public FileSeekException(string message, Exception innerException)
+                : base(message, innerException) { }
         }
     }
 }

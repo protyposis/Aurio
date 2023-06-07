@@ -33,7 +33,7 @@ namespace Aurio.Test.FingerprintingWang2003
     {
         private Profile profile;
         private FingerprintStore store;
-        
+
         public MainWindow()
         {
             InitializeComponent();
@@ -46,29 +46,34 @@ namespace Aurio.Test.FingerprintingWang2003
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ProgressMonitor.GlobalInstance.ProcessingProgressChanged += Instance_ProcessingProgressChanged;
+            ProgressMonitor.GlobalInstance.ProcessingProgressChanged +=
+                Instance_ProcessingProgressChanged;
             ProgressMonitor.GlobalInstance.ProcessingFinished += GlobalInstance_ProcessingFinished;
-            
+
             profile = FingerprintGenerator.GetProfiles()[0];
             store = new FingerprintStore(profile);
         }
 
-
-
         private void Instance_ProcessingProgressChanged(object sender, ValueEventArgs<float> e)
         {
-            progressBar1.Dispatcher.BeginInvoke((Action)delegate
-            {
-                progressBar1.Value = e.Value;
-            });
+            progressBar1.Dispatcher.BeginInvoke(
+                (Action)
+                    delegate
+                    {
+                        progressBar1.Value = e.Value;
+                    }
+            );
         }
 
         private void GlobalInstance_ProcessingFinished(object sender, EventArgs e)
         {
-            progressBar1.Dispatcher.BeginInvoke((Action)delegate
-            {
-                progressBar1.Value = 0;
-            });
+            progressBar1.Dispatcher.BeginInvoke(
+                (Action)
+                    delegate
+                    {
+                        progressBar1.Value = 0;
+                    }
+            );
         }
 
         private void button1_Click(object sender, RoutedEventArgs e)
@@ -97,45 +102,66 @@ namespace Aurio.Test.FingerprintingWang2003
                     {
                         AudioTrack audioTrack = new AudioTrack(new FileInfo(file));
                         IAudioStream audioStream = audioTrack.CreateAudioStream();
-                        IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask("Generating fingerprints for " + audioTrack.FileInfo.Name, true);
+                        IProgressReporter progressReporter =
+                            ProgressMonitor.GlobalInstance.BeginTask(
+                                "Generating fingerprints for " + audioTrack.FileInfo.Name,
+                                true
+                            );
                         int hashCount = 0;
                         long columnOffset = spectrogram1.ColumnCount;
                         int lastFrameIndex = 0;
                         float[] silentSpectrum = null;
 
                         FingerprintGenerator fpg = new FingerprintGenerator(profile);
-                        fpg.FrameProcessed += delegate (object sender2, FrameProcessedEventArgs e2)
+                        fpg.FrameProcessed += delegate(object sender2, FrameProcessedEventArgs e2)
                         {
                             var spectrum = (float[])e2.Spectrum.Clone();
                             var spectrumResidual = (float[])e2.SpectrumResidual.Clone();
                             var peaks = new List<Aurio.Matching.Wang2003.Peak>(e2.Peaks);
                             var skippedFrames = e2.Index - lastFrameIndex - 1;
                             lastFrameIndex = e2.Index;
-                            silentSpectrum ??= Enumerable.Repeat(float.MinValue, e2.Spectrum.Length).ToArray();
-                            
-                            Dispatcher.BeginInvoke((Action)delegate
-                            {
-                                if (skippedFrames > 0)
-                                {
-                                    // Draw spectrogram frames that were skipped by the fingerprint generator because
-                                    // their power was below the profile's threshold.
-                                    Debug.WriteLine($"filling {skippedFrames} skipped frames");
-                                    for (var f = 1; f <= skippedFrames; f++)
+                            silentSpectrum ??= Enumerable
+                                .Repeat(float.MinValue, e2.Spectrum.Length)
+                                .ToArray();
+
+                            Dispatcher.BeginInvoke(
+                                (Action)
+                                    delegate
                                     {
-                                        spectrogram1.AddSpectrogramColumn(silentSpectrum);
-                                        spectrogram2.AddSpectrogramColumn(silentSpectrum);
+                                        if (skippedFrames > 0)
+                                        {
+                                            // Draw spectrogram frames that were skipped by the fingerprint generator because
+                                            // their power was below the profile's threshold.
+                                            Debug.WriteLine(
+                                                $"filling {skippedFrames} skipped frames"
+                                            );
+                                            for (var f = 1; f <= skippedFrames; f++)
+                                            {
+                                                spectrogram1.AddSpectrogramColumn(silentSpectrum);
+                                                spectrogram2.AddSpectrogramColumn(silentSpectrum);
+                                            }
+                                        }
+
+                                        spectrogram1.AddSpectrogramColumn(spectrum);
+                                        spectrogram2.AddSpectrogramColumn(spectrumResidual);
+                                        peaks.ForEach(peak =>
+                                        {
+                                            spectrogram1.AddPointMarker(
+                                                columnOffset + e2.Index,
+                                                peak.Index,
+                                                Colors.Red
+                                            );
+                                            spectrogram2.AddPointMarker(
+                                                columnOffset + e2.Index,
+                                                peak.Index,
+                                                Colors.Red
+                                            );
+                                        });
+                                        progressReporter.ReportProgress(
+                                            (double)e2.Index / e2.Indices * 100
+                                        );
                                     }
-                                }
-                                
-                                spectrogram1.AddSpectrogramColumn(spectrum);
-                                spectrogram2.AddSpectrogramColumn(spectrumResidual);
-                                peaks.ForEach(peak =>
-                                {
-                                    spectrogram1.AddPointMarker(columnOffset + e2.Index, peak.Index, Colors.Red);
-                                    spectrogram2.AddPointMarker(columnOffset + e2.Index, peak.Index, Colors.Red);
-                                });
-                                progressReporter.ReportProgress((double)e2.Index / e2.Indices * 100);
-                            });
+                            );
                         };
                         fpg.PeakPairsGenerated += (_, e2) =>
                         {
@@ -144,27 +170,43 @@ namespace Aurio.Test.FingerprintingWang2003
                             {
                                 peakPairs.ForEach(pair =>
                                 {
-                                    spectrogram1.AddLineMarker(columnOffset + pair.Index, pair.Peak1.Index, 
-                                        columnOffset + pair.Index + pair.Distance, pair.Peak2.Index, Colors.Green);
-                                    spectrogram2.AddLineMarker(columnOffset + pair.Index, pair.Peak1.Index, 
-                                        columnOffset + pair.Index + pair.Distance, pair.Peak2.Index, Colors.Green);
+                                    spectrogram1.AddLineMarker(
+                                        columnOffset + pair.Index,
+                                        pair.Peak1.Index,
+                                        columnOffset + pair.Index + pair.Distance,
+                                        pair.Peak2.Index,
+                                        Colors.Green
+                                    );
+                                    spectrogram2.AddLineMarker(
+                                        columnOffset + pair.Index,
+                                        pair.Peak1.Index,
+                                        columnOffset + pair.Index + pair.Distance,
+                                        pair.Peak2.Index,
+                                        Colors.Green
+                                    );
                                 });
                             });
                         };
-                        fpg.SubFingerprintsGenerated += delegate (object sender2, SubFingerprintsGeneratedEventArgs e2)
+                        fpg.SubFingerprintsGenerated += delegate(
+                            object sender2,
+                            SubFingerprintsGeneratedEventArgs e2
+                        )
                         {
                             hashCount += e2.SubFingerprints.Count;
                             store.Add(e2);
                         };
 
                         fpg.Generate(audioTrack);
-                        Debug.WriteLine("{0} hashes (mem {1:0.00} mb)", hashCount, (hashCount * Marshal.SizeOf(typeof(SubFingerprintHash))) / 1024f / 1024f);
+                        Debug.WriteLine(
+                            "{0} hashes (mem {1:0.00} mb)",
+                            hashCount,
+                            (hashCount * Marshal.SizeOf(typeof(SubFingerprintHash))) / 1024f / 1024f
+                        );
 
                         progressReporter.Finish();
                     }
                     store.FindAllMatches();
                 });
-
             }
         }
     }

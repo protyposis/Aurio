@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -31,7 +31,6 @@ namespace Aurio.Features
     /// </summary>
     public class StreamWindower
     {
-
         public const int DEFAULT_STREAM_INPUT_BUFFER_SIZE = 32768;
 
         private readonly IAudioStream stream;
@@ -47,7 +46,13 @@ namespace Aurio.Features
         /// <param name="windowSize">the window size in the dimension of samples</param>
         /// <param name="hopSize">the hop size in the dimension of samples</param>
         /// <param name="windowType">the type of the window function to apply</param>
-        public StreamWindower(IAudioStream stream, int windowSize, int hopSize, WindowType windowType, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
+        public StreamWindower(
+            IAudioStream stream,
+            int windowSize,
+            int hopSize,
+            WindowType windowType,
+            int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE
+        )
         {
             this.stream = stream;
             this.windowSize = windowSize;
@@ -64,10 +69,13 @@ namespace Aurio.Features
         /// <param name="stream">the stream to read the audio data to process from</param>
         /// <param name="windowSize">the window size in the dimension of samples</param>
         /// <param name="hopSize">the hop size in the dimension of samples</param>
-        public StreamWindower(IAudioStream stream, int windowSize, int hopSize, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
-            : this(stream, windowSize, hopSize, WindowType.Rectangle, bufferSize)
-        {
-        }
+        public StreamWindower(
+            IAudioStream stream,
+            int windowSize,
+            int hopSize,
+            int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE
+        )
+            : this(stream, windowSize, hopSize, WindowType.Rectangle, bufferSize) { }
 
         /// <summary>
         /// Initializes a new windower for the specified stream with the specified window and hop size.
@@ -76,11 +84,21 @@ namespace Aurio.Features
         /// <param name="windowSize">the window size in the dimension of time</param>
         /// <param name="hopSize">the hop size in the dimension of time</param>
         /// <param name="windowType">the type of the window function to apply</param>
-        public StreamWindower(IAudioStream stream, TimeSpan windowSize, TimeSpan hopSize, WindowType windowType, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
+        public StreamWindower(
+            IAudioStream stream,
+            TimeSpan windowSize,
+            TimeSpan hopSize,
+            WindowType windowType,
+            int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE
+        )
         {
             this.stream = stream;
-            this.windowSize = (int)TimeUtil.TimeSpanToBytes(windowSize, stream.Properties) / stream.Properties.SampleByteSize;
-            this.hopSize = (int)TimeUtil.TimeSpanToBytes(hopSize, stream.Properties) / stream.Properties.SampleByteSize;
+            this.windowSize =
+                (int)TimeUtil.TimeSpanToBytes(windowSize, stream.Properties)
+                / stream.Properties.SampleByteSize;
+            this.hopSize =
+                (int)TimeUtil.TimeSpanToBytes(hopSize, stream.Properties)
+                / stream.Properties.SampleByteSize;
             this.bufferSize = bufferSize;
 
             // calculate next power of 2 for the window size as required by the FFT
@@ -96,8 +114,11 @@ namespace Aurio.Features
             windowSizePower2++;
             if (this.windowSize < windowSizePower2)
             {
-                Debug.WriteLine("window size enlarged to the next power of 2 as required by FFT: {0} -> {1}",
-                    this.windowSize, windowSizePower2);
+                Debug.WriteLine(
+                    "window size enlarged to the next power of 2 as required by FFT: {0} -> {1}",
+                    this.windowSize,
+                    windowSizePower2
+                );
                 this.windowSize = windowSizePower2;
             }
 
@@ -110,10 +131,13 @@ namespace Aurio.Features
         /// <param name="stream">the stream to read the audio data to process from</param>
         /// <param name="windowSize">the window size in the dimension of time</param>
         /// <param name="hopSize">the hop size in the dimension of time</param>
-        public StreamWindower(IAudioStream stream, TimeSpan windowSize, TimeSpan hopSize, int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE)
-            : this(stream, windowSize, hopSize, WindowType.Rectangle, bufferSize)
-        {
-        }
+        public StreamWindower(
+            IAudioStream stream,
+            TimeSpan windowSize,
+            TimeSpan hopSize,
+            int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE
+        )
+            : this(stream, windowSize, hopSize, WindowType.Rectangle, bufferSize) { }
 
         /// <summary>
         /// Gets the audio properties of the stream.
@@ -144,7 +168,13 @@ namespace Aurio.Features
         /// </summary>
         public virtual int WindowCount
         {
-            get { return (int)(((stream.Length / stream.Properties.SampleBlockByteSize) - WindowSize) / HopSize) + 1; }
+            get
+            {
+                return (int)(
+                        ((stream.Length / stream.Properties.SampleBlockByteSize) - WindowSize)
+                        / HopSize
+                    ) + 1;
+            }
         }
 
         private byte[] streamBuffer;
@@ -158,7 +188,9 @@ namespace Aurio.Features
         {
             if (windowSize > this.bufferSize)
             {
-                throw new ArgumentException("window size is too large - doesn't fit into the internal buffer");
+                throw new ArgumentException(
+                    "window size is too large - doesn't fit into the internal buffer"
+                );
             }
 
             int sampleBytes = stream.Properties.SampleByteSize;
@@ -203,11 +235,19 @@ namespace Aurio.Features
             frameOffset = 0;
 
             // second, fill the stream input buffer - if no bytes returned we have reached the end of the stream
-            streamBufferLevel = StreamUtil.ForceRead(stream, streamBuffer,
-                streamBufferOffset, streamBuffer.Length - streamBufferOffset);
+            streamBufferLevel = StreamUtil.ForceRead(
+                stream,
+                streamBuffer,
+                streamBufferOffset,
+                streamBuffer.Length - streamBufferOffset
+            );
             if (streamBufferLevel == 0)
             {
-                Debug.WriteLine("stream windowing finished - end position {0}/{1}", stream.Position, stream.Length);
+                Debug.WriteLine(
+                    "stream windowing finished - end position {0}/{1}",
+                    stream.Position,
+                    stream.Length
+                );
                 return false; // whole stream has been processed
             }
             streamBufferLevel += streamBufferOffset;

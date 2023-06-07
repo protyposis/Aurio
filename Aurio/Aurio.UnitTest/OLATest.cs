@@ -10,7 +10,6 @@ namespace Aurio.UnitTest
     [TestClass]
     public class OLATest
     {
-
         [TestMethod]
         public void CreateMonoIEEE()
         {
@@ -81,21 +80,31 @@ namespace Aurio.UnitTest
         public void MonoOverlapAddHann()
         {
             var properties = new AudioProperties(1, 44100, 32, AudioFormat.IEEE);
-            IAudioStream sourceStream = new SineGeneratorStream(44100, 440, TimeSpan.FromSeconds(1));
-            IAudioWriterStream targetStream = new MemoryWriterStream(new System.IO.MemoryStream(), properties);
+            IAudioStream sourceStream = new SineGeneratorStream(
+                44100,
+                440,
+                TimeSpan.FromSeconds(1)
+            );
+            IAudioWriterStream targetStream = new MemoryWriterStream(
+                new System.IO.MemoryStream(),
+                properties
+            );
 
             // 50% overlap with a Hann window is an optimal combination, Hann window is optimally uneven with a 1 as middle point
             int windowSize = 21;
             int hopSize = 11;
             var window = WindowType.Hann;
 
-            // Adjust source length to window/hop size so no samples remain at the end 
+            // Adjust source length to window/hop size so no samples remain at the end
             // (a potential last incomplete frame is not returned by the stream windower)
             // With remaining samples, the source and target length cannot be compared
-            sourceStream = new CropStream(sourceStream, 0,
+            sourceStream = new CropStream(
+                sourceStream,
+                0,
                 sourceStream.Length
-                - (sourceStream.Length - windowSize * sourceStream.SampleBlockSize)
-                % (hopSize * sourceStream.SampleBlockSize));
+                    - (sourceStream.Length - windowSize * sourceStream.SampleBlockSize)
+                        % (hopSize * sourceStream.SampleBlockSize)
+            );
 
             var sw = new StreamWindower(sourceStream, windowSize, hopSize, window);
             var ola = new OLA(targetStream, windowSize, hopSize);
@@ -113,19 +122,26 @@ namespace Aurio.UnitTest
             // Validate ola target stream content
             // Crop the streams to ignore windowed start and end when no overlap-add is performed and content definitely differs
 
-            var sourceStreamCropped = new CropStream(sourceStream,
+            var sourceStreamCropped = new CropStream(
+                sourceStream,
                 hopSize * sourceStream.SampleBlockSize * 2,
-                sourceStream.Length - hopSize * sourceStream.SampleBlockSize);
+                sourceStream.Length - hopSize * sourceStream.SampleBlockSize
+            );
 
-            var targetStreamCropped = new CropStream(targetStream,
+            var targetStreamCropped = new CropStream(
+                targetStream,
                 hopSize * sourceStream.SampleBlockSize * 2,
-                sourceStream.Length - hopSize * sourceStream.SampleBlockSize);
+                sourceStream.Length - hopSize * sourceStream.SampleBlockSize
+            );
 
             sourceStreamCropped.Position = targetStreamCropped.Position = 0;
 
             long similarFloats = StreamUtil.CompareFloats(sourceStreamCropped, targetStreamCropped);
 
-            Assert.AreEqual(sourceStreamCropped.Length / sourceStreamCropped.SampleBlockSize, similarFloats);
+            Assert.AreEqual(
+                sourceStreamCropped.Length / sourceStreamCropped.SampleBlockSize,
+                similarFloats
+            );
         }
 
         [TestMethod]
@@ -171,7 +187,8 @@ namespace Aurio.UnitTest
             // Ignore samples at begin and end which are rolling off due to windowing start/end
             CollectionAssert.AreEqual(
                 inputFloats.Skip(windowSize).Take(inputFloats.Length - windowSize * 2).ToArray(),
-                outputFloats.Skip(windowSize).Take(inputFloats.Length - windowSize * 2).ToArray());
+                outputFloats.Skip(windowSize).Take(inputFloats.Length - windowSize * 2).ToArray()
+            );
         }
     }
 }

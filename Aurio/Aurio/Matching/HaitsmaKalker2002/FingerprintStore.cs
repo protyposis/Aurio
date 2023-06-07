@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -28,7 +28,6 @@ namespace Aurio.Matching.HaitsmaKalker2002
 {
     public class FingerprintStore
     {
-
         public const int DEFAULT_FINGERPRINT_SIZE = 256;
         public const float DEFAULT_THRESHOLD = 0.35f;
 
@@ -39,7 +38,11 @@ namespace Aurio.Matching.HaitsmaKalker2002
         private IFingerprintCollisionMap collisionMap;
         private string matchSourceName;
 
-        protected FingerprintStore(IProfile profile, IFingerprintCollisionMap collisionMap, string matchSourceName)
+        protected FingerprintStore(
+            IProfile profile,
+            IFingerprintCollisionMap collisionMap,
+            string matchSourceName
+        )
         {
             FingerprintSize = DEFAULT_FINGERPRINT_SIZE;
             Threshold = DEFAULT_THRESHOLD;
@@ -51,19 +54,21 @@ namespace Aurio.Matching.HaitsmaKalker2002
             /*
              * TODO to support processing of huge datasets (or machines with low memory),
              * the store could also be moved from Dictionary/Lists to SQLite, the database
-             * written to disk (instead of in-memory like now) and the user given the 
+             * written to disk (instead of in-memory like now) and the user given the
              * choice between them (or automatically chosen depending on the amount of data).
              */
 
             this.matchSourceName = matchSourceName;
         }
 
-        public FingerprintStore(IProfile profile, IFingerprintCollisionMap collisionMap) : this(profile, collisionMap, "FP-HK02")
+        public FingerprintStore(IProfile profile, IFingerprintCollisionMap collisionMap)
+            : this(profile, collisionMap, "FP-HK02")
         {
             //
         }
 
-        public FingerprintStore(IProfile profile) : this(profile, new DictionaryCollisionMap(), "FP-HK02")
+        public FingerprintStore(IProfile profile)
+            : this(profile, new DictionaryCollisionMap(), "FP-HK02")
         {
             //
         }
@@ -75,7 +80,9 @@ namespace Aurio.Matching.HaitsmaKalker2002
             {
                 if (value < 1)
                 {
-                    throw new ArgumentOutOfRangeException("the fingerprint size must be at least 1");
+                    throw new ArgumentOutOfRangeException(
+                        "the fingerprint size must be at least 1"
+                    );
                 }
                 fingerprintSize = value;
             }
@@ -109,7 +116,11 @@ namespace Aurio.Matching.HaitsmaKalker2002
             get { return store; }
         }
 
-        public void Add(AudioTrack audioTrack, List<SubFingerprint> subFingerprints, bool suppressSilentCollisions = false)
+        public void Add(
+            AudioTrack audioTrack,
+            List<SubFingerprint> subFingerprints,
+            bool suppressSilentCollisions = false
+        )
         {
             if (subFingerprints.Count == 0)
             {
@@ -138,7 +149,10 @@ namespace Aurio.Matching.HaitsmaKalker2002
                     }
 
                     // insert a track/index lookup entry for the sub-fingerprint
-                    collisionMap.Add(sfp.Hash, new SubFingerprintLookupEntry(audioTrack, sfp.Index));
+                    collisionMap.Add(
+                        sfp.Hash,
+                        new SubFingerprintLookupEntry(audioTrack, sfp.Index)
+                    );
                 }
             }
         }
@@ -166,8 +180,10 @@ namespace Aurio.Matching.HaitsmaKalker2002
                     if (entry1.AudioTrack != entry2.AudioTrack)
                     { // don't compare tracks with themselves
                         //Debug.WriteLine("Comparing " + entry1.AudioTrack.Name + " with " + entry2.AudioTrack.Name + ":");
-                        if (store[entry1.AudioTrack].Count - entry1.Index < fingerprintSize
-                            || store[entry2.AudioTrack].Count - entry2.Index < fingerprintSize)
+                        if (
+                            store[entry1.AudioTrack].Count - entry1.Index < fingerprintSize
+                            || store[entry2.AudioTrack].Count - entry2.Index < fingerprintSize
+                        )
                         {
                             // the end of at least one track has been reached and there are not enough hashes left
                             // to do a fingerprint comparison
@@ -187,7 +203,7 @@ namespace Aurio.Matching.HaitsmaKalker2002
                                 bitErrors = (uint)fingerprintSize * 32;
                                 break;
                             }
-                            // skip fingerprints with hashes that are zero, since it is probably from 
+                            // skip fingerprints with hashes that are zero, since it is probably from
                             // a track section with silence
                             // by setting the bitErrors to the maximum, the match will not be added
                             bitErrors += track1Hash.HammingDistance(track2Hash);
@@ -197,15 +213,17 @@ namespace Aurio.Matching.HaitsmaKalker2002
                         //Debug.WriteLine("BER: " + bitErrorRate + " <- " + (bitErrorRate < threshold ? "MATCH!!!" : "no match"));
                         if (bitErrorRate < threshold)
                         {
-                            matches.Add(new Match
-                            {
-                                Similarity = 1 - bitErrorRate,
-                                Track1 = entry1.AudioTrack,
-                                Track1Time = SubFingerprintIndexToTimeSpan(entry1.Index),
-                                Track2 = entry2.AudioTrack,
-                                Track2Time = SubFingerprintIndexToTimeSpan(entry2.Index),
-                                Source = matchSourceName
-                            });
+                            matches.Add(
+                                new Match
+                                {
+                                    Similarity = 1 - bitErrorRate,
+                                    Track1 = entry1.AudioTrack,
+                                    Track1Time = SubFingerprintIndexToTimeSpan(entry1.Index),
+                                    Track2 = entry2.AudioTrack,
+                                    Track2Time = SubFingerprintIndexToTimeSpan(entry2.Index),
+                                    Source = matchSourceName
+                                }
+                            );
                         }
                     }
                 }
@@ -251,23 +269,39 @@ namespace Aurio.Matching.HaitsmaKalker2002
             int indexOffset = 0;
             if (store[entry.AudioTrack].Count - entry.Index < fingerprintSize)
             {
-                indexOffset = Math.Min(indexOffset, -fingerprintSize + store[entry.AudioTrack].Count - entry.Index);
+                indexOffset = Math.Min(
+                    indexOffset,
+                    -fingerprintSize + store[entry.AudioTrack].Count - entry.Index
+                );
             }
-            return new Fingerprint(store[entry.AudioTrack], entry.Index + indexOffset, fingerprintSize);
+            return new Fingerprint(
+                store[entry.AudioTrack],
+                entry.Index + indexOffset,
+                fingerprintSize
+            );
         }
 
         public TimeSpan SubFingerprintIndexToTimeSpan(int index)
         {
-            return new TimeSpan((long)Math.Round(index * profile.HashTimeScale * TimeUtil.SECS_TO_TICKS));
+            return new TimeSpan(
+                (long)Math.Round(index * profile.HashTimeScale * TimeUtil.SECS_TO_TICKS)
+            );
         }
 
-        public List<Match> FindMatchesFromExternalSubFingerprints(AudioTrack audioTrack, List<SubFingerprintHash> hashes)
+        public List<Match> FindMatchesFromExternalSubFingerprints(
+            AudioTrack audioTrack,
+            List<SubFingerprintHash> hashes
+        )
         {
             if (hashes.Count < this.fingerprintSize)
             {
-                throw new ArgumentException(String.Format(
-                    "Hash list is too short, cannot build fingerprints (given {0}, required at least {1})",
-                    hashes.Count, this.fingerprintSize));
+                throw new ArgumentException(
+                    String.Format(
+                        "Hash list is too short, cannot build fingerprints (given {0}, required at least {1})",
+                        hashes.Count,
+                        this.fingerprintSize
+                    )
+                );
             }
 
             var matches = new List<Match>();
@@ -294,15 +328,17 @@ namespace Aurio.Matching.HaitsmaKalker2002
                     int internalHashCount = internalHashes.Count;
 
                     // The overflow if directly taken at the indices
-                    int externalOverflow = this.fingerprintSize - (externalHashCount - externalIndex);
-                    int internalOverflow = this.fingerprintSize - (internalHashCount - internalIndex);
+                    int externalOverflow =
+                        this.fingerprintSize - (externalHashCount - externalIndex);
+                    int internalOverflow =
+                        this.fingerprintSize - (internalHashCount - internalIndex);
 
                     // The bigger of both overflows is the value by which we need to shift the sampling to the left
                     int leftShift = Math.Max(externalOverflow, internalOverflow);
 
                     // Check if we need to do a shift
                     // If the left shift is > 0, we need to shift the fingerprints to the left
-                    // if the shift is <= 0, the fingerprints can be directly sampled from the hash lists 
+                    // if the shift is <= 0, the fingerprints can be directly sampled from the hash lists
                     // (the negative value is their distance to the right border)
                     if (leftShift > 0)
                     {
@@ -310,7 +346,7 @@ namespace Aurio.Matching.HaitsmaKalker2002
                         externalIndex -= leftShift;
                         internalIndex -= leftShift;
 
-                        // Before we take the fingerprints, we need to check if that is even possible or if a fingerprint 
+                        // Before we take the fingerprints, we need to check if that is even possible or if a fingerprint
                         // would then overflow the left border
                         if (externalIndex < 0 || internalIndex < 0)
                         {
@@ -325,32 +361,54 @@ namespace Aurio.Matching.HaitsmaKalker2002
                     // A matching attempt can be described as the tuple (internalAudioTrack, externalIndex, internalIndex)
 
                     // Take the fingerprints that we want to compare
-                    Fingerprint externalFingerprint = new Fingerprint(externalHashes, externalIndex, this.fingerprintSize);
+                    Fingerprint externalFingerprint = new Fingerprint(
+                        externalHashes,
+                        externalIndex,
+                        this.fingerprintSize
+                    );
                     // We don't use GetFingerprint here because that function shifts the fingerprint left for an unknown offset
                     // if taken at the right border
-                    Fingerprint internalFingerprint = new Fingerprint(internalHashes, internalIndex, this.fingerprintSize);
+                    Fingerprint internalFingerprint = new Fingerprint(
+                        internalHashes,
+                        internalIndex,
+                        this.fingerprintSize
+                    );
 
                     // Calculate the bit error rate between both fingerprints
-                    float bitErrorRate = Fingerprint.CalculateBER(externalFingerprint, internalFingerprint);
+                    float bitErrorRate = Fingerprint.CalculateBER(
+                        externalFingerprint,
+                        internalFingerprint
+                    );
 
-                    Console.WriteLine(String.Format("{0} <> {1} => {2}", externalIndex, internalIndex, bitErrorRate));
+                    Console.WriteLine(
+                        String.Format(
+                            "{0} <> {1} => {2}",
+                            externalIndex,
+                            internalIndex,
+                            bitErrorRate
+                        )
+                    );
 
                     if (bitErrorRate < threshold)
                     {
-                        matches.Add(new Match
-                        {
-                            Similarity = 1 - bitErrorRate,
-                            Track1 = collision.AudioTrack,
-                            Track1Time = SubFingerprintIndexToTimeSpan(internalIndex),
-                            Track2 = audioTrack,
-                            Track2Time = SubFingerprintIndexToTimeSpan(externalIndex),
-                            Source = matchSourceName,
-                        });
+                        matches.Add(
+                            new Match
+                            {
+                                Similarity = 1 - bitErrorRate,
+                                Track1 = collision.AudioTrack,
+                                Track1Time = SubFingerprintIndexToTimeSpan(internalIndex),
+                                Track2 = audioTrack,
+                                Track2Time = SubFingerprintIndexToTimeSpan(externalIndex),
+                                Source = matchSourceName,
+                            }
+                        );
                     }
                 }
             }
 
-            Console.WriteLine(String.Format("{0} collisions, {1} matches", collisionCount, matches.Count));
+            Console.WriteLine(
+                String.Format("{0} collisions, {1} matches", collisionCount, matches.Count)
+            );
 
             return matches;
         }

@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -29,7 +29,6 @@ namespace Aurio.WaveControls
     [TemplatePart(Name = "PART_IndicatorContainer", Type = typeof(FrameworkElement))]
     public class VUMeter : Control
     {
-
         public const int MIN_DB = -60;
         public const int MAX_DB = 0;
 
@@ -42,22 +41,45 @@ namespace Aurio.WaveControls
 
         static VUMeter()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(VUMeter),
-                new FrameworkPropertyMetadata(typeof(VUMeter)));
+            DefaultStyleKeyProperty.OverrideMetadata(
+                typeof(VUMeter),
+                new FrameworkPropertyMetadata(typeof(VUMeter))
+            );
 
-            AmplitudeProperty = DependencyProperty.Register("Amplitude", typeof(double), typeof(VUMeter),
-                new FrameworkPropertyMetadata(0.0d, new PropertyChangedCallback(OnAmplitudeChanged)) { AffectsRender = true });
+            AmplitudeProperty = DependencyProperty.Register(
+                "Amplitude",
+                typeof(double),
+                typeof(VUMeter),
+                new FrameworkPropertyMetadata(0.0d, new PropertyChangedCallback(OnAmplitudeChanged))
+                {
+                    AffectsRender = true
+                }
+            );
 
-            DecibelPropertyKey = DependencyProperty.RegisterReadOnly("Decibel", typeof(double), typeof(VUMeter),
-                new FrameworkPropertyMetadata(double.NegativeInfinity, new PropertyChangedCallback(OnDecibelChanged)));
+            DecibelPropertyKey = DependencyProperty.RegisterReadOnly(
+                "Decibel",
+                typeof(double),
+                typeof(VUMeter),
+                new FrameworkPropertyMetadata(
+                    double.NegativeInfinity,
+                    new PropertyChangedCallback(OnDecibelChanged)
+                )
+            );
             DecibelProperty = DecibelPropertyKey.DependencyProperty;
 
-            IsOverdrivenPropertyKey = DependencyProperty.RegisterReadOnly("IsOverdriven", typeof(bool), typeof(VUMeter),
-                new FrameworkPropertyMetadata(false));
+            IsOverdrivenPropertyKey = DependencyProperty.RegisterReadOnly(
+                "IsOverdriven",
+                typeof(bool),
+                typeof(VUMeter),
+                new FrameworkPropertyMetadata(false)
+            );
             IsOverdrivenProperty = IsOverdrivenPropertyKey.DependencyProperty;
         }
 
-        private static void OnAmplitudeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnAmplitudeChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             VUMeter vuMeter = d as VUMeter;
             double newValue = (double)e.NewValue;
@@ -71,7 +93,10 @@ namespace Aurio.WaveControls
             }
         }
 
-        private static void OnDecibelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnDecibelChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             VUMeter vuMeter = d as VUMeter;
             vuMeter.UpdateVolumeIndicator();
@@ -88,7 +113,8 @@ namespace Aurio.WaveControls
         private void VUMeter_Loaded(object sender, RoutedEventArgs e)
         {
             volumeIndicator = GetTemplateChild("PART_Indicator") as FrameworkElement;
-            volumeIndicatorContainer = GetTemplateChild("PART_IndicatorContainer") as FrameworkElement;
+            volumeIndicatorContainer =
+                GetTemplateChild("PART_IndicatorContainer") as FrameworkElement;
             UpdateVolumeIndicator();
         }
 

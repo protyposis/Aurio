@@ -8,7 +8,12 @@ namespace Aurio.UnitTest
     [TestClass]
     public class CircularMemoryWriterStreamTest
     {
-        private readonly AudioProperties _properties = new AudioProperties(1, 1, 8, AudioFormat.LPCM); // sampleBlockSize is 1;
+        private readonly AudioProperties _properties = new AudioProperties(
+            1,
+            1,
+            8,
+            AudioFormat.LPCM
+        ); // sampleBlockSize is 1;
 
         [TestMethod]
         public void InitializeWithCapacity()
@@ -209,7 +214,7 @@ namespace Aurio.UnitTest
             var readBuffer = new byte[5];
             var bytesRead = s.Read(readBuffer, 0, 5);
 
-            // make sure that the stream does not read more data as has been written, 
+            // make sure that the stream does not read more data as has been written,
             // i.e. in this case there is only one byte to read
             Assert.AreEqual(1, bytesRead);
         }

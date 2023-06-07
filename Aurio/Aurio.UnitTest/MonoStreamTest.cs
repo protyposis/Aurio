@@ -4,8 +4,6 @@ using System;
 
 namespace Aurio.UnitTest
 {
-
-
     /// <summary>
     ///This is a test class for MonoStreamTest and is intended
     ///to contain all MonoStreamTest Unit Tests
@@ -13,8 +11,6 @@ namespace Aurio.UnitTest
     [TestClass()]
     public class MonoStreamTest
     {
-
-
         private TestContext testContextInstance;
 
         /// <summary>
@@ -23,18 +19,12 @@ namespace Aurio.UnitTest
         ///</summary>
         public TestContext TestContext
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
+            get { return testContextInstance; }
+            set { testContextInstance = value; }
         }
 
         #region Additional test attributes
-        // 
+        //
         //You can use the following additional attributes as you write your tests:
         //
         //Use ClassInitialize to run code before running the first test in the class
@@ -123,12 +113,21 @@ namespace Aurio.UnitTest
             Assert.AreEqual(monoStream.Length, (double)sourceStream.Length * 4);
         }
 
-        private void CreateStream(int inputChannels, int outputChannels, int lengthInSeconds,
-            out IAudioStream sourceStream, out MonoStream monoStream)
+        private void CreateStream(
+            int inputChannels,
+            int outputChannels,
+            int lengthInSeconds,
+            out IAudioStream sourceStream,
+            out MonoStream monoStream
+        )
         {
             sourceStream = new NullStream(
-                    new AudioProperties(inputChannels, 44100, 32, AudioFormat.IEEE),
-                    44100 * inputChannels * 4 /*bytesPerSample*/ * lengthInSeconds);
+                new AudioProperties(inputChannels, 44100, 32, AudioFormat.IEEE),
+                44100
+                    * inputChannels
+                    * 4 /*bytesPerSample*/
+                    * lengthInSeconds
+            );
             monoStream = new MonoStream(sourceStream, outputChannels);
         }
     }

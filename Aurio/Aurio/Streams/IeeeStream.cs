@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -27,7 +27,6 @@ namespace Aurio.Streams
 {
     public class IeeeStream : AbstractAudioStreamWrapper
     {
-
         private AudioProperties properties;
         private bool passthrough;
 
@@ -35,30 +34,48 @@ namespace Aurio.Streams
         private DReadAndConvert ReadAndConvert;
         private ByteBuffer sourceBuffer;
 
-
         public IeeeStream(IAudioStream sourceStream)
             : base(sourceStream)
         {
-            if (sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32)
+            if (
+                sourceStream.Properties.Format == AudioFormat.IEEE
+                && sourceStream.Properties.BitDepth == 32
+            )
             {
                 passthrough = true;
                 properties = sourceStream.Properties;
             }
-            else if (sourceStream.Properties.Format == AudioFormat.LPCM && sourceStream.Properties.BitDepth == 16)
+            else if (
+                sourceStream.Properties.Format == AudioFormat.LPCM
+                && sourceStream.Properties.BitDepth == 16
+            )
             {
                 ReadAndConvert = ReadPCM16;
-                properties = new AudioProperties(sourceStream.Properties.Channels,
-                    sourceStream.Properties.SampleRate, 32, AudioFormat.IEEE);
+                properties = new AudioProperties(
+                    sourceStream.Properties.Channels,
+                    sourceStream.Properties.SampleRate,
+                    32,
+                    AudioFormat.IEEE
+                );
             }
-            else if (sourceStream.Properties.Format == AudioFormat.LPCM && sourceStream.Properties.BitDepth == 24)
+            else if (
+                sourceStream.Properties.Format == AudioFormat.LPCM
+                && sourceStream.Properties.BitDepth == 24
+            )
             {
                 ReadAndConvert = ReadPCM24;
-                properties = new AudioProperties(sourceStream.Properties.Channels,
-                    sourceStream.Properties.SampleRate, 32, AudioFormat.IEEE);
+                properties = new AudioProperties(
+                    sourceStream.Properties.Channels,
+                    sourceStream.Properties.SampleRate,
+                    32,
+                    AudioFormat.IEEE
+                );
             }
             else
             {
-                throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
+                throw new ArgumentException(
+                    "unsupported source format: " + sourceStream.Properties
+                );
             }
 
             sourceBuffer = new ByteBuffer();
@@ -100,10 +117,12 @@ namespace Aurio.Streams
             int sourceBytesToRead = count / SampleBlockSize * sourceStream.SampleBlockSize;
             sourceBuffer.FillIfEmpty(sourceStream, sourceBytesToRead);
             int samples = sourceBuffer.Count / 2; // #bytes / 2 = #shorts
-
             unsafe
             {
-                fixed (byte* sourceByteBuffer = &sourceBuffer.Data[0], targetByteBuffer = &buffer[offset])
+                fixed (
+                    byte* sourceByteBuffer = &sourceBuffer.Data[0],
+                        targetByteBuffer = &buffer[offset]
+                )
                 {
                     short* sourceShortBuffer = (short*)sourceByteBuffer;
                     float* targetFloatBuffer = (float*)targetByteBuffer;
@@ -125,7 +144,6 @@ namespace Aurio.Streams
             int sourceBytesToRead = count / SampleBlockSize * sourceStream.SampleBlockSize;
             sourceBuffer.FillIfEmpty(sourceStream, sourceBytesToRead);
             int samples = sourceBuffer.Count / 3; // #bytes / 3 = #24bitsamples
-
             unsafe
             {
                 fixed (byte* targetByteBuffer = &buffer[offset])
@@ -133,7 +151,12 @@ namespace Aurio.Streams
                     float* targetFloatBuffer = (float*)targetByteBuffer;
                     for (int x = 0; x < sourceBuffer.Count; x += 3)
                     {
-                        targetFloatBuffer[x / 3] = (sourceBuffer.Data[x] << 8 | sourceBuffer.Data[x + 1] << 16 | sourceBuffer.Data[x + 2] << 24) / 2147483648f;
+                        targetFloatBuffer[x / 3] =
+                            (
+                                sourceBuffer.Data[x] << 8
+                                | sourceBuffer.Data[x + 1] << 16
+                                | sourceBuffer.Data[x + 2] << 24
+                            ) / 2147483648f;
                     }
                 }
             }

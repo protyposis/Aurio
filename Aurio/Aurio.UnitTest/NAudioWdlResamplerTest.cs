@@ -40,17 +40,26 @@ namespace Aurio.UnitTest
             int outputLengthGenerated = 0;
 
             int remainingIn = inSize;
-            int totalIn = 0, totalOut = 0;
+            int totalIn = 0,
+                totalOut = 0;
 
             do
             {
-                r.Process(sampleDataIn, 0, remainingIn, sampleDataOut, 0, outSize,
-                    remainingIn == 0, out inputLengthUsed, out outputLengthGenerated);
+                r.Process(
+                    sampleDataIn,
+                    0,
+                    remainingIn,
+                    sampleDataOut,
+                    0,
+                    outSize,
+                    remainingIn == 0,
+                    out inputLengthUsed,
+                    out outputLengthGenerated
+                );
                 totalIn += inputLengthUsed;
                 totalOut += outputLengthGenerated;
                 remainingIn -= inputLengthUsed;
-            }
-            while (inputLengthUsed > 0 || outputLengthGenerated > 0);
+            } while (inputLengthUsed > 0 || outputLengthGenerated > 0);
 
             Assert.AreEqual(inSize, totalIn, "not all data has been read");
             Assert.AreEqual(outSize, totalOut, "not all data has been put out");

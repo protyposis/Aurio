@@ -16,17 +16,18 @@ namespace MusicDetector
     {
         static void Main(string[] args)
         {
-
             if (args.Length == 0)
             {
                 Console.WriteLine("no file(s) specified");
                 Console.WriteLine();
                 Console.WriteLine("Usage: MusicDetector file_1 file_2 ... file_n");
                 Console.WriteLine("");
-                Console.WriteLine("This tool expects at least one file, either specified as filename or " +
-                                  "filename wildcard pattern. It scans all files for music content and writes " +
-                                  "detection results in separate text files named {file_x}.music. Errors are logged " +
-                                  "to a seperate error.log text file.");
+                Console.WriteLine(
+                    "This tool expects at least one file, either specified as filename or "
+                        + "filename wildcard pattern. It scans all files for music content and writes "
+                        + "detection results in separate text files named {file_x}.music. Errors are logged "
+                        + "to a seperate error.log text file."
+                );
                 return;
             }
 
@@ -44,8 +45,15 @@ namespace MusicDetector
                 if (file.Contains("*"))
                 {
                     int slashIndex = file.LastIndexOf(@"\");
-                    var di = new DirectoryInfo(slashIndex > -1 ? file.Substring(0, slashIndex) : ".");
-                    foreach (var fi in di.GetFiles(file.Substring(slashIndex > -1 ? slashIndex + 1 : 0), SearchOption.TopDirectoryOnly))
+                    var di = new DirectoryInfo(
+                        slashIndex > -1 ? file.Substring(0, slashIndex) : "."
+                    );
+                    foreach (
+                        var fi in di.GetFiles(
+                            file.Substring(slashIndex > -1 ? slashIndex + 1 : 0),
+                            SearchOption.TopDirectoryOnly
+                        )
+                    )
                     {
                         scanQueue.Enqueue(fi);
                     }
@@ -69,7 +77,9 @@ namespace MusicDetector
                     }
                     else
                     {
-                        throw new FileNotFoundException(String.Format("file '{0}' not existing or empty, skipping", fi.FullName));
+                        throw new FileNotFoundException(
+                            String.Format("file '{0}' not existing or empty, skipping", fi.FullName)
+                        );
                     }
                 }
                 catch (FileNotFoundException e)
@@ -89,7 +99,6 @@ namespace MusicDetector
 
             errorLogWriter.Flush();
             errorLogWriter.Close();
-
         }
     }
 }

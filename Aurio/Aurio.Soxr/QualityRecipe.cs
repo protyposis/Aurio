@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -29,18 +29,22 @@ namespace Aurio.Soxr
         /// 'Quick' cubic interpolation
         /// </summary>
         SOXR_QQ = 0,
+
         /// <summary>
         /// 'Low' 16-bit with larger rolloff
         /// </summary>
         SOXR_LQ = 1,
+
         /// <summary>
         /// 'Medium' 16-bit with medium rolloff.
         /// </summary>
         SOXR_MQ = 2,
+
         /// <summary>
         /// 'High quality'
         /// </summary>
         SOXR_HQ = SOXR_20_BITQ,
+
         /// <summary>
         /// 'Very high quality'
         /// </summary>
@@ -56,10 +60,12 @@ namespace Aurio.Soxr
         /// Libsamplerate equivalent 'Best sinc'
         /// </summary>
         SOXR_LSR0Q = 8,
+
         /// <summary>
         /// Libsamplerate equivalent 'Medium sinc'
         /// </summary>
         SOXR_LSR1Q = 9,
+
         /// <summary>
         /// Libsamplerate equivalent 'Fast sinc'
         /// </summary>

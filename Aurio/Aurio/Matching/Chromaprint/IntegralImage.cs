@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -26,14 +26,13 @@ namespace Aurio.Matching.Chromaprint
 {
     /// <summary>
     /// Maintains a sliding window image of the specified size and its associated integral image.
-    /// - Viola, Paul, and Michael Jones. "Rapid object detection using a boosted cascade of 
-    ///   simple features." Computer Vision and Pattern Recognition, 2001. CVPR 2001. Proceedings 
+    /// - Viola, Paul, and Michael Jones. "Rapid object detection using a boosted cascade of
+    ///   simple features." Computer Vision and Pattern Recognition, 2001. CVPR 2001. Proceedings
     ///   of the 2001 IEEE Computer Society Conference on. Vol. 1. IEEE, 2001.
     /// - http://en.wikipedia.org/wiki/Summed_area_table
     /// </summary>
     class IntegralImage
     {
-
         private int width;
         private int height;
 
@@ -59,7 +58,9 @@ namespace Aurio.Matching.Chromaprint
             Array.Copy(newColumn, column, column.Length);
 
             // Add new column to integral image
-            integralImage.Add(integralImage.Count < integralImage.Length ? new double[height] : integralImage[0]);
+            integralImage.Add(
+                integralImage.Count < integralImage.Length ? new double[height] : integralImage[0]
+            );
 
             // Calculate integral image
             var col = image[0];

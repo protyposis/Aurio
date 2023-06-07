@@ -8,4 +8,10 @@
     <FileVersion>1.0.0.0</FileVersion>
     <InformationalVersion>Snapshot</InformationalVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CSharpier.MsBuild" Version="0.24.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>

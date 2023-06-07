@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -29,14 +29,20 @@ namespace Aurio.WaveControls
 {
     public class TrackMarkerOverlay : ContentOverlay
     {
-
         public static readonly DependencyProperty MarkersProperty;
 
         static TrackMarkerOverlay()
         {
             MarkersProperty = DependencyProperty.Register(
-                "Markers", typeof(List<TrackMarker>), typeof(TrackMarkerOverlay),
-                    new FrameworkPropertyMetadata { AffectsRender = true, DefaultValue = new List<TrackMarker>() });
+                "Markers",
+                typeof(List<TrackMarker>),
+                typeof(TrackMarkerOverlay),
+                new FrameworkPropertyMetadata
+                {
+                    AffectsRender = true,
+                    DefaultValue = new List<TrackMarker>()
+                }
+            );
         }
 
         public List<TrackMarker> Markers
@@ -61,24 +67,47 @@ namespace Aurio.WaveControls
                     double renderOffset = VirtualToPhysicalIntervalOffset(marker.Position.Ticks);
 
                     // Draw line marker
-                    drawingContext.DrawLine(pen, new Point(renderOffset, 0),
-                        new Point(renderOffset, RenderSize.Height));
+                    drawingContext.DrawLine(
+                        pen,
+                        new Point(renderOffset, 0),
+                        new Point(renderOffset, RenderSize.Height)
+                    );
 
                     // Draw text label
-                    FormattedText formattedText = new FormattedText(marker.Text,
-                        CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
-                        new Typeface("Tahoma"), 8, foregroundBrush, pixelsPerDip)
-                    { TextAlignment = TextAlignment.Left };
+                    FormattedText formattedText = new FormattedText(
+                        marker.Text,
+                        CultureInfo.CurrentUICulture,
+                        FlowDirection.LeftToRight,
+                        new Typeface("Tahoma"),
+                        8,
+                        foregroundBrush,
+                        pixelsPerDip
+                    )
+                    {
+                        TextAlignment = TextAlignment.Left
+                    };
 
-                    var textBgSize = new Size(formattedText.Width + 2 * textPadding, formattedText.Height + 2 * textPadding);
-                    var textBgPosition = new Point(renderOffset + 2, RenderSize.Height - textBgSize.Height - 5);
+                    var textBgSize = new Size(
+                        formattedText.Width + 2 * textPadding,
+                        formattedText.Height + 2 * textPadding
+                    );
+                    var textBgPosition = new Point(
+                        renderOffset + 2,
+                        RenderSize.Height - textBgSize.Height - 5
+                    );
 
                     var triangle = CreateTriangle(textBgSize.Height);
-                    drawingContext.PushTransform(new TranslateTransform(textBgPosition.X, textBgPosition.Y));
+                    drawingContext.PushTransform(
+                        new TranslateTransform(textBgPosition.X, textBgPosition.Y)
+                    );
                     drawingContext.DrawGeometry(foregroundBrush, pen, triangle);
 
                     drawingContext.PushTransform(new TranslateTransform(triangle.Bounds.Width, 0));
-                    drawingContext.DrawRectangle(backgroundBrush, pen, new Rect(new Point(), textBgSize));
+                    drawingContext.DrawRectangle(
+                        backgroundBrush,
+                        pen,
+                        new Rect(new Point(), textBgSize)
+                    );
 
                     drawingContext.PushTransform(new TranslateTransform(3, 3));
                     drawingContext.DrawText(formattedText, new Point());

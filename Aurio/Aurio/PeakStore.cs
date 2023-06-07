@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -27,26 +27,31 @@ namespace Aurio
 {
     public class PeakStore
     {
-
         private static readonly int PEAK_BYTE_SIZE;
         private static readonly char[] MAGICNUMBER = { 'A', 'A', 'P', 'K' }; // AurioAudioPeaKfile
 
         /// <summary>
         /// The first file format didn't have a header and just contained the raw peaks.
-        /// 
+        ///
         /// Format 2 adds a header with:
         /// - magic number
         /// - version number (int32)
         /// - audio file last modified date
-        /// The LMD serves to check if a peak file is still valid for an audio file; if the audio file 
+        /// The LMD serves to check if a peak file is still valid for an audio file; if the audio file
         /// has changed, the peakfile is invalid (and a new one gets generated).
         /// </summary>
         private const int FILEFORMAT = 2;
-        private const int HEADERSIZE = 4 /* magic number */ + sizeof(int) + sizeof(long);
+        private const int HEADERSIZE =
+            4 /* magic number */
+            + sizeof(int)
+            + sizeof(long);
 
         static PeakStore()
         {
-            unsafe { PEAK_BYTE_SIZE = sizeof(Peak); }
+            unsafe
+            {
+                PEAK_BYTE_SIZE = sizeof(Peak);
+            }
         }
 
         public event EventHandler PeaksChanged;
@@ -70,20 +75,29 @@ namespace Aurio
         }
 
         /// <summary>
-        /// Gets the number of samples that are contained in one peak. 
+        /// Gets the number of samples that are contained in one peak.
         /// This is the threshold from which the PeakStore can be used to render a waveform.
         /// </summary>
-        public int SamplesPerPeak { get { return samplesPerPeak; } }
+        public int SamplesPerPeak
+        {
+            get { return samplesPerPeak; }
+        }
 
         /// <summary>
         /// Gets the number of channels that this PeakStore is storing peaks for.
         /// </summary>
-        public int Channels { get { return data.Length; } }
+        public int Channels
+        {
+            get { return data.Length; }
+        }
 
         /// <summary>
         /// Gets the number of peaks that are store for a channel.
         /// </summary>
-        public int Length { get { return data[0].Length / PEAK_BYTE_SIZE; } }
+        public int Length
+        {
+            get { return data[0].Length / PEAK_BYTE_SIZE; }
+        }
 
         /// <summary>
         /// Returns an array of MemoryStreams where each stream contains the peaks for a channel.
@@ -189,20 +203,26 @@ namespace Aurio
                 int samplesPerPeak = previousStepSamplesPerPeak * scaleFactor;
                 int peaksPerPeak = steps * scaleFactor;
                 byte[][] peakData = step == 1 ? data : scaledData[previousStepSamplesPerPeak];
-                int downscaledPeakDataLength = (int)Math.Ceiling((float)peakData[0].Length / scaleFactor);
+                int downscaledPeakDataLength = (int)
+                    Math.Ceiling((float)peakData[0].Length / scaleFactor);
                 if (downscaledPeakDataLength % peakSize != 0)
                 {
                     downscaledPeakDataLength += peakSize - (downscaledPeakDataLength % peakSize);
                 }
-                byte[][] downscaledPeakData = AudioUtil.CreateArray<byte>(peakData.Length, downscaledPeakDataLength);
-
+                byte[][] downscaledPeakData = AudioUtil.CreateArray<byte>(
+                    peakData.Length,
+                    downscaledPeakDataLength
+                );
                 unsafe
                 {
                     // calculate scaled peaks
                     for (int channel = 0; channel < Channels; channel++)
                     {
                         int peakCount = peakData[0].Length / sizeof(Peak);
-                        fixed (byte* peaksB = &peakData[channel][0], downscaledPeaksB = &downscaledPeakData[channel][0])
+                        fixed (
+                            byte* peaksB = &peakData[channel][0],
+                                downscaledPeaksB = &downscaledPeakData[channel][0]
+                        )
                         {
                             Peak* peaks = (Peak*)peaksB;
                             Peak* downscaledPeaks = (Peak*)downscaledPeaksB;

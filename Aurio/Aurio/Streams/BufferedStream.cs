@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -29,10 +29,8 @@ namespace Aurio.Streams
 {
     public class BufferedStream : AbstractAudioStreamWrapper
     {
-
         private class Buffer : ByteBuffer
         {
-
             /// <summary>
             /// The position in the source stream where the buffered data starts.
             /// </summary>
@@ -77,7 +75,8 @@ namespace Aurio.Streams
             /// <returns>true if the interval is contained in the buffer, else false</returns>
             public bool Contains(long position, int count)
             {
-                return position >= streamPosition && position + count <= streamPosition + Offset + Count;
+                return position >= streamPosition
+                    && position + count <= streamPosition + Offset + Count;
             }
         }
 
@@ -91,8 +90,8 @@ namespace Aurio.Streams
         /// </summary>
         /// <param name="sourceStream">the stream that should be buffered</param>
         /// <param name="bufferSize">the buffer size in bytes</param>
-        /// <param name="doubleBuffered">true if the stream should be buffered by two buffers, 
-        /// of which one gets asynchronously refilled while the other is being read from 
+        /// <param name="doubleBuffered">true if the stream should be buffered by two buffers,
+        /// of which one gets asynchronously refilled while the other is being read from
         /// (note: required memory will be bufferSize * 2)</param>
         public BufferedStream(IAudioStream sourceStream, int bufferSize, bool doubleBuffered)
             : base(sourceStream)
@@ -133,7 +132,12 @@ namespace Aurio.Streams
                 position += count;
                 return (int)count;
             }
-            else if (doubleBuffered && !backBuffer.locked && !backBuffer.Empty && backBuffer.Contains(position))
+            else if (
+                doubleBuffered
+                && !backBuffer.locked
+                && !backBuffer.Empty
+                && backBuffer.Contains(position)
+            )
             {
                 // swap buffers (requested data is contained in the back buffer so turn it to the front buffer)
                 CommonUtil.Swap<Buffer>(ref frontBuffer, ref backBuffer);

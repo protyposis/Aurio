@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -28,7 +28,6 @@ namespace Aurio.Streams
 {
     public class TimeWarpStream : AbstractAudioStreamWrapper
     {
-
         private TimeWarpCollection mappings;
         private ByteTimeWarpCollection byteMappings;
         private long length;
@@ -83,7 +82,10 @@ namespace Aurio.Streams
             }
         }
 
-        private void mappings_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void mappings_CollectionChanged(
+            object sender,
+            System.Collections.Specialized.NotifyCollectionChangedEventArgs e
+        )
         {
             var alpha = new ByteTimeWarp { From = 0, To = 0 };
             var omega = new ByteTimeWarp { From = sourceStream.Length, To = sourceStream.Length };
@@ -140,8 +142,12 @@ namespace Aurio.Streams
             ByteTimeWarp mL = byteMappings.Lower;
             ByteTimeWarp mH = byteMappings.Upper;
 
-
-            if (cropStream == null || cropStream.Begin != mL.From || cropStream.End != mH.From || resamplingStream.Length != byteMappings.Omega.To)
+            if (
+                cropStream == null
+                || cropStream.Begin != mL.From
+                || cropStream.End != mH.From
+                || resamplingStream.Length != byteMappings.Omega.To
+            )
             {
                 // mapping has changed, stream subsection must be renewed
                 if (hardReset)
@@ -150,7 +156,11 @@ namespace Aurio.Streams
                     // we add the SourceClosePreventionStream to avoid the source being closed when an internally used stream
                     // of a section is disposed or closed (as in the call below). The source stream continues to get closed
                     // when this stream is closed.
-                    cropStream = new CropStream(new SourceClosePreventionStream(sourceStream), mL.From, mH.From);
+                    cropStream = new CropStream(
+                        new SourceClosePreventionStream(sourceStream),
+                        mL.From,
+                        mH.From
+                    );
 
                     // Get rid of stream for previous section
                     if (resamplingStream != null)
@@ -159,7 +169,11 @@ namespace Aurio.Streams
                     }
 
                     // Create stream for current section
-                    resamplingStream = new ResamplingStream(cropStream, ResamplingQuality.VariableRate, ByteTimeWarp.CalculateSampleRateRatio(mL, mH));
+                    resamplingStream = new ResamplingStream(
+                        cropStream,
+                        ResamplingQuality.VariableRate,
+                        ByteTimeWarp.CalculateSampleRateRatio(mL, mH)
+                    );
                     resamplingStream.Position = position - mL.To;
                 }
                 else
@@ -167,7 +181,7 @@ namespace Aurio.Streams
                     // Reset the streams to the new conditions without creating new instances as the hard reset does
                     // NOTE always hard resetting works too, but this mode has been added to keep the sample resampler throughout playback
 
-                    // Reset crop stream to source bounds, else the successive setting of begin and end can fail if 
+                    // Reset crop stream to source bounds, else the successive setting of begin and end can fail if
                     // the new begin position is after the old end position and the validation in the crop stream fails
                     cropStream.Begin = 0;
                     cropStream.End = sourceStream.Length;
@@ -178,12 +192,15 @@ namespace Aurio.Streams
                     cropStream.Position = 0;
 
                     // Reset the resampling stream
-                    resamplingStream.SampleRateRatio = ByteTimeWarp.CalculateSampleRateRatio(mL, mH);
+                    resamplingStream.SampleRateRatio = ByteTimeWarp.CalculateSampleRateRatio(
+                        mL,
+                        mH
+                    );
                     resamplingStream.Position = position - mL.To;
                 }
             }
-
         }
+
         private void ResetStream()
         {
             ResetStream(true);
@@ -253,27 +270,41 @@ namespace Aurio.Streams
         private void PrintDebugStatus()
         {
             Debug.WriteLine("TimeWarpStream len {0,10}, pos {1,10}", length, position);
-            Debug.WriteLine("     resampler len {0,10}, pos {1,10} src buffer {2,4}", resamplingStream.Length, resamplingStream.Position, resamplingStream.BufferedBytes);
-            Debug.WriteLine("          crop len {0,10}, pos {1,10}, beg {2,10}, end {3,10}", cropStream.Length, cropStream.Position, cropStream.Begin, cropStream.End);
-            Debug.WriteLine("        source len {0,10}, pos {1,10}", sourceStream.Length, sourceStream.Position);
+            Debug.WriteLine(
+                "     resampler len {0,10}, pos {1,10} src buffer {2,4}",
+                resamplingStream.Length,
+                resamplingStream.Position,
+                resamplingStream.BufferedBytes
+            );
+            Debug.WriteLine(
+                "          crop len {0,10}, pos {1,10}, beg {2,10}, end {3,10}",
+                cropStream.Length,
+                cropStream.Position,
+                cropStream.Begin,
+                cropStream.End
+            );
+            Debug.WriteLine(
+                "        source len {0,10}, pos {1,10}",
+                sourceStream.Length,
+                sourceStream.Position
+            );
         }
 
         /// <summary>
         /// This is basically a copy of the <see cref="TimeWarp"/> class for internal use,
         /// with the difference that it operates on byte positions in the stream instead of time positions.
-        /// 
+        ///
         /// Using time positions internally in this stream lead to problems with byte borders and rounding,
         /// e.g. converting the time of the end of a stream to bytes would not necessarily result
         /// in the end byte number, but a few before or after. Also, constantly converting times and bytes
         /// back and forth is probably not very performant.
-        /// 
+        ///
         /// Because this class is a copy, it needs to stay in sync with the TimeWarp class. Unfortunately
-        /// it is not possible to create a common base class, because long and TimeSpan do not share a 
+        /// it is not possible to create a common base class, because long and TimeSpan do not share a
         /// common interface which makes generic computations impossible.
         /// </summary>
         private class ByteTimeWarp
         {
-
             public long From { get; set; }
             public long To { get; set; }
 
@@ -304,10 +335,10 @@ namespace Aurio.Streams
         /// </summary>
         private class ByteTimeWarpCollection : List<ByteTimeWarp>
         {
-
             private int currentIndex = 0;
 
-            public ByteTimeWarpCollection(int size) : base(size) { }
+            public ByteTimeWarpCollection(int size)
+                : base(size) { }
 
             public ByteTimeWarp Alpha
             {
@@ -350,7 +381,9 @@ namespace Aurio.Streams
             {
                 if (warpedPosition < Alpha.To || warpedPosition > Omega.To)
                 {
-                    throw new ArgumentOutOfRangeException("invalid warped position " + warpedPosition);
+                    throw new ArgumentOutOfRangeException(
+                        "invalid warped position " + warpedPosition
+                    );
                 }
 
                 // Either the warpedPosition falls into an interval
@@ -370,14 +403,13 @@ namespace Aurio.Streams
         }
 
         /// <summary>
-        /// This stream prevents closing of its source stream. When Close() is called, it thus does not hand the 
+        /// This stream prevents closing of its source stream. When Close() is called, it thus does not hand the
         /// call to its source, and closing of the stream stops here.
         /// </summary>
         private class SourceClosePreventionStream : AbstractAudioStreamWrapper
         {
-            public SourceClosePreventionStream(IAudioStream sourceStream) : base(sourceStream)
-            {
-            }
+            public SourceClosePreventionStream(IAudioStream sourceStream)
+                : base(sourceStream) { }
 
             public override void Close()
             {

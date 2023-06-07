@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -30,16 +30,15 @@ namespace Aurio.Matching.Echoprint
 {
     /// <summary>
     /// Echoprint code generator as described in:
-    /// - Ellis, Daniel PW, Brian Whitman, and Alastair Porter. "Echoprint: 
-    ///   An open music identification service." ISMIR 2011 Miami: 12th International 
-    ///   Society for Music Information Retrieval Conference, October 24-28. 
+    /// - Ellis, Daniel PW, Brian Whitman, and Alastair Porter. "Echoprint:
+    ///   An open music identification service." ISMIR 2011 Miami: 12th International
+    ///   Society for Music Information Retrieval Conference, October 24-28.
     ///   International Society for Music Information Retrieval, 2011.
     /// - http://echoprint.me/how
     /// - https://github.com/echonest/echoprint-codegen
     /// </summary>
     public class FingerprintGenerator
     {
-
         private const uint HashSeed = 0x9ea5fa36;
         private const uint HashBitmask = 0x000fffff;
 
@@ -56,30 +55,30 @@ namespace Aurio.Matching.Echoprint
         /// This method generates hash codes from an audio stream in a streaming fashion,
         /// which means that it only maintains a small constant-size state and can process
         /// streams of arbitrary length.
-        /// 
+        ///
         /// Here is a scheme of the data processing flow. After the subband splitting
         /// stage, every subband is processed independently.
-        /// 
+        ///
         ///                    +-----------------+   +--------------+   +-----------+
         ///   audio stream +---> mono conversion +---> downsampling +---> whitening |
         ///                    +-----------------+   +--------------+   +---------+-+
-        ///                                                                       |  
-        ///                        +-------------------+   +------------------+   |  
-        ///                        | subband splitting <---+ subband analysis <---+  
-        ///                        +--+---+---+---+----+   +------------------+      
-        ///                           |   |   |   |                                  
-        ///                           |   v   v   v                                  
-        ///                           |  ... ... ...                                 
-        ///                           |                                              
-        ///                           |   +------------------+   +-----------------+ 
-        ///                           +---> RMS downsampling +---> onset detection | 
-        ///                               +------------------+   +----------+------+ 
-        ///                                                                 |        
-        ///                                    +-----------------+          |        
-        ///   hash codes   <-------------------+ hash generation <----------+        
-        ///                                    +-----------------+                   
-        /// 
-        /// The hash codes from the hash generators of each band are then sent though a 
+        ///                                                                       |
+        ///                        +-------------------+   +------------------+   |
+        ///                        | subband splitting <---+ subband analysis <---+
+        ///                        +--+---+---+---+----+   +------------------+
+        ///                           |   |   |   |
+        ///                           |   v   v   v
+        ///                           |  ... ... ...
+        ///                           |
+        ///                           |   +------------------+   +-----------------+
+        ///                           +---> RMS downsampling +---> onset detection |
+        ///                               +------------------+   +----------+------+
+        ///                                                                 |
+        ///                                    +-----------------+          |
+        ///   hash codes   <-------------------+ hash generation <----------+
+        ///                                    +-----------------+
+        ///
+        /// The hash codes from the hash generators of each band are then sent though a
         /// sorter which brings them into sequential temporal order before they are stored
         /// in the final list.
         /// </summary>
@@ -88,10 +87,16 @@ namespace Aurio.Matching.Echoprint
         {
             IAudioStream audioStream = new ResamplingStream(
                 new MonoStream(AudioStreamFactory.FromFileInfoIeee32(track.FileInfo)),
-                ResamplingQuality.Medium, profile.SamplingRate);
+                ResamplingQuality.Medium,
+                profile.SamplingRate
+            );
 
-            var whiteningStream = new WhiteningStream(audioStream,
-                profile.WhiteningNumPoles, profile.WhiteningDecaySecs, profile.WhiteningBlockLength);
+            var whiteningStream = new WhiteningStream(
+                audioStream,
+                profile.WhiteningNumPoles,
+                profile.WhiteningDecaySecs,
+                profile.WhiteningBlockLength
+            );
             var subbandAnalyzer = new SubbandAnalyzer(whiteningStream);
 
             float[] analyzedFrame = new float[profile.SubBands];
@@ -125,7 +130,15 @@ namespace Aurio.Matching.Echoprint
 
                     if (SubFingerprintsGenerated != null)
                     {
-                        SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, hashes, currentFrame, totalFrames));
+                        SubFingerprintsGenerated(
+                            this,
+                            new SubFingerprintsGeneratedEventArgs(
+                                track,
+                                hashes,
+                                currentFrame,
+                                totalFrames
+                            )
+                        );
                         hashes.Clear();
                     }
                 }
@@ -141,7 +154,10 @@ namespace Aurio.Matching.Echoprint
 
             if (SubFingerprintsGenerated != null)
             {
-                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(track, hashes, currentFrame, totalFrames));
+                SubFingerprintsGenerated(
+                    this,
+                    new SubFingerprintsGeneratedEventArgs(track, hashes, currentFrame, totalFrames)
+                );
                 hashes.Clear();
             }
 
@@ -160,7 +176,6 @@ namespace Aurio.Matching.Echoprint
         /// </summary>
         private class BandAnalyzer
         {
-
             private static readonly double[] FilterCoefficientsBn = { 0.1883, 0.4230, 0.3392 }; /* preemph filter */
             private const double FilterCoefficientA1 = 0.98; // feedback filter coefficient
 
@@ -189,7 +204,10 @@ namespace Aurio.Matching.Echoprint
                 this.band = band;
 
                 rmsBlock = new RingBuffer<float>(profile.OnsetRmsWindowSize);
-                rmsWindow = WindowUtil.GetArray(profile.OnsetRmsWindowType, profile.OnsetRmsWindowSize);
+                rmsWindow = WindowUtil.GetArray(
+                    profile.OnsetRmsWindowType,
+                    profile.OnsetRmsWindowSize
+                );
                 sampleCount = 0;
                 rmsSampleCount = 0;
                 rmsSampleBuffer = new RingBuffer<float>(FilterCoefficientsBn.Length * 2 + 1); // needed for filtering
@@ -204,7 +222,10 @@ namespace Aurio.Matching.Echoprint
                 // hop-size times shorter than the incoming sample sequence. Onsets will be detected from the
                 // aggregated RMS sample sequence.
 
-                if (sampleCount >= profile.OnsetRmsWindowSize && sampleCount % profile.OnsetRmsHopSize == 0)
+                if (
+                    sampleCount >= profile.OnsetRmsWindowSize
+                    && sampleCount % profile.OnsetRmsHopSize == 0
+                )
                 {
                     float rmsSample = 0;
 
@@ -258,8 +279,16 @@ namespace Aurio.Matching.Echoprint
                 {
                     for (int k = 0; k < FilterCoefficientsBn.Length; ++k)
                     {
-                        xn += FilterCoefficientsBn[k] * (rmsSampleBuffer[rmsSampleBuffer.Length - 1 - k]
-                            - rmsSampleBuffer[rmsSampleBuffer.Length - 1 - (2 * FilterCoefficientsBn.Length - k)]);
+                        xn +=
+                            FilterCoefficientsBn[k]
+                            * (
+                                rmsSampleBuffer[rmsSampleBuffer.Length - 1 - k]
+                                - rmsSampleBuffer[
+                                    rmsSampleBuffer.Length
+                                        - 1
+                                        - (2 * FilterCoefficientsBn.Length - k)
+                                ]
+                            );
                     }
                 }
                 /* IIR part */
@@ -286,7 +315,11 @@ namespace Aurio.Matching.Echoprint
                 if (!contact && lastContact)
                 {
                     // If the distance between the previous and current onset is too short, we replace the previous onset
-                    if (onsetCount > 0 && rmsSampleCount - onsetBuffer[onsetBuffer.Count - 1] < profile.OnsetMinDistance)
+                    if (
+                        onsetCount > 0
+                        && rmsSampleCount - onsetBuffer[onsetBuffer.Count - 1]
+                            < profile.OnsetMinDistance
+                    )
                     {
                         onsetBuffer.RemoveHead(); // TODO check if working correctly
                         --onsetCount;
@@ -389,7 +422,13 @@ namespace Aurio.Matching.Echoprint
                         uint hashCode = MurmurHash2.Hash(hashMaterial, HashSeed) & HashBitmask;
 
                         // Set the hash alongside the time of onset
-                        hashes.Enqueue(new SubFingerprint(quantizedOnsetTime, new SubFingerprintHash(hashCode), false));
+                        hashes.Enqueue(
+                            new SubFingerprint(
+                                quantizedOnsetTime,
+                                new SubFingerprintHash(hashCode),
+                                false
+                            )
+                        );
                     }
                 }
             }
@@ -398,15 +437,14 @@ namespace Aurio.Matching.Echoprint
         /// <summary>
         /// This class collects hashes from different bands, sorts them internally by time,
         /// and fills a list with the sorted hashes.
-        /// 
-        /// Fresh hashes should be written to the queue of the source band (Queues[i]), 
+        ///
+        /// Fresh hashes should be written to the queue of the source band (Queues[i]),
         /// and sorted hashes should be fetched through the Fill method. When no more
         /// hashes are going to be added, the remaining ones can be fetched by flushing
         /// through the Fill method.
         /// </summary>
         private class HashTimeSorter
         {
-
             private Queue<SubFingerprint>[] queues;
 
             public HashTimeSorter(int bands)
@@ -439,7 +477,7 @@ namespace Aurio.Matching.Echoprint
                 // This block loops until a queue is empty (default mode) or all queues
                 // are empty (flush mode). In default mode, looping stops when a queue is
                 // empty because the minimal frame index of the remaining filled queues
-                // could still be higher than the frame index thats going to be filled next 
+                // could still be higher than the frame index thats going to be filled next
                 // into the empty queue.
                 while (true)
                 {
@@ -473,7 +511,10 @@ namespace Aurio.Matching.Echoprint
                     }
 
                     // Transfer all hashes from the current minimal frame index to the output list
-                    while (queues[minFrameBand].Count > 0 && queues[minFrameBand].Peek().Index == minFrame)
+                    while (
+                        queues[minFrameBand].Count > 0
+                        && queues[minFrameBand].Peek().Index == minFrame
+                    )
                     {
                         list.Add(queues[minFrameBand].Dequeue());
                         hashesTransferred++;

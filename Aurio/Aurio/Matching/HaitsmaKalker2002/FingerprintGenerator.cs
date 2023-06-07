@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -36,7 +36,6 @@ namespace Aurio.Matching.HaitsmaKalker2002
     /// </summary>
     public class FingerprintGenerator
     {
-
         private const int STREAM_INPUT_BUFFER_SIZE = 32768;
 
         private AudioTrack inputTrack;
@@ -49,7 +48,12 @@ namespace Aurio.Matching.HaitsmaKalker2002
         public event EventHandler<SubFingerprintsGeneratedEventArgs> SubFingerprintsGenerated;
         public event EventHandler Completed;
 
-        public FingerprintGenerator(Profile profile, AudioTrack track, int eventInterval = 512, int bufferSize = StreamWindower.DEFAULT_STREAM_INPUT_BUFFER_SIZE)
+        public FingerprintGenerator(
+            Profile profile,
+            AudioTrack track,
+            int eventInterval = 512,
+            int bufferSize = StreamWindower.DEFAULT_STREAM_INPUT_BUFFER_SIZE
+        )
         {
             this.inputTrack = track;
             this.profile = profile;
@@ -66,14 +70,25 @@ namespace Aurio.Matching.HaitsmaKalker2002
 
         public void Generate()
         {
-            IAudioStream audioStream = inputTrack.File ?
-                inputTrack.CreateAudioStream(false) :
-                inputTrack.Stream;
+            IAudioStream audioStream = inputTrack.File
+                ? inputTrack.CreateAudioStream(false)
+                : inputTrack.Stream;
 
             audioStream = new MonoStream(audioStream);
-            audioStream = new ResamplingStream(audioStream, ResamplingQuality.Medium, profile.SampleRate);
+            audioStream = new ResamplingStream(
+                audioStream,
+                ResamplingQuality.Medium,
+                profile.SampleRate
+            );
 
-            STFT stft = new STFT(audioStream, profile.FrameSize, profile.FrameStep, WindowType.Hann, STFT.OutputFormat.Decibel, this.bufferSize);
+            STFT stft = new STFT(
+                audioStream,
+                profile.FrameSize,
+                profile.FrameStep,
+                WindowType.Hann,
+                STFT.OutputFormat.Decibel,
+                this.bufferSize
+            );
             index = 0;
             indices = stft.WindowCount;
 
@@ -96,7 +111,15 @@ namespace Aurio.Matching.HaitsmaKalker2002
                 // Output subfingerprints every once in a while
                 if (index % this.eventInterval == 0 && SubFingerprintsGenerated != null)
                 {
-                    SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, subFingerprints, index, indices));
+                    SubFingerprintsGenerated(
+                        this,
+                        new SubFingerprintsGeneratedEventArgs(
+                            inputTrack,
+                            subFingerprints,
+                            index,
+                            indices
+                        )
+                    );
                     subFingerprints.Clear();
                 }
             }
@@ -104,7 +127,15 @@ namespace Aurio.Matching.HaitsmaKalker2002
             // Output remaining subfingerprints
             if (SubFingerprintsGenerated != null)
             {
-                SubFingerprintsGenerated(this, new SubFingerprintsGeneratedEventArgs(inputTrack, subFingerprints, index, indices));
+                SubFingerprintsGenerated(
+                    this,
+                    new SubFingerprintsGeneratedEventArgs(
+                        inputTrack,
+                        subFingerprints,
+                        index,
+                        indices
+                    )
+                );
             }
 
             if (Completed != null)
@@ -115,7 +146,11 @@ namespace Aurio.Matching.HaitsmaKalker2002
             audioStream.Close();
         }
 
-        private void CalculateSubFingerprint(float[] energyBands, float[] previousEnergyBands, List<SubFingerprint> list)
+        private void CalculateSubFingerprint(
+            float[] energyBands,
+            float[] previousEnergyBands,
+            List<SubFingerprint> list
+        )
         {
             SubFingerprintHash hash = new SubFingerprintHash();
             Dictionary<int, float> bitReliability = new Dictionary<int, float>();
@@ -123,7 +158,10 @@ namespace Aurio.Matching.HaitsmaKalker2002
 
             for (int m = 0; m < 32; m++)
             {
-                float difference = energyBands[m] - energyBands[m + 1] - (previousEnergyBands[m] - previousEnergyBands[m + 1]);
+                float difference =
+                    energyBands[m]
+                    - energyBands[m + 1]
+                    - (previousEnergyBands[m] - previousEnergyBands[m + 1]);
                 hash[m] = difference > 0;
                 bitReliability.Add(m, difference > 0 ? difference : -difference); // take absolute value as reliability weight
             }
@@ -133,7 +171,9 @@ namespace Aurio.Matching.HaitsmaKalker2002
             if (flipWeakestBits > 0)
             {
                 // calculate probable hashes by flipping the most unreliable bits (the bits with the least energy differences)
-                List<int> weakestBits = new List<int>(bitReliability.Keys.OrderBy(key => bitReliability[key]));
+                List<int> weakestBits = new List<int>(
+                    bitReliability.Keys.OrderBy(key => bitReliability[key])
+                );
                 // generate hashes with all possible bit combinations flipped
                 int variations = 1 << flipWeakestBits;
                 for (int i = 1; i < variations; i++)
@@ -153,7 +193,14 @@ namespace Aurio.Matching.HaitsmaKalker2002
 
         public static Profile[] GetProfiles()
         {
-            return new Profile[] { new DefaultProfile(), new BugProfile(), new VoiceProfile(), new BassProfile(), new HumanProfile() };
+            return new Profile[]
+            {
+                new DefaultProfile(),
+                new BugProfile(),
+                new VoiceProfile(),
+                new BassProfile(),
+                new HumanProfile()
+            };
         }
     }
 }

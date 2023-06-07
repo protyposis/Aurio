@@ -40,7 +40,8 @@ namespace Aurio.UnitTest
 
         private List<IAudioStream> GetStreams()
         {
-            return new List<IAudioStream> {
+            return new List<IAudioStream>
+            {
                 new BufferedStream(GetSourceStream(), 1024, true),
                 new BufferedStream(GetSourceStream(), 1024, false),
                 new CropStream(GetSourceStream()),
@@ -58,10 +59,22 @@ namespace Aurio.UnitTest
                 new VolumeClipStream(GetSourceStream()),
                 new VolumeControlStream(GetSourceStream()),
                 new VolumeMeteringStream(GetSourceStream()),
-
                 // Special cases
-                new TolerantStream(new BufferedStream(new TimeWarpStream(new IeeeStream(new NullStream(new AudioProperties(2, 44100, 16, AudioFormat.LPCM), GetSourceStream().Length))), 1024 * 256 * 4, true)),
-        };
+                new TolerantStream(
+                    new BufferedStream(
+                        new TimeWarpStream(
+                            new IeeeStream(
+                                new NullStream(
+                                    new AudioProperties(2, 44100, 16, AudioFormat.LPCM),
+                                    GetSourceStream().Length
+                                )
+                            )
+                        ),
+                        1024 * 256 * 4,
+                        true
+                    )
+                ),
+            };
         }
 
         private IAudioStream GetSourceStream()

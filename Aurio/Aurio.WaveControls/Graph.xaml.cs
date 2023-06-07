@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -38,16 +38,18 @@ namespace Aurio.WaveControls
     /// </summary>
     public partial class Graph : UserControl
     {
-
         public float[] Values
         {
             get { return (float[])GetValue(ValuesProperty); }
             set { SetValue(ValuesProperty, value); }
         }
 
-        public static readonly DependencyProperty ValuesProperty =
-            DependencyProperty.Register("Values", typeof(float[]), typeof(Graph),
-            new UIPropertyMetadata(new float[0], new PropertyChangedCallback(ValuesChanged)));
+        public static readonly DependencyProperty ValuesProperty = DependencyProperty.Register(
+            "Values",
+            typeof(float[]),
+            typeof(Graph),
+            new UIPropertyMetadata(new float[0], new PropertyChangedCallback(ValuesChanged))
+        );
 
         public GraphMode Mode
         {
@@ -55,8 +57,12 @@ namespace Aurio.WaveControls
             set { SetValue(ModeProperty, value); }
         }
 
-        public static readonly DependencyProperty ModeProperty =
-            DependencyProperty.Register("Mode", typeof(GraphMode), typeof(Graph), new UIPropertyMetadata(GraphMode.Default));
+        public static readonly DependencyProperty ModeProperty = DependencyProperty.Register(
+            "Mode",
+            typeof(GraphMode),
+            typeof(Graph),
+            new UIPropertyMetadata(GraphMode.Default)
+        );
 
         public float Minimum
         {
@@ -64,8 +70,12 @@ namespace Aurio.WaveControls
             set { SetValue(MinimumProperty, value); }
         }
 
-        public static readonly DependencyProperty MinimumProperty =
-            DependencyProperty.Register("Minimum", typeof(float), typeof(Graph), new UIPropertyMetadata(0f));
+        public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register(
+            "Minimum",
+            typeof(float),
+            typeof(Graph),
+            new UIPropertyMetadata(0f)
+        );
 
         public float Maximum
         {
@@ -73,8 +83,12 @@ namespace Aurio.WaveControls
             set { SetValue(MaximumProperty, value); }
         }
 
-        public static readonly DependencyProperty MaximumProperty =
-            DependencyProperty.Register("Maximum", typeof(float), typeof(Graph), new UIPropertyMetadata(1f));
+        public static readonly DependencyProperty MaximumProperty = DependencyProperty.Register(
+            "Maximum",
+            typeof(float),
+            typeof(Graph),
+            new UIPropertyMetadata(1f)
+        );
 
         public Brush LineBrush
         {
@@ -82,8 +96,12 @@ namespace Aurio.WaveControls
             set { SetValue(LineBrushProperty, value); }
         }
 
-        public static readonly DependencyProperty LineBrushProperty =
-            DependencyProperty.Register("LineBrush", typeof(Brush), typeof(Graph), new UIPropertyMetadata(Brushes.Green));
+        public static readonly DependencyProperty LineBrushProperty = DependencyProperty.Register(
+            "LineBrush",
+            typeof(Brush),
+            typeof(Graph),
+            new UIPropertyMetadata(Brushes.Green)
+        );
 
         public double LineThickness
         {
@@ -92,10 +110,16 @@ namespace Aurio.WaveControls
         }
 
         public static readonly DependencyProperty LineThicknessProperty =
-            DependencyProperty.Register("LineThickness", typeof(double), typeof(Graph), new UIPropertyMetadata(1.0d));
+            DependencyProperty.Register(
+                "LineThickness",
+                typeof(double),
+                typeof(Graph),
+                new UIPropertyMetadata(1.0d)
+            );
 
         private long lastUpdateTime = 0;
         private long updateTimeDelta = new TimeSpan(0, 0, 1).Ticks / 25; // 25 FPS
+
         private static void ValuesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             Graph graph = (Graph)d;
@@ -123,7 +147,12 @@ namespace Aurio.WaveControls
                 int count = 0;
                 foreach (double value in dc)
                 {
-                    graph.GraphLine.Points.Add(new Point(graph.ActualWidth / (dc.Length - 1) * count, height - factor * (value - min)));
+                    graph.GraphLine.Points.Add(
+                        new Point(
+                            graph.ActualWidth / (dc.Length - 1) * count,
+                            height - factor * (value - min)
+                        )
+                    );
                     count++;
                 }
             }
@@ -144,7 +173,12 @@ namespace Aurio.WaveControls
                 double heightScale = height / (max - min);
                 foreach (double value in dc)
                 {
-                    graph.GraphLine.Points.Add(new Point(graph.ActualWidth / (dc.Length - 1) * count, height - heightScale * (value - min)));
+                    graph.GraphLine.Points.Add(
+                        new Point(
+                            graph.ActualWidth / (dc.Length - 1) * count,
+                            height - heightScale * (value - min)
+                        )
+                    );
                     count++;
                 }
             }
@@ -156,7 +190,12 @@ namespace Aurio.WaveControls
                 double dbFactor = height / range;
                 foreach (double value in dc)
                 {
-                    graph.GraphLine.Points.Add(new Point(graph.ActualWidth / (dc.Length - 1) * count, value * -1 * dbFactor));
+                    graph.GraphLine.Points.Add(
+                        new Point(
+                            graph.ActualWidth / (dc.Length - 1) * count,
+                            value * -1 * dbFactor
+                        )
+                    );
                     count++;
                 }
             }

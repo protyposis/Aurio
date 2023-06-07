@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -29,10 +29,8 @@ namespace Aurio.TaskMonitor
 {
     public sealed class ProgressMonitor
     {
-
         private class ProgressReporter : IProgressReporter
         {
-
             private ProgressMonitor monitor;
             private string name;
             private double progress;
@@ -110,7 +108,9 @@ namespace Aurio.TaskMonitor
                 monitor.EndTask(this);
                 monitor = null;
                 isFinished = true;
-                Debug.WriteLine("ProgressReporter::" + name + " duration: " + (DateTime.Now - startTime));
+                Debug.WriteLine(
+                    "ProgressReporter::" + name + " duration: " + (DateTime.Now - startTime)
+                );
             }
 
             public bool IsFinished
@@ -142,7 +142,7 @@ namespace Aurio.TaskMonitor
 
         #region Child Monitor handling
 
-        /* A child monitor serves to monitor a subset of progress reporters of a parent monitor. 
+        /* A child monitor serves to monitor a subset of progress reporters of a parent monitor.
          * The parent monitor monitors all of its progress reporters and all progress reporters of
          * its child monitors.
          */

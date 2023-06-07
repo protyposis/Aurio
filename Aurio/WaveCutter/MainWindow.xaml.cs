@@ -25,7 +25,6 @@ namespace WaveCutter
     /// </summary>
     public partial class MainWindow : Window
     {
-
         private BackgroundWorker bw;
 
         public MainWindow()
@@ -84,7 +83,9 @@ namespace WaveCutter
             var sourceStream = new ConcatenationStream(streams.ToArray());
 
             var firstFile = parameters.SourceFiles.First();
-            string targetFileNamePrefix = firstFile.FullName.Remove(firstFile.FullName.Length - firstFile.Extension.Length);
+            string targetFileNamePrefix = firstFile.FullName.Remove(
+                firstFile.FullName.Length - firstFile.Extension.Length
+            );
             string targetFileNameSuffix = firstFile.Extension;
 
             int partCount = 0;
@@ -94,15 +95,55 @@ namespace WaveCutter
             {
                 partCount++;
                 int length = random.Next(parameters.MinLength, parameters.MaxLength); // length in seconds of the current part to write
-                long byteLength = TimeUtil.TimeSpanToBytes(new TimeSpan(TimeUtil.SECS_TO_TICKS * length), cropStream.Properties);
+                long byteLength = TimeUtil.TimeSpanToBytes(
+                    new TimeSpan(TimeUtil.SECS_TO_TICKS * length),
+                    cropStream.Properties
+                );
 
-                Debug.WriteLine("writing part " + partCount + " (" + length + " secs = " + byteLength + " bytes)");
-                Debug.WriteLine("before: " + cropStream.Begin + " / " + cropStream.End + " / " + cropStream.Position + " / " + sourceStream.Position);
+                Debug.WriteLine(
+                    "writing part "
+                        + partCount
+                        + " ("
+                        + length
+                        + " secs = "
+                        + byteLength
+                        + " bytes)"
+                );
+                Debug.WriteLine(
+                    "before: "
+                        + cropStream.Begin
+                        + " / "
+                        + cropStream.End
+                        + " / "
+                        + cropStream.Position
+                        + " / "
+                        + sourceStream.Position
+                );
                 cropStream.Begin = cropStream.End;
-                cropStream.End += sourceStream.Length - cropStream.Begin < byteLength ? sourceStream.Length - cropStream.Begin : byteLength;
+                cropStream.End +=
+                    sourceStream.Length - cropStream.Begin < byteLength
+                        ? sourceStream.Length - cropStream.Begin
+                        : byteLength;
                 cropStream.Position = 0;
-                Debug.WriteLine("after : " + cropStream.Begin + " / " + cropStream.End + " / " + cropStream.Position + " / " + sourceStream.Position);
-                AudioStreamFactory.WriteToFile(cropStream, String.Format("{0}.part{1:000}{2}", targetFileNamePrefix, partCount, targetFileNameSuffix));
+                Debug.WriteLine(
+                    "after : "
+                        + cropStream.Begin
+                        + " / "
+                        + cropStream.End
+                        + " / "
+                        + cropStream.Position
+                        + " / "
+                        + sourceStream.Position
+                );
+                AudioStreamFactory.WriteToFile(
+                    cropStream,
+                    String.Format(
+                        "{0}.part{1:000}{2}",
+                        targetFileNamePrefix,
+                        partCount,
+                        targetFileNameSuffix
+                    )
+                );
 
                 if (worker.CancellationPending)
                 {
@@ -110,7 +151,9 @@ namespace WaveCutter
                     Debug.WriteLine("canceled");
                     return;
                 }
-                worker.ReportProgress((int)((double)sourceStream.Position / sourceStream.Length * 100));
+                worker.ReportProgress(
+                    (int)((double)sourceStream.Position / sourceStream.Length * 100)
+                );
             }
             Debug.WriteLine("finished");
         }

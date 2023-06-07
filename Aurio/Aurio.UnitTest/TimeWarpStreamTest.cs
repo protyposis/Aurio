@@ -4,8 +4,6 @@ using System;
 
 namespace Aurio.UnitTest
 {
-
-
     /// <summary>
     ///This is a test class for DynamicResamplingStreamTest and is intended
     ///to contain all DynamicResamplingStreamTest Unit Tests
@@ -13,8 +11,6 @@ namespace Aurio.UnitTest
     [TestClass()]
     public class TimeWarpStreamTest
     {
-
-
         private TestContext testContextInstance;
         private static TimeWarpStream stream;
 
@@ -24,18 +20,12 @@ namespace Aurio.UnitTest
         ///</summary>
         public TestContext TestContext
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
+            get { return testContextInstance; }
+            set { testContextInstance = value; }
         }
 
         #region Additional test attributes
-        // 
+        //
         //You can use the following additional attributes as you write your tests:
         //
         //Use ClassInitialize to run code before running the first test in the class
@@ -133,18 +123,20 @@ namespace Aurio.UnitTest
         {
             var audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             TimeWarpStream s = new TimeWarpStream(
-                new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)));
+                new NullStream(
+                    audioProperties,
+                    TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)
+                )
+            );
             TimeSpan length = TimeUtil.BytesToTimeSpan(s.Length, s.Properties);
-            s.Mappings.Add(new TimeWarp
-            {
-                From = new TimeSpan(length.Ticks / 2),
-                To = new TimeSpan(length.Ticks / 4)
-            });
-            s.Mappings.Add(new TimeWarp
-            {
-                From = length,
-                To = new TimeSpan(length.Ticks / 4 * 2)
-            });
+            s.Mappings.Add(
+                new TimeWarp
+                {
+                    From = new TimeSpan(length.Ticks / 2),
+                    To = new TimeSpan(length.Ticks / 4)
+                }
+            );
+            s.Mappings.Add(new TimeWarp { From = length, To = new TimeSpan(length.Ticks / 4 * 2) });
 
             byte[] buffer = new byte[5000];
             int bytesRead;
@@ -165,17 +157,17 @@ namespace Aurio.UnitTest
         {
             var audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             TimeWarpStream s = new TimeWarpStream(
-                new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)));
+                new NullStream(
+                    audioProperties,
+                    TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)
+                )
+            );
             TimeSpan length = TimeUtil.BytesToTimeSpan(s.Length, s.Properties);
             //s.Mappings.Add(new TimeWarp {
             //    From = StreamUtil.AlignToBlockSize(length / 2, s.SampleBlockSize),
             //    To = StreamUtil.AlignToBlockSize(length / 4, s.SampleBlockSize)
             //});
-            s.Mappings.Add(new TimeWarp
-            {
-                From = length,
-                To = new TimeSpan(length.Ticks / 4 * 2)
-            });
+            s.Mappings.Add(new TimeWarp { From = length, To = new TimeSpan(length.Ticks / 4 * 2) });
 
             byte[] buffer = new byte[5000];
             int bytesRead;
@@ -199,18 +191,20 @@ namespace Aurio.UnitTest
         {
             var audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             TimeWarpStream s = new TimeWarpStream(
-                new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)));
+                new NullStream(
+                    audioProperties,
+                    TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)
+                )
+            );
             TimeSpan length = TimeUtil.BytesToTimeSpan(s.Length, s.Properties);
-            s.Mappings.Add(new TimeWarp
-            {
-                From = new TimeSpan(length.Ticks / 2),
-                To = new TimeSpan(length.Ticks / 4)
-            });
-            s.Mappings.Add(new TimeWarp
-            {
-                From = length,
-                To = new TimeSpan(length.Ticks / 4 * 2)
-            });
+            s.Mappings.Add(
+                new TimeWarp
+                {
+                    From = new TimeSpan(length.Ticks / 2),
+                    To = new TimeSpan(length.Ticks / 4)
+                }
+            );
+            s.Mappings.Add(new TimeWarp { From = length, To = new TimeSpan(length.Ticks / 4 * 2) });
 
             byte[] buffer = new byte[5000];
 
@@ -226,18 +220,20 @@ namespace Aurio.UnitTest
         {
             var audioProperties = new AudioProperties(2, 44100, 32, AudioFormat.IEEE);
             TimeWarpStream s = new TimeWarpStream(
-                new NullStream(audioProperties, TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)));
+                new NullStream(
+                    audioProperties,
+                    TimeUtil.TimeSpanToBytes(new TimeSpan(0, 1, 0), audioProperties)
+                )
+            );
             TimeSpan length = TimeUtil.BytesToTimeSpan(s.Length, s.Properties);
-            s.Mappings.Add(new TimeWarp
-            {
-                From = new TimeSpan(length.Ticks / 2),
-                To = new TimeSpan(length.Ticks / 4)
-            });
-            s.Mappings.Add(new TimeWarp
-            {
-                From = length,
-                To = new TimeSpan(length.Ticks / 4 * 2)
-            });
+            s.Mappings.Add(
+                new TimeWarp
+                {
+                    From = new TimeSpan(length.Ticks / 2),
+                    To = new TimeSpan(length.Ticks / 4)
+                }
+            );
+            s.Mappings.Add(new TimeWarp { From = length, To = new TimeSpan(length.Ticks / 4 * 2) });
 
             byte[] buffer = new byte[5000];
 

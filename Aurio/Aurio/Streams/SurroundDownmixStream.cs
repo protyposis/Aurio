@@ -11,11 +11,14 @@ namespace Aurio.Streams
     /// </summary>
     public class SurroundDownmixStream : AbstractAudioStreamWrapper
     {
-
         private static readonly float LOWER_BY_3DB = (float)VolumeUtil.DecibelToLinear(-3);
         private static readonly float LOWER_BY_6DB = (float)VolumeUtil.DecibelToLinear(-6);
 
-        private unsafe delegate void DownmixFunctionDelegate(float* sourceBuffer, float* targetBuffer, int samples);
+        private unsafe delegate void DownmixFunctionDelegate(
+            float* sourceBuffer,
+            float* targetBuffer,
+            int samples
+        );
 
         private AudioProperties properties;
         private ByteBuffer sourceBuffer;
@@ -25,15 +28,22 @@ namespace Aurio.Streams
         /// Creates a SurroundDownmixStream that downmixes surround sound of the source stream and outputs a stereo stream.
         /// </summary>
         /// <param name="sourceStream">the stream to downmix to stereo</param>
-        public SurroundDownmixStream(IAudioStream sourceStream) : base(sourceStream)
+        public SurroundDownmixStream(IAudioStream sourceStream)
+            : base(sourceStream)
         {
-            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32))
+            if (
+                !(
+                    sourceStream.Properties.Format == AudioFormat.IEEE
+                    && sourceStream.Properties.BitDepth == 32
+                )
+            )
             {
-                throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
+                throw new ArgumentException(
+                    "unsupported source format: " + sourceStream.Properties
+                );
             }
 
             int sourceChannels = sourceStream.Properties.Channels;
-
             unsafe
             {
                 if (sourceChannels == 4)
@@ -57,8 +67,12 @@ namespace Aurio.Streams
                 }
             }
 
-            properties = new AudioProperties(2, sourceStream.Properties.SampleRate,
-                sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
+            properties = new AudioProperties(
+                2,
+                sourceStream.Properties.SampleRate,
+                sourceStream.Properties.BitDepth,
+                sourceStream.Properties.Format
+            );
             sourceBuffer = new ByteBuffer();
         }
 
@@ -93,12 +107,13 @@ namespace Aurio.Streams
 
             int sourceBufferSize = count / targetChannels * sourceChannels;
             int sourceBytesRead = sourceBuffer.FillIfEmpty(sourceStream, sourceBufferSize);
-
-
             // TODO downmix
             unsafe
             {
-                fixed (byte* sourceByteBuffer = &sourceBuffer.Data[0], targetByteBuffer = &buffer[offset])
+                fixed (
+                    byte* sourceByteBuffer = &sourceBuffer.Data[0],
+                        targetByteBuffer = &buffer[offset]
+                )
                 {
                     float* sourceFloatBuffer = (float*)sourceByteBuffer;
                     float* targetFloatBuffer = (float*)targetByteBuffer;
@@ -119,7 +134,11 @@ namespace Aurio.Streams
         // http://www.tvtechnology.com/audio/0014/what-is-downmixing-part-1-stereo-loro/184912
         // https://www.cinemasound.com/3-issues-downmixing-5-1-stereo-adobe-audition/
 
-        private static unsafe void DownmixQuad(float* sourceBuffer, float* targetBuffer, int samples)
+        private static unsafe void DownmixQuad(
+            float* sourceBuffer,
+            float* targetBuffer,
+            int samples
+        )
         {
             for (int sampleNumber = 0; sampleNumber < samples; sampleNumber++)
             {

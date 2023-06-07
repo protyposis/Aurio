@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -29,7 +29,6 @@ namespace Aurio.Streams
 {
     public class ResamplingStream : AbstractAudioStreamWrapper
     {
-
         private ResamplingQuality quality;
         private IResampler resampler;
         private AudioProperties properties;
@@ -41,13 +40,24 @@ namespace Aurio.Streams
         public ResamplingStream(IAudioStream sourceStream, ResamplingQuality quality)
             : base(sourceStream)
         {
-            if (!(sourceStream.Properties.Format == AudioFormat.IEEE && sourceStream.Properties.BitDepth == 32))
+            if (
+                !(
+                    sourceStream.Properties.Format == AudioFormat.IEEE
+                    && sourceStream.Properties.BitDepth == 32
+                )
+            )
             {
-                throw new ArgumentException("unsupported source format: " + sourceStream.Properties);
+                throw new ArgumentException(
+                    "unsupported source format: " + sourceStream.Properties
+                );
             }
 
-            properties = new AudioProperties(sourceStream.Properties.Channels, sourceStream.Properties.SampleRate,
-                sourceStream.Properties.BitDepth, sourceStream.Properties.Format);
+            properties = new AudioProperties(
+                sourceStream.Properties.Channels,
+                sourceStream.Properties.SampleRate,
+                sourceStream.Properties.BitDepth,
+                sourceStream.Properties.Format
+            );
 
             this.quality = quality;
 
@@ -59,13 +69,21 @@ namespace Aurio.Streams
             position = 0;
         }
 
-        public ResamplingStream(IAudioStream sourceStream, ResamplingQuality quality, int outputSampleRate)
+        public ResamplingStream(
+            IAudioStream sourceStream,
+            ResamplingQuality quality,
+            int outputSampleRate
+        )
             : this(sourceStream, quality)
         {
             TargetSampleRate = outputSampleRate;
         }
 
-        public ResamplingStream(IAudioStream sourceStream, ResamplingQuality quality, double sampleRateRatio)
+        public ResamplingStream(
+            IAudioStream sourceStream,
+            ResamplingQuality quality,
+            double sampleRateRatio
+        )
             : this(sourceStream, quality)
         {
             SampleRateRatio = sampleRateRatio;
@@ -78,7 +96,11 @@ namespace Aurio.Streams
                 resampler.Dispose(); // delete previous resampler instance
             }
 
-            resampler = ResamplerFactory.CreateInstance(quality, properties.Channels, SampleRateRatio);
+            resampler = ResamplerFactory.CreateInstance(
+                quality,
+                properties.Channels,
+                SampleRateRatio
+            );
         }
 
         public double TargetSampleRate
@@ -122,7 +144,9 @@ namespace Aurio.Streams
             get
             {
                 return StreamUtil.AlignToBlockSize(
-                    (long)Math.Ceiling(sourceStream.Length * sampleRateRatio), SampleBlockSize);
+                    (long)Math.Ceiling(sourceStream.Length * sampleRateRatio),
+                    SampleBlockSize
+                );
             }
         }
 
@@ -170,7 +194,8 @@ namespace Aurio.Streams
                 return bytesRead;
             }
 
-            int inputLengthUsed, outputLengthGenerated;
+            int inputLengthUsed,
+                outputLengthGenerated;
             bool endOfStream = false;
 
             // loop while the sample rate converter consumes samples until it produces an output
@@ -183,11 +208,19 @@ namespace Aurio.Streams
                 // this is also the reason why the source stream's Read() method may be called multiple times although
                 // it already signalled that it has reached the end of the stream
                 endOfStream = sourceStream.Position >= sourceStream.Length && sourceBuffer.Empty;
-                resampler.Process(sourceBuffer.Data, sourceBuffer.Offset, sourceBuffer.Count,
-                    buffer, offset, count, endOfStream, out inputLengthUsed, out outputLengthGenerated);
+                resampler.Process(
+                    sourceBuffer.Data,
+                    sourceBuffer.Offset,
+                    sourceBuffer.Count,
+                    buffer,
+                    offset,
+                    count,
+                    endOfStream,
+                    out inputLengthUsed,
+                    out outputLengthGenerated
+                );
                 sourceBuffer.Read(inputLengthUsed);
-            }
-            while (inputLengthUsed > 0 && outputLengthGenerated == 0);
+            } while (inputLengthUsed > 0 && outputLengthGenerated == 0);
 
             position += outputLengthGenerated;
 
@@ -211,7 +244,12 @@ namespace Aurio.Streams
                 position -= overflow;
                 return outputLengthGenerated - overflow;
             }
-            else if (position < length && inputLengthUsed == 0 && outputLengthGenerated == 0 && endOfStream)
+            else if (
+                position < length
+                && inputLengthUsed == 0
+                && outputLengthGenerated == 0
+                && endOfStream
+            )
             {
                 int underflow = (int)(length - position);
                 if (count < underflow)

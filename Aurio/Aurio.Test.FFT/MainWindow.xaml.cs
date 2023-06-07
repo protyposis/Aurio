@@ -65,8 +65,13 @@ namespace Aurio.Test.FFT
                 fftOutputGraph.Reset();
                 fftNormalizedOutputGraph.Reset();
                 fftdBOutputGraph.Reset();
-                MessageBox.Show(this, missingLibraryException.Message, fftLib + ": Library not found!",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    this,
+                    missingLibraryException.Message,
+                    fftLib + ": Library not found!",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
             }
         }
 
@@ -85,7 +90,7 @@ namespace Aurio.Test.FFT
              * -> FFT max: 256
              * -> FFT result max: ~1
              * -> FFT dB result max: ~1
-             * 
+             *
              * source: "Windowing Functions Improve FFT Results, Part I"
              * => kann zum Normalisieren für Fensterfunktionen verwendet werden
              */
@@ -95,7 +100,11 @@ namespace Aurio.Test.FFT
             float frequencyFactor = ws / frequency;
             int sampleRate = int.Parse(sampleRateTextBox.Text);
 
-            SineGeneratorStream sine = new SineGeneratorStream(sampleRate, frequency, new TimeSpan(0, 0, 1));
+            SineGeneratorStream sine = new SineGeneratorStream(
+                sampleRate,
+                frequency,
+                new TimeSpan(0, 0, 1)
+            );
 
             float[] input = new float[ws];
             sine.Read(input, 0, ws);
@@ -152,7 +161,6 @@ namespace Aurio.Test.FFT
 
             fftOutputGraph.Values = fftIO;
 
-
             float[] fftResult = new float[ws / 2];
             //FFTUtil.Results(fftIO, fftResult);
 
@@ -186,11 +194,19 @@ namespace Aurio.Test.FFT
 
             summary.Text = String.Format(
                 "input min/max: {0}/{1} -> window min/max: {2}/{3} -> fft min/max: {4}/{5} -> result min/max/bins/sum: {6}/{7}/{8}/{9} -> dB min/max: {10:0.000000}/{11:0.000000}",
-                input.Min(), input.Max(),
-                window.Min(), window.Max(),
-                fftIO.Min(), fftIO.Max(),
-                fftResult.Min(), fftResult.Max(), fftResult.Length, sum,
-                fftResultdB.Min(), fftResultdB.Max());
+                input.Min(),
+                input.Max(),
+                window.Min(),
+                window.Max(),
+                fftIO.Min(),
+                fftIO.Max(),
+                fftResult.Min(),
+                fftResult.Max(),
+                fftResult.Length,
+                sum,
+                fftResultdB.Min(),
+                fftResultdB.Max()
+            );
         }
 
         private void ApplyExocortexDSP(float[] samples)
@@ -198,8 +214,6 @@ namespace Aurio.Test.FFT
             Fourier.RFFT(samples, FourierDirection.Forward);
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-        }
+        private void Window_Loaded(object sender, RoutedEventArgs e) { }
     }
 }

@@ -14,7 +14,6 @@ namespace Aurio.Test.FingerprintingHaitsmaKalker2002
     /// </summary>
     public partial class FingerprintView : UserControl
     {
-
         private BitmapSource bitmap;
 
         public FingerprintView()
@@ -28,11 +27,17 @@ namespace Aurio.Test.FingerprintingHaitsmaKalker2002
             set { SetValue(FingerprintProperty, value); }
         }
 
-        public static readonly DependencyProperty FingerprintProperty =
-            DependencyProperty.Register("Fingerprint", typeof(Fingerprint), typeof(FingerprintView), new UIPropertyMetadata(null,
-                new PropertyChangedCallback(OnFingerprintChanged)));
+        public static readonly DependencyProperty FingerprintProperty = DependencyProperty.Register(
+            "Fingerprint",
+            typeof(Fingerprint),
+            typeof(FingerprintView),
+            new UIPropertyMetadata(null, new PropertyChangedCallback(OnFingerprintChanged))
+        );
 
-        public static void OnFingerprintChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public static void OnFingerprintChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
             FingerprintView fv = (FingerprintView)d;
 
@@ -50,7 +55,16 @@ namespace Aurio.Test.FingerprintingHaitsmaKalker2002
                 }
             }
 
-            fv.bitmap = BitmapSource.Create(width, height, dpi, dpi, PixelFormats.Gray8, null, pixelData, width);
+            fv.bitmap = BitmapSource.Create(
+                width,
+                height,
+                dpi,
+                dpi,
+                PixelFormats.Gray8,
+                null,
+                pixelData,
+                width
+            );
             fv.bitmapDisplay.Source = fv.bitmap;
         }
 

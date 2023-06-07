@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -32,7 +32,6 @@ namespace Aurio.Matching
     /// </summary>
     public class SQLiteCollisionMap : IFingerprintCollisionMap
     {
-
         private class DTO
         {
             public UInt32 Hash { get; set; }
@@ -109,7 +108,9 @@ namespace Aurio.Matching
             int count = db.ExecuteScalar<int>("select count(*) from DTO");
             Debug.WriteLine("Cleanup count before: " + count);
 
-            db.Execute("delete from DTO where Hash in (select Hash from (select Hash As Hash, COUNT(*) As Count from DTO group by Hash) where Count = 1)");
+            db.Execute(
+                "delete from DTO where Hash in (select Hash from (select Hash As Hash, COUNT(*) As Count from DTO group by Hash) where Count = 1)"
+            );
 
             count = db.ExecuteScalar<int>("select count(*) from DTO");
             Debug.WriteLine("Cleanup count after: " + count);
@@ -121,7 +122,9 @@ namespace Aurio.Matching
             CreateLookupIndex();
 
             var start = DateTime.Now;
-            IEnumerable<DTO> result = db.Query<DTO>("select * from (select Hash As Hash, COUNT(*) As Count from DTO group by Hash) where Count > 1");
+            IEnumerable<DTO> result = db.Query<DTO>(
+                "select * from (select Hash As Hash, COUNT(*) As Count from DTO group by Hash) where Count > 1"
+            );
             List<SubFingerprintHash> hashes = new List<SubFingerprintHash>();
             foreach (DTO dto in result)
             {
@@ -143,7 +146,12 @@ namespace Aurio.Matching
             List<SubFingerprintLookupEntry> lookupEntries = new List<SubFingerprintLookupEntry>();
             foreach (DTO dto in result)
             {
-                lookupEntries.Add(new SubFingerprintLookupEntry(numberToTrack[dto.TrackNumber], dto.TrackPositionIndex));
+                lookupEntries.Add(
+                    new SubFingerprintLookupEntry(
+                        numberToTrack[dto.TrackNumber],
+                        dto.TrackPositionIndex
+                    )
+                );
             }
             //Debug.WriteLine("GetLookupEntries duration: " + (DateTime.Now - start));
             return lookupEntries;

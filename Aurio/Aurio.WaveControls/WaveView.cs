@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -41,7 +41,6 @@ namespace Aurio.WaveControls
 {
     public partial class WaveView : VirtualViewBase
     {
-
         private SolidColorBrush _lineBrush;
         private SolidColorBrush _backgroundBrush;
         private WaveformBitmapRenderer[] waveformBitmapRenderers;
@@ -58,7 +57,8 @@ namespace Aurio.WaveControls
             // event gets triggered when ActualWidth or ActualHeight change
             SizeChanged += WaveView_SizeChanged;
 
-            DependencyPropertyDescriptor.FromProperty(Selector.IsSelectedProperty, typeof(WaveView))
+            DependencyPropertyDescriptor
+                .FromProperty(Selector.IsSelectedProperty, typeof(WaveView))
                 .AddValueChanged(this, new EventHandler(OnSelectionChanged));
 
             _lineBrush = WaveformLine;
@@ -80,7 +80,13 @@ namespace Aurio.WaveControls
         public bool Antialiased
         {
             get { return ((EdgeMode)GetValue(RenderOptions.EdgeModeProperty)) != EdgeMode.Aliased; }
-            set { SetValue(RenderOptions.EdgeModeProperty, !value ? EdgeMode.Aliased : EdgeMode.Unspecified); }
+            set
+            {
+                SetValue(
+                    RenderOptions.EdgeModeProperty,
+                    !value ? EdgeMode.Aliased : EdgeMode.Unspecified
+                );
+            }
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -89,11 +95,18 @@ namespace Aurio.WaveControls
             bool debug = DebugOutput;
 
             // draw background
-            drawingContext.DrawRectangle(Background, null, new Rect(0, 0, ActualWidth, ActualHeight));
+            drawingContext.DrawRectangle(
+                Background,
+                null,
+                new Rect(0, 0, ActualWidth, ActualHeight)
+            );
 
             if (audioStream != null)
             {
-                Interval audioInterval = new Interval(TrackOffset, TrackOffset + audioStream.TimeLength.Ticks);
+                Interval audioInterval = new Interval(
+                    TrackOffset,
+                    TrackOffset + audioStream.TimeLength.Ticks
+                );
                 Interval viewportInterval = VirtualViewportInterval;
 
                 if (!audioInterval.Intersects(viewportInterval))
@@ -106,27 +119,55 @@ namespace Aurio.WaveControls
                 Interval audioToLoadInterval = visibleAudioInterval - TrackOffset;
 
                 // align interval to samples
-                Interval audioToLoadIntervalAligned = AudioUtil.AlignToSamples(audioToLoadInterval, audioStream.Properties);
-                int samplesToLoad = AudioUtil.CalculateSamples(audioStream.Properties, new TimeSpan(audioToLoadIntervalAligned.Length)) + 1;
+                Interval audioToLoadIntervalAligned = AudioUtil.AlignToSamples(
+                    audioToLoadInterval,
+                    audioStream.Properties
+                );
+                int samplesToLoad =
+                    AudioUtil.CalculateSamples(
+                        audioStream.Properties,
+                        new TimeSpan(audioToLoadIntervalAligned.Length)
+                    ) + 1;
                 double sampleLength = AudioUtil.CalculateSampleTicks(audioStream.Properties);
 
                 // calculate drawing measures
                 double viewportToDrawingScaleFactor = ActualWidth / VirtualViewportWidth;
-                int drawingOffsetAligned = (int)((-(audioToLoadInterval.From - audioToLoadIntervalAligned.From)
-                    + (visibleAudioInterval.From - viewportInterval.From)) * viewportToDrawingScaleFactor);
-                int drawingWidthAligned = (int)((samplesToLoad - 1) * sampleLength * viewportToDrawingScaleFactor);
-                int drawingOffset = (int)((visibleAudioInterval.From - viewportInterval.From) * viewportToDrawingScaleFactor);
+                int drawingOffsetAligned = (int)(
+                    (
+                        -(audioToLoadInterval.From - audioToLoadIntervalAligned.From)
+                        + (visibleAudioInterval.From - viewportInterval.From)
+                    ) * viewportToDrawingScaleFactor
+                );
+                int drawingWidthAligned = (int)(
+                    (samplesToLoad - 1) * sampleLength * viewportToDrawingScaleFactor
+                );
+                int drawingOffset = (int)(
+                    (visibleAudioInterval.From - viewportInterval.From)
+                    * viewportToDrawingScaleFactor
+                );
 
                 if (visibleAudioInterval.Length < sampleLength)
                 {
-                    drawingContext.DrawText(DebugText("VISIBLE INTERVAL WARNING: " + visibleAudioInterval.Length + " < SAMPLE LENGTH " + sampleLength), new Point(0, 0));
+                    drawingContext.DrawText(
+                        DebugText(
+                            "VISIBLE INTERVAL WARNING: "
+                                + visibleAudioInterval.Length
+                                + " < SAMPLE LENGTH "
+                                + sampleLength
+                        ),
+                        new Point(0, 0)
+                    );
                     return;
                 }
 
                 if (drawingWidthAligned <= 1)
                 {
                     // the visible width of the track is too narrow to be drawn/visible, so draw a line to visually indicate the presence of a waveform
-                    drawingContext.DrawRectangle(_lineBrush, null, new Rect(drawingOffsetAligned, 0, 1, ActualHeight));
+                    drawingContext.DrawRectangle(
+                        _lineBrush,
+                        null,
+                        new Rect(drawingOffsetAligned, 0, 1, ActualHeight)
+                    );
                     return;
                 }
 
@@ -138,12 +179,19 @@ namespace Aurio.WaveControls
                 {
                     bool peaks = samplesToLoad > drawingWidthAligned;
                     // TODO don't recreate the array every time -> resize on demand
-                    samples = AudioUtil.CreateArray<float>(audioStream.Properties.Channels, drawingWidthAligned * 2);
+                    samples = AudioUtil.CreateArray<float>(
+                        audioStream.Properties.Channels,
+                        drawingWidthAligned * 2
+                    );
                     audioStream.TimePosition = new TimeSpan(audioToLoadIntervalAligned.From);
 
                     if (peaks)
                     {
-                        sampleCount = audioStream.ReadPeaks(samples, samplesToLoad, drawingWidthAligned);
+                        sampleCount = audioStream.ReadPeaks(
+                            samples,
+                            samplesToLoad,
+                            drawingWidthAligned
+                        );
                     }
                     else
                     {
@@ -152,7 +200,10 @@ namespace Aurio.WaveControls
 
                     if (sampleCount <= 1)
                     {
-                        drawingContext.DrawText(DebugText("SAMPLE WARNING: " + sampleCount), new Point(0, 0));
+                        drawingContext.DrawText(
+                            DebugText("SAMPLE WARNING: " + sampleCount),
+                            new Point(0, 0)
+                        );
                         return;
                     }
                 }
@@ -161,10 +212,18 @@ namespace Aurio.WaveControls
                 DateTime beforeDrawing = DateTime.Now;
 
                 // draw background
-                drawingContext.DrawRectangle(_backgroundBrush, null, new Rect(drawingOffsetAligned, 0, drawingWidthAligned, ActualHeight));
+                drawingContext.DrawRectangle(
+                    _backgroundBrush,
+                    null,
+                    new Rect(drawingOffsetAligned, 0, drawingWidthAligned, ActualHeight)
+                );
                 if (debug)
                 {
-                    drawingContext.DrawRectangle(null, new Pen(Brushes.Brown, 4), new Rect(drawingOffsetAligned, 0, drawingWidthAligned, ActualHeight));
+                    drawingContext.DrawRectangle(
+                        null,
+                        new Pen(Brushes.Brown, 4),
+                        new Rect(drawingOffsetAligned, 0, drawingWidthAligned, ActualHeight)
+                    );
                 }
 
                 // draw waveform guides & create drawing guidelines
@@ -176,17 +235,32 @@ namespace Aurio.WaveControls
                 for (int channel = 0; channel < channels; channel++)
                 {
                     // waveform zero-line
-                    guidelineSet.GuidelinesY.Add((channelHeight * channel + channelHalfHeight) + 0.5);
-                    drawingContext.DrawLine(new Pen(Brushes.LightGray, 1),
-                        new Point(drawingOffsetAligned, channelHeight * channel + channelHalfHeight),
-                        new Point(drawingOffsetAligned + drawingWidthAligned, channelHeight * channel + channelHalfHeight));
+                    guidelineSet.GuidelinesY.Add(
+                        (channelHeight * channel + channelHalfHeight) + 0.5
+                    );
+                    drawingContext.DrawLine(
+                        new Pen(Brushes.LightGray, 1),
+                        new Point(
+                            drawingOffsetAligned,
+                            channelHeight * channel + channelHalfHeight
+                        ),
+                        new Point(
+                            drawingOffsetAligned + drawingWidthAligned,
+                            channelHeight * channel + channelHalfHeight
+                        )
+                    );
                     // waveform spacers
                     if (channel > 0)
                     {
                         guidelineSet.GuidelinesY.Add((channelHeight * channel) + 0.5);
-                        drawingContext.DrawLine(new Pen(Brushes.DarkGray, 1),
+                        drawingContext.DrawLine(
+                            new Pen(Brushes.DarkGray, 1),
                             new Point(drawingOffsetAligned, channelHeight * channel),
-                            new Point(drawingOffsetAligned + drawingWidthAligned, channelHeight * channel));
+                            new Point(
+                                drawingOffsetAligned + drawingWidthAligned,
+                                channelHeight * channel
+                            )
+                        );
                     }
                 }
                 drawingContext.Pop();
@@ -231,18 +305,29 @@ namespace Aurio.WaveControls
                             {
                                 if (channel == 0)
                                 {
-                                    balanceFactor = AudioTrack.Balance < 0 ? 1 : 1 - AudioTrack.Balance;
+                                    balanceFactor =
+                                        AudioTrack.Balance < 0 ? 1 : 1 - AudioTrack.Balance;
                                 }
                                 else if (channel == 1)
                                 {
-                                    balanceFactor = AudioTrack.Balance > 0 ? 1 : 1 + AudioTrack.Balance;
+                                    balanceFactor =
+                                        AudioTrack.Balance > 0 ? 1 : 1 + AudioTrack.Balance;
                                 }
                             }
 
-                            Drawing waveform = renderers[channel].Render(samples[channel], sampleCount, drawingWidthAligned, (int)channelHeight, AudioTrack.Volume * balanceFactor);
+                            Drawing waveform = renderers[channel].Render(
+                                samples[channel],
+                                sampleCount,
+                                drawingWidthAligned,
+                                (int)channelHeight,
+                                AudioTrack.Volume * balanceFactor
+                            );
                             DrawingGroup drawing = new DrawingGroup();
                             drawing.Children.Add(waveform);
-                            drawing.Transform = new TranslateTransform((int)drawingOffsetAligned, (int)(channelHeight * channel));
+                            drawing.Transform = new TranslateTransform(
+                                (int)drawingOffsetAligned,
+                                (int)(channelHeight * channel)
+                            );
                             drawingContext.DrawDrawing(drawing);
                         }
                     }
@@ -253,46 +338,112 @@ namespace Aurio.WaveControls
                 // draw track name
                 if (DrawTrackName)
                 {
-                    FormattedText formattedTrackName = new FormattedText(AudioTrack.FileInfo.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface("Segoe UI"), 10f, Brushes.White, _pixelsPerDip);
-                    drawingContext.DrawRectangle(Brushes.Black, null, new Rect(4 + drawingOffset, 5, formattedTrackName.Width + 4, formattedTrackName.Height + 2));
+                    FormattedText formattedTrackName = new FormattedText(
+                        AudioTrack.FileInfo.Name,
+                        CultureInfo.CurrentCulture,
+                        FlowDirection.LeftToRight,
+                        new Typeface("Segoe UI"),
+                        10f,
+                        Brushes.White,
+                        _pixelsPerDip
+                    );
+                    drawingContext.DrawRectangle(
+                        Brushes.Black,
+                        null,
+                        new Rect(
+                            4 + drawingOffset,
+                            5,
+                            formattedTrackName.Width + 4,
+                            formattedTrackName.Height + 2
+                        )
+                    );
                     drawingContext.DrawText(formattedTrackName, new Point(6 + drawingOffset, 6));
                 }
 
                 if (debug)
                 {
                     // DEBUG OUTPUT
-                    drawingContext.DrawText(DebugText(String.Format("source:" + "n/a" + " load:{0}ms render:{1}ms", (afterLoading - beforeLoading).TotalMilliseconds, (afterDrawing - beforeDrawing).TotalMilliseconds)),
-                        new Point(0, 20));
-                    drawingContext.DrawText(DebugText("visibleAudioInterval: " + visibleAudioInterval + ", audioToLoadInterval: " + audioToLoadInterval + ", audioToLoadIntervalAligned: " + audioToLoadIntervalAligned),
-                        new Point(0, ActualHeight) + new Vector(0, -50));
-                    drawingContext.DrawText(DebugText("Drawing Offset: " + drawingOffsetAligned + ", Width: " + drawingWidthAligned + ", ScalingFactor: " + viewportToDrawingScaleFactor + ", Samples: " + sampleCount + ", Peakratio 1:" + Math.Round(VirtualViewportWidth / sampleLength / ActualWidth, 2)),
-                        new Point(0, ActualHeight) + new Vector(0, -40));
+                    drawingContext.DrawText(
+                        DebugText(
+                            String.Format(
+                                "source:" + "n/a" + " load:{0}ms render:{1}ms",
+                                (afterLoading - beforeLoading).TotalMilliseconds,
+                                (afterDrawing - beforeDrawing).TotalMilliseconds
+                            )
+                        ),
+                        new Point(0, 20)
+                    );
+                    drawingContext.DrawText(
+                        DebugText(
+                            "visibleAudioInterval: "
+                                + visibleAudioInterval
+                                + ", audioToLoadInterval: "
+                                + audioToLoadInterval
+                                + ", audioToLoadIntervalAligned: "
+                                + audioToLoadIntervalAligned
+                        ),
+                        new Point(0, ActualHeight) + new Vector(0, -50)
+                    );
+                    drawingContext.DrawText(
+                        DebugText(
+                            "Drawing Offset: "
+                                + drawingOffsetAligned
+                                + ", Width: "
+                                + drawingWidthAligned
+                                + ", ScalingFactor: "
+                                + viewportToDrawingScaleFactor
+                                + ", Samples: "
+                                + sampleCount
+                                + ", Peakratio 1:"
+                                + Math.Round(VirtualViewportWidth / sampleLength / ActualWidth, 2)
+                        ),
+                        new Point(0, ActualHeight) + new Vector(0, -40)
+                    );
                 }
             }
 
             if (debug)
             {
                 // DEBUG OUTPUT
-                drawingContext.DrawText(DebugText("ActualWidth: " + ActualWidth + ", ActualHeight: " + ActualHeight),
-                    new Point(0, ActualHeight) + new Vector(0, -30));
-                drawingContext.DrawText(DebugText("TrackLength: " + TrackLength + ", TrackOffset: " + TrackOffset),
-                    new Point(0, ActualHeight) + new Vector(0, -20));
-                drawingContext.DrawText(DebugText("ViewportOffset: " + VirtualViewportOffset + ", ViewportWidth: " + VirtualViewportWidth),
-                    new Point(0, ActualHeight) + new Vector(0, -10));
+                drawingContext.DrawText(
+                    DebugText("ActualWidth: " + ActualWidth + ", ActualHeight: " + ActualHeight),
+                    new Point(0, ActualHeight) + new Vector(0, -30)
+                );
+                drawingContext.DrawText(
+                    DebugText("TrackLength: " + TrackLength + ", TrackOffset: " + TrackOffset),
+                    new Point(0, ActualHeight) + new Vector(0, -20)
+                );
+                drawingContext.DrawText(
+                    DebugText(
+                        "ViewportOffset: "
+                            + VirtualViewportOffset
+                            + ", ViewportWidth: "
+                            + VirtualViewportWidth
+                    ),
+                    new Point(0, ActualHeight) + new Vector(0, -10)
+                );
             }
         }
 
         private FormattedText DebugText(string text)
         {
-            return new FormattedText(text, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
-                new Typeface("Tahoma"), 8, Brushes.Black, _pixelsPerDip);
+            return new FormattedText(
+                text,
+                CultureInfo.CurrentUICulture,
+                FlowDirection.LeftToRight,
+                new Typeface("Tahoma"),
+                8,
+                Brushes.Black,
+                _pixelsPerDip
+            );
         }
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseDown(e);
 
-            if (AudioTrack.Locked) return; // block any action if track is locked
+            if (AudioTrack.Locked)
+                return; // block any action if track is locked
 
             Point mouseDownPosition = Mouse.GetPosition(this);
             //Debug.WriteLine("WaveView OnMouseDown @ " + mouseDownPosition);
@@ -384,10 +535,13 @@ namespace Aurio.WaveControls
 
         private void DispatchInvalidateVisual()
         {
-            Dispatcher.BeginInvoke((Action)delegate
-            {
-                InvalidateVisual();
-            });
+            Dispatcher.BeginInvoke(
+                (Action)
+                    delegate
+                    {
+                        InvalidateVisual();
+                    }
+            );
         }
 
         private void LoadAudioTrack()
@@ -400,12 +554,16 @@ namespace Aurio.WaveControls
             }
 
             // init renderers
-            waveformBitmapRenderers = new WaveformBitmapRenderer[audioTrack.SourceProperties.Channels];
+            waveformBitmapRenderers = new WaveformBitmapRenderer[
+                audioTrack.SourceProperties.Channels
+            ];
             for (int i = 0; i < waveformBitmapRenderers.Length; i++)
             {
                 waveformBitmapRenderers[i] = new WaveformBitmapRenderer();
             }
-            waveformGeometryRenderers = new WaveformGeometryRenderer[audioTrack.SourceProperties.Channels];
+            waveformGeometryRenderers = new WaveformGeometryRenderer[
+                audioTrack.SourceProperties.Channels
+            ];
             for (int i = 0; i < waveformGeometryRenderers.Length; i++)
             {
                 waveformGeometryRenderers[i] = new WaveformGeometryRenderer();

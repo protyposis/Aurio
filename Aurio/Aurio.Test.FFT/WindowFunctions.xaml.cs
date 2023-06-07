@@ -89,7 +89,10 @@ namespace Aurio.Test.FFT
             //PrintArrayToDebugOutput(samplesBlackmanNuttall);
         }
 
-        private void sampleCountSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void sampleCountSlider_ValueChanged(
+            object sender,
+            RoutedPropertyChangedEventArgs<double> e
+        )
         {
             if (!IsLoaded)
                 return;

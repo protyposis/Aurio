@@ -1,17 +1,17 @@
-﻿// 
+﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
 // Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
@@ -25,12 +25,11 @@ using System.Text;
 namespace Aurio.Features
 {
     /// <summary>
-    /// Overlap-add. Writes a sequence of frames with the specified window size 
+    /// Overlap-add. Writes a sequence of frames with the specified window size
     /// to a target stream, overlapped by the specified hop size.
     /// </summary>
     public class OLA
     {
-
         private readonly IAudioWriterStream stream;
         private readonly int windowSize;
         private readonly int hopSize;
@@ -101,7 +100,10 @@ namespace Aurio.Features
         {
             hopInBytes = hopSize * stream.SampleBlockSize;
             overlapInBytes = overlapSize * stream.SampleBlockSize;
-            nonoverlapInBytes = Math.Max(0, (windowSize - 2 * overlapSize) * stream.SampleBlockSize);
+            nonoverlapInBytes = Math.Max(
+                0,
+                (windowSize - 2 * overlapSize) * stream.SampleBlockSize
+            );
             buffer = new byte[nonoverlapInBytes];
             overlapBuffer = new byte[overlapInBytes];
             flushed = false;
@@ -156,7 +158,13 @@ namespace Aurio.Features
             {
                 // Shift remaining overlap to the beginning of the array (BlockCopy handles overlapping elements)
                 // This is more expensive but much simpler than implementing a circle buffer
-                Buffer.BlockCopy(overlapBuffer, hopInBytes, overlapBuffer, 0, overlapInBytes - hopInBytes);
+                Buffer.BlockCopy(
+                    overlapBuffer,
+                    hopInBytes,
+                    overlapBuffer,
+                    0,
+                    overlapInBytes - hopInBytes
+                );
             }
             // Write nonoverlapped middle section, if existing
             else if (nonoverlapInBytes > 0)
@@ -168,7 +176,13 @@ namespace Aurio.Features
             // Write the second overlap part to the buffer for addition with next frame
             if (hopSize < overlapSize)
             {
-                Buffer.BlockCopy(frame, overlapInBytes, overlapBuffer, overlapInBytes - hopInBytes, hopInBytes);
+                Buffer.BlockCopy(
+                    frame,
+                    overlapInBytes,
+                    overlapBuffer,
+                    overlapInBytes - hopInBytes,
+                    hopInBytes
+                );
             }
             else
             {
