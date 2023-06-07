@@ -6,6 +6,6 @@
     <Copyright>Copyright © 2010-2021 Mario Guggenberger</Copyright>
     <Version>1.0.0.0</Version>
     <FileVersion>1.0.0.0</FileVersion>
-    <InformationalVersion>1.0 Alpha</InformationalVersion>
+    <InformationalVersion>Snapshot</InformationalVersion>
   </PropertyGroup>
 </Project>

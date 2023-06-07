@@ -94,7 +94,7 @@ namespace Aurio.Test.HugeControlRendering
                 new FormattedText(
                     "ViewportHOffset: " + ViewportHorizontalOffset + " ViewportWidth: " + ViewportWidth + ", RenderMode: " + renderMode,
                     CultureInfo.CurrentUICulture,
-                    System.Windows.FlowDirection.LeftToRight,
+                    FlowDirection.LeftToRight,
                     new Typeface("Tahoma"),
                     8,
                     Brushes.Black,

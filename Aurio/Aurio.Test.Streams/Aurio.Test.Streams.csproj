@@ -3,27 +3,13 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-	<AssemblyTitle>Aurio Stream Processing Demo</AssemblyTitle>
+    <AssemblyTitle>Aurio Stream Processing Demo</AssemblyTitle>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="NAudio">
-      <HintPath>..\..\libs\NAudio.dll</HintPath>
-    </Reference>
-  </ItemGroup>
   <ItemGroup>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Aurio\Aurio.csproj" />
     <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.261602">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" />
   </ItemGroup>
 </Project>

@@ -1,14 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
     <AssemblyTitle>Aurio FFmpeg Interface</AssemblyTitle>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="..\Aurio.FFmpeg.Proxy32\bin\$(Configuration)\Aurio.FFmpeg.Proxy32.dll">
       <Link>ffmpeg32\Aurio.FFmpeg.Proxy32.dll</Link>
@@ -59,9 +56,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Aurio\Aurio.csproj" />
   </ItemGroup>
-
 </Project>

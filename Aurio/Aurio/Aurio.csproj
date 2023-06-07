@@ -1,30 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyTitle>Aurio Core Library</AssemblyTitle>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="licenseinfo.txt" />
   </ItemGroup>
-
   <ItemGroup>
     <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
   </ItemGroup>
-
   <ItemGroup>
-    <Reference Include="NAudio">
-      <HintPath>..\..\libs\NAudio.dll</HintPath>
-    </Reference>
+    <PackageReference Include="NAudio" Version="2.1.0" />
   </ItemGroup>
-
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="copy &quot;$(ProjectDir)\..\..\NOTICE&quot; &quot;$(ProjectDir)\licenseinfo.txt&quot;" />
   </Target>
-
 </Project>

@@ -1,23 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
-    <OutputType>Library</OutputType>
-	<AssemblyTitle>Aurio PFFFT Unit Tests</AssemblyTitle>
+    <AssemblyTitle>Aurio PFFFT Unit Tests</AssemblyTitle>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Aurio.PFFFT\Aurio.PFFFT.csproj" />
     <ProjectReference Include="..\Aurio\Aurio.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.261602">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-	<PackageReference Include="MSTest.TestAdapter" Version="2.2.7" />
-	<PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
-	<PackageReference Include="coverlet.collector" Version="3.1.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.7" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
+    <PackageReference Include="coverlet.collector" Version="3.1.0" />
   </ItemGroup>
 </Project>

@@ -1,14 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
     <AssemblyTitle>Aurio FFTW Interface</AssemblyTitle>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="..\..\libs\libfftw3f-3.dll">
       <Link>libfftw3f-3.dll</Link>
@@ -19,9 +16,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Aurio\Aurio.csproj" />
   </ItemGroup>
-
 </Project>

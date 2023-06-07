@@ -1,17 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyTitle>Aurio Exocortex.DSP FFT Interface</AssemblyTitle>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\ExocortexDSP\Exocortex.DSP.csproj" />
     <ProjectReference Include="..\Aurio\Aurio.csproj" />
   </ItemGroup>
-
 </Project>

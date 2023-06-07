@@ -3,15 +3,8 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-	  <AssemblyTitle>Aurio Multitrack Playback Demo</AssemblyTitle>
+    <AssemblyTitle>Aurio Multitrack Playback Demo</AssemblyTitle>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="NAudio, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\libs\NAudio.dll</HintPath>
-    </Reference>
-  </ItemGroup>
   <ItemGroup>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
@@ -20,10 +13,5 @@
     <ProjectReference Include="..\Aurio\Aurio.csproj" />
     <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj" />
     <ProjectReference Include="..\Aurio.WaveControls\Aurio.WaveControls.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.261602">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
   </ItemGroup>
 </Project>

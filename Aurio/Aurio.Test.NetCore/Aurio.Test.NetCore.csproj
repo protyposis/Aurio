@@ -7,9 +7,4 @@
     <ProjectReference Include="..\Aurio.Exocortex\Aurio.Exocortex.csproj" />
     <ProjectReference Include="..\Aurio\Aurio.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.261602">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
 </Project>

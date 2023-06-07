@@ -9,9 +9,9 @@
                 <DockPanel LastChildFill="True">
                     <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
                         <Label Content="{Binding Path=Name}" FontWeight="Bold"/>
-                        <Label Content="{Binding Path=Properties.SampleRate}"/>
-                        <Label Content="{Binding Path=Properties.BitDepth}"/>
-                        <Label Content="{Binding Path=Properties.Channels}"/>
+                        <Label Content="{Binding Path=SourceProperties.SampleRate}"/>
+                        <Label Content="{Binding Path=SourceProperties.BitDepth}"/>
+                        <Label Content="{Binding Path=SourceProperties.Channels}"/>
                         <Label Content="{Binding Path=Offset}" ContentStringFormat="{}{0:hh\:mm\:ss\,fff}"/>
                         <Label Content="{Binding Path=Length}" ContentStringFormat="{}{0:hh\:mm\:ss\,fff}"/>
                     </StackPanel>
