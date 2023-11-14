@@ -7,7 +7,9 @@
     <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\SQLite-Net\SQLite-Net.csproj" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Aurio\Aurio.csproj" />
   </ItemGroup>
 </Project>
