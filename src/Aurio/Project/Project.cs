@@ -18,15 +18,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
-using Aurio.Matching;
-using System.IO;
-using System.Xml.Serialization;
 using System.Xml;
+using System.Xml.Serialization;
+using Aurio.Matching;
 using Aurio.Streams;
-using System.Globalization;
-using System.Collections.ObjectModel;
 
 namespace Aurio.Project
 {
@@ -497,9 +497,10 @@ namespace Aurio.Project
 
                 FileInfo videoFileInfo = null;
                 foreach (
-                    FileInfo fileInfo in track.FileInfo.Directory.EnumerateFiles(
-                        track.FileInfo.Name.Replace(".wav", ".*")
-                    )
+                    FileInfo fileInfo in track
+                        .FileInfo
+                        .Directory
+                        .EnumerateFiles(track.FileInfo.Name.Replace(".wav", ".*"))
                 )
                 {
                     foreach (string videoExtension in videoExtensions)

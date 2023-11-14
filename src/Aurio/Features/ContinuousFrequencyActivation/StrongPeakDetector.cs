@@ -59,7 +59,8 @@ namespace Aurio.Features.ContinuousFrequencyActivation
             for (int i = 1; i < frequencyActivation.Length; i++)
             {
                 if (
-                    frequencyActivation[i] < frequencyActivation[i - 1] && direction == Direction.Up
+                    frequencyActivation[i] < frequencyActivation[i - 1]
+                    && direction == Direction.Up
                 )
                 {
                     // local maximum found

@@ -22,9 +22,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
-using StringPtr = System.IntPtr;
-using SoxrInstance = System.IntPtr;
 using SoxrError = System.IntPtr;
+using SoxrInstance = System.IntPtr;
+using StringPtr = System.IntPtr;
 
 namespace Aurio.Soxr
 {

@@ -1,7 +1,7 @@
-﻿using Aurio.Resampler;
+﻿using System;
+using Aurio.Resampler;
 using Aurio.Streams;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace Aurio.UnitTest
 {

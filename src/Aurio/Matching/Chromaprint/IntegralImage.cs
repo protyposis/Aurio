@@ -16,11 +16,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Aurio.DataStructures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Aurio.DataStructures;
 
 namespace Aurio.Matching.Chromaprint
 {

@@ -16,11 +16,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Aurio.Streams;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Aurio.Streams;
 
 namespace Aurio
 {

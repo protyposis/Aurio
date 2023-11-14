@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.IO;
-using Aurio.Project;
-using Aurio.Features.ContinuousFrequencyActivation;
-using Aurio.FFT;
-using Aurio.Resampler;
 using Aurio;
+using Aurio.Features.ContinuousFrequencyActivation;
 using Aurio.FFmpeg;
+using Aurio.FFT;
+using Aurio.Project;
+using Aurio.Resampler;
 
 namespace MusicDetector
 {

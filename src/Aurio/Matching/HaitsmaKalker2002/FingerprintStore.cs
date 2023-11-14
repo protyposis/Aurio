@@ -18,10 +18,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Aurio.Project;
-using System.Diagnostics;
 using Aurio.Streams;
 
 namespace Aurio.Matching.HaitsmaKalker2002

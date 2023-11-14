@@ -16,12 +16,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Aurio.FFT;
-using Exocortex.DSP;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Aurio.FFT;
+using Exocortex.DSP;
 
 namespace Aurio.Exocortex
 {

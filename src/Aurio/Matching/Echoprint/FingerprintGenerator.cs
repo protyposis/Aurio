@@ -16,15 +16,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Aurio.DataStructures;
-using Aurio.Project;
-using Aurio.Resampler;
-using Aurio.Streams;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Aurio.DataStructures;
+using Aurio.Project;
+using Aurio.Resampler;
+using Aurio.Streams;
 
 namespace Aurio.Matching.Echoprint
 {

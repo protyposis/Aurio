@@ -19,11 +19,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using StringPtr = System.IntPtr;
-using SoxrInstance = System.IntPtr;
-using SoxrError = System.IntPtr;
 using System.Runtime.InteropServices;
+using System.Text;
+using SoxrError = System.IntPtr;
+using SoxrInstance = System.IntPtr;
+using StringPtr = System.IntPtr;
 
 namespace Aurio.Soxr
 {

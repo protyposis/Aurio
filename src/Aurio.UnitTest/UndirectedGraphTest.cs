@@ -1,6 +1,6 @@
-﻿using Aurio.DataStructures.Graph;
+﻿using System;
+using Aurio.DataStructures.Graph;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace Aurio.UnitTest
 {

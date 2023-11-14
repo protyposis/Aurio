@@ -20,16 +20,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows.Controls;
 using System.Windows;
+using System.Windows.Controls;
 using Aurio;
 
 namespace Aurio.WaveControls
 {
     public class VirtualContentViewBase : ContentControl, VirtualView
     {
-        public static readonly DependencyProperty VirtualViewportOffsetProperty =
-            VirtualViewBase.VirtualViewportOffsetProperty.AddOwner(
+        public static readonly DependencyProperty VirtualViewportOffsetProperty = VirtualViewBase
+            .VirtualViewportOffsetProperty
+            .AddOwner(
                 typeof(VirtualContentViewBase),
                 new FrameworkPropertyMetadata()
                 {
@@ -38,8 +39,9 @@ namespace Aurio.WaveControls
                 }
             );
 
-        public static readonly DependencyProperty VirtualViewportWidthProperty =
-            VirtualViewBase.VirtualViewportWidthProperty.AddOwner(
+        public static readonly DependencyProperty VirtualViewportWidthProperty = VirtualViewBase
+            .VirtualViewportWidthProperty
+            .AddOwner(
                 typeof(VirtualContentViewBase),
                 new FrameworkPropertyMetadata()
                 {
@@ -48,8 +50,9 @@ namespace Aurio.WaveControls
                 }
             );
 
-        public static readonly DependencyProperty VirtualViewportMinWidthProperty =
-            VirtualViewBase.VirtualViewportMinWidthProperty.AddOwner(
+        public static readonly DependencyProperty VirtualViewportMinWidthProperty = VirtualViewBase
+            .VirtualViewportMinWidthProperty
+            .AddOwner(
                 typeof(VirtualContentViewBase),
                 new FrameworkPropertyMetadata()
                 {
@@ -58,8 +61,9 @@ namespace Aurio.WaveControls
                 }
             );
 
-        public static readonly DependencyProperty VirtualViewportMaxWidthProperty =
-            VirtualViewBase.VirtualViewportMaxWidthProperty.AddOwner(
+        public static readonly DependencyProperty VirtualViewportMaxWidthProperty = VirtualViewBase
+            .VirtualViewportMaxWidthProperty
+            .AddOwner(
                 typeof(VirtualContentViewBase),
                 new FrameworkPropertyMetadata()
                 {
@@ -68,8 +72,9 @@ namespace Aurio.WaveControls
                 }
             );
 
-        public static readonly DependencyProperty DebugOutputProperty =
-            VirtualViewBase.DebugOutputProperty.AddOwner(
+        public static readonly DependencyProperty DebugOutputProperty = VirtualViewBase
+            .DebugOutputProperty
+            .AddOwner(
                 typeof(VirtualContentViewBase),
                 new FrameworkPropertyMetadata() { Inherits = true }
             );

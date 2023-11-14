@@ -18,15 +18,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Aurio.Project;
-using Aurio.Streams;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using Aurio.Features;
+using Aurio.Project;
 using Aurio.Resampler;
+using Aurio.Streams;
 
 namespace Aurio.Matching.HaitsmaKalker2002
 {

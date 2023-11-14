@@ -20,8 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows.Media;
 using System.Windows;
+using System.Windows.Media;
 
 namespace Aurio.WaveControls
 {
@@ -56,15 +56,15 @@ namespace Aurio.WaveControls
                 : CreateWaveform(sampleData, sampleCount);
             // TODO integrate volume into transform
             TransformGroup transformGroup = new TransformGroup();
-            transformGroup.Children.Add(
-                new ScaleTransform(width / audioform.Bounds.Width, height / 2 * -1 * volume)
-            );
+            transformGroup
+                .Children
+                .Add(new ScaleTransform(width / audioform.Bounds.Width, height / 2 * -1 * volume));
             transformGroup.Children.Add(new TranslateTransform(0, height / 2));
             audioform.Transform = transformGroup;
 
-            waveformDrawing.Children.Add(
-                new GeometryDrawing(WaveformFill, new Pen(WaveformLine, 1), audioform)
-            );
+            waveformDrawing
+                .Children
+                .Add(new GeometryDrawing(WaveformFill, new Pen(WaveformLine, 1), audioform));
 
             if (!peaks)
             {
@@ -83,9 +83,9 @@ namespace Aurio.WaveControls
                         );
                         geometryGroup.Children.Add(sampleDot);
                     }
-                    waveformDrawing.Children.Add(
-                        new GeometryDrawing(WaveformSamplePoint, null, geometryGroup)
-                    );
+                    waveformDrawing
+                        .Children
+                        .Add(new GeometryDrawing(WaveformSamplePoint, null, geometryGroup));
                 }
             }
 

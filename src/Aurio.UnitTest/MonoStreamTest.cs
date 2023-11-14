@@ -1,6 +1,6 @@
-﻿using Aurio.Streams;
+﻿using System;
+using Aurio.Streams;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace Aurio.UnitTest
 {

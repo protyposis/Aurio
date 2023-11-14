@@ -18,12 +18,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
-using Aurio.Resampler;
-using Aurio.DataStructures;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
+using Aurio.DataStructures;
+using Aurio.Resampler;
 
 namespace Aurio.Streams
 {

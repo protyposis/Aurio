@@ -11,9 +11,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using NAudio.Wave;
-using Aurio.Streams;
 using Aurio.Resampler;
+using Aurio.Streams;
+using NAudio.Wave;
 
 namespace Aurio.Test.Streams
 {

@@ -1,10 +1,4 @@
-﻿using Aurio;
-using Aurio.FFT;
-using Aurio.Matching;
-using Aurio.Project;
-using Aurio.Resampler;
-using Aurio.TaskMonitor;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -20,6 +14,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Aurio;
+using Aurio.FFT;
+using Aurio.Matching;
+using Aurio.Project;
+using Aurio.Resampler;
+using Aurio.TaskMonitor;
 
 namespace Aurio.Test.FingerprintingBenchmark
 {
@@ -55,13 +55,15 @@ namespace Aurio.Test.FingerprintingBenchmark
 
         private void ProgressMonitor_ProcessingStarted(object sender, EventArgs e)
         {
-            progressBar1.Dispatcher.BeginInvoke(
-                (Action)
-                    delegate
-                    {
-                        progressBar1.IsEnabled = true;
-                    }
-            );
+            progressBar1
+                .Dispatcher
+                .BeginInvoke(
+                    (Action)
+                        delegate
+                        {
+                            progressBar1.IsEnabled = true;
+                        }
+                );
         }
 
         private void ProgressMonitor_ProcessingProgressChanged(
@@ -69,27 +71,31 @@ namespace Aurio.Test.FingerprintingBenchmark
             ValueEventArgs<float> e
         )
         {
-            progressBar1.Dispatcher.BeginInvoke(
-                (Action)
-                    delegate
-                    {
-                        progressBar1.Value = e.Value;
-                        progressBar1Label.Content = progressMonitor.StatusMessage;
-                    }
-            );
+            progressBar1
+                .Dispatcher
+                .BeginInvoke(
+                    (Action)
+                        delegate
+                        {
+                            progressBar1.Value = e.Value;
+                            progressBar1Label.Content = progressMonitor.StatusMessage;
+                        }
+                );
         }
 
         private void ProgressMonitor_ProcessingFinished(object sender, EventArgs e)
         {
-            progressBar1.Dispatcher.BeginInvoke(
-                (Action)
-                    delegate
-                    {
-                        progressBar1.Value = 0;
-                        progressBar1.IsEnabled = false;
-                        progressBar1Label.Content = "";
-                    }
-            );
+            progressBar1
+                .Dispatcher
+                .BeginInvoke(
+                    (Action)
+                        delegate
+                        {
+                            progressBar1.Value = 0;
+                            progressBar1.IsEnabled = false;
+                            progressBar1Label.Content = "";
+                        }
+                );
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -109,13 +115,15 @@ namespace Aurio.Test.FingerprintingBenchmark
 
         private void ReportBenchmarkResult(BenchmarkEntry e)
         {
-            dataGrid1.Dispatcher.BeginInvoke(
-                (Action)
-                    delegate
-                    {
-                        benchmarkResults.Add(e);
-                    }
-            );
+            dataGrid1
+                .Dispatcher
+                .BeginInvoke(
+                    (Action)
+                        delegate
+                        {
+                            benchmarkResults.Add(e);
+                        }
+                );
         }
 
         private void Benchmark(AudioTrack track, bool warmup)

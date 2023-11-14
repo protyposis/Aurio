@@ -16,12 +16,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Aurio.Project;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Aurio.Project;
 
 namespace Aurio.Matching.Wang2003
 {
@@ -149,10 +149,12 @@ namespace Aurio.Matching.Wang2003
                         else
                         { // ... else create a new entry
                             // Add the current length of the hash list as start pointer for all hashes belonging to the current index
-                            trackStore.index.Add(
-                                storeIndex,
-                                new TrackStore.IndexEntry(storeHashIndex, hashCount)
-                            );
+                            trackStore
+                                .index
+                                .Add(
+                                    storeIndex,
+                                    new TrackStore.IndexEntry(storeHashIndex, hashCount)
+                                );
                         }
                     }
 
@@ -284,7 +286,8 @@ namespace Aurio.Matching.Wang2003
                                 break; // exit condition
                             }
                             else if (
-                                frameCount > matchingMinFrames && rate > thresholdAccept[frameCount]
+                                frameCount > matchingMinFrames
+                                && rate > thresholdAccept[frameCount]
                             )
                             {
                                 matchFound = true;

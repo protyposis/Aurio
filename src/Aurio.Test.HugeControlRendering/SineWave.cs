@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Windows.Controls;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
-using System.Globalization;
 using System.Windows.Media.Imaging;
 
 namespace Aurio.Test.HugeControlRendering
@@ -188,9 +188,9 @@ namespace Aurio.Test.HugeControlRendering
 
             TransformGroup transformGroup = new TransformGroup();
             transformGroup.Children.Add(new ScaleTransform(1, ActualHeight / 2));
-            transformGroup.Children.Add(
-                new TranslateTransform(ViewportHorizontalOffset, ActualHeight / 2)
-            );
+            transformGroup
+                .Children
+                .Add(new TranslateTransform(ViewportHorizontalOffset, ActualHeight / 2));
             geometry.Transform = transformGroup;
 
             return geometry;

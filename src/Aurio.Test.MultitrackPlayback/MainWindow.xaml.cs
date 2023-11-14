@@ -1,26 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Aurio.Project;
-using System.IO;
-using NAudio.Wave;
-using Aurio.Streams;
-using System.Timers;
-using System.Windows.Interop;
 using System.Windows.Threading;
 using Aurio;
 using Aurio.FFT;
+using Aurio.Project;
 using Aurio.Resampler;
+using Aurio.Streams;
+using NAudio.Wave;
 
 namespace Aurio.Test.MultitrackPlayback
 {
@@ -259,26 +259,31 @@ namespace Aurio.Test.MultitrackPlayback
         {
             if (wavePlayer != null)
             {
-                lblCurrentPlaybackTime.Dispatcher.BeginInvoke(
-                    DispatcherPriority.Normal,
-                    new DispatcherOperationCallback(
-                        delegate
-                        {
-                            lblCurrentPlaybackTime.Content = TimeUtil.BytesToTimeSpan(
-                                playbackStream.Position,
-                                playbackStream.Properties
-                            );
+                lblCurrentPlaybackTime
+                    .Dispatcher
+                    .BeginInvoke(
+                        DispatcherPriority.Normal,
+                        new DispatcherOperationCallback(
+                            delegate
+                            {
+                                lblCurrentPlaybackTime.Content = TimeUtil.BytesToTimeSpan(
+                                    playbackStream.Position,
+                                    playbackStream.Properties
+                                );
 
-                            playbackSeeker.Tag = SEEKER_PROGRAMMATIC_VALUECHANGED_TAG;
-                            playbackSeeker.Value = TimeUtil
-                                .BytesToTimeSpan(playbackStream.Position, playbackStream.Properties)
-                                .TotalSeconds;
+                                playbackSeeker.Tag = SEEKER_PROGRAMMATIC_VALUECHANGED_TAG;
+                                playbackSeeker.Value = TimeUtil
+                                    .BytesToTimeSpan(
+                                        playbackStream.Position,
+                                        playbackStream.Properties
+                                    )
+                                    .TotalSeconds;
 
-                            return null;
-                        }
-                    ),
-                    null
-                );
+                                return null;
+                            }
+                        ),
+                        null
+                    );
             }
         }
 

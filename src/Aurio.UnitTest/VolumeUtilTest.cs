@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Aurio;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using Aurio;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aurio.UnitTest
 {

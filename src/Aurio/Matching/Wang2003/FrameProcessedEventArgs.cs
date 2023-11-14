@@ -16,11 +16,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Aurio.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Aurio.Project;
 
 namespace Aurio.Matching.Wang2003
 {

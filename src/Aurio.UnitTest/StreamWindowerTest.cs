@@ -1,8 +1,8 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 using Aurio.Features;
 using Aurio.Streams;
-using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aurio.UnitTest
 {

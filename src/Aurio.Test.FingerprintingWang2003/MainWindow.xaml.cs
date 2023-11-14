@@ -1,12 +1,4 @@
-﻿using Aurio.FFT;
-using Aurio.Matching;
-using Aurio.Matching.Wang2003;
-using Aurio.Project;
-using Aurio.Resampler;
-using Aurio.Streams;
-using Aurio.TaskMonitor;
-using Aurio.WaveControls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -23,6 +15,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Aurio.FFT;
+using Aurio.Matching;
+using Aurio.Matching.Wang2003;
+using Aurio.Project;
+using Aurio.Resampler;
+using Aurio.Streams;
+using Aurio.TaskMonitor;
+using Aurio.WaveControls;
 
 namespace Aurio.Test.FingerprintingWang2003
 {
@@ -56,24 +56,28 @@ namespace Aurio.Test.FingerprintingWang2003
 
         private void Instance_ProcessingProgressChanged(object sender, ValueEventArgs<float> e)
         {
-            progressBar1.Dispatcher.BeginInvoke(
-                (Action)
-                    delegate
-                    {
-                        progressBar1.Value = e.Value;
-                    }
-            );
+            progressBar1
+                .Dispatcher
+                .BeginInvoke(
+                    (Action)
+                        delegate
+                        {
+                            progressBar1.Value = e.Value;
+                        }
+                );
         }
 
         private void GlobalInstance_ProcessingFinished(object sender, EventArgs e)
         {
-            progressBar1.Dispatcher.BeginInvoke(
-                (Action)
-                    delegate
-                    {
-                        progressBar1.Value = 0;
-                    }
-            );
+            progressBar1
+                .Dispatcher
+                .BeginInvoke(
+                    (Action)
+                        delegate
+                        {
+                            progressBar1.Value = 0;
+                        }
+                );
         }
 
         private void button1_Click(object sender, RoutedEventArgs e)
@@ -102,8 +106,9 @@ namespace Aurio.Test.FingerprintingWang2003
                     {
                         AudioTrack audioTrack = new AudioTrack(new FileInfo(file));
                         IAudioStream audioStream = audioTrack.CreateAudioStream();
-                        IProgressReporter progressReporter =
-                            ProgressMonitor.GlobalInstance.BeginTask(
+                        IProgressReporter progressReporter = ProgressMonitor
+                            .GlobalInstance
+                            .BeginTask(
                                 "Generating fingerprints for " + audioTrack.FileInfo.Name,
                                 true
                             );

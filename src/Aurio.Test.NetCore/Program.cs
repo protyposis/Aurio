@@ -1,6 +1,6 @@
-﻿using Aurio.FFT;
+﻿using System;
+using Aurio.FFT;
 using Aurio.Resampler;
-using System;
 
 namespace Aurio.Test.NetCore
 {

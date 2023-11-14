@@ -18,11 +18,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using SQLite;
 using Aurio.Project;
-using System.Diagnostics;
+using SQLite;
 
 namespace Aurio.Matching
 {

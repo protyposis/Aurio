@@ -18,14 +18,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
-using System.Windows.Controls;
-using System.Windows.Media.Imaging;
-using System.Drawing.Imaging;
-using System.Windows.Media;
 using System.Windows;
-using System.Diagnostics;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Aurio.WaveControls
 {

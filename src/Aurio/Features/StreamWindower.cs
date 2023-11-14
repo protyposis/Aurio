@@ -18,11 +18,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Aurio.Streams;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace Aurio.Features
 {

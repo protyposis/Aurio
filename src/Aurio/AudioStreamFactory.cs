@@ -17,17 +17,17 @@
 //
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
-using NAudio.Wave;
-using System.IO;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using Aurio.Project;
-using Aurio.TaskMonitor;
 using Aurio.Streams;
-using System.Collections.Concurrent;
+using Aurio.TaskMonitor;
+using NAudio.Wave;
 
 namespace Aurio
 {
@@ -238,10 +238,9 @@ namespace Aurio
                     .CreateMemoryStreams()
                     .WrapWithBinaryWriters();
 
-                IProgressReporter progressReporter = ProgressMonitor.GlobalInstance.BeginTask(
-                    "Generating peaks for " + audioTrack.Name,
-                    true
-                );
+                IProgressReporter progressReporter = ProgressMonitor
+                    .GlobalInstance
+                    .BeginTask("Generating peaks for " + audioTrack.Name, true);
                 DateTime startTime = DateTime.Now;
                 int sampleBlockCount = 0;
                 int peakCount = 0;

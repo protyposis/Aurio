@@ -18,10 +18,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using Aurio.Project;
-using System.Collections.Specialized;
 
 namespace Aurio.Matching
 {

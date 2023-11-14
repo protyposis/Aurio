@@ -18,11 +18,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Aurio.Streams;
-using System.Diagnostics;
 using Aurio.Features;
+using Aurio.Streams;
 
 namespace Aurio.Matching.Dixon2005
 {

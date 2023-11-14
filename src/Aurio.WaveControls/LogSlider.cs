@@ -18,11 +18,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Windows.Controls;
 using System.Windows;
-using System.Diagnostics;
+using System.Windows.Controls;
 
 namespace Aurio.WaveControls
 {

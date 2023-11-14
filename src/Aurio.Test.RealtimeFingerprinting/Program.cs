@@ -1,11 +1,11 @@
-﻿using Aurio.FFT;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Aurio.FFT;
 using Aurio.Matching.HaitsmaKalker2002;
 using Aurio.Project;
 using Aurio.Resampler;
 using Aurio.Streams;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Aurio.Test.RealtimeFingerprinting
 {

@@ -52,24 +52,28 @@ namespace Aurio.Test.FingerprintingHaitsmaKalker2002
 
         void GlobalInstance_ProcessingProgressChanged(object sender, ValueEventArgs<float> e)
         {
-            progressBar1.Dispatcher.BeginInvoke(
-                (Action)
-                    delegate
-                    {
-                        progressBar1.Value = e.Value;
-                    }
-            );
+            progressBar1
+                .Dispatcher
+                .BeginInvoke(
+                    (Action)
+                        delegate
+                        {
+                            progressBar1.Value = e.Value;
+                        }
+                );
         }
 
         void GlobalInstance_ProcessingFinished(object sender, EventArgs e)
         {
-            progressBar1.Dispatcher.BeginInvoke(
-                (Action)
-                    delegate
-                    {
-                        progressBar1.Value = 0;
-                    }
-            );
+            progressBar1
+                .Dispatcher
+                .BeginInvoke(
+                    (Action)
+                        delegate
+                        {
+                            progressBar1.Value = 0;
+                        }
+                );
         }
 
         private void button1_Click(object sender, RoutedEventArgs e)
@@ -99,8 +103,9 @@ namespace Aurio.Test.FingerprintingHaitsmaKalker2002
                                 fileName =>
                                 {
                                     AudioTrack audioTrack = new AudioTrack(new FileInfo(fileName));
-                                    IProgressReporter progressReporter =
-                                        ProgressMonitor.GlobalInstance.BeginTask(
+                                    IProgressReporter progressReporter = ProgressMonitor
+                                        .GlobalInstance
+                                        .BeginTask(
                                             "Generating sub-fingerprints for "
                                                 + audioTrack.FileInfo.Name,
                                             true
@@ -161,9 +166,9 @@ namespace Aurio.Test.FingerprintingHaitsmaKalker2002
                     )
                     {
                         // only add hash to the list if it points to at least two different audio tracks
-                        List<SubFingerprintLookupEntry> entries = store.CollisionMap.GetValues(
-                            hash
-                        );
+                        List<SubFingerprintLookupEntry> entries = store
+                            .CollisionMap
+                            .GetValues(hash);
                         SubFingerprintLookupEntry firstEntry = entries[0];
                         for (int x = 1; x < entries.Count; x++)
                         {

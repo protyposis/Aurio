@@ -16,12 +16,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Aurio.Features;
-using Aurio.Streams;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Aurio.Features;
+using Aurio.Streams;
 
 namespace Aurio.Matching.Echoprint
 {

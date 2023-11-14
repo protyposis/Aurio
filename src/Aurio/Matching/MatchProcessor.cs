@@ -18,12 +18,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Aurio.Project;
-using System.Diagnostics;
-using Aurio.Streams;
 using Aurio.DataStructures.Graph;
+using Aurio.Project;
+using Aurio.Streams;
 
 namespace Aurio.Matching
 {
@@ -511,18 +511,16 @@ namespace Aurio.Matching
                         {
                             if (match.Track1 == trackToAlign && !match.Track1.Locked)
                             {
-                                match.Track1Time =
-                                    trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(
-                                        match.Track1Time
-                                    );
+                                match.Track1Time = trackToAlign
+                                    .TimeWarps
+                                    .TranslateSourceToWarpedPosition(match.Track1Time);
                                 adjustedMatches.Add(match);
                             }
                             else if (match.Track2 == trackToAlign && !match.Track2.Locked)
                             {
-                                match.Track2Time =
-                                    trackToAlign.TimeWarps.TranslateSourceToWarpedPosition(
-                                        match.Track2Time
-                                    );
+                                match.Track2Time = trackToAlign
+                                    .TimeWarps
+                                    .TranslateSourceToWarpedPosition(match.Track2Time);
                                 adjustedMatches.Add(match);
                             }
                         }

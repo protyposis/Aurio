@@ -7,7 +7,7 @@
     <Version>1.0.0</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CSharpier.MsBuild" Version="0.24.2">
+    <PackageReference Include="CSharpier.MsBuild" Version="0.26.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

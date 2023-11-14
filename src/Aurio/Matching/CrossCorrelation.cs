@@ -18,14 +18,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using NAudio.Wave;
-using System.Diagnostics;
 using System.Threading.Tasks;
-using Aurio.TaskMonitor;
-using Aurio.Streams;
 using Aurio.Resampler;
+using Aurio.Streams;
+using Aurio.TaskMonitor;
+using NAudio.Wave;
 
 namespace Aurio.Matching
 {

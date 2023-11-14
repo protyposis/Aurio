@@ -1,8 +1,8 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Aurio.Streams;
 using System.Collections.Generic;
 using Aurio.Resampler;
+using Aurio.Streams;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aurio.UnitTest
 {

@@ -17,12 +17,12 @@
 //
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using System.Collections;
-using System.ComponentModel;
-using System.Collections.Specialized;
 
 namespace Aurio.Project
 {

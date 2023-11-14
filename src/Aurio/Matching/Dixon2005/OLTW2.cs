@@ -17,16 +17,16 @@
 //
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Aurio.DataStructures.Matrix;
 using Aurio.Streams;
 using Aurio.TaskMonitor;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Collections.Concurrent;
-using System.Threading;
-using Aurio.DataStructures.Matrix;
 
 namespace Aurio.Matching.Dixon2005
 {

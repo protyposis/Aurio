@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -29,7 +30,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Diagnostics;
 
 namespace Aurio.WaveControls
 {
@@ -147,12 +147,15 @@ namespace Aurio.WaveControls
                 int count = 0;
                 foreach (double value in dc)
                 {
-                    graph.GraphLine.Points.Add(
-                        new Point(
-                            graph.ActualWidth / (dc.Length - 1) * count,
-                            height - factor * (value - min)
-                        )
-                    );
+                    graph
+                        .GraphLine
+                        .Points
+                        .Add(
+                            new Point(
+                                graph.ActualWidth / (dc.Length - 1) * count,
+                                height - factor * (value - min)
+                            )
+                        );
                     count++;
                 }
             }
@@ -173,12 +176,15 @@ namespace Aurio.WaveControls
                 double heightScale = height / (max - min);
                 foreach (double value in dc)
                 {
-                    graph.GraphLine.Points.Add(
-                        new Point(
-                            graph.ActualWidth / (dc.Length - 1) * count,
-                            height - heightScale * (value - min)
-                        )
-                    );
+                    graph
+                        .GraphLine
+                        .Points
+                        .Add(
+                            new Point(
+                                graph.ActualWidth / (dc.Length - 1) * count,
+                                height - heightScale * (value - min)
+                            )
+                        );
                     count++;
                 }
             }
@@ -190,12 +196,15 @@ namespace Aurio.WaveControls
                 double dbFactor = height / range;
                 foreach (double value in dc)
                 {
-                    graph.GraphLine.Points.Add(
-                        new Point(
-                            graph.ActualWidth / (dc.Length - 1) * count,
-                            value * -1 * dbFactor
-                        )
-                    );
+                    graph
+                        .GraphLine
+                        .Points
+                        .Add(
+                            new Point(
+                                graph.ActualWidth / (dc.Length - 1) * count,
+                                value * -1 * dbFactor
+                            )
+                        );
                     count++;
                 }
             }

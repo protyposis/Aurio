@@ -18,17 +18,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Aurio.Project;
-using NAudio.Wave;
 using System.Timers;
-using System.Diagnostics;
-using Aurio.Streams;
-using NAudio.CoreAudioApi;
-using Aurio.TaskMonitor;
-using System.ComponentModel;
+using Aurio.Project;
 using Aurio.Resampler;
+using Aurio.Streams;
+using Aurio.TaskMonitor;
+using NAudio.CoreAudioApi;
+using NAudio.Wave;
 
 namespace Aurio
 {
@@ -322,7 +322,8 @@ namespace Aurio
             // Set new mixer samplerate
             audioMixer.SampleRate = newSampleRate;
             // Adjust other streams' samplerates
-            trackListStreams.Values
+            trackListStreams
+                .Values
                 .ToList()
                 .ForEach(s => s.FindStream<ResamplingStream>().TargetSampleRate = newSampleRate);
             // Adjust playback output resampler rate
@@ -506,7 +507,8 @@ namespace Aurio
             else
             {
                 // Determine the maximum sample rate of the remaining tracks
-                int remainingTracksMaxSampleRate = trackListStreams.Values
+                int remainingTracksMaxSampleRate = trackListStreams
+                    .Values
                     .Select(
                         s =>
                             s.FindStream<ResamplingStream>().GetSourceStream().Properties.SampleRate

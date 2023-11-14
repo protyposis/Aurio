@@ -18,13 +18,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using Aurio.Project;
-using Aurio.Streams;
 using Aurio;
-using System.IO;
+using Aurio.Project;
 using Aurio.Resampler;
+using Aurio.Streams;
 
 namespace Aurio.Features.ContinuousFrequencyActivation
 {
