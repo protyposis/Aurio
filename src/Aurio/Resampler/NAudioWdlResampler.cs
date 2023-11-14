@@ -8,7 +8,7 @@ namespace Aurio.Resampler
 {
     public class NAudioWdlResampler : IResampler
     {
-        private NAudioWdlResamplerWrapper _resampler;
+        private NAudio.Dsp.WdlResampler _resampler;
 
         public NAudioWdlResampler(ResamplingQuality quality, int channels, double sampleRateRatio)
         {
@@ -16,7 +16,7 @@ namespace Aurio.Resampler
             Channels = channels;
             Ratio = sampleRateRatio;
 
-            _resampler = new NAudioWdlResamplerWrapper();
+            _resampler = new NAudio.Dsp.WdlResampler();
 
             // TODO apply fitting configuration settings for the different quality levels
             switch (quality)
