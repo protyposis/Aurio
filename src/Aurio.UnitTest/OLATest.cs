@@ -92,7 +92,7 @@ namespace Aurio.UnitTest
 
             // 50% overlap with a Hann window is an optimal combination, Hann window is optimally uneven with a 1 as middle point
             int windowSize = 21;
-            int hopSize = 11;
+            int hopSize = 10;
             var window = WindowType.Hann;
 
             // Adjust source length to window/hop size so no samples remain at the end
