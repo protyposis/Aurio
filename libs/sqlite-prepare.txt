@@ -1,9 +1,6 @@
 1. Download and extract almagamation source from http://www.sqlite.org/download.html
 
-2a. Compile x86 dll in Visual Studio "x86 Native Tools Command Prompt":
-    cl sqlite3.c -DSQLITE_API=__declspec(dllexport) -link -dll -out:sqlite3.x86.dll
-
-2b. Compile x64 dll in Visual Studio "x64 Native Tools Command Prompt" (or "x64 Cross Tools Command Prompt" on 32 bit Windows):
+2. Compile x64 dll in Visual Studio "x64 Native Tools Command Prompt" (or "x64 Cross Tools Command Prompt" on 32 bit Windows):
     cl sqlite3.c -DSQLITE_API=__declspec(dllexport) -link -dll -out:sqlite3.x64.dll
 
 Current version used: 3.8.8.3 / sqlite-amalgamation-3080803.zip

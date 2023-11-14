@@ -2939,7 +2939,7 @@ namespace SQLite
                 Platform = new SQLiteWin64();
             }
             else {
-                Platform = new SQLiteWin32();
+                throw new Exception("Unsupported platform");
             }
         }
 

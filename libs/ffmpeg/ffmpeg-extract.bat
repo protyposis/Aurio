@@ -4,7 +4,7 @@ setlocal EnableDelayedExpansion
 REM This script automatically extracts the downloaded FFmpeg 7-zip archives and sets up the required folder structure
 
 SET version=ffmpeg-3.3.3
-SET platforms="win32" "win64"
+SET platforms="win64"
 SET disttypes="dev" "shared"
 
 

@@ -145,18 +145,7 @@ namespace Aurio.Soxr
             }
             else
             {
-                soxr_version = Interop32.soxr_version;
-                soxr_create = Interop32.soxr_create;
-                soxr_process = Interop32.soxr_process;
-                soxr_error = Interop32.soxr_error;
-                soxr_delay = Interop32.soxr_delay;
-                soxr_engine = Interop32.soxr_engine;
-                soxr_clear = Interop32.soxr_clear;
-                soxr_delete = Interop32.soxr_delete;
-                soxr_set_io_ratio = Interop32.soxr_set_io_ratio;
-                soxr_quality_spec = Interop32.soxr_quality_spec;
-                soxr_runtime_spec = Interop32.soxr_runtime_spec;
-                soxr_io_spec = Interop32.soxr_io_spec;
+                throw new Exception("Unsupported platform");
             }
         }
     }

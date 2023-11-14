@@ -100,16 +100,7 @@ namespace Aurio.FFmpeg
             }
             else
             {
-                stream_open_file = Interop32.stream_open_file;
-                stream_open_bufferedio = Interop32.stream_open_bufferedio;
-                stream_get_output_config = Interop32.stream_get_output_config;
-                stream_read_frame = Interop32.stream_read_frame;
-                stream_seek = Interop32.stream_seek;
-                stream_seekindex_create = Interop32.stream_seekindex_create;
-                stream_seekindex_remove = Interop32.stream_seekindex_remove;
-                stream_close = Interop32.stream_close;
-                stream_has_error = Interop32.stream_has_error;
-                stream_get_error = Interop32.stream_get_error;
+                throw new Exception("Usupported platform");
             }
         }
     }

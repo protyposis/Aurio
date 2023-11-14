@@ -35,7 +35,7 @@ namespace Aurio.LibSampleRate
             }
             else
             {
-                interop = new Interop32Wrapper();
+                throw new Exception("Unsupported platform");
             }
         }
 

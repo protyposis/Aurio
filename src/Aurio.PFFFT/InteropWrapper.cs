@@ -84,15 +84,7 @@ namespace Aurio.PFFFT
             }
             else
             {
-                pffft_new_setup = Interop32.pffft_new_setup;
-                pffft_destroy_setup = Interop32.pffft_destroy_setup;
-                pffft_transform = Interop32.pffft_transform;
-                pffft_transform_ordered = Interop32.pffft_transform_ordered;
-                pffft_zreorder = Interop32.pffft_zreorder;
-                pffft_zconvolve_accumulate = Interop32.pffft_zconvolve_accumulate;
-                pffft_aligned_malloc = Interop32.pffft_aligned_malloc;
-                pffft_aligned_free = Interop32.pffft_aligned_free;
-                pffft_simd_size = Interop32.pffft_simd_size;
+                throw new Exception("Unsupported platform");
             }
         }
     }

@@ -36,7 +36,7 @@ namespace Aurio.FFTW
             }
             else
             {
-                interop = new Interop32Wrapper();
+                throw new Exception("Unsupported platform");
             }
         }
 

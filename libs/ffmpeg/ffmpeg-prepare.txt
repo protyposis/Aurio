@@ -3,23 +3,20 @@
    Currently used: FFmpeg 3.3.3
    ----------------------------
 
-2. Download "win32" and "win64" "shared" and "dev" packages
+2. Download "win64" "shared" and "dev" packages
    (7-zip is required to extract them: http://www.7-zip.org/download.html)
 
 3a. Automatically setup FFmpeg directory structure by placing downloaded files into this file's directory, calling "ffmpeg-extract.bat" and following instructions
 
    -- OR --
 
-3b. Manually extract and place contents of shared and dev archives (without root folder) in win32 or win64 subfolder
+3b. Manually extract and place contents of shared and dev archives (without root folder) in win64 subfolder
 
 4. The final folder structure should look like this:
 
    .(this folder)
    |
-   |-- win32
+   |-- win64
    |   |--bin (containing dlls)
    |   |--include (containing headers in subdirectories)
    |   |--lib (containing libs)
-   |
-   |-- win64
-       |... same as above
