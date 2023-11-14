@@ -63,8 +63,6 @@ namespace Aurio.UnitTest
 
             Assert.AreEqual(inSize, totalIn, "not all data has been read");
             Assert.AreEqual(outSize, totalOut, "not all data has been put out");
-
-            // TODO figure out how to flush the resampler to get all samples out
         }
     }
 }
