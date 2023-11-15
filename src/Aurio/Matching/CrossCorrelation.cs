@@ -25,7 +25,6 @@ using System.Threading.Tasks;
 using Aurio.Resampler;
 using Aurio.Streams;
 using Aurio.TaskMonitor;
-using NAudio.Wave;
 
 namespace Aurio.Matching
 {
