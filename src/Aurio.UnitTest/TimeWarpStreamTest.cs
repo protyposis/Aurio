@@ -12,7 +12,6 @@ namespace Aurio.UnitTest
     public class TimeWarpStreamTest
     {
         private TestContext testContextInstance;
-        private static TimeWarpStream stream;
 
         /// <summary>
         ///Gets or sets the test context which provides
