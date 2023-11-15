@@ -1,6 +1,6 @@
 // 
 // Aurio: Audio Processing, Analysis and Retrieval Library
-// Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
+// Copyright (C) 2010-2023  Mario Guggenberger <mg@protyposis.net>
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -29,6 +29,7 @@
 #include <stdio.h>
 
 // FFmpeg includes
+#include "libavcodec\avcodec.h"
 #include "libavformat\avformat.h"
 #include "libavutil\timestamp.h"
 #include "libswresample\swresample.h"
@@ -86,7 +87,7 @@ typedef struct ProxyInstance {
 	AVStream			*video_stream;
 	AVCodecContext		*audio_codec_ctx;
 	AVCodecContext		*video_codec_ctx;
-	AVPacket			pkt;
+	AVPacket			*pkt;
 	AVFrame				*frame;
 	SwrContext			*swr;
 	struct SwsContext	*sws;
@@ -147,13 +148,13 @@ EXPORT void stream_close(ProxyInstance *pi);
 EXPORT int stream_has_error(ProxyInstance *pi);
 EXPORT char* stream_get_error(ProxyInstance *pi);
 
-static void pi_init(ProxyInstance **pi);
+static int pi_init(ProxyInstance **pi);
 static void pi_free(ProxyInstance **pi);
 static void pi_set_error(ProxyInstance *pi, const char* fmt, ...);
 static int pi_has_error(ProxyInstance *pi);
 
 static void info(AVFormatContext *fmt_ctx);
-static int open_codec_context(AVFormatContext *fmt_ctx, int type);
+static int open_codec_context(AVFormatContext *fmt_ctx, AVCodecContext** codec_ctx, int type);
 static int decode_audio_packet(ProxyInstance *pi, int *got_audio_frame, int cached);
 static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cached);
 static int convert_audio_samples(ProxyInstance *pi);
@@ -176,7 +177,7 @@ int file_close(FILE *f) {
 }
 
 int file_read_packet(FILE* f, uint8_t *buf, int buf_size) {
-	return fread(buf, 1, buf_size, f);
+	return (int)fread(buf, 1, buf_size, f);
 }
 
 int64_t file_seek(FILE* f, int64_t offset, int whence) {
@@ -248,7 +249,7 @@ int main(int argc, char *argv[])
 	output_buffer = malloc(output_buffer_size);
 
 	// read full stream
-	int64_t count1 = 0, last_ts1;
+	int64_t count1 = 0, last_ts1 = -1;
 	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size, &frame_type)) >= 0) {
 		printf("read %d @ %lld type %d\n", ret, timestamp, frame_type);
 		if (frame_type == TYPE_VIDEO) {
@@ -268,7 +269,7 @@ int main(int argc, char *argv[])
 	stream_seek(pi, 0, mode == TYPE_VIDEO ? TYPE_VIDEO : TYPE_AUDIO);
 
 	// read again (output should be the same as above)
-	int64_t count2 = 0, last_ts2;
+	int64_t count2 = 0, last_ts2 = -1;
 	int64_t accumulated_frame_length = 0;
 	int last_ret = 0;
 	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size, &frame_type)) >= 0) {
@@ -312,11 +313,14 @@ int main(int argc, char *argv[])
 ProxyInstance *stream_open_file(int mode, char *filename)
 {
 	ProxyInstance *pi;
+	int ret = 0;
 
-	pi_init(&pi);
+	if ((ret = pi_init(&pi)) < 0) {
+		pi_set_error(pi, "Could not initialize proxy instance (%d)", ret);
+		return pi;
+	}
+
 	pi->mode = mode;
-
-	av_register_all();
 
 	if (avformat_open_input(&pi->fmt_ctx, filename, NULL, NULL) < 0) {
 		pi_set_error(pi, "Could not open source file %s", filename);
@@ -346,14 +350,16 @@ ProxyInstance *stream_open_bufferedio(int mode,
 	AVIOContext *io_ctx;
 	int ret;
 
-	pi_init(&pi);
-	pi->mode = mode;
+	if ((ret = pi_init(&pi)) < 0) {
+		pi_set_error(pi, "Could not initialize proxy instance (%d)", ret);
+		return pi;
+	}
 
-	av_register_all();
+	pi->mode = mode;
 
 	// Allocate IO buffer for the AVIOContext. 
 	// Must later be freed by av_free() from AVIOContext.buffer (which could be the same or a replacement buffer).
-	buffer = av_malloc(buffer_size + FF_INPUT_BUFFER_PADDING_SIZE);
+	buffer = av_malloc(buffer_size + AV_INPUT_BUFFER_PADDING_SIZE);
 
 	// Allocate the AVIOContext. Must later be freed by av_free().
 	io_ctx = avio_alloc_context(buffer, buffer_size, 0 /* not writeable */, opaque, read_packet, NULL /* no write_packet needed */, seek);
@@ -403,20 +409,19 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 
 	if (pi->mode & TYPE_AUDIO) {
 		// open audio stream
-		if ((ret = open_codec_context(pi->fmt_ctx, AVMEDIA_TYPE_AUDIO)) < 0) {
+		if ((ret = open_codec_context(pi->fmt_ctx, &pi->audio_codec_ctx, AVMEDIA_TYPE_AUDIO)) < 0) {
 			pi_set_error(pi, "Cannot find audio stream");
 			return pi;
 		}
 
 		pi->audio_stream = pi->fmt_ctx->streams[ret];
-		pi->audio_codec_ctx = pi->audio_stream->codec;
 
 		/* initialize sample format converter */
 		// http://stackoverflow.com/a/15372417
 		pi->swr = swr_alloc();
 		if (!pi->audio_codec_ctx->channel_layout) {
 			// when no channel layout is set, set default layout
-			pi->audio_codec_ctx->channel_layout = av_get_default_channel_layout(pi->audio_codec_ctx->channels);
+			//pi->audio_codec_ctx->channel_layout = av_get_default_channel_layout(pi->audio_codec_ctx->channels); // TODO FIX
 		}
 		av_opt_set_int(pi->swr, "in_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
 		av_opt_set_int(pi->swr, "out_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
@@ -462,7 +467,7 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 			printf("output: %lld length, %d frame_size\n", pi->audio_output.length, pi->audio_output.frame_size);
 		}
 
-		if (pi->audio_codec_ctx->codec->capabilities & CODEC_CAP_DELAY) {
+		if (pi->audio_codec_ctx->codec->capabilities & AV_CODEC_CAP_DELAY) {
 			// When CODEC_CAP_DELAY is set, there is a delay between input and output of the decoder
 			printf("warning: cap delay!\n");
 		}
@@ -470,13 +475,12 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 
 	if (pi->mode & TYPE_VIDEO) {
 		// open audio stream
-		if ((ret = open_codec_context(pi->fmt_ctx, AVMEDIA_TYPE_VIDEO)) < 0) {
+		if ((ret = open_codec_context(pi->fmt_ctx, &pi->video_codec_ctx, AVMEDIA_TYPE_VIDEO)) < 0) {
 			pi_set_error(pi, "Cannot find video stream");
 			return pi;
 		}
 
 		pi->video_stream = pi->fmt_ctx->streams[ret];
-		pi->video_codec_ctx = pi->video_stream->codec;
 
 		/* Initialize video frame converter */
 		// PIX_FMT_BGR24 format needed by C# for correct color interpretation (PixelFormat.Format24bppRgb)
@@ -511,16 +515,16 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 			printf("output: %lld length, %d frame_size\n", pi->video_output.length, pi->video_output.frame_size);
 		}
 
-		if (pi->video_codec_ctx->codec->capabilities & CODEC_CAP_DELAY) {
+		if (pi->video_codec_ctx->codec->capabilities & AV_CODEC_CAP_DELAY) {
 			// When CODEC_CAP_DELAY is set, there is a delay between input and output of the decoder
 			printf("warning: cap delay!\n");
 		}
 	}
 
 	/* initialize packet, set data to NULL, let the demuxer fill it */
-	av_init_packet(&pi->pkt);
-	pi->pkt.data = NULL;
-	pi->pkt.size = 0;
+	pi->pkt = av_packet_alloc();
+	pi->pkt->data = NULL;
+	pi->pkt->size = 0;
 
 	pi->frame = av_frame_alloc();
 
@@ -544,18 +548,18 @@ void *stream_get_output_config(ProxyInstance *pi, int type)
  */
 int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 {
-	int ret;
+	int ret = 0;
 	int cached = 0;
 
 	*got_frame = 0;
 	*frame_type = TYPE_NONE;
 
 	// if packet is empty, read new packet from stream
-	if (pi->pkt.size == 0) {
-		if ((ret = av_read_frame(pi->fmt_ctx, &pi->pkt)) < 0) {
+	if (pi->pkt->size == 0) {
+		if ((ret = av_read_frame(pi->fmt_ctx, pi->pkt)) < 0) {
 			// probably EOF, check for cached frames (e.g. SHN)
-			pi->pkt.data = NULL;
-			pi->pkt.size = 0;
+			pi->pkt->data = NULL;
+			pi->pkt->size = 0;
 			cached = 1;
 			if (DEBUG) fprintf(stderr, "Reaching packet EOF, setting cached flag\n");
 		}
@@ -564,9 +568,9 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 			fprintf(stderr, "Packet EOF\n");
 		}
 
-		if (pi->mode & TYPE_AUDIO && (pi->pkt.stream_index == pi->audio_stream->index || cached)) {
+		if (pi->mode & TYPE_AUDIO && (pi->pkt->stream_index == pi->audio_stream->index || cached)) {
 			if (DEBUG && cached) fprintf(stderr, "Feeding empty EOF packet to audio decoder\n");
-			ret = avcodec_send_packet(pi->audio_codec_ctx, &pi->pkt);
+			ret = avcodec_send_packet(pi->audio_codec_ctx, pi->pkt);
 			if (ret < 0) {
 				fprintf(stderr, "Error sending audio packet to decoder (%s)\n", av_err2str(ret));
 				if (ret == AVERROR_EOF) {
@@ -577,9 +581,9 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 				}
 			}
 		}
-		else if (pi->mode & TYPE_VIDEO && (pi->pkt.stream_index == pi->video_stream->index || cached)) {
+		else if (pi->mode & TYPE_VIDEO && (pi->pkt->stream_index == pi->video_stream->index || cached)) {
 			if (DEBUG && cached) fprintf(stderr, "Feeding empty EOF packet to video decoder\n");
-			ret = avcodec_send_packet(pi->video_codec_ctx, &pi->pkt);
+			ret = avcodec_send_packet(pi->video_codec_ctx, pi->pkt);
 			if (ret < 0) {
 				fprintf(stderr, "Error sending video packet to decoder (%s)\n", av_err2str(ret));
 				if (ret == AVERROR_EOF) {
@@ -592,7 +596,7 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 		}
 		else {
 			// Skip to next packet by signalling that the packet was completely read
-			pi->pkt.size = 0;
+			pi->pkt->size = 0;
 		}
 	}
 
@@ -611,31 +615,31 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	
 	
 	if (ret < 0) {
-		av_packet_unref(&pi->pkt);
+		av_packet_unref(pi->pkt);
 		return -1; // decoding failed, signal EOF
 	}
 	else if (cached && !*got_frame) {
-		av_packet_unref(&pi->pkt);
+		av_packet_unref(pi->pkt);
 		return -1; // signal the caller EOF
 	}
 
 	if (!*got_frame) {
 		// if no frame was read, signal that we need to read the next packet
-		pi->pkt.size = 0;
+		pi->pkt->size = 0;
 	}
 
 	if (*frame_type == TYPE_AUDIO && convert_audio_samples(pi) < 0) {
-		av_packet_unref(&pi->pkt);
+		av_packet_unref(pi->pkt);
 		return -1; // conversion failed, signal EOF
 	}
 	else if (*frame_type == TYPE_VIDEO && convert_video_frame(pi) < 0) {
-		av_packet_unref(&pi->pkt);
+		av_packet_unref(pi->pkt);
 		return -1; // conversion failed, signal EOF
 	}
 
 	// free packet if all content has been read
-	if (pi->pkt.size == 0) {
-		av_packet_unref(&pi->pkt);
+	if (pi->pkt->size == 0) {
+		av_packet_unref(pi->pkt);
 	}
 
 	if (*got_frame) {
@@ -643,7 +647,7 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 		// that the decoder returns, because there can be a delay between decoder input and output 
 		// (e.g. depending on threads and frame ordering)
 		// http://stackoverflow.com/a/30575055
-		pi->frame_pts = pi->frame->pkt_pts;
+		pi->frame_pts = pi->frame->pts;
 	}
 
 	/* 
@@ -661,17 +665,17 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	}
 }
 
-void update_position_and_get_timestamp(AVFrame *frame, int sample_rate, AVRational time_base, 
+void update_position_and_get_timestamp(AVFrame *frame, double sample_rate, AVRational time_base, 
 	int num_samples_read, int64_t *sample_position, int64_t *timestamp)
 {
-	if (frame->pkt_pts != AV_NOPTS_VALUE) {
+	if (frame->pts != AV_NOPTS_VALUE) {
 		// The first frame from a packet has the timestamp always set. The
 		// timestamp is the time at the beginning of the frame, whereas the
 		// sample_positon is the position until where we have read, so it's
 		// the time at the end of a frame, which means we need to add the
 		// number of read samples.
 		// TODO eventually change to av_frame_get_best_effort_timestamp (result is the same though)
-		*sample_position = pts_to_samples(sample_rate, time_base, frame->pkt_pts) + num_samples_read;
+		*sample_position = pts_to_samples(sample_rate, time_base, frame->pts) + num_samples_read;
 	}
 	else if (num_samples_read > 0) {
 		// ... but succeeding frames from the same packet do not (packets of 
@@ -779,8 +783,8 @@ void stream_seek(ProxyInstance *pi, int64_t timestamp, int type)
 	if (pi->mode & TYPE_VIDEO) avcodec_flush_buffers(pi->video_codec_ctx);
 
 	// avcodec_flush_buffers invalidates the packet reference
-	pi->pkt.data = NULL;
-	pi->pkt.size = 0;
+	pi->pkt->data = NULL;
+	pi->pkt->size = 0;
 }
 
 void stream_seekindex_create(ProxyInstance *pi, int type) {
@@ -852,9 +856,13 @@ char* stream_get_error(ProxyInstance *pi)
 /*
 * Initialize an instance data object to manage the decoding of audio.
 */
-static void pi_init(ProxyInstance **pi) {
+static int pi_init(ProxyInstance **pi) {
 	ProxyInstance *_pi;
 	*pi = _pi = malloc(sizeof(ProxyInstance));
+
+	if (_pi == NULL) {
+		return -1;
+	}
 
 	_pi->state = PI_STATE_OK;
 	_pi->error_message = NULL;
@@ -870,6 +878,8 @@ static void pi_init(ProxyInstance **pi) {
 	_pi->output_buffer = NULL;
 	_pi->audio_seekindex = NULL;
 	_pi->video_seekindex = NULL;
+
+	return 0;
 }
 
 /*
@@ -889,10 +899,11 @@ static void pi_free(ProxyInstance **pi) {
 	if (_pi->mode & TYPE_VIDEO) {
 		sws_freeContext(_pi->sws);
 	}
+	av_packet_free(&_pi->pkt);
 	av_frame_free(&_pi->frame);
 	swr_free(&_pi->swr);
-	avcodec_close(_pi->audio_codec_ctx);
-	avcodec_close(_pi->video_codec_ctx);
+	avcodec_free_context(&_pi->audio_codec_ctx);
+	avcodec_free_context(&_pi->video_codec_ctx);
 	avformat_close_input(&_pi->fmt_ctx);
 
 	/* free instance data */
@@ -929,20 +940,13 @@ static int pi_has_error(ProxyInstance *pi)
 
 static void info(AVFormatContext *fmt_ctx)
 {
-	AVStream *stream;
-	AVCodecContext *codec_ctx;
-	AVCodec *codec;
-
 	printf("%d stream(s) found:\n", fmt_ctx->nb_streams);
 
 	for (unsigned int i = 0; i < fmt_ctx->nb_streams; i++) {
-		AVDictionary *opts = NULL;
-
-		stream = fmt_ctx->streams[i];
-		codec_ctx = fmt_ctx->streams[i]->codec;
-
 		// print stream info
 		// http://ffmpeg.org/doxygen/trunk/structAVStream.html
+		AVStream *stream = fmt_ctx->streams[i];
+
 		printf("STREAM INDEX %d\n", stream->index);
 		printf("  frame rate: .......... %d/%d (real base frame rate)\n", stream->r_frame_rate.num, stream->r_frame_rate.den);
 		printf("  time base: ........... %d/%d\n", stream->time_base.num, stream->time_base.den);
@@ -953,50 +957,46 @@ static void info(AVFormatContext *fmt_ctx)
 		printf("  calculated length: ... %s\n", av_ts2timestr(stream->duration, &stream->time_base));
 
 		// print codec context info
-		// http://ffmpeg.org/doxygen/trunk/structAVCodecContext.html
-		printf("  CODEC CONTEXT:\n");
-		printf("    average bit rate: .. %d\n", codec_ctx->bit_rate);
-		printf("    time base: ......... %d/%d\n", codec_ctx->time_base.num, codec_ctx->time_base.den);
-		printf("    width: ............. %d\n", codec_ctx->width);
-		printf("    height: ............ %d\n", codec_ctx->height);
-		printf("    gop size: .......... %d\n", codec_ctx->gop_size);
-		printf("    pixel format: ...... %d\n", codec_ctx->pix_fmt);
-		printf("    sample rate: ....... %d\n", codec_ctx->sample_rate);
-		printf("    channels: .......... %d\n", codec_ctx->channels);
-		printf("    sample format: ..... %d\n", codec_ctx->sample_fmt);
-		printf("    codec type: ........ %d\n", codec_ctx->codec_type);
-		printf("    codec id: .......... %d\n", codec_ctx->codec_id);
-		printf("    codec tag: ......... %c%c%c%c (fourcc)\n", codec_ctx->codec_tag, codec_ctx->codec_tag >> 8, codec_ctx->codec_tag >> 16, codec_ctx->codec_tag >> 24);
-		printf("    sample aspect ratio: %d:%d\n", codec_ctx->sample_aspect_ratio.num, codec_ctx->sample_aspect_ratio.den);
+		// https://ffmpeg.org/doxygen/trunk/structAVCodecParameters.html
+		AVCodecParameters* codecpar = fmt_ctx->streams[i]->codecpar;
 
-		codec = avcodec_find_decoder(codec_ctx->codec_id);
-		if (!codec) {
-			printf("cannot find decoder for CODEC_ID %d\n", codec_ctx->codec_id);
-		}
-		//c = avcodec_alloc_context();
-		if (avcodec_open2(codec_ctx, codec, &opts) < 0)	{
-			printf("cannot open codec %d\n", codec_ctx->codec_id);
-		}
+		printf("  CODEC CONTEXT:\n");
+		printf("    average bit rate: .. %lld\n", codecpar->bit_rate);
+		printf("    width: ............. %d\n", codecpar->width);
+		printf("    height: ............ %d\n", codecpar->height);
+		printf("    sample rate: ....... %d\n", codecpar->sample_rate);
+		printf("    channels: .......... %d\n", codecpar->ch_layout.nb_channels);
+		printf("    codec type: ........ %d\n", codecpar->codec_type);
+		printf("    codec id: .......... %d\n", codecpar->codec_id);
+		printf("    codec tag: ......... %c%c%c%c (fourcc)\n", codecpar->codec_tag, codecpar->codec_tag >> 8, codecpar->codec_tag >> 16, codecpar->codec_tag >> 24);
+		printf("    sample aspect ratio: %d:%d\n", codecpar->sample_aspect_ratio.num, codecpar->sample_aspect_ratio.den);
 
 		// print codec info
 		// http://ffmpeg.org/doxygen/trunk/structAVCodec.html
-		printf("  CODEC:\n");
-		printf("    name: .............. %s\n", codec->name);
-		printf("    name (long): ....... %s\n", codec->long_name);
-		printf("    type: .............. %d\n", codec->type);
-		printf("    id:   .............. %d\n", codec->id);
+		const AVCodec* codec = avcodec_find_decoder(codecpar->codec_id);
 
-		printf("stream %d: %s - %s [%d/%d]\n", i, av_get_media_type_string(codec_ctx->codec_type), codec_ctx->codec_name, codec_ctx->codec_type, codec_ctx->codec_id);
+		if (!codec) {
+			printf("cannot find decoder for CODEC_ID %d\n", codecpar->codec_id);
+		}
+		else {
+			printf("  CODEC:\n");
+			printf("    name: .............. %s\n", codec->name);
+			printf("    name (long): ....... %s\n", codec->long_name);
+			printf("    type: .............. %d\n", codec->type);
+			printf("    id:   .............. %d\n", codec->id);
+		}
+
+		printf("stream %d: %s - %s [%d/%d]\n", i, av_get_media_type_string(codecpar->codec_type), avcodec_get_name(codecpar->codec_id), codecpar->codec_type, codecpar->codec_id);
 		printf("\n");
 	}
 }
 
-static int open_codec_context(AVFormatContext *fmt_ctx, int type)
+static int open_codec_context(AVFormatContext *fmt_ctx, AVCodecContext **codec_ctx, int type)
 {
 	int stream_idx;
 	AVStream *stream = NULL;
-	AVCodecContext *codec_ctx = NULL;
-	AVCodec *codec = NULL;
+	AVCodecContext *context = NULL;
+	const AVCodec *codec = NULL;
 	AVDictionary *opts = NULL;
 
 	/* Find stream of given type */
@@ -1010,34 +1010,46 @@ static int open_codec_context(AVFormatContext *fmt_ctx, int type)
 		stream = fmt_ctx->streams[stream_idx];
 
 		/* find decoder for the stream */
-		codec_ctx = stream->codec;
-		codec = avcodec_find_decoder(codec_ctx->codec_id);
+		codec = avcodec_find_decoder(stream->codecpar->codec_id);
 		if (!codec) {
 			fprintf(stderr, "Failed to find codec\n");
 			return -2;
 		}
 
-		/* Init the decoder */
-		if (avcodec_open2(codec_ctx, codec, &opts) < 0) {
-			fprintf(stderr, "Failed to open codec\n");
+		context = avcodec_alloc_context3(codec);
+		if (!context) {
+			fprintf(stderr, "Failed to create codec context\n");
 			return -3;
+		}
+
+		if (avcodec_parameters_to_context(context, stream->codecpar) < 0) {
+			fprintf(stderr, "Failed to populate codec context\n");
+			return -4;
+		}
+
+		/* Init the decoder */
+		if (avcodec_open2(context, codec, &opts) < 0) {
+			fprintf(stderr, "Failed to open codec\n");
+			return -5;
 		}
 
 		if (DEBUG) {
 			if (type == AVMEDIA_TYPE_AUDIO) {
 				printf("audio sampleformat: %s, planar: %d, channels: %d, raw bitdepth: %d, bitdepth: %d\n",
-					av_get_sample_fmt_name(codec_ctx->sample_fmt),
-					av_sample_fmt_is_planar(codec_ctx->sample_fmt),
-					codec_ctx->channels,
-					codec_ctx->bits_per_raw_sample,
-					av_get_bytes_per_sample(codec_ctx->sample_fmt) * 8);
+					av_get_sample_fmt_name(context->sample_fmt),
+					av_sample_fmt_is_planar(context->sample_fmt),
+					context->channels,
+					context->bits_per_raw_sample,
+					av_get_bytes_per_sample(context->sample_fmt) * 8);
 			}
 			else if (type == AVMEDIA_TYPE_VIDEO) {
 				printf("video sampleformat: raw bitdepth: %d\n",
-					codec_ctx->bits_per_raw_sample);
+					context->bits_per_raw_sample);
 			}
 		}
 	}
+
+	*codec_ctx = context;
 
 	return stream_idx;
 }
@@ -1076,9 +1088,9 @@ static int decode_audio_packet(ProxyInstance *pi, int *got_audio_frame, int cach
 
 	if (*got_audio_frame && DEBUG) {
 		printf("packet dts:%s pts:%s duration:%s\n",
-			av_ts2timestr(pi->pkt.dts, &pi->audio_stream->time_base),
-			av_ts2timestr(pi->pkt.pts, &pi->audio_stream->time_base),
-			av_ts2timestr(pi->pkt.duration, &pi->audio_stream->time_base));
+			av_ts2timestr(pi->pkt->dts, &pi->audio_stream->time_base),
+			av_ts2timestr(pi->pkt->pts, &pi->audio_stream->time_base),
+			av_ts2timestr(pi->pkt->duration, &pi->audio_stream->time_base));
 
 		printf("audio_frame%s n:%d nb_samples:%d pts:%s\n",
 			cached ? "(cached)" : "",
@@ -1122,9 +1134,9 @@ static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cach
 
 	if (*got_video_frame && DEBUG) {
 		printf("packet dts:%s pts:%s duration:%s\n",
-			av_ts2timestr(pi->pkt.dts, &pi->video_stream->time_base),
-			av_ts2timestr(pi->pkt.pts, &pi->video_stream->time_base),
-			av_ts2timestr(pi->pkt.duration, &pi->video_stream->time_base));
+			av_ts2timestr(pi->pkt->dts, &pi->video_stream->time_base),
+			av_ts2timestr(pi->pkt->pts, &pi->video_stream->time_base),
+			av_ts2timestr(pi->pkt->duration, &pi->video_stream->time_base));
 
 		printf("video_frame%s n:%d coded_n:%d pts:%s\n",
 			cached ? "(cached)" : "",

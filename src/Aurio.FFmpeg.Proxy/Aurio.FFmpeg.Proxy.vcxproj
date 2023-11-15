@@ -69,11 +69,11 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avformat-57.dll" "$(OutDir)"
-copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avcodec-57.dll" "$(OutDir)"
-copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avutil-55.dll" "$(OutDir)"
-copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swresample-2.dll" "$(OutDir)"
-copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swscale-4.dll" "$(OutDir)"</Command>
+      <Command>copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avformat-60.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avcodec-60.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avutil-58.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swresample-4.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swscale-7.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -95,11 +95,11 @@ copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swscale-4.dll" "$(OutDir)"</Comm
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avformat-57.dll" "$(OutDir)"
-copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avcodec-57.dll" "$(OutDir)"
-copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avutil-55.dll" "$(OutDir)"
-copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swresample-2.dll" "$(OutDir)"
-copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swscale-4.dll" "$(OutDir)"</Command>
+      <Command>copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avformat-60.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avcodec-60.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\avutil-58.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swresample-4.dll" "$(OutDir)"
+copy "$(ProjectDir)\..\..\libs\ffmpeg\win64\bin\swscale-7.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
