@@ -23,7 +23,7 @@ using System.Text;
 using Aurio.Streams;
 using NAudio.Wave;
 
-namespace Aurio
+namespace Aurio.Windows
 {
     class NAudioStreamFactory : IAudioStreamFactory
     {
@@ -32,6 +32,10 @@ namespace Aurio
             if (fileInfo.Extension.Equals(".wav"))
             {
                 return new NAudioSourceStream(new WaveFileReader(fileInfo.FullName));
+            }
+            else if (fileInfo.Extension.Equals(".mp3"))
+            {
+                return new NAudioSourceStream(new Mp3FileReader(fileInfo.FullName));
             }
             else
             {

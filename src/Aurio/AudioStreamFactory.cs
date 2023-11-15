@@ -53,19 +53,6 @@ namespace Aurio
             }
         }
 
-        private static WaveStream OpenFile(FileInfo fileInfo)
-        {
-            if (fileInfo.Extension.Equals(".wav"))
-            {
-                return new WaveFileReader(fileInfo.FullName);
-            }
-            else if (fileInfo.Extension.Equals(".mp3"))
-            {
-                return new Mp3FileReader(fileInfo.FullName);
-            }
-            return null;
-        }
-
         private static IAudioStream TryOpenSourceStream(
             FileInfo fileInfo,
             FileInfo proxyFileInfo = null

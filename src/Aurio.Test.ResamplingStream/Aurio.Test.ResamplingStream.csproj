@@ -9,6 +9,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Aurio\Aurio.csproj" />
     <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj" />
   </ItemGroup>
