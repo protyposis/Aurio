@@ -2,32 +2,35 @@
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
     <AssemblyTitle>Aurio FFmpeg Interface</AssemblyTitle>
+    <FFmpegProxyConfiguration>x64-debug</FFmpegProxyConfiguration>
+    <FFmpegProxyConfiguration Condition="'$(Configuration)' == 'Release'">x64-release</FFmpegProxyConfiguration>
+    <FFmpegProxyPath>..\..\nativesrc\out\build\$(FFmpegProxyConfiguration)\aurioffmpegproxy</FFmpegProxyPath>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Aurio.FFmpeg.Proxy\bin\$(Configuration)\Aurio.FFmpeg.Proxy.dll">
-      <Link>ffmpeg\Aurio.FFmpeg.Proxy.dll</Link>
+    <Content Include="$(FFmpegProxyPath)\aurioffmpegproxy.dll">
+      <Link>ffmpeg\aurioffmpegproxy.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\Aurio.FFmpeg.Proxy\bin\$(Configuration)\avcodec-60.dll">
+    <Content Include="$(FFmpegProxyPath)\avcodec-60.dll">
       <Link>ffmpeg\avcodec-60.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\Aurio.FFmpeg.Proxy\bin\$(Configuration)\avformat-60.dll">
+    <Content Include="$(FFmpegProxyPath)\avformat-60.dll">
       <Link>ffmpeg\avformat-60.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\Aurio.FFmpeg.Proxy\bin\$(Configuration)\avutil-58.dll">
+    <Content Include="$(FFmpegProxyPath)\avutil-58.dll">
       <Link>ffmpeg\avutil-58.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\Aurio.FFmpeg.Proxy\bin\$(Configuration)\swresample-4.dll">
+    <Content Include="$(FFmpegProxyPath)\swresample-4.dll">
       <Link>ffmpeg\swresample-4.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\Aurio.FFmpeg.Proxy\bin\$(Configuration)\swscale-7.dll">
+    <Content Include="$(FFmpegProxyPath)\swscale-7.dll">
       <Link>ffmpeg\swscale-7.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -43,12 +43,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MusicDetector", "MusicDetec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BatchResampler", "BatchResampler\BatchResampler.csproj", "{937AA772-00F3-45B8-A9FE-8504F3D12909}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Aurio.FFmpeg.Proxy", "Aurio.FFmpeg.Proxy\Aurio.FFmpeg.Proxy.vcxproj", "{11C4D931-21A8-44DD-8093-E98CACD13468}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aurio.FFmpeg", "Aurio.FFmpeg\Aurio.FFmpeg.csproj", "{8A1A603C-7005-4CC0-9AB7-E6FD3F58F621}"
-	ProjectSection(ProjectDependencies) = postProject
-		{11C4D931-21A8-44DD-8093-E98CACD13468} = {11C4D931-21A8-44DD-8093-E98CACD13468}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aurio.FFmpeg.Test", "Aurio.FFmpeg.Test\Aurio.FFmpeg.Test.csproj", "{616330A6-6386-40F1-907D-CD46884FA86F}"
 EndProject
@@ -78,7 +73,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aurio.Test.RealtimeFingerpr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aurio.Matching.SQLite", "Aurio.Matching.SQLite\Aurio.Matching.SQLite.csproj", "{01A4838A-FCF8-454F-A92D-1854177CF162}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aurio.Windows", "Aurio.Windows\Aurio.Windows.csproj", "{7DFA8BE7-1FC6-4749-AE7F-3C54A895E219}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aurio.Windows", "Aurio.Windows\Aurio.Windows.csproj", "{7DFA8BE7-1FC6-4749-AE7F-3C54A895E219}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -282,18 +277,6 @@ Global
 		{937AA772-00F3-45B8-A9FE-8504F3D12909}.Release|x64.Build.0 = Release|Any CPU
 		{937AA772-00F3-45B8-A9FE-8504F3D12909}.Release|x86.ActiveCfg = Release|Any CPU
 		{937AA772-00F3-45B8-A9FE-8504F3D12909}.Release|x86.Build.0 = Release|Any CPU
-		{11C4D931-21A8-44DD-8093-E98CACD13468}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{11C4D931-21A8-44DD-8093-E98CACD13468}.Debug|Any CPU.Build.0 = Debug|x64
-		{11C4D931-21A8-44DD-8093-E98CACD13468}.Debug|x64.ActiveCfg = Debug|x64
-		{11C4D931-21A8-44DD-8093-E98CACD13468}.Debug|x64.Build.0 = Debug|x64
-		{11C4D931-21A8-44DD-8093-E98CACD13468}.Debug|x86.ActiveCfg = Debug|x64
-		{11C4D931-21A8-44DD-8093-E98CACD13468}.Debug|x86.Build.0 = Debug|x64
-		{11C4D931-21A8-44DD-8093-E98CACD13468}.Release|Any CPU.ActiveCfg = Release|x64
-		{11C4D931-21A8-44DD-8093-E98CACD13468}.Release|Any CPU.Build.0 = Release|x64
-		{11C4D931-21A8-44DD-8093-E98CACD13468}.Release|x64.ActiveCfg = Release|x64
-		{11C4D931-21A8-44DD-8093-E98CACD13468}.Release|x64.Build.0 = Release|x64
-		{11C4D931-21A8-44DD-8093-E98CACD13468}.Release|x86.ActiveCfg = Release|x64
-		{11C4D931-21A8-44DD-8093-E98CACD13468}.Release|x86.Build.0 = Release|x64
 		{8A1A603C-7005-4CC0-9AB7-E6FD3F58F621}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8A1A603C-7005-4CC0-9AB7-E6FD3F58F621}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A1A603C-7005-4CC0-9AB7-E6FD3F58F621}.Debug|x64.ActiveCfg = Debug|Any CPU

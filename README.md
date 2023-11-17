@@ -122,18 +122,21 @@ Requirements
 ------------
 
 * Windows
-* Visual Studio 2017
-* .NET Standard 2.0 / .NET Core 2.0 (.NET Framework 4.6.2 for WPF apps)
-
-Aurio has been developed for Windows but since only a small part depends on the OS, it should be portable to the Mono platform and other OS'.
+* Visual Studio 2022
+* .NET SDK 6.0
 
 
 Build Instructions
 ------------------
 
-Aurio comes with all required dependencies except for FFmpeg (which would blow up the repo size too much). See `libs\ffmpeg\ffmpeg-prepare.txt` for instructions on how to download and where to put FFmpeg.
-
-Building works as easy as building any other Visual Studio solution and should work without problems if all dependencies have been set up correctly. Open the Visual Studio solution `Aurio\Aurio.sln` and build the `Aurio` project and optionally the `Aurio.WaveControls` project. The compiled DLLs will be built in each project's `bin` folder.
+1. Install dependencies
+   - Run `install-deps.ps1` in PowerShell
+2. Build native code in `cmd` (or open `.\nativesrc` project in VS 2022)
+   - `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64`
+   - `cmake .\nativesrc --preset x64-debug`
+   - `cmake --build .\nativesrc\out\build\x64-debug`
+3. Build managed code (or open `.\src` in VS 2022)
+   - `dotnet build .\src -c Debug`
 
 
 Documentation
