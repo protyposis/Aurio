@@ -3,7 +3,7 @@ $localname = "win64"
 $archive = "$version.zip"
 $dest = ".\libs\ffmpeg"
 
-wget -O $archive https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$archive
+Invoke-WebRequest https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$archive -OutFile $archive
 
 Expand-Archive .\$archive -DestinationPath $dest
 
