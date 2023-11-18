@@ -165,12 +165,8 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 		/* initialize sample format converter */
 		// http://stackoverflow.com/a/15372417
 		pi->swr = swr_alloc();
-		if (!pi->audio_codec_ctx->channel_layout) {
-			// when no channel layout is set, set default layout
-			//pi->audio_codec_ctx->channel_layout = av_get_default_channel_layout(pi->audio_codec_ctx->channels); // TODO FIX
-		}
-		av_opt_set_int(pi->swr, "in_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
-		av_opt_set_int(pi->swr, "out_channel_layout", pi->audio_codec_ctx->channel_layout, 0);
+		av_opt_set_chlayout(pi->swr, "in_chlayout", &pi->audio_codec_ctx->ch_layout, 0);
+		av_opt_set_chlayout(pi->swr, "out_chlayout", &pi->audio_codec_ctx->ch_layout, 0);
 		av_opt_set_int(pi->swr, "in_sample_rate", pi->audio_codec_ctx->sample_rate, 0);
 		av_opt_set_int(pi->swr, "out_sample_rate", pi->audio_codec_ctx->sample_rate, 0);
 		av_opt_set_sample_fmt(pi->swr, "in_sample_fmt", pi->audio_codec_ctx->sample_fmt, 0);
@@ -182,7 +178,7 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 
 		pi->audio_output.format.sample_rate = pi->audio_codec_ctx->sample_rate;
 		pi->audio_output.format.sample_size = av_get_bytes_per_sample(determine_target_format(pi->audio_codec_ctx));
-		pi->audio_output.format.channels = pi->audio_codec_ctx->channels;
+		pi->audio_output.format.channels = pi->audio_codec_ctx->ch_layout.nb_channels;
 
 		if (DEBUG) {
 			printf("audio_output.format: %d sample_rate, %d sample_size, %d channels\n",
@@ -210,7 +206,7 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 		pi->audio_output.frame_size = pi->audio_output.format.sample_rate; // 1 sec default frame size
 
 		if (DEBUG) {
-			printf("output: %lld length, %d frame_size\n", pi->audio_output.length, pi->audio_output.frame_size);
+			printf("output: %"PRId64" length, %d frame_size\n", pi->audio_output.length, pi->audio_output.frame_size);
 		}
 
 		if (pi->audio_codec_ctx->codec->capabilities & AV_CODEC_CAP_DELAY) {
@@ -258,7 +254,7 @@ ProxyInstance *stream_open(ProxyInstance *pi)
 		pi->video_output.frame_size = pi->video_output.format.width * pi->video_output.format.height * 4; // TODO determine real size
 
 		if (DEBUG) {
-			printf("output: %lld length, %d frame_size\n", pi->video_output.length, pi->video_output.frame_size);
+			printf("output: %"PRId64" length, %d frame_size\n", pi->video_output.length, pi->video_output.frame_size);
 		}
 
 		if (pi->video_codec_ctx->codec->capabilities & AV_CODEC_CAP_DELAY) {
@@ -501,7 +497,7 @@ void stream_seek(ProxyInstance *pi, int64_t timestamp, int type)
 	if (seekindex != NULL) {
 		int64_t index_timestamp;
 		if (seekindex_find(seekindex, timestamp, &index_timestamp) == 0) {
-			printf("adjusting seek timestamp by index: %lld -> %lld\n", timestamp, index_timestamp);
+			printf("adjusting seek timestamp by index: %"PRId64" -> %"PRId64"\n", timestamp, index_timestamp);
 			timestamp = index_timestamp;
 		}
 	}
@@ -696,9 +692,9 @@ static void info(AVFormatContext *fmt_ctx)
 		printf("STREAM INDEX %d\n", stream->index);
 		printf("  frame rate: .......... %d/%d (real base frame rate)\n", stream->r_frame_rate.num, stream->r_frame_rate.den);
 		printf("  time base: ........... %d/%d\n", stream->time_base.num, stream->time_base.den);
-		printf("  start time: .......... %lld\n", stream->start_time);
-		printf("  duration: ............ %lld\n", stream->duration);
-		printf("  number of frames: .... %lld\n", stream->nb_frames);
+		printf("  start time: .......... %"PRId64"\n", stream->start_time);
+		printf("  duration: ............ %"PRId64"\n", stream->duration);
+		printf("  number of frames: .... %"PRId64"\n", stream->nb_frames);
 		printf("  sample aspect ratio: . %d:%d\n", stream->sample_aspect_ratio.num, stream->sample_aspect_ratio.den);
 		printf("  calculated length: ... %s\n", av_ts2timestr(stream->duration, &stream->time_base));
 
@@ -707,7 +703,7 @@ static void info(AVFormatContext *fmt_ctx)
 		AVCodecParameters* codecpar = fmt_ctx->streams[i]->codecpar;
 
 		printf("  CODEC CONTEXT:\n");
-		printf("    average bit rate: .. %lld\n", codecpar->bit_rate);
+		printf("    average bit rate: .. %"PRId64"\n", codecpar->bit_rate);
 		printf("    width: ............. %d\n", codecpar->width);
 		printf("    height: ............ %d\n", codecpar->height);
 		printf("    sample rate: ....... %d\n", codecpar->sample_rate);
@@ -784,7 +780,7 @@ static int open_codec_context(AVFormatContext *fmt_ctx, AVCodecContext **codec_c
 				printf("audio sampleformat: %s, planar: %d, channels: %d, raw bitdepth: %d, bitdepth: %d\n",
 					av_get_sample_fmt_name(context->sample_fmt),
 					av_sample_fmt_is_planar(context->sample_fmt),
-					context->channels,
+					context->ch_layout.nb_channels,
 					context->bits_per_raw_sample,
 					av_get_bytes_per_sample(context->sample_fmt) * 8);
 			}
@@ -884,9 +880,9 @@ static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cach
 			av_ts2timestr(pi->pkt->pts, &pi->video_stream->time_base),
 			av_ts2timestr(pi->pkt->duration, &pi->video_stream->time_base));
 
-		printf("video_frame%s n:%d coded_n:%d pts:%s\n",
+		printf("video_frame%s n:%d pts:%s\n",
 			cached ? "(cached)" : "",
-			video_frame_count++, pi->frame->coded_picture_number,
+			video_frame_count++,
 			av_ts2timestr(pi->frame->pts, &pi->video_stream->time_base));
 	}
 
@@ -895,13 +891,19 @@ static int decode_video_packet(ProxyInstance *pi, int *got_video_frame, int cach
 
 static int convert_audio_samples(ProxyInstance *pi) {
 	/* prepare/update sample format conversion buffer */
-	int output_buffer_size_needed = pi->frame->nb_samples * pi->frame->channels * av_get_bytes_per_sample(pi->audio_codec_ctx->sample_fmt);
+	int output_buffer_size_needed = pi->frame->nb_samples * pi->frame->ch_layout.nb_channels * av_get_bytes_per_sample(pi->audio_codec_ctx->sample_fmt);
 	if (pi->output_buffer_size < output_buffer_size_needed) {
 		fprintf(stderr, "output buffer too small (%d < %d)\n", pi->output_buffer_size, output_buffer_size_needed);
 	}
 
 	/* convert samples to target format */
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wincompatible-pointer-types"
+#endif
 	int ret = swr_convert(pi->swr, &pi->output_buffer, pi->frame->nb_samples, pi->frame->extended_data, pi->frame->nb_samples);
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 	if (ret < 0) {
 		fprintf(stderr, "Could not convert input samples\n");
 	}
@@ -921,7 +923,13 @@ static int convert_video_frame(ProxyInstance *pi) {
 	 * with e.g. rgbstride = 960 for a 320px wide picture. */
 	uint8_t *output_buffer_workaround = pi->output_buffer;
 	int rgbstride[1] = { pi->frame->linesize[0] * 3 };
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wincompatible-pointer-types"
+#endif
 	int ret = sws_scale(pi->sws, pi->frame->data, pi->frame->linesize, 0, pi->video_codec_ctx->height, &output_buffer_workaround, rgbstride);
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 	if (ret < 0) {
 		fprintf(stderr, "Could not convert frame\n");
 	}

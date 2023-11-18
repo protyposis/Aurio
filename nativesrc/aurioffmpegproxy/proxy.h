@@ -20,12 +20,12 @@
 #include <stdio.h>
 
 // FFmpeg includes
-#include "libavcodec\avcodec.h"
-#include "libavformat\avformat.h"
-#include "libavutil\timestamp.h"
-#include "libswresample\swresample.h"
-#include "libavutil\opt.h"
-#include "libswscale\swscale.h"
+#include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
+#include "libavutil/timestamp.h"
+#include "libswresample/swresample.h"
+#include "libavutil/opt.h"
+#include "libswscale/swscale.h"
 
 #include "seekindex.h"
 
@@ -82,7 +82,13 @@ typedef struct ProxyInstance {
 	}					video_output;
 } ProxyInstance;
 
-#define EXPORT __declspec(dllexport)
+#if defined(_MSC_VER)
+	#define EXPORT __declspec(dllexport)
+#else
+	// https://gcc.gnu.org/wiki/Visibility
+	#define EXPORT __attribute__ ((visibility ("default")))
+#endif
+
 #define DEBUG 0
 
 #define TYPE_NONE  0x00

@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "seekindex.h"
 
@@ -220,7 +221,7 @@ void seekindex_test() {
 
 	for (int64_t x = 0; x < interval; x += increment) {
 		seekindex_build_add(si, x);
-		printf("adding %lld\n", x);
+		printf("adding %"PRId64"\n", x);
 	}
 
 	seekindex_build_finalize(si);
@@ -228,7 +229,7 @@ void seekindex_test() {
 	int64_t output = 0;
 	for (int64_t x = -5; x < interval + 5; x++) {
 		int status = seekindex_find(si, x, &output);
-		printf("lookup of %lld resulted in %lld (status %d)\n", x, output, status);
+		printf("lookup of %"PRId64" resulted in %"PRId64" (status %d)\n", x, output, status);
 	}
 
 	seekindex_free(si);

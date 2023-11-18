@@ -12,7 +12,7 @@ namespace Aurio.UnitTest
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
-            ResamplerFactory.Factory = new Soxr.ResamplerFactory();
+            ResamplerFactory.Factory = new MockResamplerFactory();
         }
 
         [TestMethod]

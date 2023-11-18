@@ -6,7 +6,6 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Aurio\Aurio.csproj" />
-		<ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />

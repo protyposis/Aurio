@@ -26,7 +26,7 @@ namespace Aurio.FFmpeg
 {
     internal class Interop64
     {
-        private const string FFMPEGPROXYLIB = "ffmpeg\\aurioffmpegproxy.dll";
+        private const string FFMPEGPROXYLIB = "aurioffmpegproxy";
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
         public static extern IntPtr stream_open_file(Type mode, string filename);

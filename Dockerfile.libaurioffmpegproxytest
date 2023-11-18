@@ -1,0 +1,15 @@
+# A simple image to test the Linux build of the aurioffmpegproxy library.
+#
+# Usage:
+# 1. build native library (with cmake)
+# 2. build image: docker build -f Dockerfile.libaurioffmpegproxytest --tag aurioffmpegproxy nativesrc/out/build/linux-debug/aurioffmpegproxy
+# 3. run container: docker run -it --rm aurioffmpegproxy [mediafile]
+#
+# Expected output is "No source file specified" when no mediafile is specified.
+
+FROM ubuntu:22.04
+
+WORKDIR /aurioffmpegproxy
+COPY . .
+
+ENTRYPOINT [ "/aurioffmpegproxy/aurioffmpegproxy" ]

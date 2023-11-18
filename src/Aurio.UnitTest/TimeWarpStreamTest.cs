@@ -1,4 +1,5 @@
 ﻿using System;
+using Aurio.Resampler;
 using Aurio.Streams;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -62,6 +63,12 @@ namespace Aurio.UnitTest
         //
 
         #endregion
+
+        [ClassInitialize()]
+        public static void MyClassInitialize(TestContext testContext)
+        {
+            ResamplerFactory.Factory = new MockResamplerFactory();
+        }
 
         //[TestMethod()]
         //public void Mapping01() {

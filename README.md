@@ -122,21 +122,38 @@ Requirements
 ------------
 
 * Windows
-* Visual Studio 2022
+  - Visual Studio 2022 (with CMake tools)
+* Linux
+  - Ubuntu 22.04
+  - CMake
+  - Ninja
 * .NET SDK 6.0
 
 
 Build Instructions
 ------------------
 
-1. Install dependencies
+### Windows
+1. Install build environment (see requirements above)
+2. Install dependencies
    - Run `install-deps.ps1` in PowerShell
-2. Build native code in `cmd` (or open `.\nativesrc` project in VS 2022)
+3. Build native code in `cmd` (or open `.\nativesrc` project in VS 2022)
    - `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64`
-   - `cmake .\nativesrc --preset x64-debug`
-   - `cmake --build .\nativesrc\out\build\x64-debug`
-3. Build managed code (or open `.\src` in VS 2022)
-   - `dotnet build .\src -c Debug`
+   - `cmake nativesrc --preset x64-debug`
+   - `cmake --build nativesrc\out\build\x64-debug`
+4. Build managed code (or open `.\src` in VS 2022)
+   - `dotnet build src -c Debug`
+
+### Linux
+1. Install build environment
+   - `apt install cmake ninja-build dotnet-sdk-6.0`
+2. Install dependencies
+   - Run `install-deps.sh`
+3. Build native code
+   - `cmake nativesrc --preset linux-debug`
+   - `cmake --build nativesrc/out/build/linux-debug`
+4. Build managed code
+   - `dotnet build src -c LinuxDebug`
 
 
 Documentation

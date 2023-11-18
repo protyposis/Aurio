@@ -1,37 +1,54 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyTitle>Aurio FFmpeg Interface</AssemblyTitle>
-    <FFmpegProxyConfiguration>x64-debug</FFmpegProxyConfiguration>
-    <FFmpegProxyConfiguration Condition="'$(Configuration)' == 'Release'">x64-release</FFmpegProxyConfiguration>
+    <Configurations>Debug;Release;LinuxDebug;LinuxRelease</Configurations>
+    <FFmpegProxyConfiguration Condition="'$(Configuration)'=='Debug'">x64-debug</FFmpegProxyConfiguration>
+    <FFmpegProxyConfiguration Condition="'$(Configuration)'=='Release'">x64-release</FFmpegProxyConfiguration>
+    <FFmpegProxyConfiguration Condition="'$(Configuration)'=='LinuxDebug'">linux-debug</FFmpegProxyConfiguration>
+    <FFmpegProxyConfiguration Condition="'$(Configuration)'=='LinuxRelease'">linux-release</FFmpegProxyConfiguration>
     <FFmpegProxyPath>..\..\nativesrc\out\build\$(FFmpegProxyConfiguration)\aurioffmpegproxy</FFmpegProxyPath>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="!$(Configuration.Contains('Linux'))">
     <Content Include="$(FFmpegProxyPath)\aurioffmpegproxy.dll">
-      <Link>ffmpeg\aurioffmpegproxy.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="$(FFmpegProxyPath)\avcodec-60.dll">
-      <Link>ffmpeg\avcodec-60.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="$(FFmpegProxyPath)\avformat-60.dll">
-      <Link>ffmpeg\avformat-60.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="$(FFmpegProxyPath)\avutil-58.dll">
-      <Link>ffmpeg\avutil-58.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="$(FFmpegProxyPath)\swresample-4.dll">
-      <Link>ffmpeg\swresample-4.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="$(FFmpegProxyPath)\swscale-7.dll">
-      <Link>ffmpeg\swscale-7.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup Condition="$(Configuration.Contains('Linux'))">
+    <Content Include="$(FFmpegProxyPath)\libaurioffmpegproxy.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(FFmpegProxyPath)\libavcodec.so.60">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(FFmpegProxyPath)\libavformat.so.60">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(FFmpegProxyPath)\libavutil.so.58">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(FFmpegProxyPath)\libswresample.so.4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(FFmpegProxyPath)\libswscale.so.7">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

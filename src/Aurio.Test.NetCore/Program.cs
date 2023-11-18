@@ -9,7 +9,6 @@ namespace Aurio.Test.NetCore
         static void Main(string[] args)
         {
             FFTFactory.Factory = new Exocortex.FFTFactory();
-            ResamplerFactory.Factory = new NAudioWdlResamplerFactory();
 
             Console.WriteLine("Hello World!");
         }

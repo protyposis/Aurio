@@ -17,6 +17,10 @@
 //
 #include "proxy.h"
 
+#ifndef max
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+#endif
+
 FILE* file_open(const char* filename) {
 	return fopen(filename, "rb");
 }
@@ -29,11 +33,11 @@ int file_close(FILE* f) {
 	return fclose(f);
 }
 
-int file_read_packet(FILE* f, uint8_t* buf, int buf_size) {
+int file_read_packet(void* f, uint8_t* buf, int buf_size) {
 	return (int)fread(buf, 1, buf_size, f);
 }
 
-int64_t file_seek(FILE* f, int64_t offset, int whence) {
+int64_t file_seek(void* f, int64_t offset, int whence) {
 	if (whence == AVSEEK_SIZE) {
 		long current_pos = ftell(f);		// temporarily save current position
 		fseek(f, 0, SEEK_END);				// seek to end
@@ -84,14 +88,14 @@ int main(int argc, char* argv[])
 	//info(pi->fmt_ctx);
 
 	if (mode & TYPE_AUDIO) {
-		printf("audio length: %lld, frame size: %d\n", pi->audio_output.length, pi->audio_output.frame_size);
+		printf("audio length: %"PRId64", frame size: %d\n", pi->audio_output.length, pi->audio_output.frame_size);
 		printf("audio format (samplerate/samplesize/channels): %d/%d/%d\n",
 			pi->audio_output.format.sample_rate, pi->audio_output.format.sample_size, pi->audio_output.format.channels);
 
 		audio_output_buffer_size = pi->audio_output.frame_size * pi->audio_output.format.channels * pi->audio_output.format.sample_size;
 	}
 	if (mode & TYPE_VIDEO) {
-		printf("video length: %lld, frame size: %d\n", pi->video_output.length, pi->video_output.frame_size);
+		printf("video length: %"PRId64", frame size: %d\n", pi->video_output.length, pi->video_output.frame_size);
 		printf("video format (width/height/fps/aspect): %d/%d/%f/%f\n",
 			pi->video_output.format.width, pi->video_output.format.height, pi->video_output.format.frame_rate, pi->video_output.format.aspect_ratio);
 
@@ -103,7 +107,7 @@ int main(int argc, char* argv[])
 	// read full stream
 	int64_t count1 = 0, last_ts1 = -1;
 	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size, &frame_type)) >= 0) {
-		printf("read %d @ %lld type %d\n", ret, timestamp, frame_type);
+		printf("read %d @ %"PRId64" type %d\n", ret, timestamp, frame_type);
 		if (frame_type == TYPE_VIDEO) {
 			printf("keyframe %d, pict_type %d, interlaced %d, top_field_first %d\n",
 				pi->video_output.current_frame.keyframe, pi->video_output.current_frame.pict_type,
@@ -125,7 +129,7 @@ int main(int argc, char* argv[])
 	int64_t accumulated_frame_length = 0;
 	int last_ret = 0;
 	while ((ret = stream_read_frame(pi, &timestamp, output_buffer, output_buffer_size, &frame_type)) >= 0) {
-		printf("read %d @ %lld type %d\n", ret, timestamp, frame_type);
+		printf("read %d @ %"PRId64" type %d\n", ret, timestamp, frame_type);
 		count2++;
 		last_ts2 = timestamp;
 		if (frame_type == TYPE_AUDIO) {
@@ -135,8 +139,8 @@ int main(int argc, char* argv[])
 	}
 	int64_t length_from_last_ts = last_ts2 + last_ret; // last timestamp + frame length
 
-	printf("read1 count: %lld, timestamp: %lld\n", count1, last_ts1);
-	printf("read2 count: %lld, timestamp: %lld\n", count2, last_ts2);
+	printf("read1 count: %"PRId64", timestamp: %"PRId64"\n", count1, last_ts1);
+	printf("read2 count: %"PRId64", timestamp: %"PRId64"\n", count2, last_ts2);
 
 	if (mode & TYPE_AUDIO) {
 		// Print lengths from 
@@ -144,7 +148,7 @@ int main(int argc, char* argv[])
 		// - summed over all frames, 
 		// - and from the last timestamp + frame length
 		// to compare for inconsistencies.
-		printf("audio length header/accumulated/last_ts: %lld/%lld/%lld\n",
+		printf("audio length header/accumulated/last_ts: %"PRId64"/%"PRId64"/%"PRId64"\n",
 			pi->audio_output.length, accumulated_frame_length, length_from_last_ts);
 	}
 
