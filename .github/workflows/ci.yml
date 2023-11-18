@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install build tools
+      run: sudo apt-get install -y cmake ninja-build
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+    - name: Install local deps
+      run: |
+        chmod +x ./install-deps.sh
+        ./install-deps.sh
+    - name: Setup native project
+      run: cmake nativesrc --preset linux-debug
+    - name: Build native code
+      run: cmake --build nativesrc/out/build/linux-debug
+    - name: Build
+      run: dotnet build src -c LinuxDebug
+    - name: Test
+      run: dotnet test src --no-build --verbosity normal -c LinuxDebug
+  windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+    - uses: ilammy/msvc-dev-cmd@v1
+    - name: Build
+      shell: pwsh
+      run: .\install-deps.ps1
+    - name: Setup native project
+      run: cmake nativesrc --preset x64-debug
+    - name: Build native code
+      run: cmake --build nativesrc\out\build\x64-debug
+    - name: Restore dependencies
+      run: dotnet restore src
+    - name: Build
+      run: dotnet build src --no-restore -c Debug
+    - name: Test
+      run: dotnet test src --no-build --verbosity normal -c Debug
