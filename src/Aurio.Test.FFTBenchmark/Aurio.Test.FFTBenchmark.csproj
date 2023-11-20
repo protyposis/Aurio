@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+	<AssemblyTitle>Aurio FFT Benchmark</AssemblyTitle>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aurio.Exocortex\Aurio.Exocortex.csproj" />
+    <ProjectReference Include="..\Aurio.FftSharp\Aurio.FftSharp.csproj" />
+    <ProjectReference Include="..\Aurio.FFTW\Aurio.FFTW.csproj" />
+    <ProjectReference Include="..\Aurio.PFFFT\Aurio.PFFFT.csproj" />
+  </ItemGroup>
+
+</Project>
