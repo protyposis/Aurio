@@ -10,6 +10,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ExocortexDSP\Exocortex.DSP.csproj" />
+    <ProjectReference Include="..\Aurio.FftSharp\Aurio.FftSharp.csproj" />
     <ProjectReference Include="..\Aurio\Aurio.csproj" />
     <ProjectReference Include="..\Aurio.FFTW\Aurio.FFTW.csproj" />
     <ProjectReference Include="..\Aurio.PFFFT\Aurio.PFFFT.csproj" />

@@ -9,6 +9,7 @@ namespace Aurio.Test.FFT
     {
         ExocortexDSP,
         FFTW,
-        PFFFT
+        PFFFT,
+        FftSharp,
     }
 }

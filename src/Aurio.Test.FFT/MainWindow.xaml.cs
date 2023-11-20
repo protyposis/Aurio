@@ -149,6 +149,11 @@ namespace Aurio.Test.FFT
                 PFFFT.PFFFT pffft = new PFFFT.PFFFT(fftIO.Length, PFFFT.Transform.Real);
                 pffft.Forward(fftIO, fftIO);
             }
+            else if (fftLib == FFTLibrary.FftSharp)
+            {
+                FftSharp.FFT fft = new FftSharp.FFT(fftIO.Length);
+                fft.Forward(fftIO);
+            }
 
             //// convert real input to complex input with im part set to zero
             //float[] fftIO = new float[ws * 2];
