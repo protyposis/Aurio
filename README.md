@@ -1,124 +1,194 @@
-Aurio: Audio Fingerprinting & Retrieval for .NET
-================================================
+# Aurio: Audio Stream Processing & Retrieval for .NET
 
-Aurio is a .NET library that focuses on audio processing, analysis, media synchronization and media retrieval and implements various audio fingerprinting methods. It has been developed for research purposes and is a by-product of the media synchronization application [AudioAlign](https://github.com/protyposis/AudioAlign).
+Aurio is an open source .NET audio library for stream processing, analysis and retrieval.
 
+<p align="center">
+  <img src="aurio-icon.png" alt="Aurio logo" width="150"/>
+</p>
 
-Features
---------
+## Features
 
-* 32-bit floating point audio processing engine
-* File I/O through NAudio and FFmpeg
-* Audio playback through NAudio
-* FFT/iFFT through PFFFT, FFTW (optional) and Exocortex.DSP (optional)
-* Resampling through Soxr and SecretRabbitCode/libsamplerate (optional)
-* Stream windowing and overlap-adding
-* STFT, inverse STFT
+* 32-bit floating point audio stream processing engine
+* File I/O (using NAudio and FFmpeg)
+* FFT and iFFT (using Exocortex.DSP, FftSharp, FFTW, PFFFT) 
+* Resampling (using NAudio, libsamplerate, Soxr)
+* Windowing, overlap-adding, STFT, iSTFT
 * Chroma
 * Dynamic Time Warping
 * On-line Time Warping (Dixon, Simon. "Live tracking of musical performances using on-line time warping." Proceedings of the 8th International Conference on Digital Audio Effects. 2005.)
 * Fingerprinting
- *  Haitsma, Jaap, and Ton Kalker. "A highly robust audio fingerprinting system." ISMIR. 2002.
- *  Wang, Avery. "An Industrial Strength Audio Search Algorithm." ISMIR. 2003.
- *  [Echoprint](http://echoprint.me/codegen) (Ellis, Daniel PW, Brian Whitman, and Alastair Porter. "Echoprint: An open music identification service." ISMIR. 2011.)
- *  AcoustID [Chromaprint](https://acoustid.org/chromaprint)
+  * Haitsma, Jaap, and Ton Kalker. "A highly robust audio fingerprinting system." ISMIR. 2002.
+  * Wang, Avery. "An Industrial Strength Audio Search Algorithm." ISMIR. 2003.
+  * [Echoprint](http://echoprint.me/codegen) (Ellis, Daniel PW, Brian Whitman, and Alastair Porter. "Echoprint: An open music identification service." ISMIR. 2011.)
+  * AcoustID [Chromaprint](https://acoustid.org/chromaprint)
+* Audio playback
+* UI widgets
 
-All audio processing (incl. fingerprinting) is stream-based and supports processing of arbitrarily long streams at constant memory usage. All fingerprinting methods are implemented from scratch, not ports from existing libraries, while keeping compatibility where possible.
+All audio processing (incl. fingerprinting) is stream-based and supports processing of arbitrarily long streams at constant memory use.
 
-Aurio.WaveControls provides WPF widgets for user interfaces:
+## Getting Started
 
-* Spectrogram / Chromagram View
-* Spectrum / Graph View
-* VU Meter
-* Correlometer
-* Time Scale
-* Wave View
+The easiest way of using Aurio is installing the [packages](#packages) through [NuGet](). For usage, check the [code examples](#examples) and [example applications](#example-applications).
+
+## Packages
+
+* `Aurio`: The core library.
+* `Aurio.Windows`: Audio player and MP3 decoder. Windows only.
+* `Aurio.WaveControls`: WPF controls and utilities for UIs. Windows only.
+  * Spectrogram / Chromagram View, Spectrum / Graph View, VU Meter, Correlometer, Time Scale, Wave View
+
+### Decoders
+
+| Name | Formats | Description | License |
+| --- | ----------- | --- | --- |
+| `Aurio` (core) | PCM Wave | Managed [NAudio](https://github.com/naudio/NAudio) decoder. | MIT |
+| `Aurio.Windows` | MP3 | Uses Windows's ACM codec through [NAudio](https://github.com/naudio/NAudio). Windows only. | MIT |
+| `Aurio.FFmpeg` | many | Decodes a very wide range of media container formats and codecs through [FFmpeg](https://ffmpeg.org/). Windows and Linux. | LGPL |
+
+### Resamplers
+
+| Name | Description | Variable Rate Support | License |
+| --- | ----------- | --- | --- |
+| `Aurio` (core) | Managed [NAudio](https://github.com/naudio/NAudio) WDL resampler. Recommended for cross-platform use. | yes | MIT |
+| `Aurio.LibSampleRate` | Native [`libsamplerate`](https://github.com/libsndfile/libsamplerate) (a.k.a. Secret Rabbit Code) library. Windows only*. | yes | GPL |
+| `Aurio.Soxr` | Native [SoX Resampler](https://sourceforge.net/projects/soxr/) library. Windows only*. | yes (depending on config) | LGPL |
+
+(*) Linux binary not integrated yet.
+
+### FFTs
+
+| Name | Description | In-Place Transform | Inverse Transform | License |
+| --- | ----------- | --- | --- | --- |
+| `Aurio.Exocortex` | [Exocortex.DSP](https://benhouston3d.com/dsp/) library. Fastest managed FFT, recommended for cross-platform use. | yes | yes | BSD |
+| `Aurio.FftSharp` | [FftSharp](https://github.com/swharden/FftSharp/) library. Much slower than Exocortex. | no | yes | MIT |
+| `Aurio.FFTW` | Native [FFTW](https://www.fftw.org/) (Fastest Fourier Transform in the West) library. Much faster than the managed implementations. Windows only*. | yes | no | GPL |
+| `Aurio.PFFFT` | Native [PFFFT](https://bitbucket.org/jpommier/pffft/) (pretty Fast FFT) library. Even faster than FFTW, recommended for high-performance use. Windows only*. | yes | yes | FFTPACK |
+
+(*) Linux binary not integrated yet.
+
+Run the `Aurio.Test.FFTBenchmark` tool for a more detailed performance comparison, or see native benchmark results [here](https://github.com/hayguen/pffft_benchmarks), [here](https://www.fftw.org/speed/), and [here](https://bitbucket.org/jpommier/pffft/).
 
 
-What's new
-----------
+## What's new
 
 See [CHANGELOG](CHANGELOG.md).
 
 
-Support
--------
+## Development
 
-For questions and issues, please open an issue on the issue tracker. Commercial support, development
-and consultation is available through [Protyposis Multimedia Solutions](https://protyposis.com).
+### Requirements
 
-Requirements
-------------
-
-* Windows
-  - Visual Studio 2022 (with CMake tools)
-* Linux
-  - Ubuntu 22.04
-  - CMake
-  - Ninja
+* Windows: Visual Studio 2022 (with CMake tools)
+* Linux: Ubuntu 22.04, CMake, Ninja
 * .NET SDK 6.0
 
+### Build Instructions
 
-Build Instructions
-------------------
-
-### Windows
-1. Install build environment (see requirements above)
-2. Install dependencies
-   - Run `install-deps.ps1` in PowerShell
-3. Build native code in `cmd` (or open `.\nativesrc` project in VS 2022)
-   - `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64`
-   - `cmake nativesrc --preset x64-debug`
-   - `cmake --build nativesrc\out\build\x64-debug`
-4. Build managed code (or open `.\src` in VS 2022)
-   - `dotnet build src -c Debug`
-
-### Linux
-1. Install build environment
-   - `apt install cmake ninja-build dotnet-sdk-6.0`
-2. Install dependencies
-   - Run `install-deps.sh`
-3. Build native code
-   - `cmake nativesrc --preset linux-debug`
-   - `cmake --build nativesrc/out/build/linux-debug`
-4. Build managed code
-   - `dotnet build src -c LinuxDebug`
+Open `./nativesrc` and `./src/Aurio.sln` in Visual Studio, or check the [CI workflow](.github/workflows/ci.yml) for the Windows and Linux CLI build command sequence.
 
 
-Documentation
--------------
+## Documentation
 
 Not available yet. If you have any questions, feel free to open an issue!
 
 
-Publications
-------------
+## Examples
 
-> Mario Guggenberger. 2015. [Aurio: Audio Processing, Analysis and Retrieval](http://protyposis.net/publications/). In Proceedings of the 23rd ACM international conference on Multimedia (MM '15). ACM, New York, NY, USA, 705-708. DOI=http://dx.doi.org/10.1145/2733373.2807408
-
-
-Examples
---------
-
-### Reading, Processing & Writing
+### Select Decoders
 
 ```csharp
-/* Read a high definition MKV video file with FFmpeg,
- * convert it to telephone sound quality,
- * and write it to a WAV file with NAudio. */
-var sourceStream = new FFmpegSourceStream(new FileInfo("high-definition-video.mkv"));
+using Aurio;
+
+// The stream factory automatically selects an appropriate decoder stream
+// for a given input. Multiple decoders can be added. The PCM Wave decoder
+// is added by default.
+
+// Add Aurio.Windows MP3 decoder
+AudioStreamFactory.AddFactory(new Windows.NAudioStreamFactory());
+// Add Aurio.FFmpeg decoder
+AudioStreamFactory.AddFactory(new FFmpeg.FFmpegAudioStreamFactory());
+
+var stream = AudioStreamFactory.FromFileInfo(new FileInfo("./media.file"));
+
+// Alternatively, decoders can be directly used without the factory
+var stream = FFmpegSourceStream(new FileInfo("./media.file"));
+```
+
+### Select Resampler
+
+```csharp
+using Aurio.Resampler;
+using Aurio.Streams;
+
+// Only one resampler can be selected at a time.
+
+// Use managed NAudio resampler from core
+ResamplerFactory.Factory = new Aurio.NAudioWdlResamplerFactory();
+// or Aurio.Soxr
+ResamplerFactory.Factory = new Aurio.Soxr.ResamplerFactory();
+// or Aurio.LibSampleRate
+ResamplerFactory.Factory = new Aurio.LibSampleRate.ResamplerFactory();
+
+// Needs resampler factory, throws otherwise
+var stream = new ResamplingStream(...);
+```
+
+### Select FFT
+
+```csharp
+using Aurio;
+using Aurio.FFT;
+
+// Only one FFT can be selected at a time.
+
+// Use Aurio.Exocortex
+FFTFactory.Factory = new Exocortex.FFTFactory();
+// or Aurio.Exocortex
+FFTFactory.Factory = new FftSharp.FFTFactory();
+// or Aurio.FFTW
+FFTFactory.Factory = new FFTW.FFTFactory();
+// or Aurio.PFFFT
+FFTFactory.Factory = new PFFFT.FFTFactory();
+
+// Needs FFT factory, throws otherwise
+var stft = new STFT(...);
+```
+
+### Stream Processing
+
+```csharp
+// Read MKV movie with surround audio
+var sourceStream = new FFmpegSourceStream(new FileInfo("media.mkv"));
+// Convert to 32-bit
 var ieee32BitStream = new IeeeStream(sourceStream);
-var monoStream = new MonoStream(ieee32BitStream);
-var resamplingStream = new ResamplingStream(monoStream, ResamplingQuality.Low, 8000);
+// Downmix to stereo
+var downmixStream = new SurroundDownmixStream(ieee32BitStream);
+// Downmix to mono
+var monoStream = new MonoStream(downmixStream);
+// Concatenate with other streams
+var concatStream = new ConcatenationStream(monoStream, anotherStream, ...);
+// Turn volume down to 50%
+var volumeStream = new VolumeControlStream(concatStream) { Volume = 0.5f, Balance = 1, Mute = false };
+// Mix with another stream
+var mixerStream = new MixerStream(concatStream.Properties.Channels, concatStream.Properties.SampleRate);
+mixerStream.Add(volumeStream);
+mixerStream.Add(yetAnotherStream);
+// Skip the first 10 samples
+var cropStream = new CropStream(mixerStream, mixerStream.Properties.SampleBlockByteSize * 10, mixerStream.Length);
+// Clip samples at max volume
+var clipStream = new VolumeClipStream(cropStream);
+// Downsample to telephone sound quality
+var resamplingStream = new ResamplingStream(clipStream, ResamplingQuality.Low, 8000);
+// Write it to a WAV fil
 var sinkStream = new NAudioSinkStream(resamplingStream);
 WaveFileWriter.CreateWaveFile("telephone-audio.wav", sinkStream);
 ```
 
-### Short-time Fourier Transform
+### STFT
 
 ```csharp
 // Setup STFT with a window size of 100ms and an overlap of 50ms
-var source = AudioStreamFactory.FromFileInfoIeee32(new FileInfo("somefilecontainingaudio.ext"));
+var source = AudioStreamFactory.FromFileInfoIeee32(new FileInfo("audio.wav"));
 var windowSize = source.Properties.SampleRate/10;
 var hopSize = windowSize/2;
 var stft = new STFT(source, windowSize, hopSize, WindowType.Hann);
@@ -129,6 +199,27 @@ while (stft.HasNext()) {
     stft.ReadFrame(spectrum);
     // do something with the spectrum (e.g. build spectrogram)
 }
+```
+
+### FFT Equalizer
+
+```csharp
+var source = new IeeeStream(...);
+var target = new MemoryWriterStream(new System.IO.MemoryStream(), source.Properties);
+
+var windowSize = 512;
+var hopSize = windowSize/2+1; // for COLA condition
+var window = WindowType.Hann;
+var stft = new STFT(source, windowSize, hopSize, window);
+var istft = new InverseSTFT(target, windowSize, hopSize, window);
+var spectrum = new float[windowSize/2];
+
+while (stft.HasNext()) {
+    stft.ReadFrame(spectrum);
+    // manipulate spectrum
+    istft.WriteFrame(spectrum);
+}
+istft.Flush();
 ```
 
 ### Generate fingerprints
@@ -193,36 +284,43 @@ var band = new TrackList<AudioTrack>(new[] {drumTrack, guitarTrack, vocalTrack})
 new MultitrackPlayer(band).Play();
 ```
 
-Example Applications
---------------------
+## Example Applications
 
 Aurio comes with a few tools and test applications that can be taken as a reference:
 
-* Tests
-  * **Aurio.FFmpeg.Test** decodes audio to wav files or video to frame images
-  * **Aurio.Test.FingerprintingBenchmark** runs a file through all fingerprinting algorithms and measures the required time.
-  * **Aurio.Test.FingerprintingHaitsmaKalker2002** fingerprints files and builds a hash store to match the fingerprinted files. The matches can be browsed and fingerprints inspected.
-  * **Aurio.Test.FingerprintingWang2003** display the spectrogram and constellation map while fingerprinting a file.
-  * **Aurio.Test.MultitrackPlayback** is a multitrack audio player with a simple user interface.
-  * **Aurio.Test.RealtimeFingerprinting** fingerprints a realtime live audio stream.
-  * **Aurio.Test.ResamlingStream** is a test bed for dynamic resampling.
-  * **Aurio.Test.WaveViewControl** is a test bed for the WaveView WPF control.
+* Test applications
+  * `Aurio.FFmpeg.Test`: Decodes audio to `.wav` files or video to `.png` frame images.
+  * `Aurio.Test.FFTBenchmark`: Measures the execution time of all supported FFT implementations at various input lengths.
+  * `Aurio.Test.FingerprintingBenchmark`: Runs a file through all fingerprinting algorithms and measures the required time.
+  * `Aurio.Test.FingerprintingHaitsmaKalker2002`: Fingerprints files and builds a hash store to match the fingerprinted files. The matches can be browsed and fingerprints inspected.
+  * `Aurio.Test.FingerprintingWang2003`: Fingerprints a file and displays a live spectrogram and constellation map.
+  * `Aurio.Test.HugeControlRendering`: Test bed for WPF waveform drawing.
+  * `Aurio.Test.MultitrackPlayback`: A multitrack audio player with a simple user interface.
+  * `Aurio.Test.RealtimeFingerprinting`: Fingerprints a real-time live audio stream.
+  * `Aurio.Test.ResamlingStream`: Test bed for dynamic resampling.
+  * `Aurio.Test.Streams`: A simple stream processing demo.
+  * `Aurio.Test.WaveViewControl`: Test bed for the `WaveView` WPF control.
 * Tools
-  * **BatchResampler** resamples wave files according to a configuration file.
-  * **MusicDetector** analyzes audio files for music content.
-  * **WaveCutter** cuts a number of concatenated files into slices of random length.
+  * `BatchResampler`: Resamples wave files according to a configuration file.
+  * `MusicDetector`: Analyzes audio files for music content.
+  * `WaveCutter`: Cuts a files into slices of random length.
 
-Aurio has originally been developed for [AudioAlign](https://github.com/protyposis/AudioAlign), a tool to automatically synchronize overlapping audio and video recordings, which uses almost all functionality of Aurio. Its sources are also available and can be used as a implementation reference.
+Aurio has originally been developed for [AudioAlign](https://github.com/protyposis/AudioAlign), a tool to research automated synchronization of overlapping audio and video recordings. It uses most functionality of Aurio and its sources can also be used as an implementation reference.
 
+## Publications
 
-Patents
--------
+> Mario Guggenberger. 2015. [Aurio: Audio Processing, Analysis and Retrieval](http://protyposis.net/publications/). In Proceedings of the 23rd ACM international conference on Multimedia (MM '15). ACM, New York, NY, USA, 705-708. DOI=http://dx.doi.org/10.1145/2733373.2807408
 
-The fingerprinting methods by Haitsma&Kalker and Wang are protected worldwide, and Echoprint is protected in the US by patents. Their usage is therefore severely limited. In Europe, patented methods can be used privately or for research purposes.
+## Support
 
+For questions and issues, please open an issue on the issue tracker. Commercial support, development
+and consultation is available through [Protyposis Multimedia Solutions](https://protyposis.com).
 
-License
--------
+## Patents
 
-Copyright (C) 2010-2017 Mario Guggenberger <mg@protyposis.net>.
+Please be aware that this library may contain code covered by patents. Users are advised to seek legal counsel to ensure compliance with all relevant patent laws and licensing requirements. For example, there are patents covering the fingerprinting methods by Haitsma & Kalker, Wang, and Echoprint. Their usage may therefore be severely limited.
+
+## License
+
+Copyright (C) 2010-2023 Mario Guggenberger <mg@protyposis.net>.
 This project is released under the terms of the GNU Affero General Public License. See `LICENSE` for details. The library can be built to be free of any copyleft requirements; get in touch if the AGPL does not suit your needs.
