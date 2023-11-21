@@ -25,7 +25,7 @@ using NAudio.Wave;
 
 namespace Aurio.Windows
 {
-    class NAudioStreamFactory : IAudioStreamFactory
+    public class NAudioStreamFactory : IAudioStreamFactory
     {
         public IAudioStream OpenFile(FileInfo fileInfo, FileInfo proxyFileInfo = null)
         {
