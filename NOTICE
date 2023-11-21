@@ -9,7 +9,7 @@ Aurio uses the following libraries and resources:
 
 NAudio
 https://github.com/naudio/NAudio
-Released under the Microsoft Public License (Ms-PL)
+Released under the MIT License
 https://opensource.org/license/mit/
 
 The following libraries can be added and used optionally:
