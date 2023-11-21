@@ -2,5 +2,6 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>Exocortex.DSP.v1</AssemblyName>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 </Project>

@@ -1,8 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <AssemblyTitle>Aurio SoxResampler Interface</AssemblyTitle>
+    <TargetFramework>net6.0</TargetFramework>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <AssemblyTitle>Aurio SoxResampler extension</AssemblyTitle>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPackable>true</IsPackable>
+    <Description>Extension library for Aurio, which provides audio resampling through the external Soxr (SoX Resampler) library (see https://github.com/chirlu/soxr).</Description>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
@@ -11,6 +14,7 @@
     <Content Include="..\..\libs\soxr.x64.dll">
       <Link>soxr.x64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/win-x64/native</PackagePath>
     </Content>
   </ItemGroup>
   <ItemGroup>

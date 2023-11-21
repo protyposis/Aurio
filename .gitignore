@@ -13,3 +13,4 @@ obj/
 **/packages/*
 
 licenseinfo.txt
+/dist

@@ -1,7 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <AssemblyTitle>Aurio FFTW Interface</AssemblyTitle>
+    <TargetFramework>net6.0</TargetFramework>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <AssemblyTitle>Aurio FFTW extension</AssemblyTitle>
+    <IsPackable>true</IsPackable>
+    <Description>Extension library for Aurio, which provides audio FFT and iFFT through the external FFTW (Fastest Fourier Transform in the West) library (see https://www.fftw.org/).</Description>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
@@ -10,6 +13,7 @@
     <Content Include="..\..\libs\libfftw3f-3.x64.dll">
       <Link>libfftw3f-3.x64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/win-x64/native</PackagePath>
     </Content>
   </ItemGroup>
   <ItemGroup>

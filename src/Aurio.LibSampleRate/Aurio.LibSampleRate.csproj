@@ -1,8 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <AssemblyTitle>Aurio LibSampleRate Interface</AssemblyTitle>
+    <TargetFramework>net6.0</TargetFramework>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <AssemblyTitle>Aurio LibSampleRate extension</AssemblyTitle>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPackable>true</IsPackable>
+    <Description>Extension library for Aurio, which provides audio resampling through the external libsamplerate/SecretRabbitCode library (see https://github.com/libsndfile/libsamplerate).</Description>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
@@ -11,6 +14,7 @@
     <Content Include="..\..\libs\libsamplerate-0.x64.dll">
       <Link>libsamplerate-0.x64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/win-x64/native</PackagePath>
     </Content>
   </ItemGroup>
   <ItemGroup>

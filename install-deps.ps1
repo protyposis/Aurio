@@ -3,6 +3,7 @@ $localname = "win64"
 $archive = "$version.zip"
 $dest = ".\libs\ffmpeg"
 
+$ProgressPreference = 'SilentlyContinue' # https://stackoverflow.com/q/28682642
 Invoke-WebRequest https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$archive -OutFile $archive
 
 Expand-Archive .\$archive -DestinationPath $dest

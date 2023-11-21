@@ -1,0 +1,9 @@
+# A simple image to build the Linux variants of the aurioffmpegproxy library (on Windows).
+#
+# Usage:
+# 1. build image: docker build -f Dockerfile.libaurioffmpeglinuxbuild --tag libaurioffmpegproxybuilder .
+# 2. run container: docker run -it --rm -v .:/aurio libaurioffmpegproxybuilder
+FROM ubuntu:22.04
+RUN apt update && apt install -y cmake ninja-build wget xz-utils
+WORKDIR /aurio
+CMD [ "./build-nativesrc-linux.sh" ]

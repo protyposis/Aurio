@@ -2,7 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-	  <AssemblyTitle>Aurio FftSharp Interface</AssemblyTitle>
+	  <AssemblyTitle>Aurio FftSharp extension</AssemblyTitle>
+    <IsPackable>true</IsPackable>
+    <Description>Extension library for Aurio, which provides audio FFT and iFFT through the external FftSharp library (see https://github.com/swharden/FftSharp/).</Description>
   </PropertyGroup>
 
   <ItemGroup>

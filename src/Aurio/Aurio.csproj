@@ -3,6 +3,14 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyTitle>Aurio Core Library</AssemblyTitle>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPackable>true</IsPackable>
+    <Description>
+Aurio is a fast and modular cross-platform 32-bit floating point audio stream processing library for analysis, 
+fingerprinting and retrieval. 
+
+It provides file I/O, playback, FFT/iFFT, (variable rate) resampling, time warping, windowing, STFT/iSTFT, 
+overlap-adding (OLA/COLA), fingerprinting, and WPF UI controls for visualization.
+    </Description>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="licenseinfo.txt" />
