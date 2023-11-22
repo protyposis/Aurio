@@ -1,4 +1,47 @@
-# Change Log
+# Changelog
+
+## 4.0.0 (2023-xx-xx)
+
+### Features
+
+* upgrade to .NET 6
+* faster fingerprint matching
+* custom audio proxy files
+* `PeakPairsGenerated` event
+* draw peak pairs into spectrogram
+* `Aurio` core cross-platform support
+* `Aurio.Windows` for Windows dependencies
+* FFT benchmarking application
+* FftSharp integration
+* FFmpeg Linux support
+* remove unnecessary .NET Core test application
+* remove x86 support
+* upgrade FFmpeg to 6.0
+* Wang guessed settings profile
+* `WdlResampler` flushing
+* support skipping missing files when loading project
+* `DummyAudioTrack` as placeholder for missing backing file
+* custom audio proxy files
+* create `Interval` from `TimeSpan`s
+* optional progress callback on `MatchProcessor.WindowFilter`
+* `FFTUtil.CalculateFrequencyBinIndex`
+* trigger progress events only if there is actual progress to report
+
+### Bug Fixes
+
+* analysis of multiple files
+* audio stream creation without proxy
+* silent spectrum frames not drawn
+* incorrect stream windower last frame detection
+* missing waveform view after reload
+* progress event without reported progress
+* status message update before `ProcessingStarted` event
+* stream factory not accessible
+* update peak file when audio file has changed
+* wave controls rendered empty
+* status message update before `ProcessingStarted` event
+* progress events without reported progress
+* periodic Hann window incorrectly applied
 
 ## 2018-12-04 d01cb3f
 * Introduced `IAudioStreamFactory` pattern that allows to register external audio stream factories in `AudioStreamFactory` to read streams
