@@ -2,9 +2,11 @@
 
 Aurio is an open source .NET audio library for stream processing, analysis and retrieval.
 
+<!-- nuget-exclude:start -->
 <p align="center">
-  <img src="aurio-icon.png" alt="Aurio logo" width="150"/>
+  <img src="aurio-icon.png" alt="Aurio logo" width="100"/>
 </p>
+<!-- nuget-exclude:end -->
 
 ## Features
 
@@ -26,9 +28,11 @@ Aurio is an open source .NET audio library for stream processing, analysis and r
 
 All audio processing (incl. fingerprinting) is stream-based and supports processing of arbitrarily long streams at constant memory use.
 
+<!-- nuget-exclude:start -->
 ## Getting Started
 
 The easiest way of using Aurio is installing the [packages](#packages) through [NuGet](). For usage, check the [code examples](#examples) and [example applications](#example-applications).
+<!-- nuget-exclude:end -->
 
 ## Packages
 
@@ -66,6 +70,7 @@ The easiest way of using Aurio is installing the [packages](#packages) through [
 
 (*) Linux binary not integrated yet.
 
+<!-- nuget-exclude:start -->
 Run the `Aurio.Test.FFTBenchmark` tool for a more detailed performance comparison, or see native benchmark results [here](https://github.com/hayguen/pffft_benchmarks), [here](https://www.fftw.org/speed/), and [here](https://bitbucket.org/jpommier/pffft/).
 
 
@@ -85,7 +90,7 @@ See [CHANGELOG](CHANGELOG.md).
 ### Build Instructions
 
 Open `./nativesrc` and `./src/Aurio.sln` in Visual Studio, or check the [CI workflow](.github/workflows/ci.yml) for the Windows and Linux CLI build command sequence.
-
+<!-- nuget-exclude:end -->
 
 ## Documentation
 
@@ -284,6 +289,7 @@ var band = new TrackList<AudioTrack>(new[] {drumTrack, guitarTrack, vocalTrack})
 new MultitrackPlayer(band).Play();
 ```
 
+<!-- nuget-exclude:start -->
 ## Example Applications
 
 Aurio comes with a few tools and test applications that can be taken as a reference:
@@ -310,6 +316,7 @@ Aurio has originally been developed for [AudioAlign](https://github.com/protypos
 ## Publications
 
 > Mario Guggenberger. 2015. [Aurio: Audio Processing, Analysis and Retrieval](http://protyposis.net/publications/). In Proceedings of the 23rd ACM international conference on Multimedia (MM '15). ACM, New York, NY, USA, 705-708. DOI=http://dx.doi.org/10.1145/2733373.2807408
+<!-- nuget-exclude:end -->
 
 ## Support
 

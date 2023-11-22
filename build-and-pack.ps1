@@ -15,6 +15,7 @@ docker build -f Dockerfile.libaurioffmpeglinuxbuild --tag libaurioffmpegproxybui
 docker run -it --rm -v .:/aurio libaurioffmpegproxybuilder
 
 Write-Host "Packing...";
+./build-nuget-readme.ps1
 dotnet pack src -c NugetPackRelease -o dist/nuget
 
 Write-Host "Done :)";

@@ -4,6 +4,7 @@
     <AssemblyTitle>Aurio Core Library</AssemblyTitle>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPackable>true</IsPackable>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <Description>
 Aurio is a fast and modular cross-platform 32-bit floating point audio stream processing library for analysis, 
 fingerprinting and retrieval. 
@@ -23,5 +24,8 @@ overlap-adding (OLA/COLA), fingerprinting, and WPF UI controls for visualization
   </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="cp &quot;$(ProjectDir)/../../NOTICE&quot; &quot;$(ProjectDir)/licenseinfo.txt&quot;" />
+    <ItemGroup>
+      <None Include="./README.nuget.md" Pack="true" PackagePath="/README.md" />
+    </ItemGroup>
   </Target>
 </Project>
