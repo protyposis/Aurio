@@ -60,7 +60,7 @@ namespace Aurio.FFmpeg.Test
 
         private static void DecodeAudio(string filename)
         {
-            FFmpegReader reader = new FFmpegReader(filename, Type.Audio);
+            FFmpegReader reader = new(filename, Type.Audio);
 
             Console.WriteLine(
                 "length {0}, frame_size {1}, sample_rate {2}, sample_size {3}, channels {4}",
@@ -83,8 +83,7 @@ namespace Aurio.FFmpeg.Test
 
             int samplesRead;
             long timestamp;
-            Type type;
-            MemoryStream ms = new MemoryStream();
+            MemoryStream ms = new();
 
             // read full stream
             while (
@@ -93,7 +92,7 @@ namespace Aurio.FFmpeg.Test
                         out timestamp,
                         output_buffer,
                         output_buffer_size,
-                        out type
+                        out _
                     )
                 ) > 0
             )
@@ -115,7 +114,7 @@ namespace Aurio.FFmpeg.Test
                         out timestamp,
                         output_buffer,
                         output_buffer_size,
-                        out type
+                        out _
                     )
                 ) > 0
             )
@@ -127,25 +126,26 @@ namespace Aurio.FFmpeg.Test
 
             // write memory to wav file
             ms.Position = 0;
-            MemorySourceStream mss = new MemorySourceStream(
-                ms,
-                new AudioProperties(
-                    reader.AudioOutputConfig.format.channels,
-                    reader.AudioOutputConfig.format.sample_rate,
-                    reader.AudioOutputConfig.format.sample_size * 8,
-                    reader.AudioOutputConfig.format.sample_size == 4
-                        ? AudioFormat.IEEE
-                        : AudioFormat.LPCM
-                )
-            );
-            IeeeStream ieee = new IeeeStream(mss);
-            NAudioSinkStream nAudioSink = new NAudioSinkStream(ieee);
+            MemorySourceStream mss =
+                new(
+                    ms,
+                    new AudioProperties(
+                        reader.AudioOutputConfig.format.channels,
+                        reader.AudioOutputConfig.format.sample_rate,
+                        reader.AudioOutputConfig.format.sample_size * 8,
+                        reader.AudioOutputConfig.format.sample_size == 4
+                            ? AudioFormat.IEEE
+                            : AudioFormat.LPCM
+                    )
+                );
+            IeeeStream ieee = new(mss);
+            NAudioSinkStream nAudioSink = new(ieee);
             WaveFileWriter.CreateWaveFile(filename + ".ffmpeg.wav", nAudioSink);
         }
 
         private static void DecodeVideo(string filename, int videoFrameInterval)
         {
-            FFmpegReader reader = new FFmpegReader(filename, Type.Video);
+            FFmpegReader reader = new(filename, Type.Video);
 
             Console.WriteLine(
                 "length {0}, frame_size {1}x{2}, frame_rate {3}, aspect_ratio {4}",
@@ -162,27 +162,14 @@ namespace Aurio.FFmpeg.Test
                 * 3 /* RGB */
             ;
             byte[] output_buffer = new byte[output_buffer_size];
-
-            int frameRead;
-            long timestamp;
-            Type type;
             int frameCount = 0;
 
-            Bitmap rgbFrame = new Bitmap(
-                reader.VideoOutputConfig.format.width,
-                reader.VideoOutputConfig.format.height
-            );
+            Bitmap rgbFrame =
+                new(reader.VideoOutputConfig.format.width, reader.VideoOutputConfig.format.height);
 
             // read full stream
             while (
-                (
-                    frameRead = reader.ReadFrame(
-                        out timestamp,
-                        output_buffer,
-                        output_buffer_size,
-                        out type
-                    )
-                ) > 0
+                reader.ReadFrame(out long timestamp, output_buffer, output_buffer_size, out _) > 0
             )
             {
                 Console.WriteLine("read frame " + frameCount + " @ " + timestamp);
