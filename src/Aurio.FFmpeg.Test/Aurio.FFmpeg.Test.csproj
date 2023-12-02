@@ -5,7 +5,7 @@
     <AssemblyTitle>Aurio FFmpeg Test App</AssemblyTitle>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Aurio\Aurio.csproj" />

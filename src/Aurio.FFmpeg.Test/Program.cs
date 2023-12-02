@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using Aurio.Streams;
 using NAudio.Wave;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Aurio.FFmpeg.Test
 {
@@ -164,8 +160,11 @@ namespace Aurio.FFmpeg.Test
             byte[] output_buffer = new byte[output_buffer_size];
             int frameCount = 0;
 
-            Bitmap rgbFrame =
-                new(reader.VideoOutputConfig.format.width, reader.VideoOutputConfig.format.height);
+            using var image = Image.WrapMemory<Bgr24>(
+                output_buffer,
+                reader.VideoOutputConfig.format.width,
+                reader.VideoOutputConfig.format.height
+            );
 
             // read full stream
             while (
@@ -176,18 +175,7 @@ namespace Aurio.FFmpeg.Test
 
                 if (frameCount % videoFrameInterval == 0)
                 {
-                    BitmapData rgbFrameData = rgbFrame.LockBits(
-                        new Rectangle(0, 0, rgbFrame.Width, rgbFrame.Height),
-                        ImageLockMode.WriteOnly,
-                        PixelFormat.Format24bppRgb
-                    );
-                    Marshal.Copy(output_buffer, 0, rgbFrameData.Scan0, output_buffer_size);
-                    rgbFrame.UnlockBits(rgbFrameData);
-
-                    rgbFrame.Save(
-                        String.Format("{0}.{1:00000000}.png", filename, frameCount),
-                        ImageFormat.Png
-                    );
+                    image.SaveAsPng(string.Format("{0}.{1:00000000}.png", filename, frameCount));
                 }
 
                 frameCount++;
