@@ -18,12 +18,14 @@ namespace Aurio.FFmpeg.Test
                 Console.WriteLine("  -a   decode audio to wav file (default setting)");
                 Console.WriteLine("  -v   decode video frames to jpg files");
                 Console.WriteLine("  -vi  video frame decoding interval (default: 1000)");
+                Console.WriteLine("  -d   dry run (no output files)");
                 Console.WriteLine("no input file specified");
                 return;
             }
 
             Type type = Type.Audio;
             int videoFrameInterval = 1000;
+            bool dryRun = false;
             int i = 0;
 
             for (; i < args.Length - 1; i++)
@@ -39,22 +41,32 @@ namespace Aurio.FFmpeg.Test
                     case "-vi":
                         videoFrameInterval = int.Parse(args[++i]);
                         break;
+                    case "-d":
+                        dryRun = true;
+                        break;
                 }
             }
 
             string filename = args[i]; // last argument
 
+            if (dryRun)
+            {
+                Console.WriteLine("Dry run enabled");
+            }
+
             if (type == Type.Audio)
             {
-                DecodeAudio(filename);
+                Console.WriteLine("Audio mode");
+                DecodeAudio(filename, dryRun);
             }
             else if (type == Type.Video)
             {
-                DecodeVideo(filename, videoFrameInterval);
+                Console.WriteLine($"Video mode (frame interval: {videoFrameInterval})");
+                DecodeVideo(filename, videoFrameInterval, dryRun);
             }
         }
 
-        private static void DecodeAudio(string filename)
+        private static void DecodeAudio(string filename, bool dryRun)
         {
             FFmpegReader reader = new(filename, Type.Audio);
 
@@ -120,6 +132,11 @@ namespace Aurio.FFmpeg.Test
 
             reader.Dispose();
 
+            if (dryRun)
+            {
+                return;
+            }
+
             // write memory to wav file
             ms.Position = 0;
             MemorySourceStream mss =
@@ -139,7 +156,7 @@ namespace Aurio.FFmpeg.Test
             WaveFileWriter.CreateWaveFile(filename + ".ffmpeg.wav", nAudioSink);
         }
 
-        private static void DecodeVideo(string filename, int videoFrameInterval)
+        private static void DecodeVideo(string filename, int videoFrameInterval, bool dryRun)
         {
             FFmpegReader reader = new(filename, Type.Video);
 
@@ -175,7 +192,17 @@ namespace Aurio.FFmpeg.Test
 
                 if (frameCount % videoFrameInterval == 0)
                 {
-                    image.SaveAsPng(string.Format("{0}.{1:00000000}.png", filename, frameCount));
+                    var fileName = string.Format("{0}.{1:00000000}.png", filename, frameCount);
+
+                    if (dryRun)
+                    {
+                        using var ms = new MemoryStream();
+                        image.SaveAsPng(ms);
+                    }
+                    else
+                    {
+                        image.SaveAsPng(fileName);
+                    }
                 }
 
                 frameCount++;
