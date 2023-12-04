@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Aurio.UnitTest
 {
     [TestClass]
-    public class WindowTest
+    public class WindowUtilTest
     {
         [TestMethod]
         public void Hann()
