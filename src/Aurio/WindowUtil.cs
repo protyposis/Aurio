@@ -38,10 +38,25 @@ namespace Aurio
         /// </summary>
         HannPeriodic,
         Hamming,
+
+        /// <summary>
+        /// Periodic Hamming window. COLA with hop size at length/2.
+        /// </summary>
+        HammingPeriodic,
         Blackman,
         Nuttall,
         BlackmanHarris,
-        BlackmanNuttall
+        BlackmanNuttall,
+
+        /// <summary>
+        /// Symmetric sine window.
+        /// </summary>
+        Sine,
+
+        /// <summary>
+        /// Periodic sine window.
+        /// </summary>
+        SinePeriodic,
     }
 
     /// <summary>
@@ -125,6 +140,20 @@ namespace Aurio
             }
         }
 
+        /// <summary>
+        /// Hamming window with COLA property when length is even and hop size is length/2, useful for FFT and overlap-add.
+        /// For uneven lengths, COLA can be achieved by using the normal Hamming window with a hop size of (length-1)/2.
+        /// </summary>
+        public static void HammingPeriodic(float[] samples, int offset, int length)
+        {
+            float[] hamming = GetArray(WindowType.Hamming, length + 1);
+
+            for (int x = offset; x < offset + length; x++)
+            {
+                samples[x] *= hamming[x];
+            }
+        }
+
         public static void Blackman(float[] samples, int offset, int length)
         {
             int index = 0;
@@ -188,6 +217,24 @@ namespace Aurio
             }
         }
 
+        private static void SineInternal(float[] samples, int offset, int length, int N)
+        {
+            for (int n = 0; n < length; n++)
+            {
+                samples[n + offset] = (float)(samples[n + offset] * Math.Sin(n * Math.PI / N));
+            }
+        }
+
+        public static void Sine(float[] samples, int offset, int length)
+        {
+            SineInternal(samples, offset, length, length - 1);
+        }
+
+        public static void SinePeriodic(float[] samples, int offset, int length)
+        {
+            SineInternal(samples, offset, length, length);
+        }
+
         public static float[] GetArray(
             WindowType windowType,
             int windowSize,
@@ -217,6 +264,9 @@ namespace Aurio
                 case WindowType.Hamming:
                     Hamming(window, 0, window.Length);
                     break;
+                case WindowType.HammingPeriodic:
+                    HammingPeriodic(window, 0, window.Length);
+                    break;
                 case WindowType.Blackman:
                     Blackman(window, 0, window.Length);
                     break;
@@ -228,6 +278,12 @@ namespace Aurio
                     break;
                 case WindowType.BlackmanNuttall:
                     BlackmanNuttall(window, 0, window.Length);
+                    break;
+                case WindowType.Sine:
+                    Sine(window, 0, window.Length);
+                    break;
+                case WindowType.SinePeriodic:
+                    SinePeriodic(window, 0, window.Length);
                     break;
                 default:
                     throw new ArgumentException("unsupported window type: " + windowType);
