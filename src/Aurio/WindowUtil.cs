@@ -285,6 +285,11 @@ namespace Aurio
                     throw new ArgumentException("unsupported window type: " + config.Type);
             }
 
+            if (config.SquareRoot)
+            {
+                window = window.Select(x => (float)Math.Sqrt(x)).ToArray();
+            }
+
             return window;
         }
 

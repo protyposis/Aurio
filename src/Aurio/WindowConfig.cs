@@ -20,4 +20,9 @@
 
 namespace Aurio;
 
-public record class WindowConfig(WindowType Type, int Size, float NormalizationFactor = 1.0f) { }
+public record class WindowConfig(
+    WindowType Type,
+    int Size,
+    float NormalizationFactor = 1.0f,
+    bool SquareRoot = false
+) { }

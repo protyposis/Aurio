@@ -146,5 +146,19 @@ namespace Aurio.UnitTest
 
             CollectionAssert.AreEqual(window1, window2);
         }
+
+        [TestMethod]
+        public void SquareRoot()
+        {
+            var window = WindowUtil.GetArray(WindowType.HannPeriodic, 20);
+            var windowRooted = WindowUtil.GetArray(
+                new WindowConfig(WindowType.HannPeriodic, 20, SquareRoot: true)
+            );
+
+            CollectionAssert.AreEqual(
+                window.Select(x => (float)Math.Sqrt(x)).ToArray(),
+                windowRooted
+            );
+        }
     }
 }
