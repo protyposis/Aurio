@@ -38,15 +38,15 @@ namespace Aurio.WaveControls
     /// </summary>
     public partial class Graph : UserControl
     {
-        public float[] Values
+        public IList<float> Values
         {
-            get { return (float[])GetValue(ValuesProperty); }
+            get { return (IList<float>)GetValue(ValuesProperty); }
             set { SetValue(ValuesProperty, value); }
         }
 
         public static readonly DependencyProperty ValuesProperty = DependencyProperty.Register(
             "Values",
-            typeof(float[]),
+            typeof(IList<float>),
             typeof(Graph),
             new UIPropertyMetadata(new float[0], new PropertyChangedCallback(ValuesChanged))
         );
@@ -134,8 +134,14 @@ namespace Aurio.WaveControls
                 return;
             }
 
+            graph.UpdateGraph();
+        }
+
+        private void UpdateGraph()
+        {
+            var graph = this;
             graph.GraphLine.Points.Clear();
-            float[] dc = (float[])e.NewValue;
+            IList<float> dc = Values;
 
             if (graph.Mode == GraphMode.Default)
             {
@@ -152,7 +158,7 @@ namespace Aurio.WaveControls
                         .Points
                         .Add(
                             new Point(
-                                graph.ActualWidth / (dc.Length - 1) * count,
+                                graph.ActualWidth / (dc.Count - 1) * count,
                                 height - factor * (value - min)
                             )
                         );
@@ -181,7 +187,7 @@ namespace Aurio.WaveControls
                         .Points
                         .Add(
                             new Point(
-                                graph.ActualWidth / (dc.Length - 1) * count,
+                                graph.ActualWidth / (dc.Count - 1) * count,
                                 height - heightScale * (value - min)
                             )
                         );
@@ -201,7 +207,7 @@ namespace Aurio.WaveControls
                         .Points
                         .Add(
                             new Point(
-                                graph.ActualWidth / (dc.Length - 1) * count,
+                                graph.ActualWidth / (dc.Count - 1) * count,
                                 value * -1 * dbFactor
                             )
                         );
@@ -213,6 +219,7 @@ namespace Aurio.WaveControls
         public Graph()
         {
             InitializeComponent();
+            Loaded += (object sender, RoutedEventArgs e) => UpdateGraph();
         }
 
         public void Reset()

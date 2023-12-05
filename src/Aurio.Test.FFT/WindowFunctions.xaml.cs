@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -20,8 +22,11 @@ namespace Aurio.Test.FFT
     /// </summary>
     public partial class WindowFunctions : Window
     {
+        public ObservableCollection<WindowFunctionViewModel> WindowFunctionModels { get; }
+
         public WindowFunctions()
         {
+            WindowFunctionModels = new ObservableCollection<WindowFunctionViewModel>();
             InitializeComponent();
         }
 
@@ -42,42 +47,16 @@ namespace Aurio.Test.FFT
 
         private void Refresh(int sampleCount)
         {
-            float[] samples = new float[sampleCount];
-            samples = samples.Select(sample => 1f).ToArray();
+            WindowFunctionModels.Clear();
 
-            graphInput.Values = samples;
-
-            float[] samplesRectangle = (float[])samples.Clone();
-            WindowUtil.Rectangle(samplesRectangle, 0, samples.Length);
-            graphRectangle.Values = samplesRectangle;
-
-            float[] samplesTriangle = (float[])samples.Clone();
-            WindowUtil.Triangle(samplesTriangle, 0, samples.Length);
-            graphTriangle.Values = samplesTriangle;
-
-            float[] samplesHamming = (float[])samples.Clone();
-            WindowUtil.Hamming(samplesHamming, 0, samples.Length);
-            graphHamming.Values = samplesHamming;
-
-            float[] samplesHann = (float[])samples.Clone();
-            WindowUtil.Hann(samplesHann, 0, samples.Length);
-            graphHann.Values = samplesHann;
-
-            float[] samplesBlackman = (float[])samples.Clone();
-            WindowUtil.Blackman(samplesBlackman, 0, samples.Length);
-            graphBlackman.Values = samplesBlackman;
-
-            float[] samplesBlackmanHarris = (float[])samples.Clone();
-            WindowUtil.BlackmanHarris(samplesBlackmanHarris, 0, samples.Length);
-            graphBlackmanHarris.Values = samplesBlackmanHarris;
-
-            float[] samplesBlackmanNuttall = (float[])samples.Clone();
-            WindowUtil.BlackmanNuttall(samplesBlackmanNuttall, 0, samples.Length);
-            graphBlackmanNuttall.Values = samplesBlackmanNuttall;
-
-            float[] samplesNuttall = (float[])samples.Clone();
-            WindowUtil.Nuttall(samplesNuttall, 0, samples.Length);
-            graphNuttall.Values = samplesNuttall;
+            Enum.GetValues(typeof(WindowType))
+                .Cast<WindowType>()
+                .Select(
+                    windowType =>
+                        new WindowFunctionViewModel(WindowUtil.GetFunction(windowType, sampleCount))
+                )
+                .ToList()
+                .ForEach(vm => WindowFunctionModels.Add(vm));
 
             //PrintArrayToDebugOutput(samples);
             //PrintArrayToDebugOutput(samplesRectangle);
