@@ -34,7 +34,6 @@ namespace Aurio.Features
         public const int DEFAULT_STREAM_INPUT_BUFFER_SIZE = 32768;
 
         private readonly IAudioStream stream;
-        private readonly int windowSize;
         private readonly int hopSize;
         private readonly WindowFunction windowFunction;
         private readonly int bufferSize;
@@ -43,21 +42,18 @@ namespace Aurio.Features
         /// Initializes a new windower for the specified stream with the specified window and hop size.
         /// </summary>
         /// <param name="stream">the stream to read the audio data to process from</param>
-        /// <param name="windowSize">the window size in the dimension of samples</param>
+        /// <param name="window">the window function to apply</param>
         /// <param name="hopSize">the hop size in the dimension of samples</param>
-        /// <param name="windowType">the type of the window function to apply</param>
         public StreamWindower(
             IAudioStream stream,
-            int windowSize,
+            WindowFunction window,
             int hopSize,
-            WindowType windowType,
             int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE
         )
         {
             this.stream = stream;
-            this.windowSize = windowSize;
             this.hopSize = hopSize;
-            this.windowFunction = WindowUtil.GetFunction(windowType, WindowSize);
+            this.windowFunction = window;
             this.bufferSize = bufferSize;
 
             Initialize();
@@ -75,7 +71,12 @@ namespace Aurio.Features
             int hopSize,
             int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE
         )
-            : this(stream, windowSize, hopSize, WindowType.Rectangle, bufferSize) { }
+            : this(
+                stream,
+                WindowUtil.GetFunction(WindowType.Rectangle, windowSize),
+                hopSize,
+                bufferSize
+            ) { }
 
         /// <summary>
         /// Initializes a new windower for the specified stream with the specified window and hop size.
@@ -86,41 +87,21 @@ namespace Aurio.Features
         /// <param name="windowType">the type of the window function to apply</param>
         public StreamWindower(
             IAudioStream stream,
+            WindowType windowType,
             TimeSpan windowSize,
             TimeSpan hopSize,
-            WindowType windowType,
             int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE
         )
         {
             this.stream = stream;
-            this.windowSize =
+            var windowSizeInSamples =
                 (int)TimeUtil.TimeSpanToBytes(windowSize, stream.Properties)
                 / stream.Properties.SampleByteSize;
             this.hopSize =
                 (int)TimeUtil.TimeSpanToBytes(hopSize, stream.Properties)
                 / stream.Properties.SampleByteSize;
             this.bufferSize = bufferSize;
-
-            // calculate next power of 2 for the window size as required by the FFT
-            // http://stackoverflow.com/questions/264080/how-do-i-calculate-the-closest-power-of-2-or-10-a-number-is
-            // http://acius2.blogspot.com/2007/11/calculating-next-power-of-2.html
-            int windowSizePower2 = this.windowSize;
-            windowSizePower2--;
-            windowSizePower2 = (windowSizePower2 >> 1) | windowSizePower2;
-            windowSizePower2 = (windowSizePower2 >> 2) | windowSizePower2;
-            windowSizePower2 = (windowSizePower2 >> 4) | windowSizePower2;
-            windowSizePower2 = (windowSizePower2 >> 8) | windowSizePower2;
-            windowSizePower2 = (windowSizePower2 >> 16) | windowSizePower2;
-            windowSizePower2++;
-            if (this.windowSize < windowSizePower2)
-            {
-                Debug.WriteLine(
-                    "window size enlarged to the next power of 2 as required by FFT: {0} -> {1}",
-                    this.windowSize,
-                    windowSizePower2
-                );
-                this.windowSize = windowSizePower2;
-            }
+            this.windowFunction = WindowUtil.GetFunction(windowType, windowSizeInSamples);
 
             Initialize();
         }
@@ -137,7 +118,7 @@ namespace Aurio.Features
             TimeSpan hopSize,
             int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE
         )
-            : this(stream, windowSize, hopSize, WindowType.Rectangle, bufferSize) { }
+            : this(stream, WindowType.Rectangle, windowSize, hopSize, bufferSize) { }
 
         /// <summary>
         /// Gets the audio properties of the stream.
@@ -152,7 +133,7 @@ namespace Aurio.Features
         /// </summary>
         public int WindowSize
         {
-            get { return windowSize; }
+            get { return windowFunction.Size; }
         }
 
         /// <summary>
@@ -171,8 +152,10 @@ namespace Aurio.Features
             get
             {
                 return (int)(
-                        ((stream.Length / stream.Properties.SampleBlockByteSize) - WindowSize)
-                        / HopSize
+                        (
+                            (stream.Length / stream.Properties.SampleBlockByteSize)
+                            - windowFunction.Size
+                        ) / HopSize
                     ) + 1;
             }
         }
@@ -186,7 +169,7 @@ namespace Aurio.Features
 
         private void Initialize()
         {
-            if (windowSize > this.bufferSize)
+            if (windowFunction.Size > this.bufferSize)
             {
                 throw new ArgumentException(
                     "window size is too large - doesn't fit into the internal buffer"
@@ -197,7 +180,7 @@ namespace Aurio.Features
             streamBuffer = new byte[this.bufferSize * sampleBytes];
             streamBufferOffset = 0;
             streamBufferLevel = 0;
-            frameSize = windowSize * sampleBytes;
+            frameSize = windowFunction.Size * sampleBytes;
             frameOffset = 0;
             hopSizeB = hopSize * sampleBytes;
         }
@@ -262,7 +245,7 @@ namespace Aurio.Features
         /// <param name="frame">the target array where the frame will be copied to</param>
         public virtual void ReadFrame(float[] frame)
         {
-            if (frame.Length < windowSize)
+            if (frame.Length < windowFunction.Size)
             {
                 throw new ArgumentException("the provided frame array has an invalid size");
             }

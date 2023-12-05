@@ -33,7 +33,12 @@ namespace Aurio.Features.ContinuousFrequencyActivation
         private const int HOP_SIZE = 256; // samples = 75%
 
         public PowerSpectrumCalculator(IAudioStream stream)
-            : base(stream, WINDOW_SIZE, HOP_SIZE, WINDOW_TYPE, OutputFormat.Decibel)
+            : base(
+                stream,
+                WindowUtil.GetFunction(WINDOW_TYPE, WINDOW_SIZE),
+                HOP_SIZE,
+                OutputFormat.Decibel
+            )
         {
             // nothing to do here
         }

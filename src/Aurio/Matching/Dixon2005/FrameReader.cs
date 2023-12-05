@@ -43,9 +43,8 @@ namespace Aurio.Matching.Dixon2005
         public FrameReader(IAudioStream stream)
             : base(
                 stream,
-                WINDOW_SIZE,
+                WindowUtil.GetFunction(WINDOW_TYPE, WINDOW_SIZE),
                 WINDOW_HOP_SIZE,
-                WINDOW_TYPE,
                 OutputFormat.MagnitudesSquared
             )
         {

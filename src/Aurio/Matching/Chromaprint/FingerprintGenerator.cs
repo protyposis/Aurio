@@ -55,11 +55,11 @@ namespace Aurio.Matching.Chromaprint
                 profile.SamplingRate
             );
 
+            var window = WindowUtil.GetFunction(profile.WindowType, profile.WindowSize);
             var chroma = new Chroma(
                 audioStream,
-                profile.WindowSize,
+                window,
                 profile.HopSize,
-                profile.WindowType,
                 profile.ChromaMinFrequency,
                 profile.ChromaMaxFrequency,
                 false,

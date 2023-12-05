@@ -58,20 +58,19 @@ namespace Aurio.Features
 
         public Chroma(
             IAudioStream stream,
-            int windowSize,
+            WindowFunction window,
             int hopSize,
-            WindowType windowType,
             float minFreq,
             float maxFreq,
             bool normalize,
             MappingMode mappingMode
         )
-            : base(stream, windowSize, hopSize, windowType, OutputFormat.MagnitudesSquared)
+            : base(stream, window, hopSize, OutputFormat.MagnitudesSquared)
         {
-            fftFrameBuffer = new float[windowSize / 2];
+            fftFrameBuffer = new float[window.Size / 2];
 
             // Precompute FFT bin to Chroma bin mapping
-            double freqToBinRatio = (double)stream.Properties.SampleRate / windowSize;
+            double freqToBinRatio = (double)stream.Properties.SampleRate / window.Size;
             int minBin = (int)Math.Floor(minFreq / freqToBinRatio);
             int maxBin = (int)Math.Ceiling(maxFreq / freqToBinRatio);
             minBin = Math.Max(minBin, 1); // skip bin 0 in any case (zero f cannot be converted to chroma)
@@ -121,32 +120,21 @@ namespace Aurio.Features
 
         public Chroma(
             IAudioStream stream,
-            int windowSize,
+            WindowFunction window,
             int hopSize,
-            WindowType windowType,
             float minFreq,
             float maxFreq
         )
-            : this(
-                stream,
-                windowSize,
-                hopSize,
-                windowType,
-                minFreq,
-                maxFreq,
-                true,
-                Chroma.MappingMode.Paper
-            )
+            : this(stream, window, hopSize, minFreq, maxFreq, true, Chroma.MappingMode.Paper)
         {
             //
         }
 
-        public Chroma(IAudioStream stream, int windowSize, int hopSize, WindowType windowType)
+        public Chroma(IAudioStream stream, WindowFunction window, int hopSize)
             : this(
                 stream,
-                windowSize,
+                window,
                 hopSize,
-                windowType,
                 0,
                 stream.Properties.SampleRate / 2,
                 true,

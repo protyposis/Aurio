@@ -60,13 +60,8 @@ namespace Aurio.Matching.Wang2003
             );
 
             // "Hanning-windowed", see quote in default profile
-            STFT stft = new STFT(
-                audioStream,
-                profile.WindowSize,
-                profile.HopSize,
-                WindowType.Hann,
-                STFT.OutputFormat.Decibel
-            );
+            var window = WindowUtil.GetFunction(WindowType.Hann, profile.WindowSize);
+            STFT stft = new STFT(audioStream, window, profile.HopSize, STFT.OutputFormat.Decibel);
             int index = 0;
             int indices = stft.WindowCount;
             int processedFrames = 0;

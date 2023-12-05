@@ -81,11 +81,11 @@ namespace Aurio.Matching.HaitsmaKalker2002
                 profile.SampleRate
             );
 
+            var window = WindowUtil.GetFunction(WindowType.Hann, profile.FrameSize);
             STFT stft = new STFT(
                 audioStream,
-                profile.FrameSize,
+                window,
                 profile.FrameStep,
-                WindowType.Hann,
                 STFT.OutputFormat.Decibel,
                 this.bufferSize
             );

@@ -57,7 +57,8 @@ namespace Aurio.UnitTest
             int hopSize = 100;
             var window = WindowType.Rectangle;
 
-            var sw = new StreamWindower(sourceStream, windowSize, hopSize, window);
+            var windowFunction = WindowUtil.GetFunction(window, windowSize);
+            var sw = new StreamWindower(sourceStream, windowFunction, hopSize);
             var ola = new OLA(targetStream, windowSize, hopSize);
 
             var frameBuffer = new float[windowSize];
@@ -90,10 +91,9 @@ namespace Aurio.UnitTest
                 properties
             );
 
-            // 50% overlap with a Hann window is an optimal combination, Hann window is optimally uneven with a 1 as middle point
-            int windowSize = 21;
-            int hopSize = 10;
-            var window = WindowType.Hann;
+            // 50% overlap with a Hann window is an optimal combination
+            var window = WindowUtil.GetFunction(WindowType.HannPeriodic, 32);
+            int hopSize = 16;
 
             // Adjust source length to window/hop size so no samples remain at the end
             // (a potential last incomplete frame is not returned by the stream windower)
@@ -102,14 +102,14 @@ namespace Aurio.UnitTest
                 sourceStream,
                 0,
                 sourceStream.Length
-                    - (sourceStream.Length - windowSize * sourceStream.SampleBlockSize)
+                    - (sourceStream.Length - window.Size * sourceStream.SampleBlockSize)
                         % (hopSize * sourceStream.SampleBlockSize)
             );
 
-            var sw = new StreamWindower(sourceStream, windowSize, hopSize, window);
-            var ola = new OLA(targetStream, windowSize, hopSize);
+            var sw = new StreamWindower(sourceStream, window, hopSize);
+            var ola = new OLA(targetStream, window.Size, hopSize);
 
-            var frameBuffer = new float[windowSize];
+            var frameBuffer = new float[window.Size];
             while (sw.HasNext())
             {
                 sw.ReadFrame(frameBuffer);
@@ -124,7 +124,7 @@ namespace Aurio.UnitTest
 
             var sourceStreamCropped = new CropStream(
                 sourceStream,
-                hopSize * sourceStream.SampleBlockSize * 2,
+                hopSize * sourceStream.SampleBlockSize * 2, // TODO remove 2 and below
                 sourceStream.Length - hopSize * sourceStream.SampleBlockSize
             );
 
@@ -147,7 +147,6 @@ namespace Aurio.UnitTest
         [TestMethod]
         public void ConstantOverlapAddHann()
         {
-            // 50% overlap with a Hann window is an optimal combination, Hann window is optimally uneven with a 1 as middle point
             SimpleOverlapAdd(5, 2, WindowType.Hann);
         }
 
@@ -169,7 +168,8 @@ namespace Aurio.UnitTest
             var targetMemoryStream = new MemoryStream();
             var targetStream = new MemoryWriterStream(targetMemoryStream, properties);
 
-            var sw = new StreamWindower(sourceStream, windowSize, hopSize, window);
+            var windowFunction = WindowUtil.GetFunction(window, windowSize);
+            var sw = new StreamWindower(sourceStream, windowFunction, hopSize);
             var ola = new OLA(targetStream, windowSize, hopSize);
 
             var frameBuffer = new float[windowSize];

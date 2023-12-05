@@ -37,32 +37,23 @@ namespace Aurio.Features
 
         public InverseSTFT(
             IAudioWriterStream stream,
-            int windowSize,
+            WindowFunction synthesisWindow,
             int hopSize,
-            int fftSize,
-            WindowType windowType,
-            float windowNormalizationFactor
+            int fftSize
         )
-            : base(stream, windowSize, hopSize)
+            : base(stream, synthesisWindow.Size, hopSize)
         {
-            if (fftSize < windowSize)
+            if (fftSize < synthesisWindow.Size)
             {
                 throw new ArgumentOutOfRangeException("fftSize must be >= windowSize");
             }
             frameBuffer = new float[fftSize];
             fft = FFTFactory.CreateInstance(fftSize);
-            synthesisWindow = WindowUtil.GetFunction(
-                new WindowConfig(windowType, windowSize, windowNormalizationFactor)
-            );
+            this.synthesisWindow = synthesisWindow;
         }
 
-        public InverseSTFT(
-            IAudioWriterStream stream,
-            int windowSize,
-            int hopSize,
-            WindowType windowType
-        )
-            : this(stream, windowSize, hopSize, windowSize, windowType, 1.0f) { }
+        public InverseSTFT(IAudioWriterStream stream, WindowFunction window, int hopSize)
+            : this(stream, window, hopSize, window.Size) { }
 
         /// <summary>
         /// Writes a raw FFT result frame into the output audio stream.

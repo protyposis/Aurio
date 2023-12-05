@@ -71,23 +71,21 @@ namespace Aurio.Features
         /// An FFT size larger than the window size can be used to increase frequency resolution. Window will be right-padded with zeros for FFT.
         /// </summary>
         /// <param name="stream">the stream to read the audio data to process from</param>
-        /// <param name="windowSize">the window size in the dimension of samples</param>
+        /// <param name="window">the window function to apply</param>
         /// <param name="hopSize">the hop size in the dimension of samples</param>
         /// <param name="fftSize">the FFT size, must be >= windowSize</param>
-        /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="outputFormat">format of the output data, e.g. raw FFT complex numbers or dB spectrum</param>
         public STFT(
             IAudioStream stream,
-            int windowSize,
+            WindowFunction window,
             int hopSize,
             int fftSize,
-            WindowType windowType,
             OutputFormat outputFormat,
             int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE
         )
-            : base(stream, windowSize, hopSize, windowType, bufferSize)
+            : base(stream, window, hopSize, bufferSize)
         {
-            if (fftSize < windowSize)
+            if (fftSize < window.Size)
             {
                 throw new ArgumentOutOfRangeException("fftSize must be >= windowSize");
             }
@@ -102,20 +100,17 @@ namespace Aurio.Features
         /// Initializes a new STFT for the specified stream with the specified window and hop size.
         /// </summary>
         /// <param name="stream">the stream to read the audio data to process from</param>
-        /// <param name="windowSize">the window size in the dimension of samples</param>
+        /// <param name="window">the window function to apply</param>
         /// <param name="hopSize">the hop size in the dimension of samples</param>
-        /// <param name="windowType">the type of the window function to apply</param>
         /// <param name="outputFormat">format of the output data, e.g. raw FFT complex numbers or dB spectrum</param>
         public STFT(
             IAudioStream stream,
-            int windowSize,
+            WindowFunction window,
             int hopSize,
-            WindowType windowType,
             OutputFormat outputFormat,
             int bufferSize = DEFAULT_STREAM_INPUT_BUFFER_SIZE
         )
-            : this(stream, windowSize, hopSize, windowSize, windowType, outputFormat, bufferSize)
-        { }
+            : this(stream, window, hopSize, window.Size, outputFormat, bufferSize) { }
 
         public override void ReadFrame(float[] fftResult)
         {

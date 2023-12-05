@@ -93,7 +93,7 @@ namespace Aurio
                 SineGeneratorStream sine = new SineGeneratorStream(1024, 16, new TimeSpan(0, 0, 1));
                 float[] input = new float[WindowSize];
                 float[] output = new float[input.Length / 2];
-                WindowFunction wf = WindowUtil.GetFunction(windowFunction.Type, input.Length);
+                WindowFunction wf = WindowUtil.GetFunction(windowFunction.Config);
 
                 sine.Read(input, 0, input.Length);
                 wf.Apply(input);
