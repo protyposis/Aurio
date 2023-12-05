@@ -17,8 +17,10 @@
 //
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using Aurio.Streams;
 
@@ -266,6 +268,42 @@ namespace Aurio
         public static long CompareFloats(IAudioStream stream1, IAudioStream stream2)
         {
             return CompareFloats(stream1, stream2, FLOAT_EPSILON);
+        }
+
+        /// <summary>
+        /// Reads the specified number of samples from the given stream and returns them as a byte array.
+        /// May return less samples if the end of stream is reached.
+        /// </summary>
+        /// <param name="stream">the stream to read the samples from</param>
+        /// <param name="samples">then number of samples to read</param>
+        /// <returns>a byte array containing the samples</returns>
+        public static byte[] ReadBytes(IAudioStream stream, int samples)
+        {
+            var bufferSize = samples * stream.SampleBlockSize;
+            var buffer = new byte[bufferSize];
+            var bytesRead = stream.Read(buffer, 0, bufferSize);
+
+            if (bytesRead < bufferSize)
+            {
+                Array.Resize(ref buffer, bytesRead);
+            }
+
+            return buffer;
+        }
+
+        /// <summary>
+        /// Reads the specified number of samples from the given stream and returns them as a float array.
+        /// May return less samples if the end of stream is reached.
+        /// </summary>
+        /// <param name="stream">the stream to read the samples from</param>
+        /// <param name="samples">then number of samples to read</param>
+        /// <returns>a float array containing the samples</returns>
+        public static float[] ReadFloats(IAudioStream stream, int samples)
+        {
+            var byteBuffer = ReadBytes(stream, samples);
+            var floatBuffer = new float[byteBuffer.Length / stream.Properties.SampleByteSize];
+            Buffer.BlockCopy(byteBuffer, 0, floatBuffer, 0, byteBuffer.Length);
+            return floatBuffer;
         }
     }
 }
