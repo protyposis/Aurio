@@ -281,5 +281,35 @@ namespace Aurio
             // Round to the nearest bin index, that's where most of the energy of the frequency will be
             return (int)Math.Min(Math.Round(floatBinIndex), binCount - 1);
         }
+
+        /// <summary>
+        /// Calculate the next power of 2 of the given value. Returns the given value
+        /// if it is already a power of 2.
+        /// Can be used to determine an FFT size that can hold a specific number of samples.
+        /// </summary>
+        public static int CalculateNextPowerOf2(int value)
+        {
+            // http://stackoverflow.com/questions/264080/how-do-i-calculate-the-closest-power-of-2-or-10-a-number-is
+            // http://acius2.blogspot.com/2007/11/calculating-next-power-of-2.html
+            int value2 = value;
+            value2--;
+            value2 = (value2 >> 1) | value2;
+            value2 = (value2 >> 2) | value2;
+            value2 = (value2 >> 4) | value2;
+            value2 = (value2 >> 8) | value2;
+            value2 = (value2 >> 16) | value2;
+            value2++;
+
+            return value2;
+        }
+
+        /// <summary>
+        /// Determines whether the given value is a power of 2.
+        /// Can be used to check whether it is a valid FFT size.
+        /// </summary>
+        public static bool IsPowerOf2(int value)
+        {
+            return CalculateNextPowerOf2(value) == value;
+        }
     }
 }
