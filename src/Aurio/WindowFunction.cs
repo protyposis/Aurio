@@ -1,6 +1,6 @@
 ﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
-// Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
+// Copyright (C) 2010-2023  Mario Guggenberger <mg@protyposis.net>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -25,19 +25,19 @@ namespace Aurio
 {
     public class WindowFunction
     {
-        private float[] window;
+        private readonly float[] window;
 
-        internal WindowFunction(float[] window, WindowType type)
+        internal WindowFunction(float[] window, WindowConfig config)
         {
             this.window = window;
-            this.Type = type;
+            this.Config = config;
         }
 
-        public WindowType Type { get; private set; }
-        public int Size
-        {
-            get { return window.Length; }
-        }
+        public WindowType Type => Config.Type;
+
+        public int Size => window.Length;
+
+        public WindowConfig Config { get; init; }
 
         public void Apply(float[] values, int valuesOffset)
         {

@@ -1,6 +1,6 @@
 ﻿//
 // Aurio: Audio Processing, Analysis and Retrieval Library
-// Copyright (C) 2010-2017  Mario Guggenberger <mg@protyposis.net>
+// Copyright (C) 2010-2023  Mario Guggenberger <mg@protyposis.net>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -235,19 +235,15 @@ namespace Aurio
             SineInternal(samples, offset, length, length);
         }
 
-        public static float[] GetArray(
-            WindowType windowType,
-            int windowSize,
-            float normalizationFactor
-        )
+        public static float[] GetArray(WindowConfig config)
         {
-            float[] window = new float[windowSize];
+            float[] window = new float[config.Size];
             for (int x = 0; x < window.Length; x++)
             {
-                window[x] = normalizationFactor;
+                window[x] = config.NormalizationFactor;
             }
 
-            switch (windowType)
+            switch (config.Type)
             {
                 case WindowType.Rectangle:
                     Rectangle(window, 0, window.Length);
@@ -286,7 +282,7 @@ namespace Aurio
                     SinePeriodic(window, 0, window.Length);
                     break;
                 default:
-                    throw new ArgumentException("unsupported window type: " + windowType);
+                    throw new ArgumentException("unsupported window type: " + config.Type);
             }
 
             return window;
@@ -294,24 +290,17 @@ namespace Aurio
 
         public static float[] GetArray(WindowType windowType, int windowSize)
         {
-            return GetArray(windowType, windowSize, 1.0f);
+            return GetArray(new WindowConfig(windowType, windowSize));
         }
 
-        public static WindowFunction GetFunction(
-            WindowType windowType,
-            int windowSize,
-            float normalizationFactor
-        )
+        public static WindowFunction GetFunction(WindowConfig config)
         {
-            return new WindowFunction(
-                GetArray(windowType, windowSize, normalizationFactor),
-                windowType
-            );
+            return new WindowFunction(GetArray(config), config);
         }
 
         public static WindowFunction GetFunction(WindowType windowType, int windowSize)
         {
-            return new WindowFunction(GetArray(windowType, windowSize), windowType);
+            return GetFunction(new WindowConfig(windowType, windowSize));
         }
 
         public static void Apply(float[] values, int valuesOffset, float[] window)

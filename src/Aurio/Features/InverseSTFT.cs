@@ -52,9 +52,7 @@ namespace Aurio.Features
             frameBuffer = new float[fftSize];
             fft = FFTFactory.CreateInstance(fftSize);
             synthesisWindow = WindowUtil.GetFunction(
-                windowType,
-                windowSize,
-                windowNormalizationFactor
+                new WindowConfig(windowType, windowSize, windowNormalizationFactor)
             );
         }
 
