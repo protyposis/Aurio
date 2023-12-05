@@ -210,15 +210,6 @@ namespace Aurio.WaveControls
             {
                 float v = sampleData[sample] * volume;
 
-                if (v > 1.0f)
-                {
-                    v = 1.0f;
-                }
-                else if (v < -1.0f)
-                {
-                    v = -1.0f;
-                }
-
                 x = (int)Math.Round((float)sample / (samples - 1) * (width - 1));
                 y = halfheight - (int)(halfheight * v);
                 if (y == height)

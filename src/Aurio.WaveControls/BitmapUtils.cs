@@ -1,4 +1,6 @@
-﻿namespace Aurio.WaveControls;
+using System.Runtime.CompilerServices;
+
+namespace Aurio.WaveControls;
 
 public static class BitmapUtils
 {
@@ -21,6 +23,7 @@ public static class BitmapUtils
         int dx = x1 - x0;
         int stepx,
             stepy;
+        int numPixels = width * height;
 
         if (dy < 0)
         {
@@ -47,7 +50,7 @@ public static class BitmapUtils
 
         y0 *= width;
         y1 *= width;
-        pixels[x0 + y0] = color;
+        DrawPixel(pixels, numPixels, x0, y0, color);
         if (dx > dy)
         {
             int fraction = dy - (dx >> 1);
@@ -61,7 +64,7 @@ public static class BitmapUtils
 
                 x0 += stepx;
                 fraction += dy;
-                pixels[x0 + y0] = color;
+                DrawPixel(pixels, numPixels, x0, y0, color);
             }
         }
         else
@@ -77,7 +80,7 @@ public static class BitmapUtils
 
                 y0 += stepy;
                 fraction += dx;
-                pixels[x0 + y0] = color;
+                DrawPixel(pixels, numPixels, x0, y0, color);
             }
         }
     }
@@ -120,6 +123,16 @@ public static class BitmapUtils
                 int pixelOffset = (j * width + i);
                 pixels[pixelOffset] = color;
             }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static unsafe void DrawPixel(int* pixels, int numPixels, int x, int y, int color)
+    {
+        int pixelIndex = x + y;
+        if (pixelIndex >= 0 && pixelIndex < numPixels)
+        {
+            pixels[pixelIndex] = color;
         }
     }
 }
