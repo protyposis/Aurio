@@ -25,12 +25,14 @@ using System.Windows;
 using System.Windows.Media;
 using Aurio;
 using Aurio.Project;
+using Aurio.Streams;
 
 namespace Aurio.WaveControls
 {
-    public partial class WaveView
+    public partial class WaveView : INotifyPropertyChanged
     {
         public static readonly DependencyProperty AudioTrackProperty;
+        public static readonly DependencyProperty AudioStreamProperty;
         public static readonly DependencyProperty RenderModeProperty;
         public static readonly DependencyProperty DrawTrackNameProperty;
 
@@ -49,6 +51,8 @@ namespace Aurio.WaveControls
 
         public static readonly RoutedEvent TrackOffsetChangedEvent;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         static WaveView()
         {
             DefaultStyleKeyProperty.OverrideMetadata(
@@ -65,6 +69,18 @@ namespace Aurio.WaveControls
                     DefaultValue = null,
                     AffectsRender = true,
                     PropertyChangedCallback = OnAudioTrackChanged
+                }
+            );
+
+            AudioStreamProperty = DependencyProperty.Register(
+                "AudioStream",
+                typeof(VisualizingStream),
+                typeof(WaveView),
+                new FrameworkPropertyMetadata
+                {
+                    DefaultValue = null,
+                    AffectsRender = true,
+                    PropertyChangedCallback = OnAudioStreamChanged
                 }
             );
 
@@ -185,22 +201,39 @@ namespace Aurio.WaveControls
         {
             WaveView waveView = d as WaveView;
             AudioTrack audioTrack = e.NewValue as AudioTrack;
-            if (waveView != null && audioTrack != null)
-            {
-                waveView.audioTrack = audioTrack;
 
-                if (waveView.IsLoaded)
+            if (waveView != null)
+            {
+                if (audioTrack != null)
                 {
-                    // If element is already loaded this must be explicitly triggered,
-                    // else it will be done by the Loaded event
-                    waveView.LoadAudioTrack();
+                    waveView.SetAudioTrack(audioTrack);
+                }
+                else
+                {
+                    waveView.UnsetAudioTrack();
                 }
             }
         }
 
-        private static void audioStream_WaveformChanged(object sender, EventArgs e)
+        private static void OnAudioStreamChanged(
+            DependencyObject d,
+            DependencyPropertyChangedEventArgs e
+        )
         {
-            throw new NotImplementedException();
+            WaveView waveView = d as WaveView;
+            VisualizingStream audioStream = e.NewValue as VisualizingStream;
+
+            if (waveView != null)
+            {
+                if (audioStream != null)
+                {
+                    waveView.SetAudioStream(audioStream);
+                }
+                else
+                {
+                    waveView.UnsetAudioTrack();
+                }
+            }
         }
 
         private static void OnWaveformLineChanged(
@@ -227,6 +260,9 @@ namespace Aurio.WaveControls
             DependencyPropertyChangedEventArgs e
         )
         {
+            (d as WaveView)
+                .PropertyChanged
+                ?.Invoke(d, new PropertyChangedEventArgs(nameof(TrackLength)));
             UpdateTrackScrollLength(d);
         }
 
@@ -251,6 +287,9 @@ namespace Aurio.WaveControls
             long trackLength = (long)d.GetValue(TrackLengthProperty);
             long viewportWidth = (long)d.GetValue(VirtualViewportWidthProperty);
             d.SetValue(TrackScrollLengthPropertyKey, trackLength - viewportWidth);
+            (d as WaveView)
+                .PropertyChanged
+                ?.Invoke(d, new PropertyChangedEventArgs(nameof(TrackScrollLength)));
         }
 
         private static void UpdateViewportZoom(DependencyObject d)
@@ -264,6 +303,12 @@ namespace Aurio.WaveControls
         {
             get { return (AudioTrack)GetValue(AudioTrackProperty); }
             set { SetValue(AudioTrackProperty, value); }
+        }
+
+        public VisualizingStream AudioStream
+        {
+            get { return (VisualizingStream)GetValue(AudioStreamProperty); }
+            set { SetValue(AudioStreamProperty, value); }
         }
 
         public WaveViewRenderMode RenderMode

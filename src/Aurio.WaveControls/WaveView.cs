@@ -64,16 +64,10 @@ namespace Aurio.WaveControls
             _lineBrush = WaveformLine;
             _backgroundBrush = WaveformBackground;
 
-            Loaded += (_, _) =>
+            // Free all references to the audio track and stream when the control gets unloaded
+            Unloaded += delegate(object o, RoutedEventArgs e)
             {
-                if (audioTrack != null)
-                {
-                    LoadAudioTrack();
-                }
-            };
-            Unloaded += (_, _) =>
-            {
-                UnloadAudioTrack();
+                UnsetAudioTrack();
             };
         }
 
@@ -301,7 +295,7 @@ namespace Aurio.WaveControls
                             // calculate the balance factor for the first two channels only (balance only applies to stereo)
                             // TODO extend for multichannel (needs implementation of a multichannel balance adjustment control)
                             float balanceFactor = 1;
-                            if (channels == 2)
+                            if (AudioTrack != null && channels == 2)
                             {
                                 if (channel == 0)
                                 {
@@ -315,12 +309,13 @@ namespace Aurio.WaveControls
                                 }
                             }
 
+                            float volume = (AudioTrack?.Volume ?? 1f) * balanceFactor;
                             Drawing waveform = renderers[channel].Render(
                                 samples[channel],
                                 sampleCount,
                                 drawingWidthAligned,
                                 (int)channelHeight,
-                                AudioTrack.Volume * balanceFactor
+                                volume
                             );
                             DrawingGroup drawing = new DrawingGroup();
                             drawing.Children.Add(waveform);
@@ -442,7 +437,7 @@ namespace Aurio.WaveControls
         {
             base.OnMouseDown(e);
 
-            if (AudioTrack.Locked)
+            if (AudioTrack == null || AudioTrack.Locked)
                 return; // block any action if track is locked
 
             Point mouseDownPosition = Mouse.GetPosition(this);
@@ -544,54 +539,79 @@ namespace Aurio.WaveControls
             );
         }
 
-        private void LoadAudioTrack()
+        private void SetAudioTrack(AudioTrack audioTrack)
         {
-            UnloadAudioTrack();
+            InitAudio(audioTrack, AudioStreamFactory.FromAudioTrackForGUI(audioTrack));
+        }
 
-            if (audioTrack == null)
-            {
-                throw new Exception("Audio track not set");
-            }
-
-            // init renderers
-            waveformBitmapRenderers = new WaveformBitmapRenderer[
-                audioTrack.SourceProperties.Channels
-            ];
-            for (int i = 0; i < waveformBitmapRenderers.Length; i++)
-            {
-                waveformBitmapRenderers[i] = new WaveformBitmapRenderer();
-            }
-            waveformGeometryRenderers = new WaveformGeometryRenderer[
-                audioTrack.SourceProperties.Channels
-            ];
-            for (int i = 0; i < waveformGeometryRenderers.Length; i++)
-            {
-                waveformGeometryRenderers[i] = new WaveformGeometryRenderer();
-            }
-
-            audioStream = AudioStreamFactory.FromAudioTrackForGUI(audioTrack);
-            audioStream.WaveformChanged += OnAudioStreamWaveformChanged;
-
+        private void InitAudioTrack(AudioTrack audioTrack)
+        {
+            this.audioTrack = audioTrack;
             audioTrack.LengthChanged += OnAudioTrackLengthChanged;
             audioTrack.VolumeChanged += OnAudioTrackVolumeChanged;
             audioTrack.BalanceChanged += OnAudioTrackBalanceChanged;
         }
 
-        private void UnloadAudioTrack()
+        private void UnsetAudioTrack()
         {
             if (audioTrack != null)
             {
                 audioTrack.BalanceChanged -= OnAudioTrackBalanceChanged;
                 audioTrack.VolumeChanged -= OnAudioTrackVolumeChanged;
                 audioTrack.LengthChanged -= OnAudioTrackLengthChanged;
+                audioTrack = null;
+            }
+        }
+
+        private void SetAudioStream(VisualizingStream audioStream)
+        {
+            InitAudio(new DummyAudioTrack("waveview-internal", TimeSpan.Zero), audioStream);
+        }
+
+        private void InitAudioStream(VisualizingStream audioStream)
+        {
+            // init renderers
+            waveformBitmapRenderers = new WaveformBitmapRenderer[audioStream.Properties.Channels];
+            for (int i = 0; i < waveformBitmapRenderers.Length; i++)
+            {
+                waveformBitmapRenderers[i] = new WaveformBitmapRenderer();
+            }
+            waveformGeometryRenderers = new WaveformGeometryRenderer[
+                audioStream.Properties.Channels
+            ];
+            for (int i = 0; i < waveformGeometryRenderers.Length; i++)
+            {
+                waveformGeometryRenderers[i] = new WaveformGeometryRenderer();
             }
 
+            this.audioStream = audioStream;
+            audioStream.WaveformChanged += OnAudioStreamWaveformChanged;
+            TrackLength = TimeUtil
+                .BytesToTimeSpan(audioStream.Length, audioStream.Properties)
+                .Ticks;
+        }
+
+        private void UnsetAudioStream()
+        {
             if (audioStream != null)
             {
                 audioStream.WaveformChanged -= OnAudioStreamWaveformChanged;
                 audioStream.Close();
                 audioStream = null;
             }
+        }
+
+        private void InitAudio(AudioTrack audioTrack, VisualizingStream audioStream)
+        {
+            UnsetAudio();
+            InitAudioStream(audioStream);
+            InitAudioTrack(audioTrack);
+        }
+
+        private void UnsetAudio()
+        {
+            UnsetAudioTrack();
+            UnsetAudioStream();
         }
     }
 }
