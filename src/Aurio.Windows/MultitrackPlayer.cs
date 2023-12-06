@@ -558,10 +558,7 @@ namespace Aurio.Windows
 
         protected virtual void OnPlaybackStateChanged()
         {
-            if (PlaybackStateChanged != null)
-            {
-                PlaybackStateChanged(this, EventArgs.Empty);
-            }
+            PlaybackStateChanged?.Invoke(this, EventArgs.Empty);
             OnPropertyChanged("CanPlay");
             OnPropertyChanged("CanPause");
             OnPropertyChanged("Playing");
@@ -569,63 +566,42 @@ namespace Aurio.Windows
 
         protected virtual void OnPlaybackStarted()
         {
-            if (PlaybackStarted != null)
-            {
-                PlaybackStarted(this, EventArgs.Empty);
-            }
+            PlaybackStarted?.Invoke(this, EventArgs.Empty);
             OnPlaybackStateChanged();
         }
 
         protected virtual void OnPlaybackPaused()
         {
-            if (PlaybackPaused != null)
-            {
-                PlaybackPaused(this, EventArgs.Empty);
-            }
+            PlaybackPaused?.Invoke(this, EventArgs.Empty);
             OnPlaybackStateChanged();
         }
 
         protected virtual void OnPlaybackStopped()
         {
-            if (PlaybackStopped != null)
-            {
-                PlaybackStopped(this, EventArgs.Empty);
-            }
+            PlaybackStopped?.Invoke(this, EventArgs.Empty);
             OnPlaybackStateChanged();
         }
 
         protected virtual void OnVolumeAnnounced(StreamVolumeEventArgs e)
         {
-            if (VolumeAnnounced != null)
-            {
-                VolumeAnnounced(this, e);
-            }
+            VolumeAnnounced?.Invoke(this, e);
         }
 
         protected virtual void OnTotalTimeChanged()
         {
-            if (TotalTimeChanged != null)
-            {
-                TotalTimeChanged(this, new ValueEventArgs<TimeSpan>(TotalTime));
-            }
+            TotalTimeChanged?.Invoke(this, new ValueEventArgs<TimeSpan>(TotalTime));
             OnPropertyChanged("TotalTime");
         }
 
         protected virtual void OnCurrentTimeChanged()
         {
-            if (CurrentTimeChanged != null)
-            {
-                CurrentTimeChanged(this, new ValueEventArgs<TimeSpan>(CurrentTime));
-            }
+            CurrentTimeChanged?.Invoke(this, new ValueEventArgs<TimeSpan>(CurrentTime));
             OnPropertyChanged("CurrentTime");
         }
 
         private void OnSamplesMonitored(StreamDataMonitorEventArgs e)
         {
-            if (SamplesMonitored != null)
-            {
-                SamplesMonitored(this, e);
-            }
+            SamplesMonitored?.Invoke(this, e);
         }
 
         #endregion
@@ -636,10 +612,7 @@ namespace Aurio.Windows
 
         protected void OnPropertyChanged(string name)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(name));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         #endregion

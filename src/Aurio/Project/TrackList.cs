@@ -57,19 +57,13 @@ namespace Aurio.Project
 
         private void OnTrackAdded(TrackListEventArgs e)
         {
-            if (TrackAdded != null)
-            {
-                TrackAdded(this, e);
-            }
+            TrackAdded?.Invoke(this, e);
             OnTrackListChanged();
         }
 
         private void OnTrackRemoved(TrackListEventArgs e)
         {
-            if (TrackRemoved != null)
-            {
-                TrackRemoved(this, e);
-            }
+            TrackRemoved?.Invoke(this, e);
             OnTrackListChanged();
         }
 
@@ -298,10 +292,7 @@ namespace Aurio.Project
 
         protected void OnPropertyChanged(string name)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(name));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         #endregion
@@ -320,10 +311,7 @@ namespace Aurio.Project
 
         protected void OnCollectionChanged(NotifyCollectionChangedEventArgs args)
         {
-            if (CollectionChanged != null)
-            {
-                CollectionChanged(this, args);
-            }
+            CollectionChanged?.Invoke(this, args);
         }
 
         #endregion

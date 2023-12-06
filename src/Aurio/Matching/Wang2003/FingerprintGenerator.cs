@@ -174,21 +174,18 @@ namespace Aurio.Matching.Wang2003
 
                 peakHistory.Add(index, peaks);
 
-                if (FrameProcessed != null)
-                {
-                    FrameProcessed(
-                        this,
-                        new FrameProcessedEventArgs
-                        {
-                            AudioTrack = track,
-                            Index = index,
-                            Indices = indices,
-                            Spectrum = spectrum,
-                            SpectrumResidual = spectrumResidual,
-                            Peaks = peaks,
-                        }
-                    );
-                }
+                FrameProcessed?.Invoke(
+                    this,
+                    new FrameProcessedEventArgs
+                    {
+                        AudioTrack = track,
+                        Index = index,
+                        Indices = indices,
+                        Spectrum = spectrum,
+                        SpectrumResidual = spectrumResidual,
+                        Peaks = peaks,
+                    }
+                );
 
                 processedFrames++;
                 index++;
@@ -437,18 +434,15 @@ namespace Aurio.Matching.Wang2003
             List<SubFingerprint> subFingerprints
         )
         {
-            if (SubFingerprintsGenerated != null)
-            {
-                SubFingerprintsGenerated(
-                    this,
-                    new SubFingerprintsGeneratedEventArgs(
-                        track,
-                        subFingerprints,
-                        subFingerprints[0].Index,
-                        indices
-                    )
-                );
-            }
+            SubFingerprintsGenerated?.Invoke(
+                this,
+                new SubFingerprintsGeneratedEventArgs(
+                    track,
+                    subFingerprints,
+                    subFingerprints[0].Index,
+                    indices
+                )
+            );
         }
 
         public static Profile[] GetProfiles()

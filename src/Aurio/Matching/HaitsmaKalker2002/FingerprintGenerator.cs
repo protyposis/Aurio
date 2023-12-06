@@ -121,23 +121,12 @@ namespace Aurio.Matching.HaitsmaKalker2002
             }
 
             // Output remaining subfingerprints
-            if (SubFingerprintsGenerated != null)
-            {
-                SubFingerprintsGenerated(
-                    this,
-                    new SubFingerprintsGeneratedEventArgs(
-                        inputTrack,
-                        subFingerprints,
-                        index,
-                        indices
-                    )
-                );
-            }
+            SubFingerprintsGenerated?.Invoke(
+                this,
+                new SubFingerprintsGeneratedEventArgs(inputTrack, subFingerprints, index, indices)
+            );
 
-            if (Completed != null)
-            {
-                Completed(this, EventArgs.Empty);
-            }
+            Completed?.Invoke(this, EventArgs.Empty);
 
             audioStream.Close();
         }

@@ -348,10 +348,7 @@ namespace Aurio.Matching.Wang2003
             }
             Debug.WriteLine("{0} matches", matches.Count);
 
-            if (MatchingFinished != null)
-            {
-                MatchingFinished(this, new ValueEventArgs<List<Match>>(matches));
-            }
+            MatchingFinished?.Invoke(this, new ValueEventArgs<List<Match>>(matches));
 
             return matches;
         }

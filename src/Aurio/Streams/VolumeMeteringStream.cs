@@ -121,13 +121,10 @@ namespace Aurio.Streams
 
         private void RaiseStreamVolumeNotification()
         {
-            if (StreamVolume != null)
-            {
-                StreamVolume(
-                    this,
-                    new StreamVolumeEventArgs() { MaxSampleValues = GetMaxSampleValues() }
-                );
-            }
+            StreamVolume?.Invoke(
+                this,
+                new StreamVolumeEventArgs() { MaxSampleValues = GetMaxSampleValues() }
+            );
         }
     }
 

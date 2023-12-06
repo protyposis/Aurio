@@ -160,18 +160,12 @@ namespace Aurio.Matching.Chromaprint
                 }
             }
 
-            if (SubFingerprintsGenerated != null)
-            {
-                SubFingerprintsGenerated(
-                    this,
-                    new SubFingerprintsGeneratedEventArgs(track, subFingerprints, index, indices)
-                );
-            }
+            SubFingerprintsGenerated?.Invoke(
+                this,
+                new SubFingerprintsGeneratedEventArgs(track, subFingerprints, index, indices)
+            );
 
-            if (Completed != null)
-            {
-                Completed(this, EventArgs.Empty);
-            }
+            Completed?.Invoke(this, EventArgs.Empty);
 
             audioStream.Close();
         }

@@ -117,11 +117,7 @@ namespace Aurio.TaskMonitor
 
             private void OnPropertyChanged(string propertyName)
             {
-                PropertyChangedEventHandler handler = PropertyChanged;
-                if (handler != null)
-                {
-                    handler(this, new PropertyChangedEventArgs(propertyName));
-                }
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
         }
 
@@ -268,10 +264,7 @@ namespace Aurio.TaskMonitor
             {
                 timer.Enabled = true;
             }
-            if (ProcessingStarted != null)
-            {
-                ProcessingStarted(this, EventArgs.Empty);
-            }
+            ProcessingStarted?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnProcessingProgressChanged()
@@ -318,10 +311,7 @@ namespace Aurio.TaskMonitor
             {
                 timer.Enabled = false;
             }
-            if (ProcessingFinished != null)
-            {
-                ProcessingFinished(this, EventArgs.Empty);
-            }
+            ProcessingFinished?.Invoke(this, EventArgs.Empty);
         }
 
         private void timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -362,19 +352,13 @@ namespace Aurio.TaskMonitor
         private void OnTaskBegun(ProgressReporter reporter)
         {
             UpdateStatusMessage();
-            if (TaskBegun != null)
-            {
-                TaskBegun(this, new ValueEventArgs<ProgressReporter>(reporter));
-            }
+            TaskBegun?.Invoke(this, new ValueEventArgs<ProgressReporter>(reporter));
         }
 
         private void OnTaskEnded(ProgressReporter reporter)
         {
             UpdateStatusMessage();
-            if (TaskEnded != null)
-            {
-                TaskEnded(this, new ValueEventArgs<ProgressReporter>(reporter));
-            }
+            TaskEnded?.Invoke(this, new ValueEventArgs<ProgressReporter>(reporter));
         }
 
         #endregion

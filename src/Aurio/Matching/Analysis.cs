@@ -271,10 +271,7 @@ namespace Aurio.Matching
 
         private void OnStarted()
         {
-            if (Started != null)
-            {
-                Started(this, EventArgs.Empty);
-            }
+            Started?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnWindowAnalyzed(
@@ -287,22 +284,19 @@ namespace Aurio.Matching
             double sumNegative
         )
         {
-            if (WindowAnalysed != null)
-            {
-                WindowAnalysed(
-                    this,
-                    new AnalysisEventArgs()
-                    {
-                        Time = time,
-                        MeasurementPointsPositive = measurementPointsPositive,
-                        MeasurementPointsNegative = measurementPointsNegative,
-                        Min = min,
-                        Max = max,
-                        SumPositive = sumPositive,
-                        SumNegative = sumNegative
-                    }
-                );
-            }
+            WindowAnalysed?.Invoke(
+                this,
+                new AnalysisEventArgs()
+                {
+                    Time = time,
+                    MeasurementPointsPositive = measurementPointsPositive,
+                    MeasurementPointsNegative = measurementPointsNegative,
+                    Min = min,
+                    Max = max,
+                    SumPositive = sumPositive,
+                    SumNegative = sumNegative
+                }
+            );
         }
 
         private void OnFinished(
@@ -314,21 +308,18 @@ namespace Aurio.Matching
             double sumNegative
         )
         {
-            if (Finished != null)
-            {
-                Finished(
-                    this,
-                    new AnalysisEventArgs()
-                    {
-                        MeasurementPointsPositive = measurementPointsPositive,
-                        MeasurementPointsNegative = measurementPointsNegative,
-                        Min = min,
-                        Max = max,
-                        SumPositive = sumPositive,
-                        SumNegative = sumNegative
-                    }
-                );
-            }
+            Finished?.Invoke(
+                this,
+                new AnalysisEventArgs()
+                {
+                    MeasurementPointsPositive = measurementPointsPositive,
+                    MeasurementPointsNegative = measurementPointsNegative,
+                    Min = min,
+                    Max = max,
+                    SumPositive = sumPositive,
+                    SumNegative = sumNegative
+                }
+            );
         }
     }
 

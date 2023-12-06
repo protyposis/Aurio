@@ -320,10 +320,7 @@ namespace Aurio.Project
 
         private void OnMuteChanged()
         {
-            if (MuteChanged != null)
-            {
-                MuteChanged(this, new ValueEventArgs<bool>(mute));
-            }
+            MuteChanged?.Invoke(this, new ValueEventArgs<bool>(mute));
             OnPropertyChanged("Mute");
         }
 
@@ -334,46 +331,31 @@ namespace Aurio.Project
                 Mute = false;
             }
 
-            if (SoloChanged != null)
-            {
-                SoloChanged(this, new ValueEventArgs<bool>(solo));
-            }
+            SoloChanged?.Invoke(this, new ValueEventArgs<bool>(solo));
             OnPropertyChanged("Solo");
         }
 
         private void OnVolumeChanged()
         {
-            if (VolumeChanged != null)
-            {
-                VolumeChanged(this, new ValueEventArgs<float>(volume));
-            }
+            VolumeChanged?.Invoke(this, new ValueEventArgs<float>(volume));
             OnPropertyChanged("Volume");
         }
 
         private void OnBalanceChanged()
         {
-            if (BalanceChanged != null)
-            {
-                BalanceChanged(this, new ValueEventArgs<float>(balance));
-            }
+            BalanceChanged?.Invoke(this, new ValueEventArgs<float>(balance));
             OnPropertyChanged("Balance");
         }
 
         private void OnInvertedPhaseChanged()
         {
-            if (InvertedPhaseChanged != null)
-            {
-                InvertedPhaseChanged(this, new ValueEventArgs<bool>(invertedPhase));
-            }
+            InvertedPhaseChanged?.Invoke(this, new ValueEventArgs<bool>(invertedPhase));
             OnPropertyChanged("InvertedPhase");
         }
 
         private void OnMonoDownmixChanged()
         {
-            if (MonoDownmixChanged != null)
-            {
-                MonoDownmixChanged(this, new ValueEventArgs<bool>(monoDownmix));
-            }
+            MonoDownmixChanged?.Invoke(this, new ValueEventArgs<bool>(monoDownmix));
             OnPropertyChanged("MonoDownmix");
         }
 

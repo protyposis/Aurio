@@ -157,10 +157,10 @@ namespace Aurio
 
         private void OnWindowAnalyzed()
         {
-            if (WindowAnalyzed != null)
-            {
-                WindowAnalyzed(this, new ValueEventArgs<float[]>((float[])outputBuffer.Clone()));
-            }
+            WindowAnalyzed?.Invoke(
+                this,
+                new ValueEventArgs<float[]>((float[])outputBuffer.Clone())
+            );
         }
     }
 }

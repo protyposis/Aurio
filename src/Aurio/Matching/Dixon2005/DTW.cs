@@ -439,18 +439,12 @@ namespace Aurio.Matching.Dixon2005
             IMatrix<double> totalCostMatrix
         )
         {
-            if (OltwInit != null)
-            {
-                OltwInit(windowSize, cellCostMatrix, totalCostMatrix);
-            }
+            OltwInit?.Invoke(windowSize, cellCostMatrix, totalCostMatrix);
         }
 
         protected void FireOltwProgress(int i, int j, int minI, int minJ, bool force)
         {
-            if (OltwProgress != null)
-            {
-                OltwProgress(i, j, i, j, false);
-            }
+            OltwProgress?.Invoke(i, j, i, j, false);
         }
     }
 }

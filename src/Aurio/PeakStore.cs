@@ -250,10 +250,7 @@ namespace Aurio
 
         public void OnPeaksChanged()
         {
-            if (PeaksChanged != null)
-            {
-                PeaksChanged(this, EventArgs.Empty);
-            }
+            PeaksChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void Fill(IAudioStream audioInputStream, IProgressReporter progressReporter = null)

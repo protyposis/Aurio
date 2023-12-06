@@ -246,10 +246,7 @@ namespace Aurio.Streams
 
         private void OnWaveformChanged()
         {
-            if (WaveformChanged != null)
-            {
-                WaveformChanged(this, EventArgs.Empty);
-            }
+            WaveformChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void peakStore_PeaksChanged(object sender, EventArgs e)

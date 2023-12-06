@@ -157,56 +157,38 @@ namespace Aurio.Project
 
         protected void OnPropertyChanged(string name)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(name));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         #endregion
 
         private void OnLengthChanged()
         {
-            if (LengthChanged != null)
-            {
-                LengthChanged(this, new ValueEventArgs<TimeSpan>(length));
-            }
+            LengthChanged?.Invoke(this, new ValueEventArgs<TimeSpan>(length));
             OnPropertyChanged("Length");
         }
 
         private void OnOffsetChanged()
         {
-            if (OffsetChanged != null)
-            {
-                OffsetChanged(this, new ValueEventArgs<TimeSpan>(offset));
-            }
+            OffsetChanged?.Invoke(this, new ValueEventArgs<TimeSpan>(offset));
             OnPropertyChanged("Offset");
         }
 
         private void OnNameChanged()
         {
-            if (NameChanged != null)
-            {
-                NameChanged(this, new ValueEventArgs<string>(name));
-            }
+            NameChanged?.Invoke(this, new ValueEventArgs<string>(name));
             OnPropertyChanged("Name");
         }
 
         private void OnColorChanged()
         {
-            if (ColorChanged != null)
-            {
-                ColorChanged(this, new ValueEventArgs<string>(color));
-            }
+            ColorChanged?.Invoke(this, new ValueEventArgs<string>(color));
             OnPropertyChanged("Color");
         }
 
         private void OnLockedChanged()
         {
-            if (LockedChanged != null)
-            {
-                LockedChanged(this, new ValueEventArgs<bool>(locked));
-            }
+            LockedChanged?.Invoke(this, new ValueEventArgs<bool>(locked));
             OnPropertyChanged("Locked");
         }
 
