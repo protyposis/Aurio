@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Aurio.Streams
 {
@@ -257,6 +258,26 @@ namespace Aurio.Streams
         private void peakStore_PeaksChanged(object sender, EventArgs e)
         {
             OnWaveformChanged();
+        }
+
+        public static async Task<VisualizingStream> Create(IAudioStream stream)
+        {
+            return await Task.Run(() =>
+                {
+                    var peakStore = new PeakStore(
+                        Aurio.PeakStore.DefaultSamplesPerPeak,
+                        stream.Properties.Channels,
+                        (int)
+                            Math.Ceiling(
+                                (double)stream.Length
+                                    / stream.SampleBlockSize
+                                    / PeakStore.DefaultSamplesPerPeak
+                            )
+                    );
+                    peakStore.Fill(stream);
+                    return new VisualizingStream(stream, peakStore);
+                })
+                .ConfigureAwait(false);
         }
     }
 }

@@ -20,6 +20,7 @@
     </Window.Resources>
     <Grid>
         <Button Content="Window Functions" Height="23" HorizontalAlignment="Left" Margin="12,12,0,0" Name="button1" VerticalAlignment="Top" Width="161" Click="button1_Click" />
+        <Button Content="OLA Visualizer (COLA/WOLA)" Height="23" HorizontalAlignment="Left" Margin="178,12,0,0" Name="olaButton" VerticalAlignment="Top" Width="161" Click="olaButton_Click" />
         <Slider AutoToolTipPlacement="TopLeft" IsSnapToTickEnabled="True" Margin="184,62,0,0" Maximum="65536" Minimum="4" Name="windowSize" TickPlacement="BottomRight" Ticks="4,8,16,32,64,128,256,512,1024,2048,4096,8192,16348,32768,65536" Value="2048" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="318" />
         <Button Content="Generate" Height="23" HorizontalAlignment="Right" Margin="0,62,12,0" Name="button2" VerticalAlignment="Top" Width="132" Click="button2_Click" />
         <ComboBox Height="23" HorizontalAlignment="Left" Margin="550,62,0,0" Name="windowTypes" VerticalAlignment="Top" Width="108" ItemsSource="{Binding Source={StaticResource WindowTypeValues}}" SelectedIndex="2" />

@@ -48,6 +48,8 @@ namespace Aurio
             + sizeof(int)
             + sizeof(long);
 
+        public const int DefaultSamplesPerPeak = 256;
+
         static PeakStore()
         {
             unsafe

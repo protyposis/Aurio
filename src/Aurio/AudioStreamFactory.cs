@@ -33,8 +33,6 @@ namespace Aurio
 {
     public static class AudioStreamFactory
     {
-        private const int SAMPLES_PER_PEAK = 256;
-
         private static BlockingCollection<Action> peakStoreQueue = new BlockingCollection<Action>();
         private static volatile int peakStoreQueueThreads = 0;
         private static readonly List<IAudioStreamFactory> factories =
@@ -146,13 +144,13 @@ namespace Aurio
             IAudioStream audioInputStream = audioTrack.CreateAudioStream();
 
             PeakStore peakStore = new PeakStore(
-                SAMPLES_PER_PEAK,
+                PeakStore.DefaultSamplesPerPeak,
                 audioInputStream.Properties.Channels,
                 (int)
                     Math.Ceiling(
                         (double)audioInputStream.Length
                             / audioInputStream.SampleBlockSize
-                            / SAMPLES_PER_PEAK
+                            / PeakStore.DefaultSamplesPerPeak
                     )
             );
 

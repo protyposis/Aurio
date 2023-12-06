@@ -35,6 +35,12 @@ namespace Aurio.Test.FFT
             wf.Show();
         }
 
+        private void olaButton_Click(object sender, RoutedEventArgs e)
+        {
+            var ola = new OlaVisualizer();
+            ola.Show();
+        }
+
         private void button2_Click(object sender, RoutedEventArgs e)
         {
             Exception missingLibraryException = null;
