@@ -184,8 +184,6 @@ namespace Aurio.FFmpeg
             out Type frameType
         )
         {
-            int type;
-
             CheckAndHandleActiveInstance();
 
             int ret = InteropWrapper.stream_read_frame(
@@ -193,7 +191,7 @@ namespace Aurio.FFmpeg
                 out timestamp,
                 output_buffer,
                 output_buffer_size,
-                out type
+                out int type
             );
             frameType = (Type)type;
 

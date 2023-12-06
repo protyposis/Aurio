@@ -144,12 +144,11 @@ namespace Aurio.FFmpeg
                 reader.Seek(seekTarget, FFmpeg.Type.Audio);
 
                 // get target position
-                FFmpeg.Type type;
                 sourceBufferLength = reader.ReadFrame(
                     out readerPosition,
                     sourceBuffer,
                     sourceBuffer.Length,
-                    out type
+                    out Type type
                 );
 
                 // check if seek ended up at seek target (or earlier because of frame size, depends on file format and stream codec)
@@ -213,13 +212,11 @@ namespace Aurio.FFmpeg
         {
             if (sourceBufferLength == -1)
             {
-                long newPosition;
-                FFmpeg.Type type;
                 sourceBufferLength = reader.ReadFrame(
-                    out newPosition,
+                    out long newPosition,
                     sourceBuffer,
                     sourceBuffer.Length,
-                    out type
+                    out Type type
                 );
 
                 if (newPosition == -1 || sourceBufferLength == -1)
@@ -313,17 +310,15 @@ namespace Aurio.FFmpeg
             byte[] output_buffer = new byte[output_buffer_size];
 
             int samplesRead;
-            long timestamp;
-            FFmpeg.Type type;
 
             // sequentially read samples from decoder and write it to wav file
             while (
                 (
                     samplesRead = reader.ReadFrame(
-                        out timestamp,
+                        out long timestamp,
                         output_buffer,
                         output_buffer_size,
-                        out type
+                        out Type type
                     )
                 ) > 0
             )

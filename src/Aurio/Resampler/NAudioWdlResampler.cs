@@ -82,16 +82,14 @@ namespace Aurio.Resampler
             // DWL resampler API docs: https://github.com/justinfrankel/WDL/blob/master/WDL/resample.h
             // Seems like all sample counts are expected per-channel (not as sum of all channels)
 
-            float[] inBuffer;
-            int inBufferOffset;
             int inputSamples = inputLength / 4 / Channels; // The max number of samples that we can offer the resampler
 
             // Ask the resampler how many input samples we should write into the input array
             int inNeeded = _resampler.ResamplePrepare(
                 inputSamples + (endOfInput ? 1 : 0),
                 Channels,
-                out inBuffer,
-                out inBufferOffset
+                out float[] inBuffer,
+                out int inBufferOffset
             );
 
             if (inNeeded > inputSamples)

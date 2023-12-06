@@ -53,8 +53,7 @@ namespace Aurio.Matching
 
         public List<SubFingerprintLookupEntry> GetValues(SubFingerprintHash hash)
         {
-            List<SubFingerprintLookupEntry> returnValue;
-            if (lookupTable.TryGetValue(hash, out returnValue))
+            if (lookupTable.TryGetValue(hash, out List<SubFingerprintLookupEntry> returnValue))
             {
                 return returnValue;
             }

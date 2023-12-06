@@ -64,11 +64,9 @@ namespace Aurio.DataStructures.Matrix
         /// <returns>Value at the specified position</returns>
         private T GetAt(int row, int col)
         {
-            Dictionary<int, T> cols;
-            if (_rows.TryGetValue(row, out cols))
+            if (_rows.TryGetValue(row, out Dictionary<int, T> cols))
             {
-                T value = default(T);
-                if (cols.TryGetValue(col, out value))
+                if (cols.TryGetValue(col, out T value))
                     return value;
             }
             return default(T);
@@ -90,8 +88,7 @@ namespace Aurio.DataStructures.Matrix
             else
             {
                 // Set value
-                Dictionary<int, T> cols;
-                if (!_rows.TryGetValue(row, out cols))
+                if (!_rows.TryGetValue(row, out Dictionary<int, T> cols))
                 {
                     cols = new Dictionary<int, T>();
                     _rows.Add(row, cols);
@@ -115,8 +112,7 @@ namespace Aurio.DataStructures.Matrix
         /// <param name="col">Matrix column</param>
         public void RemoveAt(int row, int col)
         {
-            Dictionary<int, T> cols;
-            if (_rows.TryGetValue(row, out cols))
+            if (_rows.TryGetValue(row, out Dictionary<int, T> cols))
             {
                 // Remove column from this row
                 cols.Remove(col);
@@ -132,8 +128,7 @@ namespace Aurio.DataStructures.Matrix
         /// <param name="row">Matrix row</param>
         public IEnumerable<T> GetRowData(int row)
         {
-            Dictionary<int, T> cols;
-            if (_rows.TryGetValue(row, out cols))
+            if (_rows.TryGetValue(row, out Dictionary<int, T> cols))
             {
                 foreach (KeyValuePair<int, T> pair in cols)
                 {
@@ -148,8 +143,7 @@ namespace Aurio.DataStructures.Matrix
         /// <param name="row">Matrix row</param>
         public int GetRowDataCount(int row)
         {
-            Dictionary<int, T> cols;
-            if (_rows.TryGetValue(row, out cols))
+            if (_rows.TryGetValue(row, out Dictionary<int, T> cols))
             {
                 return cols.Count;
             }
@@ -166,8 +160,7 @@ namespace Aurio.DataStructures.Matrix
         {
             foreach (KeyValuePair<int, Dictionary<int, T>> rowdata in _rows)
             {
-                T result;
-                if (rowdata.Value.TryGetValue(col, out result))
+                if (rowdata.Value.TryGetValue(col, out T result))
                     yield return result;
             }
         }

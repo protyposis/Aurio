@@ -249,8 +249,7 @@ namespace Aurio.Matching
         {
             Task.Factory.StartNew(() =>
             {
-                Result result;
-                Calculate(s1, i1, s2, i2, progressMonitor, out result);
+                Calculate(s1, i1, s2, i2, progressMonitor, out Result result);
             });
         }
 
@@ -325,8 +324,7 @@ namespace Aurio.Matching
         public static Match Adjust(Match match, ProgressMonitor progressMonitor)
         {
             // throw away the result
-            Result result;
-            return Adjust(match, progressMonitor, out result);
+            return Adjust(match, progressMonitor, out Result result);
         }
 
         public static unsafe double Correlate(float* x, float* y, int length)

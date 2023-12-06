@@ -190,12 +190,10 @@ namespace Aurio.Streams
 
         public TimeSpan TranslateSourceToWarpedPosition(TimeSpan sourcePosition)
         {
-            TimeWarp lowerMapping;
-            TimeWarp upperMapping;
             GetBoundingMappingsForSourcePosition(
                 sourcePosition,
-                out lowerMapping,
-                out upperMapping
+                out TimeWarp lowerMapping,
+                out TimeWarp upperMapping
             );
 
             if (lowerMapping == null)

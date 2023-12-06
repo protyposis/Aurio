@@ -40,9 +40,12 @@ namespace Aurio.Matching
                 float* xF = (float*)xB;
                 float* yF = (float*)yB;
                 int n = x.Length / sizeof(float);
-                CrossCorrelation.Result ccr;
-                return (1 - Math.Abs(CrossCorrelation.Calculate(xF, yF, n, out ccr)) / (n / 2d))
-                    * ccr.AbsoluteMaxValue;
+                return (
+                        1
+                        - Math.Abs(
+                            CrossCorrelation.Calculate(xF, yF, n, out CrossCorrelation.Result ccr)
+                        ) / (n / 2d)
+                    ) * ccr.AbsoluteMaxValue;
             }
         }
 

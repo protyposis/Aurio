@@ -288,10 +288,8 @@ namespace Aurio.Matching.Dixon2005
 
             // x = argmin(pathCost(t,l|*))
             // y = argmin(pathCost(k|*,j))
-            double minValX,
-                minValY;
-            int x = ArgminRow(t, j, out minValX);
-            int y = ArgminCol(t, j, out minValY);
+            int x = ArgminRow(t, j, out double minValX);
+            int y = ArgminCol(t, j, out double minValY);
 
             // NOTE the following block is taken from: Dixon / Live Tracking of Musical...
             //      and has been enhanced with the minVal* comparisons since since it would otherwise wrongly prefer columns

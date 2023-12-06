@@ -55,9 +55,7 @@ namespace Aurio.UnitTest
         [TestMethod()]
         public void StereoToMono()
         {
-            IAudioStream sourceStream;
-            MonoStream monoStream;
-            CreateStream(2, 1, 100, out sourceStream, out monoStream);
+            CreateStream(2, 1, 100, out IAudioStream sourceStream, out MonoStream monoStream);
 
             Assert.AreEqual(monoStream.Length, (double)sourceStream.Length / 2);
         }
@@ -65,9 +63,7 @@ namespace Aurio.UnitTest
         [TestMethod()]
         public void QuadroToMono()
         {
-            IAudioStream sourceStream;
-            MonoStream monoStream;
-            CreateStream(4, 1, 100, out sourceStream, out monoStream);
+            CreateStream(4, 1, 100, out IAudioStream sourceStream, out MonoStream monoStream);
 
             Assert.AreEqual(monoStream.Length, (double)sourceStream.Length / 4);
         }
@@ -75,9 +71,7 @@ namespace Aurio.UnitTest
         [TestMethod()]
         public void QuadroToStereo()
         {
-            IAudioStream sourceStream;
-            MonoStream monoStream;
-            CreateStream(4, 2, 100, out sourceStream, out monoStream);
+            CreateStream(4, 2, 100, out IAudioStream sourceStream, out MonoStream monoStream);
 
             Assert.AreEqual(monoStream.Length, (double)sourceStream.Length / 2);
         }
@@ -85,9 +79,7 @@ namespace Aurio.UnitTest
         [TestMethod()]
         public void MonoToMono()
         {
-            IAudioStream sourceStream;
-            MonoStream monoStream;
-            CreateStream(1, 1, 100, out sourceStream, out monoStream);
+            CreateStream(1, 1, 100, out IAudioStream sourceStream, out MonoStream monoStream);
 
             Assert.AreEqual(monoStream.Length, (double)sourceStream.Length);
         }
@@ -95,9 +87,7 @@ namespace Aurio.UnitTest
         [TestMethod()]
         public void MonoToStereo()
         {
-            IAudioStream sourceStream;
-            MonoStream monoStream;
-            CreateStream(1, 2, 100, out sourceStream, out monoStream);
+            CreateStream(1, 2, 100, out IAudioStream sourceStream, out MonoStream monoStream);
 
             Assert.AreEqual(monoStream.Length, (double)sourceStream.Length * 2);
         }
@@ -105,9 +95,7 @@ namespace Aurio.UnitTest
         [TestMethod()]
         public void MonoToQuadro()
         {
-            IAudioStream sourceStream;
-            MonoStream monoStream;
-            CreateStream(1, 4, 100, out sourceStream, out monoStream);
+            CreateStream(1, 4, 100, out IAudioStream sourceStream, out MonoStream monoStream);
 
             Assert.AreEqual(monoStream.Length, (double)sourceStream.Length * 4);
         }
