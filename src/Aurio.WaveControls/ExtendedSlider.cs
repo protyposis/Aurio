@@ -106,7 +106,7 @@ namespace Aurio.WaveControls
         private static Thumb GetThumb(Slider slider)
         {
             var track = slider.Template.FindName("PART_Track", slider) as Track;
-            return track == null ? null : track.Thumb;
+            return track?.Thumb;
         }
     }
 }

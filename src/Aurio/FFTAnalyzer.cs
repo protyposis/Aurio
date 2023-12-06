@@ -146,10 +146,7 @@ namespace Aurio
 
         private void CalculateFFT()
         {
-            if (WindowFunction != null)
-            {
-                WindowFunction.Apply(inputBuffer);
-            }
+            WindowFunction?.Apply(inputBuffer);
             fft.Forward(inputBuffer);
             FFTUtil.Results(inputBuffer, outputBuffer, windowFunctionNormalizationDecibelOffset);
             OnWindowAnalyzed();

@@ -161,10 +161,7 @@ namespace Aurio.Streams
                     );
 
                     // Get rid of stream for previous section
-                    if (resamplingStream != null)
-                    {
-                        resamplingStream.Close();
-                    }
+                    resamplingStream?.Close();
 
                     // Create stream for current section
                     resamplingStream = new ResamplingStream(
@@ -256,10 +253,7 @@ namespace Aurio.Streams
             Mappings = null;
 
             // Close stream of current section
-            if (resamplingStream != null)
-            {
-                resamplingStream.Close();
-            }
+            resamplingStream?.Close();
 
             // Close the source stream
             base.Close();

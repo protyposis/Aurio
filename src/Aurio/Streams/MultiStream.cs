@@ -231,10 +231,7 @@ namespace Aurio.Streams
                 Console.WriteLine(
                     "substream index change: " + currentSubStreamIndex + " -> " + value
                 );
-                if (CurrentSubStream != null)
-                {
-                    CurrentSubStream.Flush();
-                }
+                CurrentSubStream?.Flush();
                 currentSubStreamIndex = value;
             }
         }

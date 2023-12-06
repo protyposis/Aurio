@@ -87,10 +87,7 @@ namespace Aurio.Streams
 
         private void SetupResampler()
         {
-            if (resampler != null)
-            {
-                resampler.Dispose(); // delete previous resampler instance
-            }
+            resampler?.Dispose(); // delete previous resampler instance
 
             resampler = ResamplerFactory.CreateInstance(
                 quality,

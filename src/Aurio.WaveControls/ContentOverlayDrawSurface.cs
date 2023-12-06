@@ -66,10 +66,7 @@ namespace Aurio.WaveControls
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            if (Owner != null)
-            {
-                Owner.OnRenderOverlay(drawingContext);
-            }
+            Owner?.OnRenderOverlay(drawingContext);
         }
     }
 }

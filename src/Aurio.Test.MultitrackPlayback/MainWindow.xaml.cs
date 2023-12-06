@@ -64,10 +64,7 @@ namespace Aurio.Test.MultitrackPlayback
 
         private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
-            if (wavePlayer != null)
-            {
-                wavePlayer.Dispose();
-            }
+            wavePlayer?.Dispose();
             debugStreamController = new DebugStreamController();
 
             MixerStream mixer = new MixerStream(2, 44100);
@@ -236,10 +233,7 @@ namespace Aurio.Test.MultitrackPlayback
                 //playbackStream.Close();
             }
 
-            if (wavePlayer != null)
-            {
-                wavePlayer.Dispose();
-            }
+            wavePlayer?.Dispose();
         }
 
         private void timer_Elapsed(object sender, ElapsedEventArgs e)

@@ -213,10 +213,7 @@ namespace Aurio.Windows
                     }
                     writer.Write(buffer, 0, bytesRead);
 
-                    if (progressReporter != null)
-                    {
-                        progressReporter.ReportProgress((double)progress / total * 100);
-                    }
+                    progressReporter?.ReportProgress((double)progress / total * 100);
                 }
             }
 

@@ -119,10 +119,7 @@ namespace Aurio.Matching
 
                 /* r is the correlation coefficient at "delay" */
 
-                if (reporter != null)
-                {
-                    reporter.ReportProgress(((double)delay + maxdelay) / (maxdelay * 2) * 100);
-                }
+                reporter?.ReportProgress(((double)delay + maxdelay) / (maxdelay * 2) * 100);
             }
 
             float maxval = float.MinValue;
