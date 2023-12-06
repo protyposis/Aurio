@@ -18,11 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using Aurio.Features;
 using Aurio.Project;
 using Aurio.Resampler;

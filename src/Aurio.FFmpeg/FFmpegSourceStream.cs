@@ -18,12 +18,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using Aurio.FFmpeg;
 using Aurio.Streams;
 
 namespace Aurio.FFmpeg

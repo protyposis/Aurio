@@ -17,9 +17,7 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Aurio.Streams;
 using NAudio.Wave;
 

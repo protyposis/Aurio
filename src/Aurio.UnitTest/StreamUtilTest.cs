@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using Aurio;
 using Aurio.Streams;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

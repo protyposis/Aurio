@@ -1,5 +1,4 @@
 ﻿using System;
-using Aurio;
 using Aurio.Streams;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

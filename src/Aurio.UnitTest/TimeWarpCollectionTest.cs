@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using Aurio.Resampler;
 using Aurio.Streams;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

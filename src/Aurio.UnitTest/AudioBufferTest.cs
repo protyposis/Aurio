@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Aurio;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aurio.UnitTest

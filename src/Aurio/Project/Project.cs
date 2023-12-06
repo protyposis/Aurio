@@ -21,10 +21,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml;
-using System.Xml.Serialization;
 using Aurio.Matching;
 using Aurio.Streams;
 

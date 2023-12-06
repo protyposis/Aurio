@@ -17,11 +17,8 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using Aurio;
 using Aurio.Project;
 using Aurio.Resampler;
 using Aurio.Streams;
