@@ -16,16 +16,12 @@ namespace Aurio.Streams
     /// in realtime / live stream processing. It also allows for constant memory usage with infinitely long
     /// streams.
     /// </summary>
-    public class BlockingFixedLengthFifoStream : CircularMemoryWriterStream
+    public class BlockingFixedLengthFifoStream : FixedLengthFifoStream
     {
-        private long _readPosition;
-        private bool _endOfInput;
-
         public BlockingFixedLengthFifoStream(AudioProperties properties, int capacity)
             : base(properties, capacity)
         {
-            _readPosition = 0;
-            _endOfInput = false;
+            EndOfInputSignalled = false;
         }
 
         /// <summary>
@@ -39,7 +35,7 @@ namespace Aurio.Streams
             [MethodImpl(MethodImplOptions.Synchronized)]
             get
             {
-                if (_endOfInput)
+                if (EndOfInputSignalled)
                 {
                     // When EOI has been signalled, we return the actual length of this stream
                     // to allow consumers real all contents by comparing the the length with the
@@ -73,17 +69,23 @@ namespace Aurio.Streams
         public override long Position
         {
             [MethodImpl(MethodImplOptions.Synchronized)]
-            get => _readPosition;
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            set => throw new InvalidOperationException("Cannot set the read position");
-        }
-
-        public long WritePosition
-        {
-            [MethodImpl(MethodImplOptions.Synchronized)]
             get => base.Position;
             [MethodImpl(MethodImplOptions.Synchronized)]
             set => base.Position = value;
+        }
+
+        public override long WritePosition
+        {
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            get => base.WritePosition;
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            set => base.WritePosition = value;
+        }
+
+        public override long ReadDelay
+        {
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            get => base.ReadDelay;
         }
 
         /// <summary>
@@ -94,17 +96,14 @@ namespace Aurio.Streams
         /// <see cref="EndOfInputSignalled"/>
         public void SignalEndOfInput()
         {
-            _endOfInput = true;
+            EndOfInputSignalled = true;
         }
 
         /// <summary>
         /// Tells if the end of input has been signalled.
         /// </summary>
         /// <see cref="SignalEndOfInput"/>
-        public bool EndOfInputSignalled
-        {
-            get => _endOfInput;
-        }
+        public bool EndOfInputSignalled { get; private set; }
 
         /// <summary>
         /// Reads data from the stream, i.e. from the beginning of the FIFO buffer. This method blocks
@@ -121,9 +120,9 @@ namespace Aurio.Streams
             // usually consumes data much faster than it comes in, we would instantly run into an EOS
             // so we need to block reading until new data has been written.
             long bytesAvailable;
-            while ((bytesAvailable = base.Position - _readPosition) <= 0)
+            while ((bytesAvailable = base.WritePosition - base.Position) <= 0)
             {
-                if (_endOfInput)
+                if (EndOfInputSignalled)
                 {
                     // At the EOI we don't block because no more data will become available.
                     return 0;
@@ -133,48 +132,18 @@ namespace Aurio.Streams
                 Monitor.Wait(this);
             }
 
-            // Store write position so we can revert to it after reading
-            var writePosition = base.Position;
-            // Seek to read position
-            base.Position = _readPosition;
-            // Read data and update the read position
-            var bytesRead = base.Read(buffer, offset, count);
-            // Debug.WriteLine("{0} bytes read, {1} available", bytesRead, bytesAvailable);
-            _readPosition += bytesRead;
-
-            // Revert to write position
-            base.Position = writePosition;
-
-            return bytesRead;
+            return base.Read(buffer, offset, count);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if (_endOfInput)
+            if (EndOfInputSignalled)
             {
                 throw new Exception("End of input has been signalled, no more data can be written");
             }
 
-            // Write data
-            // The read method makes sure that the stream is always at the write position when
-            // writing so we don't need to take care of that here
-            // Debug.WriteLine("Writing {0} bytes @ position {1}", count, base.Position);
-            var writePosition = base.Position;
-            var writeOverflow = count - (base.Capacity - writePosition);
             base.Write(buffer, offset, count);
-            // Debug.WriteLine("Written until position {0}", base.Position);
-
-            if (writeOverflow > 0)
-            {
-                _readPosition -= writeOverflow;
-
-                if (_readPosition < 0)
-                {
-                    Debug.WriteLine("Lost {0} unread bytes", -_readPosition);
-                    _readPosition = 0;
-                }
-            }
 
             // Signal a blocked read that new data has become available
             Monitor.PulseAll(this);
