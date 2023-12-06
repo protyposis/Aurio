@@ -217,140 +217,31 @@ namespace Aurio
             // generate peakfile
             if (!peakFileLoaded)
             {
-                int channels = peakStore.Channels;
-                byte[] buffer = new byte[65536 * audioInputStream.SampleBlockSize];
-                float[] min = new float[channels];
-                float[] max = new float[channels];
-                BinaryWriter[] peakWriters = peakStore
-                    .CreateMemoryStreams()
-                    .WrapWithBinaryWriters();
-
-                IProgressReporter progressReporter = ProgressMonitor
-                    .GlobalInstance
-                    .BeginTask("Generating peaks for " + audioTrack.Name, true);
-                DateTime startTime = DateTime.Now;
-                int sampleBlockCount = 0;
-                int peakCount = 0;
-                int bytesRead;
-                long totalSampleBlocks = audioInputStream.Length / audioInputStream.SampleBlockSize;
-                long totalSamplesRead = 0;
-                int progress = 0;
-
-                for (int i = 0; i < channels; i++)
-                {
-                    min[i] = float.MaxValue;
-                    max[i] = float.MinValue;
-                }
-                unsafe
-                {
-                    fixed (byte* bufferB = &buffer[0])
-                    {
-                        float* bufferF = (float*)bufferB;
-                        int samplesRead;
-                        int samplesProcessed;
-                        bool peakStoreFull = false;
-
-                        while (
-                            (
-                                bytesRead = StreamUtil.ForceRead(
-                                    audioInputStream,
-                                    buffer,
-                                    0,
-                                    buffer.Length
-                                )
-                            ) > 0
-                        )
-                        {
-                            samplesRead = bytesRead / audioInputStream.Properties.SampleByteSize;
-                            samplesProcessed = 0;
-
-                            do
-                            {
-                                for (int channel = 0; channel < channels; channel++)
-                                {
-                                    if (min[channel] > bufferF[samplesProcessed])
-                                    {
-                                        min[channel] = bufferF[samplesProcessed];
-                                    }
-                                    if (max[channel] < bufferF[samplesProcessed])
-                                    {
-                                        max[channel] = bufferF[samplesProcessed];
-                                    }
-                                    samplesProcessed++;
-                                    totalSamplesRead++;
-                                }
-
-                                if (
-                                    ++sampleBlockCount % SAMPLES_PER_PEAK == 0
-                                    || sampleBlockCount == totalSampleBlocks
-                                )
-                                {
-                                    // write peak
-                                    peakCount++;
-                                    for (int channel = 0; channel < channels; channel++)
-                                    {
-                                        peakWriters[channel].Write(
-                                            new Peak(min[channel], max[channel])
-                                        );
-                                        // add last sample of previous peak as first sample of current peak to make consecutive peaks overlap
-                                        // this gives the impression of a continuous waveform
-                                        min[channel] = max[channel] = bufferF[
-                                            samplesProcessed - channels
-                                        ];
-                                    }
-                                    //sampleBlockCount = 0;
-                                }
-
-                                if (
-                                    sampleBlockCount == totalSampleBlocks
-                                    && samplesProcessed < samplesRead
-                                )
-                                {
-                                    // There's no more space for more peaks
-                                    // TODO how to handle this case? why is there still audio data left?
-                                    Console.WriteLine(
-                                        "peakstore full, but there are samples left ({0} < {1})",
-                                        samplesProcessed,
-                                        samplesRead
-                                    );
-                                    peakStoreFull = true;
-                                    break;
-                                }
-                            } while (samplesProcessed < samplesRead);
-
-                            progressReporter.ReportProgress(
-                                100.0f / audioInputStream.Length * audioInputStream.Position
-                            );
-                            if (
-                                (int)(100.0f / audioInputStream.Length * audioInputStream.Position)
-                                > progress
-                            )
-                            {
-                                progress = (int)(
-                                    100.0f / audioInputStream.Length * audioInputStream.Position
-                                );
-                                peakStore.OnPeaksChanged();
-                            }
-
-                            if (peakStoreFull)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                Debug.WriteLine("generating downscaled peaks...");
-                peakStore.CalculateScaledData(8, 6);
-
-                Debug.WriteLine(
-                    "peak generation finished - "
-                        + (DateTime.Now - startTime)
-                        + ", "
-                        + (peakWriters[0].BaseStream.Length * channels)
-                        + " bytes"
+                var progressMonitor = new ProgressMonitor();
+                ProgressMonitor.GlobalInstance.AddChild(progressMonitor);
+                IProgressReporter progressReporter = progressMonitor.BeginTask(
+                    "Generating peaks for " + audioTrack.Name,
+                    true
                 );
+
+                int progress = 0;
+                progressMonitor.ProcessingProgressChanged += (
+                    object sender,
+                    ValueEventArgs<float> args
+                ) =>
+                {
+                    int newProgress = (int)args.Value;
+                    if (newProgress > progress)
+                    {
+                        peakStore.OnPeaksChanged();
+                        progress = newProgress;
+                    }
+                };
+
+                peakStore.Fill(audioInputStream, progressReporter);
+
                 progressReporter.Finish();
+                ProgressMonitor.GlobalInstance.RemoveChild(progressMonitor);
 
                 if (fileSupport)
                 {
@@ -367,6 +258,7 @@ namespace Aurio
                     }
                 }
             }
+
             peakStore.OnPeaksChanged();
         }
     }

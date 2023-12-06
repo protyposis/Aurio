@@ -22,6 +22,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Aurio.Streams;
+using Aurio.TaskMonitor;
 
 namespace Aurio
 {
@@ -252,6 +254,112 @@ namespace Aurio
             {
                 PeaksChanged(this, EventArgs.Empty);
             }
+        }
+
+        public void Fill(IAudioStream audioInputStream, IProgressReporter progressReporter = null)
+        {
+            var channels = Channels;
+            var buffer = new byte[65536 * audioInputStream.SampleBlockSize];
+            var min = new float[channels];
+            var max = new float[channels];
+            var peakWriters = CreateMemoryStreams().WrapWithBinaryWriters();
+
+            var sampleBlockCount = 0;
+            var totalSampleBlocks = audioInputStream.Length / audioInputStream.SampleBlockSize;
+
+            for (int i = 0; i < channels; i++)
+            {
+                min[i] = float.MaxValue;
+                max[i] = float.MinValue;
+            }
+
+            unsafe
+            {
+                fixed (byte* bufferB = &buffer[0])
+                {
+                    var bufferF = (float*)bufferB;
+                    var peakStoreFull = false;
+                    int bytesRead;
+
+                    while (
+                        (
+                            bytesRead = StreamUtil.ForceRead(
+                                audioInputStream,
+                                buffer,
+                                0,
+                                buffer.Length
+                            )
+                        ) > 0
+                    )
+                    {
+                        var samplesRead = bytesRead / audioInputStream.Properties.SampleByteSize;
+                        var samplesProcessed = 0;
+
+                        do
+                        {
+                            for (int channel = 0; channel < channels; channel++)
+                            {
+                                if (min[channel] > bufferF[samplesProcessed])
+                                {
+                                    min[channel] = bufferF[samplesProcessed];
+                                }
+                                if (max[channel] < bufferF[samplesProcessed])
+                                {
+                                    max[channel] = bufferF[samplesProcessed];
+                                }
+                                samplesProcessed++;
+                            }
+
+                            if (
+                                ++sampleBlockCount % samplesPerPeak == 0
+                                || sampleBlockCount == totalSampleBlocks
+                            )
+                            {
+                                // write peak
+                                for (int channel = 0; channel < channels; channel++)
+                                {
+                                    peakWriters[channel].Write(
+                                        new Peak(min[channel], max[channel])
+                                    );
+                                    // add last sample of previous peak as first sample of current peak to make consecutive peaks overlap
+                                    // this gives the impression of a continuous waveform
+                                    min[channel] = max[channel] = bufferF[
+                                        samplesProcessed - channels
+                                    ];
+                                }
+                                //sampleBlockCount = 0;
+                            }
+
+                            if (
+                                sampleBlockCount == totalSampleBlocks
+                                && samplesProcessed < samplesRead
+                            )
+                            {
+                                // There's no more space for more peaks
+                                // TODO how to handle this case? why is there still audio data left?
+                                Console.WriteLine(
+                                    "peakstore full, but there are samples left ({0} < {1})",
+                                    samplesProcessed,
+                                    samplesRead
+                                );
+                                peakStoreFull = true;
+                                break;
+                            }
+                        } while (samplesProcessed < samplesRead);
+
+                        progressReporter?.ReportProgress(
+                            100.0f / audioInputStream.Length * audioInputStream.Position
+                        );
+
+                        if (peakStoreFull)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            CalculateScaledData(8, 6);
         }
     }
 }
