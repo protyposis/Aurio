@@ -25,7 +25,7 @@ using System.Text;
 namespace Aurio.Streams
 {
     /// <summary>
-    /// A stream sourced from a <see cref="System.IO.MemoryStream"/>, which can also wrap a raw byte buffer.
+    /// A stream sourced from a <see cref="System.IO.MemoryStream"/> (which can wrap a raw byte buffer), or a float array.
     /// </summary>
     public class MemorySourceStream : IAudioStream
     {
@@ -36,6 +36,23 @@ namespace Aurio.Streams
         {
             this.source = source;
             this.properties = properties;
+        }
+
+        /// <summary>
+        /// Create a stream from an array of float samples in IEEE format.
+        /// Creates a copy of the given sample array.
+        /// </summary>
+        /// <param name="samples">the array containing the samples</param>
+        /// <param name="sampleRate">the sample rate of the samples</param>
+        /// <param name="channels">the number of channels of interleaved samples</param>
+        public MemorySourceStream(float[] samples, int sampleRate, int channels)
+        {
+            var buffer = new byte[samples.Length * 4];
+            Buffer.BlockCopy(samples, 0, buffer, 0, buffer.Length);
+            var ms = new MemoryStream(buffer);
+
+            this.source = ms;
+            this.properties = new AudioProperties(channels, sampleRate, 32, AudioFormat.IEEE);
         }
 
         public AudioProperties Properties
