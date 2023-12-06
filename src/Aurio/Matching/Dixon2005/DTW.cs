@@ -372,18 +372,12 @@ namespace Aurio.Matching.Dixon2005
                     }
                     else
                     {
-                        if (
-                            p.i1 == pairBuffer[pairBuffer.Count - 1].i1
-                            && p.i2 == pairBuffer[pairBuffer.Count - 1].i2 + 1
-                        )
+                        if (p.i1 == pairBuffer[^1].i1 && p.i2 == pairBuffer[^1].i2 + 1)
                         {
                             // pairs build a horizontal line
                             pairBuffer.Add(p);
                         }
-                        else if (
-                            p.i2 == pairBuffer[pairBuffer.Count - 1].i2
-                            && p.i1 == pairBuffer[pairBuffer.Count - 1].i1 + 1
-                        )
+                        else if (p.i2 == pairBuffer[^1].i2 && p.i1 == pairBuffer[^1].i1 + 1)
                         {
                             // pairs build a vertical line
                             pairBuffer.Add(p);

@@ -111,7 +111,7 @@ namespace Aurio.Features.ContinuousFrequencyActivation
 
             /* HACK store peak count in last array element
              * it cannot happen that every element is a peak value so the last element will never be reached */
-            strongPeakValues[strongPeakValues.Length - 1] = peakCount;
+            strongPeakValues[^1] = peakCount;
         }
     }
 }

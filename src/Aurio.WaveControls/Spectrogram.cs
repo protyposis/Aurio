@@ -208,7 +208,7 @@ namespace Aurio.WaveControls
                     int color;
                     if (value > Maximum)
                     {
-                        color = colorPalette[colorPalette.Length - 1];
+                        color = colorPalette[^1];
                     }
                     else if (value < Minimum)
                     {

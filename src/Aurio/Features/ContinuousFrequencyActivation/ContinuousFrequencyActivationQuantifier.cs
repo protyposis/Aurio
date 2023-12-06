@@ -35,7 +35,7 @@ namespace Aurio.Features.ContinuousFrequencyActivation
         {
             base.ReadFrame(strongPeakValues);
 
-            int peakCount = (int)strongPeakValues[strongPeakValues.Length - 1];
+            int peakCount = (int)strongPeakValues[^1];
             Array.Sort<float>(strongPeakValues, 0, peakCount); // sort...
             Array.Reverse(strongPeakValues, 0, peakCount); // ...descending
 
