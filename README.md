@@ -31,7 +31,7 @@ All audio processing (incl. fingerprinting) is stream-based and supports process
 <!-- nuget-exclude:start -->
 ## Getting Started
 
-The easiest way of using Aurio is installing the [packages](#packages) through [NuGet](). For usage, check the [code examples](#examples) and [example applications](#example-applications).
+The easiest way of using Aurio is installing the [packages](#packages) through [NuGet](https://www.nuget.org/packages?q=aurio). For usage, check the [code examples](#examples) and [example applications](#example-applications).
 <!-- nuget-exclude:end -->
 
 ## Packages
