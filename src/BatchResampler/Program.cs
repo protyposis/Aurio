@@ -4,8 +4,8 @@ using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Aurio;
-using Aurio.FFmpeg;
 using Aurio.FFT;
+using Aurio.FFmpeg;
 using Aurio.Resampler;
 using Aurio.Streams;
 

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Aurio.Features;
 using Aurio.FFT;
+using Aurio.Features;
 using Aurio.Streams;
 
 namespace Aurio.Test.FFT

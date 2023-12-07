@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using Aurio;
-using Aurio.Features.ContinuousFrequencyActivation;
-using Aurio.FFmpeg;
 using Aurio.FFT;
+using Aurio.FFmpeg;
+using Aurio.Features.ContinuousFrequencyActivation;
 using Aurio.Project;
 using Aurio.Resampler;
 
