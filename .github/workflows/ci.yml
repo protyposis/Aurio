@@ -6,11 +6,18 @@ on:
   pull_request:
     branches: [ "main", "develop" ]
 
+env:
+  dotnet_version: 6.0.x
+
 jobs:
   code:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.dotnet_version }}
     - name: Restore tools
       run: dotnet tool restore
     - name: Code format
@@ -26,7 +33,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: ${{ env.dotnet_version }}
     - name: Install local deps
       run: |
         chmod +x ./install-deps.sh
@@ -48,7 +55,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: ${{ env.dotnet_version }}
     - uses: ilammy/msvc-dev-cmd@v1
     - name: Build
       shell: pwsh
