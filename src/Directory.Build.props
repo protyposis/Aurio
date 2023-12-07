@@ -4,7 +4,7 @@
     <Company>Mario Guggenberger / protyposis.net</Company>
     <Product>Aurio Audio Processing, Analysis and Retrieval Library</Product>
     <Copyright>Copyright © 2010-$([System.DateTime]::Now.ToString(yyyy)) Mario Guggenberger</Copyright>
-    <Version>1.0.0</Version>
+    <Version>4.0.0</Version>
     <!-- Prevent default fallback to .net7.0: https://csharpier.com/docs/MsBuild#target-frameworks -->
     <CSharpier_FrameworkVersion>net6.0</CSharpier_FrameworkVersion>
     <!-- nuget package metadata -->

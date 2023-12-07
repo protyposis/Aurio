@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.0.0 (2023-xx-xx)
+## 4.0.0 (2023-12-07)
 
 ### Features
 
@@ -26,6 +26,17 @@
 * optional progress callback on `MatchProcessor.WindowFilter`
 * `FFTUtil.CalculateFrequencyBinIndex`
 * trigger progress events only if there is actual progress to report
+* `Aurio.FFmpeg.Test` cross-platform support and dry-run mode
+* periodic Hamming, sine, periodic sine windows
+* consolidate window parameters in `WindowConfig`
+* `StreamUtil.Read*` bytes or samples to array
+* square-root windows
+* `FFTUtil.CalculateNextPowerOf2` and `IsPowerOf2`
+* create memory source stream from sample array
+* `DCOffsetStream`
+* `FixedLengthFifoStream`
+* use wave view with stream instead of track
+* overlap-add visualizer
 
 ### Bug Fixes
 
@@ -42,6 +53,7 @@
 * status message update before `ProcessingStarted` event
 * progress events without reported progress
 * periodic Hann window incorrectly applied
+* misleading representation of clipped samples by bitmap waveform renderer
 
 ## 2018-12-04 d01cb3f
 * Introduced `IAudioStreamFactory` pattern that allows to register external audio stream factories in `AudioStreamFactory` to read streams
