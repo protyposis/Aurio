@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <AssemblyTitle>Aurio PFFFT extension</AssemblyTitle>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPackable>true</IsPackable>
+    <Description>Extension library for Aurio, which provides audio FFT and iFFT through the external PFFFT (Pretty Fast FFT) library (see https://bitbucket.org/jpommier/pffft/).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\libs\pffft.x64.dll">
+      <Link>pffft.x64.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/win-x64/native</PackagePath>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aurio\Aurio.csproj" />
+  </ItemGroup>
+</Project>

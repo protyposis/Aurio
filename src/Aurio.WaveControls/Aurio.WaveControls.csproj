@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <OutputType>Library</OutputType>
+    <UseWPF>true</UseWPF>
+    <AssemblyTitle>Aurio WPF Audio Controls</AssemblyTitle>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <IsPackable>true</IsPackable>
+    <Description>Extension library for Aurio with WPF UI controls and utilities.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\Aurio.licenseheader">
+      <Link>Aurio.licenseheader</Link>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aurio\Aurio.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <AssemblyTitle>Aurio Multitrack Playback Demo</AssemblyTitle>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NAudio.WinForms" Version="2.2.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aurio.PFFFT\Aurio.PFFFT.csproj" />
+    <ProjectReference Include="..\Aurio\Aurio.csproj" />
+    <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj" />
+    <ProjectReference Include="..\Aurio.WaveControls\Aurio.WaveControls.csproj" />
+  </ItemGroup>
+</Project>

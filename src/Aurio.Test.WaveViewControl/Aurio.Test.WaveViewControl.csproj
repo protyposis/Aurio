@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <AssemblyTitle>Aurio WaveView Control Demo</AssemblyTitle>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aurio\Aurio.csproj" />
+    <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj" />
+    <ProjectReference Include="..\Aurio.WaveControls\Aurio.WaveControls.csproj" />
+  </ItemGroup>
+</Project>

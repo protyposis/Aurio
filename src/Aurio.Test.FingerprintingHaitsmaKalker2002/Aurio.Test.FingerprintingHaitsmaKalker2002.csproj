@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <AssemblyTitle>Aurio Haitsma &amp; Kalker 2002 Fingerprinting Demo</AssemblyTitle>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aurio.FFmpeg\Aurio.FFmpeg.csproj" />
+    <ProjectReference Include="..\Aurio\Aurio.csproj" />
+    <ProjectReference Include="..\Aurio.PFFFT\Aurio.PFFFT.csproj" />
+    <ProjectReference Include="..\Aurio.Soxr\Aurio.Soxr.csproj" />
+  </ItemGroup>
+</Project>

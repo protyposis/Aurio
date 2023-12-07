@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "csharpier": {
+      "version": "0.26.4",
+      "commands": [
+        "dotnet-csharpier"
+      ]
+    }
+  }
+}

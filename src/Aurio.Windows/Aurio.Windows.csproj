@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+	  <AssemblyTitle>Aurio Windows extension</AssemblyTitle>
+    <IsPackable>true</IsPackable>
+    <Description>Extension library for Aurio, which provides Windows-specific functionality (playback, NAudio MP3 decoder).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio" Version="2.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Aurio\Aurio.csproj" />
+  </ItemGroup>
+
+</Project>

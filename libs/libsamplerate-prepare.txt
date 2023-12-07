@@ -6,11 +6,7 @@
 
 3. Edit the makefile and set MSVCDir to the correct directory
 
-4a. Compile x86 dll in Visual Studio "x86 Native Tools Command Prompt":
-    cd to libsamplerate source root folder
-    make clean & make
-
-4b. Compile x64 dll in Visual Studio "x64 Native Tools Command Prompt" (or "x64 Cross Tools Command Prompt" on 32 bit Windows):
+4. Compile x64 dll in Visual Studio "x64 Native Tools Command Prompt" (or "x64 Cross Tools Command Prompt" on 32 bit Windows):
     cd to libsamplerate source root folder
     make clean & make
 

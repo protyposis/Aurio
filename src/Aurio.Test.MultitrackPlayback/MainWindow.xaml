@@ -1,0 +1,56 @@
+﻿<Window x:Class="Aurio.Test.MultitrackPlayback.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MultitrackPlaybackTest" Height="350" Width="1026" Loaded="Window_Loaded" xmlns:my="clr-namespace:Aurio.WaveControls;assembly=Aurio.WaveControls" Closed="Window_Closed">
+    <Window.Resources>
+        <my:LinearDecibelConverter x:Key="LinearDecibelConverter"/>
+        <DataTemplate x:Key="TrackListBoxItem">
+            <Border BorderThickness="0" BorderBrush="Black">
+                <DockPanel LastChildFill="True">
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                        <Label Content="{Binding Path=Name}" FontWeight="Bold"/>
+                        <Label Content="{Binding Path=SourceProperties.SampleRate}"/>
+                        <Label Content="{Binding Path=SourceProperties.BitDepth}"/>
+                        <Label Content="{Binding Path=SourceProperties.Channels}"/>
+                        <Label Content="{Binding Path=Offset}" ContentStringFormat="{}{0:hh\:mm\:ss\,fff}"/>
+                        <Label Content="{Binding Path=Length}" ContentStringFormat="{}{0:hh\:mm\:ss\,fff}"/>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <my:ExtendedSlider Name="volumeSlider" Width="100" Minimum="0" Maximum="2" SmallChange="0.001" LargeChange="0.01" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Margin="3" Value="{Binding Path=Volume}" DefaultValue="1"/>
+                        <Label Name="decibelLabel" Content="{Binding ElementName=volumeSlider, Path=Value, FallbackValue=dB, Converter={StaticResource LinearDecibelConverter}}" ContentStringFormat="{}{0:0.0}" HorizontalAlignment="Right" Width="40"/>
+                        <ToggleButton IsChecked="{Binding Path=Mute, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
+                            <TextBlock Text="M"/>
+                        </ToggleButton>
+                        <ToggleButton IsChecked="{Binding Path=Solo, Mode=TwoWay}" Margin="3" Width="{Binding Path=ActualHeight, RelativeSource={x:Static RelativeSource.Self}}">
+                            <TextBlock Text="S"/>
+                        </ToggleButton>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+    
+    <Grid>
+        <ListBox Margin="12,12,142,69" Name="trackListBox" ItemTemplate="{StaticResource TrackListBoxItem}" HorizontalContentAlignment="Stretch" AllowDrop="True" Drop="trackListBox_Drop" />
+        <Button Content="Add File" Height="23" HorizontalAlignment="Right" Margin="0,0,142,12" Name="btnAddFile" VerticalAlignment="Bottom" Width="75" Click="btnAddFile_Click" />
+        <Button Content="Play" Height="23" HorizontalAlignment="Left" Margin="12,0,0,12" Name="btnPlay" VerticalAlignment="Bottom" Width="42" Click="btnPlay_Click" />
+        <Button Content="Pause" Height="23" HorizontalAlignment="Left" Margin="60,0,0,12" Name="btnPause" VerticalAlignment="Bottom" Width="42" Click="btnPause_Click" />
+        <Button Content="Stop" Height="23" HorizontalAlignment="Left" Margin="108,0,0,12" Name="btnStop" VerticalAlignment="Bottom" Width="42" Click="btnStop_Click" />
+        <Label Content="current time..." ContentStringFormat="{}{0:hh\:mm\:ss\,fff}"  Height="28" HorizontalAlignment="Left" Margin="156,0,0,8" Name="lblCurrentPlaybackTime" VerticalAlignment="Bottom" Width="138" />
+        <GroupBox Header="Master Control" HorizontalAlignment="Right" Margin="0,12,12,69" Name="groupBox1" Width="124">
+            <Grid>
+                <Grid Margin="6,19,0,6" HorizontalAlignment="Left" Width="30">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <my:ExtendedSlider AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="3" Maximum="4" Name="volumeSlider" Orientation="Vertical" SmallChange="0.01" TickFrequency="0.1" TickPlacement="Both" Value="1" Width="30" LargeChange="0.1" DefaultValue="1" />
+                    <Label Grid.Row="1" Name="decibelLabel" Grid.Column="0" Grid.ColumnSpan="3" Content="{Binding ElementName=volumeSlider, Path=Value, FallbackValue=dB, Converter={StaticResource LinearDecibelConverter}}" ContentStringFormat="{}{0:0.0}" FontSize="9" Padding="0" HorizontalAlignment="Center"/>
+                </Grid>
+                <my:StereoVUMeter HorizontalAlignment="Left" Margin="43,6,0,6" Name="stereoVUMeter1" Width="63" />
+            </Grid>
+        </GroupBox>
+        <Slider Height="23" Margin="12,0,142,40" Name="playbackSeeker" VerticalAlignment="Bottom" LargeChange="10" SmallChange="1" ValueChanged="playbackSeeker_ValueChanged" />
+        <Label Content="total time..." ContentStringFormat="{}{0:hh\:mm\:ss\,fff}" Height="28" HorizontalAlignment="Left" Margin="300,0,0,8" Name="lblTotalPlaybackTime" VerticalAlignment="Bottom" Width="138" />
+    </Grid>
+</Window>

@@ -5,14 +5,7 @@
 3. Add CMake to PATH
    or add temporarily to cmd with: set PATH=%PATH%;"C:\Program Files (x86)\CMake\bin"
 
-4a. Compile x86 dll in Visual Studio "x86 Native Tools Command Prompt":
-    cd to soxr source root folder
-    del release /f /q
-    go.bat
-    copy soxr.dll from Release/bin as soxr.x86.dll
-    
-
-4b. Compile x64 dll in Visual Studio "x64 Native Tools Command Prompt" (or "x64 Cross Tools Command Prompt" on 32 bit Windows):
+4. Compile x64 dll in Visual Studio "x64 Native Tools Command Prompt" (or "x64 Cross Tools Command Prompt" on 32 bit Windows):
     cd to soxr source root folder
     del release /f /q
     go.bat

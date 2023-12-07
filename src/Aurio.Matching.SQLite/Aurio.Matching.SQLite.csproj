@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyTitle>Aurio SQLite Fingerprint Collision Map</AssemblyTitle>
+    <IsPackable>true</IsPackable>
+    <Description>Extension library for Aurio, which provides a fingerprint collision map implementation based on an SQLite DB.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aurio\Aurio.csproj" />
+  </ItemGroup>
+</Project>

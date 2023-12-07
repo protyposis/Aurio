@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyTitle>Aurio Exocortex.DSP FFT extension</AssemblyTitle>
+    <IsPackable>true</IsPackable>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+    <Description>Extension library for Aurio, which provides audio FFT and iFFT through the Exocortex.DSP library (see https://benhouston3d.com/dsp/).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ExocortexDSP\Exocortex.DSP.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\Aurio\Aurio.csproj" />
+  </ItemGroup>
+  <!--
+    Include the Exocortex.DSP library in this package (because there is no nuget package).
+    Since MSBuild does not directly support it, this is a workaround from 
+    https://github.com/NuGet/Home/issues/3891, consisting of below `Target`, `TargetsForTfmSpecificBuildOutput`
+    property, and the `PrivateAssets` marker on the project reference.
+  -->
+  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')->WithMetadataValue('PrivateAssets', 'All'))" />
+    </ItemGroup>
+  </Target>
+</Project>

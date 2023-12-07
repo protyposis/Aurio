@@ -1,0 +1,74 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+    <AssemblyTitle>Aurio FFmpeg extension</AssemblyTitle>
+    <Configurations>Debug;Release;LinuxDebug;LinuxRelease;NugetPackRelease;NugetPackDebug</Configurations>
+    <FFmpegProxyPlatform>x64</FFmpegProxyPlatform>
+    <FFmpegProxyPlatform Condition="$(Configuration.Contains('Linux'))">linux</FFmpegProxyPlatform>
+    <FFmpegProxyBuildConfig>release</FFmpegProxyBuildConfig>
+    <FFmpegProxyBuildConfig Condition="$(Configuration.Contains('Debug'))">debug</FFmpegProxyBuildConfig>
+    <FFmpegProxyWindowsPath>..\..\nativesrc\out\build\x64-$(FFmpegProxyBuildConfig)\aurioffmpegproxy</FFmpegProxyWindowsPath>
+    <FFmpegProxyLinuxPath>..\..\nativesrc\out\build\linux-$(FFmpegProxyBuildConfig)\aurioffmpegproxy</FFmpegProxyLinuxPath>
+    <IsPackable>true</IsPackable>
+    <Description>Extension library for Aurio, which provides audio decoding through FFmpeg (see https://ffmpeg.org/).</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
+  </ItemGroup>
+  <ItemGroup Condition="!$(Configuration.Contains('Linux')) Or $(Configuration.Contains('NugetPack'))">
+    <Content Include="$(FFmpegProxyWindowsPath)\aurioffmpegproxy.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/win-x64/native</PackagePath>
+    </Content>
+    <Content Include="$(FFmpegProxyWindowsPath)\avcodec-60.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/win-x64/native</PackagePath>
+    </Content>
+    <Content Include="$(FFmpegProxyWindowsPath)\avformat-60.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/win-x64/native</PackagePath>
+    </Content>
+    <Content Include="$(FFmpegProxyWindowsPath)\avutil-58.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/win-x64/native</PackagePath>
+    </Content>
+    <Content Include="$(FFmpegProxyWindowsPath)\swresample-4.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/win-x64/native</PackagePath>
+    </Content>
+    <Content Include="$(FFmpegProxyWindowsPath)\swscale-7.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/win-x64/native</PackagePath>
+    </Content>
+  </ItemGroup>
+  <ItemGroup Condition="$(Configuration.Contains('Linux')) Or $(Configuration.Contains('NugetPack'))">
+    <Content Include="$(FFmpegProxyLinuxPath)\libaurioffmpegproxy.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/linux-x64/native</PackagePath>
+    </Content>
+    <Content Include="$(FFmpegProxyLinuxPath)\libavcodec.so.60">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/linux-x64/native</PackagePath>
+    </Content>
+    <Content Include="$(FFmpegProxyLinuxPath)\libavformat.so.60">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/linux-x64/native</PackagePath>
+    </Content>
+    <Content Include="$(FFmpegProxyLinuxPath)\libavutil.so.58">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/linux-x64/native</PackagePath>
+    </Content>
+    <Content Include="$(FFmpegProxyLinuxPath)\libswresample.so.4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/linux-x64/native</PackagePath>
+    </Content>
+    <Content Include="$(FFmpegProxyLinuxPath)\libswscale.so.7">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>runtimes/linux-x64/native</PackagePath>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aurio\Aurio.csproj" />
+  </ItemGroup>
+</Project>
