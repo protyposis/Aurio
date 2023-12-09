@@ -45,6 +45,8 @@ namespace Aurio.FFmpeg
         /// <param name="mode">the types of data to read</param>
         public FFmpegReader(string filename, Type mode)
         {
+            ValidateNativeLibraryAvailability();
+
             this.filename = filename;
             this.mode = mode;
 
@@ -75,6 +77,8 @@ namespace Aurio.FFmpeg
         /// <param name="fileName">optional filename as a hint for FFmpeg to determine the data format</param>
         public FFmpegReader(Stream stream, Type mode, string fileName)
         {
+            ValidateNativeLibraryAvailability();
+
             this.filename = fileName ?? "bufferedIO_stream";
             this.mode = mode;
 
@@ -130,6 +134,36 @@ namespace Aurio.FFmpeg
         /// <param name="mode">the types of data to read</param>
         public FFmpegReader(Stream stream, Type mode)
             : this(stream, mode, null) { }
+
+        public static void ValidateNativeLibraryAvailability()
+        {
+            IntPtr dummyInstance = Marshal.AllocHGlobal(100);
+
+            try
+            {
+                // This can be any native invocation
+                InteropWrapper.stream_has_error(dummyInstance);
+            }
+            catch (DllNotFoundException e)
+            {
+                if (OperatingSystem.IsWindows())
+                {
+                    throw new DllNotFoundException(
+                        "The native FFmpeg proxy library cannot be loaded. Please make sure that the "
+                            + "Microsoft Visual C++ Redistributable for Visual Studio 2015 (or later) is installed.",
+                        e
+                    );
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(dummyInstance);
+            }
+        }
 
         private void CheckAndHandleOpeningError()
         {

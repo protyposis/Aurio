@@ -53,6 +53,8 @@ namespace Aurio.Soxr
             QualityFlags qualityFlags
         )
         {
+            ValidateNativeLibraryAvailability();
+
             if (inputRate <= 0 || outputRate <= 0 || channels <= 0)
             {
                 throw new SoxrException("one or more parameters are invalid (zero or negative)");
@@ -132,6 +134,30 @@ namespace Aurio.Soxr
                 QualityRecipe.SOXR_HQ,
                 QualityFlags.SOXR_ROLLOFF_SMALL
             ) { }
+
+        public static void ValidateNativeLibraryAvailability()
+        {
+            try
+            {
+                // This can be any native invocation
+                InteropWrapper.soxr_version();
+            }
+            catch (DllNotFoundException e)
+            {
+                if (OperatingSystem.IsWindows())
+                {
+                    throw new DllNotFoundException(
+                        "The native Soxr library cannot be loaded. Please make sure that the "
+                            + "Microsoft Visual C++ Redistributable for Visual Studio 2015 (or later) is installed.",
+                        e
+                    );
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
 
         /// <summary>
         /// Returns the libsoxr version.

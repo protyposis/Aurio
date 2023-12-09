@@ -22,6 +22,11 @@ namespace Aurio.Soxr
 {
     public class ResamplerFactory : IResamplerFactory
     {
+        public ResamplerFactory()
+        {
+            SoxResampler.ValidateNativeLibraryAvailability();
+        }
+
         public IResampler CreateInstance(
             ResamplingQuality quality,
             int channels,

@@ -24,6 +24,11 @@ namespace Aurio.FFmpeg
 {
     public class FFmpegAudioStreamFactory : IAudioStreamFactory
     {
+        public FFmpegAudioStreamFactory()
+        {
+            FFmpegReader.ValidateNativeLibraryAvailability();
+        }
+
         public IAudioStream OpenFile(FileInfo fileInfo, FileInfo proxyFileInfo = null)
         {
             if (FFmpegSourceStream.WaveProxySuggested(fileInfo))
