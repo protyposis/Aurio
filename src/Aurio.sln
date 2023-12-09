@@ -448,13 +448,11 @@ Global
 		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.LinuxRelease|x86.ActiveCfg = Release|Any CPU
 		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.LinuxRelease|x86.Build.0 = Release|Any CPU
 		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.NugetPackDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.NugetPackDebug|Any CPU.Build.0 = Debug|Any CPU
 		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.NugetPackDebug|x64.ActiveCfg = Debug|Any CPU
 		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.NugetPackDebug|x64.Build.0 = Debug|Any CPU
 		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.NugetPackDebug|x86.ActiveCfg = Debug|Any CPU
 		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.NugetPackDebug|x86.Build.0 = Debug|Any CPU
 		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.NugetPackRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.NugetPackRelease|Any CPU.Build.0 = Release|Any CPU
 		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.NugetPackRelease|x64.ActiveCfg = Release|Any CPU
 		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.NugetPackRelease|x64.Build.0 = Release|Any CPU
 		{26C6CD2C-D5B6-4905-B586-1FB27D699BB8}.NugetPackRelease|x86.ActiveCfg = Release|Any CPU
