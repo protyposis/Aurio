@@ -1,5 +1,15 @@
 # Changelog
 
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## [4.1.0](https://github.com/protyposis/Aurio/compare/v4.0.0...v4.1.0) (2023-12-09)
+
+
+### Features
+
+* bump Soxr to 0.1.3 ([5908909](https://github.com/protyposis/Aurio/commit/5908909f9e99f75169b2cdf25f6762cd5059ba90))
+* validate availability of native Windows libraries ([55db90b](https://github.com/protyposis/Aurio/commit/55db90b430b853c52099bcb308b80f024e4247e7))
+
 ## 4.0.0 (2023-12-07)
 
 ### Features
