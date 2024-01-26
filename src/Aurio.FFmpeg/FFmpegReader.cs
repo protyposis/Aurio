@@ -75,31 +75,18 @@ namespace Aurio.FFmpeg
         /// <param name="stream">the stream to decode</param>
         /// <param name="mode">the types of data to read</param>
         /// <param name="fileName">optional filename as a hint for FFmpeg to determine the data format</param>
-        public FFmpegReader(Stream stream, Type mode, string fileName)
+        public unsafe FFmpegReader(Stream stream, Type mode, string fileName)
         {
             ValidateNativeLibraryAvailability();
 
             this.filename = fileName ?? "bufferedIO_stream";
             this.mode = mode;
 
-            var transferBuffer = new byte[0];
             readPacketDelegate = delegate(IntPtr opaque, IntPtr buffer, int bufferSize)
             {
-                /* NOTE there's no way to cast the IntPtr to a byte array which is required
-                 * for stream reading, so we need to add an intermediary transfer buffer.
-                 */
-                // Increase transfer buffer's size if too small
-                if (transferBuffer.Length < bufferSize)
-                {
-                    transferBuffer = new byte[bufferSize];
-                }
-                // Read data into transfer buffer
-                int bytesRead = stream.Read(transferBuffer, 0, bufferSize);
+                var bufferSpan = new Span<byte>(buffer.ToPointer(), bufferSize);
+                int bytesRead = stream.Read(bufferSpan);
 
-                // Transfer data to unmanaged memory
-                Marshal.Copy(transferBuffer, 0, buffer, bytesRead);
-
-                // Return number of bytes read
                 return bytesRead;
             };
             seekDelegate = delegate(IntPtr opaque, long offset, int whence)
