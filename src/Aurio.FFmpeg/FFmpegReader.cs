@@ -24,6 +24,7 @@ namespace Aurio.FFmpeg
 {
     public class FFmpegReader : IDisposable
     {
+        private const int AVERROR_EOF = -('E' | ('O' << 8) | ('F' << 16) | (' ' << 24));
         private string filename; // store source filename for debugging
         private bool disposed = false;
         private Type mode;
@@ -86,6 +87,11 @@ namespace Aurio.FFmpeg
             {
                 var bufferSpan = new Span<byte>(buffer.ToPointer(), bufferSize);
                 int bytesRead = stream.Read(bufferSpan);
+
+                if (bytesRead <= 0)
+                {
+                    return AVERROR_EOF;
+                }
 
                 return bytesRead;
             };
