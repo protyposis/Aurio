@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Aurio.Streams;
 
 namespace Aurio.FFmpeg
@@ -301,17 +302,20 @@ namespace Aurio.FFmpeg
             }
 
             var reader = new FFmpegReader(fileInfo, FFmpeg.Type.Audio);
-
-            var writer = new MemoryWriterStream(
-                new AudioProperties(
-                    reader.AudioOutputConfig.format.channels,
-                    reader.AudioOutputConfig.format.sample_rate,
-                    reader.AudioOutputConfig.format.sample_size * 8,
-                    reader.AudioOutputConfig.format.sample_size == 4
-                        ? AudioFormat.IEEE
-                        : AudioFormat.LPCM
-                )
+            var properties = new AudioProperties(
+                reader.AudioOutputConfig.format.channels,
+                reader.AudioOutputConfig.format.sample_rate,
+                reader.AudioOutputConfig.format.sample_size * 8,
+                reader.AudioOutputConfig.format.sample_size == 4
+                    ? AudioFormat.IEEE
+                    : AudioFormat.LPCM
             );
+            var writer = new BlockingFixedLengthFifoStream(properties, 1024 * 1024 * 16);
+
+            var writerTask = Task.Run(() =>
+            {
+                AudioStreamFactory.WriteToFile(writer, proxyFileInfo.FullName);
+            });
 
             int output_buffer_size = reader.AudioOutputConfig.frame_size * writer.SampleBlockSize;
             byte[] output_buffer = new byte[output_buffer_size];
@@ -334,13 +338,8 @@ namespace Aurio.FFmpeg
                 writer.Write(output_buffer, 0, bytesRead);
             }
 
-            reader.Dispose();
-
-            writer.Position = 0;
-
-            AudioStreamFactory.WriteToFile(writer, proxyFileInfo.FullName);
-
-            writer.Close();
+            writer.SignalEndOfInput();
+            writerTask.Wait();
 
             return proxyFileInfo;
         }
