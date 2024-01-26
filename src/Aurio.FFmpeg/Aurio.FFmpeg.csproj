@@ -12,6 +12,7 @@
     <FFmpegProxyLinuxPath>..\..\nativesrc\out\build\linux-$(FFmpegProxyBuildConfig)\aurioffmpegproxy</FFmpegProxyLinuxPath>
     <IsPackable>true</IsPackable>
     <Description>Extension library for Aurio, which provides audio decoding through FFmpeg (see https://ffmpeg.org/).</Description>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
