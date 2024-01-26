@@ -34,7 +34,8 @@ int file_close(FILE* f) {
 }
 
 int file_read_packet(void* f, uint8_t* buf, int buf_size) {
-	return (int)fread(buf, 1, buf_size, f);
+	int bytesRead = (int)fread(buf, 1, buf_size, f);
+	return bytesRead > 0 ? bytesRead : AVERROR_EOF;
 }
 
 int64_t file_seek(void* f, int64_t offset, int whence) {
