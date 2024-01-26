@@ -1,10 +1,11 @@
-$version = "ffmpeg-n6.0-latest-win64-lgpl-shared-6.0"
+$release = "autobuild-2023-12-31-12-55"
+$version = "ffmpeg-n6.1.1-win64-lgpl-shared-6.1"
 $localname = "win64"
 $archive = "$version.zip"
 $dest = ".\libs\ffmpeg"
 
 $ProgressPreference = 'SilentlyContinue' # https://stackoverflow.com/q/28682642
-Invoke-WebRequest https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$archive -OutFile $archive
+Invoke-WebRequest https://github.com/BtbN/FFmpeg-Builds/releases/download/$release/$archive -OutFile $archive
 
 Expand-Archive .\$archive -DestinationPath $dest
 
