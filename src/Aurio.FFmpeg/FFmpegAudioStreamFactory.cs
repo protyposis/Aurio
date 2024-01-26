@@ -31,6 +31,8 @@ namespace Aurio.FFmpeg
 
         public IAudioStream OpenFile(FileInfo fileInfo, FileInfo proxyFileInfo = null)
         {
+            proxyFileInfo ??= FFmpegSourceStream.SuggestWaveProxyFileInfo(fileInfo);
+
             if (FFmpegSourceStream.WaveProxySuggested(fileInfo))
             {
                 Console.WriteLine("File format with known seek problems, creating proxy file...");
