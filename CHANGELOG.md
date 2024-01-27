@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.2.0](https://github.com/protyposis/Aurio/compare/v4.1.0...v4.2.0) (2024-01-27)
+
+
+### Features
+
+* bump FFmpeg to 6.1.1 ([#21](https://github.com/protyposis/Aurio/issues/21)) ([b6ccac2](https://github.com/protyposis/Aurio/commit/b6ccac2da94bd40089d58e9b14bd26054c759a38))
+* direct audio proxy file writing ([#25](https://github.com/protyposis/Aurio/issues/25)) ([2d531d0](https://github.com/protyposis/Aurio/commit/2d531d024724483c32f7a7fab7861d653f72b6f3))
+* improve FFmpeg seeking ([#26](https://github.com/protyposis/Aurio/issues/26)) ([682cf2d](https://github.com/protyposis/Aurio/commit/682cf2d3d49359d8f8678a95ccb205e73f89f819))
+* read FFmpeg samples without intermediary buffer ([#23](https://github.com/protyposis/Aurio/issues/23)) ([316cf4d](https://github.com/protyposis/Aurio/commit/316cf4d42e913288bfea200568e69b00554bcda8))
+
+
+### Bug Fixes
+
+* exception on FFmpeg proxy file creation ([#22](https://github.com/protyposis/Aurio/issues/22)) ([ba619ab](https://github.com/protyposis/Aurio/commit/ba619abc8c41b45c00031c508e0ca67222d43d5a))
+* infinite read loop at end of FFmpeg stream ([#24](https://github.com/protyposis/Aurio/issues/24)) ([6a99a85](https://github.com/protyposis/Aurio/commit/6a99a854add499bba1773eb93d18eb44693d5c2a))
+
 ## [4.1.0](https://github.com/protyposis/Aurio/compare/v4.0.0...v4.1.0) (2023-12-09)
 
 
