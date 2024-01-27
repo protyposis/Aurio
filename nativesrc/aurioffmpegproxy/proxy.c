@@ -464,10 +464,10 @@ int stream_read_frame(ProxyInstance *pi, int64_t *timestamp, uint8_t *output_buf
 			else if (*frame_type == TYPE_VIDEO) {
 				update_position_and_get_timestamp(pi->frame, pi->video_output.format.frame_rate, pi->video_stream->time_base,
 					ret, &pi->video_output.sample_position, timestamp);
-				pi->video_output.current_frame.keyframe = pi->frame->key_frame;
+				pi->video_output.current_frame.keyframe = (pi->frame->flags & AV_FRAME_FLAG_KEY) != 0;
 				pi->video_output.current_frame.pict_type = pi->frame->pict_type;
-				pi->video_output.current_frame.interlaced = pi->frame->interlaced_frame;
-				pi->video_output.current_frame.top_field_first = pi->frame->top_field_first;
+				pi->video_output.current_frame.interlaced = (pi->frame->flags & AV_FRAME_FLAG_INTERLACED) != 0;
+				pi->video_output.current_frame.top_field_first = (pi->frame->flags & AV_FRAME_FLAG_TOP_FIELD_FIRST) != 0;
 			}
 			return ret;
 		}
