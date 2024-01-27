@@ -26,5 +26,17 @@ namespace Aurio.FFmpeg.UnitTest
             var length = StreamUtil.ReadAllAndCount(s);
             Assert.True(length > 46000);
         }
+
+        [Fact]
+        public void TS_ReadDataUntilEnd()
+        {
+            var s = new FFmpegSourceStream(
+                new FileInfo("./Resources/sine440-44100-16-mono-200ms.mp3")
+            );
+
+            StreamUtil.ReadAllAndCount(s);
+
+            // Test succeeds when reading does not get stuck in infinite loop at EOF
+        }
     }
 }

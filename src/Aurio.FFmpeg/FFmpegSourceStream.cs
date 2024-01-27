@@ -91,11 +91,7 @@ namespace Aurio.FFmpeg
             );
 
             readerPosition = 0;
-            sourceBuffer = new byte[
-                reader.AudioOutputConfig.frame_size
-                    * reader.AudioOutputConfig.format.channels
-                    * reader.AudioOutputConfig.format.sample_size
-            ];
+            sourceBuffer = new byte[reader.FrameBufferSize];
             sourceBufferPosition = 0;
             sourceBufferLength = -1; // -1 means buffer empty, >= 0 means valid buffer data
 
@@ -133,7 +129,50 @@ namespace Aurio.FFmpeg
 
         private long SamplePosition
         {
-            get { return readerPosition + sourceBufferPosition; }
+            get { return readerPosition + sourceBufferPosition - readerFirstPTS; }
+        }
+
+        /// <summary>
+        /// Read frames (repeatedly) into the buffer until it contains the sample with the
+        /// desired timestamp.
+        ///
+        /// This is a helper method for sample-exact seeking, because FFmpeg seeks may end
+        /// up a long way before the desired seek target.
+        /// </summary>
+        private void ForwardReadUntilTimestamp(long targetTimestamp)
+        {
+            long previousReaderPosition = long.MinValue;
+
+            while (true)
+            {
+                sourceBufferLength = reader.ReadFrame(
+                    out readerPosition,
+                    sourceBuffer,
+                    sourceBuffer.Length,
+                    out Type type
+                );
+
+                if (readerPosition == previousReaderPosition)
+                {
+                    // Prevent an endless read-loop in case the reported position does not change.
+                    // I did not encounter this behavior, but who knows how FFmpeg acts on the myriad of supported formats.
+                    throw new InvalidOperationException("Read head is stuck");
+                }
+                else if (targetTimestamp < readerPosition)
+                {
+                    // Prevent endless loop in case the target timestamp gets skipped. Again, I
+                    // have not seen it happen, so this is just another proactive measure.
+                    throw new InvalidOperationException(
+                        "Read position is beyond the target timestamp"
+                    );
+                }
+                else if (targetTimestamp < readerPosition + sourceBufferLength)
+                {
+                    break;
+                }
+
+                previousReaderPosition = readerPosition;
+            }
         }
 
         public long Position
@@ -145,17 +184,9 @@ namespace Aurio.FFmpeg
 
                 // seek to target position
                 reader.Seek(seekTarget, FFmpeg.Type.Audio);
-
-                // get target position
-                sourceBufferLength = reader.ReadFrame(
-                    out readerPosition,
-                    sourceBuffer,
-                    sourceBuffer.Length,
-                    out Type type
-                );
+                ForwardReadUntilTimestamp(seekTarget);
 
                 // check if seek ended up at seek target (or earlier because of frame size, depends on file format and stream codec)
-                // TODO handle seek offset with bufferPosition
                 if (seekTarget == readerPosition)
                 {
                     // perfect case
