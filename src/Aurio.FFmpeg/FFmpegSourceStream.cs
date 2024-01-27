@@ -91,11 +91,7 @@ namespace Aurio.FFmpeg
             );
 
             readerPosition = 0;
-            sourceBuffer = new byte[
-                reader.AudioOutputConfig.frame_size
-                    * reader.AudioOutputConfig.format.channels
-                    * reader.AudioOutputConfig.format.sample_size
-            ];
+            sourceBuffer = new byte[reader.FrameBufferSize];
             sourceBufferPosition = 0;
             sourceBufferLength = -1; // -1 means buffer empty, >= 0 means valid buffer data
 

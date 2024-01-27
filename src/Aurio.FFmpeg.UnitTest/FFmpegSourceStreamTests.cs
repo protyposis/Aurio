@@ -78,5 +78,28 @@ namespace Aurio.FFmpeg.UnitTest
                 proxyFileInfo.FullName
             );
         }
+
+        [Fact]
+        public void MKV_NoStreamDuration_SeekingSupported()
+        {
+            var fileInfo = new FileInfo("./Resources/sine440-44100-16-mono-200ms.mkv");
+
+            var act = () => new FFmpegSourceStream(fileInfo);
+            var ex = Record.Exception(act);
+
+            // Assert no FileNotSeekableException being thrown
+            Assert.Null(ex);
+        }
+
+        [Fact]
+        public void TS_NonZeroStartTime_SeekingSupported()
+        {
+            var fileInfo = new FileInfo("./Resources/sine440-44100-16-mono-200ms.ts");
+            var s = new FFmpegSourceStream(fileInfo);
+
+            s.Position = 1000;
+
+            Assert.Equal(1000, s.Position);
+        }
     }
 }

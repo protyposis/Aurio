@@ -204,6 +204,16 @@ namespace Aurio.FFmpeg
             get { return videoOutputConfig; }
         }
 
+        public long FrameBufferSize
+        {
+            get
+            {
+                return AudioOutputConfig.frame_size
+                    * AudioOutputConfig.format.channels
+                    * AudioOutputConfig.format.sample_size;
+            }
+        }
+
         public int ReadFrame(
             out long timestamp,
             byte[] output_buffer,
