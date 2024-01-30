@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.2.1](https://github.com/protyposis/Aurio/compare/v4.2.0...v4.2.1) (2024-01-30)
+
+
+### Bug Fixes
+
+* FFmpeg end-of-stream handling breaks stream contract ([c18b299](https://github.com/protyposis/Aurio/commit/c18b29947535beed25957a0380f741b78cccc168))
+* FFmpeg sometimes seeks one frame too far ([8d33d6a](https://github.com/protyposis/Aurio/commit/8d33d6a9a96c929ca9bff2295fc828b76ad812d1))
+* initial position not zero when first PTS not zero ([8867464](https://github.com/protyposis/Aurio/commit/88674643560ecc977f4048434eb3ac553d3e1582))
+* wrongly accepted first PTS when file not seekable ([4c16721](https://github.com/protyposis/Aurio/commit/4c167213c10fc5ebf02b5b00e4b7f18fb60e4b32))
+
 ## [4.2.0](https://github.com/protyposis/Aurio/compare/v4.1.0...v4.2.0) (2024-01-27)
 
 
