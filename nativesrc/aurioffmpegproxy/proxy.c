@@ -519,9 +519,20 @@ void stream_seek(ProxyInstance *pi, int64_t timestamp, int type)
 	 *
 	 * This applies to both seek directions, backward and forward from the
 	 * current position in the stream.
+	 * 
+	 * FIXME: AVSEEK_FLAG_BACKWARD does not always work correctly and seeks
+	 * sometimes still end up at the next frame PTS(b) (also reported at
+	 * https://stackoverflow.com/a/21451032). Using `avformat_seek_file` with 
+	 * `ts == max_ts` constraint does not prevent this either.
+	 * To end up at the desired frame, seek to an earlier frame and then read
+	 * until the desired frame.
 	 */
 
 	// do seek
+	// FIXME: In some files (e.g., some MTS), it is not possible to seek to the
+	// first packet. When opening a file and reading the packets, the first packet
+	// is read, but when seeking, the first packet cannot be reached and the first
+	// read packet is actually the second packet.
 	av_seek_frame(pi->fmt_ctx, seek_stream->index, timestamp, AVSEEK_FLAG_BACKWARD);
 	
 	// flush codec

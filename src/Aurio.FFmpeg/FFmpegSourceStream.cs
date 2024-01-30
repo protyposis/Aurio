@@ -183,9 +183,8 @@ namespace Aurio.FFmpeg
                 }
                 else if (targetTimestamp < readerPosition)
                 {
-                    // Prevent endless loop in case the target timestamp gets skipped. Again, I
-                    // have not seen it happen, so this is just another proactive measure.
-                    throw new InvalidOperationException(
+                    // Prevent scanning to end of stream in case the target timestamp gets skipped.
+                    throw new SeekTargetMissedException(
                         "Read position is beyond the target timestamp"
                     );
                 }
@@ -206,8 +205,21 @@ namespace Aurio.FFmpeg
                 long seekTarget = (value / SampleBlockSize) + readerFirstPTS;
 
                 // seek to target position
-                reader.Seek(seekTarget, FFmpeg.Type.Audio);
-                ForwardReadUntilTimestamp(seekTarget);
+                try
+                {
+                    reader.Seek(seekTarget, Type.Audio);
+                    ForwardReadUntilTimestamp(seekTarget);
+                }
+                catch (SeekTargetMissedException)
+                {
+                    // FFmpeg seek is sometimes off by one frame. Try again, this time
+                    // by seeking to the previous frame.
+                    // This is an issue with the FFmpeg seek function, see `stream_seek` in `proxy.c`
+                    // for details.
+                    Console.WriteLine("Seek target miss. Retry seeking to earlier position.");
+                    reader.Seek(seekTarget - reader.AudioOutputConfig.frame_size, Type.Audio);
+                    ForwardReadUntilTimestamp(seekTarget);
+                }
 
                 // check if seek ended up at seek target (or earlier because of frame size, depends on file format and stream codec)
                 if (seekTarget == readerPosition)
@@ -253,10 +265,6 @@ namespace Aurio.FFmpeg
                         );
                     }
                 }
-
-                // seek back to seek point for successive reads to return expected data (not one frame in advance) PROBABLY NOT NEEDED
-                // TODO handle this case, e.g. when it is necessery and when it isn't (e.g. when block is chached because of bufferPosition > 0)
-                //reader.Seek(readerPosition);
             }
         }
 
@@ -493,6 +501,18 @@ namespace Aurio.FFmpeg
                 : base(message) { }
 
             public FileSeekException(string message, Exception innerException)
+                : base(message, innerException) { }
+        }
+
+        private class SeekTargetMissedException : Exception
+        {
+            public SeekTargetMissedException()
+                : base() { }
+
+            public SeekTargetMissedException(string message)
+                : base(message) { }
+
+            public SeekTargetMissedException(string message, Exception innerException)
                 : base(message, innerException) { }
         }
     }

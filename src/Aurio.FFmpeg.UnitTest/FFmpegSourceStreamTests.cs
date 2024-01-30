@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Moq;
 using Xunit;
@@ -183,6 +184,59 @@ namespace Aurio.FFmpeg.UnitTest
                         out It.Ref<Type>.IsAny
                     ),
                 Times.Once()
+            );
+        }
+
+        [Fact]
+        public void SeekBeyondTarget_ReseekToPreviousFrame()
+        {
+            var readerMock = new Mock<FFmpegReader>(
+                new FileInfo("./Resources/sine440-44100-16-mono-200ms.mkv"),
+                Type.Audio
+            );
+            var timestamps = new Queue<long>(
+                new long[]
+                {
+                    // First read determines PTS offset.
+                    0,
+                    // Second read expects frame to contain sample 25000 (100000 / sample block size),
+                    // so return 25001 to simulate that the next frame was read instead.
+                    25001,
+                    // After the expected seek and re-read, indicate that frame contains expected sample.
+                    25000
+                }
+            );
+            readerMock
+                .Setup(
+                    m =>
+                        m.ReadFrame(
+                            out It.Ref<long>.IsAny,
+                            It.IsAny<byte[]>(),
+                            It.IsAny<int>(),
+                            out It.Ref<Type>.IsAny
+                        )
+                )
+                .Callback(
+                    (out long timestamp, byte[] buffer, int bufferSize, out Type type) =>
+                    {
+                        timestamp = timestamps.Dequeue();
+                        type = Type.Audio;
+                    }
+                )
+                .Returns(1);
+            var s = new FFmpegSourceStream(readerMock.Object);
+
+            s.Position = 100000;
+
+            readerMock.Verify(
+                m =>
+                    m.ReadFrame(
+                        out It.Ref<long>.IsAny,
+                        It.IsAny<byte[]>(),
+                        It.IsAny<int>(),
+                        out It.Ref<Type>.IsAny
+                    ),
+                Times.Exactly(3)
             );
         }
     }
