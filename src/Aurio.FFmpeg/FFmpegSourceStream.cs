@@ -54,16 +54,12 @@ namespace Aurio.FFmpeg
         }
 
         /// <summary>
-        /// Decodes an audio stream through FFmpeg from an encoded file stream.
-        /// Accepts an optional file name hint to help FFmpeg determine the format of
-        /// the encoded data.
+        /// Decodes an audio stream through FFmpeg.
         /// </summary>
-        /// <param name="stream">the stream to decode</param>
-        /// <param name="fileName">optional file name hint for FFmpeg</param>
-        public FFmpegSourceStream(Stream stream, string fileName)
+        /// <param name="reader">an FFmpeg reader of an encoded stream</param>
+        public FFmpegSourceStream(FFmpegReader reader)
         {
-            sourceStream = stream;
-            reader = new FFmpegReader(stream, FFmpeg.Type.Audio, fileName);
+            this.reader = reader;
 
             if (reader.AudioOutputConfig.length == long.MinValue)
             {
@@ -102,6 +98,19 @@ namespace Aurio.FFmpeg
 
         /// <summary>
         /// Decodes an audio stream through FFmpeg from an encoded file stream.
+        /// Accepts an optional file name hint to help FFmpeg determine the format of
+        /// the encoded data.
+        /// </summary>
+        /// <param name="stream">the stream to decode</param>
+        /// <param name="fileName">optional file name hint for FFmpeg</param>
+        public FFmpegSourceStream(Stream stream, string fileName)
+            : this(new FFmpegReader(stream, FFmpeg.Type.Audio, fileName))
+        {
+            sourceStream = stream;
+        }
+
+        /// <summary>
+        /// Decodes an audio stream through FFmpeg from an encoded file stream.
         /// </summary>
         /// <param name="stream">the stream to decode</param>
         public FFmpegSourceStream(Stream stream)
@@ -134,16 +143,21 @@ namespace Aurio.FFmpeg
 
         private void DetermineFirstPts()
         {
-            // determine first PTS to handle cases where it is > 0
-            try
+            // Determine first PTS to handle files which don't start at zero. This is
+            // important for seeking and reporting the proper stream length, because
+            // Aurio streams always start at zero.
+            reader.Seek(long.MinValue, Type.Audio);
+            ReadFrame();
+
+            if (sourceBufferLength < 0)
             {
-                Position = 0;
+                // If determining the first PTS does not work, we have to expect other
+                // seeks to fail too.
+                throw new FileNotSeekableException("Determining first PTS failed");
             }
-            catch (InvalidOperationException)
-            {
-                readerFirstPTS = readerPosition;
-                Console.WriteLine("first PTS = " + readerFirstPTS);
-            }
+
+            readerFirstPTS = readerPosition;
+            Console.WriteLine("first PTS = " + readerFirstPTS);
         }
 
         /// <summary>

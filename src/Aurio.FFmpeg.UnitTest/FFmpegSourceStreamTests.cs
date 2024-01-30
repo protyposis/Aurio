@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Moq;
 using Xunit;
 
 namespace Aurio.FFmpeg.UnitTest
@@ -149,6 +150,40 @@ namespace Aurio.FFmpeg.UnitTest
 
             Assert.Equal(frameSize / 2 + s.SampleBlockSize, s.Position);
             Assert.Equal(s.SampleBlockSize, bytesRead);
+        }
+
+        [Fact]
+        public void ThrowWhenFirstPtsCannotBeDetermined()
+        {
+            var readerMock = new Mock<FFmpegReader>(
+                new FileInfo("./Resources/sine440-44100-16-mono-200ms.ts"),
+                Type.Audio
+            );
+            readerMock
+                .Setup(
+                    m =>
+                        m.ReadFrame(
+                            out It.Ref<long>.IsAny,
+                            It.IsAny<byte[]>(),
+                            It.IsAny<int>(),
+                            out It.Ref<Type>.IsAny
+                        )
+                )
+                .Returns(-1);
+
+            var act = () => new FFmpegSourceStream(readerMock.Object);
+
+            Assert.Throws<FFmpegSourceStream.FileNotSeekableException>(act);
+            readerMock.Verify(
+                m =>
+                    m.ReadFrame(
+                        out It.Ref<long>.IsAny,
+                        It.IsAny<byte[]>(),
+                        It.IsAny<int>(),
+                        out It.Ref<Type>.IsAny
+                    ),
+                Times.Once()
+            );
         }
     }
 }
