@@ -175,7 +175,12 @@ namespace Aurio.FFmpeg
             {
                 ReadFrame();
 
-                if (readerPosition == previousReaderPosition)
+                if (readerPosition == -1)
+                {
+                    // "Timestamp not found (end of file reached)"
+                    return;
+                }
+                else if (readerPosition == previousReaderPosition)
                 {
                     // Prevent an endless read-loop in case the reported position does not change.
                     // I did not encounter this behavior, but who knows how FFmpeg acts on the myriad of supported formats.
@@ -219,6 +224,16 @@ namespace Aurio.FFmpeg
                     Console.WriteLine("Seek target miss. Retry seeking to earlier position.");
                     reader.Seek(seekTarget - reader.AudioOutputConfig.frame_size, Type.Audio);
                     ForwardReadUntilTimestamp(seekTarget);
+                }
+
+                if (sourceBufferLength == -1)
+                {
+                    // End of stream handling:
+                    // The Aurio stream interface allows seeking beyond the end, so we act
+                    // like the seek was successful. `Read` won't return any samples though.
+                    readerPosition = seekTarget;
+                    sourceBufferPosition = 0;
+                    return;
                 }
 
                 // check if seek ended up at seek target (or earlier because of frame size, depends on file format and stream codec)
@@ -284,7 +299,7 @@ namespace Aurio.FFmpeg
                     out Type type
                 );
 
-                if (newPosition == -1 || sourceBufferLength == -1)
+                if (sourceBufferLength == -1)
                 {
                     return 0; // end of stream
                 }
