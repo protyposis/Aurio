@@ -95,17 +95,7 @@ namespace Aurio.FFmpeg
             sourceBufferPosition = 0;
             sourceBufferLength = -1; // -1 means buffer empty, >= 0 means valid buffer data
 
-            // determine first PTS to handle cases where it is > 0
-            try
-            {
-                Position = 0;
-            }
-            catch (InvalidOperationException)
-            {
-                readerFirstPTS = readerPosition;
-                readerPosition = 0;
-                Console.WriteLine("first PTS = " + readerFirstPTS);
-            }
+            DetermineFirstPts();
 
             seekIndexCreated = false;
         }
@@ -132,6 +122,31 @@ namespace Aurio.FFmpeg
             get { return readerPosition + sourceBufferPosition - readerFirstPTS; }
         }
 
+        private void ReadFrame()
+        {
+            sourceBufferLength = reader.ReadFrame(
+                out readerPosition,
+                sourceBuffer,
+                sourceBuffer.Length,
+                out Type type
+            );
+        }
+
+        private void DetermineFirstPts()
+        {
+            // determine first PTS to handle cases where it is > 0
+            try
+            {
+                Position = 0;
+            }
+            catch (InvalidOperationException)
+            {
+                readerFirstPTS = readerPosition;
+                readerPosition = 0;
+                Console.WriteLine("first PTS = " + readerFirstPTS);
+            }
+        }
+
         /// <summary>
         /// Read frames (repeatedly) into the buffer until it contains the sample with the
         /// desired timestamp.
@@ -145,12 +160,7 @@ namespace Aurio.FFmpeg
 
             while (true)
             {
-                sourceBufferLength = reader.ReadFrame(
-                    out readerPosition,
-                    sourceBuffer,
-                    sourceBuffer.Length,
-                    out Type type
-                );
+                ReadFrame();
 
                 if (readerPosition == previousReaderPosition)
                 {
