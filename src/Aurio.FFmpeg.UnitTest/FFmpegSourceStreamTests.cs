@@ -80,7 +80,7 @@ namespace Aurio.FFmpeg.UnitTest
         }
 
         [Fact]
-        public void MKV_NoStreamDuration_SeekingSupported()
+        public void NoStreamDuration_SeekingSupported()
         {
             var fileInfo = new FileInfo("./Resources/sine440-44100-16-mono-200ms.mkv");
 
@@ -92,7 +92,7 @@ namespace Aurio.FFmpeg.UnitTest
         }
 
         [Fact]
-        public void TS_NonZeroStartTime_SeekingSupported()
+        public void NonZeroStartTime_SeekingSupported()
         {
             var fileInfo = new FileInfo("./Resources/sine440-44100-16-mono-200ms.ts");
             var s = new FFmpegSourceStream(fileInfo);
@@ -109,6 +109,46 @@ namespace Aurio.FFmpeg.UnitTest
             var s = new FFmpegSourceStream(fileInfo);
 
             Assert.Equal(0, s.Position);
+        }
+
+        [Fact]
+        public void ReadTwoFrames_UpdatePosition()
+        {
+            var fileInfo = new FileInfo("./Resources/sine440-44100-16-mono-200ms.ts");
+            var s = new FFmpegSourceStream(fileInfo);
+            var frameSize = 1152 * s.SampleBlockSize;
+            var buffer = new byte[frameSize];
+
+            var bytesRead = s.Read(buffer, 0, buffer.Length);
+
+            Assert.Equal(frameSize, s.Position);
+            Assert.Equal(frameSize, bytesRead);
+
+            bytesRead = s.Read(buffer, 0, buffer.Length);
+
+            Assert.Equal(frameSize * 2, s.Position);
+            Assert.Equal(frameSize, bytesRead);
+        }
+
+        [Fact]
+        public void ReadIncompleteFrames_UpdatePosition()
+        {
+            var fileInfo = new FileInfo("./Resources/sine440-44100-16-mono-200ms.ts");
+            var s = new FFmpegSourceStream(fileInfo);
+            var frameSize = 1152 * s.SampleBlockSize;
+            var buffer = new byte[frameSize];
+
+            // Read half frame
+            var bytesRead = s.Read(buffer, 0, buffer.Length / 2);
+
+            Assert.Equal(frameSize / 2, s.Position);
+            Assert.Equal(frameSize / 2, bytesRead);
+
+            // Read one sample
+            bytesRead = s.Read(buffer, 0, s.SampleBlockSize);
+
+            Assert.Equal(frameSize / 2 + s.SampleBlockSize, s.Position);
+            Assert.Equal(s.SampleBlockSize, bytesRead);
         }
     }
 }
