@@ -214,7 +214,7 @@ namespace Aurio.FFmpeg
             }
         }
 
-        public int ReadFrame(
+        public virtual int ReadFrame(
             out long timestamp,
             byte[] output_buffer,
             int output_buffer_size,

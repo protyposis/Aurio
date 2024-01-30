@@ -22,9 +22,10 @@ namespace Aurio.FFmpeg.UnitTest
             var s = new FFmpegSourceStream(
                 new FileInfo("./Resources/sine440-44100-16-mono-200ms.mp3")
             );
+            var expectedMinLength = 44100 * 0.2 * 4; // Fs * 200ms * sampleSize (min, because MP3 adds additional samples)
 
             var length = StreamUtil.ReadAllAndCount(s);
-            Assert.True(length > 46000);
+            Assert.True(length >= expectedMinLength);
         }
 
         [Fact]
