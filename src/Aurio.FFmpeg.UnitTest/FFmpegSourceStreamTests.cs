@@ -101,5 +101,14 @@ namespace Aurio.FFmpeg.UnitTest
 
             Assert.Equal(1000, s.Position);
         }
+
+        [Fact]
+        public void NonZeroStartTime_InitialPositionIsZero()
+        {
+            var fileInfo = new FileInfo("./Resources/sine440-44100-16-mono-200ms.ts");
+            var s = new FFmpegSourceStream(fileInfo);
+
+            Assert.Equal(0, s.Position);
+        }
     }
 }

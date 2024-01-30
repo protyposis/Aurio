@@ -142,7 +142,6 @@ namespace Aurio.FFmpeg
             catch (InvalidOperationException)
             {
                 readerFirstPTS = readerPosition;
-                readerPosition = 0;
                 Console.WriteLine("first PTS = " + readerFirstPTS);
             }
         }
