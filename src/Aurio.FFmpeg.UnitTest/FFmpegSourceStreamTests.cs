@@ -239,5 +239,30 @@ namespace Aurio.FFmpeg.UnitTest
                 Times.Exactly(3)
             );
         }
+
+        [Fact]
+        public void SeekBeyondEnd_PositionCanBeSet()
+        {
+            var fileInfo = new FileInfo("./Resources/sine440-44100-16-mono-200ms.ts");
+            var s = new FFmpegSourceStream(fileInfo);
+            var position = 10000000000 * s.SampleBlockSize;
+
+            s.Position = position;
+
+            Assert.Equal(position, s.Position);
+        }
+
+        [Fact]
+        public void SeekBeyondEnd_ReadIndicatesEndOfStream()
+        {
+            var fileInfo = new FileInfo("./Resources/sine440-44100-16-mono-200ms.ts");
+            var s = new FFmpegSourceStream(fileInfo);
+            var position = 10000000000 * s.SampleBlockSize;
+
+            s.Position = position;
+            var bytesRead = s.Read(new byte[1000], 0, 1000);
+
+            Assert.Equal(0, bytesRead);
+        }
     }
 }
