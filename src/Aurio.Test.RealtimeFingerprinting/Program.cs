@@ -6,6 +6,7 @@ using Aurio.Matching.HaitsmaKalker2002;
 using Aurio.Project;
 using Aurio.Resampler;
 using Aurio.Streams;
+using NAudio.Dsp;
 
 namespace Aurio.Test.RealtimeFingerprinting
 {
@@ -18,7 +19,7 @@ namespace Aurio.Test.RealtimeFingerprinting
             var audioProperties = new AudioProperties(1, 44100, 32, AudioFormat.IEEE);
 
             // Aurio resampling & FFT initialization
-            ResamplerFactory.Factory = new Soxr.ResamplerFactory();
+            ResamplerFactory.Factory = new NAudioWdlResamplerFactory();
             FFTFactory.Factory = new PFFFT.FFTFactory();
 
             // Create a 10-second FIFO buffer
