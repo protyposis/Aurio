@@ -11,11 +11,7 @@
     <None Include="..\Aurio.licenseheader" Link="Aurio.licenseheader" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\libs\libsamplerate-0.x64.dll">
-      <Link>libsamplerate-0.x64.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackagePath>runtimes/win-x64/native</PackagePath>
-    </Content>
+    <PackageReference Include="LibSampleRate" Version="1.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Aurio\Aurio.csproj" />
