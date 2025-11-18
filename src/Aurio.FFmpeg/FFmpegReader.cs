@@ -162,7 +162,7 @@ namespace Aurio.FFmpeg
         {
             if (InteropWrapper.stream_has_error(instance))
             {
-                string errorMessage = Marshal.PtrToStringAnsi(
+                string errorMessage = Marshal.PtrToStringUTF8(
                     InteropWrapper.stream_get_error(instance)
                 );
                 throw new IOException("Error opening the FFmpeg stream: " + errorMessage);

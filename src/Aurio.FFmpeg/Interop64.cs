@@ -26,7 +26,10 @@ namespace Aurio.FFmpeg
         private const string FFMPEGPROXYLIB = "aurioffmpegproxy";
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
-        public static extern IntPtr stream_open_file(Type mode, string filename);
+        public static extern IntPtr stream_open_file(
+            Type mode,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string filename
+        );
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]
         public static extern IntPtr stream_open_bufferedio(
@@ -34,7 +37,7 @@ namespace Aurio.FFmpeg
             IntPtr opaque,
             InteropWrapper.CallbackDelegateReadPacket readPacket,
             InteropWrapper.CallbackDelegateSeek seek,
-            string filename
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string filename
         );
 
         [DllImport(FFMPEGPROXYLIB, CallingConvention = InteropWrapper.CC)]

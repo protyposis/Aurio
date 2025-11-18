@@ -52,5 +52,13 @@ namespace Aurio.FFmpeg.UnitTest
             // -1 signals EOF
             Assert.Equal(-1, result);
         }
+
+        [Fact]
+        public void Utf8FileName()
+        {
+            var fileInfo = new FileInfo("./Resources/utf8 special ° character.wav");
+
+            var reader = new FFmpegReader(fileInfo, Type.Audio);
+        }
     }
 }
