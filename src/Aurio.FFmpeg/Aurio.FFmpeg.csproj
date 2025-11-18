@@ -42,6 +42,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PackagePath>runtimes/win-x64/native</PackagePath>
     </Content>
+    <Content Include="$(FFmpegProxyWindowsPath)\aurioffmpegproxy.pdb" Condition="$(Configuration.Contains('Debug'))">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup Condition="$(Configuration.Contains('Linux')) Or $(Configuration.Contains('NugetPack'))">
     <Content Include="$(FFmpegProxyLinuxPath)\libaurioffmpegproxy.so">

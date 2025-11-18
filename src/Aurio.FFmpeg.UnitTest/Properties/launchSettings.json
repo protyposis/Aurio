@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Aurio.FFmpeg.UnitTest": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
