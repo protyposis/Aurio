@@ -17,6 +17,7 @@
 //
 
 using Aurio.Resampler;
+using LibSampleRate;
 
 namespace Aurio.LibSampleRate
 {

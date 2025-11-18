@@ -54,7 +54,7 @@ The easiest way of using Aurio is installing the [packages](#packages) through [
 | Name | Description | Variable Rate Support | License |
 | --- | ----------- | --- | --- |
 | `Aurio` (core) | Managed [NAudio](https://github.com/naudio/NAudio) WDL resampler. Recommended for cross-platform use. | yes | MIT |
-| `Aurio.LibSampleRate` | Native [`libsamplerate`](https://github.com/libsndfile/libsamplerate) (a.k.a. Secret Rabbit Code) library. Windows only*. | yes | GPL |
+| `Aurio.LibSampleRate` | Native [libsamplerate](https://github.com/libsndfile/libsamplerate) (a.k.a. Secret Rabbit Code) library via [LibSampleRate.NET](https://github.com/protyposis/LibSampleRate.NET). Windows only*. | yes | BSD |
 | `Aurio.Soxr` | Native [SoX Resampler](https://sourceforge.net/projects/soxr/) library. Windows only*. | yes (depending on config) | LGPL |
 
 (*) Linux binary not integrated yet.

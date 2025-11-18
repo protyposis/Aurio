@@ -67,10 +67,11 @@ https://www.fftw.org/doc/License-and-Copyright.html
 https://www.gnu.org/licenses/gpl-2.0.html
 
 Aurio.LibSampleRate:
-Secret Rabbit Code (aka libsamplerate)
-http://www.mega-nerd.com/SRC/
-Released under the GNU General Public License, Version 2 (GPLv2)
-https://www.gnu.org/licenses/gpl-2.0.html
+LibSampleRate.NET and Secret Rabbit Code (aka libsamplerate)
+https://github.com/protyposis/LibSampleRate.NET
+https://github.com/libsndfile/libsamplerate
+Released under the BSD-2-Clause license 
+https://opensource.org/license/bsd-2-clause/
 
 Aurio.FftSharp:
 FftSharp
