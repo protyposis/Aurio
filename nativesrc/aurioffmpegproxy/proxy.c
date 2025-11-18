@@ -671,7 +671,7 @@ static void pi_free(ProxyInstance **pi) {
 static void pi_set_error(ProxyInstance *pi, const char* fmt, ...)
 {
 	va_list args;
-	int error_message_length = 100;
+	int error_message_length = 500;
 	char *error_message = malloc(error_message_length);
 
 	// Print the string with the argument list into the error message char array
