@@ -23,7 +23,7 @@ overlap-adding (OLA/COLA), fingerprinting, and WPF UI controls for visualization
     <PackageReference Include="NAudio.Core" Version="2.2.1" />
   </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="cp &quot;$(ProjectDir)/../../NOTICE&quot; &quot;$(ProjectDir)/licenseinfo.txt&quot;" />
+	<Copy SourceFiles="$(ProjectDir)..\..\NOTICE" DestinationFiles="$(ProjectDir)licenseinfo.txt" />
     <ItemGroup>
       <None Include="./README.nuget.md" Pack="true" PackagePath="/README.md" />
     </ItemGroup>
