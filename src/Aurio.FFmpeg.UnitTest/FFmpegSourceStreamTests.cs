@@ -24,9 +24,13 @@ namespace Aurio.FFmpeg.UnitTest
         {
             Skip.IfNot(OperatingSystem.IsWindows());
 
-            var fileInfo = new FileInfo("X:\\folder\\file.wav");
+            var fileDescriptor = new FFmpegSourceStream.FileDescriptor(
+                "X:\\folder\\file.wav",
+                0,
+                DateTime.Now
+            );
 
-            var proxyFileInfo = FFmpegSourceStream.SuggestWaveProxyFileInfo(fileInfo);
+            var proxyFileInfo = FFmpegSourceStream.SuggestWaveProxyFileInfo(fileDescriptor);
 
             Assert.Equal("X:\\folder\\file.wav.ffproxy.wav", proxyFileInfo.FullName);
         }
@@ -36,9 +40,13 @@ namespace Aurio.FFmpeg.UnitTest
         {
             Skip.If(OperatingSystem.IsWindows());
 
-            var fileInfo = new FileInfo("/folder/file.wav");
+            var fileDescriptor = new FFmpegSourceStream.FileDescriptor(
+                "/folder/file.wav",
+                0,
+                DateTime.Now
+            );
 
-            var proxyFileInfo = FFmpegSourceStream.SuggestWaveProxyFileInfo(fileInfo);
+            var proxyFileInfo = FFmpegSourceStream.SuggestWaveProxyFileInfo(fileDescriptor);
 
             Assert.Equal("/folder/file.wav.ffproxy.wav", proxyFileInfo.FullName);
         }
@@ -48,16 +56,20 @@ namespace Aurio.FFmpeg.UnitTest
         {
             Skip.IfNot(OperatingSystem.IsWindows());
 
-            var fileInfo = new FileInfo("X:\\folder\\file.wav");
+            var fileDescriptor = new FFmpegSourceStream.FileDescriptor(
+                "X:\\folder\\file.wav",
+                1,
+                new DateTime(0).AddMilliseconds(100)
+            );
             var directoryInfo = new DirectoryInfo("Y:\\temp\\dir");
 
             var proxyFileInfo = FFmpegSourceStream.SuggestWaveProxyFileInfo(
-                fileInfo,
+                fileDescriptor,
                 directoryInfo
             );
 
             Assert.Equal(
-                "Y:\\temp\\dir\\87c18cf1c8d8e07552df4ecc1ef629995fca9c59ad47ccf7eb4816de33590af7.ffproxy.wav",
+                "Y:\\temp\\dir\\c80fb33f795ec563becb32d569268c831cfe8bbb360b00eb0da10c260b7870b6.ffproxy.wav",
                 proxyFileInfo.FullName
             );
         }
@@ -67,16 +79,20 @@ namespace Aurio.FFmpeg.UnitTest
         {
             Skip.If(OperatingSystem.IsWindows());
 
-            var fileInfo = new FileInfo("/folder/file.wav");
+            var fileDescriptor = new FFmpegSourceStream.FileDescriptor(
+                "/folder/file.wav",
+                1,
+                new DateTime(0).AddMilliseconds(100)
+            );
             var directoryInfo = new DirectoryInfo("/temp/dir");
 
             var proxyFileInfo = FFmpegSourceStream.SuggestWaveProxyFileInfo(
-                fileInfo,
+                fileDescriptor,
                 directoryInfo
             );
 
             Assert.Equal(
-                "/temp/dir/e2c5b9282d156c5bdbf95639ca2ce2516b096e4828b7aa16620cb317cc90b3d9.ffproxy.wav",
+                "/temp/dir/54f862953943df20eb4b2c8b343b118ab7134f1b5980b6dd261d452e33569afb.ffproxy.wav",
                 proxyFileInfo.FullName
             );
         }
@@ -263,6 +279,24 @@ namespace Aurio.FFmpeg.UnitTest
             var bytesRead = s.Read(new byte[1000], 0, 1000);
 
             Assert.Equal(0, bytesRead);
+        }
+
+        [Fact]
+        public void SuggestWaveProxyFileName_FileWriteTimeChange()
+        {
+            string path = "/virtual/test.bin";
+            long length = 1234;
+            DateTime t1 = new DateTime(2024, 01, 01, 0, 0, 0, DateTimeKind.Utc);
+            DateTime t2 = t1.AddMilliseconds(1); // changed timestamp
+
+            var name1 = FFmpegSourceStream.SuggestWaveProxyFileName(
+                new FFmpegSourceStream.FileDescriptor(path, length, t1)
+            );
+            var name2 = FFmpegSourceStream.SuggestWaveProxyFileName(
+                new FFmpegSourceStream.FileDescriptor(path, length, t2)
+            );
+
+            Assert.NotEqual(name1, name2);
         }
     }
 }

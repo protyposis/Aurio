@@ -469,7 +469,7 @@ namespace Aurio.FFmpeg
         /// If no storage diretory is specified, the proxy file will be located in the same directory and
         /// with the same name as the specified file.
         /// </summary>
-        /// <param name="fileInfo">the file for which a proxy file should be created</param>
+        /// <param name="fileDescriptor">the file for which a proxy file should be created</param>
         /// <param name="storageDirectory">optional directory where the proxy file will be stored (can be null)</param>
         /// <returns>the FileInfo of the suggested proxy file</returns>
         public static FileInfo SuggestWaveProxyFileInfo(
@@ -477,22 +477,48 @@ namespace Aurio.FFmpeg
             DirectoryInfo storageDirectory = null
         )
         {
+            return SuggestWaveProxyFileInfo(
+                new FileDescriptor(fileInfo.FullName, fileInfo.Length, fileInfo.LastWriteTimeUtc),
+                storageDirectory
+            );
+        }
+
+        public static FileInfo SuggestWaveProxyFileInfo(
+            FileDescriptor fileDescriptor,
+            DirectoryInfo storageDirectory = null
+        )
+        {
             if (storageDirectory == null)
             {
                 // Without a storage directory, store the proxy file beside the original file
-                return new FileInfo(fileInfo.FullName + ProxyFileExtension);
+                return new FileInfo(fileDescriptor.FullName + ProxyFileExtension);
             }
             else
             {
                 // With a storage directory specified, store the proxy file with a hashed name
                 // (to avoid name collision / overwrites) in the target directory (e.g. a temp or working directory)
-                using var sha256 = SHA256.Create();
-                byte[] hash = sha256.ComputeHash(Encoding.Unicode.GetBytes(fileInfo.FullName));
-                string hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                var name = SuggestWaveProxyFileName(fileDescriptor);
                 return new FileInfo(
-                    Path.Combine(storageDirectory.FullName, hashString + ProxyFileExtension)
+                    Path.Combine(storageDirectory.FullName, name + ProxyFileExtension)
                 );
             }
+        }
+
+        public static string SuggestWaveProxyFileName(FileDescriptor fileDescriptor)
+        {
+            // Include file size and last write timestamp (UTC) in hash to differentiate identical paths with changed contents.
+            string hashInput =
+                fileDescriptor.FullName
+                + "|"
+                + fileDescriptor.Length
+                + "|"
+                + fileDescriptor.LastWriteTimeUtc.Ticks;
+
+            using var sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(Encoding.Unicode.GetBytes(hashInput));
+            string hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+
+            return hashString;
         }
 
         public class FileNotSeekableException : Exception
@@ -530,5 +556,16 @@ namespace Aurio.FFmpeg
             public SeekTargetMissedException(string message, Exception innerException)
                 : base(message, innerException) { }
         }
+
+        /// <summary>
+        /// Lightweight immutable abstraction of <see cref="FileInfo"/> holding only the metadata
+        /// required for proxy file name generation.
+        /// Use this instead of <see cref="FileInfo"/> where direct filesystem access should be
+        /// avoided (e.g. in unit tests) or when a simple value object is sufficient.
+        /// </summary>
+        /// <param name="FullName">Absolute path (or unique identifier) of the original file.</param>
+        /// <param name="Length">File size in bytes.</param>
+        /// <param name="LastWriteTimeUtc">Last write time expressed in UTC; used to distinguish changed contents with identical paths and sizes.</param>
+        public record FileDescriptor(string FullName, long Length, DateTime LastWriteTimeUtc);
     }
 }
