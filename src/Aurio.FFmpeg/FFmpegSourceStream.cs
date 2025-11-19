@@ -389,9 +389,12 @@ namespace Aurio.FFmpeg
             );
             var writer = new BlockingFixedLengthFifoStream(properties, 1024 * 1024 * 16);
 
+            // Use a temporary file during writing to avoid incomplete proxy files on unexpected termination
+            var tempProxyFileInfo = new FileInfo(proxyFileInfo.FullName + ".part");
+
             var writerTask = Task.Run(() =>
             {
-                AudioStreamFactory.WriteToFile(writer, proxyFileInfo.FullName);
+                AudioStreamFactory.WriteToFile(writer, tempProxyFileInfo.FullName);
             });
 
             int output_buffer_size = reader.AudioOutputConfig.frame_size * writer.SampleBlockSize;
@@ -417,6 +420,9 @@ namespace Aurio.FFmpeg
 
             writer.SignalEndOfInput();
             writerTask.Wait();
+
+            // Move temp file to final proxy file
+            tempProxyFileInfo.MoveTo(proxyFileInfo.FullName, true);
 
             return proxyFileInfo;
         }
