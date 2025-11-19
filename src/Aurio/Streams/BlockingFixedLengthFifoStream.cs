@@ -91,9 +91,11 @@ namespace Aurio.Streams
         /// can still be consumed.
         /// </summary>
         /// <see cref="EndOfInputSignalled"/>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void SignalEndOfInput()
         {
             EndOfInputSignalled = true;
+            Monitor.PulseAll(this);
         }
 
         /// <summary>
