@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.2.2](https://github.com/protyposis/Aurio/compare/v4.2.1...v4.2.2) (2025-11-19)
+
+
+### Bug Fixes
+
+* FFmpeg not loading files with UTF8 chars in name ([9df72a0](https://github.com/protyposis/Aurio/commit/9df72a0397552f7ca4fe7afa00cbc576441525fc))
+* file changes not considered by proxies ([037f98b](https://github.com/protyposis/Aurio/commit/037f98bc38e43dfc98ddbb0ee3d348c2dd8bf1f2))
+* incomplete native error message ([2b6248c](https://github.com/protyposis/Aurio/commit/2b6248cdbe734d993a7f096ee8dc5ab95e20d75f))
+* stream reading stuck at the end ([103e32f](https://github.com/protyposis/Aurio/commit/103e32f8c882925b9c382494939b15767e32f514))
+* use of incomplete proxy files ([69ca6e1](https://github.com/protyposis/Aurio/commit/69ca6e1101ca8777e03a1e44ea8dfaf04b236b2c))
+
 ## [4.2.1](https://github.com/protyposis/Aurio/compare/v4.2.0...v4.2.1) (2024-01-30)
 
 
