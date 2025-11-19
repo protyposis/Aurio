@@ -16,6 +16,8 @@ docker run -it --rm -v .:/aurio libaurioffmpegproxybuilder
 
 Write-Host "Packing...";
 ./build-nuget-readme.ps1
-dotnet pack src -c NugetPackRelease -o dist/nuget
+$outputDir = "dist/nuget"
+Remove-Item -Recurse -Force -ErrorAction Ignore -Path $outputDir
+dotnet pack src -c NugetPackRelease -o $outputDir
 
 Write-Host "Done :)";
