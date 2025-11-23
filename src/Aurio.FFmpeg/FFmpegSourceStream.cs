@@ -21,8 +21,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using Aurio.Streams;
+using NAudio.Wave;
 
 namespace Aurio.FFmpeg
 {
@@ -367,6 +367,17 @@ namespace Aurio.FFmpeg
 
         public static FileInfo CreateWaveProxy(FileInfo fileInfo, FileInfo proxyFileInfo)
         {
+            using var fileStream = fileInfo.OpenRead();
+            return CreateWaveProxy(fileStream, proxyFileInfo);
+        }
+
+        public static FileInfo CreateWaveProxy(Stream fileStream, FileInfo proxyFileInfo)
+        {
+            if (fileStream == null)
+            {
+                throw new ArgumentNullException(nameof(fileStream));
+            }
+
             if (proxyFileInfo == null)
             {
                 throw new ArgumentNullException(nameof(proxyFileInfo));
@@ -378,7 +389,33 @@ namespace Aurio.FFmpeg
                 return proxyFileInfo;
             }
 
-            var reader = new FFmpegReader(fileInfo, FFmpeg.Type.Audio);
+            // Use a temporary file during writing to avoid incomplete proxy files on unexpected termination
+            var tempProxyFileInfo = new FileInfo(proxyFileInfo.FullName + ".part");
+
+            using (var proxyStream = tempProxyFileInfo.OpenWrite())
+            {
+                CreateWaveProxy(fileStream, proxyStream);
+            }
+
+            // Move temp file to final proxy file
+            tempProxyFileInfo.MoveTo(proxyFileInfo.FullName, true);
+
+            return proxyFileInfo;
+        }
+
+        public static void CreateWaveProxy(Stream fileStream, Stream proxyStream)
+        {
+            if (fileStream == null)
+            {
+                throw new ArgumentNullException(nameof(fileStream));
+            }
+
+            if (proxyStream == null)
+            {
+                throw new ArgumentNullException(nameof(proxyStream));
+            }
+
+            var reader = new FFmpegReader(fileStream, FFmpeg.Type.Audio);
             var properties = new AudioProperties(
                 reader.AudioOutputConfig.format.channels,
                 reader.AudioOutputConfig.format.sample_rate,
@@ -387,17 +424,16 @@ namespace Aurio.FFmpeg
                     ? AudioFormat.IEEE
                     : AudioFormat.LPCM
             );
-            var writer = new BlockingFixedLengthFifoStream(properties, 1024 * 1024 * 16);
 
-            // Use a temporary file during writing to avoid incomplete proxy files on unexpected termination
-            var tempProxyFileInfo = new FileInfo(proxyFileInfo.FullName + ".part");
+            var dummyStream = new NAudioSinkStream(new NullStream(properties, 0));
+            var waveFileWriterFormat = dummyStream.WaveFormat;
 
-            var writerTask = Task.Run(() =>
-            {
-                AudioStreamFactory.WriteToFile(writer, tempProxyFileInfo.FullName);
-            });
+            using WaveFileWriter waveFileWriter = new WaveFileWriter(
+                proxyStream,
+                waveFileWriterFormat
+            );
 
-            int output_buffer_size = reader.AudioOutputConfig.frame_size * writer.SampleBlockSize;
+            int output_buffer_size = reader.AudioOutputConfig.frame_size * dummyStream.BlockAlign;
             byte[] output_buffer = new byte[output_buffer_size];
 
             int samplesRead;
@@ -414,17 +450,11 @@ namespace Aurio.FFmpeg
                 ) > 0
             )
             {
-                int bytesRead = samplesRead * writer.SampleBlockSize;
-                writer.Write(output_buffer, 0, bytesRead);
+                int bytesRead = samplesRead * dummyStream.BlockAlign;
+                waveFileWriter.Write(output_buffer, 0, bytesRead);
             }
 
-            writer.SignalEndOfInput();
-            writerTask.Wait();
-
-            // Move temp file to final proxy file
-            tempProxyFileInfo.MoveTo(proxyFileInfo.FullName, true);
-
-            return proxyFileInfo;
+            waveFileWriter.Flush();
         }
 
         /// <summary>
