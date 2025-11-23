@@ -1,3 +1,9 @@
+param(
+	[string]$OutputDir = "dist/nuget",
+	[string]$Version
+)
+
+Write-Host "Parameters: OutputDir=$OutputDir Version=$Version"
 Write-Host "Setting up VS dev env...";
 $vsPath = &(Join-Path ${env:ProgramFiles(x86)} "\Microsoft Visual Studio\Installer\vswhere.exe") -latest -property installationpath
 Import-Module (Join-Path $vsPath "Common7\Tools\Microsoft.VisualStudio.DevShell.dll")
@@ -16,8 +22,14 @@ docker run -it --rm -v .:/aurio libaurioffmpegproxybuilder
 
 Write-Host "Packing...";
 ./build-nuget-readme.ps1
-$outputDir = "dist/nuget"
-Remove-Item -Recurse -Force -ErrorAction Ignore -Path $outputDir
-dotnet pack src -c NugetPackRelease -o $outputDir
+
+Remove-Item -Recurse -Force -ErrorAction Ignore -Path $OutputDir
+
+if ($Version) {
+	Write-Host "Packing with explicit version $Version";
+	dotnet pack src -c NugetPackRelease -o $OutputDir /p:PackageVersion=$Version
+} else {
+	dotnet pack src -c NugetPackRelease -o $OutputDir
+}
 
 Write-Host "Done :)";
