@@ -304,6 +304,10 @@ int stream_read_frame_any(ProxyInstance *pi, int *got_frame, int *frame_type)
 	if (pi->pkt->size == 0) {
 		if ((ret = av_read_frame(pi->fmt_ctx, pi->pkt)) < 0) {
 			// probably EOF, check for cached frames (e.g. SHN)
+			// TODO This means AV_CODEC_CAP_DELAY is likely set, handle accordingly:
+			// - Ideally stop reading, but continue feeding null packets and decoding.
+			// - Don't print errors when flag is set and they are expected.
+			// - The current implementation works, but isn't pretty.
 			pi->pkt->data = NULL;
 			pi->pkt->size = 0;
 			cached = 1;
