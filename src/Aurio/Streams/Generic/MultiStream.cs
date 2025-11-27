@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Aurio.Streams
+namespace Aurio.Streams.Generic
 {
     /// <summary>
     /// Combines/concatenates multiple files or streams into a single stream.
