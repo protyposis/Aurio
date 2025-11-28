@@ -11,10 +11,9 @@ namespace Aurio.FFmpeg.UnitTest
         [Fact]
         public void CreateWaveProxy_ProxyFileInfoIsNull()
         {
-            FileInfo fileInfo = new("X:\\test.file");
             FileInfo? proxyFileInfo = null;
 
-            void act() => FFmpegSourceStream.CreateWaveProxy(fileInfo, proxyFileInfo);
+            void act() => FFmpegSourceStream.CreateWaveProxy(new MemoryStream(), proxyFileInfo);
 
             Assert.Throws<ArgumentNullException>(act);
         }
